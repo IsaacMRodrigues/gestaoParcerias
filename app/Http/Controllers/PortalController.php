@@ -42,7 +42,7 @@ class PortalController extends Controller
 
     public function participar(Chamamento $chamamento): View|RedirectResponse
     {
-        abort_unless($chamamento->status === 'em_inscricao', 403, 'Este chamamento não está aberto para inscrições.');
+        abort_unless($chamamento->status_efetivo === 'em_inscricao', 403, 'Este chamamento não está aberto para inscrições.');
 
         $osc = auth()->user()->osc;
         if (!$osc) {
@@ -64,7 +64,7 @@ class PortalController extends Controller
 
     public function storeProposta(Request $request, Chamamento $chamamento): RedirectResponse
     {
-        abort_unless($chamamento->status === 'em_inscricao', 403);
+        abort_unless($chamamento->status_efetivo === 'em_inscricao', 403);
 
         $osc = auth()->user()->osc;
         abort_unless($osc, 403);

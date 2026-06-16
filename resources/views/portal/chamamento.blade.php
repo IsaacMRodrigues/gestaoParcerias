@@ -23,7 +23,7 @@
                 </div>
 
                 <div class="shrink-0">
-                    @if($chamamento->status === 'em_inscricao')
+                    @if($chamamento->status_efetivo === 'em_inscricao')
                         @auth
                             <a href="{{ route('portal.participar', $chamamento) }}"
                                class="inline-block px-5 py-2.5 text-sm font-semibold text-white bg-indigo-600 rounded-lg hover:bg-indigo-700 transition">
@@ -104,7 +104,7 @@
 
             @if(in_array($chamamento->status, ['publicado', 'em_inscricao']))
                 <div class="mt-8 bg-indigo-50 border border-indigo-200 rounded-lg p-5 text-center">
-                    @if($chamamento->status === 'em_inscricao')
+                    @if($chamamento->status_efetivo === 'em_inscricao')
                         <p class="text-sm text-indigo-800 font-medium mb-3">
                             Sua OSC pode submeter uma proposta para este chamamento.
                         </p>

@@ -52,4 +52,23 @@ class Chamamento extends Model
     {
         return $this->belongsTo(Programa::class);
     }
+
+    /**
+     * Status derivado das datas quando o admin não mudou manualmente.
+     * publicado + dentro do período de inscrição → trata como em_inscricao.
+     */
+    public function getStatusEfetivoAttribute(): string
+    {
+        if ($this->status === 'publicado'
+            && $this->data_inicio_inscricao
+            && $this->data_fim_inscricao
+        ) {
+            $hoje = now()->startOfDay();
+            if ($hoje->between($this->data_inicio_inscricao, $this->data_fim_inscricao)) {
+                return 'em_inscricao';
+            }
+        }
+
+        return $this->status;
+    }
 }

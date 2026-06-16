@@ -70,7 +70,7 @@
                            class="px-4 py-2 text-sm font-medium text-indigo-700 border border-indigo-300 rounded-lg hover:bg-indigo-50 text-center transition">
                             Ver Detalhes
                         </a>
-                        @if($chamamento->status === 'em_inscricao')
+                        @if($chamamento->status_efetivo === 'em_inscricao')
                             @auth
                                 <a href="{{ route('portal.participar', $chamamento) }}"
                                    class="px-4 py-2 text-sm font-medium text-white bg-indigo-600 rounded-lg hover:bg-indigo-700 text-center transition">
