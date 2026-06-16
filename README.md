@@ -36,7 +36,7 @@ php artisan db:seed
 3. [x] Cadastro institucional (Órgãos/Secretarias e OSCs)
 4. [x] Banco de Programas e Chamamentos Públicos
 5. [x] Propostas + Plano de Trabalho
-6. [ ] Workflow de Análise e Aprovação
+6. [x] Workflow de Análise e Aprovação
 7. [ ] Formalização (geração de instrumentos + assinatura eletrônica)
 8. [ ] Execução (repasses, despesas, notas fiscais)
 9. [ ] Monitoramento e Fiscalização
@@ -101,9 +101,19 @@ php artisan db:seed
 
 ---
 
+- [2026-06-16] Workflow de Análise e Aprovação
+  - Pareceres: Técnico → Jurídico → Decisão Final (cada um desbloqueia o próximo)
+  - Resultados: Aprovado / Aprovado com Ressalvas / Reprovado / Diligência
+  - Transições de status automáticas na proposta via mapa de transições no model
+  - Diligência criada junto ao parecer; OSC responde na página da diligência
+  - Proposta volta para `em_analise` automaticamente quando todas as diligências são respondidas
+  - Seção "Análise" aparece no show da proposta com botões contextuais por etapa
+
+---
+
 ## O que está sendo feito
 
-- Próximo passo: Workflow de Análise e Aprovação
+- Próximo passo: Formalização (geração de instrumentos)
 
 ---
 
