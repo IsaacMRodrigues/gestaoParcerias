@@ -32,7 +32,7 @@ php artisan db:seed
 ## Ordem de desenvolvimento planejada
 
 1. [x] Estrutura base Laravel + autenticação + perfis/permissões
-2. [ ] Cadastro de usuários (CRUD + atribuição de perfil)
+2. [x] Cadastro de usuários (CRUD + atribuição de perfil)
 3. [ ] Cadastro institucional (Órgãos/Secretarias e OSCs)
 4. [ ] Banco de Programas e Chamamentos Públicos
 5. [ ] Propostas + Plano de Trabalho
@@ -70,12 +70,16 @@ php artisan db:seed
 - [2026-06-16] `User` model atualizado com `HasRoles`
 - [2026-06-16] `RolesSeeder` criado com os 9 perfis do sistema
 - [2026-06-16] `.env` configurado para MySQL e locale `pt_BR`
+- [2026-06-16] CRUD de usuários completo (listagem, criação, edição, remoção)
+  - Campos: nome, e-mail, CPF, telefone, senha, perfil, status
+  - Paginação, feedback de sucesso, confirmação de remoção
+  - Link "Usuários" adicionado na navegação principal
 
 ---
 
 ## O que está sendo feito
 
-- Próximo passo: módulo de Cadastro de Usuários (CRUD + atribuição de perfil)
+- Próximo passo: Cadastro Institucional (Órgãos/Secretarias e OSCs)
 
 ---
 
