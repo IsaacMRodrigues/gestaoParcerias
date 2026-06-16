@@ -37,7 +37,7 @@ php artisan db:seed
 4. [x] Banco de Programas e Chamamentos Públicos
 5. [x] Propostas + Plano de Trabalho
 6. [x] Workflow de Análise e Aprovação
-7. [ ] Formalização (geração de instrumentos + assinatura eletrônica)
+7. [x] Formalização (geração de instrumentos + assinatura eletrônica)
 8. [ ] Execução (repasses, despesas, notas fiscais)
 9. [ ] Monitoramento e Fiscalização
 10. [ ] Prestação de Contas
@@ -111,9 +111,24 @@ php artisan db:seed
 
 ---
 
+- [2026-06-16] Formalização — Instrumentos e Termos Aditivos
+  - Models `Instrumento` e `Aditivo` com constantes TIPOS, STATUS, STATUS_COLORS
+  - Instrumento vincula Proposta (1-para-1), registra número, tipo, objeto, valores, vigência
+  - Método `dataFimVigente()` considera o último aditivo de prazo
+  - Botão "Formalizar Instrumento" aparece na proposta aprovada sem instrumento
+  - Botão "Ver Instrumento" aparece na proposta que já tem instrumento
+  - Fluxo de status: Minuta → Assinado → Vigente (via publicação no DOE)
+  - PATCH `assinar` e PATCH `publicar` para transições rápidas de status
+  - Termos aditivos aninhados ao instrumento (prazo, valor, objeto, apostilamento)
+  - Minuta para impressão (view sem layout, botão nativo de print)
+  - "Instrumentos" adicionado na navegação principal
+  - Tabelas `instrumentos` e `aditivos` migradas com sucesso
+
+---
+
 ## O que está sendo feito
 
-- Próximo passo: Formalização (geração de instrumentos)
+- Próximo passo: Execução (repasses, despesas, notas fiscais)
 
 ---
 

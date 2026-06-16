@@ -1,8 +1,10 @@
 <?php
 
+use App\Http\Controllers\AditivoController;
 use App\Http\Controllers\ChamamentoController;
 use App\Http\Controllers\DiligenciaController;
 use App\Http\Controllers\EtapaController;
+use App\Http\Controllers\InstrumentoController;
 use App\Http\Controllers\MetaController;
 use App\Http\Controllers\OrgaoController;
 use App\Http\Controllers\OscController;
@@ -47,6 +49,20 @@ Route::middleware('auth')->group(function () {
         ->name('propostas.diligencias.show');
     Route::patch('propostas/{proposta}/diligencias/{diligencia}/responder', [DiligenciaController::class, 'responder'])
         ->name('propostas.diligencias.responder');
+
+    Route::resource('instrumentos', InstrumentoController::class)->except(['create', 'store']);
+    Route::get('propostas/{proposta}/instrumentos/create', [InstrumentoController::class, 'create'])
+        ->name('instrumentos.create');
+    Route::post('propostas/{proposta}/instrumentos', [InstrumentoController::class, 'store'])
+        ->name('instrumentos.store');
+    Route::get('instrumentos/{instrumento}/minuta', [InstrumentoController::class, 'minuta'])
+        ->name('instrumentos.minuta');
+    Route::patch('instrumentos/{instrumento}/assinar', [InstrumentoController::class, 'assinar'])
+        ->name('instrumentos.assinar');
+    Route::patch('instrumentos/{instrumento}/publicar', [InstrumentoController::class, 'publicar'])
+        ->name('instrumentos.publicar');
+
+    Route::resource('instrumentos.aditivos', AditivoController::class)->except(['index', 'show']);
 });
 
 require __DIR__.'/auth.php';

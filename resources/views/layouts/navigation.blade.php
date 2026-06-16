@@ -51,6 +51,10 @@
                     <x-nav-link :href="route('propostas.index')" :active="request()->routeIs('propostas.*') || request()->routeIs('metas.*') || request()->routeIs('etapas.*')">
                         Propostas
                     </x-nav-link>
+
+                    <x-nav-link :href="route('instrumentos.index')" :active="request()->routeIs('instrumentos.*')">
+                        Instrumentos
+                    </x-nav-link>
                 </div>
             </div>
 
@@ -120,6 +124,9 @@
             </x-responsive-nav-link>
             <x-responsive-nav-link :href="route('propostas.index')" :active="request()->routeIs('propostas.*')">
                 Propostas
+            </x-responsive-nav-link>
+            <x-responsive-nav-link :href="route('instrumentos.index')" :active="request()->routeIs('instrumentos.*')">
+                Instrumentos
             </x-responsive-nav-link>
         </div>
 

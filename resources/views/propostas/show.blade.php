@@ -19,6 +19,18 @@
                         </button>
                     </form>
                 @endif
+                @if($proposta->status === 'aprovada' && !$proposta->instrumento)
+                    <a href="{{ route('instrumentos.create', $proposta) }}"
+                       class="px-4 py-2 text-sm font-medium text-white bg-teal-600 rounded-md hover:bg-teal-700">
+                        Formalizar Instrumento
+                    </a>
+                @endif
+                @if($proposta->instrumento)
+                    <a href="{{ route('instrumentos.show', $proposta->instrumento) }}"
+                       class="px-4 py-2 text-sm font-medium text-teal-700 bg-teal-50 border border-teal-300 rounded-md hover:bg-teal-100">
+                        Ver Instrumento
+                    </a>
+                @endif
                 <a href="{{ route('propostas.edit', $proposta) }}"
                    class="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50">
                     Editar
