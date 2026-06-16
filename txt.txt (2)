@@ -1,0 +1,74 @@
+1. Módulo Cadastro
+
+1.1. Usuário Interno: cadastrar os funcionários da prefeitura para acessar o sistema.
+Campos: Nome da Secretaria, Nome do(a) funcionário(a), Número da matrícula, Número do CPF, Telefone institucional, E-mail institucional, Perfil (com várias opções e podendo marcar mais de 01), Solicitar Assinatura com Usuário e Senha.
+
+
+
+Botões: Novo Usuário e Salvar e Alterar
+ 
+1.2. Usuário Externo: cadastrar a organização da sociedade civil
+
+Campos: 1. Dados Básicos: CNPJ, Razão social, Data de abertura do CNPJ, Classificação Nacional de Atividades Econômicas (CNAE) primário, Classificação Nacional de Atividades Econômicas (CNAE) secundário; Telefone, E-mail, Endereço completo; Anexo (Inserir Cartão do CNPJ), 2. Dados do representante legal: Nome completo, CPF, endereço completo, telefone, e-mail, Anexo (CPF, comprovante de endereço, ata da atual diretoria), Solicitar Assinatura com Usuário e Senha, 3. Membros: CPF, Nome completo, telefone pessoal, e-mail pessoal, cargo/função, Perfil (com várias opções e podendo marcar mais de 01), Solicitar Assinatura com Usuário e Senha.
+
+Perfis disponíveis no sistema:
+Nome do Perfil
+Atribuições e restrições do perfil
+ADMINISTRADOR SETORIAL
+Atribuição de Perfis, Ativação e Inativação de Usuários e Alterações de Dados de Usuários.
+Perfil exclusivo do TI.
+ANALISTA 
+Atribuído para permitir o usuário acessar o sistema, mas em processo de descontinuação.
+ANALISTA DE ADITIVO E APOSTILAMENTO
+Análise e Aprovação pela unidade gestora e gestor.
+Exibição do perfil (papel de assinatura) no momento de assinatura.
+ANALISTA DE PRESTAÇÃO DE CONTAS PRÉVIA
+Análise prévia da prestação de contas.
+ANALISTA DE VIABILIDADE TÉCNICA
+Análise e Aprovação da unidade gestora.
+Exibição do perfil (papel de assinatura) no momento de assinatura.
+ANALISTA JURÍDICO
+Análise jurídica do Instrumento.
+Exibição do perfil (papel de assinatura) no momento de assinatura.
+ANALISTA ORÇAMENTÁRIO FINANCEIRO
+Perfil exclusivo do Planejamento.
+Exibição do perfil (papel de assinatura) no momento de assinatura.
+ANALISTA TÉCNICO DO SCP
+Perfil para análise de planos e TAs e demais acessos ao sistema.
+Exibição do perfil (papel de assinatura) no momento de assinatura.
+APROVADOR DE ASSINATURA ELETRÔNICA
+
+Aprovação de solicitação de assinatura eletrônica. No caso aprova as assinaturas dos usuários dos órgãos e também dos convenentes (somente quando não é responsável legal, já que este possui aprovação automática de assinatura).
+AUDITOR EXTERNO
+Perfil de visualização de instrumentos reservado para Controladorias.
+AUDITOR GERAL
+Exibição do perfil (papel de assinatura) no momento de assinatura.
+CADASTRADOR
+Permite fazer o cadastro de cordo de cooperação, termo de fomento, termo de colaboração e alterações.
+CONTADOR
+Permite elaborar planilhas orçamentárias e prestar contas.
+ Exibição do perfil (papel de assinatura) no momento de assinatura.
+COMISSÃO MONITORAMENTO E AVALIAÇÃO
+Perfil de uso exclusivo Da Comissão de Comissão e Avaliação.
+Exibição do perfil (papel de assinatura) no momento de assinatura.
+COMISSÃO DE SELEÇÃO
+Perfil de uso exclusivo Da Comissão de Seleção de Chamamento Público.
+Exibição do perfil (papel de assinatura) no momento de assinatura.
+ENCAMINHADOR
+Assina digitalmente o convênio depois de feita todas as análises e encaminha para aprovação da SCP.
+GESTOR DA PARCERIA
+Perfil de uso exclusivo do gestor da parceria.
+Exibição do perfil (papel de assinatura) no momento de assinatura.
+OPERADOR DE ORDEM DE PAGAMENTO
+Elaborar a ordem de pagamento.
+RESPONSÁVEL DA UNIDADE GESTORA
+Perfil de uso exclusivo do Secretário.
+Exibição do perfil (papel de assinatura) no momento de assinatura.
+RESPONSÁVEL LEGAL
+Perfil de uso exclusivo do responsável legal da OSC.
+Exibição do perfil (papel de assinatura) no momento de assinatura.
+RESPONSÁVEL PELA PUBLICAÇÃO
+Perfil de uso exclusivo do SCP.
+
+
+

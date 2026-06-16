@@ -1,0 +1,156 @@
+Plataforma de Gestão de Parcerias - PGP
+
+1. Objetivo da Solução
+Desenvolver uma plataforma web integrada para gestão completa de parcerias públicas consolidando funcionalidades inspiradas no Transferegov e no SIGCON-SAÍDA.
+
+A solução deverá centralizar:
+    • Planejamento;
+    • Formalização;
+    • Execução;
+    • Monitoramento;
+    • Prestação de contas;
+    • Transparência;
+    • Controle financeiro;
+    • Governança documental;
+    • Indicadores gerenciais.
+
+2. Público-Alvo
+    • Secretarias Municipais - Unidade gestora;
+    • OSCs;
+    • Gestores;
+    • Comissão de seleção e monitoramento;
+    • Controle interno;
+    • Procuradoria.
+
+3. Arquitetura da Plataforma
+3.1 Estrutura Multiusuário
+    • Ambiente multi-órgão;
+    • Controle por perfis e permissões;
+    • Multi-secretaria;
+    • Multi-entidade parceira;
+    • Trilhas de auditoria;
+    • Logs completos de operação.
+
+4. Módulos Principais
+
+4.1 Cadastro Institucional
+Funcionalidades
+    • Cadastro de órgãos;
+    • Cadastro de OSCs;
+    • Cadastro de usuários;
+    • Perfis de acesso;
+    • Cadastro de responsáveis legais;
+    • Cadastro de comissão e gestores.
+
+4.2 Banco de Programas e Propostas
+Funcionalidades
+    • Cadastro de programas governamentais;
+    • Chamamentos públicos;
+    • Cadastro de propostas;
+    • Plano de trabalho;
+    • Análise de propostas;
+    • Validação automática de campos;
+    • Assinatura eletrônica;
+    • Workflow de aprovação.
+
+4.3 Formalização
+Funcionalidades
+    • Minutas padronizadas;
+    • Geração automática de instrumentos;
+    • Assinatura eletrônica;
+    • Parecer jurídico;
+    • Parecer técnico;
+    • Controle de vigência;
+    • Termos de apostilamentos;
+    • Termos aditivos;
+    • Reajustes;
+    • Reequilíbrio econômico-financeiro;
+    • Controle de publicação oficial;
+    • Integração com diário oficial (se já tiver criado)
+
+4.4 Execução
+Funcionalidades
+    • Processo de compra/contratação
+    • Controle de repasses;
+    • Controle de rendimentos;
+    • Pagamentos;
+    • Conciliação bancária;
+    • Integração bancária;
+    • Gestão de despesas;
+    • Upload de notas fiscais;
+    • Controle por natureza de despesa;
+    • Controle de saldo;
+    • Bloqueios automáticos;
+    • Alertas de inconsistência;
+    • Prestação financeira automatizada.
+
+4.5 Monitoramento e Fiscalização
+Funcionalidades
+    • Relatórios de execução;
+    • Visitas técnicas;
+    • Registro fotográfico;
+    • Georreferenciamento;
+    • Painel de indicadores;
+    • Alertas de atraso;
+    • Gestão de inconformidades;
+    • Solicitação de diligências;
+    • Parecer conclusivo.
+
+
+4.6 Prestação de Contas
+Funcionalidades
+    • Prestação parcial e final;
+    • Relatórios automáticos;
+    • Validação documental;
+    • Emissão de parecer;
+    • Fluxo de aprovação;
+    • Diligências;
+    • Aprovação com ressalvas;
+    • Reprovação;
+    • Tomada de contas especial;
+    • Certificação digital.
+
+4.7. Comunicação e Workflow
+Funcionalidades
+    • Caixa de tarefas;
+    • Fluxo processual;
+    • Notificações automáticas;
+    • E-mails;
+    • Histórico de interações;
+    • Central de pendências;
+
+5. Requisitos Não Funcionais
+Segurança
+    • LGPD;
+    • Criptografia;
+    • MFA;
+    • Controle granular de acesso;
+    • Logs imutáveis;
+    • Backup automático.
+
+6. Perfis de Usuário
+    • Representante legal;
+    • Secretário da unidade gestora;
+    • Gestor da parceria;
+    • Comissão de avalição e monitoramento;
+    • Comissão de seleção; 
+    • Procuradoria jurídica;
+    • Controle interno;
+    • Cadastrador de proposta
+    • Cadastrador de prestação de contas
+
+
+7. Fluxo Macro da Plataforma
+    1. Cadastro do programa;
+    2. Cadastro da proposta;
+    3. Análise técnica;
+    4. Análise jurídica;
+    5. Aprovação;
+    6. Assinatura;
+    7. Execução;
+    8. Monitoramento;
+    9. Prestação de contas;
+    10.  Parecer conclusivo;
+    11. Relatório de Monitoramento
+    12. Arquivamento.
+
