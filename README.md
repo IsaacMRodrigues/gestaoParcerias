@@ -1,75 +1,58 @@
-# Plataforma de Gestão de Parcerias - PGP
+<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
 
-> **Instrução para IA:** Este README é um documento vivo. Sempre que realizar qualquer trabalho neste projeto, atualize as seções `## O que foi feito` e `## O que está sendo feito` antes de encerrar a conversa. Não omita etapas concluídas — o histórico completo importa para quem continuar o trabalho.
+<p align="center">
+<a href="https://github.com/laravel/framework/actions"><img src="https://github.com/laravel/framework/workflows/tests/badge.svg" alt="Build Status"></a>
+<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
+<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
+<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
+</p>
 
----
+## About Laravel
 
-## Sobre o projeto
+Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
 
-Plataforma web em **Laravel** para gestão completa de parcerias públicas entre Secretarias Municipais e OSCs (Organizações da Sociedade Civil). Cobre todo o ciclo: planejamento → proposta → análise → formalização → execução → monitoramento → prestação de contas.
+- [Simple, fast routing engine](https://laravel.com/docs/routing).
+- [Powerful dependency injection container](https://laravel.com/docs/container).
+- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
+- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
+- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
+- [Robust background job processing](https://laravel.com/docs/queues).
+- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
 
-**Repositório:** https://github.com/IsaacMRodrigues/gestaoParcerias  
-**Stack:** Laravel (PHP), MySQL  
-**Equipe:** 2 desenvolvedores
+Laravel is accessible, powerful, and provides tools required for large, robust applications.
 
----
+## Learning Laravel
 
-## Ordem de desenvolvimento planejada
+Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework.
 
-1. [ ] Cadastro de usuários + perfis/permissões (Spatie Laravel Permission)
-2. [ ] Cadastro institucional (Órgãos/Secretarias e OSCs)
-3. [ ] Banco de Programas e Chamamentos Públicos
-4. [ ] Propostas + Plano de Trabalho
-5. [ ] Workflow de Análise e Aprovação
-6. [ ] Formalização (geração de instrumentos + assinatura eletrônica)
-7. [ ] Execução (repasses, despesas, notas fiscais)
-8. [ ] Monitoramento e Fiscalização
-9. [ ] Prestação de Contas
-10. [ ] Integrações externas (bancária, Diário Oficial)
+In addition, [Laracasts](https://laracasts.com) contains thousands of video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
 
----
+You can also watch bite-sized lessons with real-world projects on [Laravel Learn](https://laravel.com/learn), where you will be guided through building a Laravel application from scratch while learning PHP fundamentals.
 
-## Perfis de usuário
+## Agentic Development
 
-| Perfil | Descrição |
-|---|---|
-| Representante legal | Responsável pela OSC |
-| Secretário da unidade gestora | Responsável pela Secretaria |
-| Gestor da parceria | Acompanha a execução |
-| Comissão de avaliação e monitoramento | Analisa e monitora |
-| Comissão de seleção | Avalia propostas |
-| Procuradoria jurídica | Emite pareceres jurídicos |
-| Controle interno | Auditoria interna |
-| Cadastrador de proposta | Insere propostas |
-| Cadastrador de prestação de contas | Insere prestações de contas |
+Laravel's predictable structure and conventions make it ideal for AI coding agents like Claude Code, Cursor, and GitHub Copilot. Install [Laravel Boost](https://laravel.com/docs/ai) to supercharge your AI workflow:
 
----
+```bash
+composer require laravel/boost --dev
 
-## O que foi feito
+php artisan boost:install
+```
 
-- [2026-06-16] Especificação inicial recebida (`txt.txt`) e analisada
-- [2026-06-16] Repositório privado criado no GitHub e arquivos de especificação commitados
+Boost provides your agent 15+ tools and skills that help agents build Laravel applications while following best practices.
 
----
+## Contributing
 
-## O que está sendo feito
+Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
 
-- Nenhuma tarefa em andamento no momento.
+## Code of Conduct
 
----
+In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
 
-## Decisões técnicas registradas
+## Security Vulnerabilities
 
-- **Framework:** Laravel
-- **Permissões:** Spatie Laravel Permission (a ser instalado)
-- **Autenticação:** Laravel Breeze ou Fortify + MFA (a definir)
-- **Integrações bancárias:** deixadas para a última fase
+If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
 
----
+## License
 
-## Contexto importante
-
-- O sistema é inspirado no Transferegov (federal) e SIGCON-SAÍDA (MG), adaptado para municípios
-- Deve suportar múltiplas secretarias e múltiplas OSCs (multi-tenancy por escopo)
-- LGPD, MFA e logs imutáveis são requisitos não funcionais obrigatórios
-- Assinatura eletrônica é necessária em várias etapas (solução a definir: GOV.BR, D4Sign, etc.)
+The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
