@@ -15,15 +15,11 @@
                     <x-nav-link :href="route('dashboard')" :active="request()->routeIs('dashboard')">
                         Dashboard
                     </x-nav-link>
-                    <x-nav-link :href="route('usuarios.index')" :active="request()->routeIs('usuarios.*')">
-                        Usuários
-                    </x-nav-link>
-
                     {{-- Dropdown Cadastros --}}
                     <div x-data="{ open: false }" class="relative flex items-center">
                         <button @click="open = !open" @click.outside="open = false"
                                 class="inline-flex items-center gap-1 px-1 pt-1 text-sm font-medium border-b-2 transition duration-150 ease-in-out
-                                       {{ request()->routeIs('orgaos.*') || request()->routeIs('oscs.*')
+                                       {{ request()->routeIs('usuarios.*') || request()->routeIs('orgaos.*') || request()->routeIs('oscs.*')
                                            ? 'border-indigo-400 text-gray-900'
                                            : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300' }}">
                             Cadastros
@@ -33,6 +29,10 @@
                         </button>
                         <div x-show="open" x-transition
                              class="absolute top-full left-0 mt-1 w-52 bg-white rounded-md shadow-lg ring-1 ring-black ring-opacity-5 z-50">
+                            <a href="{{ route('usuarios.index') }}"
+                               class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
+                                Usuários
+                            </a>
                             <a href="{{ route('orgaos.index') }}"
                                class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
                                 Órgãos / Secretarias
@@ -43,6 +43,10 @@
                             </a>
                         </div>
                     </div>
+
+                    <x-nav-link :href="route('programas.index')" :active="request()->routeIs('programas.*') || request()->routeIs('chamamentos.*')">
+                        Programas
+                    </x-nav-link>
                 </div>
             </div>
 
@@ -106,6 +110,9 @@
             </x-responsive-nav-link>
             <x-responsive-nav-link :href="route('oscs.index')" :active="request()->routeIs('oscs.*')">
                 OSCs
+            </x-responsive-nav-link>
+            <x-responsive-nav-link :href="route('programas.index')" :active="request()->routeIs('programas.*')">
+                Programas
             </x-responsive-nav-link>
         </div>
 
