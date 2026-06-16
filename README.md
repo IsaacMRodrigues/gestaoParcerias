@@ -1,58 +1,96 @@
-<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
+# Plataforma de Gestão de Parcerias - PGP
 
-<p align="center">
-<a href="https://github.com/laravel/framework/actions"><img src="https://github.com/laravel/framework/workflows/tests/badge.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
-</p>
+> **Instrução para IA:** Este README é um documento vivo. Sempre que realizar qualquer trabalho neste projeto, atualize as seções `## O que foi feito` e `## O que está sendo feito` antes de encerrar a conversa. Não omita etapas concluídas — o histórico completo importa para quem continuar o trabalho.
 
-## About Laravel
+---
 
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
+## Sobre o projeto
 
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
+Plataforma web em **Laravel** para gestão completa de parcerias públicas entre Secretarias Municipais e OSCs (Organizações da Sociedade Civil). Cobre todo o ciclo: planejamento → proposta → análise → formalização → execução → monitoramento → prestação de contas.
 
-Laravel is accessible, powerful, and provides tools required for large, robust applications.
+**Repositório:** https://github.com/IsaacMRodrigues/gestaoParcerias  
+**Stack:** Laravel 13, MySQL, TailwindCSS, Blade  
+**Pacotes principais:** Laravel Breeze (auth), Spatie Laravel Permission (perfis)  
+**Equipe:** 2 desenvolvedores
 
-## Learning Laravel
+---
 
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework.
-
-In addition, [Laracasts](https://laracasts.com) contains thousands of video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
-
-You can also watch bite-sized lessons with real-world projects on [Laravel Learn](https://laravel.com/learn), where you will be guided through building a Laravel application from scratch while learning PHP fundamentals.
-
-## Agentic Development
-
-Laravel's predictable structure and conventions make it ideal for AI coding agents like Claude Code, Cursor, and GitHub Copilot. Install [Laravel Boost](https://laravel.com/docs/ai) to supercharge your AI workflow:
+## Setup do projeto (para quem clonar)
 
 ```bash
-composer require laravel/boost --dev
-
-php artisan boost:install
+composer install
+npm install && npm run build
+cp .env.example .env
+php artisan key:generate
+# Configurar DB_DATABASE, DB_USERNAME, DB_PASSWORD no .env
+php artisan migrate
+php artisan db:seed
 ```
 
-Boost provides your agent 15+ tools and skills that help agents build Laravel applications while following best practices.
+---
 
-## Contributing
+## Ordem de desenvolvimento planejada
 
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
+1. [x] Estrutura base Laravel + autenticação + perfis/permissões
+2. [ ] Cadastro de usuários (CRUD + atribuição de perfil)
+3. [ ] Cadastro institucional (Órgãos/Secretarias e OSCs)
+4. [ ] Banco de Programas e Chamamentos Públicos
+5. [ ] Propostas + Plano de Trabalho
+6. [ ] Workflow de Análise e Aprovação
+7. [ ] Formalização (geração de instrumentos + assinatura eletrônica)
+8. [ ] Execução (repasses, despesas, notas fiscais)
+9. [ ] Monitoramento e Fiscalização
+10. [ ] Prestação de Contas
+11. [ ] Integrações externas (bancária, Diário Oficial)
 
-## Code of Conduct
+---
 
-In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
+## Perfis de usuário
 
-## Security Vulnerabilities
+| Slug | Descrição |
+|---|---|
+| `representante_legal` | Responsável pela OSC |
+| `secretario_unidade_gestora` | Responsável pela Secretaria |
+| `gestor_parceria` | Acompanha a execução |
+| `comissao_avaliacao_monitoramento` | Analisa e monitora |
+| `comissao_selecao` | Avalia propostas |
+| `procuradoria_juridica` | Emite pareceres jurídicos |
+| `controle_interno` | Auditoria interna |
+| `cadastrador_proposta` | Insere propostas |
+| `cadastrador_prestacao_contas` | Insere prestações de contas |
 
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
+---
 
-## License
+## O que foi feito
 
-The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+- [2026-06-16] Especificação inicial recebida (`txt.txt`) e analisada
+- [2026-06-16] Repositório privado criado no GitHub
+- [2026-06-16] Projeto Laravel 13 criado com Breeze (Blade + TailwindCSS)
+- [2026-06-16] Spatie Laravel Permission instalado e configurado
+- [2026-06-16] `User` model atualizado com `HasRoles`
+- [2026-06-16] `RolesSeeder` criado com os 9 perfis do sistema
+- [2026-06-16] `.env` configurado para MySQL e locale `pt_BR`
+
+---
+
+## O que está sendo feito
+
+- Próximo passo: módulo de Cadastro de Usuários (CRUD + atribuição de perfil)
+
+---
+
+## Decisões técnicas registradas
+
+- **Framework:** Laravel 13
+- **Permissões:** Spatie Laravel Permission v8
+- **Auth/UI:** Laravel Breeze (Blade) + TailwindCSS
+- **Integrações bancárias:** deixadas para a última fase
+- **Assinatura eletrônica:** solução a definir (GOV.BR, D4Sign, etc.)
+
+---
+
+## Contexto importante
+
+- Inspirado no Transferegov (federal) e SIGCON-SAÍDA (MG), adaptado para municípios
+- Multi-secretaria e multi-OSC no mesmo ambiente
+- LGPD, MFA e logs imutáveis são requisitos não funcionais obrigatórios
