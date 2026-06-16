@@ -12,11 +12,7 @@
     <div class="py-8">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
 
-            @if(session('success'))
-                <div class="mb-4 p-4 text-sm text-green-800 bg-green-100 rounded-lg">
-                    {{ session('success') }}
-                </div>
-            @endif
+            <x-flash-message />
 
             <div class="bg-white shadow rounded-lg overflow-hidden">
                 <table class="min-w-full divide-y divide-gray-200">

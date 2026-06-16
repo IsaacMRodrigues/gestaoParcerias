@@ -1,0 +1,21 @@
+<?php
+
+namespace App\Models;
+
+use Illuminate\Database\Eloquent\Model;
+
+class Orgao extends Model
+{
+    protected $table = 'orgaos';
+
+    protected $fillable = [
+        'name', 'sigla', 'cnpj', 'email', 'phone',
+        'cep', 'logradouro', 'numero', 'complemento', 'bairro', 'cidade', 'estado',
+        'status',
+    ];
+
+    protected function casts(): array
+    {
+        return ['status' => 'boolean'];
+    }
+}
