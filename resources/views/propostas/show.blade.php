@@ -194,6 +194,70 @@
                 </dl>
             </div>
 
+            {{-- Documentos --}}
+            <div class="bg-white shadow rounded-lg">
+                <div class="flex items-center justify-between px-6 py-4 border-b border-gray-200">
+                    <h3 class="text-base font-semibold text-gray-800">Documentos</h3>
+                    <span class="text-xs text-gray-400">Máx. 10 MB — PDF, Word, Excel, JPG, PNG</span>
+                </div>
+
+                <div class="px-6 py-4 border-b border-gray-100 bg-gray-50">
+                    <form action="{{ route('documentos.store', $proposta) }}" method="POST" enctype="multipart/form-data"
+                          class="flex flex-wrap items-end gap-3">
+                        @csrf
+                        <div class="flex-1 min-w-[180px]">
+                            <label class="block text-xs font-medium text-gray-600 mb-1">Tipo</label>
+                            <select name="tipo" required
+                                    class="block w-full border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 text-sm">
+                                @foreach(\App\Models\Documento::TIPOS as $key => $label)
+                                    <option value="{{ $key }}">{{ $label }}</option>
+                                @endforeach
+                            </select>
+                        </div>
+                        <div class="flex-1 min-w-[180px]">
+                            <label class="block text-xs font-medium text-gray-600 mb-1">Arquivo</label>
+                            <input type="file" name="arquivo" required
+                                   class="block w-full text-sm text-gray-600 file:mr-3 file:py-1 file:px-3 file:rounded file:border-0 file:text-xs file:bg-indigo-50 file:text-indigo-700 hover:file:bg-indigo-100">
+                        </div>
+                        <button type="submit"
+                                class="px-3 py-2 text-sm font-medium text-white bg-indigo-600 rounded-md hover:bg-indigo-700">
+                            Enviar
+                        </button>
+                    </form>
+                    @error('arquivo') <p class="text-red-600 text-xs mt-2">{{ $message }}</p> @enderror
+                </div>
+
+                @forelse($proposta->documentos as $doc)
+                    <div class="flex items-center justify-between px-6 py-3 border-b border-gray-50 last:border-0">
+                        <div class="flex items-center gap-3">
+                            <div class="w-8 h-8 bg-indigo-50 rounded flex items-center justify-center text-xs font-bold text-indigo-600">
+                                {{ strtoupper(pathinfo($doc->nome_original, PATHINFO_EXTENSION)) }}
+                            </div>
+                            <div>
+                                <p class="text-sm font-medium text-gray-800">{{ $doc->nome_original }}</p>
+                                <p class="text-xs text-gray-400">
+                                    {{ \App\Models\Documento::TIPOS[$doc->tipo] ?? $doc->tipo }}
+                                    &middot; {{ $doc->tamanhoFormatado() }}
+                                    &middot; {{ $doc->created_at->format('d/m/Y H:i') }}
+                                    @if($doc->uploader) &middot; {{ $doc->uploader->name }} @endif
+                                </p>
+                            </div>
+                        </div>
+                        <div class="flex items-center gap-3">
+                            <a href="{{ route('documentos.download', $doc) }}"
+                               class="text-xs text-indigo-600 hover:text-indigo-800">Baixar</a>
+                            <form action="{{ route('documentos.destroy', [$proposta, $doc]) }}" method="POST"
+                                  onsubmit="return confirm('Remover este documento?')">
+                                @csrf @method('DELETE')
+                                <button type="submit" class="text-xs text-red-500 hover:text-red-700">Remover</button>
+                            </form>
+                        </div>
+                    </div>
+                @empty
+                    <p class="px-6 py-6 text-sm text-gray-400 text-center">Nenhum documento anexado.</p>
+                @endforelse
+            </div>
+
             {{-- Plano de Trabalho --}}
             <div class="bg-white shadow rounded-lg">
                 <div class="flex items-center justify-between px-6 py-4 border-b border-gray-200">

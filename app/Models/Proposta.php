@@ -62,6 +62,11 @@ class Proposta extends Model
         return $this->hasMany(Meta::class)->orderBy('numero');
     }
 
+    public function instrumento(): HasOne
+    {
+        return $this->hasOne(Instrumento::class);
+    }
+
     public function pareceres(): HasMany
     {
         return $this->hasMany(Parecer::class)->orderBy('created_at');
@@ -70,6 +75,11 @@ class Proposta extends Model
     public function diligencias(): HasMany
     {
         return $this->hasMany(Diligencia::class)->orderBy('created_at');
+    }
+
+    public function documentos(): HasMany
+    {
+        return $this->hasMany(Documento::class)->latest();
     }
 
     public function parecer(string $tipo): ?Parecer

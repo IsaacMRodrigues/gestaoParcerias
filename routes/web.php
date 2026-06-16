@@ -3,20 +3,45 @@
 use App\Http\Controllers\AditivoController;
 use App\Http\Controllers\ChamamentoController;
 use App\Http\Controllers\DiligenciaController;
+use App\Http\Controllers\DocumentoController;
 use App\Http\Controllers\EtapaController;
 use App\Http\Controllers\InstrumentoController;
 use App\Http\Controllers\MetaController;
 use App\Http\Controllers\OrgaoController;
 use App\Http\Controllers\OscController;
+use App\Http\Controllers\OscRegistroController;
 use App\Http\Controllers\ParecerController;
+use App\Http\Controllers\PortalController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\ProgramaController;
 use App\Http\Controllers\PropostaController;
 use App\Http\Controllers\UserController;
 use Illuminate\Support\Facades\Route;
 
-Route::get('/', function () {
-    return view('welcome');
+Route::get('/', fn() => redirect()->route('portal.index'));
+
+// Portal público
+Route::get('/portal', [PortalController::class, 'index'])->name('portal.index');
+Route::get('/portal/chamamentos/{chamamento}', [PortalController::class, 'chamamento'])->name('portal.chamamento');
+
+// Auto-cadastro de OSC
+Route::get('/cadastro/osc', [OscRegistroController::class, 'create'])->name('portal.osc.create');
+Route::post('/cadastro/osc', [OscRegistroController::class, 'store'])->name('portal.osc.store');
+
+// Área da OSC logada (portal)
+Route::middleware('auth')->group(function () {
+    Route::get('/portal/minhas-propostas', [PortalController::class, 'minhasPropostas'])->name('portal.minhas-propostas');
+    Route::get('/portal/chamamentos/{chamamento}/participar', [PortalController::class, 'participar'])->name('portal.participar');
+    Route::post('/portal/chamamentos/{chamamento}/proposta', [PortalController::class, 'storeProposta'])->name('portal.proposta.store');
+    Route::get('/portal/propostas/{proposta}', [PortalController::class, 'showProposta'])->name('portal.proposta.show');
+    Route::patch('/portal/propostas/{proposta}/submeter', [PortalController::class, 'submeterProposta'])->name('portal.proposta.submeter');
+});
+
+// Documentos (funciona para admin e portal via back())
+Route::middleware('auth')->group(function () {
+    Route::post('propostas/{proposta}/documentos', [DocumentoController::class, 'store'])->name('documentos.store');
+    Route::delete('propostas/{proposta}/documentos/{documento}', [DocumentoController::class, 'destroy'])->name('documentos.destroy');
+    Route::get('documentos/{documento}/download', [DocumentoController::class, 'download'])->name('documentos.download');
 });
 
 Route::get('/dashboard', function () {

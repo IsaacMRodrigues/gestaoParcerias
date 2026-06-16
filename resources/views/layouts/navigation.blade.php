@@ -15,6 +15,9 @@
                     <x-nav-link :href="route('dashboard')" :active="request()->routeIs('dashboard')">
                         Dashboard
                     </x-nav-link>
+                    <x-nav-link :href="route('portal.index')" :active="false">
+                        Portal Público
+                    </x-nav-link>
                     {{-- Dropdown Cadastros --}}
                     <div x-data="{ open: false }" class="relative flex items-center">
                         <button @click="open = !open" @click.outside="open = false"
