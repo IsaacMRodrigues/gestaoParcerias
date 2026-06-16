@@ -35,7 +35,7 @@ php artisan db:seed
 2. [x] Cadastro de usuários (CRUD + atribuição de perfil)
 3. [x] Cadastro institucional (Órgãos/Secretarias e OSCs)
 4. [x] Banco de Programas e Chamamentos Públicos
-5. [ ] Propostas + Plano de Trabalho
+5. [x] Propostas + Plano de Trabalho
 6. [ ] Workflow de Análise e Aprovação
 7. [ ] Formalização (geração de instrumentos + assinatura eletrônica)
 8. [ ] Execução (repasses, despesas, notas fiscais)
@@ -91,9 +91,19 @@ php artisan db:seed
 
 ---
 
+- [2026-06-16] Propostas e Plano de Trabalho
+  - Proposta vincula Chamamento + OSC com dados financeiros e datas
+  - Botão "Submeter Proposta" muda status e registra timestamp
+  - Plano de Trabalho: Metas (indicador, meta quantitativa, datas)
+  - Etapas dentro de cada Meta (responsável, período, recursos)
+  - Página show da proposta concentra todo o plano em uma única tela
+  - Rotas aninhadas: propostas → metas → etapas
+
+---
+
 ## O que está sendo feito
 
-- Próximo passo: Propostas + Plano de Trabalho
+- Próximo passo: Workflow de Análise e Aprovação
 
 ---
 
