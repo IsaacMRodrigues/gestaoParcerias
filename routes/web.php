@@ -1,10 +1,13 @@
 <?php
 
 use App\Http\Controllers\ChamamentoController;
+use App\Http\Controllers\EtapaController;
+use App\Http\Controllers\MetaController;
 use App\Http\Controllers\OrgaoController;
 use App\Http\Controllers\OscController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\ProgramaController;
+use App\Http\Controllers\PropostaController;
 use App\Http\Controllers\UserController;
 use Illuminate\Support\Facades\Route;
 
@@ -27,6 +30,11 @@ Route::middleware('auth')->group(function () {
 
     Route::resource('programas', ProgramaController::class);
     Route::resource('programas.chamamentos', ChamamentoController::class)->except(['show']);
+
+    Route::resource('propostas', PropostaController::class);
+    Route::patch('propostas/{proposta}/submeter', [PropostaController::class, 'submeter'])->name('propostas.submeter');
+    Route::resource('propostas.metas', MetaController::class)->except(['show', 'index']);
+    Route::resource('propostas.metas.etapas', EtapaController::class)->except(['show', 'index']);
 });
 
 require __DIR__.'/auth.php';

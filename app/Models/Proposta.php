@@ -1,0 +1,68 @@
+<?php
+
+namespace App\Models;
+
+use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
+
+class Proposta extends Model
+{
+    public const STATUS = [
+        'rascunho'      => 'Rascunho',
+        'submetida'     => 'Submetida',
+        'em_analise'    => 'Em Análise',
+        'em_negociacao' => 'Em Negociação',
+        'aprovada'      => 'Aprovada',
+        'reprovada'     => 'Reprovada',
+        'cancelada'     => 'Cancelada',
+    ];
+
+    public const STATUS_COLORS = [
+        'rascunho'      => 'gray',
+        'submetida'     => 'blue',
+        'em_analise'    => 'yellow',
+        'em_negociacao' => 'purple',
+        'aprovada'      => 'green',
+        'reprovada'     => 'red',
+        'cancelada'     => 'red',
+    ];
+
+    protected $fillable = [
+        'chamamento_id', 'osc_id', 'titulo', 'objeto', 'justificativa',
+        'valor_solicitado', 'valor_proprio',
+        'data_inicio_prevista', 'data_fim_prevista',
+        'status', 'submitted_at',
+    ];
+
+    protected function casts(): array
+    {
+        return [
+            'data_inicio_prevista' => 'date',
+            'data_fim_prevista'    => 'date',
+            'submitted_at'         => 'datetime',
+            'valor_solicitado'     => 'decimal:2',
+            'valor_proprio'        => 'decimal:2',
+        ];
+    }
+
+    public function chamamento(): BelongsTo
+    {
+        return $this->belongsTo(Chamamento::class);
+    }
+
+    public function osc(): BelongsTo
+    {
+        return $this->belongsTo(Osc::class);
+    }
+
+    public function metas(): HasMany
+    {
+        return $this->hasMany(Meta::class)->orderBy('numero');
+    }
+
+    public function valorTotal(): float
+    {
+        return (float) $this->valor_solicitado + (float) $this->valor_proprio;
+    }
+}
