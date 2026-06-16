@@ -8,6 +8,8 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Parecer extends Model
 {
+    protected $table = 'pareceres';
+
     public const TIPOS = [
         'tecnico'  => 'Parecer Técnico',
         'juridico' => 'Parecer Jurídico',
