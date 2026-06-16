@@ -5,6 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 
 class Proposta extends Model
 {
@@ -59,6 +60,21 @@ class Proposta extends Model
     public function metas(): HasMany
     {
         return $this->hasMany(Meta::class)->orderBy('numero');
+    }
+
+    public function pareceres(): HasMany
+    {
+        return $this->hasMany(Parecer::class)->orderBy('created_at');
+    }
+
+    public function diligencias(): HasMany
+    {
+        return $this->hasMany(Diligencia::class)->orderBy('created_at');
+    }
+
+    public function parecer(string $tipo): ?Parecer
+    {
+        return $this->pareceres->firstWhere('tipo', $tipo);
     }
 
     public function valorTotal(): float

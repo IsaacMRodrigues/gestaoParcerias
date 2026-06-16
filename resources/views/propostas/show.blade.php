@@ -31,6 +31,94 @@
         <div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 space-y-6">
             <x-flash-message />
 
+            @php
+                $parecerTecnico  = $proposta->parecer('tecnico');
+                $parecerJuridico = $proposta->parecer('juridico');
+                $parecerDecisao  = $proposta->parecer('decisao');
+                $aprovados       = ['aprovado', 'aprovado_ressalvas'];
+            @endphp
+
+            {{-- Seção de Análise --}}
+            @if(in_array($proposta->status, ['submetida', 'em_analise', 'em_negociacao', 'aprovada', 'reprovada']))
+            <div class="bg-white shadow rounded-lg">
+                <div class="flex items-center justify-between px-6 py-4 border-b border-gray-200">
+                    <h3 class="text-base font-semibold text-gray-800">Análise da Proposta</h3>
+                    <div class="flex gap-2">
+                        @if(!$parecerTecnico && in_array($proposta->status, ['submetida', 'em_analise']))
+                            <a href="{{ route('propostas.pareceres.create', [$proposta, 'tipo' => 'tecnico']) }}"
+                               class="px-3 py-1.5 text-sm font-medium text-white bg-indigo-600 rounded-md hover:bg-indigo-700">
+                                + Parecer Técnico
+                            </a>
+                        @endif
+                        @if($parecerTecnico && in_array($parecerTecnico->resultado, $aprovados) && !$parecerJuridico)
+                            <a href="{{ route('propostas.pareceres.create', [$proposta, 'tipo' => 'juridico']) }}"
+                               class="px-3 py-1.5 text-sm font-medium text-white bg-purple-600 rounded-md hover:bg-purple-700">
+                                + Parecer Jurídico
+                            </a>
+                        @endif
+                        @if($parecerJuridico && in_array($parecerJuridico->resultado, $aprovados) && !$parecerDecisao)
+                            <a href="{{ route('propostas.pareceres.create', [$proposta, 'tipo' => 'decisao']) }}"
+                               class="px-3 py-1.5 text-sm font-medium text-white bg-green-600 rounded-md hover:bg-green-700">
+                                + Decisão Final
+                            </a>
+                        @endif
+                    </div>
+                </div>
+
+                <div class="divide-y divide-gray-100">
+                    @forelse($proposta->pareceres as $parecer)
+                        @php $color = \App\Models\Parecer::RESULTADO_COLORS[$parecer->resultado] ?? 'gray'; @endphp
+                        <div class="px-6 py-4">
+                            <div class="flex items-start justify-between">
+                                <div>
+                                    <p class="text-sm font-semibold text-gray-800">
+                                        {{ \App\Models\Parecer::TIPOS[$parecer->tipo] }}
+                                    </p>
+                                    <p class="text-xs text-gray-400 mt-0.5">
+                                        {{ $parecer->responsavel ?? 'Sem responsável' }}
+                                        &middot; {{ $parecer->data_parecer->format('d/m/Y') }}
+                                    </p>
+                                </div>
+                                <span class="px-2 py-1 text-xs font-medium bg-{{ $color }}-100 text-{{ $color }}-800 rounded-full">
+                                    {{ \App\Models\Parecer::RESULTADOS[$parecer->resultado] }}
+                                </span>
+                            </div>
+                            <p class="mt-2 text-sm text-gray-700 whitespace-pre-line">{{ $parecer->texto }}</p>
+                            @if($parecer->observacoes)
+                                <p class="mt-1 text-xs text-gray-500 italic">{{ $parecer->observacoes }}</p>
+                            @endif
+
+                            {{-- Diligências vinculadas ao parecer --}}
+                            @foreach($parecer->diligencias as $diligencia)
+                                @php $dc = \App\Models\Diligencia::STATUS_COLORS[$diligencia->status] ?? 'gray'; @endphp
+                                <div class="mt-3 pl-4 border-l-2 border-blue-300">
+                                    <div class="flex items-center justify-between">
+                                        <p class="text-xs font-medium text-blue-700">
+                                            Diligência — prazo: {{ $diligencia->prazo->format('d/m/Y') }}
+                                        </p>
+                                        <div class="flex items-center gap-2">
+                                            <span class="px-1.5 py-0.5 text-xs bg-{{ $dc }}-100 text-{{ $dc }}-700 rounded">
+                                                {{ \App\Models\Diligencia::STATUS[$diligencia->status] }}
+                                            </span>
+                                            <a href="{{ route('propostas.diligencias.show', [$proposta, $diligencia]) }}"
+                                               class="text-xs text-indigo-600 hover:underline">
+                                                {{ $diligencia->status === 'pendente' ? 'Responder' : 'Ver' }}
+                                            </a>
+                                        </div>
+                                    </div>
+                                    <p class="text-xs text-gray-600 mt-0.5">{{ $diligencia->descricao }}</p>
+                                </div>
+                            @endforeach
+                        </div>
+                    @empty
+                        <p class="px-6 py-6 text-sm text-gray-400 text-center">
+                            Nenhum parecer registrado ainda.
+                        </p>
+                    @endforelse
+                </div>
+            </div>
+            @endif
+
             {{-- Dados da Proposta --}}
             <div class="bg-white shadow rounded-lg p-6">
                 <h3 class="text-base font-semibold text-gray-800 mb-4">Dados da Proposta</h3>

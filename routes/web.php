@@ -1,10 +1,12 @@
 <?php
 
 use App\Http\Controllers\ChamamentoController;
+use App\Http\Controllers\DiligenciaController;
 use App\Http\Controllers\EtapaController;
 use App\Http\Controllers\MetaController;
 use App\Http\Controllers\OrgaoController;
 use App\Http\Controllers\OscController;
+use App\Http\Controllers\ParecerController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\ProgramaController;
 use App\Http\Controllers\PropostaController;
@@ -35,6 +37,16 @@ Route::middleware('auth')->group(function () {
     Route::patch('propostas/{proposta}/submeter', [PropostaController::class, 'submeter'])->name('propostas.submeter');
     Route::resource('propostas.metas', MetaController::class)->except(['show', 'index']);
     Route::resource('propostas.metas.etapas', EtapaController::class)->except(['show', 'index']);
+
+    Route::get('propostas/{proposta}/pareceres/create/{tipo}', [ParecerController::class, 'create'])
+        ->name('propostas.pareceres.create');
+    Route::post('propostas/{proposta}/pareceres', [ParecerController::class, 'store'])
+        ->name('propostas.pareceres.store');
+
+    Route::get('propostas/{proposta}/diligencias/{diligencia}', [DiligenciaController::class, 'show'])
+        ->name('propostas.diligencias.show');
+    Route::patch('propostas/{proposta}/diligencias/{diligencia}/responder', [DiligenciaController::class, 'responder'])
+        ->name('propostas.diligencias.responder');
 });
 
 require __DIR__.'/auth.php';
