@@ -33,7 +33,7 @@ php artisan db:seed
 
 1. [x] Estrutura base Laravel + autenticação + perfis/permissões
 2. [x] Cadastro de usuários (CRUD + atribuição de perfil)
-3. [ ] Cadastro institucional (Órgãos/Secretarias e OSCs)
+3. [x] Cadastro institucional (Órgãos/Secretarias e OSCs)
 4. [ ] Banco de Programas e Chamamentos Públicos
 5. [ ] Propostas + Plano de Trabalho
 6. [ ] Workflow de Análise e Aprovação
@@ -74,12 +74,18 @@ php artisan db:seed
   - Campos: nome, e-mail, CPF, telefone, senha, perfil, status
   - Paginação, feedback de sucesso, confirmação de remoção
   - Link "Usuários" adicionado na navegação principal
+- [2026-06-16] Cadastro institucional completo (Órgãos/Secretarias e OSCs)
+  - Órgãos: nome, sigla, CNPJ, e-mail, telefone, endereço completo, status
+  - OSCs: nome, tipo, CNPJ, contato, endereço, responsável legal, status
+  - Componente reutilizável `x-address-fields` para bloco de endereço
+  - Componente `x-flash-message` para mensagens de sessão
+  - Dropdown "Cadastros" na navegação com Órgãos e OSCs
 
 ---
 
 ## O que está sendo feito
 
-- Próximo passo: Cadastro Institucional (Órgãos/Secretarias e OSCs)
+- Próximo passo: Banco de Programas e Chamamentos Públicos
 
 ---
 
