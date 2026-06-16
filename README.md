@@ -34,7 +34,7 @@ php artisan db:seed
 1. [x] Estrutura base Laravel + autenticação + perfis/permissões
 2. [x] Cadastro de usuários (CRUD + atribuição de perfil)
 3. [x] Cadastro institucional (Órgãos/Secretarias e OSCs)
-4. [ ] Banco de Programas e Chamamentos Públicos
+4. [x] Banco de Programas e Chamamentos Públicos
 5. [ ] Propostas + Plano de Trabalho
 6. [ ] Workflow de Análise e Aprovação
 7. [ ] Formalização (geração de instrumentos + assinatura eletrônica)
@@ -83,9 +83,17 @@ php artisan db:seed
 
 ---
 
+- [2026-06-16] Banco de Programas e Chamamentos Públicos
+  - Programas: tipo de instrumento (Fomento/Colaboração/Cooperação), órgão, valor, vigência, status
+  - Chamamentos: aninhados ao programa, tipo, valor, datas, status com 6 etapas
+  - Chamamentos acessados por `/programas/{id}/chamamentos`
+  - Navegação reorganizada: Usuários entrou no dropdown Cadastros; Programas no topo
+
+---
+
 ## O que está sendo feito
 
-- Próximo passo: Banco de Programas e Chamamentos Públicos
+- Próximo passo: Propostas + Plano de Trabalho
 
 ---
 
