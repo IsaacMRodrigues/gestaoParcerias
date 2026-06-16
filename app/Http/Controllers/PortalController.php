@@ -13,7 +13,8 @@ class PortalController extends Controller
     public function index(): View
     {
         $chamamentos = Chamamento::with(['programa.orgao'])
-            ->where('status', 'em_inscricao')
+            ->whereIn('status', ['publicado', 'em_inscricao'])
+            ->orderByRaw("FIELD(status, 'em_inscricao', 'publicado')")
             ->orderBy('data_fim_inscricao')
             ->paginate(12);
 

@@ -70,17 +70,23 @@
                            class="px-4 py-2 text-sm font-medium text-indigo-700 border border-indigo-300 rounded-lg hover:bg-indigo-50 text-center transition">
                             Ver Detalhes
                         </a>
-                        @auth
-                            <a href="{{ route('portal.participar', $chamamento) }}"
-                               class="px-4 py-2 text-sm font-medium text-white bg-indigo-600 rounded-lg hover:bg-indigo-700 text-center transition">
-                                Quero Participar
-                            </a>
+                        @if($chamamento->status === 'em_inscricao')
+                            @auth
+                                <a href="{{ route('portal.participar', $chamamento) }}"
+                                   class="px-4 py-2 text-sm font-medium text-white bg-indigo-600 rounded-lg hover:bg-indigo-700 text-center transition">
+                                    Quero Participar
+                                </a>
+                            @else
+                                <a href="{{ route('login') }}"
+                                   class="px-4 py-2 text-sm font-medium text-white bg-indigo-600 rounded-lg hover:bg-indigo-700 text-center transition">
+                                    Entrar para Participar
+                                </a>
+                            @endauth
                         @else
-                            <a href="{{ route('login') }}"
-                               class="px-4 py-2 text-sm font-medium text-white bg-indigo-600 rounded-lg hover:bg-indigo-700 text-center transition">
-                                Entrar para Participar
-                            </a>
-                        @endauth
+                            <span class="px-4 py-2 text-sm font-medium text-blue-600 bg-blue-50 border border-blue-200 rounded-lg text-center">
+                                Inscrições em breve
+                            </span>
+                        @endif
                     </div>
                 </div>
             </div>
