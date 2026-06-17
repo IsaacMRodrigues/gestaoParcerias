@@ -53,6 +53,21 @@ class Chamamento extends Model
         return $this->belongsTo(Programa::class);
     }
 
+    public function pecas(): \Illuminate\Database\Eloquent\Relations\MorphMany
+    {
+        return $this->morphMany(Peca::class, 'pecaable')->orderBy('ordem');
+    }
+
+    /**
+     * Categoria de peças aplicável conforme o tipo do chamamento.
+     */
+    public function categoriaPecas(): string
+    {
+        return $this->tipo === 'chamamento_publico'
+            ? 'chamamento_publico'
+            : 'dispensa_inexigibilidade';
+    }
+
     /**
      * Status derivado das datas quando o admin não mudou manualmente.
      * publicado + dentro do período de inscrição → trata como em_inscricao.

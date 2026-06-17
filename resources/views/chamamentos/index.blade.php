@@ -61,6 +61,8 @@
                                     </span>
                                 </td>
                                 <td class="px-6 py-4 text-right text-sm font-medium space-x-3 whitespace-nowrap">
+                                    <a href="{{ route('chamamentos.selecao', $chamamento) }}"
+                                       class="text-gray-600 hover:text-gray-900">Seleção</a>
                                     <a href="{{ route('programas.chamamentos.edit', [$programa, $chamamento]) }}"
                                        class="text-indigo-600 hover:text-indigo-900">Editar</a>
                                     <form action="{{ route('programas.chamamentos.destroy', [$programa, $chamamento]) }}"

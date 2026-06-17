@@ -39,8 +39,8 @@ php artisan db:seed
 6. [x] Workflow de Análise e Aprovação
 7. [x] Formalização (geração de instrumentos + assinatura eletrônica)
 8. [x] Portal público + auto-cadastro de OSC + upload de documentos
-9. [~] Módulo Unidade Gestora — 2.1 Planejamento (Processos, Termo de Referência, trâmite entre setores)
-10. [ ] Módulo Unidade Gestora — 2.2 Seleção/Celebração e 2.3 Execução do Concedente
+9. [x] Módulo Unidade Gestora — 2.1 Planejamento (Processos, Termo de Referência, trâmite entre setores)
+10. [~] Módulo Unidade Gestora — 2.2 Seleção/Celebração e 2.3 Execução do Concedente (falta Ordem de Pagamento)
 11. [ ] Execução (repasses, despesas, notas fiscais)
 12. [ ] Monitoramento e Fiscalização
 13. [ ] Prestação de Contas
@@ -154,10 +154,28 @@ php artisan db:seed
 
 ---
 
+- [2026-06-17] Módulo Unidade Gestora — 2.2 Seleção/Celebração e 2.3 Execução
+  - **Motor genérico de peças documentais** (`Peca`, polimórfico via `pecaable`)
+    - Cada item é "modelo padrão" (texto + assinatura simples) ou "arquivo" (upload)
+    - Templates por categoria em `Peca::TEMPLATES`; `sincronizar()` cria o checklist (idempotente)
+    - Progresso calculado sobre itens obrigatórios preenchidos
+  - **2.2 Seleção e Celebração** anexada ao Chamamento (`/chamamentos/{id}/selecao`)
+    - Template escolhido pelo tipo: Chamamento Público vs Dispensa/Inexigibilidade
+    - Edital, comissão, pareceres, publicações, resultados, homologação, etc.
+    - Link "Seleção" na listagem de chamamentos
+  - **2.3 Execução** anexada a cada Aditivo (`.../aditivos/{id}/documentacao`)
+    - Apostilamento usa checklist próprio; demais aditivos usam checklist de aditivo
+    - Link "Documentação" em cada aditivo no show do instrumento
+  - **Adiado**: 2.3.1 Ordem de Pagamento (envolve dados bancários — integração bancária
+    foi definida para a última fase do projeto)
+  - Tabela: `pecas` (polimórfica)
+
+---
+
 ## O que está sendo feito
 
-- Próximo passo: Módulo Unidade Gestora 2.2 (Seleção/Celebração) e 2.3 (Execução do Concedente),
-  integrando com chamamentos/instrumentos já existentes; depois Execução financeira.
+- Próximo passo: Ordem de Pagamento + Execução financeira (repasses, despesas, notas fiscais)
+  quando a fase bancária for liberada; depois Monitoramento e Prestação de Contas.
 
 ---
 

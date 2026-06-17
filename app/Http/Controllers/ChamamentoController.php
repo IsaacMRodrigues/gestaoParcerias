@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Http\Requests\ChamamentoRequest;
 use App\Models\Chamamento;
+use App\Models\Peca;
 use App\Models\Programa;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\View\View;
@@ -51,5 +52,20 @@ class ChamamentoController extends Controller
 
         return redirect()->route('programas.chamamentos.index', $programa)
             ->with('success', 'Chamamento removido com sucesso.');
+    }
+
+    /**
+     * 2.2 Seleção e Celebração — checklist documental do chamamento.
+     */
+    public function selecao(Chamamento $chamamento): View
+    {
+        $categoria = $chamamento->categoriaPecas();
+        Peca::sincronizar($chamamento, $categoria);
+
+        $chamamento->load(['programa.orgao', 'pecas.assinante']);
+        $pecas = $chamamento->pecas;
+        $progresso = Peca::progresso($pecas);
+
+        return view('chamamentos.selecao', compact('chamamento', 'pecas', 'categoria', 'progresso'));
     }
 }

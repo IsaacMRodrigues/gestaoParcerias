@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Http\Requests\AditivoRequest;
 use App\Models\Aditivo;
 use App\Models\Instrumento;
+use App\Models\Peca;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\View\View;
 
@@ -44,5 +45,22 @@ class AditivoController extends Controller
 
         return redirect()->route('instrumentos.show', $instrumento)
             ->with('success', 'Termo aditivo removido.');
+    }
+
+    /**
+     * 2.3 Execução do Concedente — documentação do aditivo/apostilamento.
+     */
+    public function documentacao(Instrumento $instrumento, Aditivo $aditivo): View
+    {
+        abort_unless($aditivo->instrumento_id === $instrumento->id, 404);
+
+        $categoria = $aditivo->categoriaPecas();
+        Peca::sincronizar($aditivo, $categoria);
+
+        $aditivo->load('pecas.assinante');
+        $pecas = $aditivo->pecas;
+        $progresso = Peca::progresso($pecas);
+
+        return view('aditivos.documentacao', compact('instrumento', 'aditivo', 'pecas', 'categoria', 'progresso'));
     }
 }

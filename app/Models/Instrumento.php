@@ -61,6 +61,11 @@ class Instrumento extends Model
         return $this->hasMany(Aditivo::class)->orderBy('numero');
     }
 
+    public function pecas(): \Illuminate\Database\Eloquent\Relations\MorphMany
+    {
+        return $this->morphMany(Peca::class, 'pecaable')->orderBy('ordem');
+    }
+
     public function valorTotal(): float
     {
         return (float) $this->valor_repasse + (float) $this->valor_proprio;

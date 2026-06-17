@@ -142,6 +142,8 @@
                                 <span class="px-2 py-1 text-xs font-medium {{ $aditivo->status === 'assinado' ? 'bg-blue-100 text-blue-800' : 'bg-gray-100 text-gray-600' }} rounded-full">
                                     {{ \App\Models\Aditivo::STATUS[$aditivo->status] }}
                                 </span>
+                                <a href="{{ route('instrumentos.aditivos.documentacao', [$instrumento, $aditivo]) }}"
+                                   class="text-xs text-gray-600 hover:text-gray-900">Documentação</a>
                                 <a href="{{ route('instrumentos.aditivos.edit', [$instrumento, $aditivo]) }}"
                                    class="text-xs text-indigo-600 hover:text-indigo-900">Editar</a>
                                 <form action="{{ route('instrumentos.aditivos.destroy', [$instrumento, $aditivo]) }}"

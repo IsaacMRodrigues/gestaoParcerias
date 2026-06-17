@@ -11,6 +11,7 @@ use App\Http\Controllers\OrgaoController;
 use App\Http\Controllers\OscController;
 use App\Http\Controllers\OscRegistroController;
 use App\Http\Controllers\ParecerController;
+use App\Http\Controllers\PecaController;
 use App\Http\Controllers\PortalController;
 use App\Http\Controllers\ProcessoController;
 use App\Http\Controllers\ProcessoPecaController;
@@ -78,6 +79,16 @@ Route::middleware(['auth', 'staff'])->group(function () {
     Route::resource('programas', ProgramaController::class);
     Route::resource('programas.chamamentos', ChamamentoController::class)->except(['show']);
 
+    // 2.2 Seleção e Celebração — checklist documental do chamamento
+    Route::get('chamamentos/{chamamento}/selecao', [ChamamentoController::class, 'selecao'])->name('chamamentos.selecao');
+
+    // Peças documentais (motor genérico — 2.2 e 2.3)
+    Route::put('pecas/{peca}', [PecaController::class, 'salvar'])->name('pecas.salvar');
+    Route::patch('pecas/{peca}/assinar', [PecaController::class, 'assinar'])->name('pecas.assinar');
+    Route::post('pecas/{peca}/arquivo', [PecaController::class, 'upload'])->name('pecas.upload');
+    Route::get('pecas/{peca}/arquivo', [PecaController::class, 'download'])->name('pecas.download');
+    Route::delete('pecas/{peca}/arquivo', [PecaController::class, 'removerArquivo'])->name('pecas.arquivo.remover');
+
     Route::resource('propostas', PropostaController::class);
     Route::patch('propostas/{proposta}/submeter', [PropostaController::class, 'submeter'])->name('propostas.submeter');
     Route::resource('propostas.metas', MetaController::class)->except(['show', 'index']);
@@ -106,6 +117,8 @@ Route::middleware(['auth', 'staff'])->group(function () {
         ->name('instrumentos.publicar');
 
     Route::resource('instrumentos.aditivos', AditivoController::class)->except(['index', 'show']);
+    Route::get('instrumentos/{instrumento}/aditivos/{aditivo}/documentacao', [AditivoController::class, 'documentacao'])
+        ->name('instrumentos.aditivos.documentacao');
 });
 
 require __DIR__.'/auth.php';

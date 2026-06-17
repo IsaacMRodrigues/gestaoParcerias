@@ -38,4 +38,17 @@ class Aditivo extends Model
     {
         return $this->belongsTo(Instrumento::class);
     }
+
+    public function pecas(): \Illuminate\Database\Eloquent\Relations\MorphMany
+    {
+        return $this->morphMany(Peca::class, 'pecaable')->orderBy('ordem');
+    }
+
+    /**
+     * Apostilamento usa um checklist próprio; demais aditivos usam o checklist de aditivo.
+     */
+    public function categoriaPecas(): string
+    {
+        return $this->tipo === 'apostilamento' ? 'apostilamento' : 'aditivo';
+    }
 }
