@@ -25,6 +25,7 @@ class User extends Authenticatable
      * @return array<string, string>
      */
     public static array $roleLabels = [
+        'administrador'                    => 'Administrador',
         'representante_legal'              => 'Representante Legal',
         'secretario_unidade_gestora'       => 'Secretário da Unidade Gestora',
         'gestor_parceria'                  => 'Gestor da Parceria',

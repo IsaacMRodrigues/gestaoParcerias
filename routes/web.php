@@ -49,8 +49,10 @@ Route::middleware('auth')->group(function () {
     Route::get('documentos/{documento}/download', [DocumentoController::class, 'download'])->name('documentos.download');
 });
 
-// Área administrativa — bloqueada para representante_legal
-Route::middleware(['auth', 'staff'])->group(function () {
+// Área administrativa — bloqueada para representante_legal.
+// 'readonly' garante que Controle Interno só leia (não grave).
+Route::middleware(['auth', 'staff', 'readonly'])->group(function () {
+    // Disponível a qualquer servidor autenticado
     Route::get('/dashboard', function () {
         return view('dashboard');
     })->name('dashboard');
@@ -59,66 +61,81 @@ Route::middleware(['auth', 'staff'])->group(function () {
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
 
-    Route::resource('usuarios', UserController::class)->except(['show']);
-    Route::resource('orgaos', OrgaoController::class)->except(['show']);
-    Route::resource('oscs', OscController::class)->except(['show']);
+    // Cadastros institucionais
+    Route::middleware('permission:cadastros')->group(function () {
+        Route::resource('usuarios', UserController::class)->except(['show']);
+        Route::resource('orgaos', OrgaoController::class)->except(['show']);
+        Route::resource('oscs', OscController::class)->except(['show']);
+    });
 
     // Módulo Unidade Gestora — Planejamento (Processos)
-    Route::get('processos/caixa', [ProcessoController::class, 'caixa'])->name('processos.caixa');
-    Route::resource('processos', ProcessoController::class)->except(['edit', 'update']);
-    Route::get('processos/{processo}/termo', [TermoReferenciaController::class, 'edit'])->name('processos.termo.edit');
-    Route::put('processos/{processo}/termo', [TermoReferenciaController::class, 'update'])->name('processos.termo.update');
-    Route::patch('processos/{processo}/termo/assinar', [TermoReferenciaController::class, 'assinar'])->name('processos.termo.assinar');
-    Route::get('processos/{processo}/pecas/{peca}', [ProcessoPecaController::class, 'edit'])->name('processos.pecas.edit');
-    Route::put('processos/{processo}/pecas/{peca}', [ProcessoPecaController::class, 'update'])->name('processos.pecas.update');
-    Route::patch('processos/{processo}/pecas/{peca}/assinar', [ProcessoPecaController::class, 'assinar'])->name('processos.pecas.assinar');
-    Route::post('processos/{processo}/enviar', [TramitacaoController::class, 'enviar'])->name('processos.enviar');
-    Route::patch('processos/{processo}/receber', [TramitacaoController::class, 'receber'])->name('processos.receber');
-    Route::patch('processos/{processo}/abrir', [TramitacaoController::class, 'abrir'])->name('processos.abrir');
+    Route::middleware('permission:planejamento')->group(function () {
+        Route::get('processos/caixa', [ProcessoController::class, 'caixa'])->name('processos.caixa');
+        Route::resource('processos', ProcessoController::class)->except(['edit', 'update']);
+        Route::get('processos/{processo}/termo', [TermoReferenciaController::class, 'edit'])->name('processos.termo.edit');
+        Route::put('processos/{processo}/termo', [TermoReferenciaController::class, 'update'])->name('processos.termo.update');
+        Route::patch('processos/{processo}/termo/assinar', [TermoReferenciaController::class, 'assinar'])->name('processos.termo.assinar');
+        Route::get('processos/{processo}/pecas/{peca}', [ProcessoPecaController::class, 'edit'])->name('processos.pecas.edit');
+        Route::put('processos/{processo}/pecas/{peca}', [ProcessoPecaController::class, 'update'])->name('processos.pecas.update');
+        Route::patch('processos/{processo}/pecas/{peca}/assinar', [ProcessoPecaController::class, 'assinar'])->name('processos.pecas.assinar');
+        Route::post('processos/{processo}/enviar', [TramitacaoController::class, 'enviar'])->name('processos.enviar');
+        Route::patch('processos/{processo}/receber', [TramitacaoController::class, 'receber'])->name('processos.receber');
+        Route::patch('processos/{processo}/abrir', [TramitacaoController::class, 'abrir'])->name('processos.abrir');
+    });
 
-    Route::resource('programas', ProgramaController::class);
-    Route::resource('programas.chamamentos', ChamamentoController::class)->except(['show']);
+    // Programas, Chamamentos e Seleção (2.2)
+    Route::middleware('permission:chamamentos')->group(function () {
+        Route::resource('programas', ProgramaController::class);
+        Route::resource('programas.chamamentos', ChamamentoController::class)->except(['show']);
+        Route::get('chamamentos/{chamamento}/selecao', [ChamamentoController::class, 'selecao'])->name('chamamentos.selecao');
+    });
 
-    // 2.2 Seleção e Celebração — checklist documental do chamamento
-    Route::get('chamamentos/{chamamento}/selecao', [ChamamentoController::class, 'selecao'])->name('chamamentos.selecao');
+    // Propostas + Plano de Trabalho
+    Route::middleware('permission:propostas')->group(function () {
+        Route::resource('propostas', PropostaController::class);
+        Route::patch('propostas/{proposta}/submeter', [PropostaController::class, 'submeter'])->name('propostas.submeter');
+        Route::resource('propostas.metas', MetaController::class)->except(['show', 'index']);
+        Route::resource('propostas.metas.etapas', EtapaController::class)->except(['show', 'index']);
+    });
 
-    // Peças documentais (motor genérico — 2.2 e 2.3)
-    Route::put('pecas/{peca}', [PecaController::class, 'salvar'])->name('pecas.salvar');
-    Route::patch('pecas/{peca}/assinar', [PecaController::class, 'assinar'])->name('pecas.assinar');
-    Route::post('pecas/{peca}/arquivo', [PecaController::class, 'upload'])->name('pecas.upload');
-    Route::get('pecas/{peca}/arquivo', [PecaController::class, 'download'])->name('pecas.download');
-    Route::delete('pecas/{peca}/arquivo', [PecaController::class, 'removerArquivo'])->name('pecas.arquivo.remover');
+    // Pareceres (técnico/jurídico/decisão) e diligências — autorização fina por tipo no controller
+    Route::middleware('permission:pareceres_tecnico|pareceres_juridico|pareceres_decisao')->group(function () {
+        Route::get('propostas/{proposta}/pareceres/create/{tipo}', [ParecerController::class, 'create'])
+            ->name('propostas.pareceres.create');
+        Route::post('propostas/{proposta}/pareceres', [ParecerController::class, 'store'])
+            ->name('propostas.pareceres.store');
+        Route::get('propostas/{proposta}/diligencias/{diligencia}', [DiligenciaController::class, 'show'])
+            ->name('propostas.diligencias.show');
+        Route::patch('propostas/{proposta}/diligencias/{diligencia}/responder', [DiligenciaController::class, 'responder'])
+            ->name('propostas.diligencias.responder');
+    });
 
-    Route::resource('propostas', PropostaController::class);
-    Route::patch('propostas/{proposta}/submeter', [PropostaController::class, 'submeter'])->name('propostas.submeter');
-    Route::resource('propostas.metas', MetaController::class)->except(['show', 'index']);
-    Route::resource('propostas.metas.etapas', EtapaController::class)->except(['show', 'index']);
+    // Formalização (instrumentos e aditivos)
+    Route::middleware('permission:formalizacao')->group(function () {
+        Route::resource('instrumentos', InstrumentoController::class)->except(['create', 'store']);
+        Route::get('propostas/{proposta}/instrumentos/create', [InstrumentoController::class, 'create'])
+            ->name('instrumentos.create');
+        Route::post('propostas/{proposta}/instrumentos', [InstrumentoController::class, 'store'])
+            ->name('instrumentos.store');
+        Route::get('instrumentos/{instrumento}/minuta', [InstrumentoController::class, 'minuta'])
+            ->name('instrumentos.minuta');
+        Route::patch('instrumentos/{instrumento}/assinar', [InstrumentoController::class, 'assinar'])
+            ->name('instrumentos.assinar');
+        Route::patch('instrumentos/{instrumento}/publicar', [InstrumentoController::class, 'publicar'])
+            ->name('instrumentos.publicar');
+        Route::resource('instrumentos.aditivos', AditivoController::class)->except(['index', 'show']);
+        Route::get('instrumentos/{instrumento}/aditivos/{aditivo}/documentacao', [AditivoController::class, 'documentacao'])
+            ->name('instrumentos.aditivos.documentacao');
+    });
 
-    Route::get('propostas/{proposta}/pareceres/create/{tipo}', [ParecerController::class, 'create'])
-        ->name('propostas.pareceres.create');
-    Route::post('propostas/{proposta}/pareceres', [ParecerController::class, 'store'])
-        ->name('propostas.pareceres.store');
-
-    Route::get('propostas/{proposta}/diligencias/{diligencia}', [DiligenciaController::class, 'show'])
-        ->name('propostas.diligencias.show');
-    Route::patch('propostas/{proposta}/diligencias/{diligencia}/responder', [DiligenciaController::class, 'responder'])
-        ->name('propostas.diligencias.responder');
-
-    Route::resource('instrumentos', InstrumentoController::class)->except(['create', 'store']);
-    Route::get('propostas/{proposta}/instrumentos/create', [InstrumentoController::class, 'create'])
-        ->name('instrumentos.create');
-    Route::post('propostas/{proposta}/instrumentos', [InstrumentoController::class, 'store'])
-        ->name('instrumentos.store');
-    Route::get('instrumentos/{instrumento}/minuta', [InstrumentoController::class, 'minuta'])
-        ->name('instrumentos.minuta');
-    Route::patch('instrumentos/{instrumento}/assinar', [InstrumentoController::class, 'assinar'])
-        ->name('instrumentos.assinar');
-    Route::patch('instrumentos/{instrumento}/publicar', [InstrumentoController::class, 'publicar'])
-        ->name('instrumentos.publicar');
-
-    Route::resource('instrumentos.aditivos', AditivoController::class)->except(['index', 'show']);
-    Route::get('instrumentos/{instrumento}/aditivos/{aditivo}/documentacao', [AditivoController::class, 'documentacao'])
-        ->name('instrumentos.aditivos.documentacao');
+    // Peças documentais (motor genérico — usado por Seleção 2.2 e Formalização 2.3)
+    Route::middleware('permission:chamamentos|formalizacao')->group(function () {
+        Route::put('pecas/{peca}', [PecaController::class, 'salvar'])->name('pecas.salvar');
+        Route::patch('pecas/{peca}/assinar', [PecaController::class, 'assinar'])->name('pecas.assinar');
+        Route::post('pecas/{peca}/arquivo', [PecaController::class, 'upload'])->name('pecas.upload');
+        Route::get('pecas/{peca}/arquivo', [PecaController::class, 'download'])->name('pecas.download');
+        Route::delete('pecas/{peca}/arquivo', [PecaController::class, 'removerArquivo'])->name('pecas.arquivo.remover');
+    });
 });
 
 require __DIR__.'/auth.php';

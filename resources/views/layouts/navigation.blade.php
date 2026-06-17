@@ -19,6 +19,7 @@
                         Portal Público
                     </x-nav-link>
                     {{-- Dropdown Cadastros --}}
+                    @can('cadastros')
                     <div x-data="{ open: false }" class="relative flex items-center">
                         <button @click="open = !open" @click.outside="open = false"
                                 class="inline-flex items-center gap-1 px-1 pt-1 text-sm font-medium border-b-2 transition duration-150 ease-in-out
@@ -46,7 +47,9 @@
                             </a>
                         </div>
                     </div>
+                    @endcan
 
+                    @can('planejamento')
                     <x-nav-link :href="route('processos.index')" :active="request()->routeIs('processos.index') || request()->routeIs('processos.create') || request()->routeIs('processos.show')">
                         Planejamento
                     </x-nav-link>
@@ -56,18 +59,25 @@
                             Caixa de Entrada
                         </x-nav-link>
                     @endif
+                    @endcan
 
+                    @can('chamamentos')
                     <x-nav-link :href="route('programas.index')" :active="request()->routeIs('programas.*') || request()->routeIs('chamamentos.*')">
                         Programas
                     </x-nav-link>
+                    @endcan
 
+                    @can('propostas')
                     <x-nav-link :href="route('propostas.index')" :active="request()->routeIs('propostas.*') || request()->routeIs('metas.*') || request()->routeIs('etapas.*')">
                         Propostas
                     </x-nav-link>
+                    @endcan
 
+                    @can('formalizacao')
                     <x-nav-link :href="route('instrumentos.index')" :active="request()->routeIs('instrumentos.*')">
                         Instrumentos
                     </x-nav-link>
+                    @endcan
                 </div>
             </div>
 
@@ -123,6 +133,7 @@
             <x-responsive-nav-link :href="route('dashboard')" :active="request()->routeIs('dashboard')">
                 Dashboard
             </x-responsive-nav-link>
+            @can('cadastros')
             <x-responsive-nav-link :href="route('usuarios.index')" :active="request()->routeIs('usuarios.*')">
                 Usuários
             </x-responsive-nav-link>
@@ -132,6 +143,8 @@
             <x-responsive-nav-link :href="route('oscs.index')" :active="request()->routeIs('oscs.*')">
                 OSCs
             </x-responsive-nav-link>
+            @endcan
+            @can('planejamento')
             <x-responsive-nav-link :href="route('processos.index')" :active="request()->routeIs('processos.index')">
                 Planejamento
             </x-responsive-nav-link>
@@ -140,15 +153,22 @@
                     Caixa de Entrada
                 </x-responsive-nav-link>
             @endif
+            @endcan
+            @can('chamamentos')
             <x-responsive-nav-link :href="route('programas.index')" :active="request()->routeIs('programas.*')">
                 Programas
             </x-responsive-nav-link>
+            @endcan
+            @can('propostas')
             <x-responsive-nav-link :href="route('propostas.index')" :active="request()->routeIs('propostas.*')">
                 Propostas
             </x-responsive-nav-link>
+            @endcan
+            @can('formalizacao')
             <x-responsive-nav-link :href="route('instrumentos.index')" :active="request()->routeIs('instrumentos.*')">
                 Instrumentos
             </x-responsive-nav-link>
+            @endcan
         </div>
 
         <!-- Responsive Settings Options -->

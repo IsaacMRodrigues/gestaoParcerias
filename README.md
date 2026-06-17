@@ -50,17 +50,24 @@ php artisan db:seed
 
 ## Perfis de usuário
 
-| Slug | Descrição |
-|---|---|
-| `representante_legal` | Responsável pela OSC |
-| `secretario_unidade_gestora` | Responsável pela Secretaria |
-| `gestor_parceria` | Acompanha a execução |
-| `comissao_avaliacao_monitoramento` | Analisa e monitora |
-| `comissao_selecao` | Avalia propostas |
-| `procuradoria_juridica` | Emite pareceres jurídicos |
-| `controle_interno` | Auditoria interna |
-| `cadastrador_proposta` | Insere propostas |
-| `cadastrador_prestacao_contas` | Insere prestações de contas |
+| Slug | Descrição | Permissões |
+|---|---|---|
+| `administrador` | Administrador do sistema | Todas |
+| `representante_legal` | Responsável pela OSC | Só portal |
+| `secretario_unidade_gestora` | Responsável pela Secretaria | planejamento, chamamentos, propostas, decisão, formalização |
+| `gestor_parceria` | Acompanha a execução | planejamento, monitoramento |
+| `comissao_avaliacao_monitoramento` | Analisa e monitora | planejamento, monitoramento |
+| `comissao_selecao` | Avalia propostas | propostas, parecer técnico, decisão |
+| `procuradoria_juridica` | Emite pareceres jurídicos | planejamento, parecer jurídico |
+| `controle_interno` | Auditoria interna | todas (**somente leitura**) |
+| `cadastrador_proposta` | Insere propostas | propostas |
+| `cadastrador_prestacao_contas` | Insere prestações de contas | prestação de contas |
+
+> Permissões por área: `cadastros`, `planejamento`, `chamamentos`, `propostas`,
+> `pareceres_tecnico`, `pareceres_juridico`, `pareceres_decisao`, `formalizacao`,
+> `monitoramento`, `prestacao_contas` — definidas em `RolesSeeder` e aplicadas por
+> middleware nas rotas + `@can` na navegação. Controle Interno vê tudo mas não grava
+> (middleware `readonly`). Representante Legal só acessa o portal (middleware `staff`).
 
 ---
 
@@ -169,6 +176,17 @@ php artisan db:seed
   - **Adiado**: 2.3.1 Ordem de Pagamento (envolve dados bancários — integração bancária
     foi definida para a última fase do projeto)
   - Tabela: `pecas` (polimórfica)
+
+---
+
+- [2026-06-17] Controle granular de acesso por perfil
+  - Novo perfil **Administrador** (acesso total, gerencia usuários/órgãos/OSCs)
+  - 10 permissões por área definidas em `RolesSeeder` e atribuídas via matriz
+  - Rotas admin agrupadas por `permission:<área>`; navegação filtrada com `@can`
+  - **Controle Interno**: acesso de leitura a tudo, escrita bloqueada (middleware `readonly`)
+  - Pareceres autorizados por tipo (técnico/jurídico/decisão) no controller
+  - Campo `setor` no usuário (já existente) continua governando o trâmite do planejamento
+  - Antes: qualquer servidor autenticado fazia tudo. Agora cada perfil vê/faz só a sua área.
 
 ---
 

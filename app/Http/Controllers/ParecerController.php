@@ -10,9 +10,26 @@ use Illuminate\View\View;
 
 class ParecerController extends Controller
 {
+    /**
+     * Permissão exigida conforme o tipo de parecer.
+     */
+    private const PERMISSAO_POR_TIPO = [
+        'tecnico'  => 'pareceres_tecnico',
+        'juridico' => 'pareceres_juridico',
+        'decisao'  => 'pareceres_decisao',
+    ];
+
+    private function autorizarTipo(string $tipo): void
+    {
+        $permissao = self::PERMISSAO_POR_TIPO[$tipo] ?? null;
+        abort_unless($permissao && auth()->user()->can($permissao), 403,
+            'Seu perfil não pode emitir este tipo de parecer.');
+    }
+
     public function create(Proposta $proposta, string $tipo): View
     {
         abort_unless(array_key_exists($tipo, Parecer::TIPOS), 404);
+        $this->autorizarTipo($tipo);
 
         $proposta->load('pareceres');
 
@@ -22,6 +39,7 @@ class ParecerController extends Controller
     public function store(ParecerRequest $request, Proposta $proposta): RedirectResponse
     {
         $data = $request->validated();
+        $this->autorizarTipo($data['tipo']);
 
         $parecer = $proposta->pareceres()->create($data);
 
