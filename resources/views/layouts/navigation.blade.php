@@ -47,6 +47,16 @@
                         </div>
                     </div>
 
+                    <x-nav-link :href="route('processos.index')" :active="request()->routeIs('processos.index') || request()->routeIs('processos.create') || request()->routeIs('processos.show')">
+                        Planejamento
+                    </x-nav-link>
+
+                    @if(auth()->user()->setor)
+                        <x-nav-link :href="route('processos.caixa')" :active="request()->routeIs('processos.caixa')">
+                            Caixa de Entrada
+                        </x-nav-link>
+                    @endif
+
                     <x-nav-link :href="route('programas.index')" :active="request()->routeIs('programas.*') || request()->routeIs('chamamentos.*')">
                         Programas
                     </x-nav-link>
@@ -122,6 +132,14 @@
             <x-responsive-nav-link :href="route('oscs.index')" :active="request()->routeIs('oscs.*')">
                 OSCs
             </x-responsive-nav-link>
+            <x-responsive-nav-link :href="route('processos.index')" :active="request()->routeIs('processos.index')">
+                Planejamento
+            </x-responsive-nav-link>
+            @if(auth()->user()->setor)
+                <x-responsive-nav-link :href="route('processos.caixa')" :active="request()->routeIs('processos.caixa')">
+                    Caixa de Entrada
+                </x-responsive-nav-link>
+            @endif
             <x-responsive-nav-link :href="route('programas.index')" :active="request()->routeIs('programas.*')">
                 Programas
             </x-responsive-nav-link>

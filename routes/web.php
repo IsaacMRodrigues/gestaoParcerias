@@ -12,9 +12,13 @@ use App\Http\Controllers\OscController;
 use App\Http\Controllers\OscRegistroController;
 use App\Http\Controllers\ParecerController;
 use App\Http\Controllers\PortalController;
+use App\Http\Controllers\ProcessoController;
+use App\Http\Controllers\ProcessoPecaController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\ProgramaController;
 use App\Http\Controllers\PropostaController;
+use App\Http\Controllers\TermoReferenciaController;
+use App\Http\Controllers\TramitacaoController;
 use App\Http\Controllers\UserController;
 use Illuminate\Support\Facades\Route;
 
@@ -57,6 +61,19 @@ Route::middleware(['auth', 'staff'])->group(function () {
     Route::resource('usuarios', UserController::class)->except(['show']);
     Route::resource('orgaos', OrgaoController::class)->except(['show']);
     Route::resource('oscs', OscController::class)->except(['show']);
+
+    // Módulo Unidade Gestora — Planejamento (Processos)
+    Route::get('processos/caixa', [ProcessoController::class, 'caixa'])->name('processos.caixa');
+    Route::resource('processos', ProcessoController::class)->except(['edit', 'update']);
+    Route::get('processos/{processo}/termo', [TermoReferenciaController::class, 'edit'])->name('processos.termo.edit');
+    Route::put('processos/{processo}/termo', [TermoReferenciaController::class, 'update'])->name('processos.termo.update');
+    Route::patch('processos/{processo}/termo/assinar', [TermoReferenciaController::class, 'assinar'])->name('processos.termo.assinar');
+    Route::get('processos/{processo}/pecas/{peca}', [ProcessoPecaController::class, 'edit'])->name('processos.pecas.edit');
+    Route::put('processos/{processo}/pecas/{peca}', [ProcessoPecaController::class, 'update'])->name('processos.pecas.update');
+    Route::patch('processos/{processo}/pecas/{peca}/assinar', [ProcessoPecaController::class, 'assinar'])->name('processos.pecas.assinar');
+    Route::post('processos/{processo}/enviar', [TramitacaoController::class, 'enviar'])->name('processos.enviar');
+    Route::patch('processos/{processo}/receber', [TramitacaoController::class, 'receber'])->name('processos.receber');
+    Route::patch('processos/{processo}/abrir', [TramitacaoController::class, 'abrir'])->name('processos.abrir');
 
     Route::resource('programas', ProgramaController::class);
     Route::resource('programas.chamamentos', ChamamentoController::class)->except(['show']);

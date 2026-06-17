@@ -31,6 +31,7 @@ class UserController extends Controller
             'email'    => $request->email,
             'cpf'      => $request->cpf,
             'phone'    => $request->phone,
+            'setor'    => $request->setor,
             'status'   => $request->boolean('status', true),
             'password' => bcrypt($request->password),
         ]);
@@ -55,6 +56,7 @@ class UserController extends Controller
             'email'  => $request->email,
             'cpf'    => $request->cpf,
             'phone'  => $request->phone,
+            'setor'  => $request->setor,
             'status' => $request->boolean('status', true),
         ];
 

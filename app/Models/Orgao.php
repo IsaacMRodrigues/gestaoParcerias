@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Orgao extends Model
 {
@@ -17,5 +18,10 @@ class Orgao extends Model
     protected function casts(): array
     {
         return ['status' => 'boolean'];
+    }
+
+    public function processos(): HasMany
+    {
+        return $this->hasMany(Processo::class);
     }
 }

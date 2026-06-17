@@ -23,6 +23,7 @@ class UserRequest extends FormRequest
             'phone'    => ['nullable', 'string', 'max:20'],
             'password' => [$this->isMethod('POST') ? 'required' : 'nullable', 'string', 'min:8', 'confirmed'],
             'role'     => ['required', 'string', 'exists:roles,name'],
+            'setor'    => ['nullable', Rule::in(array_keys(\App\Models\Processo::SETORES))],
             'status'   => ['boolean'],
         ];
     }

@@ -38,10 +38,13 @@ php artisan db:seed
 5. [x] Propostas + Plano de Trabalho
 6. [x] Workflow de Análise e Aprovação
 7. [x] Formalização (geração de instrumentos + assinatura eletrônica)
-8. [ ] Execução (repasses, despesas, notas fiscais)
-9. [ ] Monitoramento e Fiscalização
-10. [ ] Prestação de Contas
-11. [ ] Integrações externas (bancária, Diário Oficial)
+8. [x] Portal público + auto-cadastro de OSC + upload de documentos
+9. [~] Módulo Unidade Gestora — 2.1 Planejamento (Processos, Termo de Referência, trâmite entre setores)
+10. [ ] Módulo Unidade Gestora — 2.2 Seleção/Celebração e 2.3 Execução do Concedente
+11. [ ] Execução (repasses, despesas, notas fiscais)
+12. [ ] Monitoramento e Fiscalização
+13. [ ] Prestação de Contas
+14. [ ] Integrações externas (bancária, Diário Oficial)
 
 ---
 
@@ -126,9 +129,35 @@ php artisan db:seed
 
 ---
 
+- [2026-06-17] Portal público, auto-cadastro de OSC e upload de documentos
+  - Portal `/portal` lista chamamentos `publicado`/`em_inscricao` sem login
+  - `status_efetivo` deriva "em inscrição" a partir das datas de inscrição
+  - Auto-cadastro `/cadastro/osc` cria User (representante_legal) + Osc vinculados
+  - Upload de documentos na proposta (admin e portal), download e remoção
+  - Middleware `staff`: representante_legal só acessa o portal, não a área admin
+
+---
+
+- [2026-06-17] Módulo Unidade Gestora — 2.1 Planejamento (Processos)
+  - `Processo` com número automático (NNNN/AAAA), vinculado à Unidade Gestora (Órgão)
+  - `TermoReferencia` estruturado com as 5 seções do documento (2.1–2.5)
+  - `ProcessoPeca`: Ofício, Parecer Financeiro, Abertura de Processo (texto + assinatura)
+  - **Assinatura simples**: registra quem assinou e data/hora (carimbo)
+  - **Trâmite real entre setores** (UG → SCP → SEPLAN → SPC) com caixa de entrada
+    - Campo `setor` no usuário define em qual caixa ele recebe os processos
+    - Histórico de tramitação (enviar / receber / parecer por setor)
+    - Só o setor que está com o processo pode encaminhá-lo
+  - Alertas automáticos de conformidade (🔴 dotação, objeto genérico, meta sem indicador,
+    sem justificativa, sem valor / 🟢 apto para abertura)
+  - UG conclui o planejamento com "Marcar Apto" quando não há pendências
+  - Tabelas: `processos`, `termo_referencias`, `processo_pecas`, `tramitacoes` + `setor` em `users`
+
+---
+
 ## O que está sendo feito
 
-- Próximo passo: Execução (repasses, despesas, notas fiscais)
+- Próximo passo: Módulo Unidade Gestora 2.2 (Seleção/Celebração) e 2.3 (Execução do Concedente),
+  integrando com chamamentos/instrumentos já existentes; depois Execução financeira.
 
 ---
 
