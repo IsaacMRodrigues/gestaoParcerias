@@ -1,0 +1,184 @@
+2. Módulo Unidade Gestora
+
+Fluxo 
+Unidade gestora preenche o ofício e termo de referência, assina e envia SCP -> SCP recebe, analisa e envia SEPLAN -> SEPLAN recebe, analisa e emite o parecer financeiro, assina e envia UG -> UG confere, se tiver pendência resolve, se tiver ok faz a abertura do processo e envia SPC -> UG assina AP, SPC elabora o edital ou justificativa de dispensa/inexigibilidade, assina e envia SCP.
+
+*******
+2.1. Planejamento: 
+Campos: 
+Número do Processo (gerado automático), 
+
+1. Ofício
+Campos - Modelo padrão - para preencher alguns dados
+(modelo em anexo)
+
+Assinatura digital
+
+Botão: Enviar, Excluir,  Editar e Alterar
+
+2. Termo de referência
+
+2.1. Descrição da realidade objeto da parceria
+Campos:
+Unidade gestora:
+Problema identificado
+Público-alvo
+Quantidade estimada de beneficiários
+Área temática: Selecionar (Saúde, Educação, Assistência Social, Cultura, Esporte, Meio Ambiente, Desenvolvimento Econômico, Outra)
+Justificativa da necessidade pública
+Indicadores que demonstram a necessidade
+
+Dica na tela:
+Descreva a situação que demanda a atuação da administração pública e os resultados esperados para a população.
+
+2.2. Vinculação ao Planejamento Governamental
+Campos:
+Programa de Governo
+Ação Governamental
+Dotação orçamentária vinculada
+
+Validação manual:
+Conferir se existe dotação orçamentária compatível.
+
+2.3. Definição do Objeto
+Campos:
+Objeto resumido
+Vigência prevista
+Local de execução
+Objetivo geral
+Objetivos específicos
+
+Dica na tela:
+O objeto deve ser específico, mensurável e compatível com a política pública da área.
+
+2.4. Justificativa
+Campo único
+
+2.5. Recursos Financeiros
+Campos:
+Valor total previsto
+Fonte do recurso
+
+Validação manual:
+Sistema contábil.
+Sistema orçamentário.
+
+Assinatura digital
+
+Botão: Enviar, Excluir, Editar e Alterar
+
+3. Parecer financeiro
+Campo - modelo padrão
+
+Assinatura digital
+
+Botão: Enviar, Excluir, Editar e Alterar
+
+4. Abertura de processo
+Campo - modelo padrão
+
+Botão: Enviar, Excluir, Editar e Alterar
+
+Assinatura digital UG
+
+Sugiro criar alertas automáticos:
+🔴 Não existe dotação orçamentária.
+🔴 Objeto genérico.
+🔴 Meta sem indicador.
+🔴 Ausência de justificativa de dispensa.
+🔴 Valor incompatível com histórico.
+🔴 Vigência superior ao permitido.
+🟢 Planejamento apto para abertura de processo.
+
+*******
+2.2. Seleção e Celebração
+Abas:
+Chamamento Público
+Dispensa ou Inexigibilidade de Chamamento Público
+
+2.2.1. Chamamento público
+Campos:
+Modalidade: seleção (Acordo de Cooperação, Colaboração e Fomento)
+Exercício:
+Unidade gestora:
+Objeto
+Valor Máximo da Parceria
+Prazo de Execução
+Data de Publicação
+Data Inicial das Propostas
+Data Final das Propostas
+Edital - modelo padrão
+Anexos - inserir arquivos
+Comissão de Seleção - inserir arquivo
+Parecer jurídico - modelo padrão
+Publicação do extrato do edital - inserir arquivo
+Resultado parcial - inserir arquivo
+Publicação do resultado parcial - inserir arquivo
+Recursos - inserir arquivo
+Resultado definitivo - inserir arquivo
+Publicação do resultado parcial - inserir arquivo
+Termo de homologação - inserir arquivo
+
+
+2.2.2. Dispensa ou inexigibilidade de Chamamento Público
+Campos:
+Parecer técnico (CNAS) - no caso das parcerias de SUAS (campo opcional)
+Justificativa de dispensa ou inexigibilidade - modelo padrão
+Publicação do extrato - inserir arquivo
+Plano de trabalho - ‘puxar’ do módulo ‘Gestão de Parcerias’ ou inserir arquivo
+Aprovação do Plano de trabalho - modelo padrão
+Documentos de habilitação - ‘puxar’ do módulo ‘Gestão de Parcerias’ ou inserir arquivo
+Verificação da habilitação - check list em anexo - assinar
+Gestor da parceria - inserir arquivo
+Comissão de Monitoramento e Avaliação - inserir arquivo
+Parecer técnico para celebração de parceria - modelo padrão
+Minuta do termo - modelo padrão
+Certidão de autuação - modelo padrão
+Protocolo jurídico - modelo padrão
+Parecer jurídico - modelo padrão
+Termo - modelo padrão
+Publicação do extrato - inserir arquivo
+
+Obs.: Campo ‘modelo padrão’ tem assinatura digital.
+
+2.3. Execução do Concedente
+Abas: 
+Ordem de pagamento
+Aditivo
+Apostilamento
+
+2.3.1. Ordem de Pagamento
+Campos:
+Dados bancários - inserir arquivo
+Ordem de pagamento - modelo padrão (serão várias emitidas durante a vigência)
+
+2.3.2. Aditivo
+Campos:
+Manifestação da OSC - ‘puxar’ do módulo ‘Gestão de Parcerias’ ou inserir arquivo
+Formulário de prorrogação de prazo - ‘puxar’ do módulo ‘Gestão de Parcerias’ ou inserir arquivo
+Justificativa Técnica da OSC - modelo padrão
+Ata de eleição/diretoria, se houver atualização - ‘puxar’ do módulo ‘Gestão de Parcerias’ ou inserir arquivo
+Certidão de regularidade (atualizadas) - ‘puxar’ do módulo ‘Gestão de Parcerias’ ou inserir arquivo
+Orçamento/Cotação - ‘puxar’ do módulo ‘Gestão de Parcerias’ ou inserir arquivo
+Extratos bancários da conta movimento e aplicação - ‘puxar’ do módulo ‘Gestão de Parcerias’ ou inserir arquivo
+Declaração de Manutenção da Capacidade Técnica - ‘puxar’ do módulo ‘Gestão de Parcerias’ ou inserir arquivo
+Plano de Trabalho atualizado - ‘puxar’ do módulo ‘Gestão de Parcerias’ ou inserir arquivo
+Aprovação da alteração do plano de trabalho - modelo padrão
+Parecer financeiro - modelo padrão
+Justificativa da Unidade Gestora - modelo padrão
+Autorização da Unidade Gestora - modelo padrão
+Minuta do termo - modelo padrão 
+Certidão de Autuação - modelo padrão
+Protocolo na Unidade Jurídica - modelo padrão
+Parecer jurídico - modelo padrão
+Termo de aditivo- modelo padrão
+Publicação do extrato - inserir arquivo
+
+2.3.4. Apostilamento
+Manifestação da OSC - ‘puxar’ do módulo ‘Gestão de Parcerias’ ou inserir arquivo
+Orçamento/Cotação - ‘puxar’ do módulo ‘Gestão de Parcerias’ ou inserir arquivo
+Extratos bancários da conta movimento e aplicação - ‘puxar’ do módulo ‘Gestão de Parcerias’ ou inserir arquivo
+Plano de Trabalho atualizado - ‘puxar’ do módulo ‘Gestão de Parcerias’ ou inserir arquivo
+Aprovação da alteração do plano de trabalho - modelo padrão
+Autorização da Unidade Gestora - modelo padrão
+Termo de apostilamento - modelo padrão
