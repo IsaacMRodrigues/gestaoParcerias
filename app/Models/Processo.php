@@ -44,8 +44,16 @@ class Processo extends Model
         'outra'                  => 'Outra',
     ];
 
+    // Esfera do concedente — compõe o número do processo (UG.Seq.Ano.Esfera).
+    public const ESFERAS = [
+        '01' => 'Município',
+        '02' => 'Estado',
+        '03' => 'União',
+        '04' => 'Outros',
+    ];
+
     protected $fillable = [
-        'numero', 'orgao_id', 'created_by', 'status', 'setor_atual',
+        'numero', 'sequencial', 'esfera', 'orgao_id', 'created_by', 'status', 'setor_atual',
     ];
 
     public function orgao(): BelongsTo
@@ -84,14 +92,20 @@ class Processo extends Model
     }
 
     /**
-     * Gera o próximo número no formato NNNN/AAAA.
+     * Próximo número sequencial — contador contínuo e global (nunca reinicia).
      */
-    public static function proximoNumero(): string
+    public static function proximoSequencial(): int
     {
-        $ano = now()->year;
-        $ultimo = static::whereYear('created_at', $ano)->count() + 1;
+        return (static::max('sequencial') ?? 0) + 1;
+    }
 
-        return sprintf('%04d/%d', $ultimo, $ano);
+    /**
+     * Monta o número do processo no formato UG.Sequencial.Ano.Esfera
+     * (ex.: 0206.0133.2026.01).
+     */
+    public static function formatarNumero(string $codigoUg, int $sequencial, int $ano, string $esfera): string
+    {
+        return sprintf('%s.%04d.%04d.%s', $codigoUg, $sequencial, $ano, $esfera);
     }
 
     /**

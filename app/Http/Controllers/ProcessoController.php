@@ -38,20 +38,39 @@ class ProcessoController extends Controller
 
     public function create(): View
     {
-        $orgaos = Orgao::where('status', true)->orderBy('name')->get();
+        // Apenas Unidades Gestoras com código podem abrir processo (o código entra no número).
+        $orgaos = Orgao::where('status', true)
+            ->whereNotNull('codigo')
+            ->orderBy('codigo')
+            ->get();
 
-        return view('processos.create', compact('orgaos'));
+        $esferas = Processo::ESFERAS;
+
+        return view('processos.create', compact('orgaos', 'esferas'));
     }
 
     public function store(Request $request): RedirectResponse
     {
         $data = $request->validate([
             'orgao_id' => ['required', 'exists:orgaos,id'],
+            'esfera'   => ['required', 'string', \Illuminate\Validation\Rule::in(array_keys(Processo::ESFERAS))],
         ]);
 
+        $orgao = Orgao::findOrFail($data['orgao_id']);
+
+        if (! $orgao->codigo) {
+            return back()
+                ->withErrors(['orgao_id' => 'Esta Unidade Gestora não possui código cadastrado; informe o código no cadastro do Órgão.'])
+                ->withInput();
+        }
+
+        $sequencial = Processo::proximoSequencial();
+
         $processo = Processo::create([
-            'numero'      => Processo::proximoNumero(),
-            'orgao_id'    => $data['orgao_id'],
+            'numero'      => Processo::formatarNumero($orgao->codigo, $sequencial, now()->year, $data['esfera']),
+            'sequencial'  => $sequencial,
+            'esfera'      => $data['esfera'],
+            'orgao_id'    => $orgao->id,
             'created_by'  => auth()->id(),
             'status'      => 'em_planejamento',
             'setor_atual' => 'ug',

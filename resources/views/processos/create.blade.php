@@ -10,8 +10,10 @@
         <div class="max-w-xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="bg-white shadow rounded-lg p-6">
                 <p class="text-sm text-gray-500 mb-4">
-                    O número do processo será gerado automaticamente. Após criar, você preencherá
-                    o Ofício, o Termo de Referência e as demais peças.
+                    O número do processo será gerado automaticamente no formato
+                    <span class="font-mono text-gray-700">UG.Sequencial.Ano.Esfera</span>
+                    (ex.: <span class="font-mono text-gray-700">0206.0133.2026.01</span>).
+                    Após criar, você preencherá o Ofício, o Termo de Referência e as demais peças.
                 </p>
                 <form action="{{ route('processos.store') }}" method="POST" class="space-y-4">
                     @csrf
@@ -22,11 +24,23 @@
                             <option value="">Selecione...</option>
                             @foreach($orgaos as $orgao)
                                 <option value="{{ $orgao->id }}" {{ old('orgao_id') == $orgao->id ? 'selected' : '' }}>
-                                    {{ $orgao->name }} {{ $orgao->sigla ? "($orgao->sigla)" : '' }}
+                                    {{ $orgao->codigo }} — {{ $orgao->name }} {{ $orgao->sigla ? "($orgao->sigla)" : '' }}
                                 </option>
                             @endforeach
                         </select>
                         <x-input-error :messages="$errors->get('orgao_id')" class="mt-2" />
+                    </div>
+                    <div>
+                        <x-input-label for="esfera" value="Esfera do Concedente *" />
+                        <select id="esfera" name="esfera" required
+                                class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 text-sm">
+                            @foreach($esferas as $cod => $label)
+                                <option value="{{ $cod }}" {{ old('esfera', '01') === $cod ? 'selected' : '' }}>
+                                    {{ $cod }} — {{ $label }}
+                                </option>
+                            @endforeach
+                        </select>
+                        <x-input-error :messages="$errors->get('esfera')" class="mt-2" />
                     </div>
                     <div class="flex items-center justify-end gap-4 pt-2">
                         <a href="{{ route('processos.index') }}" class="text-sm text-gray-600 hover:text-gray-900">Cancelar</a>

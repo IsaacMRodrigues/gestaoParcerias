@@ -190,9 +190,26 @@ php artisan db:seed
 
 ---
 
+- [2026-06-18] Numeração padronizada do Processo — `UG.Sequencial.Ano.Esfera`
+  - Número do Processo passa a seguir o padrão municipal `UG.NNNN.AAAA.EE` (ex.: `0206.0133.2026.01`)
+    - UG = código da Unidade Gestora (4 díg.) · Sequencial = contador contínuo e global (nunca reinicia)
+      · Ano = ano de abertura do processo · Esfera = concedente (01 Município, 02 Estado, 03 União, 04 Outros)
+  - Campo `codigo` adicionado ao cadastro de Órgãos; de-para das 26 UGs em `UnidadesGestorasSeeder`
+  - Esfera como constante `Processo::ESFERAS`, selecionável no formulário (default Município)
+  - `Processo::proximoSequencial()` + `Processo::formatarNumero()`; geração no `ProcessoController@store`
+    (valida esfera e exige que a UG tenha código)
+  - Migrations: `codigo` (único) em `orgaos`; `sequencial` (único) + `esfera` em `processos`
+  - **A confirmar com a área:** ano usado é o de abertura do processo (não do instrumento, que ainda não
+    existe nessa fase); e qual UG entra quando há fundo (ex.: FIA `0213` vs Sec. de Trabalho `0209`)
+
+---
+
 ## O que está sendo feito
 
-- Próximo passo: Ordem de Pagamento + Execução financeira (repasses, despesas, notas fiscais)
+- Módulo Chamamentos: numeração do Processo concluída (`UG.Seq.Ano.Esfera`). A avaliar a seguir:
+  vincular o Processo (planejamento / trâmite interno) ao Chamamento público e, se a área desejar um
+  identificador único da parceria, propagar o número para Chamamento/Instrumento.
+- Próximo passo (geral): Ordem de Pagamento + Execução financeira (repasses, despesas, notas fiscais)
   quando a fase bancária for liberada; depois Monitoramento e Prestação de Contas.
 
 ---

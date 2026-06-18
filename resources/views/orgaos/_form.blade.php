@@ -1,6 +1,12 @@
 @php $orgao = $orgao ?? null; @endphp
 
-<div class="grid grid-cols-3 gap-4">
+<div class="grid grid-cols-4 gap-4">
+    <div>
+        <x-input-label for="codigo" value="Código UG" />
+        <x-text-input id="codigo" name="codigo" type="text" class="mt-1 block w-full"
+                      value="{{ old('codigo', $orgao?->codigo) }}" placeholder="0206" maxlength="4" />
+        <x-input-error :messages="$errors->get('codigo')" class="mt-2" />
+    </div>
     <div class="col-span-2">
         <x-input-label for="name" value="Nome *" />
         <x-text-input id="name" name="name" type="text" class="mt-1 block w-full"

@@ -17,6 +17,7 @@ class OrgaoRequest extends FormRequest
         $orgaoId = $this->route('orgao')?->id;
 
         return [
+            'codigo'      => ['nullable', 'string', 'size:4', Rule::unique('orgaos', 'codigo')->ignore($orgaoId)],
             'name'        => ['required', 'string', 'max:255'],
             'sigla'       => ['nullable', 'string', 'max:20'],
             'cnpj'        => ['nullable', 'string', 'max:18', Rule::unique('orgaos', 'cnpj')->ignore($orgaoId)],
@@ -36,6 +37,7 @@ class OrgaoRequest extends FormRequest
     public function attributes(): array
     {
         return [
+            'codigo' => 'código',
             'name'   => 'nome',
             'sigla'  => 'sigla',
             'cnpj'   => 'CNPJ',
