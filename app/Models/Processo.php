@@ -25,13 +25,17 @@ class Processo extends Model
 
     public const SETORES = [
         'ug'     => 'Unidade Gestora',
-        'scp'    => 'SCP',
-        'seplan' => 'SEPLAN',
-        'spc'    => 'SPC',
+        'scp'    => 'Setor de Convênios e Parcerias (SCP)',
+        'seplan' => 'Secretaria de Planejamento (SEPLAN)',
+        'pj'     => 'Procuradoria Jurídica (PJ)',
     ];
 
-    // Sequência sugerida do trâmite (linha 4 do termo de referência do módulo)
-    public const FLUXO = ['ug', 'scp', 'seplan', 'ug', 'spc'];
+    /**
+     * Sequência do trâmite do planejamento (fluxo confirmado pelo cliente):
+     * UG (ofício+TR) → SCP (analisa) → SEPLAN (parecer financeiro) → UG (abertura+AP)
+     * → SCP (elabora edital) → UG (assina edital) → SCP (publica — trâmite externo).
+     */
+    public const FLUXO = ['ug', 'scp', 'seplan', 'ug', 'scp', 'ug', 'scp'];
 
     public const AREAS_TEMATICAS = [
         'saude'                  => 'Saúde',
