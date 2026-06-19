@@ -19,7 +19,7 @@ class UserController extends Controller
 
     public function create(): View
     {
-        $roles = Role::orderBy('name')->get();
+        $roles = Role::where('name', '!=', 'responsavel_legal')->orderBy('name')->get();
 
         return view('usuarios.create', compact('roles'));
     }
@@ -36,7 +36,7 @@ class UserController extends Controller
             'password' => bcrypt($request->password),
         ]);
 
-        $user->syncRoles([$request->role]);
+        $user->syncRoles($request->roles);
 
         return redirect()->route('usuarios.index')
             ->with('success', 'Usuário cadastrado com sucesso.');
@@ -44,7 +44,7 @@ class UserController extends Controller
 
     public function edit(User $usuario): View
     {
-        $roles = Role::orderBy('name')->get();
+        $roles = Role::where('name', '!=', 'responsavel_legal')->orderBy('name')->get();
 
         return view('usuarios.edit', compact('usuario', 'roles'));
     }
@@ -65,7 +65,7 @@ class UserController extends Controller
         }
 
         $usuario->update($data);
-        $usuario->syncRoles([$request->role]);
+        $usuario->syncRoles($request->roles);
 
         return redirect()->route('usuarios.index')
             ->with('success', 'Usuário atualizado com sucesso.');

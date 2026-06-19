@@ -26,36 +26,44 @@ class RolesSeeder extends Seeder
     ];
 
     /**
-     * Matriz: perfil => permissões.
-     * 'administrador' e 'controle_interno' recebem todas (controle_interno só leitura via middleware).
+     * Matriz perfil => permissões (perfis do Módulo 1).
+     * '*' = todas. Auditores recebem todas porém apenas leitura (middleware readonly).
      */
     public const MATRIZ = [
-        'administrador'                    => ['*'],
-        'controle_interno'                 => ['*'], // somente leitura (middleware readonly)
-        'secretario_unidade_gestora'       => ['planejamento', 'chamamentos', 'propostas', 'pareceres_decisao', 'formalizacao'],
-        'gestor_parceria'                  => ['planejamento', 'monitoramento'],
+        'administrador_setorial'           => ['*'],
+        'auditor_externo'                  => ['*'], // somente leitura
+        'auditor_geral'                    => ['*'], // somente leitura
+        'responsavel_unidade_gestora'      => ['planejamento', 'chamamentos', 'propostas', 'pareceres_decisao', 'formalizacao'],
+        'analista_tecnico_scp'             => ['planejamento', 'chamamentos'],
+        'responsavel_publicacao'           => ['chamamentos'],
+        'analista_orcamentario_financeiro' => ['planejamento'],
+        'analista_juridico'                => ['pareceres_juridico'],
+        'analista_viabilidade_tecnica'     => ['pareceres_tecnico'],
+        'analista_aditivo_apostilamento'   => ['formalizacao'],
+        'analista_prestacao_contas_previa' => ['prestacao_contas'],
         'comissao_selecao'                 => ['propostas', 'pareceres_tecnico', 'pareceres_decisao'],
-        'comissao_avaliacao_monitoramento' => ['planejamento', 'monitoramento'],
-        'procuradoria_juridica'            => ['planejamento', 'pareceres_juridico'],
-        'cadastrador_proposta'             => ['propostas'],
-        'cadastrador_prestacao_contas'     => ['prestacao_contas'],
-        'representante_legal'              => [], // só portal
+        'comissao_monitoramento_avaliacao' => ['monitoramento'],
+        'gestor_parceria'                  => ['planejamento', 'monitoramento'],
+        'cadastrador'                      => ['chamamentos', 'propostas', 'formalizacao'],
+        'contador'                         => ['prestacao_contas'],
+        'encaminhador'                     => ['formalizacao'],
+        'operador_ordem_pagamento'         => [], // módulo de pagamento (futuro)
+        'aprovador_assinatura_eletronica'  => [], // módulo de assinatura (futuro)
+        'analista'                         => [], // acesso básico, em descontinuação
+        'responsavel_legal'                => [], // só portal
     ];
 
     public function run(): void
     {
-        // Permissões
         foreach (array_keys(self::PERMISSOES) as $perm) {
             Permission::firstOrCreate(['name' => $perm, 'guard_name' => 'web']);
         }
 
         $todas = array_keys(self::PERMISSOES);
 
-        // Perfis + atribuição
         foreach (self::MATRIZ as $role => $perms) {
             $r = Role::firstOrCreate(['name' => $role, 'guard_name' => 'web']);
-            $conceder = ($perms === ['*']) ? $todas : $perms;
-            $r->syncPermissions($conceder);
+            $r->syncPermissions($perms === ['*'] ? $todas : $perms);
         }
 
         app(PermissionRegistrar::class)->forgetCachedPermissions();

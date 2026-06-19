@@ -30,7 +30,7 @@ class OscRegistroController extends Controller
                 'status'   => true,
             ]);
 
-            $user->assignRole('representante_legal');
+            $user->assignRole('responsavel_legal');
 
             Osc::create([
                 'user_id'     => $user->id,

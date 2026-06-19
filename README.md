@@ -48,26 +48,41 @@ php artisan db:seed
 
 ---
 
-## Perfis de usuário
+## Perfis de usuário (lista oficial — Módulo 1)
 
-| Slug | Descrição | Permissões |
-|---|---|---|
-| `administrador` | Administrador do sistema | Todas |
-| `representante_legal` | Responsável pela OSC | Só portal |
-| `secretario_unidade_gestora` | Responsável pela Secretaria | planejamento, chamamentos, propostas, decisão, formalização |
-| `gestor_parceria` | Acompanha a execução | planejamento, monitoramento |
-| `comissao_avaliacao_monitoramento` | Analisa e monitora | planejamento, monitoramento |
-| `comissao_selecao` | Avalia propostas | propostas, parecer técnico, decisão |
-| `procuradoria_juridica` | Emite pareceres jurídicos | planejamento, parecer jurídico |
-| `controle_interno` | Auditoria interna | todas (**somente leitura**) |
-| `cadastrador_proposta` | Insere propostas | propostas |
-| `cadastrador_prestacao_contas` | Insere prestações de contas | prestação de contas |
+São 21 perfis. Um usuário pode ter **vários**; os marcados 🔒 são **exclusivos** de um setor
+(só atribuíveis a quem é lotado nele).
+
+| Slug | Perfil | 🔒 Setor | Permissões |
+|---|---|---|---|
+| `administrador_setorial` | Administrador Setorial | TI | todas |
+| `responsavel_unidade_gestora` | Responsável da Unidade Gestora | UG | planejamento, chamamentos, propostas, decisão, formalização |
+| `analista_tecnico_scp` | Analista Técnico do SCP | SCP | planejamento, chamamentos |
+| `responsavel_publicacao` | Responsável pela Publicação | SCP | chamamentos |
+| `analista_orcamentario_financeiro` | Analista Orçamentário Financeiro | SEPLAN | planejamento |
+| `analista_juridico` | Analista Jurídico | — | parecer jurídico |
+| `analista_viabilidade_tecnica` | Analista de Viabilidade Técnica | — | parecer técnico |
+| `analista_aditivo_apostilamento` | Analista de Aditivo e Apostilamento | — | formalização |
+| `analista_prestacao_contas_previa` | Analista de Prestação de Contas Prévia | — | prestação de contas |
+| `comissao_selecao` | Comissão de Seleção | Com. Seleção | propostas, parecer técnico, decisão |
+| `comissao_monitoramento_avaliacao` | Comissão de Monitoramento e Avaliação | Com. Avaliação | monitoramento |
+| `gestor_parceria` | Gestor da Parceria | gestor | planejamento, monitoramento |
+| `cadastrador` | Cadastrador | — | chamamentos, propostas, formalização |
+| `contador` | Contador | — | prestação de contas |
+| `encaminhador` | Encaminhador | — | formalização |
+| `operador_ordem_pagamento` | Operador de Ordem de Pagamento | — | *(futuro: pagamento)* |
+| `aprovador_assinatura_eletronica` | Aprovador de Assinatura Eletrônica | — | *(futuro: assinatura)* |
+| `auditor_externo` | Auditor Externo | — | todas (**somente leitura**) |
+| `auditor_geral` | Auditor Geral | — | todas (**somente leitura**) |
+| `analista` | Analista (em descontinuação) | — | acesso básico |
+| `responsavel_legal` | Responsável Legal | OSC | só portal |
 
 > Permissões por área: `cadastros`, `planejamento`, `chamamentos`, `propostas`,
 > `pareceres_tecnico`, `pareceres_juridico`, `pareceres_decisao`, `formalizacao`,
-> `monitoramento`, `prestacao_contas` — definidas em `RolesSeeder` e aplicadas por
-> middleware nas rotas + `@can` na navegação. Controle Interno vê tudo mas não grava
-> (middleware `readonly`). Representante Legal só acessa o portal (middleware `staff`).
+> `monitoramento`, `prestacao_contas` — definidas em `RolesSeeder`, aplicadas por
+> middleware nas rotas + `@can` na navegação. Auditores veem tudo mas não gravam
+> (middleware `readonly`). Responsável Legal só acessa o portal (middleware `staff`).
+> Setor de lotação do usuário em `User::LOTACOES`; exclusivos em `User::PERFIS_EXCLUSIVOS`.
 
 ---
 
@@ -201,6 +216,18 @@ php artisan db:seed
   - Migrations: `codigo` (único) em `orgaos`; `sequencial` (único) + `esfera` em `processos`
   - **A confirmar com a área:** ano usado é o de abertura do processo (não do instrumento, que ainda não
     existe nessa fase); e qual UG entra quando há fundo (ex.: FIA `0213` vs Sec. de Trabalho `0209`)
+
+---
+
+- [2026-06-19] Perfis do Módulo 1 (reescrita do controle de acesso)
+  - Substituídos os 9 perfis antigos pelos **21 perfis oficiais do Módulo 1**
+  - Usuário pode ter **vários perfis** (cadastro com seleção múltipla)
+  - **Perfis exclusivos** travados por setor de lotação (`User::PERFIS_EXCLUSIVOS`)
+  - Setor de lotação ampliado (`User::LOTACOES`: UG, SCP, SEPLAN, PJ, TI, Comissões, Gestoria, OSC)
+  - Auditores (Externo/Geral) com acesso somente leitura; Responsável Legal só portal
+  - Permissões por área inalteradas — apenas remapeadas para os novos perfis
+  - Setores do trâmite (Módulo 2) corrigidos: SCP/SEPLAN/PJ (SPC era erro); fluxo atualizado
+  - Respostas do cliente registradas em `Docs. Desenvolvimento/respostas-cliente.md`
 
 ---
 

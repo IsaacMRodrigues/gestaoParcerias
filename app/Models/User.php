@@ -25,17 +25,63 @@ class User extends Authenticatable
      * @return array<string, string>
      */
     public static array $roleLabels = [
-        'administrador'                    => 'Administrador',
-        'representante_legal'              => 'Representante Legal',
-        'secretario_unidade_gestora'       => 'Secretário da Unidade Gestora',
-        'gestor_parceria'                  => 'Gestor da Parceria',
-        'comissao_avaliacao_monitoramento' => 'Comissão de Avaliação e Monitoramento',
+        'administrador_setorial'           => 'Administrador Setorial',
+        'analista'                         => 'Analista (em descontinuação)',
+        'analista_aditivo_apostilamento'   => 'Analista de Aditivo e Apostilamento',
+        'analista_prestacao_contas_previa' => 'Analista de Prestação de Contas Prévia',
+        'analista_viabilidade_tecnica'     => 'Analista de Viabilidade Técnica',
+        'analista_juridico'                => 'Analista Jurídico',
+        'analista_orcamentario_financeiro' => 'Analista Orçamentário Financeiro',
+        'analista_tecnico_scp'             => 'Analista Técnico do SCP',
+        'aprovador_assinatura_eletronica'  => 'Aprovador de Assinatura Eletrônica',
+        'auditor_externo'                  => 'Auditor Externo',
+        'auditor_geral'                    => 'Auditor Geral',
+        'cadastrador'                      => 'Cadastrador',
+        'contador'                         => 'Contador',
+        'comissao_monitoramento_avaliacao' => 'Comissão de Monitoramento e Avaliação',
         'comissao_selecao'                 => 'Comissão de Seleção',
-        'procuradoria_juridica'            => 'Procuradoria Jurídica',
-        'controle_interno'                 => 'Controle Interno',
-        'cadastrador_proposta'             => 'Cadastrador de Proposta',
-        'cadastrador_prestacao_contas'     => 'Cadastrador de Prestação de Contas',
+        'encaminhador'                     => 'Encaminhador',
+        'gestor_parceria'                  => 'Gestor da Parceria',
+        'operador_ordem_pagamento'         => 'Operador de Ordem de Pagamento',
+        'responsavel_unidade_gestora'      => 'Responsável da Unidade Gestora',
+        'responsavel_legal'                => 'Responsável Legal',
+        'responsavel_publicacao'           => 'Responsável pela Publicação',
     ];
+
+    /**
+     * Setores de lotação do usuário (mais amplo que os setores do trâmite).
+     */
+    public const LOTACOES = [
+        'ug'                 => 'Unidade Gestora',
+        'scp'                => 'Setor de Convênios e Parcerias (SCP)',
+        'seplan'             => 'Secretaria de Planejamento (SEPLAN)',
+        'pj'                 => 'Procuradoria Jurídica (PJ)',
+        'ti'                 => 'Tecnologia da Informação (TI)',
+        'comissao_selecao'   => 'Comissão de Seleção',
+        'comissao_avaliacao' => 'Comissão de Avaliação e Monitoramento',
+        'gestor'             => 'Gestoria de Parcerias',
+        'osc'                => 'OSC (externo)',
+    ];
+
+    /**
+     * Perfis exclusivos de um setor: só podem ser atribuídos a quem é lotado nele.
+     */
+    public const PERFIS_EXCLUSIVOS = [
+        'administrador_setorial'           => 'ti',
+        'responsavel_unidade_gestora'      => 'ug',
+        'analista_tecnico_scp'             => 'scp',
+        'responsavel_publicacao'           => 'scp',
+        'analista_orcamentario_financeiro' => 'seplan',
+        'comissao_selecao'                 => 'comissao_selecao',
+        'comissao_monitoramento_avaliacao' => 'comissao_avaliacao',
+        'gestor_parceria'                  => 'gestor',
+        'responsavel_legal'                => 'osc',
+    ];
+
+    /**
+     * Perfis com acesso somente de leitura (auditoria).
+     */
+    public const PERFIS_SOMENTE_LEITURA = ['auditor_externo', 'auditor_geral'];
 
     protected function casts(): array
     {
@@ -53,6 +99,11 @@ class User extends Authenticatable
 
     public function setorLabel(): string
     {
-        return \App\Models\Processo::SETORES[$this->setor] ?? '—';
+        return self::LOTACOES[$this->setor] ?? '—';
+    }
+
+    public function somenteLeitura(): bool
+    {
+        return $this->hasAnyRole(self::PERFIS_SOMENTE_LEITURA);
     }
 }

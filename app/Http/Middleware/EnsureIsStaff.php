@@ -10,7 +10,7 @@ class EnsureIsStaff
 {
     public function handle(Request $request, Closure $next): Response
     {
-        if (auth()->check() && auth()->user()->hasRole('representante_legal')) {
+        if (auth()->check() && auth()->user()->hasRole('responsavel_legal')) {
             return redirect()->route('portal.index')
                 ->with('info', 'Esta área é restrita a servidores. Use o portal para gerenciar suas propostas.');
         }

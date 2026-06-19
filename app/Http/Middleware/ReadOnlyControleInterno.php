@@ -16,12 +16,12 @@ class ReadOnlyControleInterno
     {
         $user = $request->user();
 
-        if ($user && $user->hasRole('controle_interno')
+        if ($user && $user->somenteLeitura()
             && !$request->isMethodSafe()
             && !$request->routeIs('profile.*')
             && !$request->routeIs('logout')
         ) {
-            abort(403, 'Controle Interno tem acesso somente de leitura.');
+            abort(403, 'Seu perfil (auditoria) tem acesso somente de leitura.');
         }
 
         return $next($request);

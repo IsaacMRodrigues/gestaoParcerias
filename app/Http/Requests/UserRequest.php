@@ -2,6 +2,7 @@
 
 namespace App\Http\Requests;
 
+use App\Models\User;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
 
@@ -22,9 +23,31 @@ class UserRequest extends FormRequest
             'cpf'      => ['nullable', 'string', 'max:14', Rule::unique('users', 'cpf')->ignore($userId)],
             'phone'    => ['nullable', 'string', 'max:20'],
             'password' => [$this->isMethod('POST') ? 'required' : 'nullable', 'string', 'min:8', 'confirmed'],
-            'role'     => ['required', 'string', 'exists:roles,name'],
-            'setor'    => ['nullable', Rule::in(array_keys(\App\Models\Processo::SETORES))],
+            'roles'    => ['required', 'array', 'min:1'],
+            'roles.*'  => ['string', 'exists:roles,name'],
+            'setor'    => ['nullable', Rule::in(array_keys(User::LOTACOES))],
             'status'   => ['boolean'],
+        ];
+    }
+
+    /**
+     * Trava dos perfis "exclusivos": só podem ser atribuídos a quem é lotado no setor.
+     */
+    public function after(): array
+    {
+        return [
+            function ($validator) {
+                $setor = $this->input('setor');
+                foreach ((array) $this->input('roles', []) as $role) {
+                    $exigido = User::PERFIS_EXCLUSIVOS[$role] ?? null;
+                    if ($exigido && $setor !== $exigido) {
+                        $label = User::$roleLabels[$role] ?? $role;
+                        $lot   = User::LOTACOES[$exigido] ?? $exigido;
+                        $validator->errors()->add('roles',
+                            "O perfil \"{$label}\" é exclusivo do setor \"{$lot}\" — selecione esse setor para atribuí-lo.");
+                    }
+                }
+            },
         ];
     }
 
@@ -36,7 +59,8 @@ class UserRequest extends FormRequest
             'cpf'      => 'CPF',
             'phone'    => 'telefone',
             'password' => 'senha',
-            'role'     => 'perfil',
+            'roles'    => 'perfis',
+            'setor'    => 'setor',
             'status'   => 'status',
         ];
     }

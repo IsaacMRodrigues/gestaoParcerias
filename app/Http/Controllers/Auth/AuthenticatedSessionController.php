@@ -28,7 +28,7 @@ class AuthenticatedSessionController extends Controller
 
         $request->session()->regenerate();
 
-        if (auth()->user()->hasRole('representante_legal')) {
+        if (auth()->user()->hasRole('responsavel_legal')) {
             return redirect()->intended(route('portal.index'));
         }
 
