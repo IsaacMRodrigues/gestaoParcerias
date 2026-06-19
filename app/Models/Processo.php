@@ -12,14 +12,14 @@ class Processo extends Model
     public const STATUS = [
         'em_planejamento' => 'Em Planejamento',
         'em_tramite'      => 'Em Trâmite',
-        'apto'            => 'Apto para Abertura',
+        'concluido'       => 'Concluído (publicação)',
         'arquivado'       => 'Arquivado',
     ];
 
     public const STATUS_COLORS = [
         'em_planejamento' => 'gray',
         'em_tramite'      => 'yellow',
-        'apto'            => 'green',
+        'concluido'       => 'green',
         'arquivado'       => 'red',
     ];
 
@@ -31,11 +31,18 @@ class Processo extends Model
     ];
 
     /**
-     * Sequência do trâmite do planejamento (fluxo confirmado pelo cliente):
-     * UG (ofício+TR) → SCP (analisa) → SEPLAN (parecer financeiro) → UG (abertura+AP)
-     * → SCP (elabora edital) → UG (assina edital) → SCP (publica — trâmite externo).
+     * Etapas do trâmite do planejamento (fluxo confirmado pelo cliente).
+     * O índice da etapa é guardado na coluna `etapa`.
      */
-    public const FLUXO = ['ug', 'scp', 'seplan', 'ug', 'scp', 'ug', 'scp'];
+    public const ETAPAS = [
+        ['setor' => 'ug',     'acao' => 'Preencher Ofício e Termo de Referência e assinar'],
+        ['setor' => 'scp',    'acao' => 'Receber e analisar o planejamento'],
+        ['setor' => 'seplan', 'acao' => 'Analisar e emitir o Parecer Financeiro, e assinar'],
+        ['setor' => 'ug',     'acao' => 'Conferir, resolver pendências e fazer a Abertura do Processo (assinar AP)'],
+        ['setor' => 'scp',    'acao' => 'Elaborar o Edital (ou justificativa de dispensa/inexigibilidade)'],
+        ['setor' => 'ug',     'acao' => 'Assinar o Edital'],
+        ['setor' => 'scp',    'acao' => 'Publicar no site oficial (trâmite externo)'],
+    ];
 
     public const AREAS_TEMATICAS = [
         'saude'                  => 'Saúde',
@@ -57,7 +64,7 @@ class Processo extends Model
     ];
 
     protected $fillable = [
-        'numero', 'sequencial', 'esfera', 'orgao_id', 'created_by', 'status', 'setor_atual',
+        'numero', 'sequencial', 'esfera', 'orgao_id', 'created_by', 'status', 'setor_atual', 'etapa',
     ];
 
     public function orgao(): BelongsTo
@@ -151,5 +158,44 @@ class Processo extends Model
             }
         }
         return true;
+    }
+
+    // ----- Fluxo guiado -----
+
+    public function etapaInfo(?int $i = null): array
+    {
+        $i = $i ?? $this->etapa;
+        return self::ETAPAS[$i] ?? ['setor' => $this->setor_atual, 'acao' => '—'];
+    }
+
+    public function totalEtapas(): int
+    {
+        return count(self::ETAPAS);
+    }
+
+    public function ultimaEtapa(): bool
+    {
+        return $this->etapa >= $this->totalEtapas() - 1;
+    }
+
+    public function proximoSetor(): ?string
+    {
+        return self::ETAPAS[$this->etapa + 1]['setor'] ?? null;
+    }
+
+    public function setorAnterior(): ?string
+    {
+        return $this->etapa > 0 ? (self::ETAPAS[$this->etapa - 1]['setor'] ?? null) : null;
+    }
+
+    /**
+     * Pode avançar da etapa atual? (a primeira etapa exige o planejamento apto)
+     */
+    public function podeAvancar(): bool
+    {
+        if ($this->etapa === 0) {
+            return $this->estaApto();
+        }
+        return !$this->ultimaEtapa();
     }
 }

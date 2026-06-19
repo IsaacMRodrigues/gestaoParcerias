@@ -74,6 +74,7 @@ class ProcessoController extends Controller
             'created_by'  => auth()->id(),
             'status'      => 'em_planejamento',
             'setor_atual' => 'ug',
+            'etapa'       => 0,
         ]);
 
         // cria o termo de referência vazio e as peças padrão

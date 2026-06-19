@@ -78,9 +78,10 @@ Route::middleware(['auth', 'staff', 'readonly'])->group(function () {
         Route::get('processos/{processo}/pecas/{peca}', [ProcessoPecaController::class, 'edit'])->name('processos.pecas.edit');
         Route::put('processos/{processo}/pecas/{peca}', [ProcessoPecaController::class, 'update'])->name('processos.pecas.update');
         Route::patch('processos/{processo}/pecas/{peca}/assinar', [ProcessoPecaController::class, 'assinar'])->name('processos.pecas.assinar');
-        Route::post('processos/{processo}/enviar', [TramitacaoController::class, 'enviar'])->name('processos.enviar');
         Route::patch('processos/{processo}/receber', [TramitacaoController::class, 'receber'])->name('processos.receber');
-        Route::patch('processos/{processo}/abrir', [TramitacaoController::class, 'abrir'])->name('processos.abrir');
+        Route::post('processos/{processo}/avancar', [TramitacaoController::class, 'avancar'])->name('processos.avancar');
+        Route::post('processos/{processo}/devolver', [TramitacaoController::class, 'devolver'])->name('processos.devolver');
+        Route::patch('processos/{processo}/concluir', [TramitacaoController::class, 'concluir'])->name('processos.concluir');
     });
 
     // Programas, Chamamentos e Seleção (2.2)

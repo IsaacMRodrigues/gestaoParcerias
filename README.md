@@ -244,6 +244,18 @@ São 21 perfis. Um usuário pode ter **vários**; os marcados 🔒 são **exclus
 
 ---
 
+- [2026-06-19] Módulo 2 — Trâmite guiado (fiel ao fluxo do cliente)
+  - 7 etapas em `Processo::ETAPAS`: UG → SCP → SEPLAN → UG → SCP → UG → SCP (publicação)
+  - Coluna `etapa` controla a posição no fluxo (setores se repetem)
+  - **Encaminhar** avança automaticamente para o próximo setor (sem escolha livre)
+  - **Devolver** retorna à etapa anterior exigindo motivo; **Receber** registra o recebimento
+  - 1ª etapa só avança com o planejamento **apto** (alertas de conformidade)
+  - Última etapa (SCP) → **Concluir** marca o processo como publicação (trâmite externo)
+  - Stepper visual no topo do processo mostrando a etapa atual
+  - Só o setor que está com o processo pode movimentá-lo (validação no controller)
+
+---
+
 ## O que está sendo feito
 
 - Módulo Chamamentos: numeração do Processo concluída (`UG.Seq.Ano.Esfera`). A avaliar a seguir:

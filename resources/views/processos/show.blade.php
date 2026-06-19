@@ -32,7 +32,45 @@
                 $tr = $processo->termoReferencia;
                 $atual = $processo->tramitacaoAtual();
                 $aguardandoRecebimento = $atual && is_null($atual->recebido_em);
+                $emAndamento = !in_array($processo->status, ['concluido', 'arquivado']);
+                $etapaInfo = $processo->etapaInfo();
             @endphp
+
+            {{-- Stepper do fluxo --}}
+            <div class="bg-white shadow rounded-lg p-6">
+                <h3 class="text-base font-semibold text-gray-800 mb-4">Fluxo do Planejamento</h3>
+                <ol class="flex flex-wrap gap-y-3">
+                    @foreach(\App\Models\Processo::ETAPAS as $i => $et)
+                        @php
+                            $feita = $i < $processo->etapa || $processo->status === 'concluido';
+                            $atualEtapa = $i === $processo->etapa && $processo->status !== 'concluido';
+                        @endphp
+                        <li class="flex items-center">
+                            <div class="flex flex-col items-center text-center w-24">
+                                <div class="w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold
+                                    {{ $feita ? 'bg-green-500 text-white' : ($atualEtapa ? 'bg-indigo-600 text-white ring-4 ring-indigo-100' : 'bg-gray-200 text-gray-500') }}">
+                                    {{ $feita ? '✓' : $i + 1 }}
+                                </div>
+                                <span class="mt-1 text-[11px] leading-tight {{ $atualEtapa ? 'text-indigo-700 font-semibold' : 'text-gray-500' }}">
+                                    {{ strtoupper($et['setor']) }}
+                                </span>
+                            </div>
+                            @if(!$loop->last)
+                                <div class="w-6 h-px {{ $feita ? 'bg-green-400' : 'bg-gray-200' }}"></div>
+                            @endif
+                        </li>
+                    @endforeach
+                </ol>
+                @if($emAndamento)
+                    <p class="text-sm text-gray-600 mt-4">
+                        <span class="font-medium text-indigo-700">Etapa {{ $processo->etapa + 1 }}/{{ $processo->totalEtapas() }}
+                        — {{ \App\Models\Processo::SETORES[$etapaInfo['setor']] ?? $etapaInfo['setor'] }}:</span>
+                        {{ $etapaInfo['acao'] }}
+                    </p>
+                @else
+                    <p class="text-sm text-green-700 mt-4 font-medium">Trâmite concluído — encaminhado para publicação no site oficial.</p>
+                @endif
+            </div>
 
             {{-- Alertas automáticos --}}
             <div class="bg-white shadow rounded-lg p-6">
@@ -51,24 +89,6 @@
                     @endforeach
                 </ul>
             </div>
-
-            {{-- Aviso de recebimento pendente --}}
-            @if($aguardandoRecebimento && $podeAtuar)
-                <div class="bg-blue-50 border border-blue-200 rounded-lg p-4 flex items-center justify-between">
-                    <p class="text-sm text-blue-800">
-                        Este processo foi enviado ao seu setor por
-                        <strong>{{ \App\Models\Processo::SETORES[$atual->de_setor] ?? $atual->de_setor }}</strong>.
-                        Registre o recebimento para iniciar a análise.
-                    </p>
-                    <form action="{{ route('processos.receber', $processo) }}" method="POST">
-                        @csrf @method('PATCH')
-                        <button type="submit"
-                                class="px-3 py-1.5 text-sm font-medium text-white bg-blue-600 rounded-md hover:bg-blue-700">
-                            Registrar Recebimento
-                        </button>
-                    </form>
-                </div>
-            @endif
 
             {{-- Peças do processo --}}
             <div class="bg-white shadow rounded-lg">
@@ -199,58 +219,79 @@
                     @endforelse
                 </div>
 
-                {{-- Ações de trâmite --}}
-                @if($processo->status !== 'apto' && $processo->status !== 'arquivado')
-                    @if($podeAtuar && !$aguardandoRecebimento)
-                        <div class="px-6 py-4 border-t border-gray-100 bg-gray-50">
-                            <form action="{{ route('processos.enviar', $processo) }}" method="POST" class="space-y-3">
-                                @csrf
-                                <div class="grid grid-cols-3 gap-3">
+                {{-- Ações de trâmite (guiado) --}}
+                @if($emAndamento)
+                    @if(!$podeAtuar)
+                        <div class="px-6 py-4 border-t border-gray-100 bg-gray-50 text-sm text-gray-500">
+                            Este processo está com o setor
+                            <strong>{{ \App\Models\Processo::SETORES[$processo->setor_atual] ?? $processo->setor_atual }}</strong>.
+                            Apenas usuários desse setor podem movimentá-lo.
+                        </div>
+                    @elseif($aguardandoRecebimento)
+                        <div class="px-6 py-4 border-t border-gray-100 bg-blue-50 flex items-center justify-between">
+                            <p class="text-sm text-blue-800">Registre o recebimento para iniciar a etapa.</p>
+                            <form action="{{ route('processos.receber', $processo) }}" method="POST">
+                                @csrf @method('PATCH')
+                                <button type="submit"
+                                        class="px-3 py-1.5 text-sm font-medium text-white bg-blue-600 rounded-md hover:bg-blue-700">
+                                    Registrar Recebimento
+                                </button>
+                            </form>
+                        </div>
+                    @else
+                        <div class="px-6 py-4 border-t border-gray-100 bg-gray-50 space-y-4">
+                            {{-- Bloqueio de conformidade na 1ª etapa --}}
+                            @if($processo->etapa === 0 && !$processo->estaApto())
+                                <p class="text-sm text-red-700">
+                                    🔴 Resolva as pendências de conformidade acima antes de encaminhar.
+                                </p>
+                            @endif
+
+                            {{-- Avançar / Concluir --}}
+                            @if($processo->ultimaEtapa())
+                                <form action="{{ route('processos.concluir', $processo) }}" method="POST"
+                                      onsubmit="return confirm('Concluir o processo e encaminhar para publicação?')">
+                                    @csrf @method('PATCH')
+                                    <button type="submit"
+                                            class="px-4 py-2 text-sm font-medium text-white bg-green-600 rounded-md hover:bg-green-700">
+                                        Concluir (encaminhar para publicação)
+                                    </button>
+                                </form>
+                            @else
+                                <form action="{{ route('processos.avancar', $processo) }}" method="POST" class="space-y-3">
+                                    @csrf
                                     <div>
-                                        <x-input-label for="para_setor" value="Enviar para *" />
-                                        <select id="para_setor" name="para_setor" required
-                                                class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 text-sm">
-                                            <option value="">Selecione...</option>
-                                            @foreach(\App\Models\Processo::SETORES as $key => $label)
-                                                @if($key !== $processo->setor_atual)
-                                                    <option value="{{ $key }}">{{ $label }}</option>
-                                                @endif
-                                            @endforeach
-                                        </select>
-                                    </div>
-                                    <div class="col-span-2">
                                         <x-input-label for="parecer" value="Parecer / observação (opcional)" />
                                         <input id="parecer" name="parecer" type="text"
                                                class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 text-sm"
                                                placeholder="Análise do setor antes de encaminhar...">
                                     </div>
-                                </div>
-                                <div class="flex justify-end">
                                     <button type="submit"
-                                            class="px-4 py-2 text-sm font-medium text-white bg-indigo-600 rounded-md hover:bg-indigo-700">
-                                        Enviar Processo
+                                            @disabled($processo->etapa === 0 && !$processo->estaApto())
+                                            class="px-4 py-2 text-sm font-medium text-white bg-indigo-600 rounded-md hover:bg-indigo-700 disabled:opacity-50 disabled:cursor-not-allowed">
+                                        Encaminhar para {{ \App\Models\Processo::SETORES[$processo->proximoSetor()] ?? $processo->proximoSetor() }}
                                     </button>
-                                </div>
-                            </form>
-
-                            @if($processo->setor_atual === 'ug' && $processo->estaApto())
-                                <div class="mt-3 pt-3 border-t border-gray-200 flex items-center justify-between">
-                                    <p class="text-sm text-green-700">O planejamento está apto. A UG pode concluir abrindo o processo.</p>
-                                    <form action="{{ route('processos.abrir', $processo) }}" method="POST">
-                                        @csrf @method('PATCH')
-                                        <button type="submit"
-                                                class="px-4 py-2 text-sm font-medium text-white bg-green-600 rounded-md hover:bg-green-700">
-                                            Concluir / Marcar Apto
-                                        </button>
-                                    </form>
-                                </div>
+                                </form>
                             @endif
-                        </div>
-                    @elseif(!$podeAtuar)
-                        <div class="px-6 py-4 border-t border-gray-100 bg-gray-50 text-sm text-gray-500">
-                            Este processo está com o setor
-                            <strong>{{ \App\Models\Processo::SETORES[$processo->setor_atual] ?? $processo->setor_atual }}</strong>.
-                            Apenas usuários desse setor podem encaminhá-lo.
+
+                            {{-- Devolver para etapa anterior --}}
+                            @if($processo->etapa > 0)
+                                <form action="{{ route('processos.devolver', $processo) }}" method="POST"
+                                      class="pt-3 border-t border-gray-200 space-y-2">
+                                    @csrf
+                                    <x-input-label for="motivo" value="Devolver para {{ \App\Models\Processo::SETORES[$processo->setorAnterior()] ?? $processo->setorAnterior() }} (informe o motivo)" />
+                                    <div class="flex gap-2">
+                                        <input id="motivo" name="parecer" type="text"
+                                               class="flex-1 border-gray-300 rounded-md shadow-sm focus:ring-amber-500 focus:border-amber-500 text-sm"
+                                               placeholder="Motivo da devolução...">
+                                        <button type="submit"
+                                                class="px-3 py-1.5 text-sm font-medium text-amber-700 border border-amber-300 rounded-md hover:bg-amber-50 whitespace-nowrap">
+                                            Devolver
+                                        </button>
+                                    </div>
+                                    <x-input-error :messages="$errors->get('parecer')" class="mt-1" />
+                                </form>
+                            @endif
                         </div>
                     @endif
                 @endif
