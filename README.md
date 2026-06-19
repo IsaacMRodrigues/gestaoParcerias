@@ -77,11 +77,24 @@ São 21 perfis. Um usuário pode ter **vários**; os marcados 🔒 são **exclus
 | `analista` | Analista (em descontinuação) | — | acesso básico |
 | `responsavel_legal` | Responsável Legal | OSC | só portal |
 
-> Permissões por área: `cadastros`, `planejamento`, `chamamentos`, `propostas`,
-> `pareceres_tecnico`, `pareceres_juridico`, `pareceres_decisao`, `formalizacao`,
-> `monitoramento`, `prestacao_contas` — definidas em `RolesSeeder`, aplicadas por
-> middleware nas rotas + `@can` na navegação. Auditores veem tudo mas não gravam
-> (middleware `readonly`). Responsável Legal só acessa o portal (middleware `staff`).
+### O que cada área de permissão libera (em telas)
+
+| Permissão | Dá acesso a |
+|---|---|
+| `cadastros` | Menu **Cadastros**: Usuários, Órgãos/Secretarias, OSCs |
+| `planejamento` | Menu **Planejamento**: Processos, Termo de Referência, peças e **Caixa de Entrada** (trâmite) |
+| `chamamentos` | Menu **Programas**: Programas, Chamamentos e **Seleção** (checklist 2.2) |
+| `propostas` | Menu **Propostas**: Propostas + Plano de Trabalho (metas/etapas) |
+| `pareceres_tecnico` | Emitir **Parecer Técnico** na análise da proposta |
+| `pareceres_juridico` | Emitir **Parecer Jurídico** na análise da proposta |
+| `pareceres_decisao` | Emitir a **Decisão/Seleção** final da proposta |
+| `formalizacao` | Menu **Instrumentos**: Instrumentos, Aditivos, Apostilamento e Documentação (2.3) |
+| `monitoramento` | Monitoramento e Fiscalização *(módulo futuro)* |
+| `prestacao_contas` | Prestação de Contas *(módulo futuro)* |
+
+> As permissões são definidas em `RolesSeeder`, aplicadas por middleware nas rotas + `@can`
+> na navegação (o usuário só vê no menu o que pode acessar). **Auditores** veem tudo mas não
+> gravam (middleware `readonly`). **Responsável Legal** só acessa o portal (middleware `staff`).
 > Setor de lotação do usuário em `User::LOTACOES`; exclusivos em `User::PERFIS_EXCLUSIVOS`.
 
 ---
