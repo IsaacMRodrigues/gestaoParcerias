@@ -242,11 +242,19 @@
                             </form>
                         </div>
                     @else
+                        @php $pendencias = $processo->pendenciasParaAvancar(); @endphp
                         <div class="px-6 py-4 border-t border-gray-100 bg-gray-50 space-y-4">
                             {{-- Aviso consultivo de conformidade (não bloqueia) --}}
                             @if(!$processo->estaApto())
                                 <p class="text-sm text-amber-700">
                                     ⚠️ Há alertas de conformidade acima (consultivos). Você pode encaminhar mesmo assim.
+                                </p>
+                            @endif
+
+                            {{-- Pendências de assinatura (bloqueiam o encaminhamento) --}}
+                            @if(!empty($pendencias) && !$processo->ultimaEtapa())
+                                <p class="text-sm text-red-700">
+                                    🔴 Assine antes de encaminhar: <strong>{{ implode(', ', $pendencias) }}</strong>.
                                 </p>
                             @endif
 
@@ -271,7 +279,8 @@
                                                placeholder="Análise do setor antes de encaminhar...">
                                     </div>
                                     <button type="submit"
-                                            class="px-4 py-2 text-sm font-medium text-white bg-indigo-600 rounded-md hover:bg-indigo-700">
+                                            @disabled(!empty($pendencias))
+                                            class="px-4 py-2 text-sm font-medium text-white bg-indigo-600 rounded-md hover:bg-indigo-700 disabled:opacity-50 disabled:cursor-not-allowed">
                                         Encaminhar para {{ \App\Models\Processo::SETORES[$processo->proximoSetor()] ?? $processo->proximoSetor() }}
                                     </button>
                                 </form>

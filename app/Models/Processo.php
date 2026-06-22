@@ -196,4 +196,24 @@ class Processo extends Model
     {
         return !$this->ultimaEtapa();
     }
+
+    /**
+     * Peças que precisam estar ASSINADAS antes de encaminhar a etapa atual.
+     * Retorna os rótulos pendentes (vazio = pode encaminhar).
+     */
+    public function pendenciasParaAvancar(): array
+    {
+        $pend = [];
+
+        if ($this->etapa === 0) {
+            if (!$this->peca('oficio')?->assinado())       $pend[] = 'Ofício';
+            if (!$this->termoReferencia?->assinado())       $pend[] = 'Termo de Referência';
+        } elseif ($this->etapa === 2) {
+            if (!$this->peca('parecer_financeiro')?->assinado()) $pend[] = 'Parecer Financeiro';
+        } elseif ($this->etapa === 3) {
+            if (!$this->peca('abertura')?->assinado())      $pend[] = 'Abertura de Processo';
+        }
+
+        return $pend;
+    }
 }

@@ -49,6 +49,11 @@ class TramitacaoController extends Controller
         $atual = $processo->tramitacaoAtual();
         abort_if($atual && is_null($atual->recebido_em), 422, 'Registre o recebimento antes de encaminhar.');
 
+        // peças obrigatórias da etapa precisam estar assinadas
+        $pendentes = $processo->pendenciasParaAvancar();
+        abort_unless(empty($pendentes), 422,
+            'Assine antes de encaminhar: ' . implode(', ', $pendentes) . '.');
+
         $data = $request->validate(['parecer' => ['nullable', 'string']]);
 
         $proxEtapa = $processo->etapa + 1;
