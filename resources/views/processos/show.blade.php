@@ -34,6 +34,9 @@
                 $aguardandoRecebimento = $atual && is_null($atual->recebido_em);
                 $emAndamento = !in_array($processo->status, ['concluido', 'arquivado']);
                 $etapaInfo = $processo->etapaInfo();
+                // só o setor responsável (e enquanto está com ele) preenche cada peça
+                $ehUG = $emAndamento && $usuarioSetor === 'ug' && $processo->setor_atual === 'ug';
+                $ehSeplan = $emAndamento && $usuarioSetor === 'seplan' && $processo->setor_atual === 'seplan';
             @endphp
 
             {{-- Stepper do fluxo --}}
@@ -114,7 +117,7 @@
                         </div>
                         <a href="{{ route('processos.pecas.edit', [$processo, $oficio]) }}"
                            class="text-sm text-indigo-600 hover:text-indigo-900">
-                            {{ $oficio?->assinado() ? 'Ver' : 'Preencher' }}
+                            {{ $ehUG && !$oficio?->assinado() ? 'Preencher' : 'Ver' }}
                         </a>
                     </div>
 
@@ -134,7 +137,7 @@
                         </div>
                         <a href="{{ route('processos.termo.edit', $processo) }}"
                            class="text-sm text-indigo-600 hover:text-indigo-900">
-                            {{ $tr?->assinado() ? 'Ver' : 'Preencher' }}
+                            {{ $ehUG && !$tr?->assinado() ? 'Preencher' : 'Ver' }}
                         </a>
                     </div>
 
@@ -155,7 +158,7 @@
                         </div>
                         <a href="{{ route('processos.pecas.edit', [$processo, $parecer]) }}"
                            class="text-sm text-indigo-600 hover:text-indigo-900">
-                            {{ $parecer?->assinado() ? 'Ver' : 'Preencher' }}
+                            {{ $ehSeplan && !$parecer?->assinado() ? 'Preencher' : 'Ver' }}
                         </a>
                     </div>
 
@@ -176,7 +179,7 @@
                         </div>
                         <a href="{{ route('processos.pecas.edit', [$processo, $abertura]) }}"
                            class="text-sm text-indigo-600 hover:text-indigo-900">
-                            {{ $abertura?->assinado() ? 'Ver' : 'Preencher' }}
+                            {{ $ehUG && !$abertura?->assinado() ? 'Preencher' : 'Ver' }}
                         </a>
                     </div>
                 </div>

@@ -13,6 +13,20 @@ class ProcessoPeca extends Model
         'abertura'          => 'Abertura de Processo',
     ];
 
+    /**
+     * Setor responsável por preencher/assinar cada peça (fluxo do cliente).
+     */
+    public const SETOR_RESPONSAVEL = [
+        'oficio'             => 'ug',
+        'parecer_financeiro' => 'seplan',
+        'abertura'           => 'ug',
+    ];
+
+    public function setorResponsavel(): string
+    {
+        return self::SETOR_RESPONSAVEL[$this->tipo] ?? 'ug';
+    }
+
     protected $fillable = [
         'processo_id', 'tipo', 'conteudo', 'assinado_por', 'assinado_em',
     ];

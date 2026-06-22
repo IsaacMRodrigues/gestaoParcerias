@@ -15,10 +15,16 @@
                 <div class="bg-green-50 border border-green-200 text-green-800 px-4 py-3 rounded-lg text-sm">
                     Termo assinado por {{ $tr->assinante->name }} em {{ $tr->assinado_em->format('d/m/Y H:i') }}.
                 </div>
+            @elseif(!$podeEditar)
+                <div class="bg-amber-50 border border-amber-200 text-amber-800 px-4 py-3 rounded-lg text-sm">
+                    O Termo de Referência é de responsabilidade da <strong>Unidade Gestora</strong> e só pode ser
+                    preenchido quando o processo estiver com ela. Você está no modo leitura.
+                </div>
             @endif
 
             <form action="{{ route('processos.termo.update', $processo) }}" method="POST" class="space-y-6">
                 @csrf @method('PUT')
+                <fieldset @disabled(!$podeEditar) class="space-y-6 {{ $podeEditar ? '' : 'opacity-90' }}">
 
                 {{-- 2.1 Descrição da realidade --}}
                 <div class="bg-white shadow rounded-lg p-6">
@@ -152,17 +158,21 @@
                     </div>
                     <p class="text-xs text-amber-600 mt-2">Validação manual: sistema contábil e orçamentário.</p>
                 </div>
+                </fieldset>
 
                 <div class="flex items-center justify-end gap-4">
                     <a href="{{ route('processos.show', $processo) }}" class="text-sm text-gray-600 hover:text-gray-900">Voltar</a>
-                    <button type="submit"
-                            class="px-4 py-2 text-sm font-medium text-white bg-indigo-600 rounded-md hover:bg-indigo-700">
-                        Salvar Termo de Referência
-                    </button>
+                    @if($podeEditar)
+                        <button type="submit"
+                                class="px-4 py-2 text-sm font-medium text-white bg-indigo-600 rounded-md hover:bg-indigo-700">
+                            Salvar Termo de Referência
+                        </button>
+                    @endif
                 </div>
             </form>
 
             {{-- Assinatura --}}
+            @if($podeEditar || $tr->assinado())
             <div class="bg-white shadow rounded-lg p-6 flex items-center justify-between">
                 <div>
                     <p class="text-sm font-semibold text-gray-800">Assinatura digital</p>
@@ -170,7 +180,7 @@
                         {{ $tr->assinado() ? 'Assinado por ' . $tr->assinante->name . ' em ' . $tr->assinado_em->format('d/m/Y H:i') : 'Salve o conteúdo antes de assinar.' }}
                     </p>
                 </div>
-                @unless($tr->assinado())
+                @if($podeEditar && !$tr->assinado())
                     <form action="{{ route('processos.termo.assinar', $processo) }}" method="POST"
                           onsubmit="return confirm('Confirma a assinatura do Termo de Referência?')">
                         @csrf @method('PATCH')
@@ -179,8 +189,9 @@
                             Assinar
                         </button>
                     </form>
-                @endunless
+                @endif
             </div>
+            @endif
         </div>
     </div>
 </x-app-layout>

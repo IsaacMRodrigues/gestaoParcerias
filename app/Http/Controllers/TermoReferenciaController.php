@@ -10,15 +10,36 @@ use Illuminate\View\View;
 
 class TermoReferenciaController extends Controller
 {
+    /**
+     * O Termo de Referência é de responsabilidade da UG, enquanto o processo
+     * estiver com a UG e em andamento.
+     */
+    private function podeEditar(Processo $processo): bool
+    {
+        return auth()->user()->setor === 'ug'
+            && $processo->setor_atual === 'ug'
+            && in_array($processo->status, ['em_planejamento', 'em_tramite']);
+    }
+
+    private function autorizar(Processo $processo): void
+    {
+        abort_unless($this->podeEditar($processo), 403,
+            'O Termo de Referência é de responsabilidade da Unidade Gestora e só pode ser editado quando o processo estiver com ela.');
+    }
+
     public function edit(Processo $processo): View
     {
         $processo->load('termoReferencia');
+        $podeEditar = $this->podeEditar($processo) && !$processo->termoReferencia?->assinado();
 
-        return view('processos.termo', compact('processo'));
+        return view('processos.termo', compact('processo', 'podeEditar'));
     }
 
     public function update(Request $request, Processo $processo): RedirectResponse
     {
+        $this->autorizar($processo);
+        abort_if($processo->termoReferencia?->assinado(), 403, 'Termo já assinado não pode ser alterado.');
+
         $data = $request->validate([
             'problema_identificado'     => ['nullable', 'string', 'max:255'],
             'publico_alvo'              => ['nullable', 'string', 'max:255'],
@@ -47,6 +68,9 @@ class TermoReferenciaController extends Controller
 
     public function assinar(Processo $processo): RedirectResponse
     {
+        $this->autorizar($processo);
+        abort_if($processo->termoReferencia?->assinado(), 403, 'Termo já assinado.');
+
         $processo->termoReferencia()->update([
             'assinado_por' => auth()->id(),
             'assinado_em'  => now(),
