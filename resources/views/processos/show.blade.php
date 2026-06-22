@@ -243,10 +243,10 @@
                         </div>
                     @else
                         <div class="px-6 py-4 border-t border-gray-100 bg-gray-50 space-y-4">
-                            {{-- Bloqueio de conformidade na 1ª etapa --}}
-                            @if($processo->etapa === 0 && !$processo->estaApto())
-                                <p class="text-sm text-red-700">
-                                    🔴 Resolva as pendências de conformidade acima antes de encaminhar.
+                            {{-- Aviso consultivo de conformidade (não bloqueia) --}}
+                            @if(!$processo->estaApto())
+                                <p class="text-sm text-amber-700">
+                                    ⚠️ Há alertas de conformidade acima (consultivos). Você pode encaminhar mesmo assim.
                                 </p>
                             @endif
 
@@ -261,7 +261,8 @@
                                     </button>
                                 </form>
                             @else
-                                <form action="{{ route('processos.avancar', $processo) }}" method="POST" class="space-y-3">
+                                <form action="{{ route('processos.avancar', $processo) }}" method="POST" class="space-y-3"
+                                      @if(!$processo->estaApto()) onsubmit="return confirm('Há alertas de conformidade. Encaminhar mesmo assim?')" @endif>
                                     @csrf
                                     <div>
                                         <x-input-label for="parecer" value="Parecer / observação (opcional)" />
@@ -270,8 +271,7 @@
                                                placeholder="Análise do setor antes de encaminhar...">
                                     </div>
                                     <button type="submit"
-                                            @disabled($processo->etapa === 0 && !$processo->estaApto())
-                                            class="px-4 py-2 text-sm font-medium text-white bg-indigo-600 rounded-md hover:bg-indigo-700 disabled:opacity-50 disabled:cursor-not-allowed">
+                                            class="px-4 py-2 text-sm font-medium text-white bg-indigo-600 rounded-md hover:bg-indigo-700">
                                         Encaminhar para {{ \App\Models\Processo::SETORES[$processo->proximoSetor()] ?? $processo->proximoSetor() }}
                                     </button>
                                 </form>

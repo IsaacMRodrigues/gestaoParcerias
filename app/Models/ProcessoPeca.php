@@ -22,9 +22,38 @@ class ProcessoPeca extends Model
         'abertura'           => 'ug',
     ];
 
+    /**
+     * Etapa do fluxo em que cada peça é preenchida (índice em Processo::ETAPAS).
+     * Ofício = etapa 0 (UG) · Parecer Financeiro = etapa 2 (SEPLAN) · Abertura = etapa 3 (UG).
+     */
+    public const ETAPA = [
+        'oficio'             => 0,
+        'parecer_financeiro' => 2,
+        'abertura'           => 3,
+    ];
+
     public function setorResponsavel(): string
     {
         return self::SETOR_RESPONSAVEL[$this->tipo] ?? 'ug';
+    }
+
+    public function etapaDesignada(): int
+    {
+        return self::ETAPA[$this->tipo] ?? 0;
+    }
+
+    /**
+     * Pode ser preenchida/assinada agora? (setor responsável, na etapa certa,
+     * com o processo em andamento e a peça ainda não assinada)
+     */
+    public function podeEditar(Processo $processo, ?User $user): bool
+    {
+        return $user
+            && in_array($processo->status, ['em_planejamento', 'em_tramite'])
+            && !$this->assinado()
+            && $user->setor === $this->setorResponsavel()
+            && $processo->setor_atual === $this->setorResponsavel()
+            && $processo->etapa === $this->etapaDesignada();
     }
 
     protected $fillable = [

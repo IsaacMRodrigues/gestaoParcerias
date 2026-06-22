@@ -18,6 +18,7 @@ class TermoReferenciaController extends Controller
     {
         return auth()->user()->setor === 'ug'
             && $processo->setor_atual === 'ug'
+            && $processo->etapa === 0   // o TR é preenchido na 1ª etapa (junto do Ofício)
             && in_array($processo->status, ['em_planejamento', 'em_tramite']);
     }
 

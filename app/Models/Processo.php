@@ -189,13 +189,11 @@ class Processo extends Model
     }
 
     /**
-     * Pode avançar da etapa atual? (a primeira etapa exige o planejamento apto)
+     * Pode avançar da etapa atual? (os alertas de conformidade são consultivos,
+     * não bloqueiam — a UG decide encaminhar; só não avança na última etapa)
      */
     public function podeAvancar(): bool
     {
-        if ($this->etapa === 0) {
-            return $this->estaApto();
-        }
         return !$this->ultimaEtapa();
     }
 }

@@ -43,10 +43,7 @@ class TramitacaoController extends Controller
     {
         $this->autorizarSetor($processo);
 
-        abort_unless($processo->podeAvancar(), 422,
-            $processo->etapa === 0
-                ? 'O planejamento ainda possui pendências (veja os alertas).'
-                : 'Não é possível avançar a partir desta etapa.');
+        abort_unless($processo->podeAvancar(), 422, 'Não é possível avançar a partir desta etapa.');
 
         // recebimento pendente precisa ser registrado antes
         $atual = $processo->tramitacaoAtual();
