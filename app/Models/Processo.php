@@ -35,9 +35,10 @@ class Processo extends Model
      */
     public const ETAPAS = [
         ['setor' => 'ug',     'acao' => 'Preencher Ofício e Termo de Referência e assinar'],
-        ['setor' => 'scp',    'acao' => 'Receber e analisar o planejamento'],
-        ['setor' => 'seplan', 'acao' => 'Analisar e emitir o Parecer Financeiro, e assinar'],
-        ['setor' => 'ug',     'acao' => 'Conferir, resolver pendências e fazer a Abertura do Processo (assinar AP)'],
+        ['setor' => 'scp',    'acao' => 'Receber e analisar o pedido (devolve à UG)'],
+        ['setor' => 'ug',     'acao' => 'Solicitar o Parecer Financeiro à SEPLAN (Pedido de Parecer)'],
+        ['setor' => 'seplan', 'acao' => 'Emitir o Parecer Financeiro e assinar'],
+        ['setor' => 'ug',     'acao' => 'Conferir o parecer e fazer a Abertura do Processo (assinar AP)'],
         ['setor' => 'scp',    'acao' => 'Elaborar o Edital (ou justificativa de dispensa/inexigibilidade)'],
         ['setor' => 'ug',     'acao' => 'Assinar o Edital'],
         ['setor' => 'scp',    'acao' => 'Publicar no site oficial (trâmite externo)'],
@@ -192,17 +193,18 @@ class Processo extends Model
         if ($this->etapa === 0) {
             if (!$this->peca('oficio')?->assinado())             $pend[] = 'Ofício';
             if (!$this->peca('termo_referencia')?->assinado())   $pend[] = 'Termo de Referência';
-        } elseif ($this->etapa === 1) {
-            if (!$this->peca('pedido_parecer')?->assinado())      $pend[] = 'Pedido de Parecer Financeiro';
         } elseif ($this->etapa === 2) {
-            if (!$this->peca('parecer_financeiro')?->assinado())  $pend[] = 'Parecer Financeiro';
+            if (!$this->peca('pedido_parecer')?->assinado())      $pend[] = 'Pedido de Parecer Financeiro';
         } elseif ($this->etapa === 3) {
-            if (!$this->peca('abertura')?->assinado())            $pend[] = 'Termo de Abertura';
+            if (!$this->peca('parecer_financeiro')?->assinado())  $pend[] = 'Parecer Financeiro';
         } elseif ($this->etapa === 4) {
-            if (empty($this->peca('edital')?->conteudo))          $pend[] = 'Edital (elaborar)';
+            if (!$this->peca('abertura')?->assinado())            $pend[] = 'Termo de Abertura';
         } elseif ($this->etapa === 5) {
+            if (empty($this->peca('edital')?->conteudo))          $pend[] = 'Edital (elaborar)';
+        } elseif ($this->etapa === 6) {
             if (!$this->peca('edital')?->assinado())              $pend[] = 'Edital (assinatura da UG)';
         }
+        // etapa 1 (SCP): apenas analisa e devolve — sem documento obrigatório
 
         return $pend;
     }

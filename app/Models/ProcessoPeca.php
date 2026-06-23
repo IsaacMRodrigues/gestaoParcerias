@@ -22,7 +22,7 @@ class ProcessoPeca extends Model
     public const SETOR_RESPONSAVEL = [
         'oficio'             => 'ug',
         'termo_referencia'   => 'ug',
-        'pedido_parecer'     => 'scp',
+        'pedido_parecer'     => 'ug',   // a UG solicita o parecer à SEPLAN
         'parecer_financeiro' => 'seplan',
         'abertura'           => 'ug',
         'edital'             => 'scp',
@@ -31,18 +31,18 @@ class ProcessoPeca extends Model
     public const ETAPA = [
         'oficio'             => 0,
         'termo_referencia'   => 0,
-        'pedido_parecer'     => 1,
-        'parecer_financeiro' => 2,
-        'abertura'           => 3,
-        'edital'             => 4,
+        'pedido_parecer'     => 2,
+        'parecer_financeiro' => 3,
+        'abertura'           => 4,
+        'edital'             => 5,
     ];
 
     /**
      * Quem ASSINA (quando difere de quem preenche). Ex.: o Edital é elaborado
-     * pela SCP (etapa 4) mas assinado pela UG (etapa 5).
+     * pela SCP (etapa 5) mas assinado pela UG (etapa 6).
      */
     public const ASSINATURA = [
-        'edital' => ['setor' => 'ug', 'etapa' => 5],
+        'edital' => ['setor' => 'ug', 'etapa' => 6],
     ];
 
     /**
