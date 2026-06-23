@@ -43,34 +43,57 @@ class ProcessoPeca extends Model
     ];
 
     /**
-     * Texto-modelo pré-preenchido (modelo padrão do cliente — substituir os "xxxxx").
+     * Texto-modelo pré-preenchido em HTML (modelo padrão — substituir os "XXXX").
+     * Editável pelo editor rico (Quill).
      */
     public const MODELO = [
-        'oficio' =>
-            "(Papel timbrado)\n\nOfício nº xxx/xxxx                                              [Cidade], xx/xx/xxxx\n\n".
-            "A(o) Sr.(a) [responsável], Secretaria de Planejamento.\n\n".
-            "Solicitamos a celebração de parceria, nos termos da Lei Federal nº 13.019/2014.\n".
-            "A parceria proposta será executada com recursos oriundos de xxxxx e tem por finalidade xxxxx.\n\n".
-            "Diante do exposto, requer-se a análise e celebração da parceria.\n\n".
-            "Atenciosamente,\n\n_____________________________\nSecretaria Municipal de xxxxx",
-        'pedido_parecer' =>
-            "Solicito parecer financeiro do seguinte processo:\n\n".
-            "Dotação: xxxxx\nFicha: xxxxx\nFonte: xxxxx\n".
-            "Objeto do instrumento: xxxxx\nInstrumento: xxxxx\nParceiro: xxxxx\n".
-            "Valor total: R$ xxxxx (xxxxx)\nPrazo: xx meses",
-        'parecer_financeiro' =>
-            "PARECER FINANCEIRO\n\nOfício nº xxx/xxxx                                              Data: xx/xx/xxxx\n\n".
-            "A Secretaria Municipal de Planejamento, após análise, informa:\n\n".
-            "Valor solicitado: R$ xxxxx\nValor da Receita (exercício): R$ xxxxx\n".
-            "Percentual em relação às receitas orçamentárias: xx%\n\n".
-            "Parecer: xxxxx\n\n_____________________________\nSecretaria Municipal de Planejamento",
-        'abertura' =>
-            "TERMO DE ABERTURA DE PROCESSO\n\nProcesso nº: xxxxx\nData de abertura: xx/xx/xxxx\nObjeto: xxxxx\n\n".
-            "Aos xx de xxxxx de 20xx, eu, [nome], secretário(a) da unidade gestora xxxxx, ABRI o processo ".
-            "referente a xxxxx, atendendo o disposto na Lei nº 13.019/2014, art. 23.\n\n".
-            "_____________________________\nSecretário(a) — Unidade Gestora",
-        'edital' =>
-            "EDITAL DE CHAMAMENTO PÚBLICO Nº xxx/xxxx\n\n(Cole/edite aqui o conteúdo do edital.)",
+        'oficio' => <<<'HTML'
+<p class="ql-align-center"><strong>PREFEITURA MUNICIPAL DE SÃO GONÇALO DO RIO ABAIXO</strong></p>
+<p class="ql-align-center">Av. Contorno Oeste, 1.657, Cidade Universitária — CEP 35935-000 — Estado de Minas Gerais</p>
+<p><br></p>
+<p class="ql-align-center"><strong>OFÍCIO PARA SOLICITAÇÃO DE CONVÊNIOS/PARCERIAS</strong></p>
+<p><br></p>
+<p class="ql-align-right">São Gonçalo do Rio Abaixo, XX/XX/XXXX.</p>
+<p>Ofício nº XXX/XXXX</p>
+<p><br></p>
+<p>Sr(a). XXXXXXXXX<br>Secretaria de Planejamento</p>
+<p><br></p>
+<p>Prezado(a) Senhor(a),</p>
+<p>Encaminhamos a documentação pertinente e solicitamos a instauração do procedimento administrativo necessário à celebração de parceria, nos termos da Lei Federal nº 13.019, de 31 de julho de 2014, mediante Chamamento Público ou, quando cabível, por Dispensa ou Inexigibilidade de Chamamento Público, conforme os fundamentos fáticos e jurídicos constantes dos autos.</p>
+<p>A parceria proposta será executada com recursos oriundos do XXXXXXXXXXXX, à conta da Dotação Orçamentária nº XXXXXXXXXXXX, e tem por finalidade XXXXXXX, em consonância com as diretrizes da política pública setorial e com as competências desta Unidade Gestora.</p>
+<p>Diante do exposto, requer-se a análise da documentação apresentada e o prosseguimento dos atos administrativos necessários à formalização da parceria, observadas as disposições da Lei Federal nº 13.019/2014, do Decreto Municipal regulamentador e demais normas aplicáveis.</p>
+<p><br></p>
+<p>Atenciosamente,</p>
+<p><br></p>
+<p class="ql-align-center">XXXXXXXX<br>Secretária Municipal de XXXXXXXX</p>
+HTML,
+        'pedido_parecer' => <<<'HTML'
+<p>Solicito parecer financeiro do seguinte processo:</p>
+<p><strong>Dotação:</strong> XXXXX<br><strong>Ficha:</strong> XXXXX<br><strong>Fonte:</strong> XXXXX</p>
+<p><strong>Objeto do instrumento:</strong> XXXXX<br><strong>Instrumento:</strong> XXXXX<br><strong>Parceiro:</strong> XXXXX</p>
+<p><strong>Valor total:</strong> R$ XXXXX (XXXXX)<br><strong>Prazo:</strong> XX meses</p>
+HTML,
+        'parecer_financeiro' => <<<'HTML'
+<p class="ql-align-center"><strong>PARECER FINANCEIRO</strong></p>
+<p>Ofício nº XXX/XXXX &nbsp;&nbsp;&nbsp; Data: XX/XX/XXXX</p>
+<p>A Secretaria Municipal de Planejamento, após análise, informa:</p>
+<p><strong>Valor solicitado:</strong> R$ XXXXX<br><strong>Valor da Receita (exercício):</strong> R$ XXXXX<br><strong>Percentual em relação às receitas orçamentárias:</strong> XX%</p>
+<p><strong>Parecer:</strong> XXXXX</p>
+<p><br></p>
+<p class="ql-align-center">_____________________________<br>Secretaria Municipal de Planejamento</p>
+HTML,
+        'abertura' => <<<'HTML'
+<p class="ql-align-center"><strong>TERMO DE ABERTURA DE PROCESSO</strong></p>
+<p><strong>Processo nº:</strong> XXXXX<br><strong>Data de abertura:</strong> XX/XX/XXXX<br><strong>Objeto:</strong> XXXXX</p>
+<p>Aos XX de XXXXX de 20XX, eu, [nome], secretário(a) da unidade gestora XXXXX, ABRI o processo referente a XXXXX, atendendo o disposto na Lei nº 13.019/2014, art. 23.</p>
+<p><br></p>
+<p class="ql-align-center">_____________________________<br>Secretário(a) — Unidade Gestora</p>
+HTML,
+        'edital' => <<<'HTML'
+<p class="ql-align-center"><strong>EDITAL DE CHAMAMENTO PÚBLICO Nº XXX/XXXX</strong></p>
+<p><br></p>
+<p>(Cole ou edite aqui o conteúdo do edital.)</p>
+HTML,
     ];
 
     protected $fillable = [

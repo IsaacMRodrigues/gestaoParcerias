@@ -29,25 +29,30 @@
             @endif
 
             <div class="bg-white shadow rounded-lg p-6">
-                <form action="{{ route('processos.pecas.update', [$processo, $peca]) }}" method="POST" class="space-y-4">
-                    @csrf @method('PUT')
-                    <div>
-                        <x-input-label for="conteudo" value="Conteúdo (modelo padrão)" />
-                        <textarea id="conteudo" name="conteudo" rows="14"
-                                  {{ $podeEditar ? '' : 'readonly' }}
-                                  class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 text-sm font-mono {{ $podeEditar ? '' : 'bg-gray-50' }}"
-                                  placeholder="Preencha o conteúdo do documento...">{{ old('conteudo', $peca->conteudo) }}</textarea>
-                    </div>
-                    <div class="flex items-center justify-end gap-4">
-                        <a href="{{ route('processos.show', $processo) }}" class="text-sm text-gray-600 hover:text-gray-900">Voltar</a>
-                        @if($podeEditar)
+                <x-input-label value="Conteúdo (modelo padrão)" class="mb-1" />
+                @if($podeEditar)
+                    <form action="{{ route('processos.pecas.update', [$processo, $peca]) }}" method="POST" class="space-y-4">
+                        @csrf @method('PUT')
+                        {{-- editor rico (Quill); sincroniza o HTML para o input ao salvar --}}
+                        <input type="hidden" name="conteudo" id="conteudo_input" value="{{ old('conteudo', $peca->conteudo) }}">
+                        <div data-editor-rico data-target="conteudo_input" class="bg-white">{!! old('conteudo', $peca->conteudo) !!}</div>
+                        <div class="flex items-center justify-end gap-4">
+                            <a href="{{ route('processos.show', $processo) }}" class="text-sm text-gray-600 hover:text-gray-900">Voltar</a>
                             <button type="submit"
                                     class="px-4 py-2 text-sm font-medium text-white bg-indigo-600 rounded-md hover:bg-indigo-700">
                                 Salvar
                             </button>
-                        @endif
+                        </div>
+                    </form>
+                @else
+                    {{-- modo leitura: renderiza o HTML do documento --}}
+                    <div class="documento-html border border-gray-200 rounded-md p-4 bg-gray-50 text-gray-800">
+                        {!! $peca->conteudo ?: '<p class="text-gray-400">Documento ainda não preenchido.</p>' !!}
                     </div>
-                </form>
+                    <div class="flex justify-end mt-4">
+                        <a href="{{ route('processos.show', $processo) }}" class="text-sm text-gray-600 hover:text-gray-900">Voltar</a>
+                    </div>
+                @endif
             </div>
 
             @if($podeAssinar || $peca->assinado())
