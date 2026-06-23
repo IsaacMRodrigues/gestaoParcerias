@@ -51,16 +51,16 @@ class ProcessoPeca extends Model
      */
     /** Cabeçalho com brasão (logo público da prefeitura). */
     private const CABECALHO = <<<'HTML'
-<p class="ql-align-center"><img src="https://pmsgra.net/logo.png" width="80"></p>
-<p class="ql-align-center"><strong>PREFEITURA MUNICIPAL DE SÃO GONÇALO DO RIO ABAIXO</strong></p>
-<p class="ql-align-center">AV. CONTORNO OESTE, 1.657, CIDADE UNIVERSITÁRIA</p>
-<p class="ql-align-center">CEP 35935-000 – ESTADO DE MINAS GERAIS</p>
+<p style="text-align:center"><img src="https://pmsgra.net/logo.png" width="80"></p>
+<p style="text-align:center"><strong>PREFEITURA MUNICIPAL DE SÃO GONÇALO DO RIO ABAIXO</strong></p>
+<p style="text-align:center">AV. CONTORNO OESTE, 1.657, CIDADE UNIVERSITÁRIA</p>
+<p style="text-align:center">CEP 35935-000 – ESTADO DE MINAS GERAIS</p>
 <p><br></p>
 HTML;
 
     public const MODELO = [
         'termo_referencia' => self::CABECALHO . <<<'HTML'
-<p class="ql-align-center"><strong>TERMO DE REFERÊNCIA</strong></p>
+<p style="text-align:center"><strong>TERMO DE REFERÊNCIA</strong></p>
 <p><strong>DESCRIÇÃO DA REALIDADE OBJETO DA PARCERIA:</strong><br>XXXXX</p>
 <p><strong>JUSTIFICATIVA:</strong><br>XXXXX</p>
 <p><strong>OBJETO DA PARCERIA:</strong><br>XXXXX.</p>
@@ -72,12 +72,12 @@ HTML;
 <p><br></p>
 <p>Ficamos à disposição para maiores esclarecimentos.<br>Sendo o que temos para o momento, pede-se <strong>deferimento</strong>.</p>
 <p><br></p>
-<p class="ql-align-center">XXXXXX<br>Secretaria Municipal de XXXXXXXX</p>
+<p style="text-align:center">XXXXXX<br>Secretaria Municipal de XXXXXXXX</p>
 HTML,
         'oficio' => self::CABECALHO . <<<'HTML'
-<p class="ql-align-center"><strong>OFÍCIO PARA SOLICITAÇÃO DE CONVÊNIOS/PARCERIAS</strong></p>
+<p style="text-align:center"><strong>OFÍCIO PARA SOLICITAÇÃO DE CONVÊNIOS/PARCERIAS</strong></p>
 <p><br></p>
-<p class="ql-align-right">São Gonçalo do Rio Abaixo, XX/XX/XXXX.</p>
+<p style="text-align:right">São Gonçalo do Rio Abaixo, XX/XX/XXXX.</p>
 <p>Ofício nº XXX/XXXX</p>
 <p><br></p>
 <p>Sr(a). XXXXXXXXX<br>Secretaria de Planejamento</p>
@@ -89,7 +89,7 @@ HTML,
 <p><br></p>
 <p>Atenciosamente,</p>
 <p><br></p>
-<p class="ql-align-center">XXXXXXXX<br>Secretária Municipal de XXXXXXXX</p>
+<p style="text-align:center">XXXXXXXX<br>Secretária Municipal de XXXXXXXX</p>
 HTML,
         'pedido_parecer' => <<<'HTML'
 <p>Solicito parecer financeiro do seguinte <strong>processo</strong>:</p>
@@ -113,22 +113,22 @@ HTML,
 <p>A estimativa do Impacto Orçamentário Financeiro para realização da despesa prevista no Exercício XXX é de XXX% das receitas orçadas na Lei Orçamentária Anual nº XXXXX.</p>
 <p>Sendo só no momento, me coloco à disposição para quaisquer eventuais esclarecimentos.</p>
 <p><br></p>
-<p class="ql-align-center">XXXXXXXXXX<br>Secretário Municipal de Planejamento</p>
+<p style="text-align:center">XXXXXXXXXX<br>Secretário Municipal de Planejamento</p>
 HTML,
         'abertura' => self::CABECALHO . <<<'HTML'
-<p class="ql-align-center"><strong>TERMO DE ABERTURA DE PROCESSO</strong></p>
+<p style="text-align:center"><strong>TERMO DE ABERTURA DE PROCESSO</strong></p>
 <p><br></p>
 <p>Processo nº: XXXXX</p>
-<p class="ql-align-right">Data de abertura: XX/XX/XXXX</p>
+<p style="text-align:right">Data de abertura: XX/XX/XXXX</p>
 <p><br></p>
 <p>Objeto: XXXXX.</p>
 <p><br></p>
 <p>Aos XX de XXXXX de 20XX, eu, XXXXXXXX, secretária da unidade gestora: XXXXX, <strong>ABRI</strong> o processo de <strong>XXXX referente ao XXXXXX</strong>, atendendo o disposto na Lei nº. 13.019/2014, art. 23.</p>
 <p><br></p>
-<p class="ql-align-center">XXXXX<br>Secretária de XXXXXX<br>Unidade Gestora</p>
+<p style="text-align:center">XXXXX<br>Secretária de XXXXXX<br>Unidade Gestora</p>
 HTML,
         'edital' => <<<'HTML'
-<p class="ql-align-center"><strong>EDITAL DE CHAMAMENTO PÚBLICO Nº XXX/XXXX</strong></p>
+<p style="text-align:center"><strong>EDITAL DE CHAMAMENTO PÚBLICO Nº XXX/XXXX</strong></p>
 <p><br></p>
 <p>(Cole ou edite aqui o conteúdo do edital.)</p>
 HTML,

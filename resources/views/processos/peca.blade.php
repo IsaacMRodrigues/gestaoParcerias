@@ -33,9 +33,8 @@
                 @if($podeEditar)
                     <form action="{{ route('processos.pecas.update', [$processo, $peca]) }}" method="POST" class="space-y-4">
                         @csrf @method('PUT')
-                        {{-- editor rico (Quill); sincroniza o HTML para o input ao salvar --}}
-                        <input type="hidden" name="conteudo" id="conteudo_input" value="{{ old('conteudo', $peca->conteudo) }}">
-                        <div data-editor-rico data-target="conteudo_input" class="bg-white">{!! old('conteudo', $peca->conteudo) !!}</div>
+                        {{-- editor rico (TinyMCE) sobre o textarea --}}
+                        <textarea name="conteudo" data-editor-rico>{!! old('conteudo', $peca->conteudo) !!}</textarea>
                         <div class="flex items-center justify-end gap-4">
                             <a href="{{ route('processos.show', $processo) }}" class="text-sm text-gray-600 hover:text-gray-900">Voltar</a>
                             <button type="submit"
