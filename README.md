@@ -256,6 +256,20 @@ São 21 perfis. Um usuário pode ter **vários**; os marcados 🔒 são **exclus
 
 ---
 
+- [2026-06-19] Módulo 2 alinhado às respostas da cliente + modelos (Arquivos I–V)
+  - **Termo de Referência** reescrito conforme o modelo real (Arquivo II): descrição da
+    realidade, justificativa, objeto, objetivos, orçamento (valor/dotação/ficha/fonte), prazo
+  - 🆕 Peça **Pedido de Parecer Financeiro** (Arquivo III) — SCP, na etapa de análise
+  - 🆕 Peça **Edital** — SCP elabora (editor de texto) e **UG assina** na etapa seguinte
+  - Documentos abrem **pré-preenchidos com o texto-modelo** do cliente (`ProcessoPeca::MODELO`)
+  - Cada peça travada por **setor + etapa**; edição e assinatura podem ser de setores diferentes
+    (`podeEditarConteudo` × `podeAssinar`) — caso do Edital (SCP edita, UG assina)
+  - **UG automática**: usuário ganha `orgao_id` (Secretaria); na abertura do processo a UG
+    vem preenchida da lotação (fallback: seleção manual p/ quem não tem UG)
+  - Modelos do cliente em `Docs. Desenvolvimento/Modelos/`; respostas em `respostaduvidas.md`
+
+---
+
 ## O que está sendo feito
 
 - Módulo Chamamentos: numeração do Processo concluída (`UG.Seq.Ano.Esfera`). A avaliar a seguir:

@@ -32,6 +32,7 @@ class UserController extends Controller
             'cpf'      => $request->cpf,
             'phone'    => $request->phone,
             'setor'    => $request->setor,
+            'orgao_id' => $request->orgao_id,
             'status'   => $request->boolean('status', true),
             'password' => bcrypt($request->password),
         ]);
@@ -57,6 +58,7 @@ class UserController extends Controller
             'cpf'    => $request->cpf,
             'phone'  => $request->phone,
             'setor'  => $request->setor,
+            'orgao_id' => $request->orgao_id,
             'status' => $request->boolean('status', true),
         ];
 

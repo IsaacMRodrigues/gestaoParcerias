@@ -38,7 +38,10 @@ class ProcessoController extends Controller
 
     public function create(): View
     {
-        // Apenas Unidades Gestoras com código podem abrir processo (o código entra no número).
+        // UG do próprio usuário (preenchida automaticamente, se cadastrada)
+        $orgaoUsuario = auth()->user()->orgao;
+
+        // Fallback (ex.: admin sem UG): permite escolher entre as UGs com código.
         $orgaos = Orgao::where('status', true)
             ->whereNotNull('codigo')
             ->orderBy('codigo')
@@ -46,17 +49,21 @@ class ProcessoController extends Controller
 
         $esferas = Processo::ESFERAS;
 
-        return view('processos.create', compact('orgaos', 'esferas'));
+        return view('processos.create', compact('orgaos', 'esferas', 'orgaoUsuario'));
     }
 
     public function store(Request $request): RedirectResponse
     {
         $data = $request->validate([
-            'orgao_id' => ['required', 'exists:orgaos,id'],
-            'esfera'   => ['required', 'string', \Illuminate\Validation\Rule::in(array_keys(Processo::ESFERAS))],
+            'esfera' => ['required', 'string', \Illuminate\Validation\Rule::in(array_keys(Processo::ESFERAS))],
         ]);
 
-        $orgao = Orgao::findOrFail($data['orgao_id']);
+        // UG vem do cadastro do usuário; só usa a seleção manual se ele não tiver UG vinculada.
+        $orgao = auth()->user()->orgao;
+        if (! $orgao) {
+            $request->validate(['orgao_id' => ['required', 'exists:orgaos,id']]);
+            $orgao = Orgao::findOrFail($request->orgao_id);
+        }
 
         if (! $orgao->codigo) {
             return back()
@@ -77,10 +84,13 @@ class ProcessoController extends Controller
             'etapa'       => 0,
         ]);
 
-        // cria o termo de referência vazio e as peças padrão
+        // cria o termo de referência vazio e as peças padrão (já com o texto-modelo)
         $processo->termoReferencia()->create([]);
         foreach (array_keys(\App\Models\ProcessoPeca::TIPOS) as $tipo) {
-            $processo->pecas()->create(['tipo' => $tipo]);
+            $processo->pecas()->create([
+                'tipo'     => $tipo,
+                'conteudo' => \App\Models\ProcessoPeca::MODELO[$tipo] ?? null,
+            ]);
         }
 
         return redirect()->route('processos.show', $processo)

@@ -52,6 +52,24 @@
     <x-input-error :messages="$errors->get('setor')" class="mt-2" />
 </div>
 
+{{-- Unidade Gestora (Secretaria) — preenche a UG automaticamente na abertura de processo --}}
+<div>
+    <x-input-label for="orgao_id" value="Unidade Gestora (Secretaria)" />
+    <select id="orgao_id" name="orgao_id"
+            class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 text-sm">
+        <option value="">Nenhuma</option>
+        @foreach(\App\Models\Orgao::whereNotNull('codigo')->orderBy('codigo')->get() as $org)
+            <option value="{{ $org->id }}" {{ (string) old('orgao_id', $user?->orgao_id) === (string) $org->id ? 'selected' : '' }}>
+                {{ $org->codigo }} — {{ $org->name }}
+            </option>
+        @endforeach
+    </select>
+    <p class="text-xs text-gray-400 mt-1">
+        Para usuários da UG: a Secretaria é preenchida automaticamente ao abrir um processo.
+    </p>
+    <x-input-error :messages="$errors->get('orgao_id')" class="mt-2" />
+</div>
+
 {{-- Perfis de acesso (múltiplos) --}}
 <div>
     <x-input-label value="Perfis de acesso *" />

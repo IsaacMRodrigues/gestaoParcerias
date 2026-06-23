@@ -18,17 +18,24 @@
                 <form action="{{ route('processos.store') }}" method="POST" class="space-y-4">
                     @csrf
                     <div>
-                        <x-input-label for="orgao_id" value="Unidade Gestora *" />
-                        <select id="orgao_id" name="orgao_id" required
-                                class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 text-sm">
-                            <option value="">Selecione...</option>
-                            @foreach($orgaos as $orgao)
-                                <option value="{{ $orgao->id }}" {{ old('orgao_id') == $orgao->id ? 'selected' : '' }}>
-                                    {{ $orgao->codigo }} — {{ $orgao->name }} {{ $orgao->sigla ? "($orgao->sigla)" : '' }}
-                                </option>
-                            @endforeach
-                        </select>
-                        <x-input-error :messages="$errors->get('orgao_id')" class="mt-2" />
+                        <x-input-label value="Unidade Gestora *" />
+                        @if($orgaoUsuario)
+                            <div class="mt-1 px-3 py-2 bg-gray-50 border border-gray-200 rounded-md text-sm text-gray-700">
+                                {{ $orgaoUsuario->codigo }} — {{ $orgaoUsuario->name }}
+                                <span class="text-xs text-gray-400">(da sua lotação)</span>
+                            </div>
+                        @else
+                            <select id="orgao_id" name="orgao_id" required
+                                    class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 text-sm">
+                                <option value="">Selecione...</option>
+                                @foreach($orgaos as $orgao)
+                                    <option value="{{ $orgao->id }}" {{ old('orgao_id') == $orgao->id ? 'selected' : '' }}>
+                                        {{ $orgao->codigo }} — {{ $orgao->name }} {{ $orgao->sigla ? "($orgao->sigla)" : '' }}
+                                    </option>
+                                @endforeach
+                            </select>
+                            <x-input-error :messages="$errors->get('orgao_id')" class="mt-2" />
+                        @endif
                     </div>
                     <div>
                         <x-input-label for="esfera" value="Esfera do Concedente *" />

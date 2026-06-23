@@ -12,7 +12,7 @@ use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Spatie\Permission\Traits\HasRoles;
 
-#[Fillable(['name', 'email', 'cpf', 'phone', 'status', 'setor', 'password'])]
+#[Fillable(['name', 'email', 'cpf', 'phone', 'status', 'setor', 'orgao_id', 'password'])]
 #[Hidden(['password', 'remember_token'])]
 class User extends Authenticatable
 {
@@ -95,6 +95,11 @@ class User extends Authenticatable
     public function osc(): HasOne
     {
         return $this->hasOne(Osc::class);
+    }
+
+    public function orgao(): \Illuminate\Database\Eloquent\Relations\BelongsTo
+    {
+        return $this->belongsTo(Orgao::class);
     }
 
     public function setorLabel(): string

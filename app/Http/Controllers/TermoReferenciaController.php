@@ -42,23 +42,15 @@ class TermoReferenciaController extends Controller
         abort_if($processo->termoReferencia?->assinado(), 403, 'Termo já assinado não pode ser alterado.');
 
         $data = $request->validate([
-            'problema_identificado'     => ['nullable', 'string', 'max:255'],
-            'publico_alvo'              => ['nullable', 'string', 'max:255'],
-            'qtd_beneficiarios'         => ['nullable', 'integer', 'min:0'],
-            'area_tematica'             => ['nullable', Rule::in(array_keys(Processo::AREAS_TEMATICAS))],
-            'justificativa_necessidade' => ['nullable', 'string'],
-            'indicadores'               => ['nullable', 'string'],
-            'programa_governo'          => ['nullable', 'string', 'max:255'],
-            'acao_governamental'        => ['nullable', 'string', 'max:255'],
-            'dotacao_orcamentaria'      => ['nullable', 'string', 'max:255'],
-            'objeto_resumido'           => ['nullable', 'string'],
-            'vigencia_prevista'         => ['nullable', 'string', 'max:255'],
-            'local_execucao'            => ['nullable', 'string', 'max:255'],
-            'objetivo_geral'            => ['nullable', 'string'],
-            'objetivos_especificos'     => ['nullable', 'string'],
-            'justificativa'             => ['nullable', 'string'],
-            'valor_total'               => ['nullable', 'numeric', 'min:0'],
-            'fonte_recurso'             => ['nullable', 'string', 'max:255'],
+            'descricao_realidade'   => ['nullable', 'string'],
+            'justificativa'         => ['nullable', 'string'],
+            'objeto'                => ['nullable', 'string'],
+            'objetivos_especificos' => ['nullable', 'string'],
+            'valor_total'           => ['nullable', 'numeric', 'min:0'],
+            'dotacao'               => ['nullable', 'string', 'max:255'],
+            'ficha'                 => ['nullable', 'string', 'max:255'],
+            'fonte'                 => ['nullable', 'string', 'max:255'],
+            'prazo_meses'           => ['nullable', 'integer', 'min:0'],
         ]);
 
         $processo->termoReferencia()->update($data);

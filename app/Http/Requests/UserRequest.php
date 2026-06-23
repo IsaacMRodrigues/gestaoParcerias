@@ -26,6 +26,7 @@ class UserRequest extends FormRequest
             'roles'    => ['required', 'array', 'min:1'],
             'roles.*'  => ['string', 'exists:roles,name'],
             'setor'    => ['nullable', Rule::in(array_keys(User::LOTACOES))],
+            'orgao_id' => ['nullable', 'exists:orgaos,id'],
             'status'   => ['boolean'],
         ];
     }

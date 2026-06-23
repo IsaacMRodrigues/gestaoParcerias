@@ -10,33 +10,25 @@ use Illuminate\View\View;
 
 class ProcessoPecaController extends Controller
 {
-    private function autorizar(Processo $processo, ProcessoPeca $peca): void
-    {
-        abort_unless($peca->processo_id === $processo->id, 404);
-        abort_unless($peca->podeEditar($processo, auth()->user()), 403,
-            'Esta peça é de responsabilidade do setor '
-            . (Processo::SETORES[$peca->setorResponsavel()] ?? $peca->setorResponsavel())
-            . ' e só pode ser editada na etapa correspondente do fluxo.');
-    }
-
     public function edit(Processo $processo, ProcessoPeca $peca): View
     {
         abort_unless($peca->processo_id === $processo->id, 404);
 
-        $podeEditar = $peca->podeEditar($processo, auth()->user());
+        $podeEditar = $peca->podeEditarConteudo($processo, auth()->user());
+        $podeAssinar = $peca->podeAssinar($processo, auth()->user());
 
-        return view('processos.peca', compact('processo', 'peca', 'podeEditar'));
+        return view('processos.peca', compact('processo', 'peca', 'podeEditar', 'podeAssinar'));
     }
 
     public function update(Request $request, Processo $processo, ProcessoPeca $peca): RedirectResponse
     {
-        $this->autorizar($processo, $peca);
+        abort_unless($peca->processo_id === $processo->id, 404);
+        abort_unless($peca->podeEditarConteudo($processo, auth()->user()), 403,
+            'Esta peça é de responsabilidade do setor '
+            . (Processo::SETORES[$peca->setorResponsavel()] ?? $peca->setorResponsavel())
+            . ' e só pode ser editada na etapa correspondente.');
 
-        $data = $request->validate([
-            'conteudo' => ['nullable', 'string'],
-        ]);
-
-        $peca->update($data);
+        $peca->update($request->validate(['conteudo' => ['nullable', 'string']]));
 
         return redirect()->route('processos.show', $processo)
             ->with('success', ProcessoPeca::TIPOS[$peca->tipo] . ' salvo.');
@@ -44,7 +36,9 @@ class ProcessoPecaController extends Controller
 
     public function assinar(Processo $processo, ProcessoPeca $peca): RedirectResponse
     {
-        $this->autorizar($processo, $peca);
+        abort_unless($peca->processo_id === $processo->id, 404);
+        abort_unless($peca->podeAssinar($processo, auth()->user()), 403,
+            'Você não pode assinar esta peça nesta etapa.');
 
         $peca->update([
             'assinado_por' => auth()->id(),

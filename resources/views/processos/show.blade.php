@@ -94,94 +94,70 @@
             </div>
 
             {{-- Peças do processo --}}
+            @php
+                $u = auth()->user();
+                $rotuloPeca = function ($p) use ($processo, $u) {
+                    if (!$p || $p->assinado()) return 'Ver';
+                    if ($p->podeEditarConteudo($processo, $u)) return 'Preencher';
+                    if ($p->podeAssinar($processo, $u)) return 'Assinar';
+                    return 'Ver';
+                };
+                $statusPeca = function ($p) {
+                    if (!$p) return 'Não criada';
+                    if ($p->assinado()) return 'Assinado por ' . $p->assinante->name . ' em ' . $p->assinado_em->format('d/m/Y H:i');
+                    if (!empty($p->conteudo)) return 'Preenchido — não assinado';
+                    return 'Não preenchido';
+                };
+                $trEditavel = $usuarioSetor === 'ug' && $processo->setor_atual === 'ug'
+                    && $processo->etapa === 0 && $emAndamento && !$tr?->assinado();
+                $ordem = ['oficio', '__tr__', 'pedido_parecer', 'parecer_financeiro', 'abertura', 'edital'];
+            @endphp
             <div class="bg-white shadow rounded-lg">
                 <div class="px-6 py-4 border-b border-gray-200">
                     <h3 class="text-base font-semibold text-gray-800">Peças do Processo</h3>
                 </div>
 
                 <div class="divide-y divide-gray-100">
-                    {{-- Ofício --}}
-                    @php $oficio = $processo->peca('oficio'); @endphp
-                    <div class="flex items-center justify-between px-6 py-4">
-                        <div>
-                            <p class="text-sm font-semibold text-gray-800">1. Ofício</p>
-                            <p class="text-xs text-gray-400">
-                                @if($oficio?->assinado())
-                                    Assinado por {{ $oficio->assinante->name }} em {{ $oficio->assinado_em->format('d/m/Y H:i') }}
-                                @elseif($oficio?->conteudo)
-                                    Preenchido — não assinado
-                                @else
-                                    Não preenchido
-                                @endif
-                            </p>
-                        </div>
-                        <a href="{{ route('processos.pecas.edit', [$processo, $oficio]) }}"
-                           class="text-sm text-indigo-600 hover:text-indigo-900">
-                            {{ $ehUG && !$oficio?->assinado() ? 'Preencher' : 'Ver' }}
-                        </a>
-                    </div>
-
-                    {{-- Termo de Referência --}}
-                    <div class="flex items-center justify-between px-6 py-4">
-                        <div>
-                            <p class="text-sm font-semibold text-gray-800">2. Termo de Referência</p>
-                            <p class="text-xs text-gray-400">
-                                @if($tr?->assinado())
-                                    Assinado por {{ $tr->assinante->name }} em {{ $tr->assinado_em->format('d/m/Y H:i') }}
-                                @elseif($tr?->objeto_resumido)
-                                    Preenchido — não assinado
-                                @else
-                                    Não preenchido
-                                @endif
-                            </p>
-                        </div>
-                        <a href="{{ route('processos.termo.edit', $processo) }}"
-                           class="text-sm text-indigo-600 hover:text-indigo-900">
-                            {{ $ehUG && !$tr?->assinado() ? 'Preencher' : 'Ver' }}
-                        </a>
-                    </div>
-
-                    {{-- Parecer Financeiro --}}
-                    @php $parecer = $processo->peca('parecer_financeiro'); @endphp
-                    <div class="flex items-center justify-between px-6 py-4">
-                        <div>
-                            <p class="text-sm font-semibold text-gray-800">3. Parecer Financeiro</p>
-                            <p class="text-xs text-gray-400">
-                                @if($parecer?->assinado())
-                                    Assinado por {{ $parecer->assinante->name }} em {{ $parecer->assinado_em->format('d/m/Y H:i') }}
-                                @elseif($parecer?->conteudo)
-                                    Preenchido — não assinado
-                                @else
-                                    Não preenchido (emitido pela SEPLAN)
-                                @endif
-                            </p>
-                        </div>
-                        <a href="{{ route('processos.pecas.edit', [$processo, $parecer]) }}"
-                           class="text-sm text-indigo-600 hover:text-indigo-900">
-                            {{ $ehSeplan && !$parecer?->assinado() ? 'Preencher' : 'Ver' }}
-                        </a>
-                    </div>
-
-                    {{-- Abertura de Processo --}}
-                    @php $abertura = $processo->peca('abertura'); @endphp
-                    <div class="flex items-center justify-between px-6 py-4">
-                        <div>
-                            <p class="text-sm font-semibold text-gray-800">4. Abertura de Processo</p>
-                            <p class="text-xs text-gray-400">
-                                @if($abertura?->assinado())
-                                    Assinado por {{ $abertura->assinante->name }} em {{ $abertura->assinado_em->format('d/m/Y H:i') }}
-                                @elseif($abertura?->conteudo)
-                                    Preenchido — não assinado
-                                @else
-                                    Não preenchido (assinatura da UG)
-                                @endif
-                            </p>
-                        </div>
-                        <a href="{{ route('processos.pecas.edit', [$processo, $abertura]) }}"
-                           class="text-sm text-indigo-600 hover:text-indigo-900">
-                            {{ $ehUG && !$abertura?->assinado() ? 'Preencher' : 'Ver' }}
-                        </a>
-                    </div>
+                    @foreach($ordem as $i => $tipo)
+                        @if($tipo === '__tr__')
+                            <div class="flex items-center justify-between px-6 py-4">
+                                <div>
+                                    <p class="text-sm font-semibold text-gray-800">{{ $i + 1 }}. Termo de Referência
+                                        <span class="text-xs font-normal text-gray-400">— UG</span>
+                                    </p>
+                                    <p class="text-xs text-gray-400">
+                                        @if($tr?->assinado())
+                                            Assinado por {{ $tr->assinante->name }} em {{ $tr->assinado_em->format('d/m/Y H:i') }}
+                                        @elseif($tr?->objeto)
+                                            Preenchido — não assinado
+                                        @else
+                                            Não preenchido
+                                        @endif
+                                    </p>
+                                </div>
+                                <a href="{{ route('processos.termo.edit', $processo) }}"
+                                   class="text-sm text-indigo-600 hover:text-indigo-900">
+                                    {{ $trEditavel ? 'Preencher' : 'Ver' }}
+                                </a>
+                            </div>
+                        @else
+                            @php $p = $processo->peca($tipo); @endphp
+                            @if($p)
+                                <div class="flex items-center justify-between px-6 py-4">
+                                    <div>
+                                        <p class="text-sm font-semibold text-gray-800">{{ $i + 1 }}. {{ \App\Models\ProcessoPeca::TIPOS[$tipo] }}
+                                            <span class="text-xs font-normal text-gray-400">— {{ strtoupper($p->setorResponsavel()) }}</span>
+                                        </p>
+                                        <p class="text-xs text-gray-400">{{ $statusPeca($p) }}</p>
+                                    </div>
+                                    <a href="{{ route('processos.pecas.edit', [$processo, $p]) }}"
+                                       class="text-sm text-indigo-600 hover:text-indigo-900">
+                                        {{ $rotuloPeca($p) }}
+                                    </a>
+                                </div>
+                            @endif
+                        @endif
+                    @endforeach
                 </div>
             </div>
 

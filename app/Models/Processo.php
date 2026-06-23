@@ -127,14 +127,11 @@ class Processo extends Model
         $alertas = [];
         $tr = $this->termoReferencia;
 
-        if (!$tr || !$tr->dotacao_orcamentaria) {
+        if (!$tr || !$tr->dotacao) {
             $alertas[] = ['nivel' => 'erro', 'texto' => 'Não existe dotação orçamentária informada.'];
         }
-        if ($tr && $tr->objeto_resumido && str_word_count($tr->objeto_resumido) < 5) {
-            $alertas[] = ['nivel' => 'erro', 'texto' => 'Objeto genérico — descreva de forma específica e mensurável.'];
-        }
-        if (!$tr || !$tr->indicadores) {
-            $alertas[] = ['nivel' => 'erro', 'texto' => 'Meta sem indicador definido.'];
+        if (!$tr || !$tr->objeto) {
+            $alertas[] = ['nivel' => 'erro', 'texto' => 'Objeto da parceria não informado.'];
         }
         if (!$tr || !$tr->justificativa) {
             $alertas[] = ['nivel' => 'erro', 'texto' => 'Ausência de justificativa.'];
@@ -206,12 +203,18 @@ class Processo extends Model
         $pend = [];
 
         if ($this->etapa === 0) {
-            if (!$this->peca('oficio')?->assinado())       $pend[] = 'Ofício';
-            if (!$this->termoReferencia?->assinado())       $pend[] = 'Termo de Referência';
+            if (!$this->peca('oficio')?->assinado())             $pend[] = 'Ofício';
+            if (!$this->termoReferencia?->assinado())             $pend[] = 'Termo de Referência';
+        } elseif ($this->etapa === 1) {
+            if (!$this->peca('pedido_parecer')?->assinado())      $pend[] = 'Pedido de Parecer Financeiro';
         } elseif ($this->etapa === 2) {
-            if (!$this->peca('parecer_financeiro')?->assinado()) $pend[] = 'Parecer Financeiro';
+            if (!$this->peca('parecer_financeiro')?->assinado())  $pend[] = 'Parecer Financeiro';
         } elseif ($this->etapa === 3) {
-            if (!$this->peca('abertura')?->assinado())      $pend[] = 'Abertura de Processo';
+            if (!$this->peca('abertura')?->assinado())            $pend[] = 'Termo de Abertura';
+        } elseif ($this->etapa === 4) {
+            if (empty($this->peca('edital')?->conteudo))          $pend[] = 'Edital (elaborar)';
+        } elseif ($this->etapa === 5) {
+            if (!$this->peca('edital')?->assinado())              $pend[] = 'Edital (assinatura da UG)';
         }
 
         return $pend;

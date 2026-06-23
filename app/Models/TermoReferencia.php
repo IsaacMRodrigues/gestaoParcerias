@@ -11,12 +11,8 @@ class TermoReferencia extends Model
 
     protected $fillable = [
         'processo_id',
-        'problema_identificado', 'publico_alvo', 'qtd_beneficiarios', 'area_tematica',
-        'justificativa_necessidade', 'indicadores',
-        'programa_governo', 'acao_governamental', 'dotacao_orcamentaria',
-        'objeto_resumido', 'vigencia_prevista', 'local_execucao', 'objetivo_geral', 'objetivos_especificos',
-        'justificativa',
-        'valor_total', 'fonte_recurso',
+        'descricao_realidade', 'justificativa', 'objeto', 'objetivos_especificos',
+        'valor_total', 'dotacao', 'ficha', 'fonte', 'prazo_meses',
         'assinado_por', 'assinado_em',
     ];
 
