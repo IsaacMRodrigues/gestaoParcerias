@@ -51,10 +51,10 @@ class ProcessoPeca extends Model
      */
     /** Cabeçalho com brasão (logo público da prefeitura). */
     private const CABECALHO = <<<'HTML'
-<p style="text-align:center"><img src="https://pmsgra.net/logo.png" width="80"></p>
-<p style="text-align:center"><strong>PREFEITURA MUNICIPAL DE SÃO GONÇALO DO RIO ABAIXO</strong></p>
-<p style="text-align:center">AV. CONTORNO OESTE, 1.657, CIDADE UNIVERSITÁRIA</p>
-<p style="text-align:center">CEP 35935-000 – ESTADO DE MINAS GERAIS</p>
+<table style="border:none;border-collapse:collapse;width:100%"><tbody><tr>
+<td style="border:none;width:110px;vertical-align:middle"><img src="https://pmsgra.net/logo.png" width="90"></td>
+<td style="border:none;text-align:center;vertical-align:middle"><strong>PREFEITURA MUNICIPAL DE SÃO GONÇALO DO RIO ABAIXO</strong><br>AV. CONTORNO OESTE, 1.657, CIDADE UNIVERSITÁRIA<br>CEP 35935-000 – ESTADO DE MINAS GERAIS</td>
+</tr></tbody></table>
 <p><br></p>
 HTML;
 
@@ -190,6 +190,7 @@ HTML,
     {
         return $user
             && $this->emAndamento($processo)
+            && !$processo->aguardandoRecebimento()  // precisa registrar o recebimento antes
             && !$this->assinado()
             && $user->setor === $this->setorResponsavel()
             && $processo->setor_atual === $this->setorResponsavel()
@@ -203,6 +204,7 @@ HTML,
     {
         return $user
             && $this->emAndamento($processo)
+            && !$processo->aguardandoRecebimento()  // precisa registrar o recebimento antes
             && !$this->assinado()
             && !empty($this->conteudo)
             && $user->setor === $this->setorAssinatura()

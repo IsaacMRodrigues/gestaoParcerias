@@ -97,6 +97,12 @@ class Processo extends Model
         return $this->tramitacoes()->whereNull('recebido_em')->latest('enviado_em')->first();
     }
 
+    /** Há um encaminhamento aguardando o setor registrar o recebimento? */
+    public function aguardandoRecebimento(): bool
+    {
+        return $this->tramitacaoAtual() !== null;
+    }
+
     /**
      * Próximo número sequencial — contador contínuo e global (nunca reinicia).
      */
