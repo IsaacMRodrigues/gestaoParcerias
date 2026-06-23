@@ -49,11 +49,17 @@ class ProcessoPeca extends Model
      * Texto-modelo pré-preenchido em HTML (modelo padrão — substituir os "XXXX").
      * Editável pelo editor rico (Quill).
      */
-    public const MODELO = [
-        'termo_referencia' => <<<'HTML'
+    /** Cabeçalho com brasão (logo público da prefeitura). */
+    private const CABECALHO = <<<'HTML'
+<p class="ql-align-center"><img src="https://pmsgra.net/logo.png" width="80"></p>
 <p class="ql-align-center"><strong>PREFEITURA MUNICIPAL DE SÃO GONÇALO DO RIO ABAIXO</strong></p>
-<p class="ql-align-center">Av. Contorno Oeste, 1.657, Cidade Universitária — CEP 35935-000 — Estado de Minas Gerais</p>
+<p class="ql-align-center">AV. CONTORNO OESTE, 1.657, CIDADE UNIVERSITÁRIA</p>
+<p class="ql-align-center">CEP 35935-000 – ESTADO DE MINAS GERAIS</p>
 <p><br></p>
+HTML;
+
+    public const MODELO = [
+        'termo_referencia' => self::CABECALHO . <<<'HTML'
 <p class="ql-align-center"><strong>TERMO DE REFERÊNCIA</strong></p>
 <p><strong>DESCRIÇÃO DA REALIDADE OBJETO DA PARCERIA:</strong><br>XXXXX</p>
 <p><strong>JUSTIFICATIVA:</strong><br>XXXXX</p>
@@ -68,10 +74,7 @@ class ProcessoPeca extends Model
 <p><br></p>
 <p class="ql-align-center">XXXXXX<br>Secretaria Municipal de XXXXXXXX</p>
 HTML,
-        'oficio' => <<<'HTML'
-<p class="ql-align-center"><strong>PREFEITURA MUNICIPAL DE SÃO GONÇALO DO RIO ABAIXO</strong></p>
-<p class="ql-align-center">Av. Contorno Oeste, 1.657, Cidade Universitária — CEP 35935-000 — Estado de Minas Gerais</p>
-<p><br></p>
+        'oficio' => self::CABECALHO . <<<'HTML'
 <p class="ql-align-center"><strong>OFÍCIO PARA SOLICITAÇÃO DE CONVÊNIOS/PARCERIAS</strong></p>
 <p><br></p>
 <p class="ql-align-right">São Gonçalo do Rio Abaixo, XX/XX/XXXX.</p>
@@ -89,26 +92,40 @@ HTML,
 <p class="ql-align-center">XXXXXXXX<br>Secretária Municipal de XXXXXXXX</p>
 HTML,
         'pedido_parecer' => <<<'HTML'
-<p>Solicito parecer financeiro do seguinte processo:</p>
-<p><strong>Dotação:</strong> XXXXX<br><strong>Ficha:</strong> XXXXX<br><strong>Fonte:</strong> XXXXX</p>
-<p><strong>Objeto do instrumento:</strong> XXXXX<br><strong>Instrumento:</strong> XXXXX<br><strong>Parceiro:</strong> XXXXX</p>
-<p><strong>Valor total:</strong> R$ XXXXX (XXXXX)<br><strong>Prazo:</strong> XX meses</p>
+<p>Solicito parecer financeiro do seguinte <strong>processo</strong>:</p>
+<p><strong>Dotação</strong>: XXXXXX. &nbsp; <strong>Ficha</strong>: XXXXX &nbsp; <strong>Fonte</strong>: XXXXXXX</p>
+<p><strong>Objeto do instrumento</strong>: XXXXXXXXX.</p>
+<p><strong>Instrumento</strong>: XXXXXXXXXXX</p>
+<p><strong>Parceiro</strong>: XXXXXXXXX</p>
+<p><strong>Valor total</strong>: R$ XXXXX (XXXXX)</p>
+<p><strong>Prazo</strong>: XX meses</p>
 HTML,
-        'parecer_financeiro' => <<<'HTML'
-<p class="ql-align-center"><strong>PARECER FINANCEIRO</strong></p>
-<p>Ofício nº XXX/XXXX &nbsp;&nbsp;&nbsp; Data: XX/XX/XXXX</p>
-<p>A Secretaria Municipal de Planejamento, após análise, informa:</p>
-<p><strong>Valor solicitado:</strong> R$ XXXXX<br><strong>Valor da Receita (exercício):</strong> R$ XXXXX<br><strong>Percentual em relação às receitas orçamentárias:</strong> XX%</p>
-<p><strong>Parecer:</strong> XXXXX</p>
+        'parecer_financeiro' => self::CABECALHO . <<<'HTML'
+<p><strong>Nº</strong> XXX/XXXX</p>
+<p><strong>ORIGEM:</strong> Planejamento</p>
+<p><strong>ASSUNTO:</strong> Dotação orçamentária e impacto financeiro</p>
+<p><strong>DATA:</strong> XX/XX/XXXX</p>
 <p><br></p>
-<p class="ql-align-center">_____________________________<br>Secretaria Municipal de Planejamento</p>
+<p>A Secretaria Municipal de Planejamento, após análise, informa à Secretaria Municipal de administração que há previsão orçamentária e financeira na Lei Orçamentária Anual, para <strong>"XXXXXXX"</strong>.</p>
+<p>Previsão da Despesa:</p>
+<table><thead><tr><th>Ano</th><th>Secretaria Municipal</th><th>Dotação</th><th>Recurso</th><th>Ficha</th><th>Desdobrada</th><th>Valor</th></tr></thead><tbody><tr><td>XXX</td><td>XXX</td><td>XXXXX</td><td>XXX</td><td>XXX</td><td>XXXXX</td><td>XXXXX</td></tr></tbody></table>
+<table><thead><tr><th>Valor da Receita</th><th>Despesa Prevista</th><th>Impacto</th><th>Valor Total</th></tr></thead><tbody><tr><td>XXXXX</td><td>XXXXX</td><td>XXX</td><td>XXXXX</td></tr></tbody></table>
+<p>A estimativa do Impacto Orçamentário Financeiro para realização da despesa prevista no Exercício XXX é de XXX% das receitas orçadas na Lei Orçamentária Anual nº XXXXX.</p>
+<p>Sendo só no momento, me coloco à disposição para quaisquer eventuais esclarecimentos.</p>
+<p><br></p>
+<p class="ql-align-center">XXXXXXXXXX<br>Secretário Municipal de Planejamento</p>
 HTML,
-        'abertura' => <<<'HTML'
+        'abertura' => self::CABECALHO . <<<'HTML'
 <p class="ql-align-center"><strong>TERMO DE ABERTURA DE PROCESSO</strong></p>
-<p><strong>Processo nº:</strong> XXXXX<br><strong>Data de abertura:</strong> XX/XX/XXXX<br><strong>Objeto:</strong> XXXXX</p>
-<p>Aos XX de XXXXX de 20XX, eu, [nome], secretário(a) da unidade gestora XXXXX, ABRI o processo referente a XXXXX, atendendo o disposto na Lei nº 13.019/2014, art. 23.</p>
 <p><br></p>
-<p class="ql-align-center">_____________________________<br>Secretário(a) — Unidade Gestora</p>
+<p>Processo nº: XXXXX</p>
+<p class="ql-align-right">Data de abertura: XX/XX/XXXX</p>
+<p><br></p>
+<p>Objeto: XXXXX.</p>
+<p><br></p>
+<p>Aos XX de XXXXX de 20XX, eu, XXXXXXXX, secretária da unidade gestora: XXXXX, <strong>ABRI</strong> o processo de <strong>XXXX referente ao XXXXXX</strong>, atendendo o disposto na Lei nº. 13.019/2014, art. 23.</p>
+<p><br></p>
+<p class="ql-align-center">XXXXX<br>Secretária de XXXXXX<br>Unidade Gestora</p>
 HTML,
         'edital' => <<<'HTML'
 <p class="ql-align-center"><strong>EDITAL DE CHAMAMENTO PÚBLICO Nº XXX/XXXX</strong></p>

@@ -19,3 +19,7 @@
 .documento-html .ql-align-center { text-align: center; }
 .documento-html .ql-align-right { text-align: right; }
 .documento-html .ql-align-justify { text-align: justify; }
+.documento-html img { display: inline-block; max-width: 120px; height: auto; }
+.documento-html table { border-collapse: collapse; width: 100%; margin: .5rem 0; }
+.documento-html th, .documento-html td { border: 1px solid #94a3b8; padding: 4px 8px; font-size: .85rem; text-align: center; }
+.documento-html th { background: #f1f5f9; font-weight: 600; }
