@@ -270,6 +270,28 @@ São 21 perfis. Um usuário pode ter **vários**; os marcados 🔒 são **exclus
 
 ---
 
+- [2026-06-19] Módulo 2 — editor rico, documentos modelo e refinos do fluxo
+  - **Editor rico TinyMCE** (self-hosted, `license_key: gpl`, offline) substitui o textarea,
+    com **suporte a tabelas** (usado no Parecer Financeiro), fonte, alinhamento, listas, etc.
+    Init em `resources/js/editor.js` sobre `textarea[data-editor-rico]`
+  - **Termo de Referência virou documento modelo** (peça `termo_referencia`) editável no
+    editor rico, igual ao Ofício — removidos model/tabela/controller estruturados antigos
+  - Todos os documentos modelo são **HTML** (`ProcessoPeca::MODELO`), pré-preenchidos e fiéis
+    aos Arquivos I–V; **brasão** (`https://pmsgra.net/logo.png`) no cabeçalho em tabela (logo ao lado)
+  - **Fluxo corrigido (8 etapas)**: UG (Ofício+TR) → SCP **analisa e aprova/rejeita** → UG
+    **solicita o Parecer** (Pedido de Parecer) → SEPLAN (Parecer) → UG (Abertura) → SCP (Edital)
+    → UG (assina Edital) → SCP (publicação externa)
+  - Etapa de análise do SCP com botões **Aprovar** / **Rejeitar** (`Processo::etapaEhAnalise`)
+  - **Recebimento obrigatório**: só edita/assina após “Registrar Recebimento”
+    (`Processo::aguardandoRecebimento` em `podeEditarConteudo`/`podeAssinar`)
+  - Alertas de conformidade são **consultivos** (não bloqueiam encaminhar)
+
+> **Editor:** TinyMCE self-hosted via npm (`npm install`), empacotado pelo Vite — **rode
+> `npm run build`** após clonar. Interface do editor em inglês (ícones universais); pacote
+> pt-BR pode ser adicionado depois. O brasão vem de URL pública (precisa de internet ou baixar local).
+
+---
+
 ## O que está sendo feito
 
 - Módulo Chamamentos: numeração do Processo concluída (`UG.Seq.Ano.Esfera`). A avaliar a seguir:
