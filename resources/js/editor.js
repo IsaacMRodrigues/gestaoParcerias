@@ -1,4 +1,5 @@
 import Quill from 'quill';
+import 'quill/dist/quill.snow.css';
 
 /**
  * Editor rico (Quill) para os "documentos modelo".

@@ -2,8 +2,7 @@
 @tailwind components;
 @tailwind utilities;
 
-/* Editor rico (Quill) */
-@import 'quill/dist/quill.snow.css';
+/* Editor rico (Quill) — o CSS do tema é importado via resources/js/editor.js */
 
 /* Conteúdo do editor e a renderização do documento */
 .ql-editor { min-height: 320px; font-size: 0.95rem; }
