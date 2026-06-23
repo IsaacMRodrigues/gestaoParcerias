@@ -9,6 +9,7 @@ class ProcessoPeca extends Model
 {
     public const TIPOS = [
         'oficio'             => 'Ofício',
+        'termo_referencia'   => 'Termo de Referência',
         'pedido_parecer'     => 'Pedido de Parecer Financeiro',
         'parecer_financeiro' => 'Parecer Financeiro',
         'abertura'           => 'Termo de Abertura de Processo',
@@ -20,6 +21,7 @@ class ProcessoPeca extends Model
      */
     public const SETOR_RESPONSAVEL = [
         'oficio'             => 'ug',
+        'termo_referencia'   => 'ug',
         'pedido_parecer'     => 'scp',
         'parecer_financeiro' => 'seplan',
         'abertura'           => 'ug',
@@ -28,6 +30,7 @@ class ProcessoPeca extends Model
 
     public const ETAPA = [
         'oficio'             => 0,
+        'termo_referencia'   => 0,
         'pedido_parecer'     => 1,
         'parecer_financeiro' => 2,
         'abertura'           => 3,
@@ -47,6 +50,24 @@ class ProcessoPeca extends Model
      * Editável pelo editor rico (Quill).
      */
     public const MODELO = [
+        'termo_referencia' => <<<'HTML'
+<p class="ql-align-center"><strong>PREFEITURA MUNICIPAL DE SÃO GONÇALO DO RIO ABAIXO</strong></p>
+<p class="ql-align-center">Av. Contorno Oeste, 1.657, Cidade Universitária — CEP 35935-000 — Estado de Minas Gerais</p>
+<p><br></p>
+<p class="ql-align-center"><strong>TERMO DE REFERÊNCIA</strong></p>
+<p><strong>DESCRIÇÃO DA REALIDADE OBJETO DA PARCERIA:</strong><br>XXXXX</p>
+<p><strong>JUSTIFICATIVA:</strong><br>XXXXX</p>
+<p><strong>OBJETO DA PARCERIA:</strong><br>XXXXX.</p>
+<p><strong>OBJETIVOS ESPECÍFICOS:</strong></p>
+<ul><li>XXXX</li><li>XXXX</li><li>XXXX</li></ul>
+<p><strong>ESTIMATIVA DE ORÇAMENTO:</strong><br>O orçamento estimado para execução da parceria é R$ XXXXXX (XXXXXX).</p>
+<p>Dotação: XXXXXXXXXXXX &nbsp; Ficha: XXXXXX &nbsp; Fonte: XXXXXXX</p>
+<p><strong>PRAZO DE EXECUÇÃO DO PROJETO:</strong><br>O prazo de execução do projeto é de XX meses.</p>
+<p><br></p>
+<p>Ficamos à disposição para maiores esclarecimentos.<br>Sendo o que temos para o momento, pede-se <strong>deferimento</strong>.</p>
+<p><br></p>
+<p class="ql-align-center">XXXXXX<br>Secretaria Municipal de XXXXXXXX</p>
+HTML,
         'oficio' => <<<'HTML'
 <p class="ql-align-center"><strong>PREFEITURA MUNICIPAL DE SÃO GONÇALO DO RIO ABAIXO</strong></p>
 <p class="ql-align-center">Av. Contorno Oeste, 1.657, Cidade Universitária — CEP 35935-000 — Estado de Minas Gerais</p>

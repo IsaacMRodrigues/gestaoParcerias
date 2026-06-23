@@ -84,8 +84,7 @@ class ProcessoController extends Controller
             'etapa'       => 0,
         ]);
 
-        // cria o termo de referência vazio e as peças padrão (já com o texto-modelo)
-        $processo->termoReferencia()->create([]);
+        // cria as peças padrão (já com o texto-modelo)
         foreach (array_keys(\App\Models\ProcessoPeca::TIPOS) as $tipo) {
             $processo->pecas()->create([
                 'tipo'     => $tipo,
@@ -100,7 +99,7 @@ class ProcessoController extends Controller
     public function show(Processo $processo): View
     {
         $processo->load([
-            'orgao', 'criador', 'termoReferencia.assinante',
+            'orgao', 'criador',
             'pecas.assinante', 'tramitacoes.remetente', 'tramitacoes.recebedor',
         ]);
 

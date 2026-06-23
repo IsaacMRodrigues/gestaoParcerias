@@ -5,7 +5,6 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
-use Illuminate\Database\Eloquent\Relations\HasOne;
 
 class Processo extends Model
 {
@@ -77,11 +76,6 @@ class Processo extends Model
         return $this->belongsTo(User::class, 'created_by');
     }
 
-    public function termoReferencia(): HasOne
-    {
-        return $this->hasOne(TermoReferencia::class);
-    }
-
     public function pecas(): HasMany
     {
         return $this->hasMany(ProcessoPeca::class);
@@ -125,19 +119,12 @@ class Processo extends Model
     public function alertas(): array
     {
         $alertas = [];
-        $tr = $this->termoReferencia;
 
-        if (!$tr || !$tr->dotacao) {
-            $alertas[] = ['nivel' => 'erro', 'texto' => 'Não existe dotação orçamentária informada.'];
+        if (!$this->peca('oficio')?->assinado()) {
+            $alertas[] = ['nivel' => 'erro', 'texto' => 'Ofício não preenchido/assinado.'];
         }
-        if (!$tr || !$tr->objeto) {
-            $alertas[] = ['nivel' => 'erro', 'texto' => 'Objeto da parceria não informado.'];
-        }
-        if (!$tr || !$tr->justificativa) {
-            $alertas[] = ['nivel' => 'erro', 'texto' => 'Ausência de justificativa.'];
-        }
-        if (!$tr || !$tr->valor_total) {
-            $alertas[] = ['nivel' => 'erro', 'texto' => 'Valor total não informado.'];
+        if (!$this->peca('termo_referencia')?->assinado()) {
+            $alertas[] = ['nivel' => 'erro', 'texto' => 'Termo de Referência não preenchido/assinado.'];
         }
 
         if (empty($alertas)) {
@@ -204,7 +191,7 @@ class Processo extends Model
 
         if ($this->etapa === 0) {
             if (!$this->peca('oficio')?->assinado())             $pend[] = 'Ofício';
-            if (!$this->termoReferencia?->assinado())             $pend[] = 'Termo de Referência';
+            if (!$this->peca('termo_referencia')?->assinado())   $pend[] = 'Termo de Referência';
         } elseif ($this->etapa === 1) {
             if (!$this->peca('pedido_parecer')?->assinado())      $pend[] = 'Pedido de Parecer Financeiro';
         } elseif ($this->etapa === 2) {

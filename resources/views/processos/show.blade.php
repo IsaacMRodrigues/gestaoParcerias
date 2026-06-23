@@ -29,14 +29,10 @@
             @php
                 $usuarioSetor = auth()->user()->setor;
                 $podeAtuar = $usuarioSetor === $processo->setor_atual;
-                $tr = $processo->termoReferencia;
                 $atual = $processo->tramitacaoAtual();
                 $aguardandoRecebimento = $atual && is_null($atual->recebido_em);
                 $emAndamento = !in_array($processo->status, ['concluido', 'arquivado']);
                 $etapaInfo = $processo->etapaInfo();
-                // só o setor responsável (e enquanto está com ele) preenche cada peça
-                $ehUG = $emAndamento && $usuarioSetor === 'ug' && $processo->setor_atual === 'ug';
-                $ehSeplan = $emAndamento && $usuarioSetor === 'seplan' && $processo->setor_atual === 'seplan';
             @endphp
 
             {{-- Stepper do fluxo --}}
@@ -108,9 +104,7 @@
                     if (!empty($p->conteudo)) return 'Preenchido — não assinado';
                     return 'Não preenchido';
                 };
-                $trEditavel = $usuarioSetor === 'ug' && $processo->setor_atual === 'ug'
-                    && $processo->etapa === 0 && $emAndamento && !$tr?->assinado();
-                $ordem = ['oficio', '__tr__', 'pedido_parecer', 'parecer_financeiro', 'abertura', 'edital'];
+                $ordem = ['oficio', 'termo_referencia', 'pedido_parecer', 'parecer_financeiro', 'abertura', 'edital'];
             @endphp
             <div class="bg-white shadow rounded-lg">
                 <div class="px-6 py-4 border-b border-gray-200">
@@ -119,43 +113,20 @@
 
                 <div class="divide-y divide-gray-100">
                     @foreach($ordem as $i => $tipo)
-                        @if($tipo === '__tr__')
+                        @php $p = $processo->peca($tipo); @endphp
+                        @if($p)
                             <div class="flex items-center justify-between px-6 py-4">
                                 <div>
-                                    <p class="text-sm font-semibold text-gray-800">{{ $i + 1 }}. Termo de Referência
-                                        <span class="text-xs font-normal text-gray-400">— UG</span>
+                                    <p class="text-sm font-semibold text-gray-800">{{ $i + 1 }}. {{ \App\Models\ProcessoPeca::TIPOS[$tipo] }}
+                                        <span class="text-xs font-normal text-gray-400">— {{ strtoupper($p->setorResponsavel()) }}</span>
                                     </p>
-                                    <p class="text-xs text-gray-400">
-                                        @if($tr?->assinado())
-                                            Assinado por {{ $tr->assinante->name }} em {{ $tr->assinado_em->format('d/m/Y H:i') }}
-                                        @elseif($tr?->objeto)
-                                            Preenchido — não assinado
-                                        @else
-                                            Não preenchido
-                                        @endif
-                                    </p>
+                                    <p class="text-xs text-gray-400">{{ $statusPeca($p) }}</p>
                                 </div>
-                                <a href="{{ route('processos.termo.edit', $processo) }}"
+                                <a href="{{ route('processos.pecas.edit', [$processo, $p]) }}"
                                    class="text-sm text-indigo-600 hover:text-indigo-900">
-                                    {{ $trEditavel ? 'Preencher' : 'Ver' }}
+                                    {{ $rotuloPeca($p) }}
                                 </a>
                             </div>
-                        @else
-                            @php $p = $processo->peca($tipo); @endphp
-                            @if($p)
-                                <div class="flex items-center justify-between px-6 py-4">
-                                    <div>
-                                        <p class="text-sm font-semibold text-gray-800">{{ $i + 1 }}. {{ \App\Models\ProcessoPeca::TIPOS[$tipo] }}
-                                            <span class="text-xs font-normal text-gray-400">— {{ strtoupper($p->setorResponsavel()) }}</span>
-                                        </p>
-                                        <p class="text-xs text-gray-400">{{ $statusPeca($p) }}</p>
-                                    </div>
-                                    <a href="{{ route('processos.pecas.edit', [$processo, $p]) }}"
-                                       class="text-sm text-indigo-600 hover:text-indigo-900">
-                                        {{ $rotuloPeca($p) }}
-                                    </a>
-                                </div>
-                            @endif
                         @endif
                     @endforeach
                 </div>

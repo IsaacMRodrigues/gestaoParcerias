@@ -18,7 +18,6 @@ use App\Http\Controllers\ProcessoPecaController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\ProgramaController;
 use App\Http\Controllers\PropostaController;
-use App\Http\Controllers\TermoReferenciaController;
 use App\Http\Controllers\TramitacaoController;
 use App\Http\Controllers\UserController;
 use Illuminate\Support\Facades\Route;
@@ -72,9 +71,6 @@ Route::middleware(['auth', 'staff', 'readonly'])->group(function () {
     Route::middleware('permission:planejamento')->group(function () {
         Route::get('processos/caixa', [ProcessoController::class, 'caixa'])->name('processos.caixa');
         Route::resource('processos', ProcessoController::class)->except(['edit', 'update']);
-        Route::get('processos/{processo}/termo', [TermoReferenciaController::class, 'edit'])->name('processos.termo.edit');
-        Route::put('processos/{processo}/termo', [TermoReferenciaController::class, 'update'])->name('processos.termo.update');
-        Route::patch('processos/{processo}/termo/assinar', [TermoReferenciaController::class, 'assinar'])->name('processos.termo.assinar');
         Route::get('processos/{processo}/pecas/{peca}', [ProcessoPecaController::class, 'edit'])->name('processos.pecas.edit');
         Route::put('processos/{processo}/pecas/{peca}', [ProcessoPecaController::class, 'update'])->name('processos.pecas.update');
         Route::patch('processos/{processo}/pecas/{peca}/assinar', [ProcessoPecaController::class, 'assinar'])->name('processos.pecas.assinar');
