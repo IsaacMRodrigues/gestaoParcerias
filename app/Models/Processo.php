@@ -35,7 +35,7 @@ class Processo extends Model
      */
     public const ETAPAS = [
         ['setor' => 'ug',     'acao' => 'Preencher Ofício e Termo de Referência e assinar'],
-        ['setor' => 'scp',    'acao' => 'Receber e analisar o pedido (devolve à UG)'],
+        ['setor' => 'scp',    'acao' => 'Analisar o Ofício e o Termo de Referência: aprovar ou rejeitar', 'analise' => true],
         ['setor' => 'ug',     'acao' => 'Solicitar o Parecer Financeiro à SEPLAN (Pedido de Parecer)'],
         ['setor' => 'seplan', 'acao' => 'Emitir o Parecer Financeiro e assinar'],
         ['setor' => 'ug',     'acao' => 'Conferir o parecer e fazer a Abertura do Processo (assinar AP)'],
@@ -151,6 +151,12 @@ class Processo extends Model
     {
         $i = $i ?? $this->etapa;
         return self::ETAPAS[$i] ?? ['setor' => $this->setor_atual, 'acao' => '—'];
+    }
+
+    /** A etapa atual é de análise (aprovar/rejeitar), sem documento próprio? */
+    public function etapaEhAnalise(): bool
+    {
+        return (bool) ($this->etapaInfo()['analise'] ?? false);
     }
 
     public function totalEtapas(): int

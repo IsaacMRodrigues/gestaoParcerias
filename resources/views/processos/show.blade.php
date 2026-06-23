@@ -205,8 +205,8 @@
                                 </p>
                             @endif
 
-                            {{-- Avançar / Concluir --}}
                             @if($processo->ultimaEtapa())
+                                {{-- Concluir (última etapa) --}}
                                 <form action="{{ route('processos.concluir', $processo) }}" method="POST"
                                       onsubmit="return confirm('Concluir o processo e encaminhar para publicação?')">
                                     @csrf @method('PATCH')
@@ -215,7 +215,38 @@
                                         Concluir (encaminhar para publicação)
                                     </button>
                                 </form>
+
+                            @elseif($processo->etapaEhAnalise())
+                                {{-- Etapa de análise: APROVAR ou REJEITAR --}}
+                                <p class="text-sm text-gray-600">Analise os documentos acima e decida:</p>
+                                <div class="flex flex-wrap gap-3">
+                                    <form action="{{ route('processos.avancar', $processo) }}" method="POST"
+                                          onsubmit="return confirm('Aprovar e liberar para a próxima etapa?')">
+                                        @csrf
+                                        <button type="submit"
+                                                class="px-4 py-2 text-sm font-medium text-white bg-green-600 rounded-md hover:bg-green-700">
+                                            ✓ Aprovar e liberar para a {{ strtoupper($processo->proximoSetor()) }}
+                                        </button>
+                                    </form>
+                                </div>
+                                <form action="{{ route('processos.devolver', $processo) }}" method="POST"
+                                      class="pt-3 border-t border-gray-200 space-y-2">
+                                    @csrf
+                                    <x-input-label for="motivo" value="Rejeitar e devolver para correção (informe o motivo)" />
+                                    <div class="flex gap-2">
+                                        <input id="motivo" name="parecer" type="text"
+                                               class="flex-1 border-gray-300 rounded-md shadow-sm focus:ring-red-500 focus:border-red-500 text-sm"
+                                               placeholder="Motivo da rejeição / correções necessárias...">
+                                        <button type="submit"
+                                                class="px-3 py-1.5 text-sm font-medium text-white bg-red-600 rounded-md hover:bg-red-700 whitespace-nowrap">
+                                            ✕ Rejeitar
+                                        </button>
+                                    </div>
+                                    <x-input-error :messages="$errors->get('parecer')" class="mt-1" />
+                                </form>
+
                             @else
+                                {{-- Etapa com documento: encaminhar para o próximo setor --}}
                                 <form action="{{ route('processos.avancar', $processo) }}" method="POST" class="space-y-3"
                                       @if(!$processo->estaApto()) onsubmit="return confirm('Há alertas de conformidade. Encaminhar mesmo assim?')" @endif>
                                     @csrf
@@ -223,7 +254,7 @@
                                         <x-input-label for="parecer" value="Parecer / observação (opcional)" />
                                         <input id="parecer" name="parecer" type="text"
                                                class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 text-sm"
-                                               placeholder="Análise do setor antes de encaminhar...">
+                                               placeholder="Observação do setor antes de encaminhar...">
                                     </div>
                                     <button type="submit"
                                             @disabled(!empty($pendencias))
@@ -231,25 +262,25 @@
                                         Encaminhar para {{ \App\Models\Processo::SETORES[$processo->proximoSetor()] ?? $processo->proximoSetor() }}
                                     </button>
                                 </form>
-                            @endif
 
-                            {{-- Devolver para etapa anterior --}}
-                            @if($processo->etapa > 0)
-                                <form action="{{ route('processos.devolver', $processo) }}" method="POST"
-                                      class="pt-3 border-t border-gray-200 space-y-2">
-                                    @csrf
-                                    <x-input-label for="motivo" value="Devolver para {{ \App\Models\Processo::SETORES[$processo->setorAnterior()] ?? $processo->setorAnterior() }} (informe o motivo)" />
-                                    <div class="flex gap-2">
-                                        <input id="motivo" name="parecer" type="text"
-                                               class="flex-1 border-gray-300 rounded-md shadow-sm focus:ring-amber-500 focus:border-amber-500 text-sm"
-                                               placeholder="Motivo da devolução...">
-                                        <button type="submit"
-                                                class="px-3 py-1.5 text-sm font-medium text-amber-700 border border-amber-300 rounded-md hover:bg-amber-50 whitespace-nowrap">
-                                            Devolver
-                                        </button>
-                                    </div>
-                                    <x-input-error :messages="$errors->get('parecer')" class="mt-1" />
-                                </form>
+                                {{-- Devolver para etapa anterior --}}
+                                @if($processo->etapa > 0)
+                                    <form action="{{ route('processos.devolver', $processo) }}" method="POST"
+                                          class="pt-3 border-t border-gray-200 space-y-2">
+                                        @csrf
+                                        <x-input-label for="motivo" value="Devolver para {{ \App\Models\Processo::SETORES[$processo->setorAnterior()] ?? $processo->setorAnterior() }} (informe o motivo)" />
+                                        <div class="flex gap-2">
+                                            <input id="motivo" name="parecer" type="text"
+                                                   class="flex-1 border-gray-300 rounded-md shadow-sm focus:ring-amber-500 focus:border-amber-500 text-sm"
+                                                   placeholder="Motivo da devolução...">
+                                            <button type="submit"
+                                                    class="px-3 py-1.5 text-sm font-medium text-amber-700 border border-amber-300 rounded-md hover:bg-amber-50 whitespace-nowrap">
+                                                Devolver
+                                            </button>
+                                        </div>
+                                        <x-input-error :messages="$errors->get('parecer')" class="mt-1" />
+                                    </form>
+                                @endif
                             @endif
                         </div>
                     @endif
