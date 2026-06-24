@@ -77,6 +77,7 @@ Route::middleware(['auth', 'staff', 'readonly'])->group(function () {
         Route::get('processos/caixa', [ProcessoController::class, 'caixa'])->name('processos.caixa');
         Route::resource('processos', ProcessoController::class)->except(['edit', 'update']);
         Route::get('processos/{processo}/pecas/{peca}', [ProcessoPecaController::class, 'edit'])->name('processos.pecas.edit');
+        Route::get('processos/{processo}/pecas/{peca}/imprimir', [ProcessoPecaController::class, 'imprimir'])->name('processos.pecas.imprimir');
         Route::put('processos/{processo}/pecas/{peca}', [ProcessoPecaController::class, 'update'])->name('processos.pecas.update');
         Route::patch('processos/{processo}/pecas/{peca}/assinar', [ProcessoPecaController::class, 'assinar'])->name('processos.pecas.assinar');
         Route::patch('processos/{processo}/receber', [TramitacaoController::class, 'receber'])->name('processos.receber');

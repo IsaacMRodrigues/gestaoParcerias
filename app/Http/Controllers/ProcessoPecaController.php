@@ -28,6 +28,20 @@ class ProcessoPecaController extends Controller
         return view('processos.peca', compact('processo', 'peca', 'podeEditar', 'podeAssinar', 'qrValidacao'));
     }
 
+    public function imprimir(Processo $processo, ProcessoPeca $peca): View
+    {
+        abort_unless($peca->processo_id === $processo->id, 404);
+
+        $qrValidacao = null;
+        if ($peca->assinado() && $peca->codigo_validacao) {
+            $qrValidacao = \SimpleSoftwareIO\QrCode\Facades\QrCode::format('svg')
+                ->size(110)->margin(0)
+                ->generate(route('validacao.mostrar', $peca->codigo_validacao));
+        }
+
+        return view('processos.peca-impressao', compact('processo', 'peca', 'qrValidacao'));
+    }
+
     public function update(Request $request, Processo $processo, ProcessoPeca $peca): RedirectResponse
     {
         abort_unless($peca->processo_id === $processo->id, 404);

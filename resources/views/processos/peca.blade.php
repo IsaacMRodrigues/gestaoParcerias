@@ -47,45 +47,14 @@
                     {{-- modo leitura: renderiza o HTML do documento --}}
                     <div class="documento-html border border-gray-200 rounded-md p-4 bg-gray-50 text-gray-800">
                         {!! $peca->conteudo ?: '<p class="text-gray-400">Documento ainda não preenchido.</p>' !!}
-
-                        {{-- carimbo da assinatura, no padrão de documento oficial --}}
-                        @if($peca->assinado())
-                            @php
-                                $assinante = $peca->assinante;
-                                $papel = $assinante?->roles->first()?->name;
-                                $papelLabel = $papel ? (\App\Models\User::$roleLabels[$papel] ?? null) : null;
-                                $setorLabel = $assinante?->setor ? (\App\Models\Processo::SETORES[$assinante->setor] ?? null) : null;
-                                $cargo = $papelLabel ?: $setorLabel;
-                                // acrescenta a Secretaria/UG do assinante (ex.: "Responsável da Unidade Gestora — Saúde")
-                                $orgaoNome = $assinante?->orgao?->name;
-                                if ($orgaoNome) {
-                                    $cargo = $cargo ? $cargo . ' — ' . $orgaoNome : $orgaoNome;
-                                }
-                            @endphp
-                            <table style="border:none;border-collapse:collapse;width:100%;margin-top:28px;border-top:2px solid #1e3a8a;">
-                                <tr>
-                                    <td style="border:none;width:48px;vertical-align:top;padding-top:8px;font-size:26px;">🔏</td>
-                                    <td style="border:none;vertical-align:top;padding-top:8px;font-size:11px;color:#1e293b;line-height:1.5;">
-                                        <p style="margin:0;">Documento assinado eletronicamente por
-                                            <strong>{{ $assinante?->name }}</strong>@if($cargo), {{ $cargo }}@endif,
-                                            em <strong>{{ $peca->assinado_em->format('d/m/Y') }}</strong>,
-                                            às <strong>{{ $peca->assinado_em->format('H:i') }}</strong>,
-                                            conforme horário oficial de Brasília, com fundamento na Lei Federal nº 13.019/2014.</p>
-                                        <p style="margin:4px 0 0;">A autenticidade deste documento pode ser verificada apontando a câmera
-                                            para o QR Code ao lado, ou em <strong>{{ url('/validar') }}</strong> com o código
-                                            <strong style="font-family:monospace;letter-spacing:.5px;">{{ $peca->codigo_validacao }}</strong>.</p>
-                                    </td>
-                                    @if($qrValidacao)
-                                        <td style="border:none;width:120px;vertical-align:top;padding-top:8px;text-align:center;">
-                                            <div style="width:110px;">{!! $qrValidacao !!}</div>
-                                        </td>
-                                    @endif
-                                </tr>
-                            </table>
-                        @endif
+                        @include('processos._carimbo', ['peca' => $peca, 'qrValidacao' => $qrValidacao])
                     </div>
-                    <div class="flex justify-end mt-4">
+                    <div class="flex items-center justify-between mt-4">
                         <a href="{{ route('processos.show', $processo) }}" class="text-sm text-gray-600 hover:text-gray-900">Voltar</a>
+                        <a href="{{ route('processos.pecas.imprimir', [$processo, $peca]) }}" target="_blank"
+                           class="px-3 py-1.5 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50">
+                            Imprimir / PDF
+                        </a>
                     </div>
                 @endif
             </div>
