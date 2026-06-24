@@ -41,8 +41,9 @@ class ProcessoPecaController extends Controller
             'Você não pode assinar esta peça nesta etapa.');
 
         $peca->update([
-            'assinado_por' => auth()->id(),
-            'assinado_em'  => now(),
+            'assinado_por'     => auth()->id(),
+            'assinado_em'      => now(),
+            'codigo_validacao' => $peca->codigo_validacao ?: ProcessoPeca::gerarCodigoValidacao(),
         ]);
 
         return redirect()->route('processos.show', $processo)

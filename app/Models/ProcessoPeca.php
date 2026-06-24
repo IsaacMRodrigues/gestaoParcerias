@@ -135,8 +135,22 @@ HTML,
     ];
 
     protected $fillable = [
-        'processo_id', 'tipo', 'conteudo', 'assinado_por', 'assinado_em',
+        'processo_id', 'tipo', 'conteudo', 'assinado_por', 'assinado_em', 'codigo_validacao',
     ];
+
+    /** Gera um código de validação único (ex.: A1B2-C3D4-E5). */
+    public static function gerarCodigoValidacao(): string
+    {
+        do {
+            $codigo = strtoupper(
+                \Illuminate\Support\Str::random(4) . '-' .
+                \Illuminate\Support\Str::random(4) . '-' .
+                \Illuminate\Support\Str::random(2)
+            );
+        } while (static::where('codigo_validacao', $codigo)->exists());
+
+        return $codigo;
+    }
 
     protected function casts(): array
     {

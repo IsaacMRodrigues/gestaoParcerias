@@ -47,6 +47,18 @@
                     {{-- modo leitura: renderiza o HTML do documento --}}
                     <div class="documento-html border border-gray-200 rounded-md p-4 bg-gray-50 text-gray-800">
                         {!! $peca->conteudo ?: '<p class="text-gray-400">Documento ainda não preenchido.</p>' !!}
+
+                        {{-- carimbo da assinatura, posicionado ao final do documento --}}
+                        @if($peca->assinado())
+                            <div style="margin-top:24px;border:1px solid #93c5fd;border-radius:6px;padding:10px 14px;background:#eff6ff;font-size:12px;color:#1e3a8a;">
+                                <strong>✔ Documento assinado eletronicamente</strong><br>
+                                por <strong>{{ $peca->assinante->name }}</strong>
+                                @if($peca->assinante->setor)({{ \App\Models\Processo::SETORES[$peca->assinante->setor] ?? strtoupper($peca->assinante->setor) }})@endif
+                                em {{ $peca->assinado_em->format('d/m/Y \à\s H:i') }}.<br>
+                                Verifique a autenticidade em <strong>{{ url('/validar') }}</strong>
+                                com o código <strong>{{ $peca->codigo_validacao }}</strong>.
+                            </div>
+                        @endif
                     </div>
                     <div class="flex justify-end mt-4">
                         <a href="{{ route('processos.show', $processo) }}" class="text-sm text-gray-600 hover:text-gray-900">Voltar</a>
@@ -58,9 +70,15 @@
                 <div class="bg-white shadow rounded-lg p-6 flex items-center justify-between">
                     <div>
                         <p class="text-sm font-semibold text-gray-800">Assinatura digital</p>
-                        <p class="text-xs text-gray-400">
-                            {{ $peca->assinado() ? 'Documento assinado.' : 'Confira o conteúdo e assine.' }}
-                        </p>
+                        @if($peca->assinado())
+                            <p class="text-xs text-gray-500">
+                                Assinado por <strong>{{ $peca->assinante->name }}</strong>
+                                em {{ $peca->assinado_em->format('d/m/Y H:i') }}.
+                                Código de validação: <strong>{{ $peca->codigo_validacao }}</strong>
+                            </p>
+                        @else
+                            <p class="text-xs text-gray-400">Confira o conteúdo e assine.</p>
+                        @endif
                     </div>
                     @if($podeAssinar)
                         <form action="{{ route('processos.pecas.assinar', [$processo, $peca]) }}" method="POST"

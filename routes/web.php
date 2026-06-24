@@ -32,6 +32,11 @@ Route::get('/portal/chamamentos/{chamamento}', [PortalController::class, 'chamam
 Route::get('/cadastro/osc', [OscRegistroController::class, 'create'])->name('portal.osc.create');
 Route::post('/cadastro/osc', [OscRegistroController::class, 'store'])->name('portal.osc.store');
 
+// Validação pública de documentos assinados
+Route::get('/validar', [\App\Http\Controllers\ValidacaoController::class, 'index'])->name('validacao.index');
+Route::post('/validar', [\App\Http\Controllers\ValidacaoController::class, 'verificar'])->name('validacao.verificar');
+Route::get('/validar/{codigo}', [\App\Http\Controllers\ValidacaoController::class, 'mostrar'])->name('validacao.mostrar');
+
 // Área da OSC logada (portal)
 Route::middleware('auth')->group(function () {
     Route::get('/portal/minhas-propostas', [PortalController::class, 'minhasPropostas'])->name('portal.minhas-propostas');
