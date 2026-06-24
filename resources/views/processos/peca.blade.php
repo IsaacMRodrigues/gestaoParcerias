@@ -56,6 +56,11 @@
                                 $papelLabel = $papel ? (\App\Models\User::$roleLabels[$papel] ?? null) : null;
                                 $setorLabel = $assinante?->setor ? (\App\Models\Processo::SETORES[$assinante->setor] ?? null) : null;
                                 $cargo = $papelLabel ?: $setorLabel;
+                                // acrescenta a Secretaria/UG do assinante (ex.: "Responsável da Unidade Gestora — Saúde")
+                                $orgaoNome = $assinante?->orgao?->name;
+                                if ($orgaoNome) {
+                                    $cargo = $cargo ? $cargo . ' — ' . $orgaoNome : $orgaoNome;
+                                }
                             @endphp
                             <table style="border:none;border-collapse:collapse;width:100%;margin-top:28px;border-top:2px solid #1e3a8a;">
                                 <tr>
