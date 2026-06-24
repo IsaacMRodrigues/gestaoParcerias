@@ -17,7 +17,15 @@ class ProcessoPecaController extends Controller
         $podeEditar = $peca->podeEditarConteudo($processo, auth()->user());
         $podeAssinar = $peca->podeAssinar($processo, auth()->user());
 
-        return view('processos.peca', compact('processo', 'peca', 'podeEditar', 'podeAssinar'));
+        // QR Code da validação (apontando para a página pública)
+        $qrValidacao = null;
+        if ($peca->assinado() && $peca->codigo_validacao) {
+            $qrValidacao = \SimpleSoftwareIO\QrCode\Facades\QrCode::format('svg')
+                ->size(110)->margin(0)
+                ->generate(route('validacao.mostrar', $peca->codigo_validacao));
+        }
+
+        return view('processos.peca', compact('processo', 'peca', 'podeEditar', 'podeAssinar', 'qrValidacao'));
     }
 
     public function update(Request $request, Processo $processo, ProcessoPeca $peca): RedirectResponse

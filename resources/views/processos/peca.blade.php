@@ -71,10 +71,15 @@
                                             em <strong>{{ $peca->assinado_em->format('d/m/Y') }}</strong>,
                                             às <strong>{{ $peca->assinado_em->format('H:i') }}</strong>,
                                             conforme horário oficial de Brasília, com fundamento na Lei Federal nº 13.019/2014.</p>
-                                        <p style="margin:4px 0 0;">A autenticidade deste documento pode ser conferida no endereço
-                                            <strong>{{ url('/validar') }}</strong>, informando o código verificador
+                                        <p style="margin:4px 0 0;">A autenticidade deste documento pode ser verificada apontando a câmera
+                                            para o QR Code ao lado, ou em <strong>{{ url('/validar') }}</strong> com o código
                                             <strong style="font-family:monospace;letter-spacing:.5px;">{{ $peca->codigo_validacao }}</strong>.</p>
                                     </td>
+                                    @if($qrValidacao)
+                                        <td style="border:none;width:120px;vertical-align:top;padding-top:8px;text-align:center;">
+                                            <div style="width:110px;">{!! $qrValidacao !!}</div>
+                                        </td>
+                                    @endif
                                 </tr>
                             </table>
                         @endif
