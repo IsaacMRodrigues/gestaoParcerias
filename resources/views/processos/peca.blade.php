@@ -48,16 +48,30 @@
                     <div class="documento-html border border-gray-200 rounded-md p-4 bg-gray-50 text-gray-800">
                         {!! $peca->conteudo ?: '<p class="text-gray-400">Documento ainda não preenchido.</p>' !!}
 
-                        {{-- carimbo da assinatura, posicionado ao final do documento --}}
+                        {{-- carimbo da assinatura, no padrão de documento oficial --}}
                         @if($peca->assinado())
-                            <div style="margin-top:24px;border:1px solid #93c5fd;border-radius:6px;padding:10px 14px;background:#eff6ff;font-size:12px;color:#1e3a8a;">
-                                <strong>✔ Documento assinado eletronicamente</strong><br>
-                                por <strong>{{ $peca->assinante->name }}</strong>
-                                @if($peca->assinante->setor)({{ \App\Models\Processo::SETORES[$peca->assinante->setor] ?? strtoupper($peca->assinante->setor) }})@endif
-                                em {{ $peca->assinado_em->format('d/m/Y \à\s H:i') }}.<br>
-                                Verifique a autenticidade em <strong>{{ url('/validar') }}</strong>
-                                com o código <strong>{{ $peca->codigo_validacao }}</strong>.
-                            </div>
+                            @php
+                                $assinante = $peca->assinante;
+                                $papel = $assinante?->roles->first()?->name;
+                                $papelLabel = $papel ? (\App\Models\User::$roleLabels[$papel] ?? null) : null;
+                                $setorLabel = $assinante?->setor ? (\App\Models\Processo::SETORES[$assinante->setor] ?? null) : null;
+                                $cargo = $papelLabel ?: $setorLabel;
+                            @endphp
+                            <table style="border:none;border-collapse:collapse;width:100%;margin-top:28px;border-top:2px solid #1e3a8a;">
+                                <tr>
+                                    <td style="border:none;width:48px;vertical-align:top;padding-top:8px;font-size:26px;">🔏</td>
+                                    <td style="border:none;vertical-align:top;padding-top:8px;font-size:11px;color:#1e293b;line-height:1.5;">
+                                        <p style="margin:0;">Documento assinado eletronicamente por
+                                            <strong>{{ $assinante?->name }}</strong>@if($cargo), {{ $cargo }}@endif,
+                                            em <strong>{{ $peca->assinado_em->format('d/m/Y') }}</strong>,
+                                            às <strong>{{ $peca->assinado_em->format('H:i') }}</strong>,
+                                            conforme horário oficial de Brasília, com fundamento na Lei Federal nº 13.019/2014.</p>
+                                        <p style="margin:4px 0 0;">A autenticidade deste documento pode ser conferida no endereço
+                                            <strong>{{ url('/validar') }}</strong>, informando o código verificador
+                                            <strong style="font-family:monospace;letter-spacing:.5px;">{{ $peca->codigo_validacao }}</strong>.</p>
+                                    </td>
+                                </tr>
+                            </table>
                         @endif
                     </div>
                     <div class="flex justify-end mt-4">
