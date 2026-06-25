@@ -72,12 +72,12 @@ HTML;
 <p><br></p>
 <p>Ficamos à disposição para maiores esclarecimentos.<br>Sendo o que temos para o momento, pede-se <strong>deferimento</strong>.</p>
 <p><br></p>
-<p style="text-align:center">XXXXXX<br>Secretaria Municipal de XXXXXXXX</p>
+<p style="text-align:center">{{responsavel_nome}}<br>Secretaria Municipal de {{unidade_gestora}}</p>
 HTML,
         'oficio' => self::CABECALHO . <<<'HTML'
 <p style="text-align:center"><strong>OFÍCIO PARA SOLICITAÇÃO DE CONVÊNIOS/PARCERIAS</strong></p>
 <p><br></p>
-<p style="text-align:right">São Gonçalo do Rio Abaixo, XX/XX/XXXX.</p>
+<p style="text-align:right">{{cidade}}, {{data}}.</p>
 <p>Ofício nº XXX/XXXX</p>
 <p><br></p>
 <p>Sr(a). XXXXXXXXX<br>Secretaria de Planejamento</p>
@@ -89,7 +89,7 @@ HTML,
 <p><br></p>
 <p>Atenciosamente,</p>
 <p><br></p>
-<p style="text-align:center">XXXXXXXX<br>Secretária Municipal de XXXXXXXX</p>
+<p style="text-align:center">{{responsavel_nome}}<br>Secretária Municipal de {{unidade_gestora}}</p>
 HTML,
         'pedido_parecer' => <<<'HTML'
 <p>Solicito parecer financeiro do seguinte <strong>processo</strong>:</p>
@@ -101,7 +101,7 @@ HTML,
 <p><strong>Prazo</strong>: XX meses</p>
 HTML,
         'parecer_financeiro' => self::CABECALHO . <<<'HTML'
-<p><strong>Nº</strong> XXX/XXXX</p>
+<p><strong>Nº</strong> XXX/{{ano}}</p>
 <p><strong>ORIGEM:</strong> Planejamento</p>
 <p><strong>ASSUNTO:</strong> Dotação orçamentária e impacto financeiro</p>
 <p><strong>DATA:</strong> XX/XX/XXXX</p>
@@ -110,7 +110,7 @@ HTML,
 <p>Previsão da Despesa:</p>
 <table><thead><tr><th>Ano</th><th>Secretaria Municipal</th><th>Dotação</th><th>Recurso</th><th>Ficha</th><th>Desdobrada</th><th>Valor</th></tr></thead><tbody><tr><td>XXX</td><td>XXX</td><td>XXXXX</td><td>XXX</td><td>XXX</td><td>XXXXX</td><td>XXXXX</td></tr></tbody></table>
 <table><thead><tr><th>Valor da Receita</th><th>Despesa Prevista</th><th>Impacto</th><th>Valor Total</th></tr></thead><tbody><tr><td>XXXXX</td><td>XXXXX</td><td>XXX</td><td>XXXXX</td></tr></tbody></table>
-<p>A estimativa do Impacto Orçamentário Financeiro para realização da despesa prevista no Exercício XXX é de XXX% das receitas orçadas na Lei Orçamentária Anual nº XXXXX.</p>
+<p>A estimativa do Impacto Orçamentário Financeiro para realização da despesa prevista no Exercício {{ano}} é de XXX% das receitas orçadas na Lei Orçamentária Anual nº XXXXX.</p>
 <p>Sendo só no momento, me coloco à disposição para quaisquer eventuais esclarecimentos.</p>
 <p><br></p>
 <p style="text-align:center">XXXXXXXXXX<br>Secretário Municipal de Planejamento</p>
@@ -118,17 +118,17 @@ HTML,
         'abertura' => self::CABECALHO . <<<'HTML'
 <p style="text-align:center"><strong>TERMO DE ABERTURA DE PROCESSO</strong></p>
 <p><br></p>
-<p>Processo nº: XXXXX</p>
+<p>Processo nº: {{numero_processo}}</p>
 <p style="text-align:right">Data de abertura: XX/XX/XXXX</p>
 <p><br></p>
 <p>Objeto: XXXXX.</p>
 <p><br></p>
-<p>Aos XX de XXXXX de 20XX, eu, XXXXXXXX, secretária da unidade gestora: XXXXX, <strong>ABRI</strong> o processo de <strong>XXXX referente ao XXXXXX</strong>, atendendo o disposto na Lei nº. 13.019/2014, art. 23.</p>
+<p>Aos XX de XXXXX de 20XX, eu, {{responsavel_nome}}, secretária da unidade gestora: {{unidade_gestora}}, <strong>ABRI</strong> o processo de <strong>XXXX referente ao XXXXXX</strong>, atendendo o disposto na Lei nº. 13.019/2014, art. 23.</p>
 <p><br></p>
-<p style="text-align:center">XXXXX<br>Secretária de XXXXXX<br>Unidade Gestora</p>
+<p style="text-align:center">{{responsavel_nome}}<br>Secretária de {{unidade_gestora}}<br>Unidade Gestora</p>
 HTML,
         'edital' => <<<'HTML'
-<p style="text-align:center"><strong>EDITAL DE CHAMAMENTO PÚBLICO Nº XXX/XXXX</strong></p>
+<p style="text-align:center"><strong>EDITAL DE CHAMAMENTO PÚBLICO Nº XXX/{{ano}}</strong></p>
 <p><br></p>
 <p>(Cole ou edite aqui o conteúdo do edital.)</p>
 HTML,
@@ -137,6 +137,22 @@ HTML,
     protected $fillable = [
         'processo_id', 'tipo', 'conteudo', 'assinado_por', 'assinado_em', 'codigo_validacao',
     ];
+
+    /**
+     * Conteúdo inicial da peça já "puxando" os dados conhecidos do processo
+     * (número, Unidade Gestora, data) para dentro do modelo padrão.
+     */
+    public static function conteudoInicial(string $tipo, Processo $processo): ?string
+    {
+        return \App\Support\Modelo::preencher(self::MODELO[$tipo] ?? null, [
+            'numero_processo' => $processo->numero,
+            'unidade_gestora' => $processo->orgao?->name,
+            'responsavel_nome'=> $processo->criador?->name,
+            'cidade'          => 'São Gonçalo do Rio Abaixo',
+            'data'            => now()->format('d/m/Y'),
+            'ano'             => now()->year,
+        ]);
+    }
 
     /** Gera um código de validação único (ex.: A1B2-C3D4-E5). */
     public static function gerarCodigoValidacao(): string

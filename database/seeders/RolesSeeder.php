@@ -23,6 +23,8 @@ class RolesSeeder extends Seeder
         'formalizacao'      => 'Formalização (instrumentos e aditivos)',
         'monitoramento'     => 'Monitoramento e Fiscalização',
         'prestacao_contas'  => 'Prestação de Contas',
+        'ordem_pagamento'   => 'Ordem de Pagamento (execução do concedente)',
+        'execucao'          => 'Execução financeira (repasses, despesas, notas fiscais)',
     ];
 
     /**
@@ -33,21 +35,21 @@ class RolesSeeder extends Seeder
         'administrador_setorial'           => ['*'],
         'auditor_externo'                  => ['*'], // somente leitura
         'auditor_geral'                    => ['*'], // somente leitura
-        'responsavel_unidade_gestora'      => ['planejamento', 'chamamentos', 'propostas', 'pareceres_decisao', 'formalizacao'],
+        'responsavel_unidade_gestora'      => ['planejamento', 'chamamentos', 'propostas', 'pareceres_decisao', 'formalizacao', 'ordem_pagamento', 'execucao'],
         'analista_tecnico_scp'             => ['planejamento', 'chamamentos'],
         'responsavel_publicacao'           => ['chamamentos'],
         'analista_orcamentario_financeiro' => ['planejamento'],
-        'analista_juridico'                => ['pareceres_juridico'],
+        'analista_juridico'                => ['pareceres_juridico', 'planejamento'],
         'analista_viabilidade_tecnica'     => ['pareceres_tecnico'],
         'analista_aditivo_apostilamento'   => ['formalizacao'],
         'analista_prestacao_contas_previa' => ['prestacao_contas'],
         'comissao_selecao'                 => ['propostas', 'pareceres_tecnico', 'pareceres_decisao'],
         'comissao_monitoramento_avaliacao' => ['monitoramento'],
-        'gestor_parceria'                  => ['planejamento', 'monitoramento'],
+        'gestor_parceria'                  => ['planejamento', 'monitoramento', 'execucao'],
         'cadastrador'                      => ['chamamentos', 'propostas', 'formalizacao'],
         'contador'                         => ['prestacao_contas'],
         'encaminhador'                     => ['formalizacao'],
-        'operador_ordem_pagamento'         => [], // módulo de pagamento (futuro)
+        'operador_ordem_pagamento'         => ['ordem_pagamento'],
         'aprovador_assinatura_eletronica'  => [], // módulo de assinatura (futuro)
         'analista'                         => [], // acesso básico, em descontinuação
         'responsavel_legal'                => [], // só portal

@@ -1,12 +1,23 @@
-<nav x-data="{ open: false }" class="bg-white border-b border-gray-100">
+@php
+    $navUser = auth()->user();
+    $navRole = $navUser?->roles->first()?->name;
+    $navRoleLabel = $navRole ? (\App\Models\User::$roleLabels[$navRole] ?? \Illuminate\Support\Str::headline($navRole)) : null;
+    $navInitials = \Illuminate\Support\Str::of($navUser?->name ?? '?')
+        ->explode(' ')->filter()->take(2)->map(fn ($w) => mb_strtoupper(mb_substr($w, 0, 1)))->implode('');
+@endphp
+<nav x-data="{ open: false }" class="bg-white border-b border-gray-200 shadow-sm sticky top-0 z-40">
     <!-- Primary Navigation Menu -->
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div class="flex justify-between h-16">
             <div class="flex">
                 <!-- Logo -->
                 <div class="shrink-0 flex items-center">
-                    <a href="{{ route('dashboard') }}">
-                        <x-application-logo class="block h-9 w-auto fill-current text-gray-800" />
+                    <a href="{{ route('dashboard') }}" class="flex items-center gap-2.5">
+                        <span class="w-9 h-9 bg-indigo-600 rounded-lg flex items-center justify-center text-white font-black text-sm shadow-sm">PGP</span>
+                        <span class="hidden lg:flex flex-col leading-none">
+                            <span class="font-semibold text-gray-900 text-sm">Gestão de Parcerias</span>
+                            <span class="text-[11px] text-gray-400">Sistema público municipal</span>
+                        </span>
                     </a>
                 </div>
 
@@ -83,22 +94,34 @@
 
             <!-- Settings Dropdown -->
             <div class="hidden sm:flex sm:items-center sm:ms-6">
-                <x-dropdown align="right" width="48">
+                <x-dropdown align="right" width="64">
                     <x-slot name="trigger">
-                        <button class="inline-flex items-center px-3 py-2 border border-transparent text-sm leading-4 font-medium rounded-md text-gray-500 bg-white hover:text-gray-700 focus:outline-none transition ease-in-out duration-150">
-                            <div>{{ Auth::user()->name }}</div>
-
-                            <div class="ms-1">
-                                <svg class="fill-current h-4 w-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20">
-                                    <path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd" />
-                                </svg>
-                            </div>
+                        <button class="inline-flex items-center gap-2.5 pl-1.5 pr-3 py-1.5 border border-gray-200 rounded-full text-sm font-medium text-gray-600 bg-white hover:bg-gray-50 hover:border-gray-300 focus:outline-none transition ease-in-out duration-150">
+                            <span class="w-7 h-7 rounded-full bg-indigo-100 text-indigo-700 flex items-center justify-center text-xs font-bold">{{ $navInitials }}</span>
+                            <span class="flex flex-col items-start leading-none">
+                                <span class="text-gray-900 font-semibold text-[13px]">{{ Auth::user()->name }}</span>
+                                @if($navRoleLabel)
+                                    <span class="text-[11px] text-gray-400">{{ $navRoleLabel }}</span>
+                                @endif
+                            </span>
+                            <svg class="fill-current h-4 w-4 text-gray-400" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20">
+                                <path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd" />
+                            </svg>
                         </button>
                     </x-slot>
 
                     <x-slot name="content">
+                        <div class="px-4 py-3 border-b border-gray-100">
+                            <div class="text-sm font-semibold text-gray-900">{{ Auth::user()->name }}</div>
+                            <div class="text-xs text-gray-500 truncate">{{ Auth::user()->email }}</div>
+                            @if($navUser?->setor)
+                                <div class="mt-1.5 inline-flex items-center gap-1 text-[11px] font-medium text-indigo-700 bg-indigo-50 px-2 py-0.5 rounded-full">
+                                    {{ $navUser->setorLabel() }}
+                                </div>
+                            @endif
+                        </div>
                         <x-dropdown-link :href="route('profile.edit')">
-                            {{ __('Profile') }}
+                            {{ __('Perfil') }}
                         </x-dropdown-link>
 
                         <!-- Authentication -->
@@ -107,8 +130,9 @@
 
                             <x-dropdown-link :href="route('logout')"
                                     onclick="event.preventDefault();
-                                                this.closest('form').submit();">
-                                {{ __('Log Out') }}
+                                                this.closest('form').submit();"
+                                    class="text-red-600">
+                                {{ __('Sair') }}
                             </x-dropdown-link>
                         </form>
                     </x-slot>
@@ -180,7 +204,7 @@
 
             <div class="mt-3 space-y-1">
                 <x-responsive-nav-link :href="route('profile.edit')">
-                    {{ __('Profile') }}
+                    {{ __('Perfil') }}
                 </x-responsive-nav-link>
 
                 <!-- Authentication -->
@@ -190,7 +214,7 @@
                     <x-responsive-nav-link :href="route('logout')"
                             onclick="event.preventDefault();
                                         this.closest('form').submit();">
-                        {{ __('Log Out') }}
+                        {{ __('Sair') }}
                     </x-responsive-nav-link>
                 </form>
             </div>

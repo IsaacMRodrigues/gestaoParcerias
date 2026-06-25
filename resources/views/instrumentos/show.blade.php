@@ -17,6 +17,14 @@
                    class="px-3 py-1.5 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50">
                     Imprimir Minuta
                 </a>
+                @can('execucao')
+                    @if($instrumento->status === 'vigente')
+                        <a href="{{ route('instrumentos.execucao', $instrumento) }}"
+                           class="px-3 py-1.5 text-sm font-medium text-white bg-indigo-600 rounded-md hover:bg-indigo-700">
+                            Execução Financeira
+                        </a>
+                    @endif
+                @endcan
                 @if($instrumento->status === 'minuta')
                     <form action="{{ route('instrumentos.assinar', $instrumento) }}" method="POST">
                         @csrf @method('PATCH')
@@ -159,6 +167,61 @@
                     <p class="px-6 py-6 text-sm text-gray-400 text-center">Nenhum termo aditivo registrado.</p>
                 @endforelse
             </div>
+
+            {{-- 2.3.1 Ordens de Pagamento --}}
+            @can('ordem_pagamento')
+            <div class="bg-white shadow rounded-lg">
+                <div class="flex items-center justify-between px-6 py-4 border-b border-gray-200">
+                    <h3 class="text-base font-semibold text-gray-800">Ordens de Pagamento</h3>
+                    @if($instrumento->status === 'vigente')
+                        <form action="{{ route('ordens-pagamento.create', $instrumento) }}" method="POST">
+                            @csrf
+                            <button type="submit" class="px-3 py-1.5 text-sm font-medium text-white bg-indigo-600 rounded-md hover:bg-indigo-700">
+                                + Nova Ordem de Pagamento
+                            </button>
+                        </form>
+                    @else
+                        <span class="text-xs text-gray-400">Disponível quando o instrumento estiver vigente</span>
+                    @endif
+                </div>
+
+                @forelse($instrumento->ordensPagamento as $op)
+                    <div class="px-6 py-4 border-b border-gray-100 last:border-0">
+                        <div class="flex items-start justify-between">
+                            <div>
+                                <p class="text-sm font-semibold text-gray-800">
+                                    OP nº {{ $op->numero }}
+                                    @if($op->favorecido) <span class="font-normal text-gray-600">— {{ $op->favorecido }}</span> @endif
+                                </p>
+                                <p class="text-xs text-gray-400 mt-0.5">
+                                    @if($op->valor) R$ {{ number_format($op->valor, 2, ',', '.') }} @endif
+                                    @if($op->data_emissao) · Emissão: {{ $op->data_emissao->format('d/m/Y') }} @endif
+                                    @if($op->temDadosBancarios()) · 📎 dados bancários @endif
+                                </p>
+                            </div>
+                            <div class="flex items-center gap-3 ml-4 shrink-0">
+                                @if($op->assinado())
+                                    <span class="px-2 py-1 text-xs font-medium bg-green-100 text-green-800 rounded-full">Assinada</span>
+                                @else
+                                    <span class="px-2 py-1 text-xs font-medium bg-gray-100 text-gray-600 rounded-full">Rascunho</span>
+                                @endif
+                                <a href="{{ route('ordens-pagamento.edit', $op) }}" class="text-xs text-indigo-600 hover:text-indigo-900">{{ $op->assinado() ? 'Abrir' : 'Editar' }}</a>
+                                <a href="{{ route('ordens-pagamento.imprimir', $op) }}" target="_blank" class="text-xs text-gray-600 hover:text-gray-900">Imprimir</a>
+                                @unless($op->assinado())
+                                    <form action="{{ route('ordens-pagamento.destroy', $op) }}" method="POST" class="inline"
+                                          onsubmit="return confirm('Remover esta ordem de pagamento?')">
+                                        @csrf @method('DELETE')
+                                        <button type="submit" class="text-xs text-red-500 hover:text-red-700">Remover</button>
+                                    </form>
+                                @endunless
+                            </div>
+                        </div>
+                    </div>
+                @empty
+                    <p class="px-6 py-6 text-sm text-gray-400 text-center">Nenhuma ordem de pagamento emitida.</p>
+                @endforelse
+            </div>
+            @endcan
 
         </div>
     </div>

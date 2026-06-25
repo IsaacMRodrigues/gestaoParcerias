@@ -61,6 +61,45 @@ class Instrumento extends Model
         return $this->hasMany(Aditivo::class)->orderBy('numero');
     }
 
+    public function ordensPagamento(): HasMany
+    {
+        return $this->hasMany(OrdemPagamento::class)->orderBy('numero');
+    }
+
+    public function repasses(): HasMany
+    {
+        return $this->hasMany(Repasse::class)->orderBy('data_repasse');
+    }
+
+    public function despesas(): HasMany
+    {
+        return $this->hasMany(Despesa::class)->orderBy('data_despesa');
+    }
+
+    // ----- Controle de saldo (4.4 Execução) -----
+
+    public function totalRepassado(): float
+    {
+        return (float) $this->repasses()->sum('valor');
+    }
+
+    public function totalGasto(): float
+    {
+        return (float) $this->despesas()->sum('valor');
+    }
+
+    public function saldo(): float
+    {
+        return $this->totalRepassado() - $this->totalGasto();
+    }
+
+    public function percentualExecutado(): int
+    {
+        $repassado = $this->totalRepassado();
+
+        return $repassado > 0 ? (int) round($this->totalGasto() / $repassado * 100) : 0;
+    }
+
     public function pecas(): \Illuminate\Database\Eloquent\Relations\MorphMany
     {
         return $this->morphMany(Peca::class, 'pecaable')->orderBy('ordem');

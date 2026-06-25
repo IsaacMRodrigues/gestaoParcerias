@@ -1,6 +1,6 @@
 <x-portal-layout>
     <div class="max-w-xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-        @if($peca)
+        @if($doc)
             <div class="bg-white rounded-xl shadow-sm border border-green-200 p-8">
                 <div class="flex items-center gap-3 mb-4">
                     <span class="text-3xl">✅</span>
@@ -13,27 +13,27 @@
                 <dl class="divide-y divide-gray-100 text-sm">
                     <div class="py-2 flex justify-between gap-4">
                         <dt class="text-gray-500">Documento</dt>
-                        <dd class="text-gray-900 font-medium text-right">{{ \App\Models\ProcessoPeca::TIPOS[$peca->tipo] ?? $peca->tipo }}</dd>
+                        <dd class="text-gray-900 font-medium text-right">{{ $doc['tipo'] }}</dd>
                     </div>
                     <div class="py-2 flex justify-between gap-4">
-                        <dt class="text-gray-500">Processo nº</dt>
-                        <dd class="text-gray-900 text-right">{{ $peca->processo->numero }}</dd>
+                        <dt class="text-gray-500">{{ $doc['ref_label'] }}</dt>
+                        <dd class="text-gray-900 text-right">{{ $doc['ref'] }}</dd>
                     </div>
                     <div class="py-2 flex justify-between gap-4">
-                        <dt class="text-gray-500">Unidade Gestora</dt>
-                        <dd class="text-gray-900 text-right">{{ $peca->processo->orgao->name ?? '—' }}</dd>
+                        <dt class="text-gray-500">{{ $doc['extra_label'] }}</dt>
+                        <dd class="text-gray-900 text-right">{{ $doc['extra'] }}</dd>
                     </div>
                     <div class="py-2 flex justify-between gap-4">
                         <dt class="text-gray-500">Assinado por</dt>
-                        <dd class="text-gray-900 font-medium text-right">{{ $peca->assinante->name }}</dd>
+                        <dd class="text-gray-900 font-medium text-right">{{ $doc['assinante'] }}</dd>
                     </div>
                     <div class="py-2 flex justify-between gap-4">
                         <dt class="text-gray-500">Data da assinatura</dt>
-                        <dd class="text-gray-900 text-right">{{ $peca->assinado_em->format('d/m/Y \à\s H:i') }}</dd>
+                        <dd class="text-gray-900 text-right">{{ $doc['assinado_em']->format('d/m/Y \à\s H:i') }}</dd>
                     </div>
                     <div class="py-2 flex justify-between gap-4">
                         <dt class="text-gray-500">Código de validação</dt>
-                        <dd class="text-gray-900 font-mono text-right">{{ $peca->codigo_validacao }}</dd>
+                        <dd class="text-gray-900 font-mono text-right">{{ $doc['codigo'] }}</dd>
                     </div>
                 </dl>
 

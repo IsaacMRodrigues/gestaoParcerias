@@ -40,11 +40,58 @@ php artisan db:seed
 7. [x] Formalização (geração de instrumentos + assinatura eletrônica)
 8. [x] Portal público + auto-cadastro de OSC + upload de documentos
 9. [x] Módulo Unidade Gestora — 2.1 Planejamento (Processos, Termo de Referência, trâmite entre setores)
-10. [~] Módulo Unidade Gestora — 2.2 Seleção/Celebração e 2.3 Execução do Concedente (falta Ordem de Pagamento)
-11. [ ] Execução (repasses, despesas, notas fiscais)
+10. [x] Módulo Unidade Gestora — 2.2 Seleção/Celebração e 2.3 Execução do Concedente (incl. Ordem de Pagamento)
+11. [~] Execução financeira (repasses, despesas, notas fiscais — falta integração bancária)
 12. [ ] Monitoramento e Fiscalização
 13. [ ] Prestação de Contas
 14. [ ] Integrações externas (bancária, Diário Oficial)
+
+---
+
+## Fluxograma do sistema
+
+### Ciclo da parceria (visão macro)
+
+Do planejamento interno até a prestação de contas. As etapas tracejadas ainda não foram implementadas (fases 11–13).
+
+```mermaid
+flowchart TD
+    PLAN["1 · Planejamento<br/>Processo + Termo de Referência<br/>(trâmite UG / SCP / SEPLAN)"] --> CH["2 · Chamamento Público<br/>publicado no Portal"]
+    CH --> PROP["3 · Proposta da OSC<br/>+ Plano de Trabalho (metas/etapas)"]
+    PROP --> AN["4 · Análise<br/>Parecer Técnico → Jurídico → Decisão"]
+    AN -->|Diligência| PROP
+    AN -->|Reprovada| FIM(["Encerrado"])
+    AN -->|Aprovada| SEL["5 · Seleção e Celebração<br/>checklist documental (2.2)"]
+    SEL --> FORM["6 · Formalização<br/>Instrumento + Aditivos / Apostilamento (2.3)"]
+    FORM --> VIG["Assinatura + Publicação no DOE<br/>= Instrumento Vigente"]
+    VIG --> EXE["7 · Execução<br/>repasses, despesas, notas fiscais"]
+    EXE --> MON["8 · Monitoramento e Fiscalização"]
+    MON --> PC["9 · Prestação de Contas"]
+
+    classDef futuro fill:#f8fafc,stroke:#94a3b8,stroke-dasharray:4 3,color:#64748b;
+    class EXE,MON,PC futuro
+```
+
+### Trâmite interno do Planejamento (Módulo UG 2.1)
+
+As 8 etapas do processo entre os setores, conforme `Processo::ETAPAS`. O SCP pode **devolver** para a UG na etapa de análise.
+
+```mermaid
+flowchart LR
+    A(["Abertura"]) --> E1["UG<br/>Ofício + Termo de<br/>Referência (assinar)"]
+    E1 --> E2{"SCP<br/>analisar"}
+    E2 -->|rejeita| E1
+    E2 -->|aprova| E3["UG<br/>Solicitar Parecer<br/>Financeiro à SEPLAN"]
+    E3 --> E4["SEPLAN<br/>emitir Parecer<br/>Financeiro"]
+    E4 --> E5["UG<br/>Abertura do<br/>Processo (assinar)"]
+    E5 --> E6["SCP<br/>elaborar Edital"]
+    E6 --> E7["UG<br/>assinar Edital"]
+    E7 --> E8["SCP<br/>publicar no site"]
+    E8 --> Z(["Concluído"])
+```
+
+> O número do processo segue o padrão `UG.Sequencial.Ano.Esfera` (ex.: `0206.0133.2026.01`).
+> A Procuradoria Jurídica (`pj`) existe como setor, mas ainda não é uma etapa do trâmite acima.
 
 ---
 
@@ -60,7 +107,7 @@ São 21 perfis. Um usuário pode ter **vários**; os marcados 🔒 são **exclus
 | `analista_tecnico_scp` | Analista Técnico do SCP | SCP | planejamento, chamamentos |
 | `responsavel_publicacao` | Responsável pela Publicação | SCP | chamamentos |
 | `analista_orcamentario_financeiro` | Analista Orçamentário Financeiro | SEPLAN | planejamento |
-| `analista_juridico` | Analista Jurídico | — | parecer jurídico |
+| `analista_juridico` | Analista Jurídico | — | parecer jurídico, planejamento (acesso à caixa) |
 | `analista_viabilidade_tecnica` | Analista de Viabilidade Técnica | — | parecer técnico |
 | `analista_aditivo_apostilamento` | Analista de Aditivo e Apostilamento | — | formalização |
 | `analista_prestacao_contas_previa` | Analista de Prestação de Contas Prévia | — | prestação de contas |
@@ -89,6 +136,8 @@ São 21 perfis. Um usuário pode ter **vários**; os marcados 🔒 são **exclus
 | `pareceres_juridico` | Emitir **Parecer Jurídico** na análise da proposta |
 | `pareceres_decisao` | Emitir a **Decisão/Seleção** final da proposta |
 | `formalizacao` | Menu **Instrumentos**: Instrumentos, Aditivos, Apostilamento e Documentação (2.3) |
+| `ordem_pagamento` | Emitir **Ordens de Pagamento** no instrumento vigente (2.3.1) |
+| `execucao` | **Execução Financeira**: repasses, despesas, notas fiscais e saldo (4.4) |
 | `monitoramento` | Monitoramento e Fiscalização *(módulo futuro)* |
 | `prestacao_contas` | Prestação de Contas *(módulo futuro)* |
 
@@ -292,13 +341,46 @@ São 21 perfis. Um usuário pode ter **vários**; os marcados 🔒 são **exclus
 
 ---
 
+- [2026-06-25] Identidade visual unificada (PGP) e UX
+  - Login com gradiente indigo + marca PGP; navegação rebrandizada com badge PGP e chip de
+    usuário (avatar de iniciais + perfil + setor)
+  - **Dashboard real** (substitui o stub): cards de métricas por permissão, caixa de entrada
+    do setor e atalhos rápidos (`x-stat-card`, `x-quick-link`)
+  - Portal público enriquecido: hero, empty-state e seção "Como participar"
+  - Botões/links no tema indigo; shell com título PGP e rodapé
+
+- [2026-06-25] Ordem de Pagamento (Módulo UG 2.3.1)
+  - `OrdemPagamento` (várias por instrumento vigente): documento modelo padrão com assinatura
+    eletrônica (carimbo + QR + validação pública) e anexo de dados bancários
+  - Validação pública (`/validar`) estendida para reconhecer OP além das peças de processo
+  - Permissão `ordem_pagamento` (perfil `operador_ordem_pagamento` + Responsável da UG)
+
+- [2026-06-25] Preenchimento automático ("puxar") dos modelos
+  - `App\Support\Modelo` substitui marcadores `{{token}}` pelos dados conhecidos ao criar o
+    documento: nº do processo, Unidade Gestora, responsável, data; na OP: nº da OP, instrumento,
+    OSC favorecida. O conteúdo autoral/orçamentário permanece manual. Nº do Ofício é manual
+    (numeração externa ao sistema).
+
+- [2026-06-25] Execução Financeira (Módulo 4.4 — fase 11, parcial)
+  - `Repasse` e `Despesa` (com **natureza de despesa** e upload de **nota fiscal**) no instrumento
+  - **Painel de saldo**: total repassado, total gasto, saldo, % executado + alertas de
+    inconsistência (saldo negativo, despesa sem NF) e resumo por natureza
+  - Permissão `execucao` (Responsável da UG + Gestor da Parceria)
+  - Falta: rendimentos, conciliação/integração bancária (fase 14), auto-relato pela OSC
+
+- [2026-06-25] Acesso do jurídico à caixa (permissão `planejamento` ao `analista_juridico`) e
+  **tela 403 amigável** (`errors/403.blade.php`) na identidade PGP, exibindo a mensagem específica
+  do `abort()` quando houver.
+
+---
+
 ## O que está sendo feito
 
-- Módulo Chamamentos: numeração do Processo concluída (`UG.Seq.Ano.Esfera`). A avaliar a seguir:
-  vincular o Processo (planejamento / trâmite interno) ao Chamamento público e, se a área desejar um
-  identificador único da parceria, propagar o número para Chamamento/Instrumento.
-- Próximo passo (geral): Ordem de Pagamento + Execução financeira (repasses, despesas, notas fiscais)
-  quando a fase bancária for liberada; depois Monitoramento e Prestação de Contas.
+- Próximos blocos do roadmap, em ordem: **Prestação de Contas (4.6)** — apoiada nas despesas/saldo
+  da Execução —, **Monitoramento (4.5)**, e **Notificações/e-mails (4.7)**.
+- Pendência transversal: **trilhas de auditoria / logs imutáveis** (requisito não-funcional).
+- Itens finos: "puxar arquivos da OSC" nos checklists 2.2/2.3; campos Exercício/Prazo no Chamamento;
+  reajuste/reequilíbrio na Formalização; matrícula/CNAE no Cadastro.
 
 ---
 

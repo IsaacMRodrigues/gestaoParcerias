@@ -4,9 +4,11 @@ use App\Http\Controllers\AditivoController;
 use App\Http\Controllers\ChamamentoController;
 use App\Http\Controllers\DiligenciaController;
 use App\Http\Controllers\DocumentoController;
+use App\Http\Controllers\ExecucaoController;
 use App\Http\Controllers\EtapaController;
 use App\Http\Controllers\InstrumentoController;
 use App\Http\Controllers\MetaController;
+use App\Http\Controllers\OrdemPagamentoController;
 use App\Http\Controllers\OrgaoController;
 use App\Http\Controllers\OscController;
 use App\Http\Controllers\OscRegistroController;
@@ -129,6 +131,28 @@ Route::middleware(['auth', 'staff', 'readonly'])->group(function () {
         Route::resource('instrumentos.aditivos', AditivoController::class)->except(['index', 'show']);
         Route::get('instrumentos/{instrumento}/aditivos/{aditivo}/documentacao', [AditivoController::class, 'documentacao'])
             ->name('instrumentos.aditivos.documentacao');
+    });
+
+    // 2.3.1 Ordem de Pagamento (emitida durante a vigência do instrumento)
+    Route::middleware('permission:ordem_pagamento')->group(function () {
+        Route::post('instrumentos/{instrumento}/ordens-pagamento', [OrdemPagamentoController::class, 'create'])->name('ordens-pagamento.create');
+        Route::get('ordens-pagamento/{ordem}/editar', [OrdemPagamentoController::class, 'edit'])->name('ordens-pagamento.edit');
+        Route::put('ordens-pagamento/{ordem}', [OrdemPagamentoController::class, 'update'])->name('ordens-pagamento.update');
+        Route::patch('ordens-pagamento/{ordem}/assinar', [OrdemPagamentoController::class, 'assinar'])->name('ordens-pagamento.assinar');
+        Route::post('ordens-pagamento/{ordem}/dados-bancarios', [OrdemPagamentoController::class, 'uploadDadosBancarios'])->name('ordens-pagamento.dados-bancarios.upload');
+        Route::get('ordens-pagamento/{ordem}/dados-bancarios', [OrdemPagamentoController::class, 'downloadDadosBancarios'])->name('ordens-pagamento.dados-bancarios.download');
+        Route::get('ordens-pagamento/{ordem}/imprimir', [OrdemPagamentoController::class, 'imprimir'])->name('ordens-pagamento.imprimir');
+        Route::delete('ordens-pagamento/{ordem}', [OrdemPagamentoController::class, 'destroy'])->name('ordens-pagamento.destroy');
+    });
+
+    // 4.4 Execução — repasses, despesas e controle de saldo do instrumento vigente
+    Route::middleware('permission:execucao')->group(function () {
+        Route::get('instrumentos/{instrumento}/execucao', [ExecucaoController::class, 'show'])->name('instrumentos.execucao');
+        Route::post('instrumentos/{instrumento}/repasses', [ExecucaoController::class, 'storeRepasse'])->name('repasses.store');
+        Route::delete('repasses/{repasse}', [ExecucaoController::class, 'destroyRepasse'])->name('repasses.destroy');
+        Route::post('instrumentos/{instrumento}/despesas', [ExecucaoController::class, 'storeDespesa'])->name('despesas.store');
+        Route::delete('despesas/{despesa}', [ExecucaoController::class, 'destroyDespesa'])->name('despesas.destroy');
+        Route::get('despesas/{despesa}/nota-fiscal', [ExecucaoController::class, 'downloadNotaFiscal'])->name('despesas.nota.download');
     });
 
     // Peças documentais (motor genérico — usado por Seleção 2.2 e Formalização 2.3)

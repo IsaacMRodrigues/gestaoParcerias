@@ -84,11 +84,11 @@ class ProcessoController extends Controller
             'etapa'       => 0,
         ]);
 
-        // cria as peças padrão (já com o texto-modelo)
+        // cria as peças padrão (modelo já preenchido com os dados do processo)
         foreach (array_keys(\App\Models\ProcessoPeca::TIPOS) as $tipo) {
             $processo->pecas()->create([
                 'tipo'     => $tipo,
-                'conteudo' => \App\Models\ProcessoPeca::MODELO[$tipo] ?? null,
+                'conteudo' => \App\Models\ProcessoPeca::conteudoInicial($tipo, $processo),
             ]);
         }
 
