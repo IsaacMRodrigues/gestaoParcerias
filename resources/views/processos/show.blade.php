@@ -69,6 +69,12 @@
                 @else
                     <p class="text-sm text-green-700 mt-4 font-medium">Trâmite concluído — encaminhado para publicação no site oficial.</p>
                 @endif
+                @if($processo->modalidade)
+                    <p class="text-sm text-gray-600 mt-2">
+                        Modalidade definida pelo SCP:
+                        <span class="font-medium text-indigo-700">{{ \App\Models\Processo::MODALIDADES[$processo->modalidade] ?? $processo->modalidade }}</span>
+                    </p>
+                @endif
             </div>
 
             {{-- Alertas automáticos --}}
@@ -104,32 +110,48 @@
                     if (!empty($p->conteudo)) return 'Preenchido — não assinado';
                     return 'Não preenchido';
                 };
-                $ordem = ['oficio', 'termo_referencia', 'pedido_parecer', 'parecer_financeiro', 'abertura', 'edital'];
+                $ordem = ['oficio', 'termo_referencia', 'pedido_parecer', 'parecer_financeiro', 'abertura', 'edital', 'solicitacao_parecer_juridico', 'parecer_juridico'];
             @endphp
             <div class="bg-white shadow rounded-lg">
-                <div class="px-6 py-4 border-b border-gray-200">
-                    <h3 class="text-base font-semibold text-gray-800">Peças do Processo</h3>
-                </div>
+                <form method="GET" action="{{ route('processos.pecas.imprimir-lote', $processo) }}"
+                      onsubmit="if(!this.querySelector('input[name=&quot;pecas[]&quot;]:checked')){alert('Selecione ao menos um documento para baixar.');return false;}">
+                    <div class="px-6 py-4 border-b border-gray-200 flex items-center justify-between gap-3">
+                        <h3 class="text-base font-semibold text-gray-800">Peças do Processo</h3>
+                        <button type="submit"
+                                class="text-sm px-3 py-1.5 bg-indigo-600 text-white rounded-md hover:bg-indigo-700 whitespace-nowrap">
+                            ⬇ Baixar selecionados (PDF)
+                        </button>
+                    </div>
 
-                <div class="divide-y divide-gray-100">
-                    @foreach($ordem as $i => $tipo)
-                        @php $p = $processo->peca($tipo); @endphp
-                        @if($p)
-                            <div class="flex items-center justify-between px-6 py-4">
-                                <div>
-                                    <p class="text-sm font-semibold text-gray-800">{{ $i + 1 }}. {{ \App\Models\ProcessoPeca::TIPOS[$tipo] }}
-                                        <span class="text-xs font-normal text-gray-400">— {{ strtoupper($p->setorResponsavel()) }}</span>
-                                    </p>
-                                    <p class="text-xs text-gray-400">{{ $statusPeca($p) }}</p>
+                    <div class="divide-y divide-gray-100">
+                        @foreach($ordem as $i => $tipo)
+                            @php $p = $processo->peca($tipo); @endphp
+                            @if($p)
+                                <div class="flex items-center justify-between px-6 py-4">
+                                    <div class="flex items-center gap-3">
+                                        @if(!empty($p->conteudo))
+                                            <input type="checkbox" name="pecas[]" value="{{ $p->id }}"
+                                                   class="rounded border-gray-300 text-indigo-600 focus:ring-indigo-500"
+                                                   title="Selecionar para download">
+                                        @else
+                                            <span class="inline-block w-4" title="Documento ainda não preenchido"></span>
+                                        @endif
+                                        <div>
+                                            <p class="text-sm font-semibold text-gray-800">{{ $i + 1 }}. {{ \App\Models\ProcessoPeca::TIPOS[$tipo] }}
+                                                <span class="text-xs font-normal text-gray-400">— {{ strtoupper($p->setorResponsavel()) }}</span>
+                                            </p>
+                                            <p class="text-xs text-gray-400">{{ $statusPeca($p) }}</p>
+                                        </div>
+                                    </div>
+                                    <a href="{{ route('processos.pecas.edit', [$processo, $p]) }}"
+                                       class="text-sm text-indigo-600 hover:text-indigo-900">
+                                        {{ $rotuloPeca($p) }}
+                                    </a>
                                 </div>
-                                <a href="{{ route('processos.pecas.edit', [$processo, $p]) }}"
-                                   class="text-sm text-indigo-600 hover:text-indigo-900">
-                                    {{ $rotuloPeca($p) }}
-                                </a>
-                            </div>
-                        @endif
-                    @endforeach
-                </div>
+                            @endif
+                        @endforeach
+                    </div>
+                </form>
             </div>
 
             {{-- Trâmite --}}
@@ -217,18 +239,33 @@
                                 </form>
 
                             @elseif($processo->etapaEhAnalise())
-                                {{-- Etapa de análise: APROVAR ou REJEITAR --}}
-                                <p class="text-sm text-gray-600">Analise os documentos acima e decida:</p>
-                                <div class="flex flex-wrap gap-3">
-                                    <form action="{{ route('processos.avancar', $processo) }}" method="POST"
-                                          onsubmit="return confirm('Aprovar e liberar para a próxima etapa?')">
-                                        @csrf
-                                        <button type="submit"
-                                                class="px-4 py-2 text-sm font-medium text-white bg-green-600 rounded-md hover:bg-green-700">
-                                            ✓ Aprovar e liberar para a {{ strtoupper($processo->proximoSetor()) }}
-                                        </button>
-                                    </form>
-                                </div>
+                                {{-- Etapa de análise (SCP): definir a modalidade e APROVAR, ou REJEITAR --}}
+                                <p class="text-sm text-gray-600">Analise os documentos acima, defina a modalidade da seleção e decida:</p>
+                                <form action="{{ route('processos.avancar', $processo) }}" method="POST" class="space-y-4"
+                                      onsubmit="return confirm('Aprovar com a modalidade selecionada e liberar para a próxima etapa?')">
+                                    @csrf
+                                    <div>
+                                        <x-input-label value="Modalidade da seleção (define o caminho do processo)" class="mb-2" />
+                                        <div class="space-y-2">
+                                            @foreach(\App\Models\Processo::MODALIDADES as $valor => $rotulo)
+                                                <label class="flex items-start gap-3 p-3 border border-gray-200 rounded-md cursor-pointer hover:border-indigo-300 hover:bg-indigo-50/30">
+                                                    <input type="radio" name="modalidade" value="{{ $valor }}" required
+                                                           class="mt-1 text-indigo-600 focus:ring-indigo-500"
+                                                           @checked(old('modalidade', $processo->modalidade) === $valor)>
+                                                    <span>
+                                                        <span class="block text-sm font-medium text-gray-800">{{ $rotulo }}</span>
+                                                        <span class="block text-xs text-gray-500">{{ \App\Models\Processo::MODALIDADES_DESC[$valor] ?? '' }}</span>
+                                                    </span>
+                                                </label>
+                                            @endforeach
+                                        </div>
+                                        <x-input-error :messages="$errors->get('modalidade')" class="mt-1" />
+                                    </div>
+                                    <button type="submit"
+                                            class="px-4 py-2 text-sm font-medium text-white bg-green-600 rounded-md hover:bg-green-700">
+                                        ✓ Aprovar e liberar para a {{ strtoupper($processo->proximoSetor()) }}
+                                    </button>
+                                </form>
                                 <form action="{{ route('processos.devolver', $processo) }}" method="POST"
                                       class="pt-3 border-t border-gray-200 space-y-2">
                                     @csrf

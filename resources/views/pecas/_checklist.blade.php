@@ -97,6 +97,34 @@
                                 Enviar
                             </button>
                         </form>
+
+                        @if($peca->puxavel())
+                            @php $docsDisponiveis = $peca->documentosDisponiveis(); @endphp
+                            @if($docsDisponiveis->isNotEmpty())
+                                <form action="{{ route('pecas.puxar', $peca) }}" method="POST"
+                                      class="mt-2 flex items-center gap-2 flex-wrap">
+                                    @csrf
+                                    <span class="text-xs text-gray-500">ou puxar do módulo Gestão de Parcerias:</span>
+                                    <select name="documento_id" required
+                                            class="text-xs border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 max-w-xs">
+                                        <option value="">Selecione um documento…</option>
+                                        @foreach($docsDisponiveis as $doc)
+                                            <option value="{{ $doc->id }}">
+                                                {{ \App\Models\Documento::TIPOS[$doc->tipo] ?? $doc->tipo }} — {{ $doc->nome_original }}{{ $doc->proposta->osc ? ' · ' . $doc->proposta->osc->name : '' }}
+                                            </option>
+                                        @endforeach
+                                    </select>
+                                    <button type="submit"
+                                            class="px-3 py-1.5 text-xs font-medium text-indigo-700 border border-indigo-300 rounded-md hover:bg-indigo-50">
+                                        Puxar
+                                    </button>
+                                </form>
+                            @else
+                                <p class="mt-2 text-xs text-gray-400">
+                                    Nenhum documento disponível para puxar do módulo Gestão de Parcerias.
+                                </p>
+                            @endif
+                        @endif
                     @endif
                 </div>
             @endif

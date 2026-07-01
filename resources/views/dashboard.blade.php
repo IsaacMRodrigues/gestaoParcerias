@@ -97,7 +97,7 @@
                         <x-quick-link :href="route('processos.create')" label="Novo Processo" />
                     @endcan
                     @can('chamamentos')
-                        <x-quick-link :href="route('programas.index')" label="Programas &amp; Chamamentos" />
+                        <x-quick-link :href="route('programas.index')" label="Programas & Chamamentos" />
                     @endcan
                     @can('propostas')
                         <x-quick-link :href="route('propostas.index')" label="Propostas" />

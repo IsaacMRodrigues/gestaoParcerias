@@ -67,8 +67,20 @@ Route::middleware(['auth', 'staff', 'readonly'])->group(function () {
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
 
+    // Subusuários da Unidade Gestora (a UG cadastra; o admin aprova)
+    Route::middleware('role:responsavel_unidade_gestora')->group(function () {
+        Route::get('meus-usuarios', [\App\Http\Controllers\SubusuarioController::class, 'index'])->name('subusuarios.index');
+        Route::get('meus-usuarios/novo', [\App\Http\Controllers\SubusuarioController::class, 'create'])->name('subusuarios.create');
+        Route::post('meus-usuarios', [\App\Http\Controllers\SubusuarioController::class, 'store'])->name('subusuarios.store');
+    });
+
     // Cadastros institucionais
     Route::middleware('permission:cadastros')->group(function () {
+        // Aprovação de cadastros (auto-cadastro de servidores e subusuários da UG)
+        Route::get('usuarios/pendentes', [UserController::class, 'pendentes'])->name('usuarios.pendentes');
+        Route::patch('usuarios/{usuario}/aprovar', [UserController::class, 'aprovar'])->name('usuarios.aprovar');
+        Route::patch('usuarios/{usuario}/recusar', [UserController::class, 'recusar'])->name('usuarios.recusar');
+
         Route::resource('usuarios', UserController::class)->except(['show']);
         Route::resource('orgaos', OrgaoController::class)->except(['show']);
         Route::resource('oscs', OscController::class)->except(['show']);
@@ -78,6 +90,7 @@ Route::middleware(['auth', 'staff', 'readonly'])->group(function () {
     Route::middleware('permission:planejamento')->group(function () {
         Route::get('processos/caixa', [ProcessoController::class, 'caixa'])->name('processos.caixa');
         Route::resource('processos', ProcessoController::class)->except(['edit', 'update']);
+        Route::get('processos/{processo}/imprimir-pecas', [ProcessoPecaController::class, 'imprimirLote'])->name('processos.pecas.imprimir-lote');
         Route::get('processos/{processo}/pecas/{peca}', [ProcessoPecaController::class, 'edit'])->name('processos.pecas.edit');
         Route::get('processos/{processo}/pecas/{peca}/imprimir', [ProcessoPecaController::class, 'imprimir'])->name('processos.pecas.imprimir');
         Route::put('processos/{processo}/pecas/{peca}', [ProcessoPecaController::class, 'update'])->name('processos.pecas.update');
@@ -160,6 +173,7 @@ Route::middleware(['auth', 'staff', 'readonly'])->group(function () {
         Route::put('pecas/{peca}', [PecaController::class, 'salvar'])->name('pecas.salvar');
         Route::patch('pecas/{peca}/assinar', [PecaController::class, 'assinar'])->name('pecas.assinar');
         Route::post('pecas/{peca}/arquivo', [PecaController::class, 'upload'])->name('pecas.upload');
+        Route::post('pecas/{peca}/puxar', [PecaController::class, 'puxar'])->name('pecas.puxar');
         Route::get('pecas/{peca}/arquivo', [PecaController::class, 'download'])->name('pecas.download');
         Route::delete('pecas/{peca}/arquivo', [PecaController::class, 'removerArquivo'])->name('pecas.arquivo.remover');
     });

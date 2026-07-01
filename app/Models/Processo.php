@@ -40,7 +40,8 @@ class Processo extends Model
         ['setor' => 'seplan', 'acao' => 'Emitir o Parecer Financeiro e assinar'],
         ['setor' => 'ug',     'acao' => 'Conferir o parecer e fazer a Abertura do Processo (assinar AP)'],
         ['setor' => 'scp',    'acao' => 'Elaborar o Edital (ou justificativa de dispensa/inexigibilidade)'],
-        ['setor' => 'ug',     'acao' => 'Assinar o Edital'],
+        ['setor' => 'ug',     'acao' => 'Assinar o Edital e solicitar o Parecer Jurídico à Procuradoria (preencher e assinar a solicitação)'],
+        ['setor' => 'pj',     'acao' => 'Emitir o Parecer Jurídico e encaminhar à SCP (preencher e assinar)'],
         ['setor' => 'scp',    'acao' => 'Publicar no site oficial (trâmite externo)'],
     ];
 
@@ -55,6 +56,19 @@ class Processo extends Model
         'outra'                  => 'Outra',
     ];
 
+    // Modalidade da seleção — decidida pelo SCP na etapa de análise; define o caminho do processo.
+    public const MODALIDADES = [
+        'chamamento_publico' => 'Chamamento Público',
+        'dispensa'           => 'Dispensa de Chamamento Público',
+        'inexigibilidade'    => 'Inexigibilidade de Chamamento Público',
+    ];
+
+    public const MODALIDADES_DESC = [
+        'chamamento_publico' => 'Processo padrão de seleção (licitatório/competitivo) para firmar parcerias.',
+        'dispensa'           => 'A lei autoriza a contratação direta, mesmo podendo haver mais de um interessado — situações de urgência ou casos específicos previstos no marco regulatório.',
+        'inexigibilidade'    => 'Não há possibilidade de competição: a organização é a única que pode executar o objeto ou detém exclusividade.',
+    ];
+
     // Esfera do concedente — compõe o número do processo (UG.Seq.Ano.Esfera).
     public const ESFERAS = [
         '01' => 'Município',
@@ -64,7 +78,7 @@ class Processo extends Model
     ];
 
     protected $fillable = [
-        'numero', 'sequencial', 'esfera', 'orgao_id', 'created_by', 'status', 'setor_atual', 'etapa',
+        'numero', 'sequencial', 'esfera', 'modalidade', 'orgao_id', 'created_by', 'status', 'setor_atual', 'etapa',
     ];
 
     public function orgao(): BelongsTo
@@ -215,6 +229,9 @@ class Processo extends Model
             if (empty($this->peca('edital')?->conteudo))          $pend[] = 'Edital (elaborar)';
         } elseif ($this->etapa === 6) {
             if (!$this->peca('edital')?->assinado())              $pend[] = 'Edital (assinatura da UG)';
+            if (!$this->peca('solicitacao_parecer_juridico')?->assinado()) $pend[] = 'Solicitação de Parecer Jurídico';
+        } elseif ($this->etapa === 7) {
+            if (!$this->peca('parecer_juridico')?->assinado())    $pend[] = 'Parecer Jurídico';
         }
         // etapa 1 (SCP): apenas analisa e devolve — sem documento obrigatório
 

@@ -14,6 +14,16 @@
 
             <x-flash-message />
 
+            @if(($pendentesCount ?? 0) > 0)
+                <a href="{{ route('usuarios.pendentes') }}"
+                   class="flex items-center justify-between mb-4 px-4 py-3 bg-amber-50 border border-amber-200 rounded-lg text-sm hover:bg-amber-100">
+                    <span class="text-amber-800">
+                        <strong>{{ $pendentesCount }}</strong> cadastro(s) aguardando aprovação.
+                    </span>
+                    <span class="text-amber-700 font-medium">Revisar →</span>
+                </a>
+            @endif
+
             <div class="bg-white shadow rounded-lg overflow-hidden">
                 <table class="min-w-full divide-y divide-gray-200">
                     <thead class="bg-gray-50">

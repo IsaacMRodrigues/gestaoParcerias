@@ -107,6 +107,16 @@ class Peca extends Model
         'aditivo'                  => 'Termo Aditivo',
     ];
 
+    /**
+     * Itens (chave) que podem ser "puxados" do módulo Gestão de Parcerias —
+     * ou seja, preenchidos a partir dos documentos que a OSC já enviou na proposta.
+     */
+    public const PUXAVEIS = [
+        'dispensa_inexigibilidade' => ['plano_trabalho', 'docs_habilitacao'],
+        'aditivo'                  => ['manifestacao_osc', 'formulario_prorrogacao', 'ata_eleicao', 'certidoes_regularidade', 'orcamento_cotacao', 'extratos_bancarios', 'declaracao_capacidade', 'plano_trabalho_atualizado'],
+        'apostilamento'            => ['manifestacao_osc', 'orcamento_cotacao', 'extratos_bancarios', 'plano_trabalho_atualizado'],
+    ];
+
     public function pecaable(): MorphTo
     {
         return $this->morphTo();
@@ -125,6 +135,38 @@ class Peca extends Model
     public function temArquivo(): bool
     {
         return !is_null($this->arquivo_path);
+    }
+
+    /** Item de arquivo que aceita ser "puxado" do módulo Gestão de Parcerias. */
+    public function puxavel(): bool
+    {
+        return $this->tipo === 'arquivo'
+            && in_array($this->chave, self::PUXAVEIS[$this->categoria] ?? [], true);
+    }
+
+    /**
+     * Documentos da OSC disponíveis para puxar, conforme o registro dono da peça:
+     * Seleção (Chamamento) → documentos das propostas do chamamento;
+     * Aditivo/Apostilamento → documentos da proposta do instrumento.
+     */
+    public function documentosDisponiveis()
+    {
+        $alvo = $this->pecaable;
+
+        $propostaIds = match (true) {
+            $alvo instanceof Chamamento => $alvo->propostas()->pluck('id'),
+            $alvo instanceof Aditivo    => collect(array_filter([$alvo->instrumento?->proposta_id])),
+            default                     => collect(),
+        };
+
+        if ($propostaIds->isEmpty()) {
+            return collect();
+        }
+
+        return Documento::with('proposta.osc')
+            ->whereIn('proposta_id', $propostaIds)
+            ->latest()
+            ->get();
     }
 
     public function preenchido(): bool

@@ -22,7 +22,7 @@ class UserRequest extends FormRequest
             'email'    => ['required', 'email', 'max:255', Rule::unique('users', 'email')->ignore($userId)],
             'cpf'      => ['nullable', 'string', 'max:14', Rule::unique('users', 'cpf')->ignore($userId)],
             'phone'    => ['nullable', 'string', 'max:20'],
-            'password' => [$this->isMethod('POST') ? 'required' : 'nullable', 'string', 'min:8', 'confirmed'],
+            'password' => [$this->isMethod('POST') ? 'required' : 'nullable', 'string', 'min:6', 'confirmed'],
             'roles'    => ['required', 'array', 'min:1'],
             'roles.*'  => ['string', 'exists:roles,name'],
             'setor'    => ['nullable', Rule::in(array_keys(User::LOTACOES))],

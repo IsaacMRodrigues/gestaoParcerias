@@ -12,7 +12,7 @@ use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Spatie\Permission\Traits\HasRoles;
 
-#[Fillable(['name', 'email', 'cpf', 'phone', 'status', 'setor', 'orgao_id', 'password'])]
+#[Fillable(['name', 'email', 'cpf', 'matricula', 'phone', 'status', 'setor', 'orgao_id', 'password', 'approval_status', 'approved_at', 'approved_by', 'created_by', 'solicitacao_obs', 'rejeitado_motivo'])]
 #[Hidden(['password', 'remember_token'])]
 class User extends Authenticatable
 {
@@ -83,13 +83,76 @@ class User extends Authenticatable
      */
     public const PERFIS_SOMENTE_LEITURA = ['auditor_externo', 'auditor_geral'];
 
+    /**
+     * Situação da aprovação do cadastro.
+     */
+    public const APPROVAL = [
+        'pendente' => 'Pendente de aprovação',
+        'aprovado' => 'Aprovado',
+        'recusado' => 'Recusado',
+    ];
+
     protected function casts(): array
     {
         return [
             'email_verified_at' => 'datetime',
             'password'          => 'hashed',
             'status'            => 'boolean',
+            'approved_at'       => 'datetime',
         ];
+    }
+
+    public function isPendente(): bool
+    {
+        return $this->approval_status === 'pendente';
+    }
+
+    public function isAprovado(): bool
+    {
+        return $this->approval_status === 'aprovado';
+    }
+
+    public function isRecusado(): bool
+    {
+        return $this->approval_status === 'recusado';
+    }
+
+    /** Pode efetivamente autenticar (aprovado e ativo). */
+    public function podeAutenticar(): bool
+    {
+        return $this->isAprovado() && $this->status;
+    }
+
+    /** Mensagem exibida no login quando o acesso está bloqueado. */
+    public function mensagemBloqueioLogin(): string
+    {
+        if ($this->isPendente()) {
+            return 'Seu cadastro está aguardando aprovação do administrador.';
+        }
+        if ($this->isRecusado()) {
+            return 'Seu cadastro foi recusado' . ($this->rejeitado_motivo ? ': ' . $this->rejeitado_motivo : '.');
+        }
+        return 'Seu acesso está inativo. Procure o administrador.';
+    }
+
+    public function scopePendentes($query)
+    {
+        return $query->where('approval_status', 'pendente');
+    }
+
+    public function aprovadoPor(): \Illuminate\Database\Eloquent\Relations\BelongsTo
+    {
+        return $this->belongsTo(User::class, 'approved_by');
+    }
+
+    public function criadoPor(): \Illuminate\Database\Eloquent\Relations\BelongsTo
+    {
+        return $this->belongsTo(User::class, 'created_by');
+    }
+
+    public function subusuarios(): \Illuminate\Database\Eloquent\Relations\HasMany
+    {
+        return $this->hasMany(User::class, 'created_by');
     }
 
     public function osc(): HasOne

@@ -10,7 +10,7 @@ Plataforma web em **Laravel** para gestão completa de parcerias públicas entre
 
 **Repositório:** https://github.com/IsaacMRodrigues/gestaoParcerias  
 **Stack:** Laravel 13, MySQL, TailwindCSS, Blade  
-**Pacotes principais:** Laravel Breeze (auth), Spatie Laravel Permission (perfis)  
+**Pacotes principais:** Laravel Breeze (auth), Spatie Laravel Permission (perfis), simple-qrcode (validação), dompdf (PDF dos documentos)  
 **Equipe:** 2 desenvolvedores
 
 ---
@@ -74,7 +74,7 @@ flowchart TD
 
 ### Trâmite interno do Planejamento (Módulo UG 2.1)
 
-As 8 etapas do processo entre os setores, conforme `Processo::ETAPAS`. O SCP pode **devolver** para a UG na etapa de análise.
+As 9 etapas do processo entre os setores, conforme `Processo::ETAPAS`. O SCP pode **devolver** para a UG na etapa de análise.
 
 ```mermaid
 flowchart LR
@@ -85,13 +85,16 @@ flowchart LR
     E3 --> E4["SEPLAN<br/>emitir Parecer<br/>Financeiro"]
     E4 --> E5["UG<br/>Abertura do<br/>Processo (assinar)"]
     E5 --> E6["SCP<br/>elaborar Edital"]
-    E6 --> E7["UG<br/>assinar Edital"]
-    E7 --> E8["SCP<br/>publicar no site"]
-    E8 --> Z(["Concluído"])
+    E6 --> E7["UG<br/>assinar Edital +<br/>Solicitar Parecer<br/>Jurídico (assinar)"]
+    E7 --> E8["PJ<br/>emitir Parecer<br/>Jurídico (assinar)"]
+    E8 --> E9["SCP<br/>publicar no site"]
+    E9 --> Z(["Concluído"])
 ```
 
 > O número do processo segue o padrão `UG.Sequencial.Ano.Esfera` (ex.: `0206.0133.2026.01`).
-> A Procuradoria Jurídica (`pj`) existe como setor, mas ainda não é uma etapa do trâmite acima.
+> A **Procuradoria Jurídica (`pj`)** entra como etapa do trâmite: no mesmo passo em que assina o
+> Edital, a UG preenche e assina a **Solicitação de Parecer Jurídico** (Modelo VI) e encaminha à PJ,
+> que emite e assina o **Parecer Jurídico** e devolve à SCP para publicação.
 
 ---
 
@@ -372,6 +375,81 @@ São 21 perfis. Um usuário pode ter **vários**; os marcados 🔒 são **exclus
   **tela 403 amigável** (`errors/403.blade.php`) na identidade PGP, exibindo a mensagem específica
   do `abort()` quando houver.
 
+- [2026-06-29] Módulo 2 — etapa da Procuradoria Jurídica no trâmite (8 → 9 etapas)
+  - Depois do Edital, antes da publicação, o trâmite ganha o Jurídico em `Processo::ETAPAS`:
+    **(7) UG** assina o Edital **e**, no mesmo passo, preenche e assina a **Solicitação de Parecer
+    Jurídico** (Modelo VI, texto do Arquivo VI do cliente) e encaminha à PJ; **(8) PJ** preenche e
+    assina o **Parecer Jurídico** e devolve à SCP; **(9) SCP** publica
+  - Duas peças novas em `ProcessoPeca` (`solicitacao_parecer_juridico`, `parecer_juridico`) com modelo
+    pré-preenchido (a da PJ é modelo-padrão em branco, a definir com a Procuradoria), assinatura
+    carimbo+QR e validação pública — reaproveitam todo o motor de peças/tramitação existente
+  - Migration `add_etapa_juridico_to_processos`: cria as peças nos processos já abertos e remapeia
+    quem estava na antiga última etapa (7 = publicação) para a nova (8)
+  - **Setup:** o usuário que atua na etapa do PJ precisa de **lotação `pj`** + perfil com permissão
+    `planejamento` (ex.: `analista_juridico`)
+
+- [2026-06-29] Módulo 2 — modalidade da seleção definida pelo SCP na análise
+  - Na etapa de análise (SCP), ao **Aprovar**, o setor escolhe a **modalidade** que define o caminho
+    do processo: **Chamamento Público**, **Dispensa** ou **Inexigibilidade** (`Processo::MODALIDADES`,
+    com descrições em `MODALIDADES_DESC`); obrigatório para aprovar (validado em `TramitacaoController`)
+  - Coluna `modalidade` em `processos`; a escolha aparece no card do fluxo e orienta o passo do Edital
+    (Edital × justificativa de dispensa/inexigibilidade) e o checklist de Seleção 2.2
+  - Cabeçalho (brasão) + título "PEDIDO DE PARECER FINANCEIRO" no modelo do `pedido_parecer`, que era
+    o único documento financeiro sem cabeçalho — alinhado aos demais
+
+- [2026-06-29] Checklists 2.2/2.3 — "puxar do módulo Gestão de Parcerias"
+  - Itens de arquivo marcados como puxáveis (`Peca::PUXAVEIS`) agora podem ser preenchidos a partir
+    dos documentos que a OSC já enviou na proposta, além do upload manual
+  - Seleção 2.2 (Dispensa/Inexigibilidade): Plano de trabalho, Documentos de habilitação;
+    Aditivo/Apostilamento 2.3: Manifestação da OSC, Plano atualizado, Orçamento, Extratos, etc.
+  - Origem resolvida por `Peca::documentosDisponiveis()` (Chamamento → propostas; Aditivo →
+    instrumento → proposta); `PecaController@puxar` copia o arquivo para a peça (rota `pecas.puxar`)
+  - UI no partial compartilhado `pecas/_checklist` (vale para Seleção e Documentação do Aditivo)
+
+- [2026-06-29] Processo — baixar peças selecionadas em PDF (individual)
+  - Checkbox ao lado de cada documento preenchido na lista "Peças do Processo" + botão
+    "Baixar selecionados (PDF)" → **1 documento** baixa o PDF direto; **vários** vêm num **ZIP com
+    um PDF separado por documento** (download individual), nomeados na ordem oficial
+  - PDF gerado no servidor com **dompdf** (`ProcessoPecaController@imprimirLote` → `pdfDaPeca`), brasão
+    remoto + carimbo de assinatura + QR (SVG embutido) nos assinados; view `processos/peca-pdf`
+  - `imprimirLote` valida que as peças pertencem ao processo e ignora as vazias
+
+- [2026-06-29] Validação pública mostra uma cópia do documento
+  - Em `/validar/{codigo}` (pelo QR ou pelo código), além dos metadados de autenticidade, a página
+    agora exibe a **cópia fiel do documento assinado** (conteúdo HTML renderizado com brasão/tabelas)
+  - `ValidacaoController@mostrar` passa o `conteudo`; vale para peça de processo e ordem de pagamento
+
+- [2026-06-29] Onboarding de usuários com aprovação do administrador
+  - **Auto-cadastro** (`/register`) reescrito para servidores internos: informa dados, **setor**,
+    **Secretaria/UG** (lista de Órgãos) e **escolhe a própria senha** → cria usuário **pendente, sem
+    perfil e sem login**. OSC continua pelo portal (`/cadastro/osc`)
+  - **Trava de login** (`LoginRequest`/`User::podeAutenticar`): pendente, recusado ou inativo não
+    autentica, com mensagem explicando o motivo (antes o login não checava `status`)
+  - **Aprovação pelo admin** (permissão `cadastros`): tela `usuarios/pendentes` lista os cadastros,
+    o admin **atribui os perfis** (confirma setor/UG) e **aprova**, ou **recusa** com motivo
+    (`UserController@pendentes/aprovar/recusar`); badge de contagem na navegação e na lista de Usuários
+  - **Subusuários da UG**: o `responsavel_unidade_gestora` cadastra usuários da sua Secretaria
+    (`/meus-usuarios`, `SubusuarioController`) — herdam a UG, ficam **pendentes** e o admin define os
+    perfis na aprovação
+  - Migration `add_approval_to_users` (`approval_status` default `aprovado`, `approved_at/by`,
+    `created_by`, `solicitacao_obs`, `rejeitado_motivo`) — usuários existentes seguem aprovados.
+    Usuários criados pelo admin (CRUD) e OSCs entram já aprovados
+
+- [2026-06-29] Interface em pt-BR + política de senha
+  - `APP_LOCALE=pt_BR` (estava `en`); senha mínima **6 caracteres** (texto e/ou números, sem
+    complexidade) via `Password::defaults()` no `AppServiceProvider` + ajustes em UserRequest/OscRegistro
+  - Traduções: `lang/pt_BR.json` (strings do Breeze: login, perfil, etc.) e
+    `lang/pt_BR/{validation,auth,passwords,pagination}.php` (mensagens do framework); rótulo
+    "Dashboard" → "Painel". Mensagens de validação e telas de auth/perfil agora em português
+
+- [2026-06-29] Refinamentos de UI do onboarding
+  - **Navbar responsiva** corrigida (estava espremida): quebra de linha desligada nos itens,
+    container mais largo (`max-w-screen-2xl`) e breakpoint do menu `sm` → `lg` (menu completo só
+    em telas grandes; hambúrguer nas demais)
+  - **Matrícula** virou campo **obrigatório** e **Função/observação** passou a exigir preenchimento
+    no cadastro de subusuário da UG (`SubusuarioController` + view); migration `add_matricula_to_users`
+    (`matricula` única, opcional no modelo)
+
 ---
 
 ## O que está sendo feito
@@ -379,8 +457,8 @@ São 21 perfis. Um usuário pode ter **vários**; os marcados 🔒 são **exclus
 - Próximos blocos do roadmap, em ordem: **Prestação de Contas (4.6)** — apoiada nas despesas/saldo
   da Execução —, **Monitoramento (4.5)**, e **Notificações/e-mails (4.7)**.
 - Pendência transversal: **trilhas de auditoria / logs imutáveis** (requisito não-funcional).
-- Itens finos: "puxar arquivos da OSC" nos checklists 2.2/2.3; campos Exercício/Prazo no Chamamento;
-  reajuste/reequilíbrio na Formalização; matrícula/CNAE no Cadastro.
+- Itens finos: campos Exercício/Prazo no Chamamento; reajuste/reequilíbrio na Formalização;
+  matrícula/CNAE no Cadastro.
 
 ---
 

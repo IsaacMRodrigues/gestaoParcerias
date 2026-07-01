@@ -14,6 +14,8 @@ class ProcessoPeca extends Model
         'parecer_financeiro' => 'Parecer Financeiro',
         'abertura'           => 'Termo de Abertura de Processo',
         'edital'             => 'Edital',
+        'solicitacao_parecer_juridico' => 'Solicitação de Parecer Jurídico',
+        'parecer_juridico'   => 'Parecer Jurídico',
     ];
 
     /**
@@ -26,6 +28,8 @@ class ProcessoPeca extends Model
         'parecer_financeiro' => 'seplan',
         'abertura'           => 'ug',
         'edital'             => 'scp',
+        'solicitacao_parecer_juridico' => 'ug',   // a UG solicita o parecer à Procuradoria
+        'parecer_juridico'   => 'pj',
     ];
 
     public const ETAPA = [
@@ -35,6 +39,8 @@ class ProcessoPeca extends Model
         'parecer_financeiro' => 3,
         'abertura'           => 4,
         'edital'             => 5,
+        'solicitacao_parecer_juridico' => 6,
+        'parecer_juridico'   => 7,
     ];
 
     /**
@@ -91,7 +97,9 @@ HTML,
 <p><br></p>
 <p style="text-align:center">{{responsavel_nome}}<br>Secretária Municipal de {{unidade_gestora}}</p>
 HTML,
-        'pedido_parecer' => <<<'HTML'
+        'pedido_parecer' => self::CABECALHO . <<<'HTML'
+<p style="text-align:center"><strong>PEDIDO DE PARECER FINANCEIRO</strong></p>
+<p><br></p>
 <p>Solicito parecer financeiro do seguinte <strong>processo</strong>:</p>
 <p><strong>Dotação</strong>: XXXXXX. &nbsp; <strong>Ficha</strong>: XXXXX &nbsp; <strong>Fonte</strong>: XXXXXXX</p>
 <p><strong>Objeto do instrumento</strong>: XXXXXXXXX.</p>
@@ -131,6 +139,31 @@ HTML,
 <p style="text-align:center"><strong>EDITAL DE CHAMAMENTO PÚBLICO Nº XXX/{{ano}}</strong></p>
 <p><br></p>
 <p>(Cole ou edite aqui o conteúdo do edital.)</p>
+HTML,
+        'solicitacao_parecer_juridico' => self::CABECALHO . <<<'HTML'
+<p style="text-align:right">{{cidade}}, {{data}}.</p>
+<p><br></p>
+<p><strong>A/C Procuradoria Jurídica Municipal</strong></p>
+<p><br></p>
+<p>Venho por meio deste solicitar parecer jurídico acerca da possibilidade de XXXXXXXXXXXX, referente ao processo de {{numero_processo}}, conforme estabelece a Lei Federal nº 13.019/2014. Também envolve a análise da minuta do termo, que segue em anexo.</p>
+<p>Sendo o que temos para o momento, desde já agradecemos.</p>
+<p><br></p>
+<p style="text-align:center">{{responsavel_nome}}<br>Secretaria Municipal de {{unidade_gestora}}<br>Unidade Gestora</p>
+HTML,
+        'parecer_juridico' => self::CABECALHO . <<<'HTML'
+<p style="text-align:center"><strong>PARECER JURÍDICO Nº XXX/{{ano}}</strong></p>
+<p><strong>PROCESSO:</strong> {{numero_processo}}</p>
+<p><strong>INTERESSADO:</strong> Secretaria Municipal de {{unidade_gestora}} — Unidade Gestora</p>
+<p><strong>ASSUNTO:</strong> Análise jurídica da regularidade do procedimento e da minuta do termo (Lei Federal nº 13.019/2014).</p>
+<p><br></p>
+<p><strong>I — RELATÓRIO</strong></p>
+<p>XXXXXXXXXXXX</p>
+<p><strong>II — FUNDAMENTAÇÃO</strong></p>
+<p>XXXXXXXXXXXX</p>
+<p><strong>III — CONCLUSÃO</strong></p>
+<p>Ante o exposto, esta Procuradoria opina pela XXXXXXXX (regularidade jurídica) do feito, podendo o processo prosseguir para a publicação.</p>
+<p><br></p>
+<p style="text-align:center">XXXXXXXXXX<br>Procurador(a) do Município<br>Procuradoria Jurídica</p>
 HTML,
     ];
 

@@ -7,7 +7,7 @@
 @endphp
 <nav x-data="{ open: false }" class="bg-white border-b border-gray-200 shadow-sm sticky top-0 z-40">
     <!-- Primary Navigation Menu -->
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    <div class="max-w-screen-2xl mx-auto px-4 sm:px-6 lg:px-8">
         <div class="flex justify-between h-16">
             <div class="flex">
                 <!-- Logo -->
@@ -22,9 +22,9 @@
                 </div>
 
                 <!-- Navigation Links -->
-                <div class="hidden space-x-8 sm:-my-px sm:ms-10 sm:flex">
+                <div class="hidden lg:flex lg:-my-px lg:ms-6 xl:ms-8 space-x-4 xl:space-x-6">
                     <x-nav-link :href="route('dashboard')" :active="request()->routeIs('dashboard')">
-                        Dashboard
+                        Painel
                     </x-nav-link>
                     <x-nav-link :href="route('portal.index')" :active="false">
                         Portal Público
@@ -56,9 +56,24 @@
                                class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
                                 OSCs
                             </a>
+                            <div class="border-t border-gray-100 my-1"></div>
+                            @php $navPendentes = \App\Models\User::pendentes()->count(); @endphp
+                            <a href="{{ route('usuarios.pendentes') }}"
+                               class="flex items-center justify-between px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
+                                <span>Aprovações pendentes</span>
+                                @if($navPendentes > 0)
+                                    <span class="px-1.5 py-0.5 text-[11px] font-semibold bg-amber-100 text-amber-700 rounded-full">{{ $navPendentes }}</span>
+                                @endif
+                            </a>
                         </div>
                     </div>
                     @endcan
+
+                    @role('responsavel_unidade_gestora')
+                    <x-nav-link :href="route('subusuarios.index')" :active="request()->routeIs('subusuarios.*')">
+                        Meus usuários
+                    </x-nav-link>
+                    @endrole
 
                     @can('planejamento')
                     <x-nav-link :href="route('processos.index')" :active="request()->routeIs('processos.index') || request()->routeIs('processos.create') || request()->routeIs('processos.show')">
@@ -93,7 +108,7 @@
             </div>
 
             <!-- Settings Dropdown -->
-            <div class="hidden sm:flex sm:items-center sm:ms-6">
+            <div class="hidden lg:flex lg:items-center lg:ms-4">
                 <x-dropdown align="right" width="64">
                     <x-slot name="trigger">
                         <button class="inline-flex items-center gap-2.5 pl-1.5 pr-3 py-1.5 border border-gray-200 rounded-full text-sm font-medium text-gray-600 bg-white hover:bg-gray-50 hover:border-gray-300 focus:outline-none transition ease-in-out duration-150">
@@ -101,7 +116,7 @@
                             <span class="flex flex-col items-start leading-none">
                                 <span class="text-gray-900 font-semibold text-[13px]">{{ Auth::user()->name }}</span>
                                 @if($navRoleLabel)
-                                    <span class="text-[11px] text-gray-400">{{ $navRoleLabel }}</span>
+                                    <span class="hidden xl:block text-[11px] text-gray-400">{{ $navRoleLabel }}</span>
                                 @endif
                             </span>
                             <svg class="fill-current h-4 w-4 text-gray-400" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20">
@@ -140,7 +155,7 @@
             </div>
 
             <!-- Hamburger -->
-            <div class="-me-2 flex items-center sm:hidden">
+            <div class="-me-2 flex items-center lg:hidden">
                 <button @click="open = ! open" class="inline-flex items-center justify-center p-2 rounded-md text-gray-400 hover:text-gray-500 hover:bg-gray-100 focus:outline-none focus:bg-gray-100 focus:text-gray-500 transition duration-150 ease-in-out">
                     <svg class="h-6 w-6" stroke="currentColor" fill="none" viewBox="0 0 24 24">
                         <path :class="{'hidden': open, 'inline-flex': ! open }" class="inline-flex" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
@@ -152,10 +167,10 @@
     </div>
 
     <!-- Responsive Navigation Menu -->
-    <div :class="{'block': open, 'hidden': ! open}" class="hidden sm:hidden">
+    <div :class="{'block': open, 'hidden': ! open}" class="hidden lg:hidden">
         <div class="pt-2 pb-3 space-y-1">
             <x-responsive-nav-link :href="route('dashboard')" :active="request()->routeIs('dashboard')">
-                Dashboard
+                Painel
             </x-responsive-nav-link>
             @can('cadastros')
             <x-responsive-nav-link :href="route('usuarios.index')" :active="request()->routeIs('usuarios.*')">
@@ -167,7 +182,15 @@
             <x-responsive-nav-link :href="route('oscs.index')" :active="request()->routeIs('oscs.*')">
                 OSCs
             </x-responsive-nav-link>
+            <x-responsive-nav-link :href="route('usuarios.pendentes')" :active="request()->routeIs('usuarios.pendentes')">
+                Aprovações pendentes
+            </x-responsive-nav-link>
             @endcan
+            @role('responsavel_unidade_gestora')
+            <x-responsive-nav-link :href="route('subusuarios.index')" :active="request()->routeIs('subusuarios.*')">
+                Meus usuários
+            </x-responsive-nav-link>
+            @endrole
             @can('planejamento')
             <x-responsive-nav-link :href="route('processos.index')" :active="request()->routeIs('processos.index')">
                 Planejamento

@@ -58,6 +58,11 @@ class Chamamento extends Model
         return $this->morphMany(Peca::class, 'pecaable')->orderBy('ordem');
     }
 
+    public function propostas(): \Illuminate\Database\Eloquent\Relations\HasMany
+    {
+        return $this->hasMany(Proposta::class);
+    }
+
     /**
      * Categoria de peças aplicável conforme o tipo do chamamento.
      */

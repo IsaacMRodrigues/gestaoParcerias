@@ -21,7 +21,7 @@ class OscRegistroRequest extends FormRequest
             'email'      => ['required', 'email', 'max:255', 'unique:users,email'],
             'cpf'        => ['required', 'string', 'max:14', 'unique:users,cpf'],
             'resp_phone' => ['nullable', 'string', 'max:20'],
-            'password'   => ['required', 'confirmed', Password::min(8)],
+            'password'   => ['required', 'confirmed', Password::min(6)],
 
             // Dados da OSC
             'osc_name'   => ['required', 'string', 'max:255'],

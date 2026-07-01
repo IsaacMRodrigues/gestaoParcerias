@@ -54,7 +54,18 @@ class TramitacaoController extends Controller
         abort_unless(empty($pendentes), 422,
             'Assine antes de encaminhar: ' . implode(', ', $pendentes) . '.');
 
-        $data = $request->validate(['parecer' => ['nullable', 'string']]);
+        // Na etapa de análise (SCP), o setor define a modalidade da seleção ao aprovar.
+        $ehAnalise = $processo->etapaEhAnalise();
+
+        $rules = ['parecer' => ['nullable', 'string']];
+        if ($ehAnalise) {
+            $rules['modalidade'] = ['required', \Illuminate\Validation\Rule::in(array_keys(Processo::MODALIDADES))];
+        }
+
+        $data = $request->validate($rules, [
+            'modalidade.required' => 'Selecione a modalidade (Chamamento Público, Dispensa ou Inexigibilidade) antes de aprovar.',
+            'modalidade.in'       => 'Modalidade inválida.',
+        ]);
 
         $proxEtapa = $processo->etapa + 1;
         $proxSetor = Processo::ETAPAS[$proxEtapa]['setor'];
@@ -68,11 +79,16 @@ class TramitacaoController extends Controller
             'status'      => 'enviado',
         ]);
 
-        $processo->update([
+        $update = [
             'etapa'       => $proxEtapa,
             'setor_atual' => $proxSetor,
             'status'      => 'em_tramite',
-        ]);
+        ];
+        if ($ehAnalise) {
+            $update['modalidade'] = $data['modalidade'];
+        }
+
+        $processo->update($update);
 
         return redirect()->route('processos.show', $processo)
             ->with('success', 'Processo encaminhado para ' . Processo::SETORES[$proxSetor] . '.');

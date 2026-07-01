@@ -1,4 +1,4 @@
-Plataforma de Gestão de Parcerias - PGP
+1Plataforma de Gestão de Parcerias - PGP
 
 1. Objetivo da Solução
 Desenvolver uma plataforma web integrada para gestão completa de parcerias públicas consolidando funcionalidades inspiradas no Transferegov e no SIGCON-SAÍDA.

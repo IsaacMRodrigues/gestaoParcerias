@@ -45,6 +45,7 @@ class ValidacaoController extends Controller
                 'assinante'   => $peca->assinante?->name,
                 'assinado_em' => $peca->assinado_em,
                 'codigo'      => $peca->codigo_validacao,
+                'conteudo'    => $peca->conteudo,
             ];
         } else {
             $op = OrdemPagamento::with(['assinante', 'instrumento.proposta.osc'])
@@ -62,6 +63,7 @@ class ValidacaoController extends Controller
                     'assinante'   => $op->assinante?->name,
                     'assinado_em' => $op->assinado_em,
                     'codigo'      => $op->codigo_validacao,
+                    'conteudo'    => $op->conteudo,
                 ];
             }
         }

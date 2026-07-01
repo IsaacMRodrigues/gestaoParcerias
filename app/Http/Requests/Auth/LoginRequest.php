@@ -50,6 +50,18 @@ class LoginRequest extends FormRequest
             ]);
         }
 
+        // Bloqueia cadastros pendentes de aprovação, recusados ou inativos.
+        $user = Auth::user();
+        if (! $user->podeAutenticar()) {
+            $mensagem = $user->mensagemBloqueioLogin();
+            Auth::logout();
+            RateLimiter::hit($this->throttleKey());
+
+            throw ValidationException::withMessages([
+                'email' => $mensagem,
+            ]);
+        }
+
         RateLimiter::clear($this->throttleKey());
     }
 
