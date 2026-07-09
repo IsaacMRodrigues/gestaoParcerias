@@ -496,10 +496,20 @@ São 21 perfis. Um usuário pode ter **vários**; os marcados 🔒 são **exclus
   - Migration `seed_modelos_selecao_dispensa`: preenche as peças de Seleção vazias e re-semeia as peças
     do trâmite que ainda tinham placeholder — **conservador**: nunca sobrescreve conteúdo assinado ou editado
 
+- [2026-07-09] Rota de Dispensa/Inexigibilidade conferida com o checklist oficial e commitada
+  - Cruzamento com `Docs. Desenvolvimento/checklist_dispensa⁄inexigibilidade.pdf` (Lei 13.019/2014,
+    arts. 30–32): itens **1–14** cobertos (trâmite 1–6 + Seleção 2.2 itens 7–14); item **15** parcial
+    (upload de extrato, sem integração DOE/GovBr); itens **16–18** ainda não implementados
+    (autorização de início à OSC, solicitação de dados bancários, Nota de Empenho Global)
+  - Código, migrations, view `processos/selecao`, modelos VII–XI e PDFs de checklist versionados
+    no GitHub (`main`)
+
 ---
 
 ## O que está sendo feito
 
+- Fechar o checklist de dispensa: itens **16–18** (autorização à OSC, dados bancários, Nota de
+  Empenho) e completar a **publicação do Termo** (item 15 — DOE / site / GovBr).
 - Próximos blocos do roadmap, em ordem: **Prestação de Contas (4.6)** — apoiada nas despesas/saldo
   da Execução —, **Monitoramento (4.5)**, e **Notificações/e-mails (4.7)**.
 - Pendência transversal: **trilhas de auditoria / logs imutáveis** (requisito não-funcional).
