@@ -74,27 +74,36 @@ flowchart TD
 
 ### Trâmite interno do Planejamento (Módulo UG 2.1)
 
-As 9 etapas do processo entre os setores, conforme `Processo::ETAPAS`. O SCP pode **devolver** para a UG na etapa de análise.
+O trâmite **bifurca na análise do SCP (etapa 1)**, quando a modalidade é decidida. As etapas 0–4
+são comuns às duas rotas; a partir da 5 o caminho muda (`Processo::ETAPAS` × `ETAPAS_DISPENSA`,
+resolvidos por `$processo->etapas()`). O SCP pode **devolver** para a UG. Use sempre
+`$processo->etapas()` — nunca a constante estática.
 
 ```mermaid
 flowchart LR
     A(["Abertura"]) --> E1["UG<br/>Ofício + Termo de<br/>Referência (assinar)"]
-    E1 --> E2{"SCP<br/>analisar"}
+    E1 --> E2{"SCP analisar<br/>+ definir<br/>modalidade"}
     E2 -->|rejeita| E1
     E2 -->|aprova| E3["UG<br/>Solicitar Parecer<br/>Financeiro à SEPLAN"]
     E3 --> E4["SEPLAN<br/>emitir Parecer<br/>Financeiro"]
     E4 --> E5["UG<br/>Abertura do<br/>Processo (assinar)"]
-    E5 --> E6["SCP<br/>elaborar Edital"]
-    E6 --> E7["UG<br/>assinar Edital +<br/>Solicitar Parecer<br/>Jurídico (assinar)"]
-    E7 --> E8["PJ<br/>emitir Parecer<br/>Jurídico (assinar)"]
-    E8 --> E9["SCP<br/>publicar no site"]
-    E9 --> Z(["Concluído"])
+    E5 -->|Chamamento Público| C6["SCP<br/>elaborar Edital"]
+    C6 --> C7["UG<br/>assinar Edital +<br/>Solicitar Parecer<br/>Jurídico (assinar)"]
+    C7 --> C8["PJ<br/>emitir Parecer<br/>Jurídico (assinar)"]
+    C8 --> C9["SCP<br/>publicar no site"]
+    C9 --> Z(["Concluído"])
+    E5 -->|Dispensa/Inexig.| D6["UG<br/>emitir e assinar<br/>Justificativa<br/>(+ Parecer CNAS)"]
+    D6 --> D7["SCP<br/>publicar<br/>Justificativa"]
+    D7 --> Z
 ```
 
 > O número do processo segue o padrão `UG.Sequencial.Ano.Esfera` (ex.: `0206.0133.2026.01`).
-> A **Procuradoria Jurídica (`pj`)** entra como etapa do trâmite: no mesmo passo em que assina o
-> Edital, a UG preenche e assina a **Solicitação de Parecer Jurídico** (Modelo VI) e encaminha à PJ,
-> que emite e assina o **Parecer Jurídico** e devolve à SCP para publicação.
+> **Rota Chamamento Público (9 etapas):** a **Procuradoria Jurídica (`pj`)** entra no trâmite — no
+> mesmo passo em que assina o Edital, a UG preenche e assina a **Solicitação de Parecer Jurídico**
+> (Modelo VI) e encaminha à PJ, que emite o **Parecer Jurídico** e devolve à SCP para publicação.
+> **Rota Dispensa/Inexigibilidade (7 etapas):** no lugar do Edital+Jurídico, a **UG emite e assina a
+> Justificativa** de Dispensa/Inexigibilidade (art. 30–32 da Lei 13.019/2014) — com o **Parecer
+> Técnico CNAS** opcional, só nas parcerias do SUAS — e o SCP publica.
 
 ---
 
@@ -449,6 +458,43 @@ São 21 perfis. Um usuário pode ter **vários**; os marcados 🔒 são **exclus
   - **Matrícula** virou campo **obrigatório** e **Função/observação** passou a exigir preenchimento
     no cadastro de subusuário da UG (`SubusuarioController` + view); migration `add_matricula_to_users`
     (`matricula` única, opcional no modelo)
+
+- [2026-07-03] Módulo 2 — rota de **Dispensa/Inexigibilidade** no trâmite (Lei 13.019/2014, arts. 30–32)
+  - Quando o SCP decide **Dispensa** ou **Inexigibilidade** na análise (etapa 1), o trâmite passa a
+    seguir uma rota própria de **7 etapas** (`Processo::ETAPAS_DISPENSA`), em vez das 9 do Chamamento:
+    depois da Abertura, no lugar de *Edital → Solicitação/Parecer Jurídico*, a **UG emite e assina a
+    Justificativa** de Dispensa/Inexigibilidade e o **SCP publica**. Etapas 0–4 são idênticas nas duas rotas
+  - `ETAPAS` virou **ciente da modalidade**: `Processo::etapas()`/`ehDispensa()` resolvem a sequência;
+    todos os consumidores (`etapaInfo`, `proximoSetor`, `setorAnterior`, `totalEtapas`, `pendenciasParaAvancar`,
+    `TramitacaoController@avancar/devolver`, stepper e lista de peças no `show`) passaram a usar `etapas()`
+  - Duas peças novas em `ProcessoPeca`: **Justificativa de Dispensa/Inexigibilidade** (UG, etapa 5,
+    modelo com cabeçalho + fundamento legal) e **Parecer Técnico (CNAS)** — opcional, só parcerias do SUAS.
+    Reaproveitam o motor de assinatura (carimbo+QR), validação pública e PDF já existentes
+  - Migration `add_rota_dispensa_pecas`: cria as peças nos processos abertos e **realinha** os de
+    dispensa/inexigibilidade que já estavam além da rota curta (a publicação final 8→6; Edital/Jurídico 5–7→5)
+  - Peças opcionais têm fonte única em `ProcessoPeca::OPCIONAIS` (não bloqueiam o avanço) + badge "opcional" no `show`
+
+- [2026-07-03] Ponte **Processo → Seleção 2.2** para a rota de dispensa (itens 7–18 do checklist)
+  - A partir da Justificativa (etapa ≥ 5) o processo de dispensa ganha o card **"Seleção 2.2 — Celebração"**
+    (`processos/{processo}/selecao`), reunindo plano de trabalho, habilitação, pareceres, minuta e termo
+  - Reusa **integralmente** o motor `Peca` ancorando o checklist `dispensa_inexigibilidade` **ao próprio
+    Processo** (relação polimórfica `Processo::pecasSelecao()`), já que na dispensa não há Chamamento
+    competitivo. `Peca::sincronizar()` ganhou parâmetro de relação (default `pecas`) para não colidir com
+    as peças do trâmite. O partial `pecas/_checklist` e as rotas `pecas.*` (por id) servem sem alteração
+  - Guardas: `abort 404` fora da modalidade dispensa; `abort 403` antes da etapa da Justificativa
+    (`Processo::podeVerSelecao()`). O "puxar do módulo Gestão de Parcerias" fica indisponível (sem proposta
+    ligada ao Processo) — o partial já degrada com aviso; upload/assinatura manuais funcionam normalmente
+
+- [2026-07-03] Modelos oficiais VII–XI encaixados na rota de dispensa
+  - **Trâmite** (`ProcessoPeca::MODELO`): a **Justificativa** (Modelo VIII, art. 30, VI / 32) e o **Parecer
+    Técnico CNAS** (Modelo IX, Res. 21/2016) trocaram o texto-placeholder pelos **textos oficiais** do
+    cliente (HTML com cabeçalho/brasão + tokens `{{...}}`)
+  - **Seleção 2.2** ganhou pré-preenchimento: novo `Peca::MODELO` (por categoria→chave) semeado no
+    `sincronizar()` — **Certidão de Autuação** (VII), **Parecer Técnico da UG p/ celebração** (X) e
+    **Protocolo ao Jurídico** (XI), além de Justificativa e Parecer CNAS. Motor `Peca` não tinha modelo;
+    agora as peças "modelo" nascem com o texto oficial (texto puro, pois a Seleção usa textarea simples)
+  - Migration `seed_modelos_selecao_dispensa`: preenche as peças de Seleção vazias e re-semeia as peças
+    do trâmite que ainda tinham placeholder — **conservador**: nunca sobrescreve conteúdo assinado ou editado
 
 ---
 

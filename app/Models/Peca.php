@@ -117,6 +117,120 @@ class Peca extends Model
         'apostilamento'            => ['manifestacao_osc', 'orcamento_cotacao', 'extratos_bancarios', 'plano_trabalho_atualizado'],
     ];
 
+    /**
+     * Texto-modelo pré-preenchido das peças "modelo" da Seleção (semeado no
+     * `sincronizar`). Chaveado por categoria → chave. A Seleção usa textarea
+     * simples (sem editor rico), então o conteúdo é texto puro editável.
+     */
+    public const MODELO = [
+        'dispensa_inexigibilidade' => [
+            'justificativa' => <<<'TXT'
+JUSTIFICATIVA PARA INEXIGIBILIDADE OU DISPENSA
+(art. 32 da Lei nº 13.019/2014)
+
+São Gonçalo do Rio Abaixo, XX de XXXX de 20XX.
+
+ÓRGÃO RESPONSÁVEL: Secretaria Municipal de XXXXXX
+OSC: XXXXXXXXXX
+DOTAÇÃO ORÇAMENTÁRIA: XXXX  Ficha XXXX  Fonte XXXX
+DURAÇÃO: XX meses
+OBJETO DA PARCERIA: XXXXXXXXXX.
+
+1. DESCRIÇÃO DA REALIDADE OBJETO DA PARCERIA
+XXXXXXXXXX.
+
+2. JUSTIFICATIVA
+Considerando que a Lei Federal 13.019/2014 estabeleceu o regime jurídico das parcerias entre a Administração Pública e as Organizações da Sociedade Civil, tendo como regra geral o Chamamento Público;
+Considerando o Decreto Municipal 048/2020, que regulamenta a Lei nº 13.019/2014 no âmbito do município;
+Considerando que o art. 30, VI, da Lei nº 13.019/2014 prevê a dispensa de Chamamento Público no caso de atividades de educação, saúde e assistência social executadas por OSC previamente credenciadas pelo órgão gestor da respectiva política;
+Considerando que a OSC atende aos critérios do art. 2º, I, da Lei 13.019/2014 e apresentou os documentos exigidos;
+Diante do exposto, entendemos haver justificativa válida, idônea e de interesse público para a celebração de Termo de XXXXXX por XXXXXX de Chamamento Público, conforme art. 30, VI, da Lei nº 13.019/2014.
+
+XXXXXXXXXX
+Secretária Municipal de XXXXXX
+Unidade Gestora
+TXT,
+            'parecer_tecnico_cnas' => <<<'TXT'
+PARECER TÉCNICO
+(Art. 3º, §2º, II da Resolução nº 21/2016 - CNAS)
+
+ÓRGÃO RESPONSÁVEL: Secretaria Municipal de XXXXXX
+OSC: XXXXXXXXXX
+OBJETO DA PARCERIA: XXXXXXXXXX.
+
+O presente parecer foi elaborado observando o disposto na Resolução nº 21/2016 - CNAS, que trata dos requisitos para a dispensa de chamamento público de OSC.
+
+A OSC oferece serviço nos moldes da Política Nacional de Assistência Social e da Tipificação Nacional de Serviços Socioassistenciais (Resolução CNAS nº 109/2009), enquadrando-se na proteção social XXXXXX.
+
+Destaca-se que a OSC é credenciada na Secretaria Municipal de Trabalho e Desenvolvimento Social e no Conselho Municipal de Assistência Social, e que o Município não possui outros serviços socioassistenciais voltados a XXXXXXXXXX.
+
+Diante do exposto, conclui-se que as atividades exercidas pela OSC não podem ser interrompidas, tendo em vista que a descontinuidade da oferta apresenta dano mais gravoso à integridade do usuário.
+
+XXXXXXXXXX
+Assistente Social
+Secretaria Municipal de XXXXXX
+TXT,
+            'parecer_tecnico_celebracao' => <<<'TXT'
+PARECER TÉCNICO PARA CELEBRAÇÃO DA PARCERIA
+
+A Secretaria Municipal de XXXXXX, com base no que estabelece o inciso V do art. 35 da Lei 13.019/2014, referente à parceria a ser firmada entre o Município de São Gonçalo do Rio Abaixo e a OSC XXXXXXXXXX, conforme o processo nº XXXXXXXX, que tem por objeto XXXXXXXXXX, vem por meio deste parecer se pronunciar de forma expressa sobre os pontos abaixo:
+
+a) Quanto ao mérito do plano de trabalho, em conformidade com a modalidade de parceria adotada: FAVORÁVEL.
+b) Quanto à identidade e reciprocidade de interesse das partes: FAVORÁVEL.
+c) Quanto à viabilidade de execução: FAVORÁVEL.
+d) Quanto ao cronograma de desembolso: FAVORÁVEL.
+e) Quanto aos meios de fiscalização e à avaliação da execução física e financeira: FAVORÁVEL.
+f) Quanto à designação do gestor da parceria: FAVORÁVEL.
+g) Quanto à designação da comissão de monitoramento e avaliação: FAVORÁVEL.
+h) Quanto às condições de funcionamento da instituição (art. 17 da Lei 4.320/1964): FAVORÁVEL.
+
+Com base no exposto, o parecer é de que a celebração da parceria é possível.
+
+São Gonçalo do Rio Abaixo, XX de XXXX de 20XX.
+
+XXXXXXXXXX
+Secretária de XXXXXX
+Unidade Gestora
+TXT,
+            'certidao_autuacao' => <<<'TXT'
+CERTIDÃO DE AUTUAÇÃO
+
+Ao(s) XX dia(s) do mês de XXXX de 20XX, eu, XXXXXXXXXX, do Setor de Convênios e Parcerias, autuei os documentos abaixo relacionados, referentes ao processo nº XXXXXXXX (Termo de XXXXXX), por intermédio da Secretaria Municipal de XXXXXX, que me foram apresentados:
+
+- Manifestação de interesse da Unidade Gestora;
+- Reserva de dotação (parecer de viabilidade orçamentária);
+- Abertura do processo;
+- Plano de trabalho e aplicação de recurso;
+- Aprovação do plano de trabalho;
+- Documentos de habilitação (certidões, declarações, estatuto e alterações registradas, ata da diretoria, relação de dirigentes, RG/CPF e comprovante de endereço do representante legal);
+- Portaria do Gestor;
+- Portaria da Comissão de Monitoramento e Avaliação;
+- Parecer da Unidade Gestora;
+- Minuta do Termo.
+
+São Gonçalo do Rio Abaixo - MG, XX de XXXX de 20XX.
+
+XXXXXXXXXX
+Setor de Convênios e Parcerias
+TXT,
+            'protocolo_juridico' => <<<'TXT'
+São Gonçalo do Rio Abaixo, XX de XXXX de 20XX.
+
+A/C Procuradoria Jurídica Municipal
+
+Venho por meio deste solicitar parecer jurídico acerca da possibilidade de XXXXXXXXXX, referente ao processo nº XXXXXXXX, conforme estabelece a Lei Federal nº 13.019/2014.
+
+Também envolve a análise da minuta do termo, que segue em anexo.
+
+Sendo o que temos para o momento, desde já agradecemos.
+
+XXXXXXXXXX
+Secretaria Municipal de XXXXXX
+Unidade Gestora
+TXT,
+        ],
+    ];
+
     public function pecaable(): MorphTo
     {
         return $this->morphTo();
@@ -183,20 +297,30 @@ class Peca extends Model
 
     /**
      * Cria (idempotente) as peças de uma categoria para um registro a partir do template.
+     * $relacao permite apontar para uma relação morphMany diferente de `pecas()`
+     * (o Processo já usa `pecas()` para as peças do trâmite, então a Seleção
+     * polimórfica vive em `pecasSelecao()`).
      */
-    public static function sincronizar(Model $pecaable, string $categoria): void
+    public static function sincronizar(Model $pecaable, string $categoria, string $relacao = 'pecas'): void
     {
         $template = self::TEMPLATES[$categoria] ?? [];
 
         foreach ($template as $i => $item) {
-            $pecaable->pecas()->firstOrCreate(
+            $novos = [
+                'rotulo'      => $item['rotulo'],
+                'tipo'        => $item['tipo'],
+                'obrigatorio' => $item['obrigatorio'] ?? true,
+                'ordem'       => $i,
+            ];
+
+            // semeia o texto-modelo das peças "modelo" que possuem template
+            if (($item['tipo'] ?? null) === 'modelo' && isset(self::MODELO[$categoria][$item['chave']])) {
+                $novos['conteudo'] = self::MODELO[$categoria][$item['chave']];
+            }
+
+            $pecaable->{$relacao}()->firstOrCreate(
                 ['categoria' => $categoria, 'chave' => $item['chave']],
-                [
-                    'rotulo'      => $item['rotulo'],
-                    'tipo'        => $item['tipo'],
-                    'obrigatorio' => $item['obrigatorio'] ?? true,
-                    'ordem'       => $i,
-                ]
+                $novos
             );
         }
     }

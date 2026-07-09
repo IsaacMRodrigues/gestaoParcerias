@@ -5,6 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\MorphMany;
 
 class Processo extends Model
 {
@@ -32,6 +33,11 @@ class Processo extends Model
     /**
      * Etapas do trâmite do planejamento (fluxo confirmado pelo cliente).
      * O índice da etapa é guardado na coluna `etapa`.
+     *
+     * A rota bifurca na etapa 1 (análise do SCP), quando a modalidade é decidida:
+     * Chamamento Público segue por `ETAPAS` (Edital → Jurídico → publicação);
+     * Dispensa/Inexigibilidade segue por `ETAPAS_DISPENSA` (Justificativa → publicação).
+     * As etapas 0–4 são idênticas nas duas rotas. Use sempre `$processo->etapas()`.
      */
     public const ETAPAS = [
         ['setor' => 'ug',     'acao' => 'Preencher Ofício e Termo de Referência e assinar'],
@@ -39,10 +45,25 @@ class Processo extends Model
         ['setor' => 'ug',     'acao' => 'Solicitar o Parecer Financeiro à SEPLAN (Pedido de Parecer)'],
         ['setor' => 'seplan', 'acao' => 'Emitir o Parecer Financeiro e assinar'],
         ['setor' => 'ug',     'acao' => 'Conferir o parecer e fazer a Abertura do Processo (assinar AP)'],
-        ['setor' => 'scp',    'acao' => 'Elaborar o Edital (ou justificativa de dispensa/inexigibilidade)'],
+        ['setor' => 'scp',    'acao' => 'Elaborar o Edital'],
         ['setor' => 'ug',     'acao' => 'Assinar o Edital e solicitar o Parecer Jurídico à Procuradoria (preencher e assinar a solicitação)'],
         ['setor' => 'pj',     'acao' => 'Emitir o Parecer Jurídico e encaminhar à SCP (preencher e assinar)'],
         ['setor' => 'scp',    'acao' => 'Publicar no site oficial (trâmite externo)'],
+    ];
+
+    /**
+     * Rota da Dispensa/Inexigibilidade (Lei 13.019/2014, arts. 30–32).
+     * Etapas 0–4 idênticas ao Chamamento; a partir da 5 entra a Justificativa
+     * (emitida e assinada pela UG) no lugar do Edital + Parecer Jurídico.
+     */
+    public const ETAPAS_DISPENSA = [
+        ['setor' => 'ug',     'acao' => 'Preencher Ofício e Termo de Referência e assinar'],
+        ['setor' => 'scp',    'acao' => 'Analisar o Ofício e o Termo de Referência: aprovar ou rejeitar', 'analise' => true],
+        ['setor' => 'ug',     'acao' => 'Solicitar o Parecer Financeiro à SEPLAN (Pedido de Parecer)'],
+        ['setor' => 'seplan', 'acao' => 'Emitir o Parecer Financeiro e assinar'],
+        ['setor' => 'ug',     'acao' => 'Conferir o parecer e fazer a Abertura do Processo (assinar AP)'],
+        ['setor' => 'ug',     'acao' => 'Emitir e assinar a Justificativa de Dispensa/Inexigibilidade (e, se parceria do SUAS, o Parecer Técnico CNAS)'],
+        ['setor' => 'scp',    'acao' => 'Publicar a Justificativa no site oficial (trâmite externo)'],
     ];
 
     public const AREAS_TEMATICAS = [
@@ -99,6 +120,32 @@ class Processo extends Model
     public function peca(string $tipo): ?ProcessoPeca
     {
         return $this->pecas->firstWhere('tipo', $tipo);
+    }
+
+    /**
+     * Seleção 2.2 (checklist documental polimórfico) — usada na rota de
+     * Dispensa/Inexigibilidade para reunir os itens de celebração (7–18 do
+     * checklist): plano de trabalho, habilitação, pareceres, minuta e termo.
+     * Fica separada de `pecas()` (peças do trâmite) por usar o motor `Peca`.
+     */
+    public function pecasSelecao(): MorphMany
+    {
+        return $this->morphMany(Peca::class, 'pecaable');
+    }
+
+    /** Categoria do checklist de Seleção conforme a modalidade (só dispensa hoje). */
+    public function categoriaSelecao(): string
+    {
+        return 'dispensa_inexigibilidade';
+    }
+
+    /**
+     * A Seleção 2.2 fica disponível na rota de dispensa/inexigibilidade a partir
+     * da etapa da Justificativa (5) — ou seja, depois da Abertura do Processo.
+     */
+    public function podeVerSelecao(): bool
+    {
+        return $this->ehDispensa() && ($this->status === 'concluido' || $this->etapa >= 5);
     }
 
     public function tramitacoes(): HasMany
@@ -167,10 +214,22 @@ class Processo extends Model
 
     // ----- Fluxo guiado -----
 
+    /** A modalidade é dispensa ou inexigibilidade? (define a rota do trâmite) */
+    public function ehDispensa(): bool
+    {
+        return in_array($this->modalidade, ['dispensa', 'inexigibilidade'], true);
+    }
+
+    /** Sequência de etapas conforme a modalidade (chamamento por padrão). */
+    public function etapas(): array
+    {
+        return $this->ehDispensa() ? self::ETAPAS_DISPENSA : self::ETAPAS;
+    }
+
     public function etapaInfo(?int $i = null): array
     {
         $i = $i ?? $this->etapa;
-        return self::ETAPAS[$i] ?? ['setor' => $this->setor_atual, 'acao' => '—'];
+        return $this->etapas()[$i] ?? ['setor' => $this->setor_atual, 'acao' => '—'];
     }
 
     /** A etapa atual é de análise (aprovar/rejeitar), sem documento próprio? */
@@ -181,7 +240,7 @@ class Processo extends Model
 
     public function totalEtapas(): int
     {
-        return count(self::ETAPAS);
+        return count($this->etapas());
     }
 
     public function ultimaEtapa(): bool
@@ -191,12 +250,12 @@ class Processo extends Model
 
     public function proximoSetor(): ?string
     {
-        return self::ETAPAS[$this->etapa + 1]['setor'] ?? null;
+        return $this->etapas()[$this->etapa + 1]['setor'] ?? null;
     }
 
     public function setorAnterior(): ?string
     {
-        return $this->etapa > 0 ? (self::ETAPAS[$this->etapa - 1]['setor'] ?? null) : null;
+        return $this->etapa > 0 ? ($this->etapas()[$this->etapa - 1]['setor'] ?? null) : null;
     }
 
     /**
@@ -215,6 +274,7 @@ class Processo extends Model
     public function pendenciasParaAvancar(): array
     {
         $pend = [];
+        $ehDispensa = $this->ehDispensa();
 
         if ($this->etapa === 0) {
             if (!$this->peca('oficio')?->assinado())             $pend[] = 'Ofício';
@@ -226,14 +286,21 @@ class Processo extends Model
         } elseif ($this->etapa === 4) {
             if (!$this->peca('abertura')?->assinado())            $pend[] = 'Termo de Abertura';
         } elseif ($this->etapa === 5) {
-            if (empty($this->peca('edital')?->conteudo))          $pend[] = 'Edital (elaborar)';
-        } elseif ($this->etapa === 6) {
+            if ($ehDispensa) {
+                // Dispensa/Inexigibilidade: a UG emite e assina a Justificativa
+                // (o Parecer Técnico CNAS é opcional — só nas parcerias do SUAS).
+                if (!$this->peca('justificativa_dispensa')?->assinado()) $pend[] = 'Justificativa de Dispensa/Inexigibilidade';
+            } else {
+                if (empty($this->peca('edital')?->conteudo))      $pend[] = 'Edital (elaborar)';
+            }
+        } elseif ($this->etapa === 6 && !$ehDispensa) {
             if (!$this->peca('edital')?->assinado())              $pend[] = 'Edital (assinatura da UG)';
             if (!$this->peca('solicitacao_parecer_juridico')?->assinado()) $pend[] = 'Solicitação de Parecer Jurídico';
-        } elseif ($this->etapa === 7) {
+        } elseif ($this->etapa === 7 && !$ehDispensa) {
             if (!$this->peca('parecer_juridico')?->assinado())    $pend[] = 'Parecer Jurídico';
         }
         // etapa 1 (SCP): apenas analisa e devolve — sem documento obrigatório
+        // etapa final (SCP publica): sem pendência — segue para "Concluir"
 
         return $pend;
     }

@@ -67,8 +67,13 @@ class TramitacaoController extends Controller
             'modalidade.in'       => 'Modalidade inválida.',
         ]);
 
+        // A modalidade decidida na análise já resolve a rota da(s) próxima(s) etapa(s).
+        if ($ehAnalise && !empty($data['modalidade'])) {
+            $processo->modalidade = $data['modalidade'];
+        }
+
         $proxEtapa = $processo->etapa + 1;
-        $proxSetor = Processo::ETAPAS[$proxEtapa]['setor'];
+        $proxSetor = $processo->etapas()[$proxEtapa]['setor'];
 
         $processo->tramitacoes()->create([
             'de_setor'    => $processo->setor_atual,
@@ -107,7 +112,7 @@ class TramitacaoController extends Controller
         ]);
 
         $etapaAnterior = $processo->etapa - 1;
-        $setorAnterior = Processo::ETAPAS[$etapaAnterior]['setor'];
+        $setorAnterior = $processo->etapas()[$etapaAnterior]['setor'];
 
         $processo->tramitacoes()->create([
             'de_setor'    => $processo->setor_atual,

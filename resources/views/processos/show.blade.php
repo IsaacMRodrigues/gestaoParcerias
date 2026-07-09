@@ -39,7 +39,7 @@
             <div class="bg-white shadow rounded-lg p-6">
                 <h3 class="text-base font-semibold text-gray-800 mb-4">Fluxo do Planejamento</h3>
                 <ol class="flex flex-wrap gap-y-3">
-                    @foreach(\App\Models\Processo::ETAPAS as $i => $et)
+                    @foreach($processo->etapas() as $i => $et)
                         @php
                             $feita = $i < $processo->etapa || $processo->status === 'concluido';
                             $atualEtapa = $i === $processo->etapa && $processo->status !== 'concluido';
@@ -77,6 +77,30 @@
                 @endif
             </div>
 
+            {{-- Seleção 2.2 (Celebração) — rota de Dispensa/Inexigibilidade --}}
+            @if($processo->podeVerSelecao())
+                @php $progSel = \App\Models\Peca::progresso($processo->pecasSelecao); @endphp
+                <a href="{{ route('processos.selecao', $processo) }}"
+                   class="block bg-white shadow rounded-lg p-6 hover:ring-2 hover:ring-indigo-200 transition">
+                    <div class="flex items-center justify-between gap-4">
+                        <div>
+                            <h3 class="text-base font-semibold text-gray-800">Seleção 2.2 — Celebração da Parceria</h3>
+                            <p class="text-sm text-gray-500 mt-0.5">
+                                Plano de trabalho, habilitação, pareceres, minuta e termo (itens 7–18 do checklist de dispensa).
+                            </p>
+                        </div>
+                        <div class="text-right shrink-0">
+                            @if($processo->pecasSelecao->isNotEmpty())
+                                <span class="text-sm font-medium text-gray-700">{{ $progSel['ok'] }}/{{ $progSel['total'] }}</span>
+                                <span class="block text-xs text-gray-400">obrigatórias</span>
+                            @else
+                                <span class="text-sm font-medium text-indigo-600">Iniciar &rarr;</span>
+                            @endif
+                        </div>
+                    </div>
+                </a>
+            @endif
+
             {{-- Alertas automáticos --}}
             <div class="bg-white shadow rounded-lg p-6">
                 <h3 class="text-base font-semibold text-gray-800 mb-3">Conformidade do Planejamento</h3>
@@ -110,7 +134,10 @@
                     if (!empty($p->conteudo)) return 'Preenchido — não assinado';
                     return 'Não preenchido';
                 };
-                $ordem = ['oficio', 'termo_referencia', 'pedido_parecer', 'parecer_financeiro', 'abertura', 'edital', 'solicitacao_parecer_juridico', 'parecer_juridico'];
+                $comum = ['oficio', 'termo_referencia', 'pedido_parecer', 'parecer_financeiro', 'abertura'];
+                $ordem = $processo->ehDispensa()
+                    ? array_merge($comum, ['justificativa_dispensa', 'parecer_cnas'])
+                    : array_merge($comum, ['edital', 'solicitacao_parecer_juridico', 'parecer_juridico']);
             @endphp
             <div class="bg-white shadow rounded-lg">
                 <form method="GET" action="{{ route('processos.pecas.imprimir-lote', $processo) }}"
@@ -139,6 +166,9 @@
                                         <div>
                                             <p class="text-sm font-semibold text-gray-800">{{ $i + 1 }}. {{ \App\Models\ProcessoPeca::TIPOS[$tipo] }}
                                                 <span class="text-xs font-normal text-gray-400">— {{ strtoupper($p->setorResponsavel()) }}</span>
+                                                @if(in_array($tipo, \App\Models\ProcessoPeca::OPCIONAIS))
+                                                    <span class="ml-1 text-[10px] font-medium text-gray-500 bg-gray-100 px-1.5 py-0.5 rounded-full">opcional</span>
+                                                @endif
                                             </p>
                                             <p class="text-xs text-gray-400">{{ $statusPeca($p) }}</p>
                                         </div>

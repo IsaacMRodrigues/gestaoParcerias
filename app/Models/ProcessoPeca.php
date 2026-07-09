@@ -16,7 +16,16 @@ class ProcessoPeca extends Model
         'edital'             => 'Edital',
         'solicitacao_parecer_juridico' => 'Solicitação de Parecer Jurídico',
         'parecer_juridico'   => 'Parecer Jurídico',
+        // Rota Dispensa/Inexigibilidade (no lugar do Edital + Jurídico)
+        'justificativa_dispensa' => 'Justificativa de Dispensa/Inexigibilidade',
+        'parecer_cnas'           => 'Parecer Técnico (CNAS)',
     ];
+
+    /**
+     * Peças opcionais — não bloqueiam o avanço da etapa (ver `pendenciasParaAvancar`).
+     * Ex.: o Parecer Técnico CNAS só se aplica às parcerias do SUAS.
+     */
+    public const OPCIONAIS = ['parecer_cnas'];
 
     /**
      * Setor que PREENCHE cada peça e em qual etapa do fluxo.
@@ -30,6 +39,8 @@ class ProcessoPeca extends Model
         'edital'             => 'scp',
         'solicitacao_parecer_juridico' => 'ug',   // a UG solicita o parecer à Procuradoria
         'parecer_juridico'   => 'pj',
+        'justificativa_dispensa' => 'ug',   // a UG emite e assina a justificativa
+        'parecer_cnas'           => 'ug',   // opcional — só nas parcerias do SUAS
     ];
 
     public const ETAPA = [
@@ -41,6 +52,9 @@ class ProcessoPeca extends Model
         'edital'             => 5,
         'solicitacao_parecer_juridico' => 6,
         'parecer_juridico'   => 7,
+        // Rota Dispensa: ambas na etapa 5 (a justificativa substitui o edital)
+        'justificativa_dispensa' => 5,
+        'parecer_cnas'           => 5,
     ];
 
     /**
@@ -164,6 +178,44 @@ HTML,
 <p>Ante o exposto, esta Procuradoria opina pela XXXXXXXX (regularidade jurídica) do feito, podendo o processo prosseguir para a publicação.</p>
 <p><br></p>
 <p style="text-align:center">XXXXXXXXXX<br>Procurador(a) do Município<br>Procuradoria Jurídica</p>
+HTML,
+        'justificativa_dispensa' => self::CABECALHO . <<<'HTML'
+<p style="text-align:center"><strong>JUSTIFICATIVA PARA INEXIGIBILIDADE OU DISPENSA</strong><br>(art. 32, da Lei nº 13.019/2014)</p>
+<p style="text-align:right">{{cidade}}, {{data}}.</p>
+<p><br></p>
+<p><strong>ÓRGÃO RESPONSÁVEL:</strong> Secretaria Municipal de {{unidade_gestora}}</p>
+<p><strong>OSC:</strong> XXXXXXXXXX</p>
+<p><strong>DOTAÇÃO ORÇAMENTÁRIA:</strong> XXXXXXXXXX &nbsp; Ficha XXXX &nbsp; Fonte XXXX</p>
+<p><strong>DURAÇÃO:</strong> XX meses</p>
+<p><strong>OBJETO DA PARCERIA:</strong> XXXXXXXXXX.</p>
+<p><br></p>
+<p><strong>1. DESCRIÇÃO DA REALIDADE OBJETO DA PARCERIA:</strong></p>
+<p>XXXXXXXXXX é uma entidade sem fins lucrativos, que desenvolve atividades/projetos no município de São Gonçalo do Rio Abaixo. Por isso, XXXXXXXXXX.</p>
+<p><strong>2. JUSTIFICATIVA</strong></p>
+<p>Considerando que a Lei Federal 13.019/2014 estabeleceu o regime jurídico das parcerias voluntárias, com ou sem transferência de recursos financeiros, entre a Administração Pública e Organizações da Sociedade Civil, em regime de mútua cooperação, para a consecução de finalidades de interesse público.</p>
+<p>Considerando que a referida lei passou a ser aplicada aos Municípios a partir de 1º de janeiro de 2017, estabelecendo diversos critérios para a formalização de parcerias, dentre eles a regra geral de Chamamento Público.</p>
+<p>Considerando a expedição, aos 03/03/2020, do Decreto Municipal 048/2020 que alterou o Decreto 184/2017, que regulamenta a Lei nº 13.019/2014 no âmbito do município de São Gonçalo do Rio Abaixo.</p>
+<p>Considerando que o artigo 30, inciso VI, da Lei nº 13.019/2014 prevê a dispensa do procedimento de Chamamento Público "no caso de atividades voltadas ou vinculadas a serviços de educação, saúde e assistência social, desde que executadas por organizações da sociedade civil previamente credenciadas pelo órgão gestor da respectiva política".</p>
+<p>Considerando que a OSC atende aos critérios do art. 2º, I, da Lei 13.019/2014, por ser organização da sociedade civil, sem fins lucrativos, de relevância pública e social, com Estatuto que prevê a destinação do patrimônio a instituição de mesma natureza ou ao Poder Público em caso de dissolução, e que mantém escrituração contábil de acordo com as Normas Brasileiras de Contabilidade.</p>
+<p>Considerando que a entidade apresentou todos os documentos exigidos na Lei nº 13.019/2014, cumprindo os requisitos mínimos para a formalização do Termo de Parceria.</p>
+<p>Diante do exposto, entendemos haver justificativa válida, idônea e de interesse público para a celebração de Termo de XXXXXX por XXXXXX de Chamamento Público, conforme art. 30, VI, da Lei Federal nº 13.019/2014.</p>
+<p><br></p>
+<p style="text-align:center">{{responsavel_nome}}<br>Secretária Municipal de {{unidade_gestora}}<br>Unidade Gestora</p>
+HTML,
+        'parecer_cnas' => self::CABECALHO . <<<'HTML'
+<p style="text-align:center"><strong>PARECER TÉCNICO</strong><br>(Art. 3º, §2º, II da Resolução nº 21/2016 - CNAS)</p>
+<p><br></p>
+<p><strong>ÓRGÃO RESPONSÁVEL:</strong> Secretaria Municipal de {{unidade_gestora}}</p>
+<p><strong>OSC:</strong> XXXXXXXXXX</p>
+<p><strong>OBJETO DA PARCERIA:</strong> Firmar termo de parceria para a OSC executar XXXXXXXXXX no município de São Gonçalo do Rio Abaixo.</p>
+<p><br></p>
+<p>O presente parecer foi elaborado observando o disposto na Resolução nº 21/2016 - CNAS, que regulamenta e trata dos requisitos para a dispensa de chamamento público de OSC.</p>
+<p>A OSC oferece um serviço nos moldes da Política Nacional de Assistência Social e da Tipificação Nacional de Serviços Socioassistenciais (Resolução CNAS nº 109/2009), enquadrando-se na proteção social XXXXXX, por meio dos serviços de XXXXXXXXXX.</p>
+<p>Destaca-se ainda que a OSC é credenciada na Secretaria Municipal de Trabalho e Desenvolvimento Social e no Conselho Municipal de Assistência Social.</p>
+<p>Cabe salientar que o Município de São Gonçalo do Rio Abaixo não possui outros serviços socioassistenciais voltados a XXXXXXXXXX.</p>
+<p>Diante do exposto, conclui-se que as atividades exercidas pela OSC não podem ser interrompidas, tendo em vista que a descontinuidade da oferta pela entidade apresenta dano mais gravoso à integridade do usuário.</p>
+<p><br></p>
+<p style="text-align:center">XXXXXXXXXX<br>Assistente Social<br>Secretaria Municipal de {{unidade_gestora}}</p>
 HTML,
     ];
 
