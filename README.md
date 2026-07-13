@@ -506,8 +506,22 @@ São 21 perfis. Um usuário pode ter **vários**; os marcados 🔒 são **exclus
 
 ---
 
+- [2026-07-13] Modelos padrão da Seleção/Documentação preenchidos com o que havia em `Docs.`
+  - Cruzamento dos 20 modelos em branco com os arquivos I–XI: **VI = XI** (protocolo/solicitação,
+    não o parecer jurídico em si); o parecer usa o esqueleto do trâmite
+  - Novos textos em `Peca::MODELO`: **Chamamento** (Edital + Parecer jurídico), **Dispensa**
+    (+ Parecer jurídico), **Aditivo** (Parecer financeiro IV, Certidão VII, Protocolo XI, Parecer
+    jurídico). Migration `seed_modelos_selecao_disponiveis` preenche só peças vazias
+  - Continuam sem arquivo do cliente (13): aprovação do plano / verificação habilitação / minuta /
+    termo (dispensa); justificativa técnica OSC, aprovação alteração, justificativa/autorização UG,
+    minuta e termo aditivo; aprovação/autorização/termo de apostilamento
+
+---
+
 ## O que está sendo feito
 
+- Pedir ao cliente os **13 modelos padrão** ainda sem arquivo (aprovação de plano, minutas, termos,
+  justificativas/autorizações de aditivo e apostilamento).
 - Fechar o checklist de dispensa: itens **16–18** (autorização à OSC, dados bancários, Nota de
   Empenho) e completar a **publicação do Termo** (item 15 — DOE / site / GovBr).
 - Próximos blocos do roadmap, em ordem: **Prestação de Contas (4.6)** — apoiada nas despesas/saldo

@@ -118,11 +118,75 @@ class Peca extends Model
     ];
 
     /**
-     * Texto-modelo pré-preenchido das peças "modelo" da Seleção (semeado no
-     * `sincronizar`). Chaveado por categoria → chave. A Seleção usa textarea
-     * simples (sem editor rico), então o conteúdo é texto puro editável.
+     * Texto-modelo pré-preenchido das peças "modelo" da Seleção/Documentação
+     * (semeado no `sincronizar`). Chaveado por categoria → chave. A Seleção usa
+     * textarea simples (sem editor rico), então o conteúdo é texto puro editável.
+     *
+     * Fontes: Modelos oficiais I–XI do cliente + esqueleto do Edital (exemplo 005/2025).
+     * Obs.: o arquivo "VI Parecer Jurídico" é idêntico ao XI (protocolo/solicitação);
+     * o parecer jurídico em si usa o esqueleto já adotado no trâmite (ProcessoPeca).
      */
     public const MODELO = [
+        'chamamento_publico' => [
+            'edital' => <<<'TXT'
+EDITAL DE CHAMAMENTO PÚBLICO Nº XXX/20XX
+
+O MUNICÍPIO DE SÃO GONÇALO DO RIO ABAIXO, por intermédio da Secretaria Municipal de XXXXXX, torna público o presente Edital visando a seleção de Organização da Sociedade Civil interessada em celebrar TERMO DE XXXXXX, nos termos da Lei Federal nº 13.019/2014, do Decreto Municipal nº 048/2020 e demais normas aplicáveis.
+
+CAPÍTULO I — DO OBJETO
+1.1. Constitui objeto do presente Edital a seleção de OSC interessada em celebrar Termo de XXXXXX que tenha por objeto XXXXXXXXXX.
+1.1.1. O procedimento reger-se-á pela Lei nº 13.019/2014, Decreto Municipal nº 048/2020 e pelas condições deste Edital.
+
+CAPÍTULO II — DOS RECURSOS
+2.1. Será destinado o valor total de até R$ XXXXXXXX (XXXXXXXX), conforme disponibilidade orçamentária e financeira.
+2.2. Dotação: XXXXXXXXXX  Ficha: XXXX  Fonte: XXXX
+
+CAPÍTULO III — DAS CONDIÇÕES DE PARTICIPAÇÃO
+3.1. Poderão participar as OSCs que atendam aos requisitos da Lei nº 13.019/2014 e apresentem a documentação de habilitação exigida neste Edital.
+
+CAPÍTULO IV — DO PRAZO E DA FORMA DE APRESENTAÇÃO DAS PROPOSTAS
+4.1. As propostas deverão ser apresentadas no período de XX/XX/XXXX a XX/XX/XXXX, na forma indicada neste Edital.
+
+CAPÍTULO V — DA COMISSÃO DE SELEÇÃO
+5.1. A análise e o julgamento das propostas serão realizados pela Comissão de Seleção designada por portaria.
+
+CAPÍTULO VI — DOS CRITÉRIOS DE JULGAMENTO
+6.1. As propostas serão avaliadas conforme os critérios e pontuações previstos neste Edital e anexos.
+
+CAPÍTULO VII — DOS RECURSOS
+7.1. Caberá recurso nos prazos e formas previstos na legislação aplicável e neste Edital.
+
+CAPÍTULO VIII — DA HOMOLOGAÇÃO E DA CELEBRAÇÃO
+8.1. Homologado o resultado, a OSC selecionada será convocada para celebração do Termo, observadas as exigências legais.
+
+São Gonçalo do Rio Abaixo/MG, XX de XXXX de 20XX.
+
+XXXXXXXXXX
+Secretária Municipal de XXXXXX
+Unidade Gestora
+TXT,
+            'parecer_juridico' => <<<'TXT'
+PARECER JURÍDICO Nº XXX/20XX
+
+PROCESSO: XXXXXXXX
+INTERESSADO: Secretaria Municipal de XXXXXX — Unidade Gestora
+ASSUNTO: Análise jurídica da regularidade do procedimento e da minuta do termo (Lei Federal nº 13.019/2014).
+
+I — RELATÓRIO
+XXXXXXXXXXXX
+
+II — FUNDAMENTAÇÃO
+XXXXXXXXXXXX
+
+III — CONCLUSÃO
+Ante o exposto, esta Procuradoria opina pela XXXXXXXX (regularidade jurídica) do feito, podendo o processo prosseguir.
+
+XXXXXXXXXX
+Procurador(a) do Município
+Procuradoria Jurídica
+TXT,
+        ],
+
         'dispensa_inexigibilidade' => [
             'justificativa' => <<<'TXT'
 JUSTIFICATIVA PARA INEXIGIBILIDADE OU DISPENSA
@@ -227,6 +291,107 @@ Sendo o que temos para o momento, desde já agradecemos.
 XXXXXXXXXX
 Secretaria Municipal de XXXXXX
 Unidade Gestora
+TXT,
+            'parecer_juridico' => <<<'TXT'
+PARECER JURÍDICO Nº XXX/20XX
+
+PROCESSO: XXXXXXXX
+INTERESSADO: Secretaria Municipal de XXXXXX — Unidade Gestora
+ASSUNTO: Análise jurídica da regularidade do procedimento e da minuta do termo (Lei Federal nº 13.019/2014) — Dispensa/Inexigibilidade.
+
+I — RELATÓRIO
+XXXXXXXXXXXX
+
+II — FUNDAMENTAÇÃO
+XXXXXXXXXXXX
+
+III — CONCLUSÃO
+Ante o exposto, esta Procuradoria opina pela XXXXXXXX (regularidade jurídica) do feito, podendo o processo prosseguir para a celebração.
+
+XXXXXXXXXX
+Procurador(a) do Município
+Procuradoria Jurídica
+TXT,
+        ],
+
+        'aditivo' => [
+            'parecer_financeiro' => <<<'TXT'
+Nº XXX/20XX
+
+ORIGEM: Planejamento
+ASSUNTO: Dotação orçamentária e impacto financeiro (Termo Aditivo)
+DATA: XX/XX/XXXX
+
+A Secretaria Municipal de Planejamento, após análise, informa à Unidade Gestora que há previsão orçamentária e financeira na Lei Orçamentária Anual para o aditamento da parceria "XXXXXXXX".
+
+Previsão da Despesa:
+Ano | Secretaria Municipal | Dotação | Recurso | Ficha | Desdobrada | Valor
+XXX | XXX | XXXXX | XXXX | XXXX | XXXXX | XXXXX
+
+Valor da Receita | Despesa Prevista | Impacto | Valor Total
+XXXXX | XXXXX | XXXX | XXXXX
+
+A estimativa do Impacto Orçamentário Financeiro para realização da despesa prevista no Exercício 20XX é de XXX% das receitas orçadas na Lei Orçamentária Anual nº XXXXX.
+
+Sendo só no momento, me coloco à disposição para quaisquer eventuais esclarecimentos.
+
+XXXXXXXXXX
+Secretário Municipal de Planejamento
+TXT,
+            'certidao_autuacao' => <<<'TXT'
+CERTIDÃO DE AUTUAÇÃO
+
+Ao(s) XX dia(s) do mês de XXXX de 20XX, eu, XXXXXXXXXX, do Setor de Convênios e Parcerias, autuei os documentos abaixo relacionados ao Termo Aditivo do processo nº XXXXXXXX (Termo de XXXXXX), por intermédio da Secretaria Municipal de XXXXXX, que me foram apresentados:
+
+- Manifestação da OSC;
+- Justificativa Técnica da OSC;
+- Certidões de regularidade atualizadas;
+- Plano de Trabalho atualizado;
+- Aprovação da alteração do plano de trabalho;
+- Parecer financeiro;
+- Justificativa da Unidade Gestora;
+- Autorização da Unidade Gestora;
+- Minuta do Termo Aditivo.
+
+São Gonçalo do Rio Abaixo - MG, XX de XXXX de 20XX.
+
+XXXXXXXXXX
+Setor de Convênios e Parcerias
+TXT,
+            'protocolo_juridico' => <<<'TXT'
+São Gonçalo do Rio Abaixo, XX de XXXX de 20XX.
+
+A/C Procuradoria Jurídica Municipal
+
+Venho por meio deste solicitar parecer jurídico acerca da possibilidade de aditamento, referente ao processo nº XXXXXXXX, conforme estabelece a Lei Federal nº 13.019/2014.
+
+Também envolve a análise da minuta do termo aditivo, que segue em anexo.
+
+Sendo o que temos para o momento, desde já agradecemos.
+
+XXXXXXXXXX
+Secretaria Municipal de XXXXXX
+Unidade Gestora
+TXT,
+            'parecer_juridico' => <<<'TXT'
+PARECER JURÍDICO Nº XXX/20XX
+
+PROCESSO: XXXXXXXX
+INTERESSADO: Secretaria Municipal de XXXXXX — Unidade Gestora
+ASSUNTO: Análise jurídica do Termo Aditivo e da minuta (Lei Federal nº 13.019/2014).
+
+I — RELATÓRIO
+XXXXXXXXXXXX
+
+II — FUNDAMENTAÇÃO
+XXXXXXXXXXXX
+
+III — CONCLUSÃO
+Ante o exposto, esta Procuradoria opina pela XXXXXXXX (regularidade jurídica) do aditamento, podendo o processo prosseguir para a assinatura e publicação.
+
+XXXXXXXXXX
+Procurador(a) do Município
+Procuradoria Jurídica
 TXT,
         ],
     ];
