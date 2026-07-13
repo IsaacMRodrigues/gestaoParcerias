@@ -100,6 +100,7 @@ Route::middleware(['auth', 'staff', 'readonly'])->group(function () {
         Route::post('processos/{processo}/avancar', [TramitacaoController::class, 'avancar'])->name('processos.avancar');
         Route::post('processos/{processo}/devolver', [TramitacaoController::class, 'devolver'])->name('processos.devolver');
         Route::patch('processos/{processo}/concluir', [TramitacaoController::class, 'concluir'])->name('processos.concluir');
+        Route::post('processos/{processo}/publicar-chamamento', [TramitacaoController::class, 'publicar'])->name('processos.publicar-chamamento');
     });
 
     // Programas, Chamamentos e Seleção (2.2)

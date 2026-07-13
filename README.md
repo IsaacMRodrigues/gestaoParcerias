@@ -504,17 +504,22 @@ São 21 perfis. Um usuário pode ter **vários**; os marcados 🔒 são **exclus
   - Código, migrations, view `processos/selecao`, modelos VII–XI e PDFs de checklist versionados
     no GitHub (`main`)
 
----
+- [2026-07-13] Modelos padrão da Seleção/Documentação preenchidos com os arquivos oficiais
+  - Novos textos em `Peca::MODELO`: Chamamento (Edital + Parecer jurídico), Dispensa (+ Parecer
+    jurídico), Aditivo (Parecer financeiro, Certidão, Protocolo, Parecer jurídico). Restam 13
+    sem arquivo do cliente (aprovação plano, minutas, termos, justificativas/autorizações)
 
-- [2026-07-13] Modelos padrão da Seleção/Documentação preenchidos com o que havia em `Docs.`
-  - Cruzamento dos 20 modelos em branco com os arquivos I–XI: **VI = XI** (protocolo/solicitação,
-    não o parecer jurídico em si); o parecer usa o esqueleto do trâmite
-  - Novos textos em `Peca::MODELO`: **Chamamento** (Edital + Parecer jurídico), **Dispensa**
-    (+ Parecer jurídico), **Aditivo** (Parecer financeiro IV, Certidão VII, Protocolo XI, Parecer
-    jurídico). Migration `seed_modelos_selecao_disponiveis` preenche só peças vazias
-  - Continuam sem arquivo do cliente (13): aprovação do plano / verificação habilitação / minuta /
-    termo (dispensa); justificativa técnica OSC, aprovação alteração, justificativa/autorização UG,
-    minuta e termo aditivo; aprovação/autorização/termo de apostilamento
+- [2026-07-13] Ponte **Processo concluído → Chamamento** no módulo Programas
+  - Ao **Concluir** o trâmite, o sistema cria automaticamente um `Chamamento` (status
+    `publicado`) vinculado ao Processo (`processo_id`) e a um Programa da UG (criado se
+    necessário). Card no `processos/show` com links; botão **Gerar Chamamento** para
+    processos já concluídos sem publicação. Portal público lista só `chamamento_publico`
+
+- [2026-07-13] Modelos da Seleção 2.2 com **HTML + brasão + TinyMCE** (igual ao trâmite)
+  - `Peca::MODELO` passou de texto puro para HTML com cabeçalho/brasão; checklist usa
+    `data-editor-rico`; migration converte peças não assinadas ainda em TXT
+  - Assinatura da Seleção ganhou **carimbo + QR + código de validação** (`codigo_validacao`
+    em `pecas`, validação pública em `/validar`) — antes só gravava quem/quando
 
 ---
 

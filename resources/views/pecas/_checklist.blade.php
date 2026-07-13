@@ -32,26 +32,42 @@
                 </div>
             </div>
 
-            {{-- TIPO MODELO: editor de texto + assinar --}}
+            {{-- TIPO MODELO: editor rico (brasão + HTML) + assinar --}}
             @if($peca->tipo === 'modelo')
                 <details class="mt-3" {{ $peca->preenchido() && !$peca->assinado() ? 'open' : '' }}>
                     <summary class="text-xs text-indigo-600 cursor-pointer hover:underline">
                         {{ $peca->assinado() ? 'Ver conteúdo' : ($peca->preenchido() ? 'Editar conteúdo' : 'Preencher conteúdo') }}
                     </summary>
                     <div class="mt-2">
-                        <form action="{{ route('pecas.salvar', $peca) }}" method="POST">
-                            @csrf @method('PUT')
-                            <textarea name="conteudo" rows="6"
-                                      {{ $peca->assinado() ? 'readonly' : '' }}
-                                      class="block w-full border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 text-sm font-mono {{ $peca->assinado() ? 'bg-gray-50' : '' }}"
-                                      placeholder="Conteúdo do documento (modelo padrão)...">{{ old('conteudo', $peca->conteudo) }}</textarea>
-                            @unless($peca->assinado())
+                        @if($peca->assinado())
+                            <div class="documento-html border border-gray-200 rounded-md p-4 bg-white text-gray-800 text-sm">
+                                {!! $peca->conteudo ?: '<p class="text-gray-400">Documento ainda não preenchido.</p>' !!}
+                                @php
+                                    $qrValidacao = null;
+                                    if ($peca->codigo_validacao) {
+                                        $qrValidacao = \SimpleSoftwareIO\QrCode\Facades\QrCode::size(110)
+                                            ->generate(route('validacao.mostrar', $peca->codigo_validacao));
+                                    }
+                                @endphp
+                                @include('processos._carimbo', ['peca' => $peca, 'qrValidacao' => $qrValidacao])
+                            </div>
+                            @if($peca->codigo_validacao)
+                                <p class="mt-2 text-xs text-gray-500">
+                                    Código de validação:
+                                    <strong class="font-mono">{{ $peca->codigo_validacao }}</strong>
+                                    · <a href="{{ route('validacao.mostrar', $peca->codigo_validacao) }}" target="_blank" class="text-indigo-600 hover:underline">Validar</a>
+                                </p>
+                            @endif
+                        @else
+                            <form action="{{ route('pecas.salvar', $peca) }}" method="POST">
+                                @csrf @method('PUT')
+                                <textarea name="conteudo" data-editor-rico>{!! old('conteudo', $peca->conteudo) !!}</textarea>
                                 <button type="submit"
                                         class="mt-2 px-3 py-1.5 text-xs font-medium text-white bg-indigo-600 rounded-md hover:bg-indigo-700">
                                     Salvar
                                 </button>
-                            @endunless
-                        </form>
+                            </form>
+                        @endif
                         @if($peca->preenchido() && !$peca->assinado())
                             <form action="{{ route('pecas.assinar', $peca) }}" method="POST" class="mt-2"
                                   onsubmit="return confirm('Confirma a assinatura digital deste documento?')">

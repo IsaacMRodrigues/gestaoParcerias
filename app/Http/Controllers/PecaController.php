@@ -26,10 +26,12 @@ class PecaController extends Controller
     public function assinar(Peca $peca): RedirectResponse
     {
         abort_if($peca->tipo !== 'modelo', 422);
+        abort_if(empty($peca->conteudo), 422, 'Preencha o documento antes de assinar.');
 
         $peca->update([
-            'assinado_por' => auth()->id(),
-            'assinado_em'  => now(),
+            'assinado_por'     => auth()->id(),
+            'assinado_em'      => now(),
+            'codigo_validacao' => $peca->codigo_validacao ?: Peca::gerarCodigoValidacao(),
         ]);
 
         return back()->with('success', $peca->rotulo . ' assinado.');

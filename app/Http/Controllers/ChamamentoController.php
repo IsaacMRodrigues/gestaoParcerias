@@ -62,7 +62,7 @@ class ChamamentoController extends Controller
         $categoria = $chamamento->categoriaPecas();
         Peca::sincronizar($chamamento, $categoria);
 
-        $chamamento->load(['programa.orgao', 'pecas.assinante']);
+        $chamamento->load(['programa.orgao', 'pecas.assinante.roles', 'pecas.assinante.orgao']);
         $pecas = $chamamento->pecas;
         $progresso = Peca::progresso($pecas);
 

@@ -5,6 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Database\Eloquent\Relations\MorphMany;
 
 class Processo extends Model
@@ -131,6 +132,12 @@ class Processo extends Model
     public function pecasSelecao(): MorphMany
     {
         return $this->morphMany(Peca::class, 'pecaable');
+    }
+
+    /** Chamamento gerado na conclusão do trâmite (publicação). */
+    public function chamamento(): HasOne
+    {
+        return $this->hasOne(Chamamento::class);
     }
 
     /** Categoria do checklist de Seleção conforme a modalidade (só dispensa hoje). */
@@ -303,5 +310,71 @@ class Processo extends Model
         // etapa final (SCP publica): sem pendência — segue para "Concluir"
 
         return $pend;
+    }
+
+    /**
+     * Gera (idempotente) o Chamamento no módulo Programas a partir deste Processo
+     * concluído — é a ponte Planejamento → Seleção/Publicação.
+     */
+    public function gerarChamamentoPublicacao(): Chamamento
+    {
+        if ($existente = $this->chamamento) {
+            return $existente;
+        }
+
+        abort_unless($this->status === 'concluido', 422, 'Só é possível publicar após concluir o trâmite.');
+        abort_unless($this->modalidade, 422, 'O processo não tem modalidade definida.');
+        abort_unless(isset(Chamamento::TIPOS[$this->modalidade]), 422, 'Modalidade inválida para gerar chamamento.');
+
+        $this->loadMissing('orgao');
+        $orgao = $this->orgao;
+        $ano = $this->created_at?->year ?? now()->year;
+
+        $programa = Programa::firstOrCreate(
+            [
+                'orgao_id' => $orgao->id,
+                'sigla'    => 'PGP-' . ($orgao->codigo ?: $orgao->id) . '-' . $ano,
+            ],
+            [
+                'name'   => 'Parcerias ' . ($orgao->sigla ?: $orgao->name) . ' ' . $ano,
+                'tipo'   => 'termo_colaboracao',
+                'status' => 'ativo',
+            ]
+        );
+
+        $tipoLabel = self::MODALIDADES[$this->modalidade] ?? $this->modalidade;
+        $objeto = $this->extrairObjetoDoTermo() ?: ('Parceria originada do processo ' . $this->numero);
+
+        return Chamamento::create([
+            'programa_id'     => $programa->id,
+            'processo_id'     => $this->id,
+            'numero'          => $this->numero,
+            'titulo'          => $tipoLabel . ' — processo ' . $this->numero,
+            'objeto'          => $objeto,
+            'tipo'            => $this->modalidade,
+            'status'          => 'publicado',
+            'data_publicacao' => now()->toDateString(),
+        ]);
+    }
+
+    /** Tenta obter o objeto a partir do Termo de Referência (texto livre/HTML). */
+    public function extrairObjetoDoTermo(): ?string
+    {
+        $html = $this->peca('termo_referencia')?->conteudo;
+        if (!$html) {
+            return null;
+        }
+
+        $texto = html_entity_decode(strip_tags($html), ENT_QUOTES | ENT_HTML5, 'UTF-8');
+        $texto = preg_replace('/\s+/u', ' ', $texto) ?? $texto;
+
+        if (preg_match('/OBJETO(?:\s+DA\s+PARCERIA)?\s*:?\s*(.+?)(?:OBJETIVOS|ESTIMATIVA|PRAZO|JUSTIFICATIVA|$)/iu', $texto, $m)) {
+            $objeto = trim($m[1], " \t\n\r\0\x0B.;");
+            if (mb_strlen($objeto) > 20) {
+                return mb_substr($objeto, 0, 2000);
+            }
+        }
+
+        return null;
     }
 }

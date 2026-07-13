@@ -88,7 +88,7 @@
                            class="px-4 py-2 text-sm font-medium text-indigo-700 border border-indigo-300 rounded-lg hover:bg-indigo-50 text-center transition">
                             Ver Detalhes
                         </a>
-                        @if($chamamento->status_efetivo === 'em_inscricao')
+                        @if($chamamento->aceitaPropostas())
                             @auth
                                 <a href="{{ route('portal.participar', $chamamento) }}"
                                    class="px-4 py-2 text-sm font-medium text-white bg-indigo-600 rounded-lg hover:bg-indigo-700 text-center transition">
@@ -100,6 +100,10 @@
                                     Entrar para Participar
                                 </a>
                             @endauth
+                        @elseif($chamamento->ehDispensa())
+                            <span class="px-4 py-2 text-sm font-medium text-green-700 bg-green-50 border border-green-200 rounded-lg text-center">
+                                Publicado
+                            </span>
                         @else
                             <span class="px-4 py-2 text-sm font-medium text-blue-600 bg-blue-50 border border-blue-200 rounded-lg text-center">
                                 Inscrições em breve
@@ -115,9 +119,9 @@
                         <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 0 0-3.375-3.375h-1.5A1.125 1.125 0 0 1 13.5 7.125v-1.5a3.375 3.375 0 0 0-3.375-3.375H8.25m2.25 0H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 0 0-9-9Z"/>
                     </svg>
                 </div>
-                <p class="mt-4 text-lg font-semibold text-gray-900">Nenhum chamamento aberto no momento</p>
+                <p class="mt-4 text-lg font-semibold text-gray-900">Nenhuma publicação no momento</p>
                 <p class="text-sm text-gray-500 mt-1 max-w-md mx-auto">
-                    Assim que um novo chamamento for publicado, ele aparecerá aqui. Adiante o seu cadastro para participar quando abrir.
+                    Assim que um chamamento, dispensa ou inexigibilidade for publicado, ele aparecerá aqui.
                 </p>
                 <div class="flex flex-wrap items-center justify-center gap-3 mt-6">
                     <a href="{{ route('portal.osc.create') }}"

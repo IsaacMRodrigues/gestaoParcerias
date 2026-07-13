@@ -100,8 +100,9 @@ class ProcessoController extends Controller
     public function show(Processo $processo): View
     {
         $processo->load([
-            'orgao', 'criador',
+            'orgao', 'criador', 'chamamento.programa',
             'pecas.assinante', 'tramitacoes.remetente', 'tramitacoes.recebedor',
+            'pecasSelecao',
         ]);
 
         return view('processos.show', compact('processo'));
@@ -120,7 +121,7 @@ class ProcessoController extends Controller
         $categoria = $processo->categoriaSelecao();
         Peca::sincronizar($processo, $categoria, 'pecasSelecao');
 
-        $processo->load(['orgao', 'pecasSelecao.assinante']);
+        $processo->load(['orgao', 'pecasSelecao.assinante.roles', 'pecasSelecao.assinante.orgao']);
         $pecas = $processo->pecasSelecao->sortBy('ordem')->values();
         $progresso = Peca::progresso($pecas);
 

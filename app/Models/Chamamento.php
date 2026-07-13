@@ -32,7 +32,7 @@ class Chamamento extends Model
     ];
 
     protected $fillable = [
-        'programa_id', 'numero', 'titulo', 'objeto', 'tipo',
+        'programa_id', 'processo_id', 'numero', 'titulo', 'objeto', 'tipo',
         'valor_disponivel', 'data_publicacao', 'data_inicio_inscricao',
         'data_fim_inscricao', 'data_resultado', 'requisitos', 'status',
     ];
@@ -51,6 +51,11 @@ class Chamamento extends Model
     public function programa(): BelongsTo
     {
         return $this->belongsTo(Programa::class);
+    }
+
+    public function processo(): BelongsTo
+    {
+        return $this->belongsTo(Processo::class);
     }
 
     public function pecas(): \Illuminate\Database\Eloquent\Relations\MorphMany
@@ -90,5 +95,18 @@ class Chamamento extends Model
         }
 
         return $this->status;
+    }
+
+    /** Chamamento competitivo aberto a propostas da OSC no portal. */
+    public function aceitaPropostas(): bool
+    {
+        return $this->tipo === 'chamamento_publico'
+            && $this->status_efetivo === 'em_inscricao';
+    }
+
+    /** Dispensa/Inexigibilidade — publicação pública, sem inscrição competitiva. */
+    public function ehDispensa(): bool
+    {
+        return in_array($this->tipo, ['dispensa', 'inexigibilidade'], true);
     }
 }

@@ -77,6 +77,51 @@
                 @endif
             </div>
 
+            {{-- Publicação → Chamamento no módulo Programas --}}
+            @if($processo->status === 'concluido')
+                <div class="bg-white shadow rounded-lg p-6">
+                    <h3 class="text-base font-semibold text-gray-800 mb-2">Publicação / Chamamento</h3>
+                    @if($processo->chamamento)
+                        <p class="text-sm text-gray-600 mb-3">
+                            Este processo gerou o registro no módulo Programas:
+                        </p>
+                        <div class="flex flex-wrap items-center gap-3">
+                            <span class="px-2.5 py-1 text-xs font-medium bg-green-100 text-green-800 rounded-full">
+                                {{ \App\Models\Chamamento::TIPOS[$processo->chamamento->tipo] ?? $processo->chamamento->tipo }}
+                            </span>
+                            <span class="text-sm text-gray-800 font-medium">{{ $processo->chamamento->titulo }}</span>
+                        </div>
+                        <div class="mt-3 flex flex-wrap gap-3 text-sm">
+                            <a href="{{ route('programas.chamamentos.index', $processo->chamamento->programa) }}"
+                               class="text-indigo-600 hover:underline font-medium">
+                                Ver em Programas &rarr;
+                            </a>
+                            <a href="{{ route('chamamentos.selecao', $processo->chamamento) }}"
+                               class="text-gray-600 hover:underline">
+                                Checklist Seleção 2.2
+                            </a>
+                            @if($processo->chamamento->tipo === 'chamamento_publico')
+                                <a href="{{ route('portal.chamamento', $processo->chamamento) }}"
+                                   class="text-gray-600 hover:underline" target="_blank">
+                                    Ver no portal
+                                </a>
+                            @endif
+                        </div>
+                    @else
+                        <p class="text-sm text-amber-700 mb-3">
+                            O trâmite está concluído, mas o chamamento ainda não foi gerado no módulo Programas.
+                        </p>
+                        <form action="{{ route('processos.publicar-chamamento', $processo) }}" method="POST">
+                            @csrf
+                            <button type="submit"
+                                    class="px-4 py-2 text-sm font-medium text-white bg-indigo-600 rounded-md hover:bg-indigo-700">
+                                Gerar Chamamento / Publicação
+                            </button>
+                        </form>
+                    @endif
+                </div>
+            @endif
+
             {{-- Seleção 2.2 (Celebração) — rota de Dispensa/Inexigibilidade --}}
             @if($processo->podeVerSelecao())
                 @php $progSel = \App\Models\Peca::progresso($processo->pecasSelecao); @endphp

@@ -20,11 +20,23 @@ import 'tinymce/plugins/autoresize';
 // CSS aplicado dentro do editor (como string)
 import contentCss from 'tinymce/skins/content/default/content.min.css?raw';
 
-function iniciarEditores() {
-    if (!document.querySelector('textarea[data-editor-rico]')) return;
+function iniciarEditores(root = document) {
+    const alvos = root.querySelectorAll('textarea[data-editor-rico]');
+    if (!alvos.length) return;
+
+    // Evita reinicializar textareas que já têm instância TinyMCE
+    const seletor = Array.from(alvos)
+        .filter((el) => !tinymce.get(el.id) && !el.closest('.tox-tinymce'))
+        .map((el, i) => {
+            if (!el.id) el.id = `editor-rico-${Date.now()}-${i}`;
+            return `#${CSS.escape(el.id)}`;
+        })
+        .join(',');
+
+    if (!seletor) return;
 
     tinymce.init({
-        selector: 'textarea[data-editor-rico]',
+        selector: seletor,
         license_key: 'gpl',
         promotion: false,
         branding: false,
@@ -35,28 +47,45 @@ function iniciarEditores() {
             'undo redo | blocks fontfamily fontsize | bold italic underline strike | ' +
             'forecolor backcolor | alignleft aligncenter alignright alignjustify | ' +
             'bullist numlist outdent indent | table | link | removeformat',
-        skin: false,        // skin já importado acima
-        content_css: false, // usamos content_style abaixo
+        skin: false,
+        content_css: false,
         content_style:
             contentCss +
             '\n body{font-family:Arial,Helvetica,sans-serif;font-size:14px;line-height:1.6;padding:16px;}' +
             ' table{border-collapse:collapse;width:100%;} ' +
             ' th,td{border:1px solid #94a3b8;padding:4px 8px;} th{background:#f1f5f9;} ' +
             ' img{max-width:120px;height:auto;}',
-        // garante que o HTML seja gravado no textarea antes do submit
         setup(editor) {
             editor.on('change', () => editor.save());
         },
     });
+}
 
-    // sincroniza todos os editores ao enviar qualquer formulário
+function prepararFormularios() {
     document.querySelectorAll('form').forEach((form) => {
+        if (form.dataset.tinymceBound) return;
+        form.dataset.tinymceBound = '1';
         form.addEventListener('submit', () => tinymce.triggerSave());
     });
 }
 
-if (document.readyState !== 'loading') {
+function iniciar() {
     iniciarEditores();
+    prepararFormularios();
+
+    // Peças da Seleção ficam em <details>: reinicia o editor ao abrir
+    document.querySelectorAll('details').forEach((detalhe) => {
+        detalhe.addEventListener('toggle', () => {
+            if (detalhe.open) {
+                iniciarEditores(detalhe);
+                prepararFormularios();
+            }
+        });
+    });
+}
+
+if (document.readyState !== 'loading') {
+    iniciar();
 } else {
-    document.addEventListener('DOMContentLoaded', iniciarEditores);
+    document.addEventListener('DOMContentLoaded', iniciar);
 }

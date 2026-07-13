@@ -15,6 +15,7 @@ class PortalController extends Controller
         $chamamentos = Chamamento::with(['programa.orgao'])
             ->whereIn('status', ['publicado', 'em_inscricao'])
             ->orderByRaw("FIELD(status, 'em_inscricao', 'publicado')")
+            ->orderByDesc('data_publicacao')
             ->orderBy('data_fim_inscricao')
             ->paginate(12);
 
@@ -42,7 +43,7 @@ class PortalController extends Controller
 
     public function participar(Chamamento $chamamento): View|RedirectResponse
     {
-        abort_unless($chamamento->status_efetivo === 'em_inscricao', 403, 'Este chamamento não está aberto para inscrições.');
+        abort_unless($chamamento->aceitaPropostas(), 403, 'Este chamamento não está aberto para inscrições.');
 
         $osc = auth()->user()->osc;
         if (!$osc) {
@@ -64,7 +65,7 @@ class PortalController extends Controller
 
     public function storeProposta(Request $request, Chamamento $chamamento): RedirectResponse
     {
-        abort_unless($chamamento->status_efetivo === 'em_inscricao', 403);
+        abort_unless($chamamento->aceitaPropostas(), 403);
 
         $osc = auth()->user()->osc;
         abort_unless($osc, 403);

@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Chamamento;
 use App\Models\Processo;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -146,7 +147,27 @@ class TramitacaoController extends Controller
 
         $processo->update(['status' => 'concluido']);
 
+        $chamamento = $processo->gerarChamamentoPublicacao();
+
         return redirect()->route('processos.show', $processo)
-            ->with('success', 'Processo concluído — encaminhado para publicação no site oficial.');
+            ->with('success', 'Processo concluído e publicado como '
+                . (Chamamento::TIPOS[$chamamento->tipo] ?? 'chamamento')
+                . ' no programa "' . $chamamento->programa->name . '".');
+    }
+
+    /**
+     * Gera o Chamamento para um processo já concluído que ainda não tenha publicação.
+     */
+    public function publicar(Processo $processo): RedirectResponse
+    {
+        abort_unless($processo->status === 'concluido', 422, 'O processo precisa estar concluído.');
+        abort_unless(!$processo->chamamento, 422, 'Este processo já possui chamamento publicado.');
+
+        // Processo já concluído: qualquer usuário com planejamento pode gerar a publicação
+        // (não exige mais estar no setor atual).
+        $chamamento = $processo->gerarChamamentoPublicacao();
+
+        return redirect()->route('processos.show', $processo)
+            ->with('success', 'Chamamento gerado: ' . $chamamento->titulo);
     }
 }

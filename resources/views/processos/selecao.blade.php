@@ -52,7 +52,7 @@
                 <div class="px-6 py-4 border-b border-gray-200">
                     <h3 class="text-base font-semibold text-gray-800">Peças da Celebração</h3>
                     <p class="text-xs text-gray-400 mt-0.5">
-                        "Modelo padrão" tem assinatura digital. Demais itens são arquivos anexados.
+                        "Modelo padrão" usa editor rico com brasão e assinatura digital. Demais itens são arquivos anexados.
                     </p>
                 </div>
                 @include('pecas._checklist', ['pecas' => $pecas])

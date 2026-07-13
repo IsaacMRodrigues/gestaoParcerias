@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\OrdemPagamento;
+use App\Models\Peca;
 use App\Models\ProcessoPeca;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
@@ -65,6 +66,34 @@ class ValidacaoController extends Controller
                     'codigo'      => $op->codigo_validacao,
                     'conteudo'    => $op->conteudo,
                 ];
+            } else {
+                $selecao = Peca::with(['assinante', 'pecaable'])
+                    ->where('tipo', 'modelo')
+                    ->whereNotNull('assinado_em')
+                    ->where('codigo_validacao', $codigo)
+                    ->first();
+
+                if ($selecao) {
+                    $alvo = $selecao->pecaable;
+                    $ref = match (true) {
+                        $alvo instanceof \App\Models\Processo   => $alvo->numero,
+                        $alvo instanceof \App\Models\Chamamento => $alvo->numero ?: $alvo->titulo,
+                        $alvo instanceof \App\Models\Aditivo    => 'Aditivo #' . $alvo->id,
+                        default                                 => '—',
+                    };
+
+                    $doc = [
+                        'tipo'        => $selecao->rotulo,
+                        'ref_label'   => 'Referência',
+                        'ref'         => $ref,
+                        'extra_label' => 'Categoria',
+                        'extra'       => Peca::CATEGORIA_LABELS[$selecao->categoria] ?? $selecao->categoria,
+                        'assinante'   => $selecao->assinante?->name,
+                        'assinado_em' => $selecao->assinado_em,
+                        'codigo'      => $selecao->codigo_validacao,
+                        'conteudo'    => $selecao->conteudo,
+                    ];
+                }
             }
         }
 

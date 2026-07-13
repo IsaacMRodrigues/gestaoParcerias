@@ -57,7 +57,7 @@ class AditivoController extends Controller
         $categoria = $aditivo->categoriaPecas();
         Peca::sincronizar($aditivo, $categoria);
 
-        $aditivo->load('pecas.assinante');
+        $aditivo->load('pecas.assinante.roles', 'pecas.assinante.orgao');
         $pecas = $aditivo->pecas;
         $progresso = Peca::progresso($pecas);
 
