@@ -43,19 +43,36 @@
                               class="block w-full border-gray-300 rounded-lg shadow-sm focus:ring-indigo-500 focus:border-indigo-500 text-sm">{{ old('justificativa') }}</textarea>
                 </div>
 
+                @php
+                    $valSolicRaw = old('valor_solicitado', $chamamento->valor_disponivel);
+                    $valSolicFmt = ($valSolicRaw !== null && $valSolicRaw !== '') ? number_format((float) $valSolicRaw, 2, ',', '.') : '';
+                    $valPropRaw  = old('valor_proprio', 0);
+                    $valPropFmt  = number_format((float) $valPropRaw, 2, ',', '.');
+                @endphp
                 <div class="grid grid-cols-2 gap-4">
                     <div>
-                        <label for="valor_solicitado" class="block text-sm font-medium text-gray-700 mb-1">Valor Solicitado (R$) *</label>
-                        <input id="valor_solicitado" name="valor_solicitado" type="number" step="0.01" min="0" required
-                               value="{{ old('valor_solicitado') }}"
-                               class="block w-full border-gray-300 rounded-lg shadow-sm focus:ring-indigo-500 focus:border-indigo-500 text-sm @error('valor_solicitado') border-red-300 @enderror">
+                        <label for="valor_solicitado_display" class="block text-sm font-medium text-gray-700 mb-1">Valor Solicitado (R$) *</label>
+                        <div class="relative">
+                            <span class="absolute inset-y-0 left-0 flex items-center pl-3 text-sm text-gray-500 pointer-events-none">R$</span>
+                            <input id="valor_solicitado_display" type="text" inputmode="numeric" required
+                                   data-money="valor_solicitado" value="{{ $valSolicFmt }}"
+                                   class="block w-full pl-10 border-gray-300 rounded-lg shadow-sm focus:ring-indigo-500 focus:border-indigo-500 text-sm @error('valor_solicitado') border-red-300 @enderror">
+                            <input type="hidden" name="valor_solicitado" id="valor_solicitado" value="{{ $valSolicRaw }}">
+                        </div>
+                        @if($chamamento->valor_disponivel)
+                            <p class="text-xs text-gray-400 mt-1">Sugerido do chamamento: R$ {{ number_format($chamamento->valor_disponivel, 2, ',', '.') }}</p>
+                        @endif
                         @error('valor_solicitado') <p class="text-red-600 text-xs mt-1">{{ $message }}</p> @enderror
                     </div>
                     <div>
-                        <label for="valor_proprio" class="block text-sm font-medium text-gray-700 mb-1">Contrapartida da OSC (R$)</label>
-                        <input id="valor_proprio" name="valor_proprio" type="number" step="0.01" min="0"
-                               value="{{ old('valor_proprio', 0) }}"
-                               class="block w-full border-gray-300 rounded-lg shadow-sm focus:ring-indigo-500 focus:border-indigo-500 text-sm">
+                        <label for="valor_proprio_display" class="block text-sm font-medium text-gray-700 mb-1">Contrapartida da OSC (R$)</label>
+                        <div class="relative">
+                            <span class="absolute inset-y-0 left-0 flex items-center pl-3 text-sm text-gray-500 pointer-events-none">R$</span>
+                            <input id="valor_proprio_display" type="text" inputmode="numeric"
+                                   data-money="valor_proprio" value="{{ $valPropFmt }}"
+                                   class="block w-full pl-10 border-gray-300 rounded-lg shadow-sm focus:ring-indigo-500 focus:border-indigo-500 text-sm">
+                            <input type="hidden" name="valor_proprio" id="valor_proprio" value="{{ $valPropRaw }}">
+                        </div>
                     </div>
                 </div>
 
@@ -88,4 +105,26 @@
             </form>
         </div>
     </div>
+
+    <script>
+        (function () {
+            function formatBRL(cents) {
+                return (cents / 100).toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+            }
+            document.querySelectorAll('[data-money]').forEach(function (disp) {
+                var hidden = document.getElementById(disp.dataset.money);
+                function sync() {
+                    var digits = disp.value.replace(/\D/g, '');
+                    if (!digits) { disp.value = ''; hidden.value = ''; return; }
+                    var cents = parseInt(digits, 10);
+                    disp.value = formatBRL(cents);
+                    hidden.value = (cents / 100).toFixed(2);
+                }
+                disp.addEventListener('input', sync);
+                // sincroniza o campo oculto com o valor já pré-preenchido/formatado
+                var d0 = disp.value.replace(/\D/g, '');
+                hidden.value = d0 ? (parseInt(d0, 10) / 100).toFixed(2) : '';
+            });
+        })();
+    </script>
 </x-portal-layout>
