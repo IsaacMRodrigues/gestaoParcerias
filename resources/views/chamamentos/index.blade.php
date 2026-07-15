@@ -39,6 +39,12 @@
                                         <span class="font-medium">{{ $chamamento->numero }}</span> —
                                     @endif
                                     {{ $chamamento->titulo }}
+                                    @if($chamamento->processo)
+                                        <a href="{{ route('processos.show', $chamamento->processo) }}"
+                                           class="block text-xs text-indigo-600 hover:underline mt-0.5">
+                                            &larr; originado do Processo {{ $chamamento->processo->numero }}
+                                        </a>
+                                    @endif
                                 </td>
                                 <td class="px-6 py-4 text-sm text-gray-600">
                                     {{ \App\Models\Chamamento::TIPOS[$chamamento->tipo] ?? $chamamento->tipo }}

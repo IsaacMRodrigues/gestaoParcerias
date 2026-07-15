@@ -6,7 +6,6 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
-use Illuminate\Database\Eloquent\Relations\MorphMany;
 
 class Processo extends Model
 {
@@ -123,36 +122,27 @@ class Processo extends Model
         return $this->pecas->firstWhere('tipo', $tipo);
     }
 
-    /**
-     * Seleção 2.2 (checklist documental polimórfico) — usada na rota de
-     * Dispensa/Inexigibilidade para reunir os itens de celebração (7–18 do
-     * checklist): plano de trabalho, habilitação, pareceres, minuta e termo.
-     * Fica separada de `pecas()` (peças do trâmite) por usar o motor `Peca`.
-     */
-    public function pecasSelecao(): MorphMany
-    {
-        return $this->morphMany(Peca::class, 'pecaable');
-    }
-
     /** Chamamento gerado na conclusão do trâmite (publicação). */
     public function chamamento(): HasOne
     {
         return $this->hasOne(Chamamento::class);
     }
 
-    /** Categoria do checklist de Seleção conforme a modalidade (só dispensa hoje). */
-    public function categoriaSelecao(): string
-    {
-        return 'dispensa_inexigibilidade';
-    }
-
     /**
-     * A Seleção 2.2 fica disponível na rota de dispensa/inexigibilidade a partir
-     * da etapa da Justificativa (5) — ou seja, depois da Abertura do Processo.
+     * Instrumento(s) formalizado(s) desta parceria, alcançados pela cadeia
+     * Processo → Chamamento → Proposta → Instrumento. Pode ser mais de um
+     * (várias propostas/OSCs sob o mesmo chamamento).
      */
-    public function podeVerSelecao(): bool
+    public function instrumentosDaParceria()
     {
-        return $this->ehDispensa() && ($this->status === 'concluido' || $this->etapa >= 5);
+        if (! $this->chamamento) {
+            return collect();
+        }
+
+        return Instrumento::whereHas('proposta', fn ($q) => $q->where('chamamento_id', $this->chamamento->id))
+            ->with('proposta.osc')
+            ->orderByDesc('created_at')
+            ->get();
     }
 
     public function tramitacoes(): HasMany

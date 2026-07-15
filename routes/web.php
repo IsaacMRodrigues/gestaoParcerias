@@ -90,7 +90,6 @@ Route::middleware(['auth', 'staff', 'readonly'])->group(function () {
     Route::middleware('permission:planejamento')->group(function () {
         Route::get('processos/caixa', [ProcessoController::class, 'caixa'])->name('processos.caixa');
         Route::resource('processos', ProcessoController::class)->except(['edit', 'update']);
-        Route::get('processos/{processo}/selecao', [ProcessoController::class, 'selecao'])->name('processos.selecao');
         Route::get('processos/{processo}/imprimir-pecas', [ProcessoPecaController::class, 'imprimirLote'])->name('processos.pecas.imprimir-lote');
         Route::get('processos/{processo}/pecas/{peca}', [ProcessoPecaController::class, 'edit'])->name('processos.pecas.edit');
         Route::get('processos/{processo}/pecas/{peca}/imprimir', [ProcessoPecaController::class, 'imprimir'])->name('processos.pecas.imprimir');

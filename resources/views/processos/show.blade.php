@@ -107,6 +107,13 @@
                                 </a>
                             @endif
                         </div>
+                        @if($processo->chamamento->tipo === 'chamamento_publico' && ! $processo->chamamento->data_inicio_inscricao)
+                            <p class="mt-3 text-sm text-amber-700 bg-amber-50 border border-amber-100 rounded-md px-3 py-2">
+                                ⚠️ Defina o <strong>período de inscrição</strong> no chamamento para abri-lo a propostas das OSCs.
+                                <a href="{{ route('programas.chamamentos.edit', [$processo->chamamento->programa, $processo->chamamento]) }}"
+                                   class="underline font-medium">Definir datas &rarr;</a>
+                            </p>
+                        @endif
                     @else
                         <p class="text-sm text-amber-700 mb-3">
                             O trâmite está concluído, mas o chamamento ainda não foi gerado no módulo Programas.
@@ -122,28 +129,32 @@
                 </div>
             @endif
 
-            {{-- Seleção 2.2 (Celebração) — rota de Dispensa/Inexigibilidade --}}
-            @if($processo->podeVerSelecao())
-                @php $progSel = \App\Models\Peca::progresso($processo->pecasSelecao); @endphp
-                <a href="{{ route('processos.selecao', $processo) }}"
-                   class="block bg-white shadow rounded-lg p-6 hover:ring-2 hover:ring-indigo-200 transition">
-                    <div class="flex items-center justify-between gap-4">
-                        <div>
-                            <h3 class="text-base font-semibold text-gray-800">Seleção 2.2 — Celebração da Parceria</h3>
-                            <p class="text-sm text-gray-500 mt-0.5">
-                                Plano de trabalho, habilitação, pareceres, minuta e termo (itens 7–18 do checklist de dispensa).
-                            </p>
-                        </div>
-                        <div class="text-right shrink-0">
-                            @if($processo->pecasSelecao->isNotEmpty())
-                                <span class="text-sm font-medium text-gray-700">{{ $progSel['ok'] }}/{{ $progSel['total'] }}</span>
-                                <span class="block text-xs text-gray-400">obrigatórias</span>
-                            @else
-                                <span class="text-sm font-medium text-indigo-600">Iniciar &rarr;</span>
-                            @endif
-                        </div>
-                    </div>
-                </a>
+            {{-- Atalho para o(s) Termo(s)/Instrumento(s) formalizados desta parceria --}}
+            @php $instrumentosParceria = $processo->instrumentosDaParceria(); @endphp
+            @if($instrumentosParceria->isNotEmpty())
+                <div class="bg-white shadow rounded-lg p-6">
+                    <h3 class="text-base font-semibold text-gray-800 mb-3">Instrumento(s) formalizado(s)</h3>
+                    <ul class="divide-y divide-gray-100">
+                        @foreach($instrumentosParceria as $inst)
+                            @php $cor = \App\Models\Instrumento::STATUS_COLORS[$inst->status] ?? 'gray'; @endphp
+                            <li class="flex items-center justify-between gap-3 py-2">
+                                <div>
+                                    <p class="text-sm font-medium text-gray-800">
+                                        {{ $inst->numero ? $inst->numero . ' — ' : '' }}{{ \App\Models\Instrumento::TIPOS[$inst->tipo] ?? $inst->tipo }}
+                                        <span class="ml-1 px-2 py-0.5 text-xs font-medium bg-{{ $cor }}-100 text-{{ $cor }}-800 rounded-full">
+                                            {{ \App\Models\Instrumento::STATUS[$inst->status] ?? $inst->status }}
+                                        </span>
+                                    </p>
+                                    @if($inst->proposta?->osc)
+                                        <p class="text-xs text-gray-400">{{ $inst->proposta->osc->name }}</p>
+                                    @endif
+                                </div>
+                                <a href="{{ route('instrumentos.show', $inst) }}"
+                                   class="text-sm text-indigo-600 hover:underline font-medium whitespace-nowrap">Ver Termo &rarr;</a>
+                            </li>
+                        @endforeach
+                    </ul>
+                </div>
             @endif
 
             {{-- Alertas automáticos --}}

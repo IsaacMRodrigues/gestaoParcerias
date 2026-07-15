@@ -389,10 +389,9 @@ HTML,
     }
 
     /**
-     * Cria (idempotente) as peças de uma categoria para um registro a partir do template.
-     * $relacao permite apontar para uma relação morphMany diferente de `pecas()`
-     * (o Processo já usa `pecas()` para as peças do trâmite, então a Seleção
-     * polimórfica vive em `pecasSelecao()`).
+     * Cria (idempotente) as peças de uma categoria para um registro a partir do
+     * template. $relacao permite apontar para uma relação morphMany diferente de
+     * `pecas()`, caso algum dono use `pecas()` para outra finalidade.
      */
     public static function sincronizar(Model $pecaable, string $categoria, string $relacao = 'pecas'): void
     {

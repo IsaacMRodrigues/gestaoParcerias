@@ -521,6 +521,22 @@ São 21 perfis. Um usuário pode ter **vários**; os marcados 🔒 são **exclus
   - Assinatura da Seleção ganhou **carimbo + QR + código de validação** (`codigo_validacao`
     em `pecas`, validação pública em `/validar`) — antes só gravava quem/quando
 
+- [2026-07-15] Unificação da Seleção 2.2 e ligações da cadeia completa
+  - **Seleção 2.2 unificada no Chamamento**: como todo processo concluído passou a gerar um
+    Chamamento (que já carrega a Seleção), a ponte antiga que ancorava o checklist da dispensa
+    **no Processo** virou duplicata — removida (`processos.selecao`, `Processo::pecasSelecao/
+    categoriaSelecao/podeVerSelecao`, view `processos/selecao`). Migration
+    `remover_selecao_ancorada_no_processo` apaga as peças órfãs (preserva assinadas). Agora
+    dispensa e chamamento_publico usam o **mesmo** caminho: `chamamentos/{chamamento}/selecao`
+  - **Backlink Chamamento → Processo**: a listagem de chamamentos mostra "← originado do
+    Processo NNNN" com link (`ChamamentoController@index` faz eager-load de `processo`)
+  - **Atalho Processo → Termo**: o `processos/show` lista os Instrumento(s) formalizados desta
+    parceria (`Processo::instrumentosDaParceria()`, via Chamamento → Proposta → Instrumento)
+    com status e OSC, linkando para o Termo
+  - **Cadeia verificada ponta a ponta** (chamamento_publico): concluir → Chamamento `publicado`
+    → aparece no Portal. ⚠️ o chamamento nasce **sem período de inscrição**; enquanto a UG não
+    o define, não aceita propostas — o `show` agora exibe aviso com link "Definir datas"
+
 ---
 
 ## O que está sendo feito

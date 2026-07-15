@@ -3,7 +3,6 @@
 namespace App\Http\Controllers;
 
 use App\Models\Orgao;
-use App\Models\Peca;
 use App\Models\Processo;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -102,30 +101,9 @@ class ProcessoController extends Controller
         $processo->load([
             'orgao', 'criador', 'chamamento.programa',
             'pecas.assinante', 'tramitacoes.remetente', 'tramitacoes.recebedor',
-            'pecasSelecao',
         ]);
 
         return view('processos.show', compact('processo'));
-    }
-
-    /**
-     * Seleção 2.2 (Celebração) da rota de Dispensa/Inexigibilidade — reúne os
-     * itens 7–18 do checklist (plano de trabalho, habilitação, pareceres, minuta,
-     * termo). Reaproveita o motor `Peca` ancorado ao próprio Processo.
-     */
-    public function selecao(Processo $processo): View
-    {
-        abort_unless($processo->ehDispensa(), 404, 'A Seleção por dispensa/inexigibilidade só existe nessa modalidade.');
-        abort_unless($processo->podeVerSelecao(), 403, 'A Seleção fica disponível a partir da Justificativa (após a Abertura do Processo).');
-
-        $categoria = $processo->categoriaSelecao();
-        Peca::sincronizar($processo, $categoria, 'pecasSelecao');
-
-        $processo->load(['orgao', 'pecasSelecao.assinante.roles', 'pecasSelecao.assinante.orgao']);
-        $pecas = $processo->pecasSelecao->sortBy('ordem')->values();
-        $progresso = Peca::progresso($pecas);
-
-        return view('processos.selecao', compact('processo', 'pecas', 'categoria', 'progresso'));
     }
 
     public function destroy(Processo $processo): RedirectResponse

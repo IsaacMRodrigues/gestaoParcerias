@@ -14,6 +14,7 @@ class ChamamentoController extends Controller
     public function index(Programa $programa): View
     {
         $chamamentos = $programa->chamamentos()
+            ->with('processo')
             ->orderBy('created_at', 'desc')
             ->paginate(15);
 
