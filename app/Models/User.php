@@ -174,4 +174,16 @@ class User extends Authenticatable
     {
         return $this->hasAnyRole(self::PERFIS_SOMENTE_LEITURA);
     }
+
+    /**
+     * Vê dados (ex.: propostas) de TODOS os órgãos? — administrador, auditoria
+     * (somente leitura) ou papéis transversais não lotados numa Secretaria
+     * específica (comissões etc.). Quem é lotado numa UG vê só o próprio órgão.
+     */
+    public function podeVerTodosOrgaos(): bool
+    {
+        return is_null($this->orgao_id)
+            || $this->somenteLeitura()
+            || $this->hasRole('administrador_setorial');
+    }
 }

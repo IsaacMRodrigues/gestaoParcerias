@@ -94,8 +94,12 @@
                     @endcan
 
                     @can('propostas')
+                    @php $navPropostasNovas = \App\Models\Proposta::visiveisPara(auth()->user())->where('status', 'submetida')->count(); @endphp
                     <x-nav-link :href="route('propostas.index')" :active="request()->routeIs('propostas.*') || request()->routeIs('metas.*') || request()->routeIs('etapas.*')">
                         Propostas
+                        @if($navPropostasNovas > 0)
+                            <span class="ml-1.5 px-1.5 py-0.5 text-[11px] font-semibold bg-amber-100 text-amber-700 rounded-full">{{ $navPropostasNovas }}</span>
+                        @endif
                     </x-nav-link>
                     @endcan
 
@@ -209,6 +213,10 @@
             @can('propostas')
             <x-responsive-nav-link :href="route('propostas.index')" :active="request()->routeIs('propostas.*')">
                 Propostas
+                @php $navPropostasNovas = \App\Models\Proposta::visiveisPara(auth()->user())->where('status', 'submetida')->count(); @endphp
+                @if($navPropostasNovas > 0)
+                    <span class="ml-1 px-1.5 py-0.5 text-[11px] font-semibold bg-amber-100 text-amber-700 rounded-full">{{ $navPropostasNovas }}</span>
+                @endif
             </x-responsive-nav-link>
             @endcan
             @can('formalizacao')

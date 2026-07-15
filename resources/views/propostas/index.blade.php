@@ -27,12 +27,15 @@
                     </thead>
                     <tbody class="bg-white divide-y divide-gray-200">
                         @forelse($propostas as $proposta)
-                            <tr>
+                            <tr class="{{ $proposta->status === 'submetida' ? 'bg-amber-50/60' : '' }}">
                                 <td class="px-6 py-4 text-sm font-medium text-gray-900">
                                     <a href="{{ route('propostas.show', $proposta) }}"
                                        class="text-indigo-600 hover:underline">
                                         {{ $proposta->titulo }}
                                     </a>
+                                    @if($proposta->status === 'submetida')
+                                        <span class="ml-1.5 px-1.5 py-0.5 text-[10px] font-semibold bg-amber-100 text-amber-700 rounded-full align-middle">nova</span>
+                                    @endif
                                 </td>
                                 <td class="px-6 py-4 text-sm text-gray-600">{{ $proposta->osc->name }}</td>
                                 <td class="px-6 py-4 text-sm text-gray-600">

@@ -52,6 +52,20 @@ class Proposta extends Model
         return $this->belongsTo(Chamamento::class);
     }
 
+    /**
+     * Restringe às propostas visíveis ao usuário: quem é lotado numa Secretaria
+     * (órgão) vê só as propostas dos chamamentos do seu órgão; admin/auditoria e
+     * papéis transversais veem todas.
+     */
+    public function scopeVisiveisPara($query, User $user)
+    {
+        if ($user->podeVerTodosOrgaos()) {
+            return $query;
+        }
+
+        return $query->whereHas('chamamento.programa', fn ($q) => $q->where('orgao_id', $user->orgao_id));
+    }
+
     public function osc(): BelongsTo
     {
         return $this->belongsTo(Osc::class);

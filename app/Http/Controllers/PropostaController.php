@@ -14,6 +14,7 @@ class PropostaController extends Controller
     public function index(): View
     {
         $propostas = Proposta::with(['chamamento.programa', 'osc'])
+            ->visiveisPara(auth()->user())
             ->orderBy('created_at', 'desc')
             ->paginate(15);
 
