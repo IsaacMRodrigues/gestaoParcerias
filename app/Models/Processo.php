@@ -335,7 +335,7 @@ class Processo extends Model
         $tipoLabel = self::MODALIDADES[$this->modalidade] ?? $this->modalidade;
         $objeto = $this->extrairObjetoDoTermo() ?: ('Parceria originada do processo ' . $this->numero);
 
-        return Chamamento::create([
+        $dados = [
             'programa_id'     => $programa->id,
             'processo_id'     => $this->id,
             'numero'          => $this->numero,
@@ -344,7 +344,17 @@ class Processo extends Model
             'tipo'            => $this->modalidade,
             'status'          => 'publicado',
             'data_publicacao' => now()->toDateString(),
-        ]);
+        ];
+
+        // Chamamento Público é competitivo: já abre uma janela de inscrição padrão
+        // (mínimo de 30 dias da publicação, art. 26 §1º da Lei 13.019/2014) para que
+        // as OSCs possam submeter propostas no portal. A UG ajusta as datas se quiser.
+        if ($this->modalidade === 'chamamento_publico') {
+            $dados['data_inicio_inscricao'] = now()->toDateString();
+            $dados['data_fim_inscricao']    = now()->addDays(30)->toDateString();
+        }
+
+        return Chamamento::create($dados);
     }
 
     /** Tenta obter o objeto a partir do Termo de Referência (texto livre/HTML). */
