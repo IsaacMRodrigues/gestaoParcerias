@@ -13,6 +13,7 @@ class ProcessoPecaController extends Controller
     public function edit(Processo $processo, ProcessoPeca $peca): View
     {
         abort_unless($peca->processo_id === $processo->id, 404);
+        abort_unless($processo->visivelPara(auth()->user()), 403, 'Este processo pertence a outra Secretaria.');
 
         $podeEditar = $peca->podeEditarConteudo($processo, auth()->user());
         $podeAssinar = $peca->podeAssinar($processo, auth()->user());
@@ -34,6 +35,8 @@ class ProcessoPecaController extends Controller
      */
     public function imprimirLote(Request $request, Processo $processo)
     {
+        abort_unless($processo->visivelPara(auth()->user()), 403, 'Este processo pertence a outra Secretaria.');
+
         $ids = array_map('intval', (array) $request->query('pecas', []));
 
         $ordemTipos = array_keys(ProcessoPeca::TIPOS);
@@ -107,6 +110,7 @@ class ProcessoPecaController extends Controller
     public function imprimir(Processo $processo, ProcessoPeca $peca): View
     {
         abort_unless($peca->processo_id === $processo->id, 404);
+        abort_unless($processo->visivelPara(auth()->user()), 403, 'Este processo pertence a outra Secretaria.');
 
         $qrValidacao = null;
         if ($peca->assinado() && $peca->codigo_validacao) {
@@ -121,6 +125,7 @@ class ProcessoPecaController extends Controller
     public function update(Request $request, Processo $processo, ProcessoPeca $peca): RedirectResponse
     {
         abort_unless($peca->processo_id === $processo->id, 404);
+        abort_unless($processo->visivelPara(auth()->user()), 403, 'Este processo pertence a outra Secretaria.');
         abort_unless($peca->podeEditarConteudo($processo, auth()->user()), 403,
             'Esta peça é de responsabilidade do setor '
             . (Processo::SETORES[$peca->setorResponsavel()] ?? $peca->setorResponsavel())
@@ -135,6 +140,7 @@ class ProcessoPecaController extends Controller
     public function assinar(Processo $processo, ProcessoPeca $peca): RedirectResponse
     {
         abort_unless($peca->processo_id === $processo->id, 404);
+        abort_unless($processo->visivelPara(auth()->user()), 403, 'Este processo pertence a outra Secretaria.');
         abort_unless($peca->podeAssinar($processo, auth()->user()), 403,
             'Você não pode assinar esta peça nesta etapa.');
 

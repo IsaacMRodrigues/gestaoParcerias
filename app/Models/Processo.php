@@ -31,6 +31,13 @@ class Processo extends Model
     ];
 
     /**
+     * Setores centrais do trâmite (compartilhados por todas as secretarias) —
+     * processam processos de qualquer órgão. A UG, ao contrário, é específica de
+     * cada Secretaria e só enxerga os próprios processos.
+     */
+    public const SETORES_CENTRAIS = ['scp', 'seplan', 'pj'];
+
+    /**
      * Etapas do trâmite do planejamento (fluxo confirmado pelo cliente).
      * O índice da etapa é guardado na coluna `etapa`.
      *
@@ -215,6 +222,34 @@ class Processo extends Model
     public function ehDispensa(): bool
     {
         return in_array($this->modalidade, ['dispensa', 'inexigibilidade'], true);
+    }
+
+    /**
+     * O usuário enxerga processos de todos os órgãos? — administrador, auditoria,
+     * ou quem atua num setor central do trâmite (SCP/SEPLAN/PJ). A UG lotada numa
+     * Secretaria só vê os processos do próprio órgão.
+     */
+    protected static function usuarioVeTodosProcessos(User $user): bool
+    {
+        return $user->podeVerTodosOrgaos()
+            || in_array($user->setor, self::SETORES_CENTRAIS, true);
+    }
+
+    /** Restringe aos processos que o usuário pode ver (por órgão, exceto centrais). */
+    public function scopeVisiveisPara($query, User $user)
+    {
+        if (self::usuarioVeTodosProcessos($user)) {
+            return $query;
+        }
+
+        return $query->where('orgao_id', $user->orgao_id);
+    }
+
+    /** Este processo pode ser visto por este usuário? (autorização do show). */
+    public function visivelPara(User $user): bool
+    {
+        return self::usuarioVeTodosProcessos($user)
+            || $this->orgao_id === $user->orgao_id;
     }
 
     /** Sequência de etapas conforme a modalidade (chamamento por padrão). */

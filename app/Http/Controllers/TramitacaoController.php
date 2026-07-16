@@ -14,6 +14,8 @@ class TramitacaoController extends Controller
      */
     private function autorizarSetor(Processo $processo): void
     {
+        abort_unless($processo->visivelPara(auth()->user()), 403,
+            'Este processo pertence a outra Secretaria.');
         abort_unless(auth()->user()->setor === $processo->setor_atual, 403,
             'Apenas o setor que está com o processo pode movimentá-lo.');
     }
@@ -160,6 +162,7 @@ class TramitacaoController extends Controller
      */
     public function publicar(Processo $processo): RedirectResponse
     {
+        abort_unless($processo->visivelPara(auth()->user()), 403, 'Este processo pertence a outra Secretaria.');
         abort_unless($processo->status === 'concluido', 422, 'O processo precisa estar concluído.');
         abort_unless(!$processo->chamamento, 422, 'Este processo já possui chamamento publicado.');
 

@@ -13,6 +13,7 @@ class ProcessoController extends Controller
     public function index(): View
     {
         $processos = Processo::with(['orgao', 'criador'])
+            ->visiveisPara(auth()->user())
             ->orderByDesc('created_at')
             ->paginate(15);
 
@@ -28,6 +29,7 @@ class ProcessoController extends Controller
         abort_unless($setor, 403, 'Seu usuário não está vinculado a nenhum setor.');
 
         $processos = Processo::with(['orgao', 'criador'])
+            ->visiveisPara(auth()->user())
             ->where('setor_atual', $setor)
             ->where('status', 'em_tramite')
             ->orderByDesc('updated_at')
@@ -98,6 +100,8 @@ class ProcessoController extends Controller
 
     public function show(Processo $processo): View
     {
+        abort_unless($processo->visivelPara(auth()->user()), 403, 'Este processo pertence a outra Secretaria.');
+
         $processo->load([
             'orgao', 'criador', 'chamamento.programa',
             'pecas.assinante', 'tramitacoes.remetente', 'tramitacoes.recebedor',
@@ -108,6 +112,8 @@ class ProcessoController extends Controller
 
     public function destroy(Processo $processo): RedirectResponse
     {
+        abort_unless($processo->visivelPara(auth()->user()), 403, 'Este processo pertence a outra Secretaria.');
+
         $processo->delete();
 
         return redirect()->route('processos.index')
