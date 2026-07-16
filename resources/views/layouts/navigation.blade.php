@@ -21,92 +21,100 @@
                     </a>
                 </div>
 
-                <!-- Navigation Links -->
-                <div class="hidden lg:flex lg:-my-px lg:ms-6 xl:ms-8 space-x-4 xl:space-x-6">
+                @php
+                    $navItem = 'block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100';
+                    $navPropostasNovas = auth()->user()->can('propostas')
+                        ? \App\Models\Proposta::visiveisPara(auth()->user())->where('status', 'submetida')->count()
+                        : 0;
+                @endphp
+
+                {{-- Navegação por etapa do ciclo da parceria:
+                     Planejamento → Seleção → Celebração → Execução → Monitoramento → Prestação de Contas --}}
+                <div class="hidden lg:flex lg:-my-px lg:ms-6 xl:ms-8 space-x-3 xl:space-x-5">
                     <x-nav-link :href="route('dashboard')" :active="request()->routeIs('dashboard')">
                         Painel
                     </x-nav-link>
                     <x-nav-link :href="route('portal.index')" :active="false">
                         Portal Público
                     </x-nav-link>
-                    {{-- Dropdown Cadastros --}}
-                    @can('cadastros')
-                    <div x-data="{ open: false }" class="relative flex items-center">
-                        <button @click="open = !open" @click.outside="open = false"
-                                class="inline-flex items-center gap-1 px-1 pt-1 text-sm font-medium border-b-2 transition duration-150 ease-in-out
-                                       {{ request()->routeIs('usuarios.*') || request()->routeIs('orgaos.*') || request()->routeIs('oscs.*')
-                                           ? 'border-indigo-400 text-gray-900'
-                                           : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300' }}">
-                            Cadastros
-                            <svg class="h-4 w-4" fill="currentColor" viewBox="0 0 20 20">
-                                <path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd" />
-                            </svg>
-                        </button>
-                        <div x-show="open" x-transition
-                             class="absolute top-full left-0 mt-1 w-52 bg-white rounded-md shadow-lg ring-1 ring-black ring-opacity-5 z-50">
-                            <a href="{{ route('usuarios.index') }}"
-                               class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
-                                Usuários
-                            </a>
-                            <a href="{{ route('orgaos.index') }}"
-                               class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
-                                Órgãos / Secretarias
-                            </a>
-                            <a href="{{ route('oscs.index') }}"
-                               class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
-                                OSCs
-                            </a>
-                            <div class="border-t border-gray-100 my-1"></div>
-                            @php $navPendentes = \App\Models\User::pendentes()->count(); @endphp
-                            <a href="{{ route('usuarios.pendentes') }}"
+
+                    {{-- 1. Planejamento --}}
+                    @can('planejamento')
+                    <x-nav-dropdown label="Planejamento"
+                                    :active="request()->routeIs('processos.*')">
+                        <a href="{{ route('processos.index') }}" class="{{ $navItem }}">Processos</a>
+                        @if(auth()->user()->setor)
+                            <a href="{{ route('processos.caixa') }}" class="{{ $navItem }}">Caixa de Entrada</a>
+                        @endif
+                    </x-nav-dropdown>
+                    @endcan
+
+                    {{-- 2. Seleção --}}
+                    @canany(['chamamentos', 'propostas'])
+                    <x-nav-dropdown label="Seleção"
+                                    :active="request()->routeIs('programas.*') || request()->routeIs('chamamentos.*') || request()->routeIs('propostas.*') || request()->routeIs('metas.*') || request()->routeIs('etapas.*')">
+                        <x-slot name="badge">
+                            @if($navPropostasNovas > 0)
+                                <span class="ml-1 px-1.5 py-0.5 text-[11px] font-semibold bg-amber-100 text-amber-700 rounded-full">{{ $navPropostasNovas }}</span>
+                            @endif
+                        </x-slot>
+                        @can('chamamentos')
+                            <a href="{{ route('programas.index') }}" class="{{ $navItem }}">Programas e Chamamentos</a>
+                        @endcan
+                        @can('propostas')
+                            <a href="{{ route('propostas.index') }}"
                                class="flex items-center justify-between px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
-                                <span>Aprovações pendentes</span>
-                                @if($navPendentes > 0)
-                                    <span class="px-1.5 py-0.5 text-[11px] font-semibold bg-amber-100 text-amber-700 rounded-full">{{ $navPendentes }}</span>
+                                <span>Propostas</span>
+                                @if($navPropostasNovas > 0)
+                                    <span class="px-1.5 py-0.5 text-[11px] font-semibold bg-amber-100 text-amber-700 rounded-full">{{ $navPropostasNovas }}</span>
                                 @endif
                             </a>
-                        </div>
-                    </div>
-                    @endcan
+                        @endcan
+                    </x-nav-dropdown>
+                    @endcanany
 
-                    @role('responsavel_unidade_gestora')
-                    <x-nav-link :href="route('subusuarios.index')" :active="request()->routeIs('subusuarios.*')">
-                        Meus usuários
-                    </x-nav-link>
-                    @endrole
-
-                    @can('planejamento')
-                    <x-nav-link :href="route('processos.index')" :active="request()->routeIs('processos.index') || request()->routeIs('processos.create') || request()->routeIs('processos.show')">
-                        Planejamento
-                    </x-nav-link>
-
-                    @if(auth()->user()->setor)
-                        <x-nav-link :href="route('processos.caixa')" :active="request()->routeIs('processos.caixa')">
-                            Caixa de Entrada
-                        </x-nav-link>
-                    @endif
-                    @endcan
-
-                    @can('chamamentos')
-                    <x-nav-link :href="route('programas.index')" :active="request()->routeIs('programas.*') || request()->routeIs('chamamentos.*')">
-                        Programas
-                    </x-nav-link>
-                    @endcan
-
-                    @can('propostas')
-                    @php $navPropostasNovas = \App\Models\Proposta::visiveisPara(auth()->user())->where('status', 'submetida')->count(); @endphp
-                    <x-nav-link :href="route('propostas.index')" :active="request()->routeIs('propostas.*') || request()->routeIs('metas.*') || request()->routeIs('etapas.*')">
-                        Propostas
-                        @if($navPropostasNovas > 0)
-                            <span class="ml-1.5 px-1.5 py-0.5 text-[11px] font-semibold bg-amber-100 text-amber-700 rounded-full">{{ $navPropostasNovas }}</span>
-                        @endif
-                    </x-nav-link>
-                    @endcan
-
+                    {{-- 3. Celebração --}}
                     @can('formalizacao')
-                    <x-nav-link :href="route('instrumentos.index')" :active="request()->routeIs('instrumentos.*')">
-                        Instrumentos
-                    </x-nav-link>
+                    <x-nav-dropdown label="Celebração" :active="request()->routeIs('instrumentos.*')">
+                        <a href="{{ route('instrumentos.index') }}" class="{{ $navItem }}">Instrumentos / Termos</a>
+                    </x-nav-dropdown>
+                    @endcan
+
+                    {{-- 4. Execução — existe, mas dentro de cada Instrumento --}}
+                    @can('execucao')
+                    <x-nav-soon label="Execução" hint="Abra pela tela do Instrumento (repasses, despesas e saldo)." />
+                    @endcan
+
+                    {{-- 5 e 6. Etapas ainda não implementadas --}}
+                    @can('monitoramento')
+                    <x-nav-soon label="Monitoramento" hint="Em breve" />
+                    @endcan
+                    @can('prestacao_contas')
+                    <x-nav-soon label="Prestação de Contas" hint="Em breve" />
+                    @endcan
+
+                    {{-- Cadastros (transversal, não é etapa) --}}
+                    @can('cadastros')
+                    @php $navPendentes = \App\Models\User::pendentes()->count(); @endphp
+                    <x-nav-dropdown label="Cadastros"
+                                    :active="request()->routeIs('usuarios.*') || request()->routeIs('orgaos.*') || request()->routeIs('oscs.*')">
+                        <x-slot name="badge">
+                            @if($navPendentes > 0)
+                                <span class="ml-1 px-1.5 py-0.5 text-[11px] font-semibold bg-amber-100 text-amber-700 rounded-full">{{ $navPendentes }}</span>
+                            @endif
+                        </x-slot>
+                        <a href="{{ route('usuarios.index') }}" class="{{ $navItem }}">Usuários</a>
+                        <a href="{{ route('orgaos.index') }}" class="{{ $navItem }}">Órgãos / Secretarias</a>
+                        <a href="{{ route('oscs.index') }}" class="{{ $navItem }}">OSCs</a>
+                        <div class="border-t border-gray-100 my-1"></div>
+                        <a href="{{ route('usuarios.pendentes') }}"
+                           class="flex items-center justify-between px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
+                            <span>Aprovações pendentes</span>
+                            @if($navPendentes > 0)
+                                <span class="px-1.5 py-0.5 text-[11px] font-semibold bg-amber-100 text-amber-700 rounded-full">{{ $navPendentes }}</span>
+                            @endif
+                        </a>
+                    </x-nav-dropdown>
                     @endcan
                 </div>
             </div>
@@ -139,6 +147,11 @@
                                 </div>
                             @endif
                         </div>
+                        @role('responsavel_unidade_gestora')
+                        <x-dropdown-link :href="route('subusuarios.index')">
+                            Meus usuários
+                        </x-dropdown-link>
+                        @endrole
                         <x-dropdown-link :href="route('profile.edit')">
                             {{ __('Perfil') }}
                         </x-dropdown-link>
@@ -172,11 +185,67 @@
 
     <!-- Responsive Navigation Menu -->
     <div :class="{'block': open, 'hidden': ! open}" class="hidden lg:hidden">
+        @php $navSecao = 'px-4 pt-3 pb-1 text-[11px] font-semibold uppercase tracking-wide text-gray-400'; @endphp
         <div class="pt-2 pb-3 space-y-1">
             <x-responsive-nav-link :href="route('dashboard')" :active="request()->routeIs('dashboard')">
                 Painel
             </x-responsive-nav-link>
+            <x-responsive-nav-link :href="route('portal.index')" :active="false">
+                Portal Público
+            </x-responsive-nav-link>
+
+            @can('planejamento')
+            <p class="{{ $navSecao }}">1 · Planejamento</p>
+            <x-responsive-nav-link :href="route('processos.index')" :active="request()->routeIs('processos.index')">
+                Processos
+            </x-responsive-nav-link>
+            @if(auth()->user()->setor)
+                <x-responsive-nav-link :href="route('processos.caixa')" :active="request()->routeIs('processos.caixa')">
+                    Caixa de Entrada
+                </x-responsive-nav-link>
+            @endif
+            @endcan
+
+            @canany(['chamamentos', 'propostas'])
+            <p class="{{ $navSecao }}">2 · Seleção</p>
+            @can('chamamentos')
+            <x-responsive-nav-link :href="route('programas.index')" :active="request()->routeIs('programas.*')">
+                Programas e Chamamentos
+            </x-responsive-nav-link>
+            @endcan
+            @can('propostas')
+            <x-responsive-nav-link :href="route('propostas.index')" :active="request()->routeIs('propostas.*')">
+                Propostas
+                @if($navPropostasNovas > 0)
+                    <span class="ml-1 px-1.5 py-0.5 text-[11px] font-semibold bg-amber-100 text-amber-700 rounded-full">{{ $navPropostasNovas }}</span>
+                @endif
+            </x-responsive-nav-link>
+            @endcan
+            @endcanany
+            @can('formalizacao')
+            <p class="{{ $navSecao }}">3 · Celebração</p>
+            <x-responsive-nav-link :href="route('instrumentos.index')" :active="request()->routeIs('instrumentos.*')">
+                Instrumentos / Termos
+            </x-responsive-nav-link>
+            @endcan
+
+            @can('execucao')
+            <p class="{{ $navSecao }}">4 · Execução</p>
+            <p class="px-4 py-2 text-sm text-gray-400">Abra pela tela do Instrumento.</p>
+            @endcan
+
+            @canany(['monitoramento', 'prestacao_contas'])
+            <p class="{{ $navSecao }}">Próximas etapas</p>
+            @can('monitoramento')
+                <p class="px-4 py-1 text-sm text-gray-400">Monitoramento / Avaliação — em breve</p>
+            @endcan
+            @can('prestacao_contas')
+                <p class="px-4 py-1 text-sm text-gray-400">Prestação de Contas — em breve</p>
+            @endcan
+            @endcanany
+
             @can('cadastros')
+            <p class="{{ $navSecao }}">Cadastros</p>
             <x-responsive-nav-link :href="route('usuarios.index')" :active="request()->routeIs('usuarios.*')">
                 Usuários
             </x-responsive-nav-link>
@@ -188,42 +257,17 @@
             </x-responsive-nav-link>
             <x-responsive-nav-link :href="route('usuarios.pendentes')" :active="request()->routeIs('usuarios.pendentes')">
                 Aprovações pendentes
+                @if($navPendentes ?? 0)
+                    <span class="ml-1 px-1.5 py-0.5 text-[11px] font-semibold bg-amber-100 text-amber-700 rounded-full">{{ $navPendentes }}</span>
+                @endif
             </x-responsive-nav-link>
             @endcan
+
             @role('responsavel_unidade_gestora')
             <x-responsive-nav-link :href="route('subusuarios.index')" :active="request()->routeIs('subusuarios.*')">
                 Meus usuários
             </x-responsive-nav-link>
             @endrole
-            @can('planejamento')
-            <x-responsive-nav-link :href="route('processos.index')" :active="request()->routeIs('processos.index')">
-                Planejamento
-            </x-responsive-nav-link>
-            @if(auth()->user()->setor)
-                <x-responsive-nav-link :href="route('processos.caixa')" :active="request()->routeIs('processos.caixa')">
-                    Caixa de Entrada
-                </x-responsive-nav-link>
-            @endif
-            @endcan
-            @can('chamamentos')
-            <x-responsive-nav-link :href="route('programas.index')" :active="request()->routeIs('programas.*')">
-                Programas
-            </x-responsive-nav-link>
-            @endcan
-            @can('propostas')
-            <x-responsive-nav-link :href="route('propostas.index')" :active="request()->routeIs('propostas.*')">
-                Propostas
-                @php $navPropostasNovas = \App\Models\Proposta::visiveisPara(auth()->user())->where('status', 'submetida')->count(); @endphp
-                @if($navPropostasNovas > 0)
-                    <span class="ml-1 px-1.5 py-0.5 text-[11px] font-semibold bg-amber-100 text-amber-700 rounded-full">{{ $navPropostasNovas }}</span>
-                @endif
-            </x-responsive-nav-link>
-            @endcan
-            @can('formalizacao')
-            <x-responsive-nav-link :href="route('instrumentos.index')" :active="request()->routeIs('instrumentos.*')">
-                Instrumentos
-            </x-responsive-nav-link>
-            @endcan
         </div>
 
         <!-- Responsive Settings Options -->
