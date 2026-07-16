@@ -14,7 +14,8 @@
                 <div class="shrink-0 flex items-center">
                     <a href="{{ route('dashboard') }}" class="flex items-center gap-2.5">
                         <span class="w-9 h-9 bg-indigo-600 rounded-lg flex items-center justify-center text-white font-black text-sm shadow-sm">PGP</span>
-                        <span class="hidden lg:flex flex-col leading-none">
+                        {{-- só em telas bem largas: a trilha de etapas tem prioridade --}}
+                        <span class="hidden 2xl:flex flex-col leading-none">
                             <span class="font-semibold text-gray-900 text-sm">Gestão de Parcerias</span>
                             <span class="text-[11px] text-gray-400">Sistema público municipal</span>
                         </span>
@@ -30,13 +31,16 @@
 
                 {{-- Navegação por etapa do ciclo da parceria:
                      Planejamento → Seleção → Celebração → Execução → Monitoramento → Prestação de Contas --}}
-                <div class="hidden lg:flex lg:-my-px lg:ms-6 xl:ms-8 space-x-3 xl:space-x-5">
+                <div class="hidden lg:flex lg:-my-px lg:ms-4 xl:ms-6 space-x-2.5 xl:space-x-4">
                     <x-nav-link :href="route('dashboard')" :active="request()->routeIs('dashboard')">
                         Painel
                     </x-nav-link>
                     <x-nav-link :href="route('portal.index')" :active="false">
                         Portal Público
                     </x-nav-link>
+
+                    {{-- Trilha completa do ciclo: as 6 etapas aparecem sempre. Sem
+                         permissão (ou sem tela ainda), a etapa fica em cinza, sem link. --}}
 
                     {{-- 1. Planejamento --}}
                     @can('planejamento')
@@ -47,6 +51,8 @@
                             <a href="{{ route('processos.caixa') }}" class="{{ $navItem }}">Caixa de Entrada</a>
                         @endif
                     </x-nav-dropdown>
+                    @else
+                    <x-nav-soon label="Planejamento" hint="Você não tem acesso a esta etapa." />
                     @endcan
 
                     {{-- 2. Seleção --}}
@@ -71,6 +77,8 @@
                             </a>
                         @endcan
                     </x-nav-dropdown>
+                    @else
+                    <x-nav-soon label="Seleção" hint="Você não tem acesso a esta etapa." />
                     @endcanany
 
                     {{-- 3. Celebração --}}
@@ -78,20 +86,17 @@
                     <x-nav-dropdown label="Celebração" :active="request()->routeIs('instrumentos.*')">
                         <a href="{{ route('instrumentos.index') }}" class="{{ $navItem }}">Instrumentos / Termos</a>
                     </x-nav-dropdown>
+                    @else
+                    <x-nav-soon label="Celebração" hint="Você não tem acesso a esta etapa." />
                     @endcan
 
-                    {{-- 4. Execução — existe, mas dentro de cada Instrumento --}}
-                    @can('execucao')
-                    <x-nav-soon label="Execução" hint="Abra pela tela do Instrumento (repasses, despesas e saldo)." />
-                    @endcan
+                    {{-- 4. Execução — já existe, porém dentro de cada Instrumento --}}
+                    <x-nav-soon label="Execução"
+                                hint="Repasses, despesas e saldo: abra pela tela do Instrumento." />
 
                     {{-- 5 e 6. Etapas ainda não implementadas --}}
-                    @can('monitoramento')
-                    <x-nav-soon label="Monitoramento" hint="Em breve" />
-                    @endcan
-                    @can('prestacao_contas')
+                    <x-nav-soon label="Monitoramento &amp; Avaliação" hint="Em breve" />
                     <x-nav-soon label="Prestação de Contas" hint="Em breve" />
-                    @endcan
 
                     {{-- Cadastros (transversal, não é etapa) --}}
                     @can('cadastros')
@@ -204,6 +209,9 @@
                     Caixa de Entrada
                 </x-responsive-nav-link>
             @endif
+            @else
+            <p class="{{ $navSecao }}">1 · Planejamento</p>
+            <p class="px-4 py-1 text-sm text-gray-400">Você não tem acesso a esta etapa.</p>
             @endcan
 
             @canany(['chamamentos', 'propostas'])
@@ -221,28 +229,29 @@
                 @endif
             </x-responsive-nav-link>
             @endcan
+            @else
+            <p class="{{ $navSecao }}">2 · Seleção</p>
+            <p class="px-4 py-1 text-sm text-gray-400">Você não tem acesso a esta etapa.</p>
             @endcanany
+
             @can('formalizacao')
             <p class="{{ $navSecao }}">3 · Celebração</p>
             <x-responsive-nav-link :href="route('instrumentos.index')" :active="request()->routeIs('instrumentos.*')">
                 Instrumentos / Termos
             </x-responsive-nav-link>
+            @else
+            <p class="{{ $navSecao }}">3 · Celebração</p>
+            <p class="px-4 py-1 text-sm text-gray-400">Você não tem acesso a esta etapa.</p>
             @endcan
 
-            @can('execucao')
             <p class="{{ $navSecao }}">4 · Execução</p>
-            <p class="px-4 py-2 text-sm text-gray-400">Abra pela tela do Instrumento.</p>
-            @endcan
+            <p class="px-4 py-1 text-sm text-gray-400">Repasses, despesas e saldo — abra pela tela do Instrumento.</p>
 
-            @canany(['monitoramento', 'prestacao_contas'])
-            <p class="{{ $navSecao }}">Próximas etapas</p>
-            @can('monitoramento')
-                <p class="px-4 py-1 text-sm text-gray-400">Monitoramento / Avaliação — em breve</p>
-            @endcan
-            @can('prestacao_contas')
-                <p class="px-4 py-1 text-sm text-gray-400">Prestação de Contas — em breve</p>
-            @endcan
-            @endcanany
+            <p class="{{ $navSecao }}">5 · Monitoramento &amp; Avaliação</p>
+            <p class="px-4 py-1 text-sm text-gray-400">Em breve.</p>
+
+            <p class="{{ $navSecao }}">6 · Prestação de Contas</p>
+            <p class="px-4 py-1 text-sm text-gray-400">Em breve.</p>
 
             @can('cadastros')
             <p class="{{ $navSecao }}">Cadastros</p>
