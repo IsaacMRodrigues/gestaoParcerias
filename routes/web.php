@@ -95,6 +95,9 @@ Route::middleware(['auth', 'staff', 'readonly'])->group(function () {
         Route::get('processos/{processo}/pecas/{peca}/imprimir', [ProcessoPecaController::class, 'imprimir'])->name('processos.pecas.imprimir');
         Route::put('processos/{processo}/pecas/{peca}', [ProcessoPecaController::class, 'update'])->name('processos.pecas.update');
         Route::patch('processos/{processo}/pecas/{peca}/assinar', [ProcessoPecaController::class, 'assinar'])->name('processos.pecas.assinar');
+        Route::post('processos/{processo}/pecas/{peca}/anexos', [ProcessoPecaController::class, 'anexar'])->name('processos.pecas.anexos.store');
+        Route::get('processos/{processo}/pecas/{peca}/anexos/{anexo}', [ProcessoPecaController::class, 'baixarAnexo'])->name('processos.pecas.anexos.download');
+        Route::delete('processos/{processo}/pecas/{peca}/anexos/{anexo}', [ProcessoPecaController::class, 'removerAnexo'])->name('processos.pecas.anexos.destroy');
         Route::patch('processos/{processo}/receber', [TramitacaoController::class, 'receber'])->name('processos.receber');
         Route::post('processos/{processo}/avancar', [TramitacaoController::class, 'avancar'])->name('processos.avancar');
         Route::post('processos/{processo}/devolver', [TramitacaoController::class, 'devolver'])->name('processos.devolver');

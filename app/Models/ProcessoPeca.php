@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class ProcessoPeca extends Model
 {
@@ -282,6 +283,11 @@ HTML,
         return $this->belongsTo(Processo::class);
     }
 
+    public function anexos(): HasMany
+    {
+        return $this->hasMany(ProcessoPecaAnexo::class, 'processo_peca_id')->latest();
+    }
+
     public function assinante(): BelongsTo
     {
         return $this->belongsTo(User::class, 'assinado_por');
@@ -290,6 +296,24 @@ HTML,
     public function assinado(): bool
     {
         return !is_null($this->assinado_em);
+    }
+
+    /** A peça é do tipo ARQUIVO (sem editor/assinatura — só upload)? */
+    public function ehArquivo(): bool
+    {
+        return in_array($this->tipo, self::ARQUIVO, true);
+    }
+
+    /** A peça aceita anexos (ARQUIVO ou peça de texto que também aceita, como o Edital)? */
+    public function aceitaAnexos(): bool
+    {
+        return $this->ehArquivo() || in_array($this->tipo, self::COM_ANEXOS, true);
+    }
+
+    /** Tem ao menos um anexo? (peça ARQUIVO considera-se preenchida quando sim). */
+    public function temAnexo(): bool
+    {
+        return $this->anexos()->exists();
     }
 
     public function setorResponsavel(): string
@@ -323,6 +347,23 @@ HTML,
     public function podeEditarConteudo(Processo $processo, ?User $user): bool
     {
         return $user
+            && !$this->ehArquivo()                  // peça ARQUIVO não tem texto — ver podeAnexar()
+            && $this->emAndamento($processo)
+            && !$processo->aguardandoRecebimento()  // precisa registrar o recebimento antes
+            && !$this->assinado()
+            && $user->setor === $this->setorResponsavel()
+            && $processo->setor_atual === $this->setorResponsavel()
+            && $processo->etapa === $this->etapaDesignada();
+    }
+
+    /**
+     * Pode ANEXAR arquivos a esta peça? (peça ARQUIVO ou de texto que aceita anexos,
+     * pelo setor responsável, na etapa dela, antes de assinar/encaminhar).
+     */
+    public function podeAnexar(Processo $processo, ?User $user): bool
+    {
+        return $user
+            && $this->aceitaAnexos()
             && $this->emAndamento($processo)
             && !$processo->aguardandoRecebimento()  // precisa registrar o recebimento antes
             && !$this->assinado()

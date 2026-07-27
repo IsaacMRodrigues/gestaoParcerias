@@ -560,12 +560,27 @@ São 21 perfis. Um usuário pode ter **vários**; os marcados 🔒 são **exclus
     tipo ARQUIVO na tela de edição; considerar os anexos em `pendenciasParaAvancar`; e migration
     que cria as peças novas nos processos já abertos (hoje só nascem em processos novos)
 
+- [2026-07-27] **Anexos das peças do trâmite — concluído** (fechou a lista "Falta para concluir" acima)
+  - `ProcessoPeca::anexos()` (HasMany p/ `ProcessoPecaAnexo`) + helpers `ehArquivo()`,
+    `aceitaAnexos()`, `temAnexo()` e `podeAnexar()` (mesma regra de `podeEditarConteudo`, mas
+    para arquivos). `podeEditarConteudo()` agora ignora peças ARQUIVO (não têm texto)
+  - **Upload / download / remoção** de anexos: `ProcessoPecaController@anexar|baixarAnexo|removerAnexo`
+    e rotas `processos.pecas.anexos.{store,download,destroy}` (disco `local`, em
+    `processo-pecas/{peca_id}/`, mesmos limites do motor de peças: PDF/Word/Excel/JPG/PNG, 10 MB)
+  - **Interface**: partial reutilizável `processos/_anexos.blade.php`; `processos/peca` mostra a
+    seção de anexos (peça ARQUIVO substitui o editor; o **Edital** mostra editor **e** anexos);
+    `processos/show` inclui `portaria_comissao` e `comprovante_publicacao` no `$ordem` do
+    Chamamento (ordenadas por etapa) com rótulo "Anexar" e status por nº de arquivos
+  - **Bloqueio de avanço**: na etapa 6 (Chamamento), a **Portaria da Comissão de Seleção** exige
+    ≥ 1 anexo para encaminhar. O Comprovante de Publicação (etapa final) **não** bloqueia o
+    "Concluir" — a prova de publicação é anexada depois de publicar
+  - **Backfill**: migration `2026_07_27_120000_seed_pecas_arquivo_processos_existentes` cria as
+    duas peças ARQUIVO nos processos já abertos (nos novos já nascem pelo `store`)
+
 ---
 
 ## O que está sendo feito
 
-- **Anexos das peças do trâmite** (iniciado em 2026-07-27): concluir a ligação na interface —
-  ver a lista "Falta para concluir" na entrada de 27/07 acima.
 - Pedir ao cliente os **13 modelos padrão** ainda sem arquivo (aprovação de plano, minutas, termos,
   justificativas/autorizações de aditivo e apostilamento).
 - Fechar o checklist de dispensa: itens **16–18** (autorização à OSC, dados bancários, Nota de

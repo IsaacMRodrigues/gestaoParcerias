@@ -328,6 +328,7 @@ class Processo extends Model
         } elseif ($this->etapa === 6 && !$ehDispensa) {
             if (!$this->peca('edital')?->assinado())              $pend[] = 'Edital (assinatura da UG)';
             if (!$this->peca('solicitacao_parecer_juridico')?->assinado()) $pend[] = 'Solicitação de Parecer Jurídico';
+            if (!$this->peca('portaria_comissao')?->temAnexo())   $pend[] = 'Portaria da Comissão de Seleção (anexar arquivo)';
         } elseif ($this->etapa === 7 && !$ehDispensa) {
             if (!$this->peca('parecer_juridico')?->assinado())    $pend[] = 'Parecer Jurídico';
         }

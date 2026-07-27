@@ -4,9 +4,12 @@ namespace App\Http\Controllers;
 
 use App\Models\Processo;
 use App\Models\ProcessoPeca;
+use App\Models\ProcessoPecaAnexo;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\View\View;
+use Symfony\Component\HttpFoundation\StreamedResponse;
 
 class ProcessoPecaController extends Controller
 {
@@ -17,6 +20,8 @@ class ProcessoPecaController extends Controller
 
         $podeEditar = $peca->podeEditarConteudo($processo, auth()->user());
         $podeAssinar = $peca->podeAssinar($processo, auth()->user());
+        $podeAnexar = $peca->podeAnexar($processo, auth()->user());
+        $anexos = $peca->aceitaAnexos() ? $peca->anexos()->with('remetente')->get() : collect();
 
         // QR Code da validação (apontando para a página pública)
         $qrValidacao = null;
@@ -26,7 +31,7 @@ class ProcessoPecaController extends Controller
                 ->generate(route('validacao.mostrar', $peca->codigo_validacao));
         }
 
-        return view('processos.peca', compact('processo', 'peca', 'podeEditar', 'podeAssinar', 'qrValidacao'));
+        return view('processos.peca', compact('processo', 'peca', 'podeEditar', 'podeAssinar', 'podeAnexar', 'anexos', 'qrValidacao'));
     }
 
     /**
@@ -152,5 +157,60 @@ class ProcessoPecaController extends Controller
 
         return redirect()->route('processos.show', $processo)
             ->with('success', ProcessoPeca::TIPOS[$peca->tipo] . ' assinado.');
+    }
+
+    /** Anexa um arquivo à peça (peça ARQUIVO ou de texto que aceita anexos, ex. Edital). */
+    public function anexar(Request $request, Processo $processo, ProcessoPeca $peca): RedirectResponse
+    {
+        abort_unless($peca->processo_id === $processo->id, 404);
+        abort_unless($peca->podeAnexar($processo, auth()->user()), 403,
+            'Você não pode anexar arquivos a esta peça nesta etapa.');
+
+        $request->validate([
+            'arquivo' => ['required', 'file', 'mimes:pdf,doc,docx,xls,xlsx,jpg,jpeg,png', 'max:10240'],
+        ], [
+            'arquivo.required' => 'Selecione um arquivo para anexar.',
+            'arquivo.max'      => 'O arquivo não pode ultrapassar 10 MB.',
+            'arquivo.mimes'    => 'Formatos aceitos: PDF, Word, Excel, JPG, PNG.',
+        ]);
+
+        $arquivo = $request->file('arquivo');
+        $path = $arquivo->store('processo-pecas/' . $peca->id, 'local');
+
+        $peca->anexos()->create([
+            'arquivo_path' => $path,
+            'arquivo_nome' => $arquivo->getClientOriginalName(),
+            'tamanho'      => $arquivo->getSize(),
+            'mime_type'    => $arquivo->getMimeType(),
+            'enviado_por'  => auth()->id(),
+        ]);
+
+        return redirect()->route('processos.pecas.edit', [$processo, $peca])
+            ->with('success', 'Arquivo anexado.');
+    }
+
+    /** Baixa um anexo da peça. */
+    public function baixarAnexo(Processo $processo, ProcessoPeca $peca, ProcessoPecaAnexo $anexo): StreamedResponse
+    {
+        abort_unless($peca->processo_id === $processo->id && $anexo->processo_peca_id === $peca->id, 404);
+        abort_unless(Storage::disk('local')->exists($anexo->arquivo_path), 404, 'Arquivo não encontrado.');
+
+        return Storage::disk('local')->download($anexo->arquivo_path, $anexo->arquivo_nome);
+    }
+
+    /** Remove um anexo da peça (mesma regra de quem pode anexar). */
+    public function removerAnexo(Processo $processo, ProcessoPeca $peca, ProcessoPecaAnexo $anexo): RedirectResponse
+    {
+        abort_unless($peca->processo_id === $processo->id && $anexo->processo_peca_id === $peca->id, 404);
+        abort_unless($peca->podeAnexar($processo, auth()->user()), 403,
+            'Você não pode remover anexos desta peça nesta etapa.');
+
+        if ($anexo->arquivo_path) {
+            Storage::disk('local')->delete($anexo->arquivo_path);
+        }
+        $anexo->delete();
+
+        return redirect()->route('processos.pecas.edit', [$processo, $peca])
+            ->with('success', 'Anexo removido.');
     }
 }

@@ -11,7 +11,15 @@
     <div class="py-8">
         <div class="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 space-y-6">
 
-            @if($peca->assinado())
+            @if($peca->ehArquivo())
+                <div class="bg-gray-50 border border-gray-200 text-gray-700 px-4 py-3 rounded-lg text-sm">
+                    Este documento é anexado como <strong>arquivo</strong> (sem edição de texto nem assinatura no sistema).
+                    Responsável: <strong>{{ \App\Models\Processo::SETORES[$peca->setorResponsavel()] ?? $peca->setorResponsavel() }}</strong>.
+                    @unless($podeAnexar)
+                        Você está no modo leitura.
+                    @endunless
+                </div>
+            @elseif($peca->assinado())
                 <div class="bg-green-50 border border-green-200 text-green-800 px-4 py-3 rounded-lg text-sm">
                     Assinado por {{ $peca->assinante->name }} em {{ $peca->assinado_em->format('d/m/Y H:i') }}.
                 </div>
@@ -28,6 +36,7 @@
                 </div>
             @endif
 
+            @unless($peca->ehArquivo())
             <div class="bg-white shadow rounded-lg p-6">
                 <x-input-label value="Conteúdo (modelo padrão)" class="mb-1" />
                 @if($podeEditar)
@@ -73,8 +82,27 @@
                     </div>
                 @endif
             </div>
+            @endunless
 
-            @if($podeAssinar || $peca->assinado())
+            {{-- Anexos: peça ARQUIVO (só arquivos) ou peça de texto que aceita anexos (Edital) --}}
+            @if($peca->aceitaAnexos())
+                @include('processos._anexos', ['processo' => $processo, 'peca' => $peca, 'anexos' => $anexos, 'podeAnexar' => $podeAnexar])
+
+                {{-- Peça ARQUIVO não tem card de conteúdo: oferece o Voltar aqui --}}
+                @if($peca->ehArquivo())
+                    <div>
+                        <a href="{{ route('processos.show', $processo) }}"
+                           class="inline-flex items-center gap-2 px-4 py-2.5 text-sm font-semibold text-gray-700 bg-white border border-gray-300 rounded-lg shadow-sm hover:bg-gray-50 hover:border-gray-400 transition">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+                            </svg>
+                            Voltar
+                        </a>
+                    </div>
+                @endif
+            @endif
+
+            @if(!$peca->ehArquivo() && ($podeAssinar || $peca->assinado()))
                 <div class="bg-white shadow rounded-lg p-6 flex items-center justify-between">
                     <div>
                         <p class="text-sm font-semibold text-gray-800">Assinatura digital</p>

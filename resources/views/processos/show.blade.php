@@ -179,13 +179,19 @@
             @php
                 $u = auth()->user();
                 $rotuloPeca = function ($p) use ($processo, $u) {
-                    if (!$p || $p->assinado()) return 'Ver';
+                    if (!$p) return 'Ver';
+                    if ($p->ehArquivo()) return $p->podeAnexar($processo, $u) ? 'Anexar' : 'Ver';
+                    if ($p->assinado()) return 'Ver';
                     if ($p->podeEditarConteudo($processo, $u)) return 'Preencher';
                     if ($p->podeAssinar($processo, $u)) return 'Assinar';
                     return 'Ver';
                 };
                 $statusPeca = function ($p) {
                     if (!$p) return 'Não criada';
+                    if ($p->ehArquivo()) {
+                        $n = $p->anexos()->count();
+                        return $n ? $n . ' ' . ($n === 1 ? 'arquivo anexado' : 'arquivos anexados') : 'Nenhum arquivo anexado';
+                    }
                     if ($p->assinado()) return 'Assinado por ' . $p->assinante->name . ' em ' . $p->assinado_em->format('d/m/Y H:i');
                     if (!empty($p->conteudo)) return 'Preenchido — não assinado';
                     return 'Não preenchido';
@@ -193,7 +199,7 @@
                 $comum = ['oficio', 'termo_referencia', 'pedido_parecer', 'parecer_financeiro', 'abertura'];
                 $ordem = $processo->ehDispensa()
                     ? array_merge($comum, ['justificativa_dispensa', 'parecer_cnas'])
-                    : array_merge($comum, ['edital', 'solicitacao_parecer_juridico', 'parecer_juridico']);
+                    : array_merge($comum, ['edital', 'portaria_comissao', 'solicitacao_parecer_juridico', 'parecer_juridico', 'comprovante_publicacao']);
             @endphp
             <div class="bg-white shadow rounded-lg">
                 <form method="GET" action="{{ route('processos.pecas.imprimir-lote', $processo) }}"
