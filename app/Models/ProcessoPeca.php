@@ -14,12 +14,27 @@ class ProcessoPeca extends Model
         'parecer_financeiro' => 'Parecer Financeiro',
         'abertura'           => 'Termo de Abertura de Processo',
         'edital'             => 'Edital',
+        'portaria_comissao'  => 'Portaria da Comissão de Seleção',
         'solicitacao_parecer_juridico' => 'Solicitação de Parecer Jurídico',
         'parecer_juridico'   => 'Parecer Jurídico',
+        'comprovante_publicacao' => 'Comprovante de Publicação (Diário Oficial e site)',
         // Rota Dispensa/Inexigibilidade (no lugar do Edital + Jurídico)
         'justificativa_dispensa' => 'Justificativa de Dispensa/Inexigibilidade',
         'parecer_cnas'           => 'Parecer Técnico (CNAS)',
     ];
+
+    /**
+     * Peças que são ARQUIVO em vez de texto: não têm editor nem assinatura
+     * digital — o documento já vem assinado/publicado de fora e é só anexado.
+     * Considera-se preenchida quando tem ao menos um anexo.
+     */
+    public const ARQUIVO = ['portaria_comissao', 'comprovante_publicacao'];
+
+    /**
+     * Peças de texto que também aceitam anexos (o Edital tem os seus anexos,
+     * enviados na própria tela de edição, pela SCP).
+     */
+    public const COM_ANEXOS = ['edital'];
 
     /**
      * Peças opcionais — não bloqueiam o avanço da etapa (ver `pendenciasParaAvancar`).
@@ -37,8 +52,10 @@ class ProcessoPeca extends Model
         'parecer_financeiro' => 'seplan',
         'abertura'           => 'ug',
         'edital'             => 'scp',
+        'portaria_comissao'  => 'ug',   // a UG anexa a portaria ao revisar o edital
         'solicitacao_parecer_juridico' => 'ug',   // a UG solicita o parecer à Procuradoria
         'parecer_juridico'   => 'pj',
+        'comprovante_publicacao' => 'scp',  // a SCP anexa o comprovante ao publicar
         'justificativa_dispensa' => 'ug',   // a UG emite e assina a justificativa
         'parecer_cnas'           => 'ug',   // opcional — só nas parcerias do SUAS
     ];
@@ -50,8 +67,10 @@ class ProcessoPeca extends Model
         'parecer_financeiro' => 3,
         'abertura'           => 4,
         'edital'             => 5,
+        'portaria_comissao'  => 6,
         'solicitacao_parecer_juridico' => 6,
         'parecer_juridico'   => 7,
+        'comprovante_publicacao' => 8,
         // Rota Dispensa: ambas na etapa 5 (a justificativa substitui o edital)
         'justificativa_dispensa' => 5,
         'parecer_cnas'           => 5,

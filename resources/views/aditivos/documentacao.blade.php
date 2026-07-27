@@ -38,7 +38,7 @@
 
             <div class="bg-white shadow rounded-lg">
                 <div class="px-6 py-4 border-b border-gray-200">
-                    <h3 class="text-base font-semibold text-gray-800">Peças do Processo</h3>
+                    <h3 class="text-base font-semibold text-gray-800">Documentos do Processo</h3>
                     <p class="text-xs text-gray-400 mt-0.5">
                         Itens "puxar do módulo Gestão de Parcerias" podem ser anexados manualmente nesta versão.
                     </p>

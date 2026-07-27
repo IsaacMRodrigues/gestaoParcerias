@@ -12,57 +12,6 @@
         <form method="POST" action="{{ route('portal.osc.store') }}" class="space-y-8">
             @csrf
 
-            {{-- Dados do Representante Legal --}}
-            <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
-                <h2 class="text-base font-semibold text-gray-800 mb-4 pb-2 border-b border-gray-100">
-                    Dados do Representante Legal
-                </h2>
-                <div class="grid grid-cols-1 gap-4">
-                    <div>
-                        <label for="resp_nome" class="block text-sm font-medium text-gray-700 mb-1">Nome Completo *</label>
-                        <input id="resp_nome" name="resp_nome" type="text" required
-                               value="{{ old('resp_nome') }}"
-                               class="block w-full border-gray-300 rounded-lg shadow-sm focus:ring-indigo-500 focus:border-indigo-500 text-sm @error('resp_nome') border-red-300 @enderror">
-                        @error('resp_nome') <p class="text-red-600 text-xs mt-1">{{ $message }}</p> @enderror
-                    </div>
-                    <div class="grid grid-cols-2 gap-4">
-                        <div>
-                            <label for="cpf" class="block text-sm font-medium text-gray-700 mb-1">CPF *</label>
-                            <input id="cpf" name="cpf" type="text" required
-                                   value="{{ old('cpf') }}" placeholder="000.000.000-00"
-                                   class="block w-full border-gray-300 rounded-lg shadow-sm focus:ring-indigo-500 focus:border-indigo-500 text-sm @error('cpf') border-red-300 @enderror">
-                            @error('cpf') <p class="text-red-600 text-xs mt-1">{{ $message }}</p> @enderror
-                        </div>
-                        <div>
-                            <label for="resp_phone" class="block text-sm font-medium text-gray-700 mb-1">Telefone</label>
-                            <input id="resp_phone" name="resp_phone" type="text"
-                                   value="{{ old('resp_phone') }}" placeholder="(00) 00000-0000"
-                                   class="block w-full border-gray-300 rounded-lg shadow-sm focus:ring-indigo-500 focus:border-indigo-500 text-sm">
-                        </div>
-                    </div>
-                    <div>
-                        <label for="email" class="block text-sm font-medium text-gray-700 mb-1">E-mail (será seu login) *</label>
-                        <input id="email" name="email" type="email" required
-                               value="{{ old('email') }}"
-                               class="block w-full border-gray-300 rounded-lg shadow-sm focus:ring-indigo-500 focus:border-indigo-500 text-sm @error('email') border-red-300 @enderror">
-                        @error('email') <p class="text-red-600 text-xs mt-1">{{ $message }}</p> @enderror
-                    </div>
-                    <div class="grid grid-cols-2 gap-4">
-                        <div>
-                            <label for="password" class="block text-sm font-medium text-gray-700 mb-1">Senha *</label>
-                            <input id="password" name="password" type="password" required
-                                   class="block w-full border-gray-300 rounded-lg shadow-sm focus:ring-indigo-500 focus:border-indigo-500 text-sm @error('password') border-red-300 @enderror">
-                            @error('password') <p class="text-red-600 text-xs mt-1">{{ $message }}</p> @enderror
-                        </div>
-                        <div>
-                            <label for="password_confirmation" class="block text-sm font-medium text-gray-700 mb-1">Confirmar Senha *</label>
-                            <input id="password_confirmation" name="password_confirmation" type="password" required
-                                   class="block w-full border-gray-300 rounded-lg shadow-sm focus:ring-indigo-500 focus:border-indigo-500 text-sm">
-                        </div>
-                    </div>
-                </div>
-            </div>
-
             {{-- Dados da OSC --}}
             <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
                 <h2 class="text-base font-semibold text-gray-800 mb-4 pb-2 border-b border-gray-100">
@@ -154,6 +103,57 @@
                                 @endforeach
                             </select>
                             @error('estado') <p class="text-red-600 text-xs mt-1">{{ $message }}</p> @enderror
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            {{-- Dados do Representante Legal --}}
+            <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+                <h2 class="text-base font-semibold text-gray-800 mb-4 pb-2 border-b border-gray-100">
+                    Dados do Representante Legal
+                </h2>
+                <div class="grid grid-cols-1 gap-4">
+                    <div>
+                        <label for="resp_nome" class="block text-sm font-medium text-gray-700 mb-1">Nome Completo *</label>
+                        <input id="resp_nome" name="resp_nome" type="text" required
+                               value="{{ old('resp_nome') }}"
+                               class="block w-full border-gray-300 rounded-lg shadow-sm focus:ring-indigo-500 focus:border-indigo-500 text-sm @error('resp_nome') border-red-300 @enderror">
+                        @error('resp_nome') <p class="text-red-600 text-xs mt-1">{{ $message }}</p> @enderror
+                    </div>
+                    <div class="grid grid-cols-2 gap-4">
+                        <div>
+                            <label for="cpf" class="block text-sm font-medium text-gray-700 mb-1">CPF *</label>
+                            <input id="cpf" name="cpf" type="text" required
+                                   value="{{ old('cpf') }}" placeholder="000.000.000-00"
+                                   class="block w-full border-gray-300 rounded-lg shadow-sm focus:ring-indigo-500 focus:border-indigo-500 text-sm @error('cpf') border-red-300 @enderror">
+                            @error('cpf') <p class="text-red-600 text-xs mt-1">{{ $message }}</p> @enderror
+                        </div>
+                        <div>
+                            <label for="resp_phone" class="block text-sm font-medium text-gray-700 mb-1">Telefone</label>
+                            <input id="resp_phone" name="resp_phone" type="text"
+                                   value="{{ old('resp_phone') }}" placeholder="(00) 00000-0000"
+                                   class="block w-full border-gray-300 rounded-lg shadow-sm focus:ring-indigo-500 focus:border-indigo-500 text-sm">
+                        </div>
+                    </div>
+                    <div>
+                        <label for="email" class="block text-sm font-medium text-gray-700 mb-1">E-mail (será seu login) *</label>
+                        <input id="email" name="email" type="email" required
+                               value="{{ old('email') }}"
+                               class="block w-full border-gray-300 rounded-lg shadow-sm focus:ring-indigo-500 focus:border-indigo-500 text-sm @error('email') border-red-300 @enderror">
+                        @error('email') <p class="text-red-600 text-xs mt-1">{{ $message }}</p> @enderror
+                    </div>
+                    <div class="grid grid-cols-2 gap-4">
+                        <div>
+                            <label for="password" class="block text-sm font-medium text-gray-700 mb-1">Senha *</label>
+                            <input id="password" name="password" type="password" required
+                                   class="block w-full border-gray-300 rounded-lg shadow-sm focus:ring-indigo-500 focus:border-indigo-500 text-sm @error('password') border-red-300 @enderror">
+                            @error('password') <p class="text-red-600 text-xs mt-1">{{ $message }}</p> @enderror
+                        </div>
+                        <div>
+                            <label for="password_confirmation" class="block text-sm font-medium text-gray-700 mb-1">Confirmar Senha *</label>
+                            <input id="password_confirmation" name="password_confirmation" type="password" required
+                                   class="block w-full border-gray-300 rounded-lg shadow-sm focus:ring-indigo-500 focus:border-indigo-500 text-sm">
                         </div>
                     </div>
                 </div>

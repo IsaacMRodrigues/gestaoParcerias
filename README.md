@@ -537,10 +537,35 @@ São 21 perfis. Um usuário pode ter **vários**; os marcados 🔒 são **exclus
     → aparece no Portal. ⚠️ o chamamento nasce **sem período de inscrição**; enquanto a UG não
     o define, não aceita propostas — o `show` agora exibe aviso com link "Definir datas"
 
+- [2026-07-27] Ajustes de UX e base para **anexos das peças do trâmite** (em andamento)
+  - **"Peças do Processo" → "Documentos do Processo"** no `processos/show` e na Documentação do
+    Aditivo — "peça" é jargão interno; a tela agora fala a língua do usuário
+  - **Cadastro de OSC**: blocos reordenados — *Dados da OSC* primeiro, *Dados do Representante
+    Legal* depois (quem se cadastra pensa primeiro na entidade, depois em quem responde por ela)
+  - **Modelos oficiais XII–XX recebidos do cliente** e versionados em
+    `Docs. Desenvolvimento/Modelos/`: Relatório da Comissão de Seleção, Ata, Resultado
+    provisório e definitivo do Edital, Aprovação do Plano de Trabalho, Termo de Adjudicação e
+    Homologação, Ordem de Pagamento GLOBAL e PARCIAL. **Ainda não encaixados** em `Peca::MODELO`
+    — reduzem a lista dos 13 modelos pendentes, mas o texto precisa ser transposto para HTML
+  - **Limpeza dos assets**: removidos 5 CSS antigos de `public/build/assets` que não eram mais
+    referenciados pelo `manifest.json` (sobras de builds anteriores versionadas por engano)
+  - **Base (ainda não ligada na interface) para peças do tipo ARQUIVO**: tabela
+    `processo_peca_anexos` (1:N) + model `ProcessoPecaAnexo`, e duas peças novas em
+    `ProcessoPeca` — **Portaria da Comissão de Seleção** (UG, etapa 6) e **Comprovante de
+    Publicação** (SCP, etapa 8, Diário Oficial + site). Constantes `ProcessoPeca::ARQUIVO`
+    (peça é só upload, sem editor nem assinatura — preenchida quando tem ≥ 1 anexo) e
+    `COM_ANEXOS` (peça de texto que também aceita anexos — caso do Edital)
+  - ⚠️ **Falta para concluir**: relação `anexos()` em `ProcessoPeca`; rotas/controller de
+    upload, download e remoção; exibir as duas peças no `$ordem` do `processos/show` e tratar o
+    tipo ARQUIVO na tela de edição; considerar os anexos em `pendenciasParaAvancar`; e migration
+    que cria as peças novas nos processos já abertos (hoje só nascem em processos novos)
+
 ---
 
 ## O que está sendo feito
 
+- **Anexos das peças do trâmite** (iniciado em 2026-07-27): concluir a ligação na interface —
+  ver a lista "Falta para concluir" na entrada de 27/07 acima.
 - Pedir ao cliente os **13 modelos padrão** ainda sem arquivo (aprovação de plano, minutas, termos,
   justificativas/autorizações de aditivo e apostilamento).
 - Fechar o checklist de dispensa: itens **16–18** (autorização à OSC, dados bancários, Nota de

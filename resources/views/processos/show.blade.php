@@ -199,7 +199,7 @@
                 <form method="GET" action="{{ route('processos.pecas.imprimir-lote', $processo) }}"
                       onsubmit="if(!this.querySelector('input[name=&quot;pecas[]&quot;]:checked')){alert('Selecione ao menos um documento para baixar.');return false;}">
                     <div class="px-6 py-4 border-b border-gray-200 flex items-center justify-between gap-3">
-                        <h3 class="text-base font-semibold text-gray-800">Peças do Processo</h3>
+                        <h3 class="text-base font-semibold text-gray-800">Documentos do Processo</h3>
                         <button type="submit"
                                 class="text-sm px-3 py-1.5 bg-indigo-600 text-white rounded-md hover:bg-indigo-700 whitespace-nowrap">
                             ⬇ Baixar selecionados (PDF)
