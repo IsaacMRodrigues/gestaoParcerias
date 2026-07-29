@@ -630,6 +630,15 @@ São 21 perfis. Um usuário pode ter **vários**; os marcados 🔒 são **exclus
     repeater dinâmico (Alpine.js) no formulário; `OscController` recria os membros a cada gravação
     (ignora linhas em branco)
 
+- [2026-07-29] Ajustes na navbar administrativa (`layouts/navigation`)
+  - **Execução** deixou de ser botão morto: agora é link para **Instrumentos / Termos** (onde ficam
+    repasses, despesas e saldo), quando o usuário tem `formalizacao` — no desktop e no mobile
+  - Corrigido o rótulo **"Monitoramento & Avaliação"** (aparecia `&amp;` escapado em dobro)
+  - Logo enxuto: removido o texto "Gestão de Parcerias / Sistema público municipal" (a trilha de
+    etapas tem prioridade de espaço)
+  - Menu do usuário reduzido a **apenas o avatar** (iniciais), com o nome no `title`; nome completo e
+    perfil saíram do topo (continuam dentro do dropdown)
+
 ---
 
 ## O que está sendo feito

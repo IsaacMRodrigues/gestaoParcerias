@@ -14,11 +14,6 @@
                 <div class="shrink-0 flex items-center">
                     <a href="{{ route('dashboard') }}" class="flex items-center gap-2.5">
                         <span class="w-9 h-9 bg-indigo-600 rounded-lg flex items-center justify-center text-white font-black text-sm shadow-sm">PGP</span>
-                        {{-- só em telas bem largas: a trilha de etapas tem prioridade --}}
-                        <span class="hidden 2xl:flex flex-col leading-none">
-                            <span class="font-semibold text-gray-900 text-sm">Gestão de Parcerias</span>
-                            <span class="text-[11px] text-gray-400">Sistema público municipal</span>
-                        </span>
                     </a>
                 </div>
 
@@ -90,12 +85,19 @@
                     <x-nav-soon label="Celebração" hint="Você não tem acesso a esta etapa." />
                     @endcan
 
-                    {{-- 4. Execução — já existe, porém dentro de cada Instrumento --}}
+                    {{-- 4. Execução — os repasses/despesas ficam dentro de cada Instrumento --}}
+                    @can('formalizacao')
+                    <x-nav-link :href="route('instrumentos.index')"
+                                :active="request()->routeIs('instrumentos.execucao') || request()->routeIs('repasses.*') || request()->routeIs('despesas.*')">
+                        Execução
+                    </x-nav-link>
+                    @else
                     <x-nav-soon label="Execução"
                                 hint="Repasses, despesas e saldo: abra pela tela do Instrumento." />
+                    @endcan
 
                     {{-- 5 e 6. Etapas ainda não implementadas --}}
-                    <x-nav-soon label="Monitoramento &amp; Avaliação" hint="Em breve" />
+                    <x-nav-soon label="Monitoramento & Avaliação" hint="Em breve" />
                     <x-nav-soon label="Prestação de Contas" hint="Em breve" />
 
                     {{-- Cadastros (transversal, não é etapa) --}}
@@ -128,17 +130,9 @@
             <div class="hidden lg:flex lg:items-center lg:ms-4">
                 <x-dropdown align="right" width="64">
                     <x-slot name="trigger">
-                        <button class="inline-flex items-center gap-2.5 pl-1.5 pr-3 py-1.5 border border-gray-200 rounded-full text-sm font-medium text-gray-600 bg-white hover:bg-gray-50 hover:border-gray-300 focus:outline-none transition ease-in-out duration-150">
-                            <span class="w-7 h-7 rounded-full bg-indigo-100 text-indigo-700 flex items-center justify-center text-xs font-bold">{{ $navInitials }}</span>
-                            <span class="flex flex-col items-start leading-none">
-                                <span class="text-gray-900 font-semibold text-[13px]">{{ Auth::user()->name }}</span>
-                                @if($navRoleLabel)
-                                    <span class="hidden xl:block text-[11px] text-gray-400">{{ $navRoleLabel }}</span>
-                                @endif
-                            </span>
-                            <svg class="fill-current h-4 w-4 text-gray-400" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20">
-                                <path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd" />
-                            </svg>
+                        <button title="{{ Auth::user()->name }}"
+                                class="flex items-center justify-center w-9 h-9 rounded-full bg-indigo-100 text-indigo-700 text-xs font-bold hover:bg-indigo-200 focus:outline-none focus:ring-2 focus:ring-indigo-300 transition">
+                            {{ $navInitials }}
                         </button>
                     </x-slot>
 
@@ -245,7 +239,14 @@
             @endcan
 
             <p class="{{ $navSecao }}">4 · Execução</p>
+            @can('formalizacao')
+            <x-responsive-nav-link :href="route('instrumentos.index')"
+                :active="request()->routeIs('instrumentos.execucao') || request()->routeIs('repasses.*') || request()->routeIs('despesas.*')">
+                Instrumentos / Execução
+            </x-responsive-nav-link>
+            @else
             <p class="px-4 py-1 text-sm text-gray-400">Repasses, despesas e saldo — abra pela tela do Instrumento.</p>
+            @endcan
 
             <p class="{{ $navSecao }}">5 · Monitoramento &amp; Avaliação</p>
             <p class="px-4 py-1 text-sm text-gray-400">Em breve.</p>
