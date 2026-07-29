@@ -9,10 +9,12 @@
                 Organizações da Sociedade Civil podem submeter propostas para os chamamentos disponíveis.
             </p>
             <div class="flex flex-wrap items-center justify-center gap-3 mt-7">
-                <a href="{{ route('portal.osc.create') }}"
-                   class="px-5 py-2.5 text-sm font-semibold text-indigo-800 bg-white rounded-lg shadow hover:bg-indigo-50 transition">
-                    Cadastre sua OSC
-                </a>
+                @guest
+                    <a href="{{ route('portal.osc.create') }}"
+                       class="px-5 py-2.5 text-sm font-semibold text-indigo-800 bg-white rounded-lg shadow hover:bg-indigo-50 transition">
+                        Cadastre sua OSC
+                    </a>
+                @endguest
                 <a href="#chamamentos"
                    class="px-5 py-2.5 text-sm font-semibold text-white border border-white/40 rounded-lg hover:bg-white/10 transition">
                     Ver chamamentos
@@ -123,16 +125,18 @@
                 <p class="text-sm text-gray-500 mt-1 max-w-md mx-auto">
                     Assim que um chamamento, dispensa ou inexigibilidade for publicado, ele aparecerá aqui.
                 </p>
-                <div class="flex flex-wrap items-center justify-center gap-3 mt-6">
-                    <a href="{{ route('portal.osc.create') }}"
-                       class="px-5 py-2.5 text-sm font-semibold text-white bg-indigo-600 rounded-lg hover:bg-indigo-700 transition">
-                        Cadastrar minha OSC
-                    </a>
-                    <a href="{{ route('login') }}"
-                       class="px-5 py-2.5 text-sm font-semibold text-indigo-700 border border-indigo-300 rounded-lg hover:bg-indigo-50 transition">
-                        Já tenho cadastro
-                    </a>
-                </div>
+                @guest
+                    <div class="flex flex-wrap items-center justify-center gap-3 mt-6">
+                        <a href="{{ route('portal.osc.create') }}"
+                           class="px-5 py-2.5 text-sm font-semibold text-white bg-indigo-600 rounded-lg hover:bg-indigo-700 transition">
+                            Cadastrar minha OSC
+                        </a>
+                        <a href="{{ route('login') }}"
+                           class="px-5 py-2.5 text-sm font-semibold text-indigo-700 border border-indigo-300 rounded-lg hover:bg-indigo-50 transition">
+                            Já tenho cadastro
+                        </a>
+                    </div>
+                @endguest
             </div>
         @endforelse
 
@@ -140,7 +144,8 @@
             <div class="mt-6">{{ $chamamentos->links() }}</div>
         @endif
 
-        {{-- Como participar --}}
+        {{-- Como participar (onboarding de OSC nova — só para visitantes) --}}
+        @guest
         <div class="mt-14">
             <h2 class="text-sm font-semibold text-gray-500 uppercase tracking-wider mb-5 text-center">Como participar</h2>
             <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
@@ -157,5 +162,6 @@
                 @endforeach
             </div>
         </div>
+        @endguest
     </div>
 </x-portal-layout>

@@ -176,6 +176,17 @@ class User extends Authenticatable
     }
 
     /**
+     * Usuário interno do sistema (equipe da Administração) — qualquer papel que
+     * não seja exclusivamente o `responsavel_legal` das OSCs, que só acessa o
+     * portal público. Usado para manter o menu administrativo no topo mesmo
+     * quando o interno navega pelo portal.
+     */
+    public function temAcessoInterno(): bool
+    {
+        return $this->roles->contains(fn ($role) => $role->name !== 'responsavel_legal');
+    }
+
+    /**
      * Vê dados (ex.: propostas) de TODOS os órgãos? — administrador, auditoria
      * (somente leitura) ou papéis transversais não lotados numa Secretaria
      * específica (comissões etc.). Quem é lotado numa UG vê só o próprio órgão.

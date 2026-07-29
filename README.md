@@ -605,6 +605,11 @@ São 21 perfis. Um usuário pode ter **vários**; os marcados 🔒 são **exclus
     🔴 **obrigatório** ou ⚪ **opcional** — em vez de só marcar as opcionais. Fecha a dúvida do "2/7":
     o percentual só chega a 100% no fim do ciclo (resultado definitivo + termo de homologação), o que
     é o comportamento correto — a publicação já é travada pela **conclusão do trâmite do processo**
+  - **Portal x usuário interno**: `User::temAcessoInterno()` (qualquer papel além de `responsavel_legal`).
+    O layout do portal (`layouts/portal`) passa a renderizar o **menu administrativo** (`layouts/navigation`)
+    no topo quando um usuário interno navega pelo portal, em vez do header simplificado — mantendo a
+    navegação do sistema. Os CTAs **"Cadastre sua OSC"** (hero, estado vazio, "Como participar", bloco
+    de inscrições e submenu do usuário) agora só aparecem para **visitantes** (`@guest`)
 
 ---
 

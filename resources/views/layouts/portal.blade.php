@@ -8,6 +8,13 @@
 </head>
 <body class="bg-gray-50 text-gray-800 min-h-screen flex flex-col">
 
+    @php $portalInterno = auth()->check() && auth()->user()->temAcessoInterno(); @endphp
+
+    @if($portalInterno)
+        {{-- Usuário interno da Administração: mantém o menu do sistema no topo,
+             para continuar navegando mesmo estando no portal público. --}}
+        @include('layouts.navigation')
+    @else
     <header class="bg-indigo-800 text-white shadow">
         <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="flex items-center justify-between h-16">
@@ -44,16 +51,6 @@
                             </button>
                             <div x-show="open" x-transition
                                  class="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg ring-1 ring-black ring-opacity-5 z-50 text-gray-700">
-                                @if(!auth()->user()->osc)
-                                    <a href="{{ route('portal.osc.create') }}"
-                                       class="block px-4 py-2 text-sm hover:bg-gray-100">
-                                        Cadastrar minha OSC
-                                    </a>
-                                @endif
-                                <a href="{{ route('dashboard') }}"
-                                   class="block px-4 py-2 text-sm hover:bg-gray-100">
-                                    Área Administrativa
-                                </a>
                                 <form method="POST" action="{{ route('logout') }}">
                                     @csrf
                                     <button type="submit"
@@ -77,6 +74,7 @@
             </div>
         </div>
     </header>
+    @endif
 
     <main class="flex-1">
         {{ $slot }}

@@ -156,10 +156,12 @@
                                 Previsão: {{ $chamamento->data_inicio_inscricao->format('d/m/Y') }}.
                             @endif
                         </p>
-                        <p class="text-xs text-blue-600 mt-1">
-                            <a href="{{ route('portal.osc.create') }}" class="underline">Cadastre sua OSC</a>
-                            para estar pronto quando as inscrições abrirem.
-                        </p>
+                        @guest
+                            <p class="text-xs text-blue-600 mt-1">
+                                <a href="{{ route('portal.osc.create') }}" class="underline">Cadastre sua OSC</a>
+                                para estar pronto quando as inscrições abrirem.
+                            </p>
+                        @endguest
                     @endif
                 </div>
             @endif
