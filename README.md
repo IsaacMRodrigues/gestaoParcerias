@@ -615,6 +615,21 @@ São 21 perfis. Um usuário pode ter **vários**; os marcados 🔒 são **exclus
     o visitante vê "Entrar para Participar". `PortalController@participar` redireciona o interno de volta
     ao chamamento com flash `info` (em vez de mandá-lo ao cadastro de OSC, que não se aplica a ele)
 
+- [2026-07-29] Cadastro completo de OSC (Módulo 1.2) e Matrícula do usuário interno
+  - **Usuário interno (1.1)**: campo **Matrícula** no formulário (`usuarios/_form`), validação `unique`
+    em `UserRequest` e persistência no `UserController` (a coluna já existia)
+  - **OSC — dados básicos**: novas colunas **Data de abertura do CNPJ**, **CNAE primário** e
+    **CNAE secundário** (migration `add_cadastro_fields_to_oscs_table`)
+  - **OSC — representante legal**: **endereço completo** próprio (`resp_*`) — o componente
+    `x-address-fields` ganhou props `prefix`/`title` e é reaproveitado para os dois endereços
+  - **OSC — anexos** (disco privado `local`, PDF/JPG/PNG até 10 MB): **Cartão CNPJ** e, do
+    representante, **CPF**, **Comprovante de endereço** e **Ata da diretoria**. Componente
+    `x-osc-anexo` (upload + link do arquivo atual); rota `oscs.anexo` e `OscController@baixarAnexo`
+    para download autenticado; `destroy` limpa a pasta `oscs/{id}`
+  - **OSC — Membros/Diretoria**: nova tabela `osc_membros` + model `OscMembro` (relação `Osc::membros`),
+    repeater dinâmico (Alpine.js) no formulário; `OscController` recria os membros a cada gravação
+    (ignora linhas em branco)
+
 ---
 
 ## O que está sendo feito

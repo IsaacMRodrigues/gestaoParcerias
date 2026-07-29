@@ -84,6 +84,7 @@ Route::middleware(['auth', 'staff', 'readonly'])->group(function () {
         Route::resource('usuarios', UserController::class)->except(['show']);
         Route::resource('orgaos', OrgaoController::class)->except(['show']);
         Route::resource('oscs', OscController::class)->except(['show']);
+        Route::get('oscs/{osc}/anexo/{campo}', [OscController::class, 'baixarAnexo'])->name('oscs.anexo');
     });
 
     // Módulo Unidade Gestora — Planejamento (Processos)

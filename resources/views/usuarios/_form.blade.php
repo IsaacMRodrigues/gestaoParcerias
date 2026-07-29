@@ -17,8 +17,8 @@
     <x-input-error :messages="$errors->get('email')" class="mt-2" />
 </div>
 
-{{-- CPF e Telefone --}}
-<div class="grid grid-cols-2 gap-4">
+{{-- CPF, Matrícula e Telefone --}}
+<div class="grid grid-cols-3 gap-4">
     <div>
         <x-input-label for="cpf" value="CPF" />
         <x-text-input id="cpf" name="cpf" type="text" class="mt-1 block w-full"
@@ -26,7 +26,13 @@
         <x-input-error :messages="$errors->get('cpf')" class="mt-2" />
     </div>
     <div>
-        <x-input-label for="phone" value="Telefone" />
+        <x-input-label for="matricula" value="Matrícula" />
+        <x-text-input id="matricula" name="matricula" type="text" class="mt-1 block w-full"
+                      value="{{ old('matricula', $user?->matricula) }}" maxlength="50" />
+        <x-input-error :messages="$errors->get('matricula')" class="mt-2" />
+    </div>
+    <div>
+        <x-input-label for="phone" value="Telefone institucional" />
         <x-text-input id="phone" name="phone" type="text" class="mt-1 block w-full"
                       value="{{ old('phone', $user?->phone) }}" placeholder="(00) 00000-0000" maxlength="20" />
         <x-input-error :messages="$errors->get('phone')" class="mt-2" />

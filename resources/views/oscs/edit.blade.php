@@ -6,7 +6,7 @@
     <div class="py-8">
         <div class="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="bg-white shadow rounded-lg p-6">
-                <form action="{{ route('oscs.update', $osc) }}" method="POST" class="space-y-4">
+                <form action="{{ route('oscs.update', $osc) }}" method="POST" class="space-y-4" enctype="multipart/form-data">
                     @csrf
                     @method('PUT')
                     @include('oscs._form', ['osc' => $osc])

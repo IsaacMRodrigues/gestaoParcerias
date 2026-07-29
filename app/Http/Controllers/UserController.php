@@ -109,11 +109,12 @@ class UserController extends Controller
     public function store(UserRequest $request): RedirectResponse
     {
         $user = User::create([
-            'name'     => $request->name,
-            'email'    => $request->email,
-            'cpf'      => $request->cpf,
-            'phone'    => $request->phone,
-            'setor'    => $request->setor,
+            'name'      => $request->name,
+            'email'     => $request->email,
+            'cpf'       => $request->cpf,
+            'matricula' => $request->matricula,
+            'phone'     => $request->phone,
+            'setor'     => $request->setor,
             'orgao_id' => $request->orgao_id,
             'status'   => $request->boolean('status', true),
             'password' => bcrypt($request->password),
@@ -135,13 +136,14 @@ class UserController extends Controller
     public function update(UserRequest $request, User $usuario): RedirectResponse
     {
         $data = [
-            'name'   => $request->name,
-            'email'  => $request->email,
-            'cpf'    => $request->cpf,
-            'phone'  => $request->phone,
-            'setor'  => $request->setor,
-            'orgao_id' => $request->orgao_id,
-            'status' => $request->boolean('status', true),
+            'name'      => $request->name,
+            'email'     => $request->email,
+            'cpf'       => $request->cpf,
+            'matricula' => $request->matricula,
+            'phone'     => $request->phone,
+            'setor'     => $request->setor,
+            'orgao_id'  => $request->orgao_id,
+            'status'    => $request->boolean('status', true),
         ];
 
         if ($request->filled('password')) {
