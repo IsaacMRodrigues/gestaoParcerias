@@ -156,7 +156,7 @@
                                    class="text-xs text-indigo-600 hover:text-indigo-900">Editar</a>
                                 <form action="{{ route('instrumentos.aditivos.destroy', [$instrumento, $aditivo]) }}"
                                       method="POST" class="inline"
-                                      onsubmit="return confirm('Remover este aditivo?')">
+                                      data-confirm="Remover este aditivo?">
                                     @csrf @method('DELETE')
                                     <button type="submit" class="text-xs text-red-500 hover:text-red-700">Remover</button>
                                 </form>
@@ -209,7 +209,7 @@
                                 <a href="{{ route('ordens-pagamento.imprimir', $op) }}" target="_blank" class="text-xs text-gray-600 hover:text-gray-900">Imprimir</a>
                                 @unless($op->assinado())
                                     <form action="{{ route('ordens-pagamento.destroy', $op) }}" method="POST" class="inline"
-                                          onsubmit="return confirm('Remover esta ordem de pagamento?')">
+                                          data-confirm="Remover esta ordem de pagamento?">
                                         @csrf @method('DELETE')
                                         <button type="submit" class="text-xs text-red-500 hover:text-red-700">Remover</button>
                                     </form>

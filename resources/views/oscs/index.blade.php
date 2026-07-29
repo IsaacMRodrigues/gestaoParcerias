@@ -44,7 +44,7 @@
                                 <td class="px-6 py-4 text-right text-sm font-medium space-x-3">
                                     <a href="{{ route('oscs.edit', $osc) }}" class="text-indigo-600 hover:text-indigo-900">Editar</a>
                                     <form action="{{ route('oscs.destroy', $osc) }}" method="POST" class="inline"
-                                          onsubmit="return confirm('Deseja remover esta OSC?')">
+                                          data-confirm="Deseja remover esta OSC?">
                                         @csrf
                                         @method('DELETE')
                                         <button type="submit" class="text-red-600 hover:text-red-900">Remover</button>

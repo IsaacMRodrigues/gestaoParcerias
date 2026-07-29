@@ -55,7 +55,7 @@
                                     <a href="{{ route('propostas.show', $proposta) }}" class="text-gray-500 hover:text-gray-800">Ver</a>
                                     <a href="{{ route('propostas.edit', $proposta) }}" class="text-indigo-600 hover:text-indigo-900">Editar</a>
                                     <form action="{{ route('propostas.destroy', $proposta) }}" method="POST" class="inline"
-                                          onsubmit="return confirm('Deseja remover esta proposta?')">
+                                          data-confirm="Deseja remover esta proposta?">
                                         @csrf
                                         @method('DELETE')
                                         <button type="submit" class="text-red-600 hover:text-red-900">Remover</button>

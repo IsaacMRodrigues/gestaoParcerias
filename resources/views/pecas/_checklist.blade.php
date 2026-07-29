@@ -70,7 +70,7 @@
                         @endif
                         @if($peca->preenchido() && !$peca->assinado())
                             <form action="{{ route('pecas.assinar', $peca) }}" method="POST" class="mt-2"
-                                  onsubmit="return confirm('Confirma a assinatura digital deste documento?')">
+                                  data-confirm="Confirma a assinatura digital deste documento?">
                                 @csrf @method('PATCH')
                                 <button type="submit"
                                         class="px-3 py-1.5 text-xs font-medium text-white bg-blue-600 rounded-md hover:bg-blue-700">
@@ -96,7 +96,7 @@
                             <div class="flex items-center gap-3">
                                 <a href="{{ route('pecas.download', $peca) }}" class="text-xs text-indigo-600 hover:text-indigo-900">Baixar</a>
                                 <form action="{{ route('pecas.arquivo.remover', $peca) }}" method="POST"
-                                      onsubmit="return confirm('Remover este arquivo?')">
+                                      data-confirm="Remover este arquivo?">
                                     @csrf @method('DELETE')
                                     <button type="submit" class="text-xs text-red-500 hover:text-red-700">Remover</button>
                                 </form>

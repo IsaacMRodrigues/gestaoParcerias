@@ -18,7 +18,7 @@
                 </span>
                 @if($proposta->status === 'rascunho')
                     <form action="{{ route('portal.proposta.submeter', $proposta) }}" method="POST"
-                          onsubmit="return confirm('Confirma a submissão? Após isso não será possível editar.')">
+                          data-confirm="Confirma a submissão? Após isso não será possível editar.">
                         @csrf @method('PATCH')
                         <button type="submit"
                                 class="px-4 py-2 text-sm font-semibold text-white bg-green-600 rounded-lg hover:bg-green-700 transition">
@@ -132,7 +132,7 @@
                            class="text-xs text-indigo-600 hover:text-indigo-800">Baixar</a>
                         @if($proposta->status === 'rascunho')
                             <form action="{{ route('documentos.destroy', [$proposta, $doc]) }}" method="POST"
-                                  onsubmit="return confirm('Remover este documento?')">
+                                  data-confirm="Remover este documento?">
                                 @csrf @method('DELETE')
                                 <button type="submit" class="text-xs text-red-500 hover:text-red-700">Remover</button>
                             </form>

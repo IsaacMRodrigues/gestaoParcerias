@@ -73,7 +73,7 @@
                                        class="text-indigo-600 hover:text-indigo-900">Editar</a>
                                     <form action="{{ route('programas.chamamentos.destroy', [$programa, $chamamento]) }}"
                                           method="POST" class="inline"
-                                          onsubmit="return confirm('Deseja remover este chamamento?')">
+                                          data-confirm="Deseja remover este chamamento?">
                                         @csrf
                                         @method('DELETE')
                                         <button type="submit" class="text-red-600 hover:text-red-900">Remover</button>

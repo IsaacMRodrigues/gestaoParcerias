@@ -49,7 +49,7 @@
                                 <td class="px-6 py-4 text-right text-sm font-medium space-x-3 whitespace-nowrap">
                                     <a href="{{ route('processos.show', $processo) }}" class="text-indigo-600 hover:text-indigo-900">Abrir</a>
                                     <form action="{{ route('processos.destroy', $processo) }}" method="POST" class="inline"
-                                          onsubmit="return confirm('Remover este processo?')">
+                                          data-confirm="Remover este processo?">
                                         @csrf @method('DELETE')
                                         <button type="submit" class="text-red-600 hover:text-red-900">Remover</button>
                                     </form>

@@ -60,7 +60,7 @@
                                     </a>
                                     <a href="{{ route('programas.edit', $programa) }}" class="text-indigo-600 hover:text-indigo-900">Editar</a>
                                     <form action="{{ route('programas.destroy', $programa) }}" method="POST" class="inline"
-                                          onsubmit="return confirm('Deseja remover este programa?')">
+                                          data-confirm="Deseja remover este programa?">
                                         @csrf
                                         @method('DELETE')
                                         <button type="submit" class="text-red-600 hover:text-red-900">Remover</button>

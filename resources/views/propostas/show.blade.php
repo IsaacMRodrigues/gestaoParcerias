@@ -10,7 +10,7 @@
             <div class="flex items-center gap-3">
                 @if($proposta->status === 'rascunho')
                     <form action="{{ route('propostas.submeter', $proposta) }}" method="POST"
-                          onsubmit="return confirm('Confirma a submissão desta proposta?')">
+                          data-confirm="Confirma a submissão desta proposta?">
                         @csrf
                         @method('PATCH')
                         <button type="submit"
@@ -247,7 +247,7 @@
                             <a href="{{ route('documentos.download', $doc) }}"
                                class="text-xs text-indigo-600 hover:text-indigo-800">Baixar</a>
                             <form action="{{ route('documentos.destroy', [$proposta, $doc]) }}" method="POST"
-                                  onsubmit="return confirm('Remover este documento?')">
+                                  data-confirm="Remover este documento?">
                                 @csrf @method('DELETE')
                                 <button type="submit" class="text-xs text-red-500 hover:text-red-700">Remover</button>
                             </form>
@@ -295,7 +295,7 @@
                                    class="text-xs text-gray-500 hover:text-gray-800">Editar</a>
                                 <form action="{{ route('propostas.metas.destroy', [$proposta, $meta]) }}"
                                       method="POST" class="inline"
-                                      onsubmit="return confirm('Remover esta meta e todas as etapas?')">
+                                      data-confirm="Remover esta meta e todas as etapas?">
                                     @csrf
                                     @method('DELETE')
                                     <button type="submit" class="text-xs text-red-500 hover:text-red-700">Remover</button>
@@ -334,7 +334,7 @@
                                                        class="text-xs text-gray-400 hover:text-gray-700">Editar</a>
                                                     <form action="{{ route('propostas.metas.etapas.destroy', [$proposta, $meta, $etapa]) }}"
                                                           method="POST" class="inline"
-                                                          onsubmit="return confirm('Remover esta etapa?')">
+                                                          data-confirm="Remover esta etapa?">
                                                         @csrf
                                                         @method('DELETE')
                                                         <button type="submit" class="text-xs text-red-400 hover:text-red-600">Remover</button>

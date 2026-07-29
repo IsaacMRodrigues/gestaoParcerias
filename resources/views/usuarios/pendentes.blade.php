@@ -89,7 +89,7 @@
 
                     {{-- Recusar --}}
                     <form action="{{ route('usuarios.recusar', $u) }}" method="POST" class="mt-3 pt-3 border-t border-gray-100"
-                          onsubmit="return confirm('Recusar este cadastro?')">
+                          data-confirm="Recusar este cadastro?">
                         @csrf @method('PATCH')
                         <x-input-label value="Recusar (informe o motivo)" />
                         <div class="flex gap-2 mt-1">

@@ -203,7 +203,8 @@
             @endphp
             <div class="bg-white shadow rounded-lg">
                 <form method="GET" action="{{ route('processos.pecas.imprimir-lote', $processo) }}"
-                      onsubmit="if(!this.querySelector('input[name=&quot;pecas[]&quot;]:checked')){alert('Selecione ao menos um documento para baixar.');return false;}">
+                      data-require-checked="pecas[]"
+                      data-require-checked-message="Selecione ao menos um documento para baixar.">
                     <div class="px-6 py-4 border-b border-gray-200 flex items-center justify-between gap-3">
                         <h3 class="text-base font-semibold text-gray-800">Documentos do Processo</h3>
                         <button type="submit"
@@ -322,7 +323,7 @@
                             @if($processo->ultimaEtapa())
                                 {{-- Concluir (última etapa) --}}
                                 <form action="{{ route('processos.concluir', $processo) }}" method="POST"
-                                      onsubmit="return confirm('Concluir o processo e encaminhar para publicação?')">
+                                      data-confirm="Concluir o processo e encaminhar para publicação?">
                                     @csrf @method('PATCH')
                                     <button type="submit"
                                             class="px-4 py-2 text-sm font-medium text-white bg-green-600 rounded-md hover:bg-green-700">
@@ -334,7 +335,7 @@
                                 {{-- Etapa de análise (SCP): definir a modalidade e APROVAR, ou REJEITAR --}}
                                 <p class="text-sm text-gray-600">Analise os documentos acima, defina a modalidade da seleção e decida:</p>
                                 <form action="{{ route('processos.avancar', $processo) }}" method="POST" class="space-y-4"
-                                      onsubmit="return confirm('Aprovar com a modalidade selecionada e liberar para a próxima etapa?')">
+                                      data-confirm="Aprovar com a modalidade selecionada e liberar para a próxima etapa?">
                                     @csrf
                                     <div>
                                         <x-input-label value="Modalidade da seleção (define o caminho do processo)" class="mb-2" />
@@ -377,7 +378,7 @@
                             @else
                                 {{-- Etapa com documento: encaminhar para o próximo setor --}}
                                 <form action="{{ route('processos.avancar', $processo) }}" method="POST" class="space-y-3"
-                                      @if(!$processo->estaApto()) onsubmit="return confirm('Há alertas de conformidade. Encaminhar mesmo assim?')" @endif>
+                                      @if(!$processo->estaApto()) data-confirm="Há alertas de conformidade. Encaminhar mesmo assim?" @endif>
                                     @csrf
                                     <div>
                                         <x-input-label for="parecer" value="Parecer / observação (opcional)" />

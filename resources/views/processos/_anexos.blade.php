@@ -31,7 +31,7 @@
                     </div>
                     @if($podeAnexar)
                         <form action="{{ route('processos.pecas.anexos.destroy', [$processo, $peca, $anexo]) }}" method="POST"
-                              onsubmit="return confirm('Remover este anexo?')">
+                              data-confirm="Remover este anexo?">
                             @csrf @method('DELETE')
                             <button type="submit" class="text-xs text-red-600 hover:text-red-800 whitespace-nowrap">Remover</button>
                         </form>

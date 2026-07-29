@@ -75,7 +75,7 @@
                                 <td class="px-6 py-2 text-right font-medium">R$ {{ number_format($r->valor, 2, ',', '.') }}</td>
                                 <td class="px-6 py-2 text-gray-500">{{ $r->documento ?? '—' }}</td>
                                 <td class="px-6 py-2 text-right">
-                                    <form action="{{ route('repasses.destroy', $r) }}" method="POST" onsubmit="return confirm('Remover este repasse?')">
+                                    <form action="{{ route('repasses.destroy', $r) }}" method="POST" data-confirm="Remover este repasse?">
                                         @csrf @method('DELETE')
                                         <button class="text-xs text-red-500 hover:text-red-700">Remover</button>
                                     </form>
@@ -133,7 +133,7 @@
                                     @endif
                                 </td>
                                 <td class="px-6 py-2 text-right">
-                                    <form action="{{ route('despesas.destroy', $d) }}" method="POST" onsubmit="return confirm('Remover esta despesa?')">
+                                    <form action="{{ route('despesas.destroy', $d) }}" method="POST" data-confirm="Remover esta despesa?">
                                         @csrf @method('DELETE')
                                         <button class="text-xs text-red-500 hover:text-red-700">Remover</button>
                                     </form>

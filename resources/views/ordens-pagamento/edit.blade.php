@@ -92,7 +92,7 @@
 
                 @unless($op->assinado())
                     <form method="POST" action="{{ route('ordens-pagamento.assinar', $op) }}"
-                          onsubmit="return confirm('Assinar eletronicamente esta ordem de pagamento? Após assinar não será possível editá-la.')">
+                          data-confirm="Assinar eletronicamente esta ordem de pagamento? Após assinar não será possível editá-la.">
                         @csrf @method('PATCH')
                         <button type="submit" class="px-4 py-2 text-sm font-semibold text-white bg-green-600 rounded-lg hover:bg-green-700">
                             🔏 Assinar

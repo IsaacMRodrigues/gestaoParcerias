@@ -162,6 +162,17 @@ São 21 perfis. Um usuário pode ter **vários**; os marcados 🔒 são **exclus
 
 ## O que foi feito
 
+- [2026-07-29] **Modais no lugar de `alert()`/`confirm()` nativos** — UX consistente em todo o sistema
+  - Módulo global `resources/js/confirm-modal.js` + estilos `.cmodal-*` em `resources/css/app.css`
+    (tema claro/escuro, variante *danger* vermelho, animação, fecha por Esc/backdrop/Cancelar)
+  - **Sem JS na página**: os forms usam atributos — `data-confirm="..."` (pergunta antes de enviar),
+    `data-confirm-variant="danger"`, `data-confirm-title`, `data-confirm-text`; links `<a data-confirm>`
+    também são interceptados. O variante *danger* é inferido por palavras (Remover/Excluir/Recusar…)
+  - Validação "selecione ao menos um" (download de peças em lote) virou `data-require-checked` +
+    `data-require-checked-message` (antes era `alert()`)
+  - Converteu **25 `confirm()`** e **1 `alert()`** em 17 views; `requestSubmit()` preserva a validação
+    nativa dos campos obrigatórios (ex.: modalidade na aprovação do SCP)
+
 - [2026-06-16] Especificação inicial recebida (`txt.txt`) e analisada
 - [2026-06-16] Repositório privado criado no GitHub
 - [2026-06-16] Projeto Laravel 13 criado com Breeze (Blade + TailwindCSS)
