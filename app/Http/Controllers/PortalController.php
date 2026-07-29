@@ -24,8 +24,20 @@ class PortalController extends Controller
 
     public function chamamento(Chamamento $chamamento): View
     {
-        $chamamento->load(['programa.orgao']);
-        return view('portal.chamamento', compact('chamamento'));
+        $chamamento->load(['programa.orgao', 'processo.pecas']);
+
+        // Documentos públicos do chamamento: peças de texto assinadas do processo
+        // de origem (Edital ou Justificativa de Dispensa) — têm página pública de
+        // validação, onde a OSC lê o teor completo e confere a assinatura.
+        $publicos = ['edital', 'justificativa_dispensa', 'parecer_cnas'];
+        $documentosPublicos = $chamamento->processo
+            ? $chamamento->processo->pecas
+                ->whereIn('tipo', $publicos)
+                ->filter(fn ($p) => $p->assinado() && $p->codigo_validacao)
+                ->values()
+            : collect();
+
+        return view('portal.chamamento', compact('chamamento', 'documentosPublicos'));
     }
 
     public function minhasPropostas(): View

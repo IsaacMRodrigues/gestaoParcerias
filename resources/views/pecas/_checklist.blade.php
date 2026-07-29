@@ -16,10 +16,12 @@
                     <div>
                         <p class="text-sm font-medium text-gray-800">
                             {{ $peca->rotulo }}
-                            @unless($peca->obrigatorio)
-                                <span class="ml-1 text-xs text-gray-400 font-normal">(opcional)</span>
-                            @endunless
-                            <span class="ml-2 text-xs px-1.5 py-0.5 rounded {{ $peca->tipo === 'modelo' ? 'bg-purple-50 text-purple-600' : 'bg-amber-50 text-amber-600' }}">
+                            @if($peca->obrigatorio)
+                                <span class="ml-1 text-xs px-1.5 py-0.5 rounded bg-red-50 text-red-600 font-medium">obrigatório</span>
+                            @else
+                                <span class="ml-1 text-xs px-1.5 py-0.5 rounded bg-gray-100 text-gray-500 font-normal">opcional</span>
+                            @endif
+                            <span class="ml-1 text-xs px-1.5 py-0.5 rounded {{ $peca->tipo === 'modelo' ? 'bg-purple-50 text-purple-600' : 'bg-amber-50 text-amber-600' }}">
                                 {{ $peca->tipo === 'modelo' ? 'modelo padrão' : 'arquivo' }}
                             </span>
                         </p>

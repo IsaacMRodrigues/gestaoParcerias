@@ -118,11 +118,30 @@
                         <p class="text-sm text-amber-700 mb-3">
                             O trâmite está concluído, mas o chamamento ainda não foi gerado no módulo Programas.
                         </p>
-                        <form action="{{ route('processos.publicar-chamamento', $processo) }}" method="POST">
+                        <form action="{{ route('processos.publicar-chamamento', $processo) }}" method="POST" class="space-y-3">
                             @csrf
+                            @unless($processo->modalidade)
+                                <div>
+                                    <x-input-label value="Modalidade da seleção (não foi definida no trâmite — escolha para publicar)" class="mb-2" />
+                                    <div class="space-y-2">
+                                        @foreach(\App\Models\Processo::MODALIDADES as $valor => $rotulo)
+                                            <label class="flex items-start gap-3 p-3 border border-gray-200 rounded-md cursor-pointer hover:border-indigo-300 hover:bg-indigo-50/30">
+                                                <input type="radio" name="modalidade" value="{{ $valor }}" required
+                                                       class="mt-1 text-indigo-600 focus:ring-indigo-500"
+                                                       @checked(old('modalidade') === $valor)>
+                                                <span>
+                                                    <span class="block text-sm font-medium text-gray-800">{{ $rotulo }}</span>
+                                                    <span class="block text-xs text-gray-500">{{ \App\Models\Processo::MODALIDADES_DESC[$valor] ?? '' }}</span>
+                                                </span>
+                                            </label>
+                                        @endforeach
+                                    </div>
+                                    <x-input-error :messages="$errors->get('modalidade')" class="mt-1" />
+                                </div>
+                            @endunless
                             <button type="submit"
                                     class="px-4 py-2 text-sm font-medium text-white bg-indigo-600 rounded-md hover:bg-indigo-700">
-                                Gerar Chamamento / Publicação
+                                Gerar Publicação / Chamamento
                             </button>
                         </form>
                     @endif

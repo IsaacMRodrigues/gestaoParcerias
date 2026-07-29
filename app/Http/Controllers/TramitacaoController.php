@@ -6,6 +6,7 @@ use App\Models\Chamamento;
 use App\Models\Processo;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Validation\Rule;
 
 class TramitacaoController extends Controller
 {
@@ -160,11 +161,20 @@ class TramitacaoController extends Controller
     /**
      * Gera o Chamamento para um processo já concluído que ainda não tenha publicação.
      */
-    public function publicar(Processo $processo): RedirectResponse
+    public function publicar(Request $request, Processo $processo): RedirectResponse
     {
         abort_unless($processo->visivelPara(auth()->user()), 403, 'Este processo pertence a outra Secretaria.');
         abort_unless($processo->status === 'concluido', 422, 'O processo precisa estar concluído.');
         abort_unless(!$processo->chamamento, 422, 'Este processo já possui chamamento publicado.');
+
+        // Se a modalidade não foi definida no trâmite (ex.: processos antigos),
+        // permite escolhê-la aqui antes de gerar a publicação.
+        if (! $processo->modalidade) {
+            $data = $request->validate([
+                'modalidade' => ['required', Rule::in(array_keys(Processo::MODALIDADES))],
+            ]);
+            $processo->update(['modalidade' => $data['modalidade']]);
+        }
 
         // Processo já concluído: qualquer usuário com planejamento pode gerar a publicação
         // (não exige mais estar no setor atual).

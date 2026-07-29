@@ -588,6 +588,24 @@ São 21 perfis. Um usuário pode ter **vários**; os marcados 🔒 são **exclus
   - **Backfill**: migration `2026_07_27_120000_seed_pecas_arquivo_processos_existentes` cria as
     duas peças ARQUIVO nos processos já abertos (nos novos já nascem pelo `store`)
 
+- [2026-07-29] Portal público, publicação por modalidade e clareza do checklist de Seleção
+  - **Documentos no portal público**: `portal/chamamento` ganhou a seção **"Documentos do Chamamento"**,
+    que lista as peças assinadas do processo de origem (Edital / Justificativa de Dispensa / Parecer
+    CNAS) com link para a **página oficial de validação** (`validacao.mostrar`), onde a OSC lê o teor
+    completo e confere a assinatura. `PortalController@chamamento` monta `$documentosPublicos`
+    (peças `assinado()` + `codigo_validacao`) a partir de `processo.pecas`
+  - **Card "Dados do Chamamento"** na tela interna de Seleção (`chamamentos/selecao`): objeto, tipo/status,
+    órgão, valor, datas, requisitos e atalhos (processo de origem, editar, ver no portal).
+    `ChamamentoController@selecao` passou a carregar a relação `processo`
+  - **Publicação com modalidade escolhida no ato**: correção do **422** ao gerar publicação/chamamento
+    quando o processo estava concluído sem `modalidade`. `TramitacaoController@publicar` agora aceita e
+    valida `modalidade` (`Rule::in(Processo::MODALIDADES)`) quando ausente, e `processos/show` mostra o
+    seletor de modalidade antes de gerar
+  - **Checklist de Seleção mais claro** (`pecas/_checklist`): toda peça exibe selo explícito —
+    🔴 **obrigatório** ou ⚪ **opcional** — em vez de só marcar as opcionais. Fecha a dúvida do "2/7":
+    o percentual só chega a 100% no fim do ciclo (resultado definitivo + termo de homologação), o que
+    é o comportamento correto — a publicação já é travada pela **conclusão do trâmite do processo**
+
 ---
 
 ## O que está sendo feito

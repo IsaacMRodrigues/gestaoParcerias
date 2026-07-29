@@ -106,6 +106,26 @@
                 </div>
             @endif
 
+            @if($documentosPublicos->isNotEmpty())
+                <div class="mt-6 border-t border-gray-100 pt-6">
+                    <h2 class="text-sm font-semibold text-gray-700 mb-3">Documentos do Chamamento</h2>
+                    <ul class="space-y-2">
+                        @foreach($documentosPublicos as $doc)
+                            <li>
+                                <a href="{{ route('validacao.mostrar', $doc->codigo_validacao) }}" target="_blank"
+                                   class="inline-flex items-center gap-2 text-sm text-indigo-600 hover:underline font-medium">
+                                    <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                                    </svg>
+                                    {{ \App\Models\ProcessoPeca::TIPOS[$doc->tipo] ?? $doc->tipo }} (ler documento)
+                                </a>
+                            </li>
+                        @endforeach
+                    </ul>
+                    <p class="text-xs text-gray-400 mt-2">Documentos assinados eletronicamente — abrem na página oficial de validação.</p>
+                </div>
+            @endif
+
             @if(in_array($chamamento->status, ['publicado', 'em_inscricao']))
                 <div class="mt-8 bg-indigo-50 border border-indigo-200 rounded-lg p-5 text-center">
                     @if($chamamento->status_efetivo === 'em_inscricao')
