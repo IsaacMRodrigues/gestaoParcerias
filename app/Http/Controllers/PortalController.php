@@ -59,6 +59,12 @@ class PortalController extends Controller
 
         $osc = auth()->user()->osc;
         if (!$osc) {
+            // Usuário interno da Administração não participa como OSC.
+            if (auth()->user()->temAcessoInterno()) {
+                return redirect()->route('portal.chamamento', $chamamento)
+                    ->with('info', 'Você está conectado como usuário do sistema. A submissão de propostas é exclusiva das OSCs.');
+            }
+
             return redirect()->route('portal.osc.create')
                 ->with('info', 'Cadastre sua OSC antes de submeter uma proposta.');
         }

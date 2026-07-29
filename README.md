@@ -610,6 +610,10 @@ São 21 perfis. Um usuário pode ter **vários**; os marcados 🔒 são **exclus
     no topo quando um usuário interno navega pelo portal, em vez do header simplificado — mantendo a
     navegação do sistema. Os CTAs **"Cadastre sua OSC"** (hero, estado vazio, "Como participar", bloco
     de inscrições e submenu do usuário) agora só aparecem para **visitantes** (`@guest`)
+  - **Participação só para OSC**: o botão **"Submeter Proposta"** aparece apenas para usuários com OSC
+    (`auth()->user()->osc`); o usuário interno vê um aviso de que a submissão é exclusiva das OSCs e
+    o visitante vê "Entrar para Participar". `PortalController@participar` redireciona o interno de volta
+    ao chamamento com flash `info` (em vez de mandá-lo ao cadastro de OSC, que não se aplica a ele)
 
 ---
 

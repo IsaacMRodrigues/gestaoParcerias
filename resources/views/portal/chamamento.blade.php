@@ -5,6 +5,12 @@
             <a href="{{ route('portal.index') }}" class="hover:underline">← Chamamentos</a>
         </p>
 
+        @if(session('info'))
+            <div class="mb-4 bg-amber-50 border border-amber-200 text-amber-800 px-4 py-3 rounded-lg text-sm">
+                {{ session('info') }}
+            </div>
+        @endif
+
         <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-8">
 
             <div class="flex items-start justify-between gap-4 mb-6">
@@ -25,10 +31,16 @@
                 <div class="shrink-0">
                     @if($chamamento->aceitaPropostas())
                         @auth
-                            <a href="{{ route('portal.participar', $chamamento) }}"
-                               class="inline-block px-5 py-2.5 text-sm font-semibold text-white bg-indigo-600 rounded-lg hover:bg-indigo-700 transition">
-                                Submeter Proposta
-                            </a>
+                            @if(auth()->user()->osc)
+                                <a href="{{ route('portal.participar', $chamamento) }}"
+                                   class="inline-block px-5 py-2.5 text-sm font-semibold text-white bg-indigo-600 rounded-lg hover:bg-indigo-700 transition">
+                                    Submeter Proposta
+                                </a>
+                            @elseif(auth()->user()->temAcessoInterno())
+                                <span class="inline-block px-4 py-2 text-xs font-medium text-gray-500 bg-gray-100 border border-gray-200 rounded-lg">
+                                    Usuário do sistema — a submissão é feita por OSCs
+                                </span>
+                            @endif
                         @else
                             <a href="{{ route('login') }}"
                                class="inline-block px-5 py-2.5 text-sm font-semibold text-white bg-indigo-600 rounded-lg hover:bg-indigo-700 transition">
@@ -133,10 +145,16 @@
                             Sua OSC pode submeter uma proposta para este chamamento.
                         </p>
                         @auth
-                            <a href="{{ route('portal.participar', $chamamento) }}"
-                               class="inline-block px-6 py-2.5 text-sm font-semibold text-white bg-indigo-600 rounded-lg hover:bg-indigo-700 transition">
-                                Submeter Proposta
-                            </a>
+                            @if(auth()->user()->osc)
+                                <a href="{{ route('portal.participar', $chamamento) }}"
+                                   class="inline-block px-6 py-2.5 text-sm font-semibold text-white bg-indigo-600 rounded-lg hover:bg-indigo-700 transition">
+                                    Submeter Proposta
+                                </a>
+                            @elseif(auth()->user()->temAcessoInterno())
+                                <p class="text-xs text-indigo-600">
+                                    Você está conectado como usuário do sistema. A submissão de propostas é exclusiva das OSCs.
+                                </p>
+                            @endif
                         @else
                             <div class="flex justify-center gap-3">
                                 <a href="{{ route('login') }}"
