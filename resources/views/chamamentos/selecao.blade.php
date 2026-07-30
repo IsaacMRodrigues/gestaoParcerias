@@ -103,6 +103,147 @@
                 </div>
             </div>
 
+            {{-- Trâmite da Seleção (só Chamamento Público) --}}
+            @if($chamamento->temTramiteSelecao())
+                @php
+                    $etapaAtual   = (int) $chamamento->selecao_etapa;
+                    $meuSetor     = auth()->user()->setor;
+                    $souDoSetor   = $meuSetor === $chamamento->selecao_setor;
+                    $concluida    = $chamamento->selecaoConcluida();
+                    $pendencias   = $concluida ? [] : $chamamento->pendenciasSelecao();
+                @endphp
+                <div class="bg-white shadow rounded-lg p-6">
+                    <div class="flex items-start justify-between gap-3 mb-4">
+                        <div>
+                            <h3 class="text-base font-semibold text-gray-800">Trâmite da Seleção</h3>
+                            <p class="text-xs text-gray-400 mt-0.5">
+                                Julgamento das propostas → publicações → homologação pelo Prefeito.
+                            </p>
+                        </div>
+                        @if($concluida)
+                            <span class="px-2.5 py-1 text-xs font-medium bg-green-100 text-green-800 rounded-full whitespace-nowrap">
+                                Encerrada em {{ $chamamento->selecao_concluida_em->format('d/m/Y H:i') }}
+                            </span>
+                        @else
+                            <span class="px-2.5 py-1 text-xs font-medium bg-amber-100 text-amber-800 rounded-full whitespace-nowrap">
+                                Com {{ \App\Models\Chamamento::SETORES_SELECAO[$chamamento->selecao_setor] ?? $chamamento->selecao_setor }}
+                            </span>
+                        @endif
+                    </div>
+
+                    {{-- Trilha das etapas --}}
+                    <ol class="space-y-2">
+                        @foreach(\App\Models\Chamamento::ETAPAS_SELECAO as $i => $etapa)
+                            @php
+                                $feita = $concluida || $i < $etapaAtual;
+                                $agora = !$concluida && $i === $etapaAtual;
+                            @endphp
+                            <li class="flex items-start gap-3 text-sm">
+                                <span class="mt-0.5 w-5 h-5 shrink-0 rounded-full border text-[11px] font-bold flex items-center justify-center
+                                    {{ $feita ? 'bg-green-100 border-green-300 text-green-700'
+                                             : ($agora ? 'bg-indigo-100 border-indigo-300 text-indigo-700'
+                                                       : 'bg-white border-gray-300 text-gray-400') }}">
+                                    {{ $feita ? '✓' : $i + 1 }}
+                                </span>
+                                <span class="{{ $agora ? 'text-gray-900 font-medium' : ($feita ? 'text-gray-500' : 'text-gray-400') }}">
+                                    <span class="text-xs font-semibold uppercase tracking-wide
+                                        {{ $agora ? 'text-indigo-600' : 'text-gray-400' }}">
+                                        {{ strtoupper($etapa['setor']) }}
+                                    </span>
+                                    — {{ $etapa['acao'] }}
+                                </span>
+                            </li>
+                        @endforeach
+                    </ol>
+
+                    @unless($concluida)
+                        {{-- Pendências da etapa --}}
+                        @if($pendencias)
+                            <div class="mt-4 bg-amber-50 border border-amber-200 rounded-md p-3">
+                                <p class="text-xs font-semibold text-amber-800">Pendências desta etapa:</p>
+                                <ul class="mt-1 text-xs text-amber-700 list-disc list-inside space-y-0.5">
+                                    @foreach($pendencias as $p)
+                                        <li>{{ $p }}</li>
+                                    @endforeach
+                                </ul>
+                            </div>
+                        @endif
+
+                        {{-- Ações do setor que está com a Seleção --}}
+                        @if($souDoSetor)
+                            <div class="mt-4 pt-4 border-t border-gray-100 space-y-3">
+                                @if($chamamento->ultimaEtapaSelecao())
+                                    <form action="{{ route('chamamentos.selecao.concluir', $chamamento) }}" method="POST"
+                                          data-confirm="Encerrar a Seleção? O chamamento será homologado e seguirá para a Celebração.">
+                                        @csrf
+                                        <button type="submit" @disabled($pendencias)
+                                                class="px-4 py-2 text-sm font-medium text-white bg-green-600 rounded-md hover:bg-green-700 disabled:opacity-50 disabled:cursor-not-allowed">
+                                            Encerrar Seleção (homologar)
+                                        </button>
+                                    </form>
+                                @else
+                                    <form action="{{ route('chamamentos.selecao.avancar', $chamamento) }}" method="POST" class="space-y-2">
+                                        @csrf
+                                        <textarea name="parecer" rows="2" placeholder="Observação (opcional)"
+                                                  class="block w-full border-gray-300 rounded-md shadow-sm text-sm focus:ring-indigo-500 focus:border-indigo-500"></textarea>
+                                        <button type="submit" @disabled($pendencias)
+                                                class="px-4 py-2 text-sm font-medium text-white bg-indigo-600 rounded-md hover:bg-indigo-700 disabled:opacity-50 disabled:cursor-not-allowed">
+                                            Encaminhar para
+                                            {{ \App\Models\Chamamento::SETORES_SELECAO[\App\Models\Chamamento::ETAPAS_SELECAO[$etapaAtual + 1]['setor']] }}
+                                        </button>
+                                    </form>
+                                @endif
+
+                                @if($etapaAtual > 0)
+                                    <form action="{{ route('chamamentos.selecao.devolver', $chamamento) }}" method="POST"
+                                          class="space-y-2 pt-2 border-t border-gray-100">
+                                        @csrf
+                                        <textarea name="parecer" rows="2" required placeholder="Motivo da devolução (obrigatório)"
+                                                  class="block w-full border-gray-300 rounded-md shadow-sm text-sm focus:ring-red-500 focus:border-red-500"></textarea>
+                                        <button type="submit"
+                                                class="px-4 py-2 text-sm font-medium text-red-700 border border-red-300 rounded-md hover:bg-red-50">
+                                            Devolver para
+                                            {{ \App\Models\Chamamento::SETORES_SELECAO[$chamamento->setorAnteriorSelecao()] }}
+                                        </button>
+                                    </form>
+                                @endif
+                            </div>
+                        @else
+                            <p class="mt-4 pt-4 border-t border-gray-100 text-xs text-gray-500">
+                                A Seleção está com
+                                <strong>{{ \App\Models\Chamamento::SETORES_SELECAO[$chamamento->selecao_setor] ?? $chamamento->selecao_setor }}</strong>.
+                                Só esse setor pode movimentá-la.
+                            </p>
+                        @endif
+                    @endunless
+
+                    {{-- Histórico --}}
+                    @if($chamamento->selecaoTramitacoes->isNotEmpty())
+                        <details class="mt-4 pt-4 border-t border-gray-100">
+                            <summary class="text-xs text-indigo-600 cursor-pointer hover:underline">
+                                Histórico de movimentações ({{ $chamamento->selecaoTramitacoes->count() }})
+                            </summary>
+                            <ul class="mt-2 space-y-2">
+                                @foreach($chamamento->selecaoTramitacoes as $mov)
+                                    <li class="text-xs text-gray-600 border-l-2 pl-3
+                                        {{ $mov->status === 'devolvido' ? 'border-red-300' : 'border-gray-200' }}">
+                                        <span class="font-medium">
+                                            {{ \App\Models\SelecaoTramitacao::STATUS[$mov->status] ?? $mov->status }}
+                                        </span>
+                                        · {{ strtoupper($mov->de_setor) }} → {{ strtoupper($mov->para_setor) }}
+                                        · {{ $mov->enviado_em?->format('d/m/Y H:i') }}
+                                        @if($mov->remetente) · {{ $mov->remetente->name }} @endif
+                                        @if($mov->parecer)
+                                            <p class="text-gray-500 mt-0.5 whitespace-pre-line">{{ $mov->parecer }}</p>
+                                        @endif
+                                    </li>
+                                @endforeach
+                            </ul>
+                        </details>
+                    @endif
+                </div>
+            @endif
+
             {{-- Progresso --}}
             <div class="bg-white shadow rounded-lg p-6">
                 <div class="flex items-center justify-between mb-2">

@@ -103,6 +103,44 @@ class Peca extends Model
         ],
     ];
 
+    /**
+     * Trâmite da Seleção (só categoria `chamamento_publico`): setor que PREENCHE
+     * cada peça e em qual etapa de `Chamamento::ETAPAS_SELECAO`.
+     *
+     * As peças anteriores ao julgamento (Edital, anexos, portaria da Comissão,
+     * parecer jurídico e publicação do extrato) vêm do Planejamento e ficam fora
+     * do trâmite — seguem editáveis por quem tem a permissão de chamamentos.
+     */
+    public const SELECAO_SETOR = [
+        'relatorio_comissao'       => 'ug',
+        'ata_comissao'             => 'ug',
+        'resultado_parcial'        => 'ug',
+        'pub_resultado_parcial'    => 'scp',
+        'recursos'                 => 'ug',
+        'resultado_definitivo'     => 'ug',
+        'pub_resultado_definitivo' => 'scp',
+        'termo_homologacao'        => 'scp',  // a SCP emite; o Prefeito assina
+    ];
+
+    public const SELECAO_ETAPA = [
+        'relatorio_comissao'       => 0,
+        'ata_comissao'             => 0,
+        'resultado_parcial'        => 0,
+        'pub_resultado_parcial'    => 1,
+        'recursos'                 => 2,
+        'resultado_definitivo'     => 2,
+        'pub_resultado_definitivo' => 3,
+        'termo_homologacao'        => 3,
+    ];
+
+    /**
+     * Quem ASSINA, quando difere de quem preenche: o Termo de Adjudicação e
+     * Homologação é emitido pela SCP (etapa 3) e assinado pelo Prefeito (etapa 4).
+     */
+    public const SELECAO_ASSINATURA = [
+        'termo_homologacao' => ['setor' => 'pm', 'etapa' => 4],
+    ];
+
     public const CATEGORIA_LABELS = [
         'chamamento_publico'       => 'Chamamento Público',
         'dispensa_inexigibilidade' => 'Dispensa / Inexigibilidade',
@@ -491,6 +529,125 @@ HTML,
     public function preenchido(): bool
     {
         return $this->tipo === 'modelo' ? !empty($this->conteudo) : $this->temArquivo();
+    }
+
+    // ------------------------------------------------------------------
+    // Trâmite da Seleção — quem pode preencher/assinar e quando
+    // ------------------------------------------------------------------
+
+    /**
+     * O dono desta peça é um Chamamento Público em trâmite de Seleção?
+     * Fora desse caso (Dispensa, Aditivo, Apostilamento) não há trâmite e as
+     * regras antigas valem — quem tem a permissão da tela edita.
+     */
+    private function chamamentoEmSelecao(): ?Chamamento
+    {
+        if ($this->categoria !== 'chamamento_publico') {
+            return null;
+        }
+
+        $alvo = $this->pecaable;
+
+        return $alvo instanceof Chamamento && $alvo->temTramiteSelecao() ? $alvo : null;
+    }
+
+    /** Setor designado para preencher a peça no trâmite da Seleção. */
+    public function selecaoSetor(): ?string
+    {
+        return self::SELECAO_SETOR[$this->chave] ?? null;
+    }
+
+    public function selecaoEtapa(): ?int
+    {
+        return self::SELECAO_ETAPA[$this->chave] ?? null;
+    }
+
+    public function selecaoSetorAssinatura(): ?string
+    {
+        return self::SELECAO_ASSINATURA[$this->chave]['setor'] ?? $this->selecaoSetor();
+    }
+
+    public function selecaoEtapaAssinatura(): ?int
+    {
+        return self::SELECAO_ASSINATURA[$this->chave]['etapa'] ?? $this->selecaoEtapa();
+    }
+
+    /**
+     * Pode preencher (texto ou upload) agora? Só o setor designado, na etapa
+     * designada, enquanto a Seleção não estiver encerrada.
+     */
+    public function podePreencher(?User $user): bool
+    {
+        $chamamento = $this->chamamentoEmSelecao();
+
+        // Sem trâmite (ou peça fora do fluxo): mantém o comportamento anterior.
+        if (!$chamamento || $this->selecaoSetor() === null) {
+            return true;
+        }
+
+        if ($chamamento->selecaoConcluida() || $this->assinado()) {
+            return false;
+        }
+
+        return $user
+            && $user->setor === $this->selecaoSetor()
+            && (int) $chamamento->selecao_etapa === $this->selecaoEtapa();
+    }
+
+    /**
+     * Pode assinar agora? Mesma regra, porém pelo setor/etapa de assinatura —
+     * é o que reserva o Termo de Adjudicação e Homologação ao Prefeito.
+     */
+    public function podeAssinar(?User $user): bool
+    {
+        if ($this->tipo !== 'modelo' || empty($this->conteudo) || $this->assinado()) {
+            return false;
+        }
+
+        $chamamento = $this->chamamentoEmSelecao();
+
+        if (!$chamamento || $this->selecaoSetor() === null) {
+            return true;
+        }
+
+        if ($chamamento->selecaoConcluida()) {
+            return false;
+        }
+
+        return $user
+            && $user->setor === $this->selecaoSetorAssinatura()
+            && (int) $chamamento->selecao_etapa === $this->selecaoEtapaAssinatura();
+    }
+
+    /**
+     * Explicação curta de por que a peça está travada (para a interface).
+     * Devolve null quando o usuário pode atuar nela agora.
+     */
+    public function motivoTrava(?User $user = null): ?string
+    {
+        $chamamento = $this->chamamentoEmSelecao();
+
+        if (!$chamamento || $this->selecaoSetor() === null || $this->assinado()) {
+            return null;
+        }
+
+        // Quem pode preencher ou assinar agora não vê trava.
+        if ($this->podePreencher($user) || $this->podeAssinar($user)) {
+            return null;
+        }
+
+        if ($chamamento->selecaoConcluida()) {
+            return 'Seleção encerrada.';
+        }
+
+        $setor = Chamamento::SETORES_SELECAO[$this->selecaoSetorAssinatura()] ?? $this->selecaoSetorAssinatura();
+        $etapa = $this->selecaoEtapa();
+
+        if ((int) $chamamento->selecao_etapa !== $etapa) {
+            return 'Disponível na etapa ' . ($etapa + 1) . ' do trâmite (' . $setor . ').';
+        }
+
+        return 'Ação do setor responsável: ' . $setor . '.';
     }
 
     public function tamanhoFormatado(): string

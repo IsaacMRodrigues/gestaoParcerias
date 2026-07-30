@@ -639,6 +639,31 @@ São 21 perfis. Um usuário pode ter **vários**; os marcados 🔒 são **exclus
   - Menu do usuário reduzido a **apenas o avatar** (iniciais), com o nome no `title`; nome completo e
     perfil saíram do topo (continuam dentro do dropdown)
 
+- [2026-07-30] **Trâmite da Seleção** (Fluxo Seleção) e perfil do **Prefeito Municipal**
+  - **Perfil novo `prefeito_municipal`** (Módulo 1): lotação **`pm` — Gabinete do Prefeito**, perfil
+    exclusivo desse setor, com as permissões `chamamentos` e `formalizacao`. Assina o Termo de
+    Adjudicação e Homologação que encerra a Seleção
+  - **`Chamamento::ETAPAS_SELECAO`** — 5 etapas, só no Chamamento Público:
+    1. **UG** emite Relatório da Comissão + Ata + Resultado Provisório (assina) → SCP
+    2. **SCP** anexa o comprovante de publicação do provisório → UG
+    3. **UG** analisa recursos (se houver) e emite o Resultado Definitivo (assina) → SCP
+    4. **SCP** anexa o comprovante do definitivo e **emite** o Termo de Adjudicação e Homologação → PM
+    5. **Prefeito** assina o Termo → encerra a Seleção e devolve à UG para a Celebração
+  - Campos `selecao_etapa`/`selecao_setor`/`selecao_concluida_em` em `chamamentos` e histórico em
+    **`selecao_tramitacoes`** (quem encaminhou/devolveu, quando e o motivo)
+  - **`SelecaoController`** com `avancar`, `devolver` e `concluir`: só o setor que está com a Seleção
+    movimenta; devolução exige motivo; encaminhar exige as peças da etapa prontas. Ao encerrar, o
+    chamamento vai a `encerrado` com `data_resultado` preenchida
+  - **Peça designada por setor + etapa**: `Peca::SELECAO_SETOR`, `SELECAO_ETAPA` e `SELECAO_ASSINATURA`
+    (o Termo é emitido pela **SCP** na etapa 4 e assinado pelo **Prefeito** na 5). `podePreencher()`,
+    `podeAssinar()` e `motivoTrava()` travam a peça fora da vez — validado também no `PecaController`
+    (salvar/assinar/upload/puxar/remover), não só na interface
+  - Fora do Chamamento Público (Dispensa, Aditivo, Apostilamento) **nada muda**: sem trâmite, quem tem
+    a permissão da tela continua editando
+  - Interface: **trilha das 5 etapas** com etapa atual/concluídas, lista de pendências, botões
+    Encaminhar/Devolver/Encerrar e histórico de movimentações na tela de Seleção; no checklist as peças
+    travadas mostram 🔒 com o motivo
+
 - [2026-07-30] `Atualizações.txt` — protocolo pela SCP e modelos novos de Seleção/Celebração
   - **Protocolos passam à SCP** (linha 4 do documento): `pedido_parecer` e
     `solicitacao_parecer_juridico` mudaram de `ug` para `scp` em `ProcessoPeca::SETOR_RESPONSAVEL`

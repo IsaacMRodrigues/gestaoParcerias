@@ -1,6 +1,13 @@
 {{-- Espera: $pecas (Collection de App\Models\Peca) --}}
 <div class="divide-y divide-gray-100">
     @foreach($pecas as $peca)
+        @php
+            // No trâmite da Seleção só o setor da etapa atual preenche/assina;
+            // fora dele (Dispensa, Aditivo, Apostilamento) tudo segue liberado.
+            $podePreencher = $peca->podePreencher(auth()->user());
+            $podeAssinar   = $peca->podeAssinar(auth()->user());
+            $trava         = $peca->motivoTrava(auth()->user());
+        @endphp
         <div class="px-6 py-4">
             <div class="flex items-start justify-between gap-4">
                 <div class="flex items-start gap-3">
@@ -29,6 +36,8 @@
                             <p class="text-xs text-gray-400 mt-0.5">
                                 Assinado por {{ $peca->assinante->name }} em {{ $peca->assinado_em->format('d/m/Y H:i') }}
                             </p>
+                        @elseif($trava)
+                            <p class="text-xs text-amber-600 mt-0.5">🔒 {{ $trava }}</p>
                         @endif
                     </div>
                 </div>
@@ -60,7 +69,7 @@
                                     · <a href="{{ route('validacao.mostrar', $peca->codigo_validacao) }}" target="_blank" class="text-indigo-600 hover:underline">Validar</a>
                                 </p>
                             @endif
-                        @else
+                        @elseif($podePreencher)
                             <form action="{{ route('pecas.salvar', $peca) }}" method="POST">
                                 @csrf @method('PUT')
                                 <textarea name="conteudo" data-editor-rico>{!! old('conteudo', $peca->conteudo) !!}</textarea>
@@ -69,8 +78,12 @@
                                     Salvar
                                 </button>
                             </form>
+                        @else
+                            <div class="documento-html border border-gray-200 rounded-md p-4 bg-gray-50 text-gray-700 text-sm">
+                                {!! $peca->conteudo ?: '<p class="text-gray-400">Documento ainda não preenchido.</p>' !!}
+                            </div>
                         @endif
-                        @if($peca->preenchido() && !$peca->assinado())
+                        @if($peca->preenchido() && $podeAssinar)
                             <form action="{{ route('pecas.assinar', $peca) }}" method="POST" class="mt-2"
                                   data-confirm="Confirma a assinatura digital deste documento?">
                                 @csrf @method('PATCH')
@@ -97,13 +110,17 @@
                             </div>
                             <div class="flex items-center gap-3">
                                 <a href="{{ route('pecas.download', $peca) }}" class="text-xs text-indigo-600 hover:text-indigo-900">Baixar</a>
-                                <form action="{{ route('pecas.arquivo.remover', $peca) }}" method="POST"
-                                      data-confirm="Remover este arquivo?">
-                                    @csrf @method('DELETE')
-                                    <button type="submit" class="text-xs text-red-500 hover:text-red-700">Remover</button>
-                                </form>
+                                @if($podePreencher)
+                                    <form action="{{ route('pecas.arquivo.remover', $peca) }}" method="POST"
+                                          data-confirm="Remover este arquivo?">
+                                        @csrf @method('DELETE')
+                                        <button type="submit" class="text-xs text-red-500 hover:text-red-700">Remover</button>
+                                    </form>
+                                @endif
                             </div>
                         </div>
+                    @elseif(!$podePreencher)
+                        <p class="text-xs text-gray-400">Nenhum arquivo enviado.</p>
                     @else
                         <form action="{{ route('pecas.upload', $peca) }}" method="POST" enctype="multipart/form-data"
                               class="flex items-center gap-2">

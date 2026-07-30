@@ -13,6 +13,8 @@ class PecaController extends Controller
     public function salvar(Request $request, Peca $peca): RedirectResponse
     {
         abort_if($peca->tipo !== 'modelo', 422);
+        abort_unless($peca->podePreencher(auth()->user()), 403,
+            $peca->motivoTrava(auth()->user()) ?? 'Você não pode preencher esta peça agora.');
 
         $data = $request->validate([
             'conteudo' => ['nullable', 'string'],
@@ -27,6 +29,8 @@ class PecaController extends Controller
     {
         abort_if($peca->tipo !== 'modelo', 422);
         abort_if(empty($peca->conteudo), 422, 'Preencha o documento antes de assinar.');
+        abort_unless($peca->podeAssinar(auth()->user()), 403,
+            $peca->motivoTrava(auth()->user()) ?? 'Você não pode assinar esta peça agora.');
 
         $peca->update([
             'assinado_por'     => auth()->id(),
@@ -40,6 +44,8 @@ class PecaController extends Controller
     public function upload(Request $request, Peca $peca): RedirectResponse
     {
         abort_if($peca->tipo !== 'arquivo', 422);
+        abort_unless($peca->podePreencher(auth()->user()), 403,
+            $peca->motivoTrava(auth()->user()) ?? 'Você não pode enviar arquivo para esta peça agora.');
 
         $request->validate([
             'arquivo' => ['required', 'file', 'mimes:pdf,doc,docx,xls,xlsx,jpg,jpeg,png', 'max:10240'],
@@ -74,6 +80,8 @@ class PecaController extends Controller
     {
         abort_if($peca->tipo !== 'arquivo', 422);
         abort_unless($peca->puxavel(), 422, 'Esta peça não permite puxar do módulo Gestão de Parcerias.');
+        abort_unless($peca->podePreencher(auth()->user()), 403,
+            $peca->motivoTrava(auth()->user()) ?? 'Você não pode alterar esta peça agora.');
 
         $data = $request->validate(['documento_id' => ['required', 'integer']]);
 
@@ -109,6 +117,9 @@ class PecaController extends Controller
 
     public function removerArquivo(Peca $peca): RedirectResponse
     {
+        abort_unless($peca->podePreencher(auth()->user()), 403,
+            $peca->motivoTrava(auth()->user()) ?? 'Você não pode alterar esta peça agora.');
+
         if ($peca->arquivo_path) {
             Storage::disk('local')->delete($peca->arquivo_path);
         }

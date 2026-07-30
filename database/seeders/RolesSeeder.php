@@ -36,6 +36,8 @@ class RolesSeeder extends Seeder
         'auditor_externo'                  => ['*'], // somente leitura
         'auditor_geral'                    => ['*'], // somente leitura
         'responsavel_unidade_gestora'      => ['planejamento', 'chamamentos', 'propostas', 'pareceres_decisao', 'formalizacao', 'ordem_pagamento', 'execucao'],
+        // Prefeito: assina o Termo de Adjudicação e Homologação que encerra a Seleção.
+        'prefeito_municipal'               => ['chamamentos', 'formalizacao'],
         'analista_tecnico_scp'             => ['planejamento', 'chamamentos'],
         'responsavel_publicacao'           => ['chamamentos'],
         'analista_orcamentario_financeiro' => ['planejamento'],

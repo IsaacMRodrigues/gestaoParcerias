@@ -35,6 +35,7 @@ class Chamamento extends Model
         'programa_id', 'processo_id', 'numero', 'titulo', 'objeto', 'tipo',
         'valor_disponivel', 'data_publicacao', 'data_inicio_inscricao',
         'data_fim_inscricao', 'data_resultado', 'requisitos', 'status',
+        'selecao_etapa', 'selecao_setor', 'selecao_concluida_em',
     ];
 
     protected function casts(): array
@@ -45,8 +46,32 @@ class Chamamento extends Model
             'data_fim_inscricao'    => 'date',
             'data_resultado'        => 'date',
             'valor_disponivel'      => 'decimal:2',
+            'selecao_concluida_em'  => 'datetime',
         ];
     }
+
+    /**
+     * Setores que atuam na Seleção. Além dos setores do trâmite do Processo,
+     * entra o Gabinete do Prefeito (PM), que assina a homologação.
+     */
+    public const SETORES_SELECAO = [
+        'ug'  => 'Unidade Gestora',
+        'scp' => 'Setor de Convênios e Parcerias (SCP)',
+        'pm'  => 'Gabinete do Prefeito (PM)',
+    ];
+
+    /**
+     * Etapas do trâmite da Seleção (Fluxo Seleção confirmado pelo cliente).
+     * Só se aplica ao Chamamento Público — Dispensa/Inexigibilidade não tem
+     * julgamento de propostas nem recurso.
+     */
+    public const ETAPAS_SELECAO = [
+        ['setor' => 'ug',  'acao' => 'Analisar as propostas: emitir o Relatório da Comissão, a Ata e o Resultado Provisório (assinar) e encaminhar à SCP'],
+        ['setor' => 'scp', 'acao' => 'Anexar o comprovante de publicação do Resultado Provisório e devolver à UG'],
+        ['setor' => 'ug',  'acao' => 'Analisar os recursos (se houver) e emitir o Resultado Definitivo (assinar), encaminhando à SCP'],
+        ['setor' => 'scp', 'acao' => 'Anexar o comprovante de publicação do Resultado Definitivo e emitir o Termo de Adjudicação e Homologação'],
+        ['setor' => 'pm',  'acao' => 'Assinar o Termo de Adjudicação e Homologação (encerra a Seleção)'],
+    ];
 
     public function programa(): BelongsTo
     {
@@ -108,5 +133,102 @@ class Chamamento extends Model
     public function ehDispensa(): bool
     {
         return in_array($this->tipo, ['dispensa', 'inexigibilidade'], true);
+    }
+
+    // ------------------------------------------------------------------
+    // Trâmite da Seleção (Fluxo Seleção: UG → SCP → UG → SCP → Prefeito)
+    // ------------------------------------------------------------------
+
+    public function selecaoTramitacoes(): \Illuminate\Database\Eloquent\Relations\HasMany
+    {
+        return $this->hasMany(SelecaoTramitacao::class)->latest('id');
+    }
+
+    /** O trâmite da Seleção só existe no Chamamento Público. */
+    public function temTramiteSelecao(): bool
+    {
+        return $this->tipo === 'chamamento_publico';
+    }
+
+    public function selecaoConcluida(): bool
+    {
+        return !is_null($this->selecao_concluida_em);
+    }
+
+    public function etapaSelecaoInfo(?int $i = null): array
+    {
+        $i ??= (int) $this->selecao_etapa;
+
+        return self::ETAPAS_SELECAO[$i] ?? ['setor' => $this->selecao_setor, 'acao' => '—'];
+    }
+
+    public function totalEtapasSelecao(): int
+    {
+        return count(self::ETAPAS_SELECAO);
+    }
+
+    public function ultimaEtapaSelecao(): bool
+    {
+        return (int) $this->selecao_etapa >= $this->totalEtapasSelecao() - 1;
+    }
+
+    public function podeAvancarSelecao(): bool
+    {
+        return $this->temTramiteSelecao() && !$this->selecaoConcluida() && !$this->ultimaEtapaSelecao();
+    }
+
+    public function setorAnteriorSelecao(): ?string
+    {
+        return (int) $this->selecao_etapa > 0
+            ? (self::ETAPAS_SELECAO[$this->selecao_etapa - 1]['setor'] ?? null)
+            : null;
+    }
+
+    /**
+     * Peças que precisam estar prontas antes de encaminhar a etapa atual da
+     * Seleção. Retorna os rótulos pendentes (vazio = pode encaminhar).
+     */
+    public function pendenciasSelecao(): array
+    {
+        $pend  = [];
+        $etapa = (int) $this->selecao_etapa;
+
+        // As peças exigidas em cada etapa, conforme o Fluxo Seleção.
+        $exigidas = [
+            0 => ['relatorio_comissao', 'ata_comissao', 'resultado_parcial'],
+            1 => ['pub_resultado_parcial'],
+            2 => ['resultado_definitivo'],
+            3 => ['pub_resultado_definitivo', 'termo_homologacao'],
+            4 => ['termo_homologacao'],
+        ];
+
+        foreach ($exigidas[$etapa] ?? [] as $chave) {
+            $peca = $this->pecaSelecao($chave);
+            if (!$peca) {
+                continue;
+            }
+
+            // Modelo: precisa estar assinado — exceto o Termo, que a SCP só
+            // emite na etapa 3 (a assinatura é do Prefeito, na etapa 4).
+            if ($peca->tipo === 'modelo') {
+                $soPreencher = $chave === 'termo_homologacao' && $etapa === 3;
+                $ok = $soPreencher ? !empty($peca->conteudo) : $peca->assinado();
+                if (!$ok) {
+                    $pend[] = $peca->rotulo . ($soPreencher ? ' (emitir)' : ' (assinar)');
+                }
+            } elseif (!$peca->temArquivo()) {
+                $pend[] = $peca->rotulo . ' (anexar arquivo)';
+            }
+        }
+
+        return $pend;
+    }
+
+    /** Peça da Seleção por chave (usa a coleção já carregada quando houver). */
+    public function pecaSelecao(string $chave): ?Peca
+    {
+        return $this->relationLoaded('pecas')
+            ? $this->pecas->firstWhere('chave', $chave)
+            : $this->pecas()->where('chave', $chave)->first();
     }
 }

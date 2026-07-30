@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\AditivoController;
 use App\Http\Controllers\ChamamentoController;
+use App\Http\Controllers\SelecaoController;
 use App\Http\Controllers\DiligenciaController;
 use App\Http\Controllers\DocumentoController;
 use App\Http\Controllers\ExecucaoController;
@@ -111,6 +112,10 @@ Route::middleware(['auth', 'staff', 'readonly'])->group(function () {
         Route::resource('programas', ProgramaController::class);
         Route::resource('programas.chamamentos', ChamamentoController::class)->except(['show']);
         Route::get('chamamentos/{chamamento}/selecao', [ChamamentoController::class, 'selecao'])->name('chamamentos.selecao');
+        // Trâmite da Seleção: UG → SCP → UG → SCP → Prefeito
+        Route::post('chamamentos/{chamamento}/selecao/avancar', [SelecaoController::class, 'avancar'])->name('chamamentos.selecao.avancar');
+        Route::post('chamamentos/{chamamento}/selecao/devolver', [SelecaoController::class, 'devolver'])->name('chamamentos.selecao.devolver');
+        Route::post('chamamentos/{chamamento}/selecao/concluir', [SelecaoController::class, 'concluir'])->name('chamamentos.selecao.concluir');
     });
 
     // Propostas + Plano de Trabalho
