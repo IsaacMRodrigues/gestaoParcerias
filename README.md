@@ -639,6 +639,18 @@ São 21 perfis. Um usuário pode ter **vários**; os marcados 🔒 são **exclus
   - Menu do usuário reduzido a **apenas o avatar** (iniciais), com o nome no `title`; nome completo e
     perfil saíram do topo (continuam dentro do dropdown)
 
+- [2026-07-30] **Tela principal por perfil** e **Transparência pública** (fecha o `Atualizações.txt`)
+  - `/` deixou de redirecionar ao portal e passou a ser a **tela principal** (`landing`), com os cinco
+    acessos do modelo enviado pelo cliente: **Prefeitura** e **OSC** (levam ao login) e **Cidadão**,
+    **Parlamentar** e **Conselho** (consulta livre, sem cadastro). Quem já está logado é redirecionado
+    ao seu destino — interno vai ao Painel, OSC vai ao portal
+  - Nova página pública **`/transparencia`** — as **parcerias celebradas**, que o texto do modelo promete:
+    OSC, objeto, órgão, valor do repasse, vigência e publicação no DOE, com totalizadores (nº de
+    parcerias e valor pactuado) e filtros por pesquisa, tipo de instrumento e exercício
+  - **Só instrumentos assinados são públicos** (`assinado`, `vigente`, `encerrado`) — minuta não aparece
+  - Link **Transparência** no menu do portal; a tela principal também atalha para cadastro de OSC,
+    chamamentos abertos e validação de documentos
+
 - [2026-07-30] **Trâmite da Celebração** (Fluxo Etapa de Celebração) — com a OSC dentro do fluxo
   - Ancorado na **proposta aprovada** (é ela que vira a parceria): `celebracao_etapa`,
     `celebracao_setor`, `celebracao_iniciada_em`/`concluida_em` em `propostas` e histórico em

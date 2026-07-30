@@ -26,11 +26,22 @@ use App\Http\Controllers\TramitacaoController;
 use App\Http\Controllers\UserController;
 use Illuminate\Support\Facades\Route;
 
-Route::get('/', fn() => redirect()->route('portal.index'));
+// Tela principal: escolha do perfil de acesso (Prefeitura, OSC, Cidadão,
+// Parlamentar e Conselho). Quem já está logado vai direto ao seu destino.
+Route::get('/', function () {
+    if (auth()->check()) {
+        return auth()->user()->temAcessoInterno()
+            ? redirect()->route('dashboard')
+            : redirect()->route('portal.index');
+    }
+
+    return view('landing');
+})->name('landing');
 
 // Portal público
 Route::get('/portal', [PortalController::class, 'index'])->name('portal.index');
 Route::get('/portal/chamamentos/{chamamento}', [PortalController::class, 'chamamento'])->name('portal.chamamento');
+Route::get('/transparencia', [PortalController::class, 'transparencia'])->name('transparencia');
 
 // Auto-cadastro de OSC
 Route::get('/cadastro/osc', [OscRegistroController::class, 'create'])->name('portal.osc.create');

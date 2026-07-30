@@ -32,6 +32,10 @@
                        class="text-indigo-200 hover:text-white transition {{ request()->routeIs('portal.index') ? 'text-white font-medium' : '' }}">
                         Chamamentos
                     </a>
+                    <a href="{{ route('transparencia') }}"
+                       class="text-indigo-200 hover:text-white transition {{ request()->routeIs('transparencia') ? 'text-white font-medium' : '' }}">
+                        Transparência
+                    </a>
 
                     @auth
                         @if(auth()->user()->osc)

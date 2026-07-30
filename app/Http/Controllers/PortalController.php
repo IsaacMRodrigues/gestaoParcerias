@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Chamamento;
+use App\Models\Instrumento;
 use App\Models\Proposta;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -20,6 +21,45 @@ class PortalController extends Controller
             ->paginate(12);
 
         return view('portal.index', compact('chamamentos'));
+    }
+
+    /**
+     * Transparência pública: as parcerias já celebradas, com valores e vigência.
+     * É o que Cidadão, Parlamentar e Conselho consultam — sem necessidade de login.
+     */
+    public function transparencia(Request $request): View
+    {
+        $filtros = $request->only(['busca', 'tipo', 'exercicio']);
+
+        $instrumentos = Instrumento::with(['proposta.osc', 'proposta.chamamento.programa.orgao'])
+            // só o que já foi assinado é público
+            ->whereIn('status', ['assinado', 'vigente', 'encerrado'])
+            ->when($filtros['busca'] ?? null, function ($q, $busca) {
+                $q->where(function ($sub) use ($busca) {
+                    $sub->where('numero', 'like', "%{$busca}%")
+                        ->orWhere('objeto', 'like', "%{$busca}%")
+                        ->orWhereHas('proposta.osc', fn ($o) => $o->where('name', 'like', "%{$busca}%"));
+                });
+            })
+            ->when($filtros['tipo'] ?? null, fn ($q, $v) => $q->where('tipo', $v))
+            ->when($filtros['exercicio'] ?? null, fn ($q, $v) => $q->whereYear('data_assinatura', $v))
+            ->orderByDesc('data_assinatura')
+            ->paginate(15)
+            ->withQueryString();
+
+        $totais = [
+            'parcerias' => $instrumentos->total(),
+            'repassado' => (float) Instrumento::whereIn('status', ['assinado', 'vigente', 'encerrado'])
+                ->sum('valor_repasse'),
+        ];
+
+        $exercicios = Instrumento::whereIn('status', ['assinado', 'vigente', 'encerrado'])
+            ->whereNotNull('data_assinatura')
+            ->selectRaw('DISTINCT YEAR(data_assinatura) AS ano')
+            ->orderByDesc('ano')
+            ->pluck('ano');
+
+        return view('portal.transparencia', compact('instrumentos', 'filtros', 'totais', 'exercicios'));
     }
 
     public function chamamento(Chamamento $chamamento): View
