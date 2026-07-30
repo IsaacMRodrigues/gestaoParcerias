@@ -639,6 +639,20 @@ São 21 perfis. Um usuário pode ter **vários**; os marcados 🔒 são **exclus
   - Menu do usuário reduzido a **apenas o avatar** (iniciais), com o nome no `title`; nome completo e
     perfil saíram do topo (continuam dentro do dropdown)
 
+- [2026-07-30] **Assinatura das partes** e **Parecer da SCP** (fecha os itens que faltavam da Celebração)
+  - **Contra-assinatura do Termo (assinatura das partes)**: o Fluxo Celebração diz "SCP encaminha para
+    assinatura das partes", mas só a Administração assinava. A peça passou a guardar a **segunda
+    assinatura** (`contra_assinado_por/em` + `codigo_validacao_contra`), com o mapa
+    `Peca::CELEBRACAO_CONTRA_ASSINATURA` e `podeContraAssinar()` — o Termo é assinado pelo **Município**
+    (SCP, etapa 8) e **contra-assinado pela OSC** (etapa 9). Só a OSC daquela parceria contra-assina, e
+    só depois da assinatura da Administração
+  - **Parecer da SCP** (conferência final): novo modelo com checklist de 9 itens conferindo plano,
+    habilitação, pareceres e minuta, com conclusão favorável / com ressalvas / devolução
+  - A Celebração foi de **14 para 15 etapas** — entrou a etapa 9 (OSC contra-assina) e as seguintes
+    deslocaram +1; a migration reajusta as celebrações em andamento e cria a peça nova
+  - Checklist da Celebração: 17 → **18 itens**; a peça mostra o estado da contra-assinatura
+    (⏳ aguardando / assinado por, com o código de validação próprio)
+
 - [2026-07-30] **Recurso administrativo da OSC** (item que faltava do Fluxo Seleção)
   - O Fluxo Seleção prevê "UG … analisa os recursos, se houver, emite resposta e envia a OSC", e o
     próprio modelo do Resultado Provisório promete que "o recurso deverá ser protocolado

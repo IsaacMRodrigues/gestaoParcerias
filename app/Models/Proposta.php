@@ -74,8 +74,9 @@ class Proposta extends Model
         ['setor' => 'ug',     'acao' => 'Anexar as portarias do Gestor e da Comissão de Monitoramento e emitir o Parecer Técnico'],
         ['setor' => 'scp',    'acao' => 'Conferir o processo e emitir/assinar o Protocolo na Unidade Jurídica'],
         ['setor' => 'pj',     'acao' => 'Analisar e emitir/assinar o Parecer Jurídico'],
-        ['setor' => 'scp',    'acao' => 'Emitir o Termo, colher a assinatura das partes e anexar o comprovante de publicação (Diário Oficial e site)'],
-        ['setor' => 'scp',    'acao' => 'Emitir a Autorização de Início de Execução e solicitar os dados bancários à OSC'],
+        ['setor' => 'scp',    'acao' => 'Emitir o Parecer da SCP e o Termo, assinando-o pelo Município'],
+        ['setor' => 'osc',    'acao' => 'Assinar o Termo (contra-assinatura da OSC — assinatura das partes)'],
+        ['setor' => 'scp',    'acao' => 'Anexar o comprovante de publicação (Diário Oficial e site) e emitir a Autorização de Início de Execução'],
         ['setor' => 'osc',    'acao' => 'Informar os dados bancários da conta específica da parceria'],
         ['setor' => 'scp',    'acao' => 'Elaborar a Ordem de Pagamento Global e encaminhar à UG'],
         ['setor' => 'ug',     'acao' => 'Assinar a Ordem de Pagamento Global'],
@@ -231,7 +232,9 @@ class Proposta extends Model
             }
 
             if ($peca->tipo === 'modelo') {
-                $soPreencher = $chave === 'op_global' && $etapa === 11;
+                // A OP Global é apenas elaborada pela SCP na etapa 12 — a
+                // assinatura é da UG, na etapa 13.
+                $soPreencher = $chave === 'op_global' && $etapa === 12;
                 $ok = $soPreencher ? !empty($peca->conteudo) : $peca->assinado();
                 if (!$ok) {
                     $pend[] = $peca->rotulo . ($soPreencher ? ' (emitir)' : ' (assinar)');
@@ -241,8 +244,13 @@ class Proposta extends Model
             }
         }
 
-        // Etapa 12: a UG assina a OP Global elaborada pela SCP.
-        if ($etapa === 12 && !$this->pecaCelebracao('op_global')?->assinado()) {
+        // Etapa 9: assinatura das partes — a OSC contra-assina o Termo.
+        if ($etapa === 9 && !$this->pecaCelebracao('termo')?->contraAssinado()) {
+            $pend[] = 'Termo de Parceria (contra-assinatura da OSC)';
+        }
+
+        // Etapa 13: a UG assina a OP Global elaborada pela SCP.
+        if ($etapa === 13 && !$this->pecaCelebracao('op_global')?->assinado()) {
             $pend[] = 'Ordem de Pagamento Global (assinar)';
         }
 

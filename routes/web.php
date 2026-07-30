@@ -208,6 +208,7 @@ Route::middleware(['auth', 'staff', 'readonly'])->group(function () {
 Route::middleware('auth')->group(function () {
     Route::put('pecas/{peca}', [PecaController::class, 'salvar'])->name('pecas.salvar');
     Route::patch('pecas/{peca}/assinar', [PecaController::class, 'assinar'])->name('pecas.assinar');
+    Route::patch('pecas/{peca}/contra-assinar', [PecaController::class, 'contraAssinar'])->name('pecas.contra-assinar');
     Route::post('pecas/{peca}/arquivo', [PecaController::class, 'upload'])->name('pecas.upload');
     Route::post('pecas/{peca}/puxar', [PecaController::class, 'puxar'])->name('pecas.puxar');
     Route::get('pecas/{peca}/arquivo', [PecaController::class, 'download'])->name('pecas.download');

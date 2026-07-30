@@ -15,13 +15,15 @@ class Peca extends Model
         'tipo', 'obrigatorio', 'ordem',
         'conteudo', 'arquivo_path', 'arquivo_nome', 'tamanho', 'mime_type',
         'assinado_por', 'assinado_em', 'codigo_validacao',
+        'contra_assinado_por', 'contra_assinado_em', 'codigo_validacao_contra',
     ];
 
     protected function casts(): array
     {
         return [
-            'obrigatorio' => 'boolean',
-            'assinado_em' => 'datetime',
+            'obrigatorio'        => 'boolean',
+            'assinado_em'        => 'datetime',
+            'contra_assinado_em' => 'datetime',
         ];
     }
 
@@ -82,6 +84,7 @@ class Peca extends Model
             ['chave' => 'parecer_tecnico',       'rotulo' => 'Parecer Técnico para celebração (modelo padrão)',        'tipo' => 'modelo',  'obrigatorio' => true],
             ['chave' => 'protocolo_juridico',    'rotulo' => 'Protocolo na Unidade Jurídica (modelo padrão)',          'tipo' => 'modelo',  'obrigatorio' => true],
             ['chave' => 'parecer_juridico',      'rotulo' => 'Parecer Jurídico (modelo padrão)',                       'tipo' => 'modelo',  'obrigatorio' => true],
+            ['chave' => 'parecer_scp',           'rotulo' => 'Parecer da SCP — conferência final (modelo padrão)',    'tipo' => 'modelo',  'obrigatorio' => true],
             ['chave' => 'termo',                 'rotulo' => 'Termo de Parceria (modelo padrão)',                      'tipo' => 'modelo',  'obrigatorio' => true],
             ['chave' => 'comprovante_publicacao','rotulo' => 'Comprovante de publicação (Diário Oficial e site)',      'tipo' => 'arquivo', 'obrigatorio' => true],
             ['chave' => 'autorizacao_inicio',    'rotulo' => 'Autorização de Início de Execução (modelo padrão)',      'tipo' => 'modelo',  'obrigatorio' => true],
@@ -186,7 +189,8 @@ class Peca extends Model
         'parecer_tecnico'        => 'ug',
         'protocolo_juridico'     => 'scp',
         'parecer_juridico'       => 'pj',
-        'termo'                  => 'scp',
+        'parecer_scp'            => 'scp',
+        'termo'                  => 'scp',  // Município assina; a OSC contra-assina
         'comprovante_publicacao' => 'scp',
         'autorizacao_inicio'     => 'scp',
         'dados_bancarios'        => 'osc',
@@ -206,12 +210,13 @@ class Peca extends Model
         'parecer_tecnico'        => 5,
         'protocolo_juridico'     => 6,
         'parecer_juridico'       => 7,
+        'parecer_scp'            => 8,
         'termo'                  => 8,
-        'comprovante_publicacao' => 8,
-        'autorizacao_inicio'     => 9,
-        'dados_bancarios'        => 10,
-        'op_global'              => 11,
-        'comprovante_empenho'    => 13,
+        'comprovante_publicacao' => 10,
+        'autorizacao_inicio'     => 10,
+        'dados_bancarios'        => 11,
+        'op_global'              => 12,
+        'comprovante_empenho'    => 14,
     ];
 
     /**
@@ -219,7 +224,15 @@ class Peca extends Model
      * pela Unidade Gestora (etapa 12).
      */
     public const CELEBRACAO_ASSINATURA = [
-        'op_global' => ['setor' => 'ug', 'etapa' => 12],
+        'op_global' => ['setor' => 'ug', 'etapa' => 13],
+    ];
+
+    /**
+     * Contra-assinatura ("assinatura das partes"): o Termo é assinado pelo
+     * Município (SCP, etapa 8) e contra-assinado pela OSC na etapa 9.
+     */
+    public const CELEBRACAO_CONTRA_ASSINATURA = [
+        'termo' => ['setor' => 'osc', 'etapa' => 9],
     ];
 
     /**
@@ -576,6 +589,30 @@ HTML,
 <p style="text-align:center">XXXXXXXXXX<br>Secretária Municipal de XXXXXX<br>Administração Pública Municipal</p>
 <p style="text-align:center">XXXXXXXXXX<br>Representante Legal<br>Organização da Sociedade Civil</p>
 HTML,
+            'parecer_scp' => self::CABECALHO . <<<'HTML'
+<p style="text-align:center"><strong>PARECER DO SETOR DE CONVÊNIOS E PARCERIAS Nº XXX/20XX</strong><br>(conferência final do processo de celebração)</p>
+<p><strong>PROCESSO:</strong> XXXXXXXX<br><strong>OSC:</strong> XXXXXXXXXX &nbsp; <strong>CNPJ:</strong> XXXXXXXX<br><strong>UNIDADE GESTORA:</strong> Secretaria Municipal de XXXXXX<br><strong>OBJETO:</strong> XXXXXXXXXX</p>
+<p><strong>I — DA CONFERÊNCIA</strong></p>
+<p>O Setor de Convênios e Parcerias procedeu à conferência final do processo, verificando a presença e a regularidade formal das peças abaixo, na forma da Lei Federal nº 13.019/2014 e do Decreto Municipal nº 048/2020:</p>
+<table><thead><tr><th>Item</th><th>Peça</th><th>Conforme</th></tr></thead><tbody>
+<tr><td>1</td><td>Plano de Trabalho apresentado pela OSC</td><td>( ) Sim ( ) Não</td></tr>
+<tr><td>2</td><td>Documentos de habilitação (art. 34 da Lei nº 13.019/2014)</td><td>( ) Sim ( ) Não</td></tr>
+<tr><td>3</td><td>Aprovação do Plano de Trabalho pela Unidade Gestora</td><td>( ) Sim ( ) Não</td></tr>
+<tr><td>4</td><td>Parecer Financeiro da SEPLAN (dotação e impacto)</td><td>( ) Sim ( ) Não</td></tr>
+<tr><td>5</td><td>Portaria do Gestor da Parceria</td><td>( ) Sim ( ) Não</td></tr>
+<tr><td>6</td><td>Portaria da Comissão de Monitoramento e Avaliação</td><td>( ) Sim ( ) Não</td></tr>
+<tr><td>7</td><td>Parecer Técnico da Unidade Gestora (art. 35, V)</td><td>( ) Sim ( ) Não</td></tr>
+<tr><td>8</td><td>Parecer Jurídico da Procuradoria (art. 35, VI)</td><td>( ) Sim ( ) Não</td></tr>
+<tr><td>9</td><td>Minuta do Termo compatível com o Plano de Trabalho</td><td>( ) Sim ( ) Não</td></tr>
+</tbody></table>
+<p><strong>II — DAS RESSALVAS</strong></p>
+<p>XXXXXXXX</p>
+<p><strong>III — CONCLUSÃO</strong></p>
+<p>Ante o exposto, este Setor manifesta-se:</p>
+<p>( ) <strong>Favoravelmente</strong> à celebração da parceria, estando o processo apto à assinatura das partes;<br>( ) <strong>Favoravelmente com ressalvas</strong>, devendo as observações do item II ser sanadas;<br>( ) <strong>Pela devolução</strong> do processo à origem, para saneamento das pendências apontadas.</p>
+<p style="text-align:right">São Gonçalo do Rio Abaixo, XX de XXXX de 20XX.</p>
+<p style="text-align:center">XXXXXXXXXX<br>Setor de Convênios e Parcerias (SCP)</p>
+HTML,
             'autorizacao_inicio' => self::CABECALHO . <<<'HTML'
 <p style="text-align:right">São Gonçalo do Rio Abaixo, XX de XXXX de 20XX.</p>
 <p style="text-align:center"><strong>AUTORIZAÇÃO DE INÍCIO DE EXECUÇÃO</strong></p>
@@ -641,6 +678,47 @@ HTML,
     public function assinado(): bool
     {
         return !is_null($this->assinado_em);
+    }
+
+    public function contraAssinante(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'contra_assinado_por');
+    }
+
+    public function contraAssinado(): bool
+    {
+        return !is_null($this->contra_assinado_em);
+    }
+
+    /** A peça exige assinatura das partes (Município + OSC)? */
+    public function exigeContraAssinatura(): bool
+    {
+        return $this->categoria === 'celebracao'
+            && isset(self::CELEBRACAO_CONTRA_ASSINATURA[$this->chave]);
+    }
+
+    /**
+     * Pode contra-assinar agora? Exige a assinatura do Município já lançada e,
+     * como é a vez da OSC, que seja a OSC daquela parceria.
+     */
+    public function podeContraAssinar(?User $user): bool
+    {
+        if (!$this->exigeContraAssinatura() || !$this->assinado() || $this->contraAssinado()) {
+            return false;
+        }
+
+        $dono = $this->donoEmTramite();
+        if (!$dono || $dono->tramiteEncerrado()) {
+            return false;
+        }
+
+        $regra = self::CELEBRACAO_CONTRA_ASSINATURA[$this->chave];
+
+        if (!$user || $user->setor !== $regra['setor'] || $dono->tramiteEtapaAtual() !== $regra['etapa']) {
+            return false;
+        }
+
+        return $regra['setor'] !== 'osc' || $this->oscDona($user, $dono);
     }
 
     /** Gera um código de validação único (ex.: A1B2-C3D4-E5). */

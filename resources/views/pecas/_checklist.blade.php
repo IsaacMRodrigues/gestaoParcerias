@@ -36,6 +36,16 @@
                             <p class="text-xs text-gray-400 mt-0.5">
                                 Assinado por {{ $peca->assinante->name }} em {{ $peca->assinado_em->format('d/m/Y H:i') }}
                             </p>
+                            @if($peca->exigeContraAssinatura())
+                                <p class="text-xs mt-0.5 {{ $peca->contraAssinado() ? 'text-gray-400' : 'text-amber-600' }}">
+                                    @if($peca->contraAssinado())
+                                        Contra-assinado pela OSC — {{ $peca->contraAssinante->name ?? '—' }}
+                                        em {{ $peca->contra_assinado_em->format('d/m/Y H:i') }}
+                                    @else
+                                        ⏳ Aguardando a contra-assinatura da OSC (assinatura das partes)
+                                    @endif
+                                </p>
+                            @endif
                         @elseif($trava)
                             <p class="text-xs text-amber-600 mt-0.5">🔒 {{ $trava }}</p>
                         @endif
@@ -68,6 +78,22 @@
                                     <strong class="font-mono">{{ $peca->codigo_validacao }}</strong>
                                     · <a href="{{ route('validacao.mostrar', $peca->codigo_validacao) }}" target="_blank" class="text-indigo-600 hover:underline">Validar</a>
                                 </p>
+                            @endif
+                            @if($peca->contraAssinado() && $peca->codigo_validacao_contra)
+                                <p class="mt-1 text-xs text-gray-500">
+                                    Contra-assinatura da OSC:
+                                    <strong class="font-mono">{{ $peca->codigo_validacao_contra }}</strong>
+                                </p>
+                            @endif
+                            @if($peca->podeContraAssinar(auth()->user()))
+                                <form action="{{ route('pecas.contra-assinar', $peca) }}" method="POST" class="mt-3"
+                                      data-confirm="Confirma a assinatura deste Termo pela OSC?">
+                                    @csrf @method('PATCH')
+                                    <button type="submit"
+                                            class="px-3 py-1.5 text-xs font-medium text-white bg-emerald-600 rounded-md hover:bg-emerald-700">
+                                        Assinar como OSC (contra-assinatura)
+                                    </button>
+                                </form>
                             @endif
                         @elseif($podePreencher)
                             <form action="{{ route('pecas.salvar', $peca) }}" method="POST">

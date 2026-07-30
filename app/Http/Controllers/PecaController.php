@@ -60,6 +60,28 @@ class PecaController extends Controller
         return back()->with('success', $peca->rotulo . ' assinado.');
     }
 
+    /**
+     * Contra-assinatura ("assinatura das partes"): a OSC assina o Termo já
+     * assinado pelo Município.
+     */
+    public function contraAssinar(Peca $peca): RedirectResponse
+    {
+        abort_unless($peca->exigeContraAssinatura(), 422,
+            'Esta peça não exige assinatura das partes.');
+        abort_unless($peca->assinado(), 422,
+            'O documento ainda não foi assinado pela Administração.');
+        abort_unless($peca->podeContraAssinar(auth()->user()), 403,
+            'Você não pode contra-assinar este documento agora.');
+
+        $peca->update([
+            'contra_assinado_por'     => auth()->id(),
+            'contra_assinado_em'      => now(),
+            'codigo_validacao_contra' => $peca->codigo_validacao_contra ?: Peca::gerarCodigoValidacao(),
+        ]);
+
+        return back()->with('success', $peca->rotulo . ' contra-assinado pela OSC.');
+    }
+
     public function upload(Request $request, Peca $peca): RedirectResponse
     {
         abort_if($peca->tipo !== 'arquivo', 422);
