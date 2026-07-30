@@ -174,10 +174,20 @@
                 <div class="flex items-center justify-between px-6 py-4 border-b border-gray-200">
                     <h3 class="text-base font-semibold text-gray-800">Ordens de Pagamento</h3>
                     @if($instrumento->status === 'vigente')
-                        <form action="{{ route('ordens-pagamento.create', $instrumento) }}" method="POST">
+                        @php $temGlobal = $instrumento->ordensPagamento->contains('tipo', 'global'); @endphp
+                        <form action="{{ route('ordens-pagamento.create', $instrumento) }}" method="POST"
+                              class="flex items-center gap-2">
                             @csrf
-                            <button type="submit" class="px-3 py-1.5 text-sm font-medium text-white bg-indigo-600 rounded-md hover:bg-indigo-700">
-                                + Nova Ordem de Pagamento
+                            <select name="tipo"
+                                    class="border-gray-300 rounded-md shadow-sm text-sm focus:ring-indigo-500 focus:border-indigo-500">
+                                @foreach(\App\Models\OrdemPagamento::TIPOS as $key => $label)
+                                    <option value="{{ $key }}" {{ $key === 'global' && $temGlobal ? 'disabled' : '' }}>
+                                        {{ $label }}{{ $key === 'global' && $temGlobal ? ' — já emitida' : '' }}
+                                    </option>
+                                @endforeach
+                            </select>
+                            <button type="submit" class="px-3 py-1.5 text-sm font-medium text-white bg-indigo-600 rounded-md hover:bg-indigo-700 whitespace-nowrap">
+                                + Nova OP
                             </button>
                         </form>
                     @else
@@ -191,6 +201,9 @@
                             <div>
                                 <p class="text-sm font-semibold text-gray-800">
                                     OP nº {{ $op->numero }}
+                                    <span class="ml-1 px-1.5 py-0.5 text-[11px] font-medium rounded {{ $op->ehGlobal() ? 'bg-purple-50 text-purple-700' : 'bg-blue-50 text-blue-700' }}">
+                                        {{ $op->ehGlobal() ? 'Global' : 'Parcial' }}
+                                    </span>
                                     @if($op->favorecido) <span class="font-normal text-gray-600">— {{ $op->favorecido }}</span> @endif
                                 </p>
                                 <p class="text-xs text-gray-400 mt-0.5">

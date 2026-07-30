@@ -37,12 +37,15 @@ class Peca extends Model
             ['chave' => 'comissao_selecao',          'rotulo' => 'Comissão de Seleção',                     'tipo' => 'arquivo', 'obrigatorio' => true],
             ['chave' => 'parecer_juridico',          'rotulo' => 'Parecer jurídico (modelo padrão)',        'tipo' => 'modelo',  'obrigatorio' => true],
             ['chave' => 'pub_extrato_edital',        'rotulo' => 'Publicação do extrato do edital',         'tipo' => 'arquivo', 'obrigatorio' => true],
-            ['chave' => 'resultado_parcial',         'rotulo' => 'Resultado parcial',                       'tipo' => 'arquivo', 'obrigatorio' => false],
-            ['chave' => 'pub_resultado_parcial',     'rotulo' => 'Publicação do resultado parcial',         'tipo' => 'arquivo', 'obrigatorio' => false],
-            ['chave' => 'recursos',                  'rotulo' => 'Recursos',                                'tipo' => 'arquivo', 'obrigatorio' => false],
-            ['chave' => 'resultado_definitivo',      'rotulo' => 'Resultado definitivo',                    'tipo' => 'arquivo', 'obrigatorio' => true],
+            // Julgamento das propostas pela Comissão de Seleção (UG)
+            ['chave' => 'relatorio_comissao',        'rotulo' => 'Relatório da Comissão de Seleção (modelo padrão)', 'tipo' => 'modelo', 'obrigatorio' => true],
+            ['chave' => 'ata_comissao',              'rotulo' => 'Ata da Comissão de Seleção (modelo padrão)',       'tipo' => 'modelo', 'obrigatorio' => true],
+            ['chave' => 'resultado_parcial',         'rotulo' => 'Resultado provisório (modelo padrão)',    'tipo' => 'modelo',  'obrigatorio' => true],
+            ['chave' => 'pub_resultado_parcial',     'rotulo' => 'Publicação do resultado provisório',      'tipo' => 'arquivo', 'obrigatorio' => true],
+            ['chave' => 'recursos',                  'rotulo' => 'Recursos (se houver)',                    'tipo' => 'arquivo', 'obrigatorio' => false],
+            ['chave' => 'resultado_definitivo',      'rotulo' => 'Resultado definitivo (modelo padrão)',    'tipo' => 'modelo',  'obrigatorio' => true],
             ['chave' => 'pub_resultado_definitivo',  'rotulo' => 'Publicação do resultado definitivo',      'tipo' => 'arquivo', 'obrigatorio' => true],
-            ['chave' => 'termo_homologacao',         'rotulo' => 'Termo de homologação',                    'tipo' => 'arquivo', 'obrigatorio' => true],
+            ['chave' => 'termo_homologacao',         'rotulo' => 'Termo de Adjudicação e Homologação (modelo padrão)', 'tipo' => 'modelo', 'obrigatorio' => true],
         ],
 
         // 2.2.2 Dispensa ou Inexigibilidade de Chamamento
@@ -169,6 +172,87 @@ HTML,
 <p>Ante o exposto, esta Procuradoria opina pela XXXXXXXX (regularidade jurídica) do feito, podendo o processo prosseguir.</p>
 <p style="text-align:center">XXXXXXXXXX<br>Procurador(a) do Município<br>Procuradoria Jurídica</p>
 HTML,
+            'relatorio_comissao' => self::CABECALHO . <<<'HTML'
+<p style="text-align:center"><strong>RELATÓRIO DA COMISSÃO DE SELEÇÃO</strong><br>Portaria nº. XXX/XXXX</p>
+<p style="text-align:center"><strong>CHAMAMENTO PÚBLICO Nº. XXXX/XXXX</strong><br>LEI Nº 13.019/2014<br>DECRETO MUNICIPAL Nº 048/2020</p>
+<p><strong>1. IDENTIFICAÇÃO</strong></p>
+<p>Chamamento Público nº: XXXXXXXX<br>Processo Administrativo nº: XXXXXXXX<br>Modalidade de Parceria: (Termo de Fomento / Termo de Colaboração)<br>Organização da Sociedade Civil – OSC: XXXXXXXX<br>Objeto da Parceria: XXXXXXXX<br>Valor Global Proposto: R$ XXXXXXXX<br>Vigência da Parceria: XXXXXXXX</p>
+<p><strong>2. BASE LEGAL E COMPETÊNCIA</strong></p>
+<p>O presente Relatório Técnico é elaborado pela Comissão de Seleção, regularmente designada pela Portaria nº. XXXX/XXXX, em conformidade com a Lei Federal nº 13.019/2014 e o Decreto Municipal nº 048/2020, com a finalidade de analisar e manifestar-se, de forma expressa, objetiva e motivada, sobre a proposta apresentada no âmbito do Chamamento Público nº. XXX/XXXX.</p>
+<p>A análise observa, ainda, os princípios da legalidade, impessoalidade, moralidade, publicidade, eficiência, planejamento, transparência e controle, conforme exigido pelos órgãos de controle interno e externo.</p>
+<p><strong>3. ANÁLISE TÉCNICA DA PROPOSTA</strong></p>
+<p><strong>a) Do mérito da proposta e conformidade com a modalidade adotada</strong></p>
+<p>A Comissão analisou a Proposta verificando: aderência do objeto ao Chamamento Público; compatibilidade com a modalidade de parceria adotada; coerência entre metas, atividades, indicadores e resultados esperados; alinhamento com a política pública municipal correspondente.</p>
+<p>Conclui-se que o mérito da proposta ( ) atende &nbsp; ( ) atende com ressalvas &nbsp; ( ) não atende aos critérios técnicos e objetivos estabelecidos no edital, na Lei nº 13.019/2014 e no Decreto Municipal nº 048/2020.</p>
+<p>Justificativa técnica: XXXXXXXX</p>
+<p><strong>b) Da identidade e da reciprocidade de interesse das partes</strong></p>
+<p>Restou evidenciada a convergência de interesses institucionais entre a Administração Pública Municipal e a OSC proponente, caracterizando atuação em mútua cooperação, sem transferência indevida de responsabilidades típicas do ente público, conforme os pressupostos do MROSC e do Decreto Municipal nº 048/2020.</p>
+<p>Manifestação da Comissão: ( ) Atendida &nbsp; ( ) Parcialmente atendida &nbsp; ( ) Não atendida</p>
+<p><strong>c) Da viabilidade de execução da parceria</strong></p>
+<p>A Comissão avaliou a viabilidade da execução considerando: capacidade técnica e operacional da OSC; compatibilidade entre metas, prazos e recursos; adequação da equipe técnica proposta; experiência prévia da entidade em objetos similares; riscos identificados e medidas mitigadoras.</p>
+<p>Conclui-se que a proposta é ( ) viável &nbsp; ( ) viável com ajustes &nbsp; ( ) inviável, sob os aspectos técnico, operacional e financeiro.</p>
+<p><strong>d) Da verificação do cronograma de desembolso</strong></p>
+<p>O cronograma de desembolso foi analisado quanto à compatibilidade com o cronograma de execução física; proporcionalidade entre liberação de recursos e cumprimento das metas; observância da capacidade financeira do Município.</p>
+<p>Verificou-se que o cronograma ( ) está adequado &nbsp; ( ) necessita ajustes &nbsp; ( ) não está adequado, atendendo aos parâmetros exigidos pela Lei nº 13.019/2014, pelo Decreto Municipal nº 048/2020 e pelas boas práticas de controle financeiro.</p>
+<p>Observações: XXXXXXXX</p>
+<p><strong>e) Dos meios de fiscalização e dos procedimentos de avaliação</strong></p>
+<p>Meios de fiscalização: acompanhamento contínuo pelo Gestor da Parceria; análise dos relatórios de execução física e financeira; verificação documental das despesas realizadas; diligências e visitas técnicas in loco, quando necessário; atuação da Comissão de Monitoramento e Avaliação.</p>
+<p>Procedimentos de avaliação: verificação do cumprimento das metas e indicadores pactuados; análise da conformidade da execução financeira; emissão de parecer técnico conclusivo sobre os resultados alcançados; adoção de medidas corretivas, quando cabíveis.</p>
+<p><strong>4. CONCLUSÃO DA COMISSÃO DE SELEÇÃO</strong></p>
+<p>Diante da análise técnica realizada, a Comissão de Seleção manifesta-se:</p>
+<p>( ) Favoravelmente à seleção da proposta<br>( ) Favoravelmente à seleção da proposta, com ressalvas<br>( ) Desfavoravelmente à seleção da proposta</p>
+<p>Motivação conclusiva: XXXXXXXX</p>
+<p style="text-align:right">São Gonçalo do Rio Abaixo/MG, XX de XXXX de 20XX.</p>
+<p style="text-align:center">XXXXXXXXXX<br>Presidente da Comissão de Seleção</p>
+<p style="text-align:center">XXXXXXXXXX<br>Membro &nbsp;&nbsp;&nbsp; XXXXXXXXXX<br>Membro</p>
+HTML,
+            'ata_comissao' => self::CABECALHO . <<<'HTML'
+<p style="text-align:center"><strong>ATA Nº XXX/20XX DA COMISSÃO DE SELEÇÃO</strong><br>CHAMAMENTO PÚBLICO Nº XXX/20XX</p>
+<p>Aos XX dias do mês de XXXX de 20XX, às XX horas, reuniram-se os membros da Comissão de Seleção designados pela Portaria nº XXX/20XX, para proceder à análise e ao julgamento das propostas apresentadas em decorrência do Chamamento Público nº XXX/20XX, cujo objeto é XXXXXXXXXX.</p>
+<p>Presentes os membros abaixo relacionados:</p>
+<p>XXXXXXXXXX – Presidente;<br>XXXXXXXXXX – Membro;<br>XXXXXXXXXX – Membro.</p>
+<p>Iniciados os trabalhos, a Comissão verificou as propostas protocoladas dentro do prazo estabelecido no edital, conforme relação a seguir:</p>
+<table><thead><tr><th>Organização da Sociedade Civil</th><th>Pontuação Obtida</th><th>Classificação</th></tr></thead><tbody><tr><td>XXXXXXXX</td><td>XXXX</td><td>XXXX</td></tr></tbody></table>
+<p>Após a análise individual e colegiada das propostas, observados os critérios de julgamento, pontuação e demais requisitos previstos no edital e na Lei Federal nº 13.019/2014, a Comissão deliberou pela seguinte classificação final:</p>
+<p>1º Lugar: XXXXXXXXXX<br>2º Lugar: XXXXXXXXXX<br>3º Lugar: XXXXXXXXXX</p>
+<p>A Comissão declara que todas as análises foram realizadas em conformidade com os princípios da legalidade, impessoalidade, moralidade, publicidade, eficiência, isonomia e julgamento objetivo, bem como em observância às disposições constantes do edital e da Lei Federal nº 13.019/2014.</p>
+<p>Fica consignado que o resultado preliminar deverá ser publicado para fins de ciência dos interessados e abertura do prazo recursal previsto no edital.</p>
+<p>Nada mais havendo a tratar, foi encerrada a reunião, lavrando-se a presente ata, que após lida e aprovada, segue assinada pelos membros da Comissão de Seleção.</p>
+<p style="text-align:right">São Gonçalo do Rio Abaixo/MG, XX de XXXX de 20XX.</p>
+<p style="text-align:center">XXXXXXXXXX<br>Presidente – Comissão de Seleção</p>
+<p style="text-align:center">XXXXXXXXXX<br>Membro – Comissão de Seleção</p>
+<p style="text-align:center">XXXXXXXXXX<br>Membro – Comissão de Seleção</p>
+HTML,
+            'resultado_parcial' => self::CABECALHO . <<<'HTML'
+<p style="text-align:center"><strong>RESULTADO PROVISÓRIO DE SELEÇÃO E CLASSIFICAÇÃO DAS PROPOSTAS APRESENTADAS PELAS ORGANIZAÇÕES DA SOCIEDADE CIVIL NO CHAMAMENTO PÚBLICO EDITAL Nº. XXX/XXXX</strong></p>
+<p>A Comissão de Seleção, no uso de suas atribuições legais previstas no art. XX, do Edital de Chamamento Público XXXX/XXXX e suas alterações, bem como a Portaria nº. XXX/XXXX,</p>
+<p style="text-align:center"><strong>RESOLVE:</strong></p>
+<p><strong>Art. 1º</strong> Tornar público o resultado provisório de seleção e classificação das Propostas apresentadas pelas organizações da sociedade civil visando a celebração de parcerias em regime de mútua colaboração para a execução relacionados no Edital de Chamamento nº XXXX/XXXX, nos termos da tabela abaixo:</p>
+<table><thead><tr><th>Organização da Sociedade Civil</th><th>CNPJ</th><th>Título do Projeto</th><th>Nota Final</th><th>Classificação</th></tr></thead><tbody><tr><td>XXXXXXXX</td><td>XXXXXXXX</td><td>XXXXXXXX</td><td>XXXX</td><td>XXXX</td></tr></tbody></table>
+<p><strong>Art. 2º</strong> Nos termos da Lei Federal nº 13.019/2014 e do respectivo edital de Chamamento Público, as Organizações da Sociedade Civil participantes poderão interpor recurso administrativo contra o resultado divulgado, observando o prazo estabelecido no cronograma do certame, até XX/XX/XXXX. O recurso deverá ser protocolado eletronicamente por meio do PGP, em arquivo único no formato PDF, devidamente assinado pelo representante legal da organização ou por procurador legalmente constituído, acompanhado da documentação pertinente, quando cabível.</p>
+<p><strong>Parágrafo Único</strong> - O envio após o prazo previsto no caput deste artigo torna intempestivo o recurso, impedindo sua análise e julgamento.</p>
+<p style="text-align:right">São Gonçalo do Rio Abaixo, XX/XX/XXXX.</p>
+<p style="text-align:center">Membro 1 &nbsp;&nbsp;&nbsp; Membro 2 &nbsp;&nbsp;&nbsp; Membro 3<br>Comissão de Seleção do Chamamento Público XXXX/XXXX<br>Portaria n. XXXX/XXXX</p>
+HTML,
+            'resultado_definitivo' => self::CABECALHO . <<<'HTML'
+<p style="text-align:center"><strong>RESULTADO DEFINITIVO DE SELEÇÃO E CLASSIFICAÇÃO DAS PROPOSTAS APRESENTADAS PELAS ORGANIZAÇÕES DA SOCIEDADE CIVIL NO CHAMAMENTO PÚBLICO EDITAL Nº. XXX/XXXX</strong></p>
+<p>A Comissão de Seleção, no uso de suas atribuições legais previstas no art. XX, do Edital de Chamamento Público XXXX/XXXX e suas alterações, bem como a Portaria nº. XXX/XXXX,</p>
+<p style="text-align:center"><strong>RESOLVE:</strong></p>
+<p><strong>Art. 1º</strong> Tornar público o resultado definitivo de seleção e classificação das Propostas apresentadas pelas organizações da sociedade civil visando a celebração de parcerias em regime de mútua colaboração para a execução relacionados no Edital de Chamamento nº XXXX/XXXX, nos termos da tabela abaixo:</p>
+<table><thead><tr><th>Organização da Sociedade Civil</th><th>CNPJ</th><th>Título do Projeto</th><th>Nota Final</th><th>Classificação</th></tr></thead><tbody><tr><td>XXXXXXXX</td><td>XXXXXXXX</td><td>XXXXXXXX</td><td>XXXX</td><td>XXXX</td></tr></tbody></table>
+<p style="text-align:right">São Gonçalo do Rio Abaixo, XX/XX/XXXX.</p>
+<p style="text-align:center">Membro 1 &nbsp;&nbsp;&nbsp; Membro 2 &nbsp;&nbsp;&nbsp; Membro 3<br>Comissão de Seleção do Chamamento Público XXXX/XXXX<br>Portaria n. XXXX/XXXX</p>
+HTML,
+            'termo_homologacao' => self::CABECALHO . <<<'HTML'
+<p style="text-align:center"><strong>TERMO DE ADJUDICAÇÃO E HOMOLOGAÇÃO</strong></p>
+<p>Fica autorizada e homologada a celebração de termo de XXXXX do Chamamento Público nº. XXX/XXXX com a:</p>
+<p style="text-align:center">XXXXXXXXXX<br>CNPJ nº XXXXXXXX<br>Valor: R$ XXXXXXXX</p>
+<p>desde que atendidos os termos da Lei nº. 13.019/2014 e cumprido o planejamento descrito no Plano de Trabalho.</p>
+<p>O plano de trabalho e o termo de XXXXXX deverão ser disponibilizados no site da Prefeitura/Parcerias MROSC, como forma de atender o art. 32, § 1º da Lei Federal nº 13.019/2014.</p>
+<p>O extrato do Termo, após o cumprimento dos prazos, deverá ser publicado no Diário Oficial do Estado, para que o mesmo tenha eficácia e ser disponibilizado no site da prefeitura para consulta pública.</p>
+<p style="text-align:right">São Gonçalo do Rio Abaixo, XX/XX/XXXX.</p>
+<p style="text-align:center">XXXXXXXXXXXXX<br>Prefeito Municipal</p>
+HTML,
         ],
         'dispensa_inexigibilidade' => [
             'justificativa' => self::CABECALHO . <<<'HTML'
@@ -199,6 +283,34 @@ HTML,
 <p>Destaca-se que a OSC é credenciada na Secretaria Municipal de Trabalho e Desenvolvimento Social e no Conselho Municipal de Assistência Social, e que o Município não possui outros serviços socioassistenciais voltados a XXXXXXXXXX.</p>
 <p>Diante do exposto, conclui-se que as atividades exercidas pela OSC não podem ser interrompidas, tendo em vista que a descontinuidade da oferta apresenta dano mais gravoso à integridade do usuário.</p>
 <p style="text-align:center">XXXXXXXXXX<br>Assistente Social<br>Secretaria Municipal de XXXXXX</p>
+HTML,
+            'aprovacao_plano' => self::CABECALHO . <<<'HTML'
+<p style="text-align:center"><strong>APROVAÇÃO DO PLANO DE TRABALHO</strong></p>
+<p><strong>OSC:</strong> XXXXXXXXXX<br><strong>CNPJ:</strong> XXXXXXXX<br><strong>Objeto da Parceria:</strong> XXXXXXXXXX<br><strong>Instrumento:</strong> ( ) Termo de Fomento &nbsp; ( ) Termo de Colaboração &nbsp; ( ) Acordo de Cooperação<br><strong>Secretaria/Unidade Gestora:</strong> XXXXXXXXXX</p>
+<p><strong>ANÁLISE DO PLANO DE TRABALHO</strong></p>
+<table><thead><tr><th>Item</th><th>Verificação</th><th>Sim</th><th>Não</th><th>Observações</th></tr></thead><tbody>
+<tr><td>1</td><td>O Plano de Trabalho foi apresentado pela OSC selecionada no Chamamento Público?</td><td>( )</td><td>( )</td><td></td></tr>
+<tr><td>2</td><td>O objeto do Plano de Trabalho está em conformidade com o objeto previsto no edital e na proposta aprovada?</td><td>( )</td><td>( )</td><td></td></tr>
+<tr><td>3</td><td>A descrição da realidade que fundamenta a parceria está adequada e compatível com o interesse público?</td><td>( )</td><td>( )</td><td></td></tr>
+<tr><td>4</td><td>As metas e os resultados esperados estão claramente definidos?</td><td>( )</td><td>( )</td><td></td></tr>
+<tr><td>5</td><td>Os indicadores de monitoramento e avaliação estão previstos e são mensuráveis?</td><td>( )</td><td>( )</td><td></td></tr>
+<tr><td>6</td><td>As atividades e etapas de execução estão devidamente detalhadas?</td><td>( )</td><td>( )</td><td></td></tr>
+<tr><td>7</td><td>O cronograma de execução está compatível com a vigência da parceria?</td><td>( )</td><td>( )</td><td></td></tr>
+<tr><td>8</td><td>O plano de aplicação dos recursos está compatível com o objeto da parceria?</td><td>( )</td><td>( )</td><td></td></tr>
+<tr><td>9</td><td>As despesas previstas guardam relação direta com a execução do objeto?</td><td>( )</td><td>( )</td><td></td></tr>
+<tr><td>10</td><td>Os valores apresentados são compatíveis com os preços praticados no mercado ou devidamente justificados?</td><td>( )</td><td>( )</td><td></td></tr>
+<tr><td>11</td><td>O cronograma de desembolso está adequado à execução das atividades?</td><td>( )</td><td>( )</td><td></td></tr>
+<tr><td>12</td><td>O Plano de Trabalho atende aos requisitos do art. 22 da Lei Federal nº 13.019/2014?</td><td>( )</td><td>( )</td><td></td></tr>
+<tr><td>13</td><td>Há disponibilidade orçamentária para a celebração da parceria?</td><td>( )</td><td>( )</td><td></td></tr>
+<tr><td>14</td><td>A parceria está alinhada às políticas públicas e às competências da Unidade Gestora?</td><td>( )</td><td>( )</td><td></td></tr>
+<tr><td>15</td><td>Foram observadas as exigências do edital, da legislação aplicável e das normas municipais vigentes?</td><td>( )</td><td>( )</td><td></td></tr>
+</tbody></table>
+<p><strong>MANIFESTAÇÃO DA UNIDADE GESTORA</strong></p>
+<p>Após análise do Plano de Trabalho apresentado pela Organização da Sociedade Civil acima identificada, considerando os requisitos previstos na Lei Federal nº 13.019/2014, no edital de Chamamento Público e nas normas municipais aplicáveis, esta Unidade Gestora conclui que:</p>
+<p>( ) O Plano de Trabalho encontra-se apto e aprovado para prosseguimento dos trâmites visando à celebração da parceria.<br>( ) O Plano de Trabalho necessita de ajustes/complementações, conforme observações registradas neste documento.<br>( ) O Plano de Trabalho não atende aos requisitos necessários para aprovação.</p>
+<p>Justificativa da decisão: XXXXXXXX</p>
+<p style="text-align:right">São Gonçalo do Rio Abaixo/MG, XX/XX/XXXX.</p>
+<p style="text-align:center">XXXXXXXXXX<br>Secretário(a) Municipal da Unidade Gestora XXXXX</p>
 HTML,
             'parecer_tecnico_celebracao' => self::CABECALHO . <<<'HTML'
 <p style="text-align:center"><strong>PARECER TÉCNICO PARA CELEBRAÇÃO DA PARCERIA</strong></p>

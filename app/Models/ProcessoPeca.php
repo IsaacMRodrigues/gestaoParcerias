@@ -49,12 +49,12 @@ class ProcessoPeca extends Model
     public const SETOR_RESPONSAVEL = [
         'oficio'             => 'ug',
         'termo_referencia'   => 'ug',
-        'pedido_parecer'     => 'ug',   // a UG solicita o parecer à SEPLAN
+        'pedido_parecer'     => 'scp',  // a SCP protocola o pedido de parecer à SEPLAN
         'parecer_financeiro' => 'seplan',
         'abertura'           => 'ug',
         'edital'             => 'scp',
         'portaria_comissao'  => 'ug',   // a UG anexa a portaria ao revisar o edital
-        'solicitacao_parecer_juridico' => 'ug',   // a UG solicita o parecer à Procuradoria
+        'solicitacao_parecer_juridico' => 'scp',  // a SCP protocola o pedido de parecer à Procuradoria
         'parecer_juridico'   => 'pj',
         'comprovante_publicacao' => 'scp',  // a SCP anexa o comprovante ao publicar
         'justificativa_dispensa' => 'ug',   // a UG emite e assina a justificativa
@@ -69,9 +69,9 @@ class ProcessoPeca extends Model
         'abertura'           => 4,
         'edital'             => 5,
         'portaria_comissao'  => 6,
-        'solicitacao_parecer_juridico' => 6,
-        'parecer_juridico'   => 7,
-        'comprovante_publicacao' => 8,
+        'solicitacao_parecer_juridico' => 7,
+        'parecer_juridico'   => 8,
+        'comprovante_publicacao' => 9,
         // Rota Dispensa: ambas na etapa 5 (a justificativa substitui o edital)
         'justificativa_dispensa' => 5,
         'parecer_cnas'           => 5,

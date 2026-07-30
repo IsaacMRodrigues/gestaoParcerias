@@ -639,6 +639,28 @@ São 21 perfis. Um usuário pode ter **vários**; os marcados 🔒 são **exclus
   - Menu do usuário reduzido a **apenas o avatar** (iniciais), com o nome no `title`; nome completo e
     perfil saíram do topo (continuam dentro do dropdown)
 
+- [2026-07-30] `Atualizações.txt` — protocolo pela SCP e modelos novos de Seleção/Celebração
+  - **Protocolos passam à SCP** (linha 4 do documento): `pedido_parecer` e
+    `solicitacao_parecer_juridico` mudaram de `ug` para `scp` em `ProcessoPeca::SETOR_RESPONSAVEL`
+  - **Rota do Chamamento ganhou uma etapa** (10 no total): a UG revisa/assina o Edital e anexa a
+    Portaria da Comissão (etapa 6) e encaminha **à SCP**, que emite e assina o **Protocolo
+    (Solicitação de Parecer Jurídico)** na nova etapa 7 e então segue à Procuradoria (8) e publica (9).
+    Consequência: ao devolver, o PJ volta para a **SCP**, que devolve à UG se houver pendência
+  - Etapa 2 (Pedido de Parecer Financeiro) passou a ser da **SCP** nas duas rotas — fecha o
+    "SCP recebe, analisa e envia SEPLAN" do Fluxo CP
+  - Migration `reajusta_etapas_protocolo_juridico_scp` desloca +1 as etapas 7→8 e 8→9 dos processos
+    já existentes na rota Chamamento
+  - **Modelos novos da Seleção** (`Peca::TEMPLATES['chamamento_publico']` passou de 11 para 13 itens):
+    novos **Relatório da Comissão de Seleção** e **Ata da Comissão**; o **Resultado provisório**, o
+    **Resultado definitivo** e o **Termo de Adjudicação e Homologação** deixaram de ser "arquivo" e
+    viraram **modelo padrão assinável**, com o texto oficial dos `.docx` em `Peca::MODELO`
+  - **Aprovação do Plano de Trabalho** (Celebração) ganhou o texto-modelo com o checklist de 15 itens
+  - Migration `atualiza_pecas_selecao_modelos_novos` realinha rótulo/tipo/obrigatoriedade/ordem das
+    peças já criadas e semeia os textos (mantém como arquivo o que já tinha upload, para não órfãos)
+  - **Ordem de Pagamento ganhou tipo**: **Global** (empenho do exercício, uma vez por instrumento) e
+    **Parcial** (subempenho de cada parcela), cada um com seu texto-modelo; seletor na tela do
+    Instrumento e selo do tipo na listagem
+
 - [2026-07-30] Filtros na tela de Programas Governamentais (`programas/index`)
   - Barra de filtros por **pesquisa** (nome/sigla), **órgão**, **tipo** e **status**;
     `ProgramaController@index` aplica com `when()`, preserva a query na paginação (`withQueryString`)

@@ -49,11 +49,12 @@ class Processo extends Model
     public const ETAPAS = [
         ['setor' => 'ug',     'acao' => 'Preencher Ofício e Termo de Referência e assinar'],
         ['setor' => 'scp',    'acao' => 'Analisar o Ofício e o Termo de Referência: aprovar ou rejeitar', 'analise' => true],
-        ['setor' => 'ug',     'acao' => 'Solicitar o Parecer Financeiro à SEPLAN (Pedido de Parecer)'],
+        ['setor' => 'scp',    'acao' => 'Solicitar o Parecer Financeiro à SEPLAN (Pedido de Parecer)'],
         ['setor' => 'seplan', 'acao' => 'Emitir o Parecer Financeiro e assinar'],
         ['setor' => 'ug',     'acao' => 'Conferir o parecer e fazer a Abertura do Processo (assinar AP)'],
-        ['setor' => 'scp',    'acao' => 'Elaborar o Edital'],
-        ['setor' => 'ug',     'acao' => 'Assinar o Edital e solicitar o Parecer Jurídico à Procuradoria (preencher e assinar a solicitação)'],
+        ['setor' => 'scp',    'acao' => 'Elaborar o Edital e seus anexos'],
+        ['setor' => 'ug',     'acao' => 'Revisar e assinar o Edital, anexar a Portaria da Comissão de Seleção e encaminhar à SCP'],
+        ['setor' => 'scp',    'acao' => 'Emitir e assinar o Protocolo (Solicitação de Parecer Jurídico) e encaminhar à Procuradoria'],
         ['setor' => 'pj',     'acao' => 'Emitir o Parecer Jurídico e encaminhar à SCP (preencher e assinar)'],
         ['setor' => 'scp',    'acao' => 'Publicar no site oficial (trâmite externo)'],
     ];
@@ -66,7 +67,7 @@ class Processo extends Model
     public const ETAPAS_DISPENSA = [
         ['setor' => 'ug',     'acao' => 'Preencher Ofício e Termo de Referência e assinar'],
         ['setor' => 'scp',    'acao' => 'Analisar o Ofício e o Termo de Referência: aprovar ou rejeitar', 'analise' => true],
-        ['setor' => 'ug',     'acao' => 'Solicitar o Parecer Financeiro à SEPLAN (Pedido de Parecer)'],
+        ['setor' => 'scp',    'acao' => 'Solicitar o Parecer Financeiro à SEPLAN (Pedido de Parecer)'],
         ['setor' => 'seplan', 'acao' => 'Emitir o Parecer Financeiro e assinar'],
         ['setor' => 'ug',     'acao' => 'Conferir o parecer e fazer a Abertura do Processo (assinar AP)'],
         ['setor' => 'ug',     'acao' => 'Emitir e assinar a Justificativa de Dispensa/Inexigibilidade (e, se parceria do SUAS, o Parecer Técnico CNAS)'],
@@ -327,9 +328,10 @@ class Processo extends Model
             }
         } elseif ($this->etapa === 6 && !$ehDispensa) {
             if (!$this->peca('edital')?->assinado())              $pend[] = 'Edital (assinatura da UG)';
-            if (!$this->peca('solicitacao_parecer_juridico')?->assinado()) $pend[] = 'Solicitação de Parecer Jurídico';
             if (!$this->peca('portaria_comissao')?->temAnexo())   $pend[] = 'Portaria da Comissão de Seleção (anexar arquivo)';
         } elseif ($this->etapa === 7 && !$ehDispensa) {
+            if (!$this->peca('solicitacao_parecer_juridico')?->assinado()) $pend[] = 'Solicitação de Parecer Jurídico (Protocolo)';
+        } elseif ($this->etapa === 8 && !$ehDispensa) {
             if (!$this->peca('parecer_juridico')?->assinado())    $pend[] = 'Parecer Jurídico';
         }
         // etapa 1 (SCP): apenas analisa e devolve — sem documento obrigatório

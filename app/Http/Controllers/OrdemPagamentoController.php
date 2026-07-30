@@ -12,16 +12,24 @@ use Symfony\Component\HttpFoundation\StreamedResponse;
 
 class OrdemPagamentoController extends Controller
 {
-    public function create(Instrumento $instrumento): RedirectResponse
+    public function create(Request $request, Instrumento $instrumento): RedirectResponse
     {
         abort_unless($instrumento->status === 'vigente', 403,
             'Ordens de pagamento só podem ser emitidas em instrumentos vigentes.');
+
+        $tipo = $request->input('tipo') === 'global' ? 'global' : 'parcial';
+
+        // O empenho global é solicitado uma única vez por instrumento.
+        if ($tipo === 'global' && $instrumento->ordensPagamento()->where('tipo', 'global')->exists()) {
+            return back()->with('info', 'Este instrumento já possui uma Ordem de Pagamento Global.');
+        }
 
         $numero = (int) $instrumento->ordensPagamento()->max('numero') + 1;
 
         $op = $instrumento->ordensPagamento()->create([
             'numero'   => $numero,
-            'conteudo' => OrdemPagamento::conteudoInicial($instrumento->loadMissing('proposta.osc'), $numero, auth()->user()?->name),
+            'tipo'     => $tipo,
+            'conteudo' => OrdemPagamento::conteudoInicial($instrumento->loadMissing('proposta.osc'), $numero, auth()->user()?->name, $tipo),
         ]);
 
         return redirect()->route('ordens-pagamento.edit', $op)

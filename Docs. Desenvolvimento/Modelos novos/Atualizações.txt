@@ -1,0 +1,30 @@
+Fluxo CP
+UG preenche o ofício e termo de referência, assina e envia SCP -> SCP recebe, analisa e envia SEPLAN -> SEPLAN recebe, analisa e emite o parecer financeiro, assina e envia UG -> UG confere, se tiver pendência resolve, se tiver ok faz a abertura do processo, assina AP, envia SCP -> SCP elabora a minuta do edital e anexos e envia UG -> UG revisa, assina, anexa a portaria da Comissão de Seleção, elabora e assina o protocolo jurídico e envia PJ -> PJ analisa o processo e emite parecer, se tiver pendência envia para UG e se não tiver pendência assina e envia SCP -> SCP anexa o comprovante de publicação no diário oficial e no site oficial. (verificar se ja foi feito)
+
+Etapa pedido (protocolo) de parecer financeiro e solicitação (protocolo) de parecer jurídico - resp alterar para SCP (VERIFICAR SE JA FOI FEITO)
+
+---------------------------------------------------------
+
+Fluxo Seleção
+OSC cadastra a proposta e envia UG -> UG vai analisar, emiti relatório da comissão, ata e resultado provisório (modelos em anexo) envia para SCP -> SCP anexa o comprovante de publicação do resultado provisório e envia a UG -> UG recebe e analisa os recursos, se houver, emite resposta e envia a OSC, se não/após emite resultado definitivo e envia a SCP -> SCP anexa o comprovante de publicação do resultado definitivo, emite o termo de homologação e envia a PM -> PM assina e envia a UG
+
+OSC - Organização do Sociedade Civil
+PM - Prefeito Municipal
+
+MODELO - Relatório da Comissão de Seleção
+MODELO - Ata
+MODELO - Resultado provisório_EDITAL DE CHAMAMENTO PUBLICO
+MODELO - Resultado definitivo_EDITAL DE CHAMAMENTO PUBLICO
+
+ai fecha a etapa de seleção
+
+MODELO - TERMO DE ADJUDICAÇÃO E HOMOLOGAÇÃO
+-----------------------------------------------------
+
+Fluxo Etapa de Celebração
+UG encaminha o termo de homologação e convoca a OSC a apresentar plano de trabalho e documentos para habilitação -> OSC elabora o plano de trabalho, anexa documentos para habilitação e envia a UG -> UG analisa, emite/assina a aprovação do plano de trabalho e envia SCP -> SCP analisa e solicita parecer financeiro a SEPLAN -> SEPLAN analisa, elabora/assina parecer e envia UG -> UG anexa a portaria do Gestor e Comissão de Monitoramento e Avaliação, emite o parecer técnico e envia SCP -> confere o processo e emite/assina protocolo jurídico e envia PJ -> PJ analisa e emite/assina parecer e envia a SCP -> SCP analisa o processo e emite parecer, se tiver pendência devolve e se não tiver pendência assina e envia SCP -> SCP encaminha para assinatura das partes, após anexa o comprovante de publicação no diário oficial e no site oficial  -> SCP autorização de início de execução à OSC e solicita dados bancários envia a OSC -> OSC inseri os dados bancários e envia a SCP -> SCP elabora o ordem de pagamento global e envia para UG -> UG assina e envia a SCP -> SCP anexa o comprovante de empenho global;
+
+MODELO - Aprovação do PLANO DE TRABALHO
+MODELO - Ordem de Pagamento - GLOBAL
+MODELO - Tela principal
+MODELO - Ordem de pagamento - PARCIAL
