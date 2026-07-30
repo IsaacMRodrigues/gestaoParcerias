@@ -766,15 +766,46 @@ São 21 perfis. Um usuário pode ter **vários**; os marcados 🔒 são **exclus
 
 ## O que está sendo feito
 
-- Pedir ao cliente os **13 modelos padrão** ainda sem arquivo (aprovação de plano, minutas, termos,
-  justificativas/autorizações de aditivo e apostilamento).
+### 📌 Última entrega — `Docs. Desenvolvimento/Modelos novos/` e `Atualizações.txt`
+
+O trabalho mais recente do projeto foi a implementação **completa** da pasta **`Modelos novos`** e do
+arquivo **`Atualizações.txt`** que o cliente entregou (30/07/2026). Foi executado nesta ordem — as
+entradas correspondentes estão em `## O que foi feito`, da mais antiga para a mais recente:
+
+1. **Protocolos passam à SCP** (linha 4 do documento) + os **modelos novos** de Seleção/Celebração e a
+   Ordem de Pagamento **Global × Parcial**
+2. **Trâmite da Seleção** (UG → SCP → UG → SCP → Prefeito) e o novo perfil **Prefeito Municipal**
+3. **Trâmite da Celebração**, com a **OSC dentro do fluxo**
+4. **Tela principal por perfil** (Prefeitura, OSC, Cidadão, Parlamentar, Conselho) e a **Transparência**
+   pública das parcerias celebradas
+5. **Recurso administrativo da OSC** — protocolo eletrônico pelo portal e resposta da UG
+6. **Assinatura das partes** no Termo (contra-assinatura da OSC) e o **Parecer da SCP** ← *última*
+
+Todos os 8 modelos da pasta foram incorporados: Relatório da Comissão, Ata, Resultado Provisório,
+Resultado Definitivo, Termo de Adjudicação e Homologação, Aprovação do Plano de Trabalho, Ordem de
+Pagamento Global e Parcial, além da Tela principal.
+
+**Única pendência do documento é uma decisão do cliente, não código:** como a UG passou a encaminhar à
+**SCP** (e não direto ao PJ), a devolução do Parecer Jurídico por pendência agora vai para a **SCP**,
+que devolve à UG — o texto do Fluxo CP dizia "envia para UG". Funciona, mas é um desvio da letra.
+
+### Próximos passos
+
+- Próximos blocos do roadmap, em ordem: **Monitoramento (4.5)** e **Prestação de Contas (4.6)**
+  — apoiada nas despesas/saldo da Execução —, e **Notificações/e-mails (4.7)**. São o que falta para
+  fechar o ciclo da parceria.
+- **Fluxo real de assinatura eletrônica**: hoje assina-se direto na peça; falta a *solicitação* de
+  assinatura com aprovação pelo perfil **Aprovador de Assinatura Eletrônica** (o perfil existe, o
+  workflow não), com aprovação automática para o Responsável Legal.
+- Pedir ao cliente os **modelos padrão ainda sem arquivo** — restam os de **aditivo e apostilamento**
+  (justificativas, autorizações, minutas e termos).
 - Fechar o checklist de dispensa: itens **16–18** (autorização à OSC, dados bancários, Nota de
   Empenho) e completar a **publicação do Termo** (item 15 — DOE / site / GovBr).
-- Próximos blocos do roadmap, em ordem: **Prestação de Contas (4.6)** — apoiada nas despesas/saldo
-  da Execução —, **Monitoramento (4.5)**, e **Notificações/e-mails (4.7)**.
 - Pendência transversal: **trilhas de auditoria / logs imutáveis** (requisito não-funcional).
-- Itens finos: campos Exercício/Prazo no Chamamento; reajuste/reequilíbrio na Formalização;
-  matrícula/CNAE no Cadastro.
+- Itens finos: campos **Exercício** e **Prazo de Execução** no Chamamento (2.2.1 do módulo 2);
+  reajuste/reequilíbrio na Formalização.
+- Definir com o cliente o que **Parlamentar** e **Conselho** veem de diferente na tela principal —
+  hoje ambos apontam para a Transparência, por falta dessa definição.
 
 ---
 
