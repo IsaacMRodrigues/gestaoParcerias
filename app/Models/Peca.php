@@ -68,6 +68,27 @@ class Peca extends Model
             ['chave' => 'pub_extrato_final',         'rotulo' => 'Publicação do extrato',                   'tipo' => 'arquivo', 'obrigatorio' => true],
         ],
 
+        // Celebração (Fluxo Etapa de Celebração) — ancorada na proposta aprovada
+        'celebracao' => [
+            ['chave' => 'convocacao_osc',        'rotulo' => 'Convocação da OSC (modelo padrão)',                      'tipo' => 'modelo',  'obrigatorio' => true],
+            ['chave' => 'plano_trabalho',        'rotulo' => 'Plano de Trabalho (enviado pela OSC)',                   'tipo' => 'arquivo', 'obrigatorio' => true],
+            ['chave' => 'docs_habilitacao',      'rotulo' => 'Documentos de habilitação (enviados pela OSC)',          'tipo' => 'arquivo', 'obrigatorio' => true],
+            ['chave' => 'aprovacao_plano',       'rotulo' => 'Aprovação do Plano de Trabalho (modelo padrão)',         'tipo' => 'modelo',  'obrigatorio' => true],
+            ['chave' => 'pedido_parecer',        'rotulo' => 'Pedido de Parecer Financeiro (modelo padrão)',           'tipo' => 'modelo',  'obrigatorio' => true],
+            ['chave' => 'parecer_financeiro',    'rotulo' => 'Parecer Financeiro (modelo padrão)',                     'tipo' => 'modelo',  'obrigatorio' => true],
+            ['chave' => 'portaria_gestor',       'rotulo' => 'Portaria do Gestor da Parceria',                         'tipo' => 'arquivo', 'obrigatorio' => true],
+            ['chave' => 'portaria_comissao_mon', 'rotulo' => 'Portaria da Comissão de Monitoramento e Avaliação',      'tipo' => 'arquivo', 'obrigatorio' => true],
+            ['chave' => 'parecer_tecnico',       'rotulo' => 'Parecer Técnico para celebração (modelo padrão)',        'tipo' => 'modelo',  'obrigatorio' => true],
+            ['chave' => 'protocolo_juridico',    'rotulo' => 'Protocolo na Unidade Jurídica (modelo padrão)',          'tipo' => 'modelo',  'obrigatorio' => true],
+            ['chave' => 'parecer_juridico',      'rotulo' => 'Parecer Jurídico (modelo padrão)',                       'tipo' => 'modelo',  'obrigatorio' => true],
+            ['chave' => 'termo',                 'rotulo' => 'Termo de Parceria (modelo padrão)',                      'tipo' => 'modelo',  'obrigatorio' => true],
+            ['chave' => 'comprovante_publicacao','rotulo' => 'Comprovante de publicação (Diário Oficial e site)',      'tipo' => 'arquivo', 'obrigatorio' => true],
+            ['chave' => 'autorizacao_inicio',    'rotulo' => 'Autorização de Início de Execução (modelo padrão)',      'tipo' => 'modelo',  'obrigatorio' => true],
+            ['chave' => 'dados_bancarios',       'rotulo' => 'Dados bancários (enviados pela OSC)',                    'tipo' => 'arquivo', 'obrigatorio' => true],
+            ['chave' => 'op_global',             'rotulo' => 'Ordem de Pagamento Global (modelo padrão)',              'tipo' => 'modelo',  'obrigatorio' => true],
+            ['chave' => 'comprovante_empenho',   'rotulo' => 'Comprovante de empenho global',                          'tipo' => 'arquivo', 'obrigatorio' => true],
+        ],
+
         // 2.3.4 Apostilamento
         'apostilamento' => [
             ['chave' => 'manifestacao_osc',          'rotulo' => 'Manifestação da OSC',                     'tipo' => 'arquivo', 'obrigatorio' => true],
@@ -144,8 +165,62 @@ class Peca extends Model
     public const CATEGORIA_LABELS = [
         'chamamento_publico'       => 'Chamamento Público',
         'dispensa_inexigibilidade' => 'Dispensa / Inexigibilidade',
+        'celebracao'               => 'Celebração da Parceria',
         'apostilamento'            => 'Apostilamento',
         'aditivo'                  => 'Termo Aditivo',
+    ];
+
+    /**
+     * Trâmite da Celebração (categoria `celebracao`, ancorada na Proposta):
+     * setor que PREENCHE cada peça e em qual etapa de
+     * `Proposta::ETAPAS_CELEBRACAO`.
+     */
+    public const CELEBRACAO_SETOR = [
+        'convocacao_osc'         => 'ug',
+        'plano_trabalho'         => 'osc',
+        'docs_habilitacao'       => 'osc',
+        'aprovacao_plano'        => 'ug',
+        'pedido_parecer'         => 'scp',
+        'parecer_financeiro'     => 'seplan',
+        'portaria_gestor'        => 'ug',
+        'portaria_comissao_mon'  => 'ug',
+        'parecer_tecnico'        => 'ug',
+        'protocolo_juridico'     => 'scp',
+        'parecer_juridico'       => 'pj',
+        'termo'                  => 'scp',
+        'comprovante_publicacao' => 'scp',
+        'autorizacao_inicio'     => 'scp',
+        'dados_bancarios'        => 'osc',
+        'op_global'              => 'scp',  // a SCP elabora; a UG assina
+        'comprovante_empenho'    => 'scp',
+    ];
+
+    public const CELEBRACAO_ETAPA = [
+        'convocacao_osc'         => 0,
+        'plano_trabalho'         => 1,
+        'docs_habilitacao'       => 1,
+        'aprovacao_plano'        => 2,
+        'pedido_parecer'         => 3,
+        'parecer_financeiro'     => 4,
+        'portaria_gestor'        => 5,
+        'portaria_comissao_mon'  => 5,
+        'parecer_tecnico'        => 5,
+        'protocolo_juridico'     => 6,
+        'parecer_juridico'       => 7,
+        'termo'                  => 8,
+        'comprovante_publicacao' => 8,
+        'autorizacao_inicio'     => 9,
+        'dados_bancarios'        => 10,
+        'op_global'              => 11,
+        'comprovante_empenho'    => 13,
+    ];
+
+    /**
+     * A Ordem de Pagamento Global é elaborada pela SCP (etapa 11) e assinada
+     * pela Unidade Gestora (etapa 12).
+     */
+    public const CELEBRACAO_ASSINATURA = [
+        'op_global' => ['setor' => 'ug', 'etapa' => 12],
     ];
 
     /**
@@ -458,7 +533,101 @@ HTML,
 <p style="text-align:center">XXXXXXXXXX<br>Procurador(a) do Município<br>Procuradoria Jurídica</p>
 HTML,
         ],
+        // Celebração: apenas os modelos próprios desta etapa. Os demais são
+        // reaproveitados de outras categorias/motores em `modeloTexto()`.
+        'celebracao' => [
+            'convocacao_osc' => self::CABECALHO . <<<'HTML'
+<p style="text-align:right">São Gonçalo do Rio Abaixo, XX de XXXX de 20XX.</p>
+<p style="text-align:center"><strong>CONVOCAÇÃO PARA APRESENTAÇÃO DE PLANO DE TRABALHO E DOCUMENTOS DE HABILITAÇÃO</strong></p>
+<p><strong>OSC:</strong> XXXXXXXXXX<br><strong>CNPJ:</strong> XXXXXXXX<br><strong>Chamamento Público nº:</strong> XXX/20XX<br><strong>Processo nº:</strong> XXXXXXXX</p>
+<p>Prezado(a) Representante Legal,</p>
+<p>Considerando a homologação do resultado definitivo do Chamamento Público nº XXX/20XX, na qual essa Organização da Sociedade Civil foi selecionada, e nos termos dos arts. 22 e 34 da Lei Federal nº 13.019/2014 e do Decreto Municipal nº 048/2020, fica essa OSC <strong>CONVOCADA</strong> a apresentar, no prazo de XX (XXXXX) dias, por meio do PGP:</p>
+<p>a) o <strong>Plano de Trabalho</strong>, contendo a descrição da realidade, as metas, os indicadores, o cronograma de execução e o plano de aplicação dos recursos, conforme art. 22 da Lei nº 13.019/2014;</p>
+<p>b) os <strong>documentos de habilitação</strong> exigidos no edital e no art. 34 da Lei nº 13.019/2014 (estatuto e alterações registradas, ata da atual diretoria, certidões de regularidade fiscal e trabalhista, comprovante de endereço da sede e documentos do representante legal).</p>
+<p>O não atendimento no prazo poderá acarretar a perda do direito à celebração da parceria, com a convocação da próxima OSC classificada.</p>
+<p style="text-align:center">XXXXXXXXXX<br>Secretária Municipal de XXXXXX<br>Unidade Gestora</p>
+HTML,
+            'termo' => self::CABECALHO . <<<'HTML'
+<p style="text-align:center"><strong>TERMO DE XXXXXX Nº XXX/20XX</strong></p>
+<p>TERMO DE XXXXXX QUE ENTRE SI CELEBRAM O <strong>MUNICÍPIO DE SÃO GONÇALO DO RIO ABAIXO</strong>, por intermédio da Secretaria Municipal de XXXXXX, e a organização da sociedade civil <strong>XXXXXXXXXX</strong>, na forma abaixo:</p>
+<p><strong>ADMINISTRAÇÃO PÚBLICA:</strong> MUNICÍPIO DE SÃO GONÇALO DO RIO ABAIXO, CNPJ nº XXXXXXXX, neste ato representado pelo(a) Secretário(a) Municipal de XXXXXX, Sr(a). XXXXXXXXXX.</p>
+<p><strong>ORGANIZAÇÃO DA SOCIEDADE CIVIL:</strong> XXXXXXXXXX, CNPJ nº XXXXXXXX, com sede em XXXXXXXXXX, neste ato representada por seu(sua) representante legal, Sr(a). XXXXXXXXXX, CPF nº XXXXXXXX.</p>
+<p><strong>CLÁUSULA PRIMEIRA — DO OBJETO</strong></p>
+<p>1.1. O presente Termo tem por objeto XXXXXXXXXX, conforme o Plano de Trabalho aprovado, que integra este instrumento independentemente de transcrição.</p>
+<p><strong>CLÁUSULA SEGUNDA — DAS OBRIGAÇÕES DAS PARTES</strong></p>
+<p>2.1. As partes obrigam-se ao cumprimento da Lei Federal nº 13.019/2014, do Decreto Municipal nº 048/2020 e das condições estabelecidas neste Termo e no Plano de Trabalho.</p>
+<p><strong>CLÁUSULA TERCEIRA — DOS RECURSOS FINANCEIROS</strong></p>
+<p>3.1. Para a execução do objeto será repassado o valor total de R$ XXXXXXXX (XXXXXXXX), à conta da dotação orçamentária XXXXX, Ficha XXXX, Fonte XXXX.</p>
+<p>3.2. Os repasses observarão o cronograma de desembolso do Plano de Trabalho.</p>
+<p><strong>CLÁUSULA QUARTA — DA MOVIMENTAÇÃO DOS RECURSOS</strong></p>
+<p>4.1. Os recursos serão depositados e movimentados em conta bancária específica desta parceria, isenta de tarifas.</p>
+<p><strong>CLÁUSULA QUINTA — DA VIGÊNCIA</strong></p>
+<p>5.1. O presente Termo vigorará de XX/XX/XXXX a XX/XX/XXXX, podendo ser prorrogado nos termos da lei.</p>
+<p><strong>CLÁUSULA SEXTA — DO GESTOR E DO MONITORAMENTO</strong></p>
+<p>6.1. A execução será acompanhada pelo Gestor da Parceria designado por portaria e pela Comissão de Monitoramento e Avaliação.</p>
+<p><strong>CLÁUSULA SÉTIMA — DA PRESTAÇÃO DE CONTAS</strong></p>
+<p>7.1. A OSC prestará contas na forma dos arts. 63 a 72 da Lei nº 13.019/2014.</p>
+<p><strong>CLÁUSULA OITAVA — DA DENÚNCIA E DA RESCISÃO</strong></p>
+<p>8.1. O presente Termo poderá ser denunciado ou rescindido na forma do art. 42, XVI, da Lei nº 13.019/2014.</p>
+<p><strong>CLÁUSULA NONA — DA PUBLICIDADE</strong></p>
+<p>9.1. O extrato deste Termo será publicado no Diário Oficial e disponibilizado no site oficial do Município.</p>
+<p><strong>CLÁUSULA DÉCIMA — DO FORO</strong></p>
+<p>10.1. Fica eleito o foro da Comarca de XXXXXXXX para dirimir as questões oriundas deste Termo.</p>
+<p style="text-align:right">São Gonçalo do Rio Abaixo, XX de XXXX de 20XX.</p>
+<p style="text-align:center">XXXXXXXXXX<br>Secretária Municipal de XXXXXX<br>Administração Pública Municipal</p>
+<p style="text-align:center">XXXXXXXXXX<br>Representante Legal<br>Organização da Sociedade Civil</p>
+HTML,
+            'autorizacao_inicio' => self::CABECALHO . <<<'HTML'
+<p style="text-align:right">São Gonçalo do Rio Abaixo, XX de XXXX de 20XX.</p>
+<p style="text-align:center"><strong>AUTORIZAÇÃO DE INÍCIO DE EXECUÇÃO</strong></p>
+<p><strong>OSC:</strong> XXXXXXXXXX<br><strong>CNPJ:</strong> XXXXXXXX<br><strong>Termo de XXXXXX nº:</strong> XXX/20XX<br><strong>Processo nº:</strong> XXXXXXXX</p>
+<p>Prezado(a) Representante Legal,</p>
+<p>Comunicamos que, cumpridas as exigências legais e publicado o extrato do Termo de XXXXXX nº XXX/20XX no Diário Oficial e no site oficial do Município, fica essa Organização da Sociedade Civil <strong>AUTORIZADA a iniciar a execução</strong> do objeto pactuado a partir de XX/XX/XXXX, observado o Plano de Trabalho aprovado.</p>
+<p>Solicitamos, ainda, a informação dos <strong>dados bancários</strong> da <strong>conta específica</strong> desta parceria (banco, agência, operação e conta corrente), a ser aberta exclusivamente para a movimentação dos recursos, conforme art. 51 da Lei Federal nº 13.019/2014, por meio do PGP.</p>
+<p>Registre-se que as despesas somente poderão ser realizadas a partir da presente autorização e dentro da vigência da parceria.</p>
+<p style="text-align:center">XXXXXXXXXX<br>Setor de Convênios e Parcerias (SCP)</p>
+HTML,
+        ],
     ];
+
+    /**
+     * Texto-modelo da peça. A Celebração reaproveita os modelos equivalentes de
+     * outras categorias e motores (a rota Dispensa cobre os mesmos documentos),
+     * em vez de duplicar o texto.
+     */
+    public static function modeloTexto(string $categoria, string $chave): ?string
+    {
+        if (isset(self::MODELO[$categoria][$chave])) {
+            return self::MODELO[$categoria][$chave];
+        }
+
+        if ($categoria !== 'celebracao') {
+            return null;
+        }
+
+        // Documentos idênticos aos da rota Dispensa/Inexigibilidade.
+        $daDispensa = [
+            'aprovacao_plano'    => 'aprovacao_plano',
+            'parecer_tecnico'    => 'parecer_tecnico_celebracao',
+            'protocolo_juridico' => 'protocolo_juridico',
+            'parecer_juridico'   => 'parecer_juridico',
+        ];
+        if (isset($daDispensa[$chave])) {
+            return self::MODELO['dispensa_inexigibilidade'][$daDispensa[$chave]] ?? null;
+        }
+
+        // Documentos que o trâmite do Processo já modela.
+        if (in_array($chave, ['pedido_parecer', 'parecer_financeiro'], true)) {
+            return ProcessoPeca::MODELO[$chave] ?? null;
+        }
+
+        // A Ordem de Pagamento Global tem o seu próprio ofício-modelo.
+        if ($chave === 'op_global') {
+            return OrdemPagamento::MODELO_GLOBAL;
+        }
+
+        return null;
+    }
 
     public function pecaable(): MorphTo
     {
@@ -536,62 +705,118 @@ HTML,
     // ------------------------------------------------------------------
 
     /**
-     * O dono desta peça é um Chamamento Público em trâmite de Seleção?
-     * Fora desse caso (Dispensa, Aditivo, Apostilamento) não há trâmite e as
-     * regras antigas valem — quem tem a permissão da tela edita.
+     * O dono desta peça está em trâmite (Seleção, no Chamamento Público, ou
+     * Celebração, na Proposta aprovada)? Fora desses casos (Dispensa, Aditivo,
+     * Apostilamento) não há trâmite e as regras antigas valem — quem tem a
+     * permissão da tela edita.
      */
-    private function chamamentoEmSelecao(): ?Chamamento
+    private function donoEmTramite(): Chamamento|Proposta|null
     {
-        if ($this->categoria !== 'chamamento_publico') {
-            return null;
-        }
-
         $alvo = $this->pecaable;
 
-        return $alvo instanceof Chamamento && $alvo->temTramiteSelecao() ? $alvo : null;
+        return match (true) {
+            $this->categoria === 'chamamento_publico'
+                && $alvo instanceof Chamamento && $alvo->temTramiteSelecao() => $alvo,
+            $this->categoria === 'celebracao' && $alvo instanceof Proposta => $alvo,
+            default => null,
+        };
     }
 
-    /** Setor designado para preencher a peça no trâmite da Seleção. */
+    /** Mapas de designação conforme a categoria em trâmite. */
+    private function mapaSetor(): array
+    {
+        return $this->categoria === 'celebracao' ? self::CELEBRACAO_SETOR : self::SELECAO_SETOR;
+    }
+
+    private function mapaEtapa(): array
+    {
+        return $this->categoria === 'celebracao' ? self::CELEBRACAO_ETAPA : self::SELECAO_ETAPA;
+    }
+
+    private function mapaAssinatura(): array
+    {
+        return $this->categoria === 'celebracao' ? self::CELEBRACAO_ASSINATURA : self::SELECAO_ASSINATURA;
+    }
+
+    /** Setor designado para preencher a peça no trâmite. */
     public function selecaoSetor(): ?string
     {
-        return self::SELECAO_SETOR[$this->chave] ?? null;
+        return $this->mapaSetor()[$this->chave] ?? null;
     }
 
     public function selecaoEtapa(): ?int
     {
-        return self::SELECAO_ETAPA[$this->chave] ?? null;
+        return $this->mapaEtapa()[$this->chave] ?? null;
     }
 
     public function selecaoSetorAssinatura(): ?string
     {
-        return self::SELECAO_ASSINATURA[$this->chave]['setor'] ?? $this->selecaoSetor();
+        return $this->mapaAssinatura()[$this->chave]['setor'] ?? $this->selecaoSetor();
     }
 
     public function selecaoEtapaAssinatura(): ?int
     {
-        return self::SELECAO_ASSINATURA[$this->chave]['etapa'] ?? $this->selecaoEtapa();
+        return $this->mapaAssinatura()[$this->chave]['etapa'] ?? $this->selecaoEtapa();
     }
 
     /**
      * Pode preencher (texto ou upload) agora? Só o setor designado, na etapa
      * designada, enquanto a Seleção não estiver encerrada.
      */
+    /** A peça é governada por um trâmite (Seleção ou Celebração)? */
+    public function emTramite(): bool
+    {
+        return $this->donoEmTramite() !== null && $this->selecaoSetor() !== null;
+    }
+
+    /**
+     * Quando a vez é da OSC, ela só atua nas peças da própria parceria.
+     */
+    private function oscDona(?User $user, Chamamento|Proposta|null $dono): bool
+    {
+        return $user?->osc
+            && $dono instanceof Proposta
+            && $user->osc->id === $dono->osc_id;
+    }
+
     public function podePreencher(?User $user): bool
     {
-        $chamamento = $this->chamamentoEmSelecao();
+        $dono = $this->donoEmTramite();
 
         // Sem trâmite (ou peça fora do fluxo): mantém o comportamento anterior.
-        if (!$chamamento || $this->selecaoSetor() === null) {
+        if (!$dono || $this->selecaoSetor() === null) {
             return true;
         }
 
-        if ($chamamento->selecaoConcluida() || $this->assinado()) {
+        if ($dono->tramiteEncerrado() || $this->assinado()) {
             return false;
         }
 
-        return $user
-            && $user->setor === $this->selecaoSetor()
-            && (int) $chamamento->selecao_etapa === $this->selecaoEtapa();
+        if (!$user
+            || $user->setor !== $this->selecaoSetor()
+            || $dono->tramiteEtapaAtual() !== $this->selecaoEtapa()
+        ) {
+            return false;
+        }
+
+        return $this->selecaoSetor() !== 'osc' || $this->oscDona($user, $dono);
+    }
+
+    /**
+     * Pode ver o conteúdo/arquivo da peça: quem atua no sistema, ou a OSC nas
+     * peças da própria parceria.
+     */
+    public function podeVer(?User $user): bool
+    {
+        if (!$user) {
+            return false;
+        }
+
+        if ($user->can('chamamentos') || $user->can('formalizacao')) {
+            return true;
+        }
+
+        return $this->oscDona($user, $this->donoEmTramite());
     }
 
     /**
@@ -604,19 +829,24 @@ HTML,
             return false;
         }
 
-        $chamamento = $this->chamamentoEmSelecao();
+        $dono = $this->donoEmTramite();
 
-        if (!$chamamento || $this->selecaoSetor() === null) {
+        if (!$dono || $this->selecaoSetor() === null) {
             return true;
         }
 
-        if ($chamamento->selecaoConcluida()) {
+        if ($dono->tramiteEncerrado()) {
             return false;
         }
 
-        return $user
-            && $user->setor === $this->selecaoSetorAssinatura()
-            && (int) $chamamento->selecao_etapa === $this->selecaoEtapaAssinatura();
+        if (!$user
+            || $user->setor !== $this->selecaoSetorAssinatura()
+            || $dono->tramiteEtapaAtual() !== $this->selecaoEtapaAssinatura()
+        ) {
+            return false;
+        }
+
+        return $this->selecaoSetorAssinatura() !== 'osc' || $this->oscDona($user, $dono);
     }
 
     /**
@@ -625,9 +855,9 @@ HTML,
      */
     public function motivoTrava(?User $user = null): ?string
     {
-        $chamamento = $this->chamamentoEmSelecao();
+        $dono = $this->donoEmTramite();
 
-        if (!$chamamento || $this->selecaoSetor() === null || $this->assinado()) {
+        if (!$dono || $this->selecaoSetor() === null || $this->assinado()) {
             return null;
         }
 
@@ -636,14 +866,14 @@ HTML,
             return null;
         }
 
-        if ($chamamento->selecaoConcluida()) {
-            return 'Seleção encerrada.';
+        if ($dono->tramiteEncerrado()) {
+            return $this->categoria === 'celebracao' ? 'Celebração concluída.' : 'Seleção encerrada.';
         }
 
-        $setor = Chamamento::SETORES_SELECAO[$this->selecaoSetorAssinatura()] ?? $this->selecaoSetorAssinatura();
+        $setor = $dono->tramiteSetorLabel($this->selecaoSetorAssinatura());
         $etapa = $this->selecaoEtapa();
 
-        if ((int) $chamamento->selecao_etapa !== $etapa) {
+        if ($dono->tramiteEtapaAtual() !== $etapa) {
             return 'Disponível na etapa ' . ($etapa + 1) . ' do trâmite (' . $setor . ').';
         }
 
@@ -675,8 +905,10 @@ HTML,
             ];
 
             // semeia o texto-modelo das peças "modelo" que possuem template
-            if (($item['tipo'] ?? null) === 'modelo' && isset(self::MODELO[$categoria][$item['chave']])) {
-                $novos['conteudo'] = self::MODELO[$categoria][$item['chave']];
+            if (($item['tipo'] ?? null) === 'modelo'
+                && ($texto = self::modeloTexto($categoria, $item['chave'])) !== null
+            ) {
+                $novos['conteudo'] = $texto;
             }
 
             $pecaable->{$relacao}()->firstOrCreate(

@@ -39,6 +39,15 @@
                     <span class="px-2 py-1 text-xs font-medium bg-{{ $color }}-100 text-{{ $color }}-800 rounded-full">
                         {{ \App\Models\Proposta::STATUS[$proposta->status] }}
                     </span>
+                    @if($proposta->temTramiteCelebracao())
+                        <a href="{{ route('celebracao.show', $proposta) }}"
+                           class="px-3 py-1.5 text-xs font-semibold text-white bg-indigo-600 rounded-md hover:bg-indigo-700 whitespace-nowrap">
+                            Celebração
+                            @if($proposta->celebracao_setor === 'osc' && !$proposta->celebracaoConcluida())
+                                <span class="ml-1 px-1 py-0.5 bg-amber-300 text-amber-900 rounded">sua vez</span>
+                            @endif
+                        </a>
+                    @endif
                     <a href="{{ route('portal.proposta.show', $proposta) }}"
                        class="text-sm text-indigo-600 hover:text-indigo-800 font-medium">
                         {{ $proposta->status === 'rascunho' ? 'Continuar' : 'Ver' }}

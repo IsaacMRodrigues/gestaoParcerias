@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\AditivoController;
+use App\Http\Controllers\CelebracaoController;
 use App\Http\Controllers\ChamamentoController;
 use App\Http\Controllers\SelecaoController;
 use App\Http\Controllers\DiligenciaController;
@@ -178,15 +179,25 @@ Route::middleware(['auth', 'staff', 'readonly'])->group(function () {
         Route::get('despesas/{despesa}/nota-fiscal', [ExecucaoController::class, 'downloadNotaFiscal'])->name('despesas.nota.download');
     });
 
-    // Peças documentais (motor genérico — usado por Seleção 2.2 e Formalização 2.3)
-    Route::middleware('permission:chamamentos|formalizacao')->group(function () {
-        Route::put('pecas/{peca}', [PecaController::class, 'salvar'])->name('pecas.salvar');
-        Route::patch('pecas/{peca}/assinar', [PecaController::class, 'assinar'])->name('pecas.assinar');
-        Route::post('pecas/{peca}/arquivo', [PecaController::class, 'upload'])->name('pecas.upload');
-        Route::post('pecas/{peca}/puxar', [PecaController::class, 'puxar'])->name('pecas.puxar');
-        Route::get('pecas/{peca}/arquivo', [PecaController::class, 'download'])->name('pecas.download');
-        Route::delete('pecas/{peca}/arquivo', [PecaController::class, 'removerArquivo'])->name('pecas.arquivo.remover');
-    });
+});
+
+// Peças documentais (motor genérico — Seleção 2.2, Celebração e Formalização 2.3).
+// A autorização é feita no PecaController: peças em trâmite são liberadas por
+// setor + etapa (o que inclui a vez da OSC na Celebração); fora de trâmite,
+// continua exigindo a permissão de chamamentos/formalização.
+Route::middleware('auth')->group(function () {
+    Route::put('pecas/{peca}', [PecaController::class, 'salvar'])->name('pecas.salvar');
+    Route::patch('pecas/{peca}/assinar', [PecaController::class, 'assinar'])->name('pecas.assinar');
+    Route::post('pecas/{peca}/arquivo', [PecaController::class, 'upload'])->name('pecas.upload');
+    Route::post('pecas/{peca}/puxar', [PecaController::class, 'puxar'])->name('pecas.puxar');
+    Route::get('pecas/{peca}/arquivo', [PecaController::class, 'download'])->name('pecas.download');
+    Route::delete('pecas/{peca}/arquivo', [PecaController::class, 'removerArquivo'])->name('pecas.arquivo.remover');
+
+    // Trâmite da Celebração — acessível aos setores internos e à OSC da parceria
+    Route::get('celebracao/{proposta}', [CelebracaoController::class, 'show'])->name('celebracao.show');
+    Route::post('celebracao/{proposta}/avancar', [CelebracaoController::class, 'avancar'])->name('celebracao.avancar');
+    Route::post('celebracao/{proposta}/devolver', [CelebracaoController::class, 'devolver'])->name('celebracao.devolver');
+    Route::post('celebracao/{proposta}/concluir', [CelebracaoController::class, 'concluir'])->name('celebracao.concluir');
 });
 
 require __DIR__.'/auth.php';

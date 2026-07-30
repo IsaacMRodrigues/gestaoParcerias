@@ -639,6 +639,34 @@ São 21 perfis. Um usuário pode ter **vários**; os marcados 🔒 são **exclus
   - Menu do usuário reduzido a **apenas o avatar** (iniciais), com o nome no `title`; nome completo e
     perfil saíram do topo (continuam dentro do dropdown)
 
+- [2026-07-30] **Trâmite da Celebração** (Fluxo Etapa de Celebração) — com a OSC dentro do fluxo
+  - Ancorado na **proposta aprovada** (é ela que vira a parceria): `celebracao_etapa`,
+    `celebracao_setor`, `celebracao_iniciada_em`/`concluida_em` em `propostas` e histórico em
+    **`celebracao_tramitacoes`**
+  - **`Proposta::ETAPAS_CELEBRACAO`** — 14 etapas, agora incluindo a própria **OSC** como setor:
+    UG convoca → **OSC** (plano de trabalho + habilitação) → UG (aprova o plano) → SCP (pede parecer)
+    → SEPLAN (parecer financeiro) → UG (portarias + parecer técnico) → SCP (protocolo) → PJ (parecer)
+    → SCP (termo + assinatura das partes + publicação) → SCP (autorização de início) → **OSC** (dados
+    bancários) → SCP (OP Global) → UG (assina a OP) → SCP (comprovante de empenho) → conclui
+  - **Nova categoria de peças `celebracao`** com 17 documentos. Os textos-modelo são **reaproveitados**
+    das categorias equivalentes via `Peca::modeloTexto()` (a rota Dispensa cobre os mesmos documentos;
+    o Pedido/Parecer Financeiro vêm do trâmite do Processo; a OP Global vem de `OrdemPagamento`),
+    e só os próprios da etapa são novos: **Convocação da OSC**, **Termo de Parceria** e
+    **Autorização de Início de Execução**
+  - **Motor de peças generalizado**: `Peca` deixou de ser específico da Seleção — `donoEmTramite()` e os
+    mapas por categoria atendem Seleção (Chamamento) e Celebração (Proposta), com a interface uniforme
+    `tramiteEtapaAtual()`/`tramiteEncerrado()`/`tramiteSetorLabel()` nos dois donos
+  - **Segurança da vez da OSC**: quando a etapa é da OSC, além de setor + etapa exige-se que seja a
+    **OSC daquela parceria** (`oscDona`); `podeVer()` impede que uma OSC baixe peça de outra. A OSC
+    **não devolve** o trâmite (bloqueado no controller, não só na interface)
+  - As rotas `pecas.*` saíram do grupo `permission:chamamentos|formalizacao` para `auth`: a autorização
+    passou ao `PecaController` — peça em trâmite é liberada por setor + etapa (o que abre a vez da OSC);
+    peça fora de trâmite continua exigindo a permissão da área
+  - Tela `celebracao/show` serve **os dois públicos** (`x-dynamic-component`): layout administrativo para
+    a equipe e layout do portal para a OSC. Trilha extraída para o componente reutilizável
+    `x-tramite-trilha`. Link "Celebração" na proposta (interno) e em Minhas Propostas, com selo
+    **"sua vez"** quando a bola está com a OSC
+
 - [2026-07-30] **Trâmite da Seleção** (Fluxo Seleção) e perfil do **Prefeito Municipal**
   - **Perfil novo `prefeito_municipal`** (Módulo 1): lotação **`pm` — Gabinete do Prefeito**, perfil
     exclusivo desse setor, com as permissões `chamamentos` e `formalizacao`. Assina o Termo de

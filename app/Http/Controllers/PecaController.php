@@ -10,11 +10,31 @@ use Symfony\Component\HttpFoundation\StreamedResponse;
 
 class PecaController extends Controller
 {
+    /**
+     * Autorização das peças. Peças em trâmite (Seleção/Celebração) são gated por
+     * setor + etapa — o que também abre a vez da OSC nas peças da própria
+     * parceria. Peças fora de trâmite continuam exigindo a permissão da área.
+     */
+    private function autorizar(Peca $peca, string $acao = 'preencher'): void
+    {
+        $user = auth()->user();
+
+        $permitido = $acao === 'assinar'
+            ? $peca->podeAssinar($user)
+            : $peca->podePreencher($user);
+
+        abort_unless($permitido, 403,
+            $peca->motivoTrava($user) ?? 'Você não pode alterar esta peça agora.');
+
+        if (!$peca->emTramite()) {
+            abort_unless($user?->can('chamamentos') || $user?->can('formalizacao'), 403);
+        }
+    }
+
     public function salvar(Request $request, Peca $peca): RedirectResponse
     {
         abort_if($peca->tipo !== 'modelo', 422);
-        abort_unless($peca->podePreencher(auth()->user()), 403,
-            $peca->motivoTrava(auth()->user()) ?? 'Você não pode preencher esta peça agora.');
+        $this->autorizar($peca);
 
         $data = $request->validate([
             'conteudo' => ['nullable', 'string'],
@@ -29,8 +49,7 @@ class PecaController extends Controller
     {
         abort_if($peca->tipo !== 'modelo', 422);
         abort_if(empty($peca->conteudo), 422, 'Preencha o documento antes de assinar.');
-        abort_unless($peca->podeAssinar(auth()->user()), 403,
-            $peca->motivoTrava(auth()->user()) ?? 'Você não pode assinar esta peça agora.');
+        $this->autorizar($peca, 'assinar');
 
         $peca->update([
             'assinado_por'     => auth()->id(),
@@ -44,8 +63,7 @@ class PecaController extends Controller
     public function upload(Request $request, Peca $peca): RedirectResponse
     {
         abort_if($peca->tipo !== 'arquivo', 422);
-        abort_unless($peca->podePreencher(auth()->user()), 403,
-            $peca->motivoTrava(auth()->user()) ?? 'Você não pode enviar arquivo para esta peça agora.');
+        $this->autorizar($peca);
 
         $request->validate([
             'arquivo' => ['required', 'file', 'mimes:pdf,doc,docx,xls,xlsx,jpg,jpeg,png', 'max:10240'],
@@ -80,8 +98,7 @@ class PecaController extends Controller
     {
         abort_if($peca->tipo !== 'arquivo', 422);
         abort_unless($peca->puxavel(), 422, 'Esta peça não permite puxar do módulo Gestão de Parcerias.');
-        abort_unless($peca->podePreencher(auth()->user()), 403,
-            $peca->motivoTrava(auth()->user()) ?? 'Você não pode alterar esta peça agora.');
+        $this->autorizar($peca);
 
         $data = $request->validate(['documento_id' => ['required', 'integer']]);
 
@@ -110,6 +127,7 @@ class PecaController extends Controller
 
     public function download(Peca $peca): StreamedResponse
     {
+        abort_unless($peca->podeVer(auth()->user()), 403);
         abort_unless($peca->arquivo_path && Storage::disk('local')->exists($peca->arquivo_path), 404);
 
         return Storage::disk('local')->download($peca->arquivo_path, $peca->arquivo_nome);
@@ -117,8 +135,7 @@ class PecaController extends Controller
 
     public function removerArquivo(Peca $peca): RedirectResponse
     {
-        abort_unless($peca->podePreencher(auth()->user()), 403,
-            $peca->motivoTrava(auth()->user()) ?? 'Você não pode alterar esta peça agora.');
+        $this->autorizar($peca);
 
         if ($peca->arquivo_path) {
             Storage::disk('local')->delete($peca->arquivo_path);

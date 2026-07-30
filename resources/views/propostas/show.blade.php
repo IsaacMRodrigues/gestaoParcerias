@@ -19,6 +19,12 @@
                         </button>
                     </form>
                 @endif
+                @if($proposta->temTramiteCelebracao())
+                    <a href="{{ route('celebracao.show', $proposta) }}"
+                       class="px-4 py-2 text-sm font-medium text-white bg-indigo-600 rounded-md hover:bg-indigo-700">
+                        Celebração
+                    </a>
+                @endif
                 @if($proposta->status === 'aprovada' && !$proposta->instrumento)
                     <a href="{{ route('instrumentos.create', $proposta) }}"
                        class="px-4 py-2 text-sm font-medium text-white bg-teal-600 rounded-md hover:bg-teal-700">

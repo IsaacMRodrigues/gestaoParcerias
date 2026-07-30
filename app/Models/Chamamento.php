@@ -155,6 +155,22 @@ class Chamamento extends Model
         return !is_null($this->selecao_concluida_em);
     }
 
+    // Interface uniforme de trâmite, usada pelo motor de peças (ver Peca).
+    public function tramiteEtapaAtual(): int
+    {
+        return (int) $this->selecao_etapa;
+    }
+
+    public function tramiteEncerrado(): bool
+    {
+        return $this->selecaoConcluida();
+    }
+
+    public function tramiteSetorLabel(?string $setor): string
+    {
+        return self::SETORES_SELECAO[$setor] ?? (string) $setor;
+    }
+
     public function etapaSelecaoInfo(?int $i = null): array
     {
         $i ??= (int) $this->selecao_etapa;

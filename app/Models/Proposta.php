@@ -34,18 +34,53 @@ class Proposta extends Model
         'valor_solicitado', 'valor_proprio',
         'data_inicio_prevista', 'data_fim_prevista',
         'status', 'submitted_at',
+        'celebracao_etapa', 'celebracao_setor', 'celebracao_iniciada_em', 'celebracao_concluida_em',
     ];
 
     protected function casts(): array
     {
         return [
-            'data_inicio_prevista' => 'date',
-            'data_fim_prevista'    => 'date',
-            'submitted_at'         => 'datetime',
-            'valor_solicitado'     => 'decimal:2',
-            'valor_proprio'        => 'decimal:2',
+            'data_inicio_prevista'    => 'date',
+            'data_fim_prevista'       => 'date',
+            'submitted_at'            => 'datetime',
+            'valor_solicitado'        => 'decimal:2',
+            'valor_proprio'           => 'decimal:2',
+            'celebracao_iniciada_em'  => 'datetime',
+            'celebracao_concluida_em' => 'datetime',
         ];
     }
+
+    /**
+     * Setores que atuam na Celebração — inclui a própria OSC, que envia o plano
+     * de trabalho, os documentos de habilitação e os dados bancários.
+     */
+    public const SETORES_CELEBRACAO = [
+        'ug'     => 'Unidade Gestora',
+        'osc'    => 'Organização da Sociedade Civil',
+        'scp'    => 'Setor de Convênios e Parcerias (SCP)',
+        'seplan' => 'Secretaria de Planejamento (SEPLAN)',
+        'pj'     => 'Procuradoria Jurídica (PJ)',
+    ];
+
+    /**
+     * Etapas da Celebração (Fluxo Etapa de Celebração confirmado pelo cliente).
+     */
+    public const ETAPAS_CELEBRACAO = [
+        ['setor' => 'ug',     'acao' => 'Encaminhar o Termo de Homologação e convocar a OSC a apresentar o Plano de Trabalho e os documentos de habilitação'],
+        ['setor' => 'osc',    'acao' => 'Elaborar o Plano de Trabalho e anexar os documentos de habilitação'],
+        ['setor' => 'ug',     'acao' => 'Analisar e emitir/assinar a Aprovação do Plano de Trabalho'],
+        ['setor' => 'scp',    'acao' => 'Analisar e solicitar o Parecer Financeiro à SEPLAN'],
+        ['setor' => 'seplan', 'acao' => 'Analisar, elaborar e assinar o Parecer Financeiro'],
+        ['setor' => 'ug',     'acao' => 'Anexar as portarias do Gestor e da Comissão de Monitoramento e emitir o Parecer Técnico'],
+        ['setor' => 'scp',    'acao' => 'Conferir o processo e emitir/assinar o Protocolo na Unidade Jurídica'],
+        ['setor' => 'pj',     'acao' => 'Analisar e emitir/assinar o Parecer Jurídico'],
+        ['setor' => 'scp',    'acao' => 'Emitir o Termo, colher a assinatura das partes e anexar o comprovante de publicação (Diário Oficial e site)'],
+        ['setor' => 'scp',    'acao' => 'Emitir a Autorização de Início de Execução e solicitar os dados bancários à OSC'],
+        ['setor' => 'osc',    'acao' => 'Informar os dados bancários da conta específica da parceria'],
+        ['setor' => 'scp',    'acao' => 'Elaborar a Ordem de Pagamento Global e encaminhar à UG'],
+        ['setor' => 'ug',     'acao' => 'Assinar a Ordem de Pagamento Global'],
+        ['setor' => 'scp',    'acao' => 'Anexar o comprovante de empenho global (encerra a Celebração)'],
+    ];
 
     public function chamamento(): BelongsTo
     {
@@ -104,5 +139,129 @@ class Proposta extends Model
     public function valorTotal(): float
     {
         return (float) $this->valor_solicitado + (float) $this->valor_proprio;
+    }
+
+    // ------------------------------------------------------------------
+    // Trâmite da Celebração (UG → OSC → UG → SCP → SEPLAN → … → SCP)
+    // ------------------------------------------------------------------
+
+    /** Peças da Celebração (checklist documental desta parceria). */
+    public function pecas(): \Illuminate\Database\Eloquent\Relations\MorphMany
+    {
+        return $this->morphMany(Peca::class, 'pecaable')->orderBy('ordem');
+    }
+
+    public function celebracaoTramitacoes(): HasMany
+    {
+        return $this->hasMany(CelebracaoTramitacao::class)->latest('id');
+    }
+
+    /** A Celebração só existe para a proposta aprovada. */
+    public function temTramiteCelebracao(): bool
+    {
+        return $this->status === 'aprovada' || !is_null($this->celebracao_iniciada_em);
+    }
+
+    public function celebracaoIniciada(): bool
+    {
+        return !is_null($this->celebracao_iniciada_em);
+    }
+
+    public function celebracaoConcluida(): bool
+    {
+        return !is_null($this->celebracao_concluida_em);
+    }
+
+    public function etapaCelebracaoInfo(?int $i = null): array
+    {
+        $i ??= (int) $this->celebracao_etapa;
+
+        return self::ETAPAS_CELEBRACAO[$i] ?? ['setor' => $this->celebracao_setor, 'acao' => '—'];
+    }
+
+    public function totalEtapasCelebracao(): int
+    {
+        return count(self::ETAPAS_CELEBRACAO);
+    }
+
+    public function ultimaEtapaCelebracao(): bool
+    {
+        return (int) $this->celebracao_etapa >= $this->totalEtapasCelebracao() - 1;
+    }
+
+    public function podeAvancarCelebracao(): bool
+    {
+        return $this->temTramiteCelebracao()
+            && !$this->celebracaoConcluida()
+            && !$this->ultimaEtapaCelebracao();
+    }
+
+    public function setorAnteriorCelebracao(): ?string
+    {
+        return (int) $this->celebracao_etapa > 0
+            ? (self::ETAPAS_CELEBRACAO[$this->celebracao_etapa - 1]['setor'] ?? null)
+            : null;
+    }
+
+    public function pecaCelebracao(string $chave): ?Peca
+    {
+        return $this->relationLoaded('pecas')
+            ? $this->pecas->firstWhere('chave', $chave)
+            : $this->pecas()->where('chave', $chave)->first();
+    }
+
+    /**
+     * Peças que precisam estar prontas antes de encaminhar a etapa atual.
+     * A Ordem de Pagamento Global é apenas emitida pela SCP na etapa 11 — a
+     * assinatura é da UG, na etapa 12.
+     */
+    public function pendenciasCelebracao(): array
+    {
+        $pend  = [];
+        $etapa = (int) $this->celebracao_etapa;
+
+        foreach (Peca::CELEBRACAO_ETAPA as $chave => $etapaPeca) {
+            if ($etapaPeca !== $etapa) {
+                continue;
+            }
+
+            $peca = $this->pecaCelebracao($chave);
+            if (!$peca || !$peca->obrigatorio) {
+                continue;
+            }
+
+            if ($peca->tipo === 'modelo') {
+                $soPreencher = $chave === 'op_global' && $etapa === 11;
+                $ok = $soPreencher ? !empty($peca->conteudo) : $peca->assinado();
+                if (!$ok) {
+                    $pend[] = $peca->rotulo . ($soPreencher ? ' (emitir)' : ' (assinar)');
+                }
+            } elseif (!$peca->temArquivo()) {
+                $pend[] = $peca->rotulo . ' (anexar arquivo)';
+            }
+        }
+
+        // Etapa 12: a UG assina a OP Global elaborada pela SCP.
+        if ($etapa === 12 && !$this->pecaCelebracao('op_global')?->assinado()) {
+            $pend[] = 'Ordem de Pagamento Global (assinar)';
+        }
+
+        return $pend;
+    }
+
+    // Interface uniforme de trâmite, usada pelo motor de peças (ver Peca).
+    public function tramiteEtapaAtual(): int
+    {
+        return (int) $this->celebracao_etapa;
+    }
+
+    public function tramiteEncerrado(): bool
+    {
+        return $this->celebracaoConcluida();
+    }
+
+    public function tramiteSetorLabel(?string $setor): string
+    {
+        return self::SETORES_CELEBRACAO[$setor] ?? (string) $setor;
     }
 }
