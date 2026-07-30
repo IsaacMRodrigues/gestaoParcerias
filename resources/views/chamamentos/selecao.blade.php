@@ -244,6 +244,102 @@
                 </div>
             @endif
 
+            {{-- Recursos contra o resultado provisório --}}
+            @if($chamamento->temTramiteSelecao() && ($chamamento->recursos->isNotEmpty() || $chamamento->faseRecursalAberta()))
+                <div class="bg-white shadow rounded-lg">
+                    <div class="px-6 py-4 border-b border-gray-200 flex items-start justify-between gap-3">
+                        <div>
+                            <h3 class="text-base font-semibold text-gray-800">Recursos</h3>
+                            <p class="text-xs text-gray-400 mt-0.5">
+                                Protocolados pelas OSCs contra o resultado provisório. Cada recurso precisa de
+                                resposta antes do resultado definitivo.
+                            </p>
+                        </div>
+                        @php $semResp = $chamamento->recursos->whereNull('respondido_em')->count(); @endphp
+                        @if($semResp > 0)
+                            <span class="px-2.5 py-1 text-xs font-medium bg-amber-100 text-amber-800 rounded-full whitespace-nowrap">
+                                {{ $semResp }} sem resposta
+                            </span>
+                        @endif
+                    </div>
+
+                    @forelse($chamamento->recursos as $rec)
+                        <div class="px-6 py-4 border-b border-gray-100 last:border-0">
+                            <div class="flex items-start justify-between gap-3">
+                                <div class="min-w-0">
+                                    <p class="text-sm font-semibold text-gray-800">{{ $rec->osc->name ?? 'OSC' }}</p>
+                                    <p class="text-xs text-gray-400 mt-0.5">
+                                        Protocolado em {{ $rec->protocolado_em?->format('d/m/Y H:i') }}
+                                        @if($rec->temArquivo())
+                                            · <a href="{{ route('recursos.download', $rec) }}" class="text-indigo-600 hover:underline">
+                                                {{ $rec->arquivo_nome }} ({{ $rec->tamanhoFormatado() }})
+                                            </a>
+                                        @endif
+                                    </p>
+                                </div>
+                                @if($rec->respondido())
+                                    @php $cor = \App\Models\Recurso::RESULTADO_COLORS[$rec->resultado] ?? 'gray'; @endphp
+                                    <span class="px-2 py-1 text-xs font-medium bg-{{ $cor }}-100 text-{{ $cor }}-800 rounded-full whitespace-nowrap">
+                                        {{ $rec->resultadoLabel() }}
+                                    </span>
+                                @else
+                                    <span class="px-2 py-1 text-xs font-medium bg-gray-100 text-gray-600 rounded-full whitespace-nowrap">
+                                        Aguardando resposta
+                                    </span>
+                                @endif
+                            </div>
+
+                            @if($rec->fundamentacao)
+                                <div class="mt-2 bg-gray-50 rounded-md p-3">
+                                    <p class="text-xs font-medium text-gray-500 uppercase tracking-wide">Fundamentação da OSC</p>
+                                    <p class="text-sm text-gray-700 mt-1 whitespace-pre-line">{{ $rec->fundamentacao }}</p>
+                                </div>
+                            @endif
+
+                            @if($rec->respondido())
+                                <div class="mt-2 border-l-2 border-indigo-200 pl-3">
+                                    <p class="text-xs font-medium text-gray-500 uppercase tracking-wide">
+                                        Resposta da Unidade Gestora
+                                    </p>
+                                    <p class="text-sm text-gray-700 mt-1 whitespace-pre-line">{{ $rec->resposta }}</p>
+                                    <p class="text-xs text-gray-400 mt-1">
+                                        {{ $rec->respondente->name ?? '—' }} · {{ $rec->respondido_em->format('d/m/Y H:i') }}
+                                        @if($rec->codigo_validacao)
+                                            · código <strong class="font-mono">{{ $rec->codigo_validacao }}</strong>
+                                        @endif
+                                    </p>
+                                </div>
+                            @elseif($chamamento->faseRecursalAberta() && auth()->user()->setor === $chamamento->selecao_setor)
+                                <form action="{{ route('recursos.responder', $rec) }}" method="POST" class="mt-3 space-y-2">
+                                    @csrf
+                                    <div class="flex flex-wrap items-center gap-3">
+                                        <label class="text-xs font-medium text-gray-500">Resultado</label>
+                                        <select name="resultado" required
+                                                class="border-gray-300 rounded-md shadow-sm text-sm focus:ring-indigo-500 focus:border-indigo-500">
+                                            <option value="">Selecione…</option>
+                                            @foreach(\App\Models\Recurso::RESULTADOS as $k => $lbl)
+                                                <option value="{{ $k }}">{{ $lbl }}</option>
+                                            @endforeach
+                                        </select>
+                                    </div>
+                                    <textarea name="resposta" rows="3" required
+                                              placeholder="Fundamentação da decisão sobre o recurso"
+                                              class="block w-full border-gray-300 rounded-md shadow-sm text-sm focus:ring-indigo-500 focus:border-indigo-500"></textarea>
+                                    <button type="submit"
+                                            class="px-3 py-1.5 text-xs font-medium text-white bg-indigo-600 rounded-md hover:bg-indigo-700">
+                                        Responder recurso
+                                    </button>
+                                </form>
+                            @endif
+                        </div>
+                    @empty
+                        <div class="px-6 py-6 text-sm text-gray-500">
+                            Fase recursal aberta — nenhum recurso protocolado até o momento.
+                        </div>
+                    @endforelse
+                </div>
+            @endif
+
             {{-- Progresso --}}
             <div class="bg-white shadow rounded-lg p-6">
                 <div class="flex items-center justify-between mb-2">

@@ -67,6 +67,7 @@ class ChamamentoController extends Controller
             'programa.orgao', 'processo',
             'pecas.assinante.roles', 'pecas.assinante.orgao',
             'selecaoTramitacoes.remetente',
+            'recursos.osc', 'recursos.respondente',
         ]);
         $pecas = $chamamento->pecas;
         $progresso = Peca::progresso($pecas);

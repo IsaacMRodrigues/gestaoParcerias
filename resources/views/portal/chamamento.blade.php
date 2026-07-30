@@ -138,6 +138,76 @@
                 </div>
             @endif
 
+            {{-- Fase recursal: a OSC participante protocola o seu recurso --}}
+            @auth
+                @if($meuRecurso || ($participei && $chamamento->faseRecursalAberta()))
+                    <div class="mt-6 border-t border-gray-100 pt-6">
+                        <h2 class="text-sm font-semibold text-gray-700 mb-3">Recurso contra o resultado provisório</h2>
+
+                        @if($meuRecurso)
+                            <div class="bg-gray-50 border border-gray-200 rounded-lg p-4">
+                                <p class="text-sm text-gray-700">
+                                    Recurso protocolado em
+                                    <strong>{{ $meuRecurso->protocolado_em?->format('d/m/Y H:i') }}</strong>.
+                                    @if($meuRecurso->temArquivo())
+                                        <a href="{{ route('recursos.download', $meuRecurso) }}" class="text-indigo-600 hover:underline">
+                                            Baixar a peça enviada
+                                        </a>
+                                    @endif
+                                </p>
+
+                                @if($meuRecurso->respondido())
+                                    @php $cor = \App\Models\Recurso::RESULTADO_COLORS[$meuRecurso->resultado] ?? 'gray'; @endphp
+                                    <div class="mt-3 pt-3 border-t border-gray-200">
+                                        <span class="px-2 py-1 text-xs font-medium bg-{{ $cor }}-100 text-{{ $cor }}-800 rounded-full">
+                                            {{ $meuRecurso->resultadoLabel() }}
+                                        </span>
+                                        <p class="text-sm text-gray-700 mt-2 whitespace-pre-line">{{ $meuRecurso->resposta }}</p>
+                                        <p class="text-xs text-gray-400 mt-2">
+                                            Resposta em {{ $meuRecurso->respondido_em->format('d/m/Y H:i') }}
+                                            @if($meuRecurso->codigo_validacao)
+                                                · código <strong class="font-mono">{{ $meuRecurso->codigo_validacao }}</strong>
+                                            @endif
+                                        </p>
+                                    </div>
+                                @else
+                                    <p class="text-xs text-gray-500 mt-2">
+                                        Aguardando a análise da Unidade Gestora. A resposta aparecerá aqui.
+                                    </p>
+                                @endif
+                            </div>
+                        @else
+                            <form action="{{ route('recursos.store', $chamamento) }}" method="POST"
+                                  enctype="multipart/form-data" class="space-y-3"
+                                  data-confirm="Protocolar o recurso? Após o envio não é possível alterá-lo.">
+                                @csrf
+                                <div>
+                                    <label for="fundamentacao" class="block text-xs font-medium text-gray-500 mb-1">
+                                        Fundamentação do recurso
+                                    </label>
+                                    <textarea name="fundamentacao" id="fundamentacao" rows="4" required
+                                              placeholder="Descreva as razões do recurso"
+                                              class="block w-full border-gray-300 rounded-md shadow-sm text-sm focus:ring-indigo-500 focus:border-indigo-500">{{ old('fundamentacao') }}</textarea>
+                                    <x-input-error :messages="$errors->get('fundamentacao')" class="mt-1" />
+                                </div>
+                                <div>
+                                    <label for="arquivo" class="block text-xs font-medium text-gray-500 mb-1">
+                                        Peça recursal assinada (arquivo único em PDF)
+                                    </label>
+                                    <input type="file" name="arquivo" id="arquivo" accept=".pdf" required
+                                           class="block w-full text-sm text-gray-600 file:mr-3 file:py-1.5 file:px-3 file:rounded file:border-0 file:text-xs file:bg-indigo-50 file:text-indigo-700 hover:file:bg-indigo-100">
+                                    <x-input-error :messages="$errors->get('arquivo')" class="mt-1" />
+                                </div>
+                                <button type="submit"
+                                        class="px-5 py-2.5 text-sm font-semibold text-white bg-indigo-600 rounded-lg hover:bg-indigo-700 transition">
+                                    Protocolar recurso
+                                </button>
+                            </form>
+                        @endif
+                    </div>
+                @endif
+            @endauth
+
             @if(in_array($chamamento->status, ['publicado', 'em_inscricao']))
                 <div class="mt-8 bg-indigo-50 border border-indigo-200 rounded-lg p-5 text-center">
                     @if($chamamento->status_efetivo === 'em_inscricao')

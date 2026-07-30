@@ -144,6 +144,31 @@ class Chamamento extends Model
         return $this->hasMany(SelecaoTramitacao::class)->latest('id');
     }
 
+    public function recursos(): \Illuminate\Database\Eloquent\Relations\HasMany
+    {
+        return $this->hasMany(Recurso::class)->latest('id');
+    }
+
+    /**
+     * A fase recursal está aberta? Vale a partir da publicação do resultado
+     * provisório (etapa 1 concluída) e até a UG emitir o resultado definitivo
+     * (fim da etapa 2) — é a janela em que a OSC pode protocolar o recurso.
+     */
+    public function faseRecursalAberta(): bool
+    {
+        return $this->temTramiteSelecao()
+            && !$this->selecaoConcluida()
+            && (int) $this->selecao_etapa === 2;
+    }
+
+    /** Recursos protocolados que ainda não têm resposta da UG. */
+    public function recursosSemResposta(): int
+    {
+        return $this->relationLoaded('recursos')
+            ? $this->recursos->whereNull('respondido_em')->count()
+            : $this->recursos()->whereNull('respondido_em')->count();
+    }
+
     /** O trâmite da Seleção só existe no Chamamento Público. */
     public function temTramiteSelecao(): bool
     {
@@ -217,6 +242,14 @@ class Chamamento extends Model
             3 => ['pub_resultado_definitivo', 'termo_homologacao'],
             4 => ['termo_homologacao'],
         ];
+
+        // Etapa 2: todo recurso protocolado precisa de resposta antes do
+        // resultado definitivo (Fluxo Seleção: "analisa os recursos … emite resposta").
+        if ($etapa === 2 && ($semResposta = $this->recursosSemResposta()) > 0) {
+            $pend[] = $semResposta === 1
+                ? '1 recurso sem resposta'
+                : "{$semResposta} recursos sem resposta";
+        }
 
         foreach ($exigidas[$etapa] ?? [] as $chave) {
             $peca = $this->pecaSelecao($chave);

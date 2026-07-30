@@ -21,6 +21,7 @@ use App\Http\Controllers\ProcessoController;
 use App\Http\Controllers\ProcessoPecaController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\ProgramaController;
+use App\Http\Controllers\RecursoController;
 use App\Http\Controllers\PropostaController;
 use App\Http\Controllers\TramitacaoController;
 use App\Http\Controllers\UserController;
@@ -59,6 +60,14 @@ Route::middleware('auth')->group(function () {
     Route::post('/portal/chamamentos/{chamamento}/proposta', [PortalController::class, 'storeProposta'])->name('portal.proposta.store');
     Route::get('/portal/propostas/{proposta}', [PortalController::class, 'showProposta'])->name('portal.proposta.show');
     Route::patch('/portal/propostas/{proposta}/submeter', [PortalController::class, 'submeterProposta'])->name('portal.proposta.submeter');
+    // Recurso contra o resultado provisório (protocolo eletrônico pela OSC)
+    Route::post('/portal/chamamentos/{chamamento}/recurso', [RecursoController::class, 'store'])->name('recursos.store');
+});
+
+// Recursos: download pela OSC autora ou pela equipe; resposta pela Unidade Gestora
+Route::middleware('auth')->group(function () {
+    Route::get('recursos/{recurso}/arquivo', [RecursoController::class, 'download'])->name('recursos.download');
+    Route::post('recursos/{recurso}/responder', [RecursoController::class, 'responder'])->name('recursos.responder');
 });
 
 // Documentos (funciona para admin e portal via back())

@@ -42,7 +42,8 @@ class Peca extends Model
             ['chave' => 'ata_comissao',              'rotulo' => 'Ata da Comissão de Seleção (modelo padrão)',       'tipo' => 'modelo', 'obrigatorio' => true],
             ['chave' => 'resultado_parcial',         'rotulo' => 'Resultado provisório (modelo padrão)',    'tipo' => 'modelo',  'obrigatorio' => true],
             ['chave' => 'pub_resultado_parcial',     'rotulo' => 'Publicação do resultado provisório',      'tipo' => 'arquivo', 'obrigatorio' => true],
-            ['chave' => 'recursos',                  'rotulo' => 'Recursos (se houver)',                    'tipo' => 'arquivo', 'obrigatorio' => false],
+            // Os recursos não são uma peça única: cada OSC protocola o seu pelo
+            // portal e recebe resposta própria (ver o model Recurso).
             ['chave' => 'resultado_definitivo',      'rotulo' => 'Resultado definitivo (modelo padrão)',    'tipo' => 'modelo',  'obrigatorio' => true],
             ['chave' => 'pub_resultado_definitivo',  'rotulo' => 'Publicação do resultado definitivo',      'tipo' => 'arquivo', 'obrigatorio' => true],
             ['chave' => 'termo_homologacao',         'rotulo' => 'Termo de Adjudicação e Homologação (modelo padrão)', 'tipo' => 'modelo', 'obrigatorio' => true],
@@ -137,7 +138,6 @@ class Peca extends Model
         'ata_comissao'             => 'ug',
         'resultado_parcial'        => 'ug',
         'pub_resultado_parcial'    => 'scp',
-        'recursos'                 => 'ug',
         'resultado_definitivo'     => 'ug',
         'pub_resultado_definitivo' => 'scp',
         'termo_homologacao'        => 'scp',  // a SCP emite; o Prefeito assina
@@ -148,7 +148,6 @@ class Peca extends Model
         'ata_comissao'             => 0,
         'resultado_parcial'        => 0,
         'pub_resultado_parcial'    => 1,
-        'recursos'                 => 2,
         'resultado_definitivo'     => 2,
         'pub_resultado_definitivo' => 3,
         'termo_homologacao'        => 3,

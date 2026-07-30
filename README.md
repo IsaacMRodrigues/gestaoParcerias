@@ -639,6 +639,22 @@ São 21 perfis. Um usuário pode ter **vários**; os marcados 🔒 são **exclus
   - Menu do usuário reduzido a **apenas o avatar** (iniciais), com o nome no `title`; nome completo e
     perfil saíram do topo (continuam dentro do dropdown)
 
+- [2026-07-30] **Recurso administrativo da OSC** (item que faltava do Fluxo Seleção)
+  - O Fluxo Seleção prevê "UG … analisa os recursos, se houver, emite resposta e envia a OSC", e o
+    próprio modelo do Resultado Provisório promete que "o recurso deverá ser protocolado
+    eletronicamente por meio do PGP" — o sistema não fazia nem uma coisa nem outra
+  - Novo **motor de recursos** (tabela `recursos` + model `Recurso`): a **OSC protocola** pelo portal
+    (fundamentação + peça recursal em PDF único) e a **UG responde** com resultado
+    (**provido / parcialmente provido / improvido**) e fundamentação, gerando **código de validação**
+  - Substitui a peça única "Recursos" do checklist, que não dava conta de vários recursos de OSCs
+    diferentes, cada um com a sua resposta — o checklist de Seleção foi de 13 para 12 itens
+  - **Fase recursal** controlada pelo trâmite: abre na etapa 3 da Seleção (após a publicação do
+    resultado provisório) e só então a OSC participante pode recorrer; um recurso por OSC
+  - **Trava de avanço**: a UG não emite o resultado definitivo enquanto houver recurso sem resposta
+  - Isolamento: a OSC só protocola se apresentou proposta e só baixa/vê o **próprio** recurso
+  - Interface: formulário e resposta na página pública do chamamento (lado da OSC) e card **Recursos**
+    na tela de Seleção, com o julgamento de cada um (lado da UG)
+
 - [2026-07-30] **Tela principal por perfil** e **Transparência pública** (fecha o `Atualizações.txt`)
   - `/` deixou de redirecionar ao portal e passou a ser a **tela principal** (`landing`), com os cinco
     acessos do modelo enviado pelo cliente: **Prefeitura** e **OSC** (levam ao login) e **Cidadão**,

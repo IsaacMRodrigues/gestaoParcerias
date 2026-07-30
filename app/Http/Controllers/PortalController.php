@@ -69,6 +69,15 @@ class PortalController extends Controller
         // Documentos públicos do chamamento: peças de texto assinadas do processo
         // de origem (Edital ou Justificativa de Dispensa) — têm página pública de
         // validação, onde a OSC lê o teor completo e confere a assinatura.
+        // Recurso da OSC logada neste chamamento (para protocolar ou ver a resposta)
+        $osc = auth()->user()?->osc;
+        $meuRecurso = $osc
+            ? $chamamento->recursos()->where('osc_id', $osc->id)->first()
+            : null;
+        $participei = $osc
+            ? $chamamento->propostas()->where('osc_id', $osc->id)->exists()
+            : false;
+
         $publicos = ['edital', 'justificativa_dispensa', 'parecer_cnas'];
         $documentosPublicos = $chamamento->processo
             ? $chamamento->processo->pecas
@@ -77,7 +86,9 @@ class PortalController extends Controller
                 ->values()
             : collect();
 
-        return view('portal.chamamento', compact('chamamento', 'documentosPublicos'));
+        return view('portal.chamamento', compact(
+            'chamamento', 'documentosPublicos', 'meuRecurso', 'participei'
+        ));
     }
 
     public function minhasPropostas(): View
