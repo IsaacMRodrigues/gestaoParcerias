@@ -6,18 +6,33 @@ use App\Http\Requests\ProgramaRequest;
 use App\Models\Orgao;
 use App\Models\Programa;
 use Illuminate\Http\RedirectResponse;
+use Illuminate\Http\Request;
 use Illuminate\View\View;
 
 class ProgramaController extends Controller
 {
-    public function index(): View
+    public function index(Request $request): View
     {
+        $filtros = $request->only(['busca', 'orgao_id', 'tipo', 'status']);
+
         $programas = Programa::with('orgao')
             ->withCount('chamamentos')
+            ->when($filtros['busca'] ?? null, function ($q, $busca) {
+                $q->where(function ($sub) use ($busca) {
+                    $sub->where('name', 'like', "%{$busca}%")
+                        ->orWhere('sigla', 'like', "%{$busca}%");
+                });
+            })
+            ->when($filtros['orgao_id'] ?? null, fn ($q, $v) => $q->where('orgao_id', $v))
+            ->when($filtros['tipo'] ?? null, fn ($q, $v) => $q->where('tipo', $v))
+            ->when($filtros['status'] ?? null, fn ($q, $v) => $q->where('status', $v))
             ->orderBy('name')
-            ->paginate(15);
+            ->paginate(15)
+            ->withQueryString();
 
-        return view('programas.index', compact('programas'));
+        $orgaos = Orgao::orderBy('name')->get();
+
+        return view('programas.index', compact('programas', 'orgaos', 'filtros'));
     }
 
     public function create(): View

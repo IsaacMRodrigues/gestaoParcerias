@@ -639,6 +639,12 @@ São 21 perfis. Um usuário pode ter **vários**; os marcados 🔒 são **exclus
   - Menu do usuário reduzido a **apenas o avatar** (iniciais), com o nome no `title`; nome completo e
     perfil saíram do topo (continuam dentro do dropdown)
 
+- [2026-07-30] Filtros na tela de Programas Governamentais (`programas/index`)
+  - Barra de filtros por **pesquisa** (nome/sigla), **órgão**, **tipo** e **status**;
+    `ProgramaController@index` aplica com `when()`, preserva a query na paginação (`withQueryString`)
+    e devolve `$orgaos`/`$filtros`. Contador de resultados, "Limpar filtros" e mensagem de vazio
+    específica quando há filtro sem resultado
+
 ---
 
 ## O que está sendo feito
