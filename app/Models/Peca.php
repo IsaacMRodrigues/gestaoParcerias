@@ -314,15 +314,17 @@ HTML,
 <p>Restou evidenciada a convergência de interesses institucionais entre a Administração Pública Municipal e a OSC proponente, caracterizando atuação em mútua cooperação, sem transferência indevida de responsabilidades típicas do ente público, conforme os pressupostos do MROSC e do Decreto Municipal nº 048/2020.</p>
 <p>Manifestação da Comissão: ( ) Atendida &nbsp; ( ) Parcialmente atendida &nbsp; ( ) Não atendida</p>
 <p><strong>c) Da viabilidade de execução da parceria</strong></p>
-<p>A Comissão avaliou a viabilidade da execução considerando: capacidade técnica e operacional da OSC; compatibilidade entre metas, prazos e recursos; adequação da equipe técnica proposta; experiência prévia da entidade em objetos similares; riscos identificados e medidas mitigadoras.</p>
+<p>A Comissão avaliou a viabilidade da execução considerando os critérios exigidos pelo controle interno e pelo TCE/MG, notadamente: capacidade técnica e operacional da OSC; compatibilidade entre metas, prazos e recursos; adequação da equipe técnica proposta; experiência prévia da entidade em objetos similares; riscos identificados e medidas mitigadoras.</p>
 <p>Conclui-se que a proposta é ( ) viável &nbsp; ( ) viável com ajustes &nbsp; ( ) inviável, sob os aspectos técnico, operacional e financeiro.</p>
 <p><strong>d) Da verificação do cronograma de desembolso</strong></p>
 <p>O cronograma de desembolso foi analisado quanto à compatibilidade com o cronograma de execução física; proporcionalidade entre liberação de recursos e cumprimento das metas; observância da capacidade financeira do Município.</p>
 <p>Verificou-se que o cronograma ( ) está adequado &nbsp; ( ) necessita ajustes &nbsp; ( ) não está adequado, atendendo aos parâmetros exigidos pela Lei nº 13.019/2014, pelo Decreto Municipal nº 048/2020 e pelas boas práticas de controle financeiro.</p>
 <p>Observações: XXXXXXXX</p>
 <p><strong>e) Dos meios de fiscalização e dos procedimentos de avaliação</strong></p>
-<p>Meios de fiscalização: acompanhamento contínuo pelo Gestor da Parceria; análise dos relatórios de execução física e financeira; verificação documental das despesas realizadas; diligências e visitas técnicas in loco, quando necessário; atuação da Comissão de Monitoramento e Avaliação.</p>
-<p>Procedimentos de avaliação: verificação do cumprimento das metas e indicadores pactuados; análise da conformidade da execução financeira; emissão de parecer técnico conclusivo sobre os resultados alcançados; adoção de medidas corretivas, quando cabíveis.</p>
+<p>Em atendimento às exigências do Decreto Municipal nº 048/2020 e ao checklist do Controle Interno/TCE-MG, a Comissão registra que a execução da parceria será fiscalizada e avaliada por meio de:</p>
+<p><strong>Meios de fiscalização:</strong> acompanhamento contínuo pelo Gestor da Parceria; análise dos relatórios de execução física e financeira; verificação documental das despesas realizadas; diligências e visitas técnicas in loco, quando necessário; atuação da Comissão de Monitoramento e Avaliação.</p>
+<p><strong>Procedimentos de avaliação:</strong> verificação do cumprimento das metas e indicadores pactuados; análise da conformidade da execução financeira; emissão de parecer técnico conclusivo sobre os resultados alcançados; adoção de medidas corretivas, quando cabíveis.</p>
+<p>Esses mecanismos asseguram controle efetivo, rastreabilidade e transparência, mitigando riscos de glosa e apontamentos pelos órgãos de controle.</p>
 <p><strong>4. CONCLUSÃO DA COMISSÃO DE SELEÇÃO</strong></p>
 <p>Diante da análise técnica realizada, a Comissão de Seleção manifesta-se:</p>
 <p>( ) Favoravelmente à seleção da proposta<br>( ) Favoravelmente à seleção da proposta, com ressalvas<br>( ) Desfavoravelmente à seleção da proposta</p>

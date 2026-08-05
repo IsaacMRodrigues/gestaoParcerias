@@ -639,6 +639,15 @@ São 21 perfis. Um usuário pode ter **vários**; os marcados 🔒 são **exclus
   - Menu do usuário reduzido a **apenas o avatar** (iniciais), com o nome no `title`; nome completo e
     perfil saíram do topo (continuam dentro do dropdown)
 
+- [2026-07-30] Conferência dos 8 modelos da pasta `Modelos novos` contra os `.docx` originais
+  - Verificação trecho a trecho de cada modelo já incorporado. **Uma divergência encontrada e
+    corrigida**: o texto do **Relatório da Comissão de Seleção** havia sido condensado demais e perdeu
+    as menções ao **controle interno e ao TCE/MG** (alíneas "c" e "e") e o parágrafo de fecho sobre
+    rastreabilidade e risco de glosa — restaurados
+  - Migration `ressemeia_relatorio_comissao_controle_interno` atualiza as peças ainda **não assinadas**
+    (peça assinada é documento definitivo e não é alterada)
+  - Os demais 7 modelos conferem integralmente com o original
+
 - [2026-07-30] **Assinatura das partes** e **Parecer da SCP** (fecha os itens que faltavam da Celebração)
   - **Contra-assinatura do Termo (assinatura das partes)**: o Fluxo Celebração diz "SCP encaminha para
     assinatura das partes", mas só a Administração assinava. A peça passou a guardar a **segunda
