@@ -98,11 +98,12 @@
             <span class="{{ $soon }}"><span class="{{ $etapa }} border-gray-200">3</span> Celebração</span>
         @endcan
 
-        {{-- 4. Execução — vive dentro de cada Instrumento --}}
-        @can('formalizacao')
-            <a href="{{ route('instrumentos.index') }}"
-               class="{{ $link }} {{ request()->routeIs('instrumentos.execucao') || request()->routeIs('repasses.*') || request()->routeIs('despesas.*') ? $on : '' }}">
-                <span class="{{ $etapa }} {{ $etapaOff }}">4</span>
+        {{-- 4. Execução — lista as parcerias e abre a execução de cada uma --}}
+        @can('execucao')
+            @php $emExecucao = request()->routeIs('execucao.*') || request()->routeIs('instrumentos.execucao')
+                || request()->routeIs('repasses.*') || request()->routeIs('despesas.*'); @endphp
+            <a href="{{ route('execucao.index') }}" class="{{ $link }} {{ $emExecucao ? $on : '' }}">
+                <span class="{{ $etapa }} {{ $emExecucao ? $etapaOn : $etapaOff }}">4</span>
                 Execução
             </a>
         @else

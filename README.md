@@ -639,6 +639,20 @@ São 21 perfis. Um usuário pode ter **vários**; os marcados 🔒 são **exclus
   - Menu do usuário reduzido a **apenas o avatar** (iniciais), com o nome no `title`; nome completo e
     perfil saíram do topo (continuam dentro do dropdown)
 
+- [2026-07-30] **Execução** ganha tela própria e correções de lançamento
+  - A opção **Execução** da sidebar apontava para a lista de Instrumentos — clicava e caía na
+    Celebração, sem sentido próprio. Agora existe **`/execucao`**: lista as parcerias já assinadas com
+    **repassado, gasto, saldo e % executado**, filtros por OSC/termo/objeto e situação; clicando, abre
+    a execução daquela parceria. Passou a ser gated por `permission:execucao` (era `formalizacao`)
+  - **Despesa lançada sem nota fiscal não podia mais receber a nota** — caso corriqueiro, já que a
+    despesa costuma ser registrada antes de a nota chegar. Novo `updateDespesa`: permite **anexar
+    depois**, **substituir** ou **remover** a nota, além de corrigir data, valor, natureza, fornecedor
+    e descrição. Na listagem, quem está sem nota mostra o botão **"anexar NF"**
+  - **Repasses também não tinham edição** — novo `updateRepasse` corrige parcela, data, valor e
+    documento/OB
+  - Edição **inline** na própria tabela: cada linha vira um `<tbody>` com escopo Alpine próprio,
+    alternando entre leitura e formulário (HTML válido, sem modal)
+
 - [2026-07-30] Tela **Modelos padrão** — catálogo de apoio do TI
   - Nova tela `/modelos`, **exclusiva do perfil Administrador Setorial** (`role:administrador_setorial`
     na rota e `@role` no link da sidebar, sob a seção "Tecnologia da Informação"): reúne num só lugar

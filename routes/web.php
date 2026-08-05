@@ -198,10 +198,13 @@ Route::middleware(['auth', 'staff', 'readonly'])->group(function () {
 
     // 4.4 Execução — repasses, despesas e controle de saldo do instrumento vigente
     Route::middleware('permission:execucao')->group(function () {
+        Route::get('execucao', [ExecucaoController::class, 'index'])->name('execucao.index');
         Route::get('instrumentos/{instrumento}/execucao', [ExecucaoController::class, 'show'])->name('instrumentos.execucao');
         Route::post('instrumentos/{instrumento}/repasses', [ExecucaoController::class, 'storeRepasse'])->name('repasses.store');
+        Route::put('repasses/{repasse}', [ExecucaoController::class, 'updateRepasse'])->name('repasses.update');
         Route::delete('repasses/{repasse}', [ExecucaoController::class, 'destroyRepasse'])->name('repasses.destroy');
         Route::post('instrumentos/{instrumento}/despesas', [ExecucaoController::class, 'storeDespesa'])->name('despesas.store');
+        Route::put('despesas/{despesa}', [ExecucaoController::class, 'updateDespesa'])->name('despesas.update');
         Route::delete('despesas/{despesa}', [ExecucaoController::class, 'destroyDespesa'])->name('despesas.destroy');
         Route::get('despesas/{despesa}/nota-fiscal', [ExecucaoController::class, 'downloadNotaFiscal'])->name('despesas.nota.download');
     });

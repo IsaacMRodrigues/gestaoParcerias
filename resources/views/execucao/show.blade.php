@@ -67,24 +67,70 @@
                     <thead class="bg-gray-50 text-xs uppercase text-gray-500">
                         <tr><th class="px-6 py-2 text-left">Parcela</th><th class="px-6 py-2 text-left">Data</th><th class="px-6 py-2 text-right">Valor</th><th class="px-6 py-2 text-left">Documento</th><th class="px-6 py-2"></th></tr>
                     </thead>
-                    <tbody class="divide-y divide-gray-100">
-                        @forelse($instrumento->repasses as $r)
-                            <tr>
+                    @forelse($instrumento->repasses as $r)
+                        {{-- um tbody por repasse: dá escopo ao Alpine para alternar
+                             entre a linha de leitura e a de edição --}}
+                        <tbody x-data="{ editando: false }" class="border-t border-gray-100">
+                            <tr x-show="!editando">
                                 <td class="px-6 py-2">{{ $r->parcela ? $r->parcela.'ª' : '—' }}</td>
                                 <td class="px-6 py-2">{{ $r->data_repasse->format('d/m/Y') }}</td>
                                 <td class="px-6 py-2 text-right font-medium">R$ {{ number_format($r->valor, 2, ',', '.') }}</td>
                                 <td class="px-6 py-2 text-gray-500">{{ $r->documento ?? '—' }}</td>
-                                <td class="px-6 py-2 text-right">
-                                    <form action="{{ route('repasses.destroy', $r) }}" method="POST" data-confirm="Remover este repasse?">
-                                        @csrf @method('DELETE')
-                                        <button class="text-xs text-red-500 hover:text-red-700">Remover</button>
+                                <td class="px-6 py-2">
+                                    <div class="flex items-center justify-end gap-3">
+                                        <button type="button" @click="editando = true"
+                                                class="text-xs text-brand-600 hover:text-brand-800">Editar</button>
+                                        <form action="{{ route('repasses.destroy', $r) }}" method="POST" data-confirm="Remover este repasse?">
+                                            @csrf @method('DELETE')
+                                            <button class="text-xs text-red-500 hover:text-red-700">Remover</button>
+                                        </form>
+                                    </div>
+                                </td>
+                            </tr>
+                            <tr x-show="editando" style="display:none" class="bg-brand-50/50">
+                                <td colspan="5" class="px-6 py-4">
+                                    <form action="{{ route('repasses.update', $r) }}" method="POST"
+                                          class="grid grid-cols-2 sm:grid-cols-6 gap-3 items-end">
+                                        @csrf @method('PUT')
+                                        <div>
+                                            <x-input-label value="Parcela" />
+                                            <x-text-input name="parcela" type="number" min="1" class="mt-1 block w-full"
+                                                          value="{{ $r->parcela }}" />
+                                        </div>
+                                        <div>
+                                            <x-input-label value="Data *" />
+                                            <x-text-input name="data_repasse" type="date" required class="mt-1 block w-full"
+                                                          value="{{ $r->data_repasse->format('Y-m-d') }}" />
+                                        </div>
+                                        <div>
+                                            <x-input-label value="Valor (R$) *" />
+                                            <x-text-input name="valor" type="number" step="0.01" min="0.01" required
+                                                          class="mt-1 block w-full" value="{{ $r->valor }}" />
+                                        </div>
+                                        <div class="sm:col-span-2">
+                                            <x-input-label value="Documento / OB" />
+                                            <x-text-input name="documento" type="text" class="mt-1 block w-full"
+                                                          value="{{ $r->documento }}" />
+                                        </div>
+                                        <div class="flex items-center gap-2">
+                                            <button type="submit"
+                                                    class="px-3 py-2 text-sm font-medium text-white bg-brand-600 rounded-md hover:bg-brand-700">
+                                                Salvar
+                                            </button>
+                                            <button type="button" @click="editando = false"
+                                                    class="px-3 py-2 text-sm text-gray-600 hover:text-gray-900">
+                                                Cancelar
+                                            </button>
+                                        </div>
                                     </form>
                                 </td>
                             </tr>
-                        @empty
+                        </tbody>
+                    @empty
+                        <tbody>
                             <tr><td colspan="5" class="px-6 py-6 text-center text-gray-400">Nenhum repasse registrado.</td></tr>
-                        @endforelse
-                    </tbody>
+                        </tbody>
+                    @endforelse
                 </table>
             </div>
 
@@ -118,9 +164,9 @@
                     <thead class="bg-gray-50 text-xs uppercase text-gray-500">
                         <tr><th class="px-6 py-2 text-left">Data</th><th class="px-6 py-2 text-left">Natureza</th><th class="px-6 py-2 text-left">Fornecedor</th><th class="px-6 py-2 text-right">Valor</th><th class="px-6 py-2 text-left">NF</th><th class="px-6 py-2"></th></tr>
                     </thead>
-                    <tbody class="divide-y divide-gray-100">
-                        @forelse($instrumento->despesas as $d)
-                            <tr>
+                    @forelse($instrumento->despesas as $d)
+                        <tbody x-data="{ editando: false }" class="border-t border-gray-100">
+                            <tr x-show="!editando">
                                 <td class="px-6 py-2">{{ $d->data_despesa->format('d/m/Y') }}</td>
                                 <td class="px-6 py-2">{{ $d->naturezaLabel() }}</td>
                                 <td class="px-6 py-2 text-gray-600">{{ $d->fornecedor ?? '—' }}@if($d->descricao)<span class="block text-xs text-gray-400">{{ $d->descricao }}</span>@endif</td>
@@ -129,19 +175,93 @@
                                     @if($d->temNotaFiscal())
                                         <a href="{{ route('despesas.nota.download', $d) }}" class="text-brand-600 hover:text-brand-900">📎 {{ $d->nota_fiscal_numero ?? 'baixar' }}</a>
                                     @else
-                                        <span class="text-xs text-amber-600">sem NF</span>
+                                        <button type="button" @click="editando = true"
+                                                class="text-xs text-amber-700 bg-amber-50 border border-amber-200 px-2 py-0.5 rounded hover:bg-amber-100">
+                                            anexar NF
+                                        </button>
                                     @endif
                                 </td>
-                                <td class="px-6 py-2 text-right">
-                                    <form action="{{ route('despesas.destroy', $d) }}" method="POST" data-confirm="Remover esta despesa?">
-                                        @csrf @method('DELETE')
-                                        <button class="text-xs text-red-500 hover:text-red-700">Remover</button>
+                                <td class="px-6 py-2">
+                                    <div class="flex items-center justify-end gap-3">
+                                        <button type="button" @click="editando = true"
+                                                class="text-xs text-brand-600 hover:text-brand-800">Editar</button>
+                                        <form action="{{ route('despesas.destroy', $d) }}" method="POST" data-confirm="Remover esta despesa?">
+                                            @csrf @method('DELETE')
+                                            <button class="text-xs text-red-500 hover:text-red-700">Remover</button>
+                                        </form>
+                                    </div>
+                                </td>
+                            </tr>
+                            <tr x-show="editando" style="display:none" class="bg-brand-50/50">
+                                <td colspan="6" class="px-6 py-4">
+                                    <form action="{{ route('despesas.update', $d) }}" method="POST" enctype="multipart/form-data"
+                                          class="grid grid-cols-2 sm:grid-cols-6 gap-3 items-end">
+                                        @csrf @method('PUT')
+                                        <div>
+                                            <x-input-label value="Data *" />
+                                            <x-text-input name="data_despesa" type="date" required class="mt-1 block w-full"
+                                                          value="{{ $d->data_despesa->format('Y-m-d') }}" />
+                                        </div>
+                                        <div>
+                                            <x-input-label value="Valor (R$) *" />
+                                            <x-text-input name="valor" type="number" step="0.01" min="0.01" required
+                                                          class="mt-1 block w-full" value="{{ $d->valor }}" />
+                                        </div>
+                                        <div class="sm:col-span-2">
+                                            <x-input-label value="Natureza *" />
+                                            <select name="natureza" required
+                                                    class="mt-1 block w-full border-gray-300 rounded-md shadow-sm text-sm focus:ring-brand-500 focus:border-brand-500">
+                                                @foreach(\App\Models\Despesa::NATUREZAS as $k => $label)
+                                                    <option value="{{ $k }}" {{ $d->natureza === $k ? 'selected' : '' }}>{{ $label }}</option>
+                                                @endforeach
+                                            </select>
+                                        </div>
+                                        <div class="sm:col-span-2">
+                                            <x-input-label value="Fornecedor" />
+                                            <x-text-input name="fornecedor" type="text" class="mt-1 block w-full"
+                                                          value="{{ $d->fornecedor }}" />
+                                        </div>
+                                        <div class="sm:col-span-3">
+                                            <x-input-label value="Descrição" />
+                                            <x-text-input name="descricao" type="text" class="mt-1 block w-full"
+                                                          value="{{ $d->descricao }}" />
+                                        </div>
+                                        <div>
+                                            <x-input-label value="NF nº" />
+                                            <x-text-input name="nota_fiscal_numero" type="text" class="mt-1 block w-full"
+                                                          value="{{ $d->nota_fiscal_numero }}" />
+                                        </div>
+                                        <div class="sm:col-span-2">
+                                            <x-input-label value="{{ $d->temNotaFiscal() ? 'Substituir a nota fiscal' : 'Anexar a nota fiscal' }}" />
+                                            <input name="nota_fiscal" type="file" accept=".pdf,.jpg,.jpeg,.png"
+                                                   class="mt-1 block w-full text-sm text-gray-600 file:mr-3 file:py-1.5 file:px-3 file:rounded-md file:border-0 file:text-sm file:bg-brand-50 file:text-brand-700 hover:file:bg-brand-100" />
+                                            @if($d->temNotaFiscal())
+                                                <label class="flex items-center gap-2 mt-2 text-xs text-gray-600">
+                                                    <input type="checkbox" name="remover_nota" value="1"
+                                                           class="rounded border-gray-300 text-red-600 focus:ring-red-500">
+                                                    Remover a nota atual ({{ $d->nota_fiscal_nome }})
+                                                </label>
+                                            @endif
+                                        </div>
+                                        <div class="sm:col-span-6 flex items-center gap-2">
+                                            <button type="submit"
+                                                    class="px-3 py-2 text-sm font-medium text-white bg-brand-600 rounded-md hover:bg-brand-700">
+                                                Salvar
+                                            </button>
+                                            <button type="button" @click="editando = false"
+                                                    class="px-3 py-2 text-sm text-gray-600 hover:text-gray-900">
+                                                Cancelar
+                                            </button>
+                                        </div>
                                     </form>
                                 </td>
                             </tr>
-                        @empty
+                        </tbody>
+                    @empty
+                        <tbody>
                             <tr><td colspan="6" class="px-6 py-6 text-center text-gray-400">Nenhuma despesa lançada.</td></tr>
-                        @endforelse
+                        </tbody>
+                    @endforelse
                     </tbody>
                 </table>
                 @if($porNatureza->count())
