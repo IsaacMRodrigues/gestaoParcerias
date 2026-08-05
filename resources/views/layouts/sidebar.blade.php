@@ -138,6 +138,17 @@
                 Meus usuários
             </a>
         @endrole
+
+        {{-- Apoio do TI --}}
+        @role('administrador_setorial')
+            <p class="{{ $sec }}">Tecnologia da Informação</p>
+            <a href="{{ route('modelos.index') }}" class="{{ $link }} {{ request()->routeIs('modelos.*') ? $on : '' }}">
+                <svg class="shrink-0" style="width:18px;height:18px" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.8">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+                </svg>
+                Modelos
+            </a>
+        @endrole
     </nav>
 
     <div class="border-t border-gray-100 px-4 py-3 text-[11px] text-gray-400 shrink-0">

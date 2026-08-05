@@ -639,6 +639,20 @@ São 21 perfis. Um usuário pode ter **vários**; os marcados 🔒 são **exclus
   - Menu do usuário reduzido a **apenas o avatar** (iniciais), com o nome no `title`; nome completo e
     perfil saíram do topo (continuam dentro do dropdown)
 
+- [2026-07-30] Tela **Modelos padrão** — catálogo de apoio do TI
+  - Nova tela `/modelos`, **exclusiva do perfil Administrador Setorial** (`role:administrador_setorial`
+    na rota e `@role` no link da sidebar, sob a seção "Tecnologia da Informação"): reúne num só lugar
+    **todos os textos-modelo** que alimentam as peças dos trâmites
+  - Agrupados por origem: **Planejamento** (trâmite do Processo), **Seleção**, **Celebração**,
+    **Dispensa/Inexigibilidade**, **Aditivo**, **Apostilamento** e **Ordem de Pagamento** —
+    54 itens no total, dos quais **42 já têm texto**
+  - Cada linha mostra a chave, o **setor responsável** e a **etapa** em que o documento é preenchido;
+    quem ainda não tem texto fica marcado como **"sem texto"** (é a lista de modelos a pedir ao cliente)
+  - `modelos.show` faz a **pré-visualização** do documento como ele nasce na peça, com brasão e tudo
+  - `ModeloController` monta o catálogo a partir das próprias constantes (`Peca::TEMPLATES`/`MODELO`,
+    `ProcessoPeca::MODELO`, `OrdemPagamento::MODELO*`) — não duplica conteúdo, então a tela reflete
+    automaticamente qualquer modelo novo
+
 - [2026-07-30] Ajuste do uso da cor — **neutro na base, marca nos detalhes**
   - Os blocos grandes de verde saturado (splash da tela principal, hero do portal, cabeçalho da
     Transparência, fundo do login e header/footer do portal) davam ar de site de campanha, não de

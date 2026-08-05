@@ -10,6 +10,7 @@ use App\Http\Controllers\ExecucaoController;
 use App\Http\Controllers\EtapaController;
 use App\Http\Controllers\InstrumentoController;
 use App\Http\Controllers\MetaController;
+use App\Http\Controllers\ModeloController;
 use App\Http\Controllers\OrdemPagamentoController;
 use App\Http\Controllers\OrgaoController;
 use App\Http\Controllers\OscController;
@@ -88,6 +89,12 @@ Route::middleware(['auth', 'staff', 'readonly'])->group(function () {
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
+
+    // Catálogo de modelos padrão — apoio do TI (Administrador Setorial)
+    Route::middleware('role:administrador_setorial')->group(function () {
+        Route::get('modelos', [ModeloController::class, 'index'])->name('modelos.index');
+        Route::get('modelos/{origem}/{chave}', [ModeloController::class, 'show'])->name('modelos.show');
+    });
 
     // Subusuários da Unidade Gestora (a UG cadastra; o admin aprova)
     Route::middleware('role:responsavel_unidade_gestora')->group(function () {
