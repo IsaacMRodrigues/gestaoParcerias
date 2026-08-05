@@ -65,7 +65,7 @@
                     <div>
                         <x-input-label for="solicitacao_obs" value="Função / observação" />
                         <textarea id="solicitacao_obs" name="solicitacao_obs" rows="2" required
-                                  class="block mt-1 w-full border-gray-300 rounded-md shadow-sm text-sm focus:ring-indigo-500 focus:border-indigo-500"
+                                  class="block mt-1 w-full border-gray-300 rounded-md shadow-sm text-sm focus:ring-brand-500 focus:border-brand-500"
                                   placeholder="Ex.: função do usuário, perfis sugeridos...">{{ old('solicitacao_obs') }}</textarea>
                         <x-input-error :messages="$errors->get('solicitacao_obs')" class="mt-1" />
                     </div>
@@ -73,7 +73,7 @@
                     <div class="flex items-center justify-end gap-3 pt-2">
                         <a href="{{ route('subusuarios.index') }}" class="text-sm text-gray-600 hover:text-gray-900">Cancelar</a>
                         <button type="submit"
-                                class="px-4 py-2 text-sm font-medium text-white bg-indigo-600 rounded-md hover:bg-indigo-700">
+                                class="px-4 py-2 text-sm font-medium text-white bg-brand-600 rounded-md hover:bg-brand-700">
                             Criar usuário
                         </button>
                     </div>

@@ -10,7 +10,7 @@
     <div>
         <x-input-label for="tipo" value="Tipo *" />
         <select id="tipo" name="tipo" required
-                class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 text-sm">
+                class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-brand-500 focus:border-brand-500 text-sm">
             <option value="">Selecione...</option>
             @foreach(\App\Models\Aditivo::TIPOS as $key => $label)
                 <option value="{{ $key }}" {{ old('tipo', $aditivo?->tipo) === $key ? 'selected' : '' }}>
@@ -23,7 +23,7 @@
     <div>
         <x-input-label for="status" value="Status *" />
         <select id="status" name="status" required
-                class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 text-sm">
+                class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-brand-500 focus:border-brand-500 text-sm">
             @foreach(\App\Models\Aditivo::STATUS as $key => $label)
                 <option value="{{ $key }}" {{ old('status', $aditivo?->status ?? 'minuta') === $key ? 'selected' : '' }}>
                     {{ $label }}
@@ -36,7 +36,7 @@
 <div class="mt-4">
     <x-input-label for="descricao" value="Descrição / Justificativa *" />
     <textarea id="descricao" name="descricao" rows="3" required
-              class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 text-sm">{{ old('descricao', $aditivo?->descricao) }}</textarea>
+              class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-brand-500 focus:border-brand-500 text-sm">{{ old('descricao', $aditivo?->descricao) }}</textarea>
     <x-input-error :messages="$errors->get('descricao')" class="mt-2" />
 </div>
 

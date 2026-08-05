@@ -1,7 +1,7 @@
 <x-portal-layout>
     <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
 
-        <p class="text-sm text-indigo-600 mb-2">
+        <p class="text-sm text-brand-600 mb-2">
             <a href="{{ route('portal.index') }}" class="hover:underline">← Chamamentos</a>
         </p>
 
@@ -15,7 +15,7 @@
 
             <div class="flex items-start justify-between gap-4 mb-6">
                 <div>
-                    <span class="text-xs font-medium text-indigo-600 bg-indigo-50 px-2 py-0.5 rounded">
+                    <span class="text-xs font-medium text-brand-600 bg-brand-50 px-2 py-0.5 rounded">
                         {{ \App\Models\Chamamento::TIPOS[$chamamento->tipo] ?? $chamamento->tipo }}
                     </span>
                     <h1 class="text-2xl font-bold text-gray-900 mt-2">
@@ -33,7 +33,7 @@
                         @auth
                             @if(auth()->user()->osc)
                                 <a href="{{ route('portal.participar', $chamamento) }}"
-                                   class="inline-block px-5 py-2.5 text-sm font-semibold text-white bg-indigo-600 rounded-lg hover:bg-indigo-700 transition">
+                                   class="inline-block px-5 py-2.5 text-sm font-semibold text-white bg-brand-600 rounded-lg hover:bg-brand-700 transition">
                                     Submeter Proposta
                                 </a>
                             @elseif(auth()->user()->temAcessoInterno())
@@ -43,7 +43,7 @@
                             @endif
                         @else
                             <a href="{{ route('login') }}"
-                               class="inline-block px-5 py-2.5 text-sm font-semibold text-white bg-indigo-600 rounded-lg hover:bg-indigo-700 transition">
+                               class="inline-block px-5 py-2.5 text-sm font-semibold text-white bg-brand-600 rounded-lg hover:bg-brand-700 transition">
                                 Entrar para Participar
                             </a>
                         @endauth
@@ -125,7 +125,7 @@
                         @foreach($documentosPublicos as $doc)
                             <li>
                                 <a href="{{ route('validacao.mostrar', $doc->codigo_validacao) }}" target="_blank"
-                                   class="inline-flex items-center gap-2 text-sm text-indigo-600 hover:underline font-medium">
+                                   class="inline-flex items-center gap-2 text-sm text-brand-600 hover:underline font-medium">
                                     <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
                                     </svg>
@@ -150,7 +150,7 @@
                                     Recurso protocolado em
                                     <strong>{{ $meuRecurso->protocolado_em?->format('d/m/Y H:i') }}</strong>.
                                     @if($meuRecurso->temArquivo())
-                                        <a href="{{ route('recursos.download', $meuRecurso) }}" class="text-indigo-600 hover:underline">
+                                        <a href="{{ route('recursos.download', $meuRecurso) }}" class="text-brand-600 hover:underline">
                                             Baixar a peça enviada
                                         </a>
                                     @endif
@@ -187,7 +187,7 @@
                                     </label>
                                     <textarea name="fundamentacao" id="fundamentacao" rows="4" required
                                               placeholder="Descreva as razões do recurso"
-                                              class="block w-full border-gray-300 rounded-md shadow-sm text-sm focus:ring-indigo-500 focus:border-indigo-500">{{ old('fundamentacao') }}</textarea>
+                                              class="block w-full border-gray-300 rounded-md shadow-sm text-sm focus:ring-brand-500 focus:border-brand-500">{{ old('fundamentacao') }}</textarea>
                                     <x-input-error :messages="$errors->get('fundamentacao')" class="mt-1" />
                                 </div>
                                 <div>
@@ -195,11 +195,11 @@
                                         Peça recursal assinada (arquivo único em PDF)
                                     </label>
                                     <input type="file" name="arquivo" id="arquivo" accept=".pdf" required
-                                           class="block w-full text-sm text-gray-600 file:mr-3 file:py-1.5 file:px-3 file:rounded file:border-0 file:text-xs file:bg-indigo-50 file:text-indigo-700 hover:file:bg-indigo-100">
+                                           class="block w-full text-sm text-gray-600 file:mr-3 file:py-1.5 file:px-3 file:rounded file:border-0 file:text-xs file:bg-brand-50 file:text-brand-700 hover:file:bg-brand-100">
                                     <x-input-error :messages="$errors->get('arquivo')" class="mt-1" />
                                 </div>
                                 <button type="submit"
-                                        class="px-5 py-2.5 text-sm font-semibold text-white bg-indigo-600 rounded-lg hover:bg-indigo-700 transition">
+                                        class="px-5 py-2.5 text-sm font-semibold text-white bg-brand-600 rounded-lg hover:bg-brand-700 transition">
                                     Protocolar recurso
                                 </button>
                             </form>
@@ -209,30 +209,30 @@
             @endauth
 
             @if(in_array($chamamento->status, ['publicado', 'em_inscricao']))
-                <div class="mt-8 bg-indigo-50 border border-indigo-200 rounded-lg p-5 text-center">
+                <div class="mt-8 bg-brand-50 border border-brand-200 rounded-lg p-5 text-center">
                     @if($chamamento->status_efetivo === 'em_inscricao')
-                        <p class="text-sm text-indigo-800 font-medium mb-3">
+                        <p class="text-sm text-brand-800 font-medium mb-3">
                             Sua OSC pode submeter uma proposta para este chamamento.
                         </p>
                         @auth
                             @if(auth()->user()->osc)
                                 <a href="{{ route('portal.participar', $chamamento) }}"
-                                   class="inline-block px-6 py-2.5 text-sm font-semibold text-white bg-indigo-600 rounded-lg hover:bg-indigo-700 transition">
+                                   class="inline-block px-6 py-2.5 text-sm font-semibold text-white bg-brand-600 rounded-lg hover:bg-brand-700 transition">
                                     Submeter Proposta
                                 </a>
                             @elseif(auth()->user()->temAcessoInterno())
-                                <p class="text-xs text-indigo-600">
+                                <p class="text-xs text-brand-600">
                                     Você está conectado como usuário do sistema. A submissão de propostas é exclusiva das OSCs.
                                 </p>
                             @endif
                         @else
                             <div class="flex justify-center gap-3">
                                 <a href="{{ route('login') }}"
-                                   class="px-5 py-2 text-sm font-medium text-white bg-indigo-600 rounded-lg hover:bg-indigo-700 transition">
+                                   class="px-5 py-2 text-sm font-medium text-white bg-brand-600 rounded-lg hover:bg-brand-700 transition">
                                     Entrar
                                 </a>
                                 <a href="{{ route('portal.osc.create') }}"
-                                   class="px-5 py-2 text-sm font-medium text-indigo-700 border border-indigo-300 rounded-lg hover:bg-indigo-50 transition">
+                                   class="px-5 py-2 text-sm font-medium text-brand-700 border border-brand-300 rounded-lg hover:bg-brand-50 transition">
                                     Cadastrar OSC
                                 </a>
                             </div>

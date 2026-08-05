@@ -49,7 +49,7 @@
                     </div>
                 @endif
 
-                <a href="{{ route('validacao.index') }}" class="inline-block mt-6 text-sm text-indigo-600 hover:underline">
+                <a href="{{ route('validacao.index') }}" class="inline-block mt-6 text-sm text-brand-600 hover:underline">
                     ← Validar outro documento
                 </a>
             </div>
@@ -74,7 +74,7 @@
                     Confira o código e tente novamente.
                 </p>
                 <a href="{{ route('validacao.index') }}"
-                   class="inline-block mt-6 px-5 py-2 text-sm font-medium text-white bg-indigo-600 rounded-lg hover:bg-indigo-700">
+                   class="inline-block mt-6 px-5 py-2 text-sm font-medium text-white bg-brand-600 rounded-lg hover:bg-brand-700">
                     Tentar novamente
                 </a>
             </div>

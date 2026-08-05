@@ -1,17 +1,17 @@
 <x-portal-layout>
     {{-- Hero --}}
-    <div class="relative bg-gradient-to-br from-indigo-800 via-indigo-700 to-purple-800 text-white px-4 overflow-hidden">
+    <div class="relative bg-gradient-to-br from-brand-800 via-brand-700 to-brand-900 text-white px-4 overflow-hidden">
         <div class="absolute inset-0 opacity-10" style="background-image:radial-gradient(circle at 1px 1px,#fff 1px,transparent 0);background-size:28px 28px;"></div>
         <div class="relative max-w-3xl mx-auto text-center py-16">
-            <span class="inline-block text-xs font-semibold uppercase tracking-wider text-indigo-200 bg-white/10 px-3 py-1 rounded-full mb-4">Portal Público de Parcerias</span>
+            <span class="inline-block text-xs font-semibold uppercase tracking-wider text-brand-200 bg-white/10 px-3 py-1 rounded-full mb-4">Portal Público de Parcerias</span>
             <h1 class="text-4xl font-bold mb-3 tracking-tight">Chamamentos Públicos Abertos</h1>
-            <p class="text-indigo-200 text-lg">
+            <p class="text-brand-200 text-lg">
                 Organizações da Sociedade Civil podem submeter propostas para os chamamentos disponíveis.
             </p>
             <div class="flex flex-wrap items-center justify-center gap-3 mt-7">
                 @guest
                     <a href="{{ route('portal.osc.create') }}"
-                       class="px-5 py-2.5 text-sm font-semibold text-indigo-800 bg-white rounded-lg shadow hover:bg-indigo-50 transition">
+                       class="px-5 py-2.5 text-sm font-semibold text-brand-800 bg-white rounded-lg shadow hover:bg-brand-50 transition">
                         Cadastre sua OSC
                     </a>
                 @endguest
@@ -39,7 +39,7 @@
         <div class="flex items-center justify-between mb-5">
             <h2 class="text-sm font-semibold text-gray-500 uppercase tracking-wider">Chamamentos disponíveis</h2>
             @if($chamamentos->total() > 0)
-                <span class="text-xs font-medium text-indigo-700 bg-indigo-50 px-2.5 py-1 rounded-full">{{ $chamamentos->total() }} aberto(s)</span>
+                <span class="text-xs font-medium text-brand-700 bg-brand-50 px-2.5 py-1 rounded-full">{{ $chamamentos->total() }} aberto(s)</span>
             @endif
         </div>
 
@@ -48,7 +48,7 @@
                 <div class="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4">
                     <div class="flex-1">
                         <div class="flex items-center gap-2 mb-1">
-                            <span class="text-xs font-medium text-indigo-600 bg-indigo-50 px-2 py-0.5 rounded">
+                            <span class="text-xs font-medium text-brand-600 bg-brand-50 px-2 py-0.5 rounded">
                                 {{ \App\Models\Chamamento::TIPOS[$chamamento->tipo] ?? $chamamento->tipo }}
                             </span>
                             <span class="text-xs text-gray-400">
@@ -87,18 +87,18 @@
 
                     <div class="flex flex-col gap-2 shrink-0">
                         <a href="{{ route('portal.chamamento', $chamamento) }}"
-                           class="px-4 py-2 text-sm font-medium text-indigo-700 border border-indigo-300 rounded-lg hover:bg-indigo-50 text-center transition">
+                           class="px-4 py-2 text-sm font-medium text-brand-700 border border-brand-300 rounded-lg hover:bg-brand-50 text-center transition">
                             Ver Detalhes
                         </a>
                         @if($chamamento->aceitaPropostas())
                             @auth
                                 <a href="{{ route('portal.participar', $chamamento) }}"
-                                   class="px-4 py-2 text-sm font-medium text-white bg-indigo-600 rounded-lg hover:bg-indigo-700 text-center transition">
+                                   class="px-4 py-2 text-sm font-medium text-white bg-brand-600 rounded-lg hover:bg-brand-700 text-center transition">
                                     Quero Participar
                                 </a>
                             @else
                                 <a href="{{ route('login') }}"
-                                   class="px-4 py-2 text-sm font-medium text-white bg-indigo-600 rounded-lg hover:bg-indigo-700 text-center transition">
+                                   class="px-4 py-2 text-sm font-medium text-white bg-brand-600 rounded-lg hover:bg-brand-700 text-center transition">
                                     Entrar para Participar
                                 </a>
                             @endauth
@@ -116,8 +116,8 @@
             </div>
         @empty
             <div class="bg-white rounded-2xl border border-gray-200 px-6 py-14 text-center">
-                <div class="w-14 h-14 mx-auto rounded-full bg-indigo-50 flex items-center justify-center">
-                    <svg class="w-7 h-7 text-indigo-500" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.6">
+                <div class="w-14 h-14 mx-auto rounded-full bg-brand-50 flex items-center justify-center">
+                    <svg class="w-7 h-7 text-brand-500" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.6">
                         <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 0 0-3.375-3.375h-1.5A1.125 1.125 0 0 1 13.5 7.125v-1.5a3.375 3.375 0 0 0-3.375-3.375H8.25m2.25 0H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 0 0-9-9Z"/>
                     </svg>
                 </div>
@@ -128,11 +128,11 @@
                 @guest
                     <div class="flex flex-wrap items-center justify-center gap-3 mt-6">
                         <a href="{{ route('portal.osc.create') }}"
-                           class="px-5 py-2.5 text-sm font-semibold text-white bg-indigo-600 rounded-lg hover:bg-indigo-700 transition">
+                           class="px-5 py-2.5 text-sm font-semibold text-white bg-brand-600 rounded-lg hover:bg-brand-700 transition">
                             Cadastrar minha OSC
                         </a>
                         <a href="{{ route('login') }}"
-                           class="px-5 py-2.5 text-sm font-semibold text-indigo-700 border border-indigo-300 rounded-lg hover:bg-indigo-50 transition">
+                           class="px-5 py-2.5 text-sm font-semibold text-brand-700 border border-brand-300 rounded-lg hover:bg-brand-50 transition">
                             Já tenho cadastro
                         </a>
                     </div>
@@ -155,7 +155,7 @@
                     ['3', 'Acompanhe', 'Veja o andamento da análise e os resultados em "Minhas Propostas".'],
                 ] as [$n, $titulo, $desc])
                     <div class="bg-white rounded-xl border border-gray-200 p-6">
-                        <span class="w-9 h-9 rounded-lg bg-indigo-600 text-white font-bold flex items-center justify-center">{{ $n }}</span>
+                        <span class="w-9 h-9 rounded-lg bg-brand-600 text-white font-bold flex items-center justify-center">{{ $n }}</span>
                         <h3 class="mt-4 font-semibold text-gray-900">{{ $titulo }}</h3>
                         <p class="text-sm text-gray-500 mt-1">{{ $desc }}</p>
                     </div>

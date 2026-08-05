@@ -20,7 +20,7 @@
                 <li class="flex items-center justify-between gap-3 px-3 py-2">
                     <div class="min-w-0">
                         <a href="{{ route('processos.pecas.anexos.download', [$processo, $peca, $anexo]) }}"
-                           class="text-sm text-indigo-600 hover:underline font-medium truncate block">
+                           class="text-sm text-brand-600 hover:underline font-medium truncate block">
                             {{ $anexo->arquivo_nome }}
                         </a>
                         <p class="text-xs text-gray-400">
@@ -46,9 +46,9 @@
               enctype="multipart/form-data" class="flex flex-wrap items-center gap-3 pt-2 border-t border-gray-100">
             @csrf
             <input type="file" name="arquivo" required
-                   class="text-sm text-gray-600 file:mr-3 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-medium file:bg-indigo-50 file:text-indigo-700 hover:file:bg-indigo-100">
+                   class="text-sm text-gray-600 file:mr-3 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-medium file:bg-brand-50 file:text-brand-700 hover:file:bg-brand-100">
             <button type="submit"
-                    class="px-4 py-2 text-sm font-semibold text-white bg-indigo-600 rounded-md hover:bg-indigo-700">
+                    class="px-4 py-2 text-sm font-semibold text-white bg-brand-600 rounded-md hover:bg-brand-700">
                 Anexar
             </button>
             <x-input-error :messages="$errors->get('arquivo')" class="w-full mt-1" />

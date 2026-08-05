@@ -56,7 +56,7 @@
             {{-- TIPO MODELO: editor rico (brasão + HTML) + assinar --}}
             @if($peca->tipo === 'modelo')
                 <details class="mt-3" {{ $peca->preenchido() && !$peca->assinado() ? 'open' : '' }}>
-                    <summary class="text-xs text-indigo-600 cursor-pointer hover:underline">
+                    <summary class="text-xs text-brand-600 cursor-pointer hover:underline">
                         {{ $peca->assinado() ? 'Ver conteúdo' : ($peca->preenchido() ? 'Editar conteúdo' : 'Preencher conteúdo') }}
                     </summary>
                     <div class="mt-2">
@@ -76,7 +76,7 @@
                                 <p class="mt-2 text-xs text-gray-500">
                                     Código de validação:
                                     <strong class="font-mono">{{ $peca->codigo_validacao }}</strong>
-                                    · <a href="{{ route('validacao.mostrar', $peca->codigo_validacao) }}" target="_blank" class="text-indigo-600 hover:underline">Validar</a>
+                                    · <a href="{{ route('validacao.mostrar', $peca->codigo_validacao) }}" target="_blank" class="text-brand-600 hover:underline">Validar</a>
                                 </p>
                             @endif
                             @if($peca->contraAssinado() && $peca->codigo_validacao_contra)
@@ -100,7 +100,7 @@
                                 @csrf @method('PUT')
                                 <textarea name="conteudo" data-editor-rico>{!! old('conteudo', $peca->conteudo) !!}</textarea>
                                 <button type="submit"
-                                        class="mt-2 px-3 py-1.5 text-xs font-medium text-white bg-indigo-600 rounded-md hover:bg-indigo-700">
+                                        class="mt-2 px-3 py-1.5 text-xs font-medium text-white bg-brand-600 rounded-md hover:bg-brand-700">
                                     Salvar
                                 </button>
                             </form>
@@ -128,14 +128,14 @@
                     @if($peca->temArquivo())
                         <div class="flex items-center justify-between bg-gray-50 rounded-md px-3 py-2">
                             <div class="flex items-center gap-2">
-                                <span class="text-xs font-bold text-indigo-600 uppercase">
+                                <span class="text-xs font-bold text-brand-600 uppercase">
                                     {{ strtoupper(pathinfo($peca->arquivo_nome, PATHINFO_EXTENSION)) }}
                                 </span>
                                 <span class="text-sm text-gray-700">{{ $peca->arquivo_nome }}</span>
                                 <span class="text-xs text-gray-400">({{ $peca->tamanhoFormatado() }})</span>
                             </div>
                             <div class="flex items-center gap-3">
-                                <a href="{{ route('pecas.download', $peca) }}" class="text-xs text-indigo-600 hover:text-indigo-900">Baixar</a>
+                                <a href="{{ route('pecas.download', $peca) }}" class="text-xs text-brand-600 hover:text-brand-900">Baixar</a>
                                 @if($podePreencher)
                                     <form action="{{ route('pecas.arquivo.remover', $peca) }}" method="POST"
                                           data-confirm="Remover este arquivo?">
@@ -152,9 +152,9 @@
                               class="flex items-center gap-2">
                             @csrf
                             <input type="file" name="arquivo" required
-                                   class="block text-sm text-gray-600 file:mr-3 file:py-1 file:px-3 file:rounded file:border-0 file:text-xs file:bg-indigo-50 file:text-indigo-700 hover:file:bg-indigo-100">
+                                   class="block text-sm text-gray-600 file:mr-3 file:py-1 file:px-3 file:rounded file:border-0 file:text-xs file:bg-brand-50 file:text-brand-700 hover:file:bg-brand-100">
                             <button type="submit"
-                                    class="px-3 py-1.5 text-xs font-medium text-white bg-indigo-600 rounded-md hover:bg-indigo-700">
+                                    class="px-3 py-1.5 text-xs font-medium text-white bg-brand-600 rounded-md hover:bg-brand-700">
                                 Enviar
                             </button>
                         </form>
@@ -167,7 +167,7 @@
                                     @csrf
                                     <span class="text-xs text-gray-500">ou puxar do módulo Gestão de Parcerias:</span>
                                     <select name="documento_id" required
-                                            class="text-xs border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 max-w-xs">
+                                            class="text-xs border-gray-300 rounded-md shadow-sm focus:ring-brand-500 focus:border-brand-500 max-w-xs">
                                         <option value="">Selecione um documento…</option>
                                         @foreach($docsDisponiveis as $doc)
                                             <option value="{{ $doc->id }}">
@@ -176,7 +176,7 @@
                                         @endforeach
                                     </select>
                                     <button type="submit"
-                                            class="px-3 py-1.5 text-xs font-medium text-indigo-700 border border-indigo-300 rounded-md hover:bg-indigo-50">
+                                            class="px-3 py-1.5 text-xs font-medium text-brand-700 border border-brand-300 rounded-md hover:bg-brand-50">
                                         Puxar
                                     </button>
                                 </form>

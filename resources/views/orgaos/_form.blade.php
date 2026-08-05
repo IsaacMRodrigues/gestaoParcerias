@@ -45,7 +45,7 @@
 
 <div class="flex items-center gap-3 mt-4">
     <input id="status" name="status" type="checkbox" value="1"
-           class="rounded border-gray-300 text-indigo-600 shadow-sm focus:ring-indigo-500"
+           class="rounded border-gray-300 text-brand-600 shadow-sm focus:ring-brand-500"
            {{ old('status', $orgao ? ($orgao->status ? '1' : '0') : '1') === '1' ? 'checked' : '' }}>
     <x-input-label for="status" value="Órgão ativo" />
 </div>

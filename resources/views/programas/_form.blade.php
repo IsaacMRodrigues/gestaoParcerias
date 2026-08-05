@@ -19,7 +19,7 @@
     <div>
         <x-input-label for="tipo" value="Tipo de Instrumento *" />
         <select id="tipo" name="tipo" required
-                class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 text-sm">
+                class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-brand-500 focus:border-brand-500 text-sm">
             <option value="">Selecione...</option>
             @foreach(\App\Models\Programa::TIPOS as $key => $label)
                 <option value="{{ $key }}" {{ old('tipo', $programa?->tipo) === $key ? 'selected' : '' }}>
@@ -32,7 +32,7 @@
     <div>
         <x-input-label for="orgao_id" value="Órgão / Secretaria *" />
         <select id="orgao_id" name="orgao_id" required
-                class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 text-sm">
+                class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-brand-500 focus:border-brand-500 text-sm">
             <option value="">Selecione...</option>
             @foreach($orgaos as $orgao)
                 <option value="{{ $orgao->id }}" {{ old('orgao_id', $programa?->orgao_id) == $orgao->id ? 'selected' : '' }}>
@@ -47,7 +47,7 @@
 <div class="mt-4">
     <x-input-label for="objetivo" value="Objetivo" />
     <textarea id="objetivo" name="objetivo" rows="3"
-              class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 text-sm">{{ old('objetivo', $programa?->objetivo) }}</textarea>
+              class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-brand-500 focus:border-brand-500 text-sm">{{ old('objetivo', $programa?->objetivo) }}</textarea>
     <x-input-error :messages="$errors->get('objetivo')" class="mt-2" />
 </div>
 
@@ -75,7 +75,7 @@
 <div class="mt-4">
     <x-input-label for="status" value="Status *" />
     <select id="status" name="status" required
-            class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 text-sm">
+            class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-brand-500 focus:border-brand-500 text-sm">
         @foreach(\App\Models\Programa::STATUS as $key => $label)
             <option value="{{ $key }}" {{ old('status', $programa?->status ?? 'ativo') === $key ? 'selected' : '' }}>
                 {{ $label }}

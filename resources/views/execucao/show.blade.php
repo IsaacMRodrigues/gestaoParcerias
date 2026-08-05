@@ -44,7 +44,7 @@
                     <p class="text-sm text-gray-500">Executado</p>
                     <p class="mt-1 text-2xl font-bold text-gray-900">{{ $pct }}%</p>
                     <div class="mt-2 h-1.5 bg-gray-100 rounded-full overflow-hidden">
-                        <div class="h-full bg-indigo-600" style="width: {{ min($pct, 100) }}%"></div>
+                        <div class="h-full bg-brand-600" style="width: {{ min($pct, 100) }}%"></div>
                     </div>
                 </div>
             </div>
@@ -100,7 +100,7 @@
                     <div><x-input-label for="valor_d" value="Valor (R$) *" /><x-text-input id="valor_d" name="valor" type="number" step="0.01" min="0.01" required class="mt-1 block w-full" /></div>
                     <div class="sm:col-span-2">
                         <x-input-label for="natureza" value="Natureza *" />
-                        <select id="natureza" name="natureza" required class="mt-1 block w-full border-gray-300 rounded-md shadow-sm text-sm focus:ring-indigo-500 focus:border-indigo-500">
+                        <select id="natureza" name="natureza" required class="mt-1 block w-full border-gray-300 rounded-md shadow-sm text-sm focus:ring-brand-500 focus:border-brand-500">
                             @foreach(\App\Models\Despesa::NATUREZAS as $k => $label)<option value="{{ $k }}">{{ $label }}</option>@endforeach
                         </select>
                     </div>
@@ -110,7 +110,7 @@
                     <div class="sm:col-span-2">
                         <x-input-label for="nota_fiscal" value="Nota fiscal (arquivo)" />
                         <input id="nota_fiscal" name="nota_fiscal" type="file" accept=".pdf,.jpg,.jpeg,.png"
-                               class="mt-1 block w-full text-sm text-gray-600 file:mr-3 file:py-1.5 file:px-3 file:rounded-md file:border-0 file:text-sm file:bg-indigo-50 file:text-indigo-700 hover:file:bg-indigo-100" />
+                               class="mt-1 block w-full text-sm text-gray-600 file:mr-3 file:py-1.5 file:px-3 file:rounded-md file:border-0 file:text-sm file:bg-brand-50 file:text-brand-700 hover:file:bg-brand-100" />
                     </div>
                     <div><x-primary-button class="w-full justify-center">Lançar</x-primary-button></div>
                 </form>
@@ -127,7 +127,7 @@
                                 <td class="px-6 py-2 text-right font-medium">R$ {{ number_format($d->valor, 2, ',', '.') }}</td>
                                 <td class="px-6 py-2">
                                     @if($d->temNotaFiscal())
-                                        <a href="{{ route('despesas.nota.download', $d) }}" class="text-indigo-600 hover:text-indigo-900">📎 {{ $d->nota_fiscal_numero ?? 'baixar' }}</a>
+                                        <a href="{{ route('despesas.nota.download', $d) }}" class="text-brand-600 hover:text-brand-900">📎 {{ $d->nota_fiscal_numero ?? 'baixar' }}</a>
                                     @else
                                         <span class="text-xs text-amber-600">sem NF</span>
                                     @endif

@@ -25,7 +25,7 @@
                             @php $color = \App\Models\Instrumento::STATUS_COLORS[$instrumento->status] ?? 'gray'; @endphp
                             <tr>
                                 <td class="px-6 py-4 text-sm font-medium text-gray-900">
-                                    <a href="{{ route('instrumentos.show', $instrumento) }}" class="text-indigo-600 hover:underline">
+                                    <a href="{{ route('instrumentos.show', $instrumento) }}" class="text-brand-600 hover:underline">
                                         {{ $instrumento->numero }}
                                     </a>
                                 </td>
@@ -48,7 +48,7 @@
                                 <td class="px-6 py-4 text-right text-sm font-medium space-x-3 whitespace-nowrap">
                                     <a href="{{ route('instrumentos.minuta', $instrumento) }}" target="_blank"
                                        class="text-gray-500 hover:text-gray-800">Minuta</a>
-                                    <a href="{{ route('instrumentos.show', $instrumento) }}" class="text-indigo-600 hover:text-indigo-900">Ver</a>
+                                    <a href="{{ route('instrumentos.show', $instrumento) }}" class="text-brand-600 hover:text-brand-900">Ver</a>
                                 </td>
                             </tr>
                         @empty

@@ -4,7 +4,7 @@
         <p class="text-sm text-gray-500 mt-1">
             Para servidores internos. Seu acesso será liberado após a <strong>aprovação do administrador</strong>,
             que também definirá seus perfis. OSCs devem usar o
-            <a href="{{ route('portal.osc.create') }}" class="text-indigo-600 hover:underline">cadastro do portal</a>.
+            <a href="{{ route('portal.osc.create') }}" class="text-brand-600 hover:underline">cadastro do portal</a>.
         </p>
     </div>
 
@@ -43,7 +43,7 @@
         <div class="mt-4">
             <x-input-label for="setor" value="Setor de lotação" />
             <select id="setor" name="setor" required
-                    class="block mt-1 w-full border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 rounded-md shadow-sm">
+                    class="block mt-1 w-full border-gray-300 focus:border-brand-500 focus:ring-brand-500 rounded-md shadow-sm">
                 <option value="">Selecione...</option>
                 @foreach($setores as $valor => $rotulo)
                     <option value="{{ $valor }}" @selected(old('setor') === $valor)>{{ $rotulo }}</option>
@@ -56,7 +56,7 @@
         <div class="mt-4">
             <x-input-label for="orgao_id" value="Secretaria / Unidade Gestora" />
             <select id="orgao_id" name="orgao_id"
-                    class="block mt-1 w-full border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 rounded-md shadow-sm">
+                    class="block mt-1 w-full border-gray-300 focus:border-brand-500 focus:ring-brand-500 rounded-md shadow-sm">
                 <option value="">Selecione (obrigatório para Unidade Gestora)...</option>
                 @foreach($orgaos as $orgao)
                     <option value="{{ $orgao->id }}" @selected((int) old('orgao_id') === $orgao->id)>
@@ -85,13 +85,13 @@
         <div class="mt-4">
             <x-input-label for="solicitacao_obs" value="Justificativa / observação (opcional)" />
             <textarea id="solicitacao_obs" name="solicitacao_obs" rows="2"
-                      class="block mt-1 w-full border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 rounded-md shadow-sm text-sm"
+                      class="block mt-1 w-full border-gray-300 focus:border-brand-500 focus:ring-brand-500 rounded-md shadow-sm text-sm"
                       placeholder="Ex.: função, motivo do acesso...">{{ old('solicitacao_obs') }}</textarea>
             <x-input-error :messages="$errors->get('solicitacao_obs')" class="mt-2" />
         </div>
 
         <div class="flex items-center justify-end mt-6">
-            <a class="underline text-sm text-gray-600 hover:text-gray-900 rounded-md focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500" href="{{ route('login') }}">
+            <a class="underline text-sm text-gray-600 hover:text-gray-900 rounded-md focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-brand-500" href="{{ route('login') }}">
                 Já tem cadastro?
             </a>
 

@@ -15,7 +15,7 @@
                     </span>
                 </h2>
             </div>
-            <span class="px-3 py-1.5 text-sm font-medium bg-indigo-50 text-indigo-700 rounded-full">
+            <span class="px-3 py-1.5 text-sm font-medium bg-brand-50 text-brand-700 rounded-full">
                 {{ \App\Models\Peca::CATEGORIA_LABELS[$categoria] ?? $categoria }}
             </span>
         </div>
@@ -88,7 +88,7 @@
 
                 <div class="mt-4 pt-4 border-t border-gray-100 flex flex-wrap gap-4 text-sm">
                     @if($chamamento->processo)
-                        <a href="{{ route('processos.show', $chamamento->processo) }}" class="text-indigo-600 hover:underline font-medium">
+                        <a href="{{ route('processos.show', $chamamento->processo) }}" class="text-brand-600 hover:underline font-medium">
                             &larr; Processo de origem {{ $chamamento->processo->numero }}
                         </a>
                     @endif
@@ -141,13 +141,13 @@
                             <li class="flex items-start gap-3 text-sm">
                                 <span class="mt-0.5 w-5 h-5 shrink-0 rounded-full border text-[11px] font-bold flex items-center justify-center
                                     {{ $feita ? 'bg-green-100 border-green-300 text-green-700'
-                                             : ($agora ? 'bg-indigo-100 border-indigo-300 text-indigo-700'
+                                             : ($agora ? 'bg-brand-100 border-brand-300 text-brand-700'
                                                        : 'bg-white border-gray-300 text-gray-400') }}">
                                     {{ $feita ? '✓' : $i + 1 }}
                                 </span>
                                 <span class="{{ $agora ? 'text-gray-900 font-medium' : ($feita ? 'text-gray-500' : 'text-gray-400') }}">
                                     <span class="text-xs font-semibold uppercase tracking-wide
-                                        {{ $agora ? 'text-indigo-600' : 'text-gray-400' }}">
+                                        {{ $agora ? 'text-brand-600' : 'text-gray-400' }}">
                                         {{ strtoupper($etapa['setor']) }}
                                     </span>
                                     — {{ $etapa['acao'] }}
@@ -185,9 +185,9 @@
                                     <form action="{{ route('chamamentos.selecao.avancar', $chamamento) }}" method="POST" class="space-y-2">
                                         @csrf
                                         <textarea name="parecer" rows="2" placeholder="Observação (opcional)"
-                                                  class="block w-full border-gray-300 rounded-md shadow-sm text-sm focus:ring-indigo-500 focus:border-indigo-500"></textarea>
+                                                  class="block w-full border-gray-300 rounded-md shadow-sm text-sm focus:ring-brand-500 focus:border-brand-500"></textarea>
                                         <button type="submit" @disabled($pendencias)
-                                                class="px-4 py-2 text-sm font-medium text-white bg-indigo-600 rounded-md hover:bg-indigo-700 disabled:opacity-50 disabled:cursor-not-allowed">
+                                                class="px-4 py-2 text-sm font-medium text-white bg-brand-600 rounded-md hover:bg-brand-700 disabled:opacity-50 disabled:cursor-not-allowed">
                                             Encaminhar para
                                             {{ \App\Models\Chamamento::SETORES_SELECAO[\App\Models\Chamamento::ETAPAS_SELECAO[$etapaAtual + 1]['setor']] }}
                                         </button>
@@ -220,7 +220,7 @@
                     {{-- Histórico --}}
                     @if($chamamento->selecaoTramitacoes->isNotEmpty())
                         <details class="mt-4 pt-4 border-t border-gray-100">
-                            <summary class="text-xs text-indigo-600 cursor-pointer hover:underline">
+                            <summary class="text-xs text-brand-600 cursor-pointer hover:underline">
                                 Histórico de movimentações ({{ $chamamento->selecaoTramitacoes->count() }})
                             </summary>
                             <ul class="mt-2 space-y-2">
@@ -271,7 +271,7 @@
                                     <p class="text-xs text-gray-400 mt-0.5">
                                         Protocolado em {{ $rec->protocolado_em?->format('d/m/Y H:i') }}
                                         @if($rec->temArquivo())
-                                            · <a href="{{ route('recursos.download', $rec) }}" class="text-indigo-600 hover:underline">
+                                            · <a href="{{ route('recursos.download', $rec) }}" class="text-brand-600 hover:underline">
                                                 {{ $rec->arquivo_nome }} ({{ $rec->tamanhoFormatado() }})
                                             </a>
                                         @endif
@@ -297,7 +297,7 @@
                             @endif
 
                             @if($rec->respondido())
-                                <div class="mt-2 border-l-2 border-indigo-200 pl-3">
+                                <div class="mt-2 border-l-2 border-brand-200 pl-3">
                                     <p class="text-xs font-medium text-gray-500 uppercase tracking-wide">
                                         Resposta da Unidade Gestora
                                     </p>
@@ -315,7 +315,7 @@
                                     <div class="flex flex-wrap items-center gap-3">
                                         <label class="text-xs font-medium text-gray-500">Resultado</label>
                                         <select name="resultado" required
-                                                class="border-gray-300 rounded-md shadow-sm text-sm focus:ring-indigo-500 focus:border-indigo-500">
+                                                class="border-gray-300 rounded-md shadow-sm text-sm focus:ring-brand-500 focus:border-brand-500">
                                             <option value="">Selecione…</option>
                                             @foreach(\App\Models\Recurso::RESULTADOS as $k => $lbl)
                                                 <option value="{{ $k }}">{{ $lbl }}</option>
@@ -324,9 +324,9 @@
                                     </div>
                                     <textarea name="resposta" rows="3" required
                                               placeholder="Fundamentação da decisão sobre o recurso"
-                                              class="block w-full border-gray-300 rounded-md shadow-sm text-sm focus:ring-indigo-500 focus:border-indigo-500"></textarea>
+                                              class="block w-full border-gray-300 rounded-md shadow-sm text-sm focus:ring-brand-500 focus:border-brand-500"></textarea>
                                     <button type="submit"
-                                            class="px-3 py-1.5 text-xs font-medium text-white bg-indigo-600 rounded-md hover:bg-indigo-700">
+                                            class="px-3 py-1.5 text-xs font-medium text-white bg-brand-600 rounded-md hover:bg-brand-700">
                                         Responder recurso
                                     </button>
                                 </form>

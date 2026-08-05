@@ -639,6 +639,24 @@ São 21 perfis. Um usuário pode ter **vários**; os marcados 🔒 são **exclus
   - Menu do usuário reduzido a **apenas o avatar** (iniciais), com o nome no `title`; nome completo e
     perfil saíram do topo (continuam dentro do dropdown)
 
+- [2026-07-30] **Identidade visual da Prefeitura** e **sidebar** no lugar da navbar
+  - **Paleta oficial** no `tailwind.config.js`: `brand` (verde **#00A859**, escuro **#008A48**, claro
+    **#E6F9F0**) e `accent` (laranja **#EE7736**, escuro **#D4622A**, claro **#FEF3EC**), com as escalas
+    50–900 interpoladas. O antigo índigo foi substituído pelo verde da marca em **590 ocorrências**
+    nas views, mais os mapas de cor dos models (`STATUS_COLORS`) e o componente `stat-card`
+  - **`safelist` no Tailwind**: as classes montadas em tempo de execução (`bg-{{ $color }}-100`, vindas
+    dos `STATUS_COLORS`) não aparecem no código-fonte e vinham sobrevivendo à purga por acaso, porque
+    as mesmas classes existiam literalmente em outro lugar. Agora estão garantidas
+  - **Marca**: novo componente `x-marca` com o `logotipo.png` oficial (variante `branco` para fundos
+    escuros) no lugar do badge de texto "PGP", e **favicon** `ico.png` em todos os layouts
+  - Gradientes que terminavam em roxo passaram ao verde escuro da marca; os botões de consulta pública
+    da tela principal (Cidadão, Parlamentar, Conselho) passaram ao **laranja de destaque**
+  - **Navegação por sidebar**: a área administrativa deixou a barra horizontal (que espremia a trilha de
+    6 etapas) e passou a `layouts/sidebar` — coluna fixa de 256px com a marca, o ciclo da parceria
+    numerado, Cadastros e os badges de pendências; no topo restou apenas o menu do usuário (avatar).
+    No celular vira gaveta com sobreposição (Alpine). `layouts/navigation` (barra horizontal) **continua
+    em uso** no portal, para o usuário interno não perder o menu do sistema ao navegar por lá
+
 - [2026-07-30] Conferência dos 8 modelos da pasta `Modelos novos` contra os `.docx` originais
   - Verificação trecho a trecho de cada modelo já incorporado. **Uma divergência encontrada e
     corrigida**: o texto do **Relatório da Comissão de Seleção** havia sido condensado demais e perdeu

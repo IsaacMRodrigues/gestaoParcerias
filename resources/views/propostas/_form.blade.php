@@ -4,7 +4,7 @@
     <div>
         <x-input-label for="chamamento_id" value="Chamamento *" />
         <select id="chamamento_id" name="chamamento_id" required
-                class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 text-sm">
+                class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-brand-500 focus:border-brand-500 text-sm">
             <option value="">Selecione...</option>
             @foreach($chamamentos as $chamamento)
                 <option value="{{ $chamamento->id }}"
@@ -19,7 +19,7 @@
     <div>
         <x-input-label for="osc_id" value="OSC *" />
         <select id="osc_id" name="osc_id" required
-                class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 text-sm">
+                class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-brand-500 focus:border-brand-500 text-sm">
             <option value="">Selecione...</option>
             @foreach($oscs as $osc)
                 <option value="{{ $osc->id }}"
@@ -42,14 +42,14 @@
 <div class="mt-4">
     <x-input-label for="objeto" value="Objeto *" />
     <textarea id="objeto" name="objeto" rows="3" required
-              class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 text-sm">{{ old('objeto', $proposta?->objeto) }}</textarea>
+              class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-brand-500 focus:border-brand-500 text-sm">{{ old('objeto', $proposta?->objeto) }}</textarea>
     <x-input-error :messages="$errors->get('objeto')" class="mt-2" />
 </div>
 
 <div class="mt-4">
     <x-input-label for="justificativa" value="Justificativa" />
     <textarea id="justificativa" name="justificativa" rows="3"
-              class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 text-sm">{{ old('justificativa', $proposta?->justificativa) }}</textarea>
+              class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-brand-500 focus:border-brand-500 text-sm">{{ old('justificativa', $proposta?->justificativa) }}</textarea>
     <x-input-error :messages="$errors->get('justificativa')" class="mt-2" />
 </div>
 
@@ -83,7 +83,7 @@
     <div>
         <x-input-label for="status" value="Status *" />
         <select id="status" name="status" required
-                class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 text-sm">
+                class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-brand-500 focus:border-brand-500 text-sm">
             @foreach(\App\Models\Proposta::STATUS as $key => $label)
                 <option value="{{ $key }}" {{ old('status', $proposta?->status ?? 'rascunho') === $key ? 'selected' : '' }}>
                     {{ $label }}

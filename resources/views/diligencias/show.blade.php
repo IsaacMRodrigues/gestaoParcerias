@@ -55,12 +55,12 @@
                         <div>
                             <x-input-label for="resposta" value="Resposta *" />
                             <textarea id="resposta" name="resposta" rows="5" required
-                                      class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 text-sm">{{ old('resposta') }}</textarea>
+                                      class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-brand-500 focus:border-brand-500 text-sm">{{ old('resposta') }}</textarea>
                             <x-input-error :messages="$errors->get('resposta')" class="mt-2" />
                         </div>
                         <div class="flex justify-end">
                             <button type="submit"
-                                    class="px-4 py-2 text-sm font-medium text-white bg-indigo-600 rounded-md hover:bg-indigo-700">
+                                    class="px-4 py-2 text-sm font-medium text-white bg-brand-600 rounded-md hover:bg-brand-700">
                                 Enviar Resposta
                             </button>
                         </div>

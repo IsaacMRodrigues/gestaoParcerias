@@ -47,10 +47,10 @@
                         <li class="flex items-center">
                             <div class="flex flex-col items-center text-center w-24">
                                 <div class="w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold
-                                    {{ $feita ? 'bg-green-500 text-white' : ($atualEtapa ? 'bg-indigo-600 text-white ring-4 ring-indigo-100' : 'bg-gray-200 text-gray-500') }}">
+                                    {{ $feita ? 'bg-green-500 text-white' : ($atualEtapa ? 'bg-brand-600 text-white ring-4 ring-brand-100' : 'bg-gray-200 text-gray-500') }}">
                                     {{ $feita ? '✓' : $i + 1 }}
                                 </div>
-                                <span class="mt-1 text-[11px] leading-tight {{ $atualEtapa ? 'text-indigo-700 font-semibold' : 'text-gray-500' }}">
+                                <span class="mt-1 text-[11px] leading-tight {{ $atualEtapa ? 'text-brand-700 font-semibold' : 'text-gray-500' }}">
                                     {{ strtoupper($et['setor']) }}
                                 </span>
                             </div>
@@ -62,7 +62,7 @@
                 </ol>
                 @if($emAndamento)
                     <p class="text-sm text-gray-600 mt-4">
-                        <span class="font-medium text-indigo-700">Etapa {{ $processo->etapa + 1 }}/{{ $processo->totalEtapas() }}
+                        <span class="font-medium text-brand-700">Etapa {{ $processo->etapa + 1 }}/{{ $processo->totalEtapas() }}
                         — {{ \App\Models\Processo::SETORES[$etapaInfo['setor']] ?? $etapaInfo['setor'] }}:</span>
                         {{ $etapaInfo['acao'] }}
                     </p>
@@ -72,7 +72,7 @@
                 @if($processo->modalidade)
                     <p class="text-sm text-gray-600 mt-2">
                         Modalidade definida pelo SCP:
-                        <span class="font-medium text-indigo-700">{{ \App\Models\Processo::MODALIDADES[$processo->modalidade] ?? $processo->modalidade }}</span>
+                        <span class="font-medium text-brand-700">{{ \App\Models\Processo::MODALIDADES[$processo->modalidade] ?? $processo->modalidade }}</span>
                     </p>
                 @endif
             </div>
@@ -93,7 +93,7 @@
                         </div>
                         <div class="mt-3 flex flex-wrap gap-3 text-sm">
                             <a href="{{ route('programas.chamamentos.index', $processo->chamamento->programa) }}"
-                               class="text-indigo-600 hover:underline font-medium">
+                               class="text-brand-600 hover:underline font-medium">
                                 Ver em Programas &rarr;
                             </a>
                             <a href="{{ route('chamamentos.selecao', $processo->chamamento) }}"
@@ -125,9 +125,9 @@
                                     <x-input-label value="Modalidade da seleção (não foi definida no trâmite — escolha para publicar)" class="mb-2" />
                                     <div class="space-y-2">
                                         @foreach(\App\Models\Processo::MODALIDADES as $valor => $rotulo)
-                                            <label class="flex items-start gap-3 p-3 border border-gray-200 rounded-md cursor-pointer hover:border-indigo-300 hover:bg-indigo-50/30">
+                                            <label class="flex items-start gap-3 p-3 border border-gray-200 rounded-md cursor-pointer hover:border-brand-300 hover:bg-brand-50/30">
                                                 <input type="radio" name="modalidade" value="{{ $valor }}" required
-                                                       class="mt-1 text-indigo-600 focus:ring-indigo-500"
+                                                       class="mt-1 text-brand-600 focus:ring-brand-500"
                                                        @checked(old('modalidade') === $valor)>
                                                 <span>
                                                     <span class="block text-sm font-medium text-gray-800">{{ $rotulo }}</span>
@@ -140,7 +140,7 @@
                                 </div>
                             @endunless
                             <button type="submit"
-                                    class="px-4 py-2 text-sm font-medium text-white bg-indigo-600 rounded-md hover:bg-indigo-700">
+                                    class="px-4 py-2 text-sm font-medium text-white bg-brand-600 rounded-md hover:bg-brand-700">
                                 Gerar Publicação / Chamamento
                             </button>
                         </form>
@@ -169,7 +169,7 @@
                                     @endif
                                 </div>
                                 <a href="{{ route('instrumentos.show', $inst) }}"
-                                   class="text-sm text-indigo-600 hover:underline font-medium whitespace-nowrap">Ver Termo &rarr;</a>
+                                   class="text-sm text-brand-600 hover:underline font-medium whitespace-nowrap">Ver Termo &rarr;</a>
                             </li>
                         @endforeach
                     </ul>
@@ -227,7 +227,7 @@
                     <div class="px-6 py-4 border-b border-gray-200 flex items-center justify-between gap-3">
                         <h3 class="text-base font-semibold text-gray-800">Documentos do Processo</h3>
                         <button type="submit"
-                                class="text-sm px-3 py-1.5 bg-indigo-600 text-white rounded-md hover:bg-indigo-700 whitespace-nowrap">
+                                class="text-sm px-3 py-1.5 bg-brand-600 text-white rounded-md hover:bg-brand-700 whitespace-nowrap">
                             ⬇ Baixar selecionados (PDF)
                         </button>
                     </div>
@@ -240,7 +240,7 @@
                                     <div class="flex items-center gap-3">
                                         @if(!empty($p->conteudo))
                                             <input type="checkbox" name="pecas[]" value="{{ $p->id }}"
-                                                   class="rounded border-gray-300 text-indigo-600 focus:ring-indigo-500"
+                                                   class="rounded border-gray-300 text-brand-600 focus:ring-brand-500"
                                                    title="Selecionar para download">
                                         @else
                                             <span class="inline-block w-4" title="Documento ainda não preenchido"></span>
@@ -256,7 +256,7 @@
                                         </div>
                                     </div>
                                     <a href="{{ route('processos.pecas.edit', [$processo, $p]) }}"
-                                       class="text-sm text-indigo-600 hover:text-indigo-900">
+                                       class="text-sm text-brand-600 hover:text-brand-900">
                                         {{ $rotuloPeca($p) }}
                                     </a>
                                 </div>
@@ -277,7 +277,7 @@
                     @forelse($processo->tramitacoes as $t)
                         <div class="flex gap-3 pb-4 last:pb-0">
                             <div class="flex flex-col items-center">
-                                <div class="w-2.5 h-2.5 rounded-full bg-indigo-500 mt-1.5"></div>
+                                <div class="w-2.5 h-2.5 rounded-full bg-brand-500 mt-1.5"></div>
                                 @if(!$loop->last)<div class="w-px flex-1 bg-gray-200"></div>@endif
                             </div>
                             <div class="flex-1 pb-2">
@@ -360,9 +360,9 @@
                                         <x-input-label value="Modalidade da seleção (define o caminho do processo)" class="mb-2" />
                                         <div class="space-y-2">
                                             @foreach(\App\Models\Processo::MODALIDADES as $valor => $rotulo)
-                                                <label class="flex items-start gap-3 p-3 border border-gray-200 rounded-md cursor-pointer hover:border-indigo-300 hover:bg-indigo-50/30">
+                                                <label class="flex items-start gap-3 p-3 border border-gray-200 rounded-md cursor-pointer hover:border-brand-300 hover:bg-brand-50/30">
                                                     <input type="radio" name="modalidade" value="{{ $valor }}" required
-                                                           class="mt-1 text-indigo-600 focus:ring-indigo-500"
+                                                           class="mt-1 text-brand-600 focus:ring-brand-500"
                                                            @checked(old('modalidade', $processo->modalidade) === $valor)>
                                                     <span>
                                                         <span class="block text-sm font-medium text-gray-800">{{ $rotulo }}</span>
@@ -402,12 +402,12 @@
                                     <div>
                                         <x-input-label for="parecer" value="Parecer / observação (opcional)" />
                                         <input id="parecer" name="parecer" type="text"
-                                               class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 text-sm"
+                                               class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-brand-500 focus:border-brand-500 text-sm"
                                                placeholder="Observação do setor antes de encaminhar...">
                                     </div>
                                     <button type="submit"
                                             @disabled(!empty($pendencias))
-                                            class="px-4 py-2 text-sm font-medium text-white bg-indigo-600 rounded-md hover:bg-indigo-700 disabled:opacity-50 disabled:cursor-not-allowed">
+                                            class="px-4 py-2 text-sm font-medium text-white bg-brand-600 rounded-md hover:bg-brand-700 disabled:opacity-50 disabled:cursor-not-allowed">
                                         Encaminhar para {{ \App\Models\Processo::SETORES[$processo->proximoSetor()] ?? $processo->proximoSetor() }}
                                     </button>
                                 </form>

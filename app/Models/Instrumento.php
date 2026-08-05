@@ -26,7 +26,7 @@ class Instrumento extends Model
         'minuta'     => 'gray',
         'assinado'   => 'blue',
         'vigente'    => 'green',
-        'encerrado'  => 'indigo',
+        'encerrado'  => 'brand',
         'rescindido' => 'red',
     ];
 

@@ -20,7 +20,7 @@
                 @can('execucao')
                     @if($instrumento->status === 'vigente')
                         <a href="{{ route('instrumentos.execucao', $instrumento) }}"
-                           class="px-3 py-1.5 text-sm font-medium text-white bg-indigo-600 rounded-md hover:bg-indigo-700">
+                           class="px-3 py-1.5 text-sm font-medium text-white bg-brand-600 rounded-md hover:bg-brand-700">
                             Execução Financeira
                         </a>
                     @endif
@@ -126,7 +126,7 @@
                     <h3 class="text-base font-semibold text-gray-800">Termos Aditivos / Apostilamentos</h3>
                     @if(in_array($instrumento->status, ['assinado', 'vigente']))
                         <a href="{{ route('instrumentos.aditivos.create', $instrumento) }}"
-                           class="px-3 py-1.5 text-sm font-medium text-white bg-indigo-600 rounded-md hover:bg-indigo-700">
+                           class="px-3 py-1.5 text-sm font-medium text-white bg-brand-600 rounded-md hover:bg-brand-700">
                             + Novo Aditivo
                         </a>
                     @endif
@@ -153,7 +153,7 @@
                                 <a href="{{ route('instrumentos.aditivos.documentacao', [$instrumento, $aditivo]) }}"
                                    class="text-xs text-gray-600 hover:text-gray-900">Documentação</a>
                                 <a href="{{ route('instrumentos.aditivos.edit', [$instrumento, $aditivo]) }}"
-                                   class="text-xs text-indigo-600 hover:text-indigo-900">Editar</a>
+                                   class="text-xs text-brand-600 hover:text-brand-900">Editar</a>
                                 <form action="{{ route('instrumentos.aditivos.destroy', [$instrumento, $aditivo]) }}"
                                       method="POST" class="inline"
                                       data-confirm="Remover este aditivo?">
@@ -179,14 +179,14 @@
                               class="flex items-center gap-2">
                             @csrf
                             <select name="tipo"
-                                    class="border-gray-300 rounded-md shadow-sm text-sm focus:ring-indigo-500 focus:border-indigo-500">
+                                    class="border-gray-300 rounded-md shadow-sm text-sm focus:ring-brand-500 focus:border-brand-500">
                                 @foreach(\App\Models\OrdemPagamento::TIPOS as $key => $label)
                                     <option value="{{ $key }}" {{ $key === 'global' && $temGlobal ? 'disabled' : '' }}>
                                         {{ $label }}{{ $key === 'global' && $temGlobal ? ' — já emitida' : '' }}
                                     </option>
                                 @endforeach
                             </select>
-                            <button type="submit" class="px-3 py-1.5 text-sm font-medium text-white bg-indigo-600 rounded-md hover:bg-indigo-700 whitespace-nowrap">
+                            <button type="submit" class="px-3 py-1.5 text-sm font-medium text-white bg-brand-600 rounded-md hover:bg-brand-700 whitespace-nowrap">
                                 + Nova OP
                             </button>
                         </form>
@@ -218,7 +218,7 @@
                                 @else
                                     <span class="px-2 py-1 text-xs font-medium bg-gray-100 text-gray-600 rounded-full">Rascunho</span>
                                 @endif
-                                <a href="{{ route('ordens-pagamento.edit', $op) }}" class="text-xs text-indigo-600 hover:text-indigo-900">{{ $op->assinado() ? 'Abrir' : 'Editar' }}</a>
+                                <a href="{{ route('ordens-pagamento.edit', $op) }}" class="text-xs text-brand-600 hover:text-brand-900">{{ $op->assinado() ? 'Abrir' : 'Editar' }}</a>
                                 <a href="{{ route('ordens-pagamento.imprimir', $op) }}" target="_blank" class="text-xs text-gray-600 hover:text-gray-900">Imprimir</a>
                                 @unless($op->assinado())
                                     <form action="{{ route('ordens-pagamento.destroy', $op) }}" method="POST" class="inline"

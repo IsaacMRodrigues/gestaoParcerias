@@ -17,7 +17,7 @@
                             Cancelar
                         </a>
                         <button type="submit"
-                                class="px-4 py-2 text-sm font-medium text-white bg-indigo-600 rounded-md hover:bg-indigo-700">
+                                class="px-4 py-2 text-sm font-medium text-white bg-brand-600 rounded-md hover:bg-brand-700">
                             Cadastrar
                         </button>
                     </div>

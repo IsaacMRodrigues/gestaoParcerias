@@ -21,7 +21,7 @@
     <div>
         <x-input-label for="tipo" value="Tipo" />
         <select id="tipo" name="tipo"
-                class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 text-sm">
+                class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-brand-500 focus:border-brand-500 text-sm">
             <option value="">Selecione...</option>
             @foreach(\App\Models\Osc::TIPOS as $key => $label)
                 <option value="{{ $key }}" {{ old('tipo', $osc?->tipo) === $key ? 'selected' : '' }}>
@@ -130,7 +130,7 @@
             <p class="text-xs text-gray-400">CPF, nome, contato e cargo de cada membro do quadro.</p>
         </div>
         <button type="button" @click="membros.push({nome:'',cpf:'',phone:'',email:'',cargo:''})"
-                class="px-3 py-1.5 text-xs font-medium text-indigo-700 border border-indigo-300 rounded-md hover:bg-indigo-50">
+                class="px-3 py-1.5 text-xs font-medium text-brand-700 border border-brand-300 rounded-md hover:bg-brand-50">
             + Adicionar membro
         </button>
     </div>
@@ -142,27 +142,27 @@
             <div class="sm:col-span-4">
                 <label class="text-xs font-medium text-gray-500">Nome</label>
                 <input type="text" x-model="m.nome" :name="`membros[${i}][nome]`"
-                       class="mt-1 block w-full border-gray-300 rounded-md shadow-sm text-sm focus:ring-indigo-500 focus:border-indigo-500">
+                       class="mt-1 block w-full border-gray-300 rounded-md shadow-sm text-sm focus:ring-brand-500 focus:border-brand-500">
             </div>
             <div class="sm:col-span-3">
                 <label class="text-xs font-medium text-gray-500">CPF</label>
                 <input type="text" x-model="m.cpf" :name="`membros[${i}][cpf]`" maxlength="14" placeholder="000.000.000-00"
-                       class="mt-1 block w-full border-gray-300 rounded-md shadow-sm text-sm focus:ring-indigo-500 focus:border-indigo-500">
+                       class="mt-1 block w-full border-gray-300 rounded-md shadow-sm text-sm focus:ring-brand-500 focus:border-brand-500">
             </div>
             <div class="sm:col-span-2">
                 <label class="text-xs font-medium text-gray-500">Cargo/Função</label>
                 <input type="text" x-model="m.cargo" :name="`membros[${i}][cargo]`"
-                       class="mt-1 block w-full border-gray-300 rounded-md shadow-sm text-sm focus:ring-indigo-500 focus:border-indigo-500">
+                       class="mt-1 block w-full border-gray-300 rounded-md shadow-sm text-sm focus:ring-brand-500 focus:border-brand-500">
             </div>
             <div class="sm:col-span-2">
                 <label class="text-xs font-medium text-gray-500">Telefone</label>
                 <input type="text" x-model="m.phone" :name="`membros[${i}][phone]`" maxlength="20"
-                       class="mt-1 block w-full border-gray-300 rounded-md shadow-sm text-sm focus:ring-indigo-500 focus:border-indigo-500">
+                       class="mt-1 block w-full border-gray-300 rounded-md shadow-sm text-sm focus:ring-brand-500 focus:border-brand-500">
             </div>
             <div class="sm:col-span-11">
                 <label class="text-xs font-medium text-gray-500">E-mail</label>
                 <input type="email" x-model="m.email" :name="`membros[${i}][email]`"
-                       class="mt-1 block w-full border-gray-300 rounded-md shadow-sm text-sm focus:ring-indigo-500 focus:border-indigo-500">
+                       class="mt-1 block w-full border-gray-300 rounded-md shadow-sm text-sm focus:ring-brand-500 focus:border-brand-500">
             </div>
             <div class="sm:col-span-1 flex justify-end">
                 <button type="button" @click="membros.splice(i, 1)"
@@ -175,7 +175,7 @@
 {{-- Status --}}
 <div class="flex items-center gap-3 mt-4">
     <input id="status" name="status" type="checkbox" value="1"
-           class="rounded border-gray-300 text-indigo-600 shadow-sm focus:ring-indigo-500"
+           class="rounded border-gray-300 text-brand-600 shadow-sm focus:ring-brand-500"
            {{ old('status', $osc ? ($osc->status ? '1' : '0') : '1') === '1' ? 'checked' : '' }}>
     <x-input-label for="status" value="OSC ativa" />
 </div>

@@ -9,7 +9,7 @@
                 <h2 class="text-xl font-semibold text-gray-800 mt-0.5">Chamamentos Públicos</h2>
             </div>
             <a href="{{ route('programas.chamamentos.create', $programa) }}"
-               class="px-4 py-2 text-sm font-medium text-white bg-indigo-600 rounded-md hover:bg-indigo-700">
+               class="px-4 py-2 text-sm font-medium text-white bg-brand-600 rounded-md hover:bg-brand-700">
                 + Novo Chamamento
             </a>
         </div>
@@ -41,7 +41,7 @@
                                     {{ $chamamento->titulo }}
                                     @if($chamamento->processo)
                                         <a href="{{ route('processos.show', $chamamento->processo) }}"
-                                           class="block text-xs text-indigo-600 hover:underline mt-0.5">
+                                           class="block text-xs text-brand-600 hover:underline mt-0.5">
                                             &larr; originado do Processo {{ $chamamento->processo->numero }}
                                         </a>
                                     @endif
@@ -70,7 +70,7 @@
                                     <a href="{{ route('chamamentos.selecao', $chamamento) }}"
                                        class="text-gray-600 hover:text-gray-900">Seleção</a>
                                     <a href="{{ route('programas.chamamentos.edit', [$programa, $chamamento]) }}"
-                                       class="text-indigo-600 hover:text-indigo-900">Editar</a>
+                                       class="text-brand-600 hover:text-brand-900">Editar</a>
                                     <form action="{{ route('programas.chamamentos.destroy', [$programa, $chamamento]) }}"
                                           method="POST" class="inline"
                                           data-confirm="Deseja remover este chamamento?">

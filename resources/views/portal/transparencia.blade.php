@@ -1,12 +1,12 @@
 <x-portal-layout>
     {{-- Cabeçalho --}}
-    <div class="bg-gradient-to-br from-indigo-800 via-indigo-700 to-purple-800 text-white px-4">
+    <div class="bg-gradient-to-br from-brand-800 via-brand-700 to-brand-900 text-white px-4">
         <div class="max-w-6xl mx-auto py-12 text-center">
-            <span class="inline-block text-xs font-semibold uppercase tracking-wider text-indigo-200 bg-white/10 px-3 py-1 rounded-full mb-4">
+            <span class="inline-block text-xs font-semibold uppercase tracking-wider text-brand-200 bg-white/10 px-3 py-1 rounded-full mb-4">
                 Transparência
             </span>
             <h1 class="text-3xl font-bold tracking-tight">Parcerias Celebradas</h1>
-            <p class="text-indigo-200 mt-2 max-w-2xl mx-auto text-sm">
+            <p class="text-brand-200 mt-2 max-w-2xl mx-auto text-sm">
                 Repasses de recursos municipais ao Terceiro Setor, nos termos da Lei Federal nº 13.019/2014.
                 Consulta livre, sem necessidade de cadastro.
             </p>
@@ -14,11 +14,11 @@
             <div class="mt-8 grid grid-cols-1 sm:grid-cols-2 gap-4 max-w-lg mx-auto">
                 <div class="bg-white/10 rounded-xl px-5 py-4">
                     <p class="text-2xl font-bold">{{ number_format($totais['parcerias'], 0, ',', '.') }}</p>
-                    <p class="text-xs text-indigo-200 mt-0.5">parcerias celebradas</p>
+                    <p class="text-xs text-brand-200 mt-0.5">parcerias celebradas</p>
                 </div>
                 <div class="bg-white/10 rounded-xl px-5 py-4">
                     <p class="text-2xl font-bold">R$ {{ number_format($totais['repassado'], 2, ',', '.') }}</p>
-                    <p class="text-xs text-indigo-200 mt-0.5">valor total pactuado</p>
+                    <p class="text-xs text-brand-200 mt-0.5">valor total pactuado</p>
                 </div>
             </div>
         </div>
@@ -34,12 +34,12 @@
                 <label for="busca" class="block text-xs font-medium text-gray-500 mb-1">Pesquisar</label>
                 <input type="text" name="busca" id="busca" value="{{ $filtros['busca'] ?? '' }}"
                        placeholder="OSC, número do termo ou objeto"
-                       class="block w-full border-gray-300 rounded-md shadow-sm text-sm focus:ring-indigo-500 focus:border-indigo-500">
+                       class="block w-full border-gray-300 rounded-md shadow-sm text-sm focus:ring-brand-500 focus:border-brand-500">
             </div>
             <div>
                 <label for="tipo" class="block text-xs font-medium text-gray-500 mb-1">Instrumento</label>
                 <select name="tipo" id="tipo"
-                        class="block w-full border-gray-300 rounded-md shadow-sm text-sm focus:ring-indigo-500 focus:border-indigo-500">
+                        class="block w-full border-gray-300 rounded-md shadow-sm text-sm focus:ring-brand-500 focus:border-brand-500">
                     <option value="">Todos</option>
                     @foreach(\App\Models\Instrumento::TIPOS as $key => $label)
                         <option value="{{ $key }}" {{ ($filtros['tipo'] ?? '') === $key ? 'selected' : '' }}>{{ $label }}</option>
@@ -49,7 +49,7 @@
             <div>
                 <label for="exercicio" class="block text-xs font-medium text-gray-500 mb-1">Exercício</label>
                 <select name="exercicio" id="exercicio"
-                        class="block w-full border-gray-300 rounded-md shadow-sm text-sm focus:ring-indigo-500 focus:border-indigo-500">
+                        class="block w-full border-gray-300 rounded-md shadow-sm text-sm focus:ring-brand-500 focus:border-brand-500">
                     <option value="">Todos</option>
                     @foreach($exercicios as $ano)
                         <option value="{{ $ano }}" {{ (string) ($filtros['exercicio'] ?? '') === (string) $ano ? 'selected' : '' }}>{{ $ano }}</option>
@@ -58,7 +58,7 @@
             </div>
             <div class="sm:col-span-2 lg:col-span-4 flex items-center gap-3">
                 <button type="submit"
-                        class="px-4 py-2 text-sm font-medium text-white bg-indigo-600 rounded-md hover:bg-indigo-700">
+                        class="px-4 py-2 text-sm font-medium text-white bg-brand-600 rounded-md hover:bg-brand-700">
                     Filtrar
                 </button>
                 @if($temFiltro)
@@ -74,7 +74,7 @@
                     <div class="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-3">
                         <div class="min-w-0">
                             <div class="flex flex-wrap items-center gap-2">
-                                <span class="text-xs font-medium text-indigo-600 bg-indigo-50 px-2 py-0.5 rounded">
+                                <span class="text-xs font-medium text-brand-600 bg-brand-50 px-2 py-0.5 rounded">
                                     {{ \App\Models\Instrumento::TIPOS[$inst->tipo] ?? $inst->tipo }}
                                 </span>
                                 @php $cor = \App\Models\Instrumento::STATUS_COLORS[$inst->status] ?? 'gray'; @endphp
@@ -119,8 +119,8 @@
                 </div>
             @empty
                 <div class="bg-white rounded-2xl border border-gray-200 px-6 py-14 text-center">
-                    <div class="w-14 h-14 mx-auto rounded-full bg-indigo-50 flex items-center justify-center">
-                        <svg class="w-7 h-7 text-indigo-500" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.6">
+                    <div class="w-14 h-14 mx-auto rounded-full bg-brand-50 flex items-center justify-center">
+                        <svg class="w-7 h-7 text-brand-500" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.6">
                             <path stroke-linecap="round" stroke-linejoin="round" d="M12 6v12m-3-2.818.879.659c1.171.879 3.07.879 4.242 0 1.172-.879 1.172-2.303 0-3.182C13.536 12.219 12.768 12 12 12c-.725 0-1.45-.22-2.003-.659-1.106-.879-1.106-2.303 0-3.182s2.9-.879 4.006 0l.415.33M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z"/>
                         </svg>
                     </div>
@@ -132,7 +132,7 @@
                             ? 'Ajuste os filtros para ampliar a busca.'
                             : 'Assim que um termo for assinado, ele aparecerá aqui com o valor e a vigência.' }}
                     </p>
-                    <a href="{{ route('portal.index') }}" class="text-indigo-600 hover:underline text-sm mt-4 inline-block">
+                    <a href="{{ route('portal.index') }}" class="text-brand-600 hover:underline text-sm mt-4 inline-block">
                         Ver chamamentos abertos →
                     </a>
                 </div>

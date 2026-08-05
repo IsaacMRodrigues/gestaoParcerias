@@ -13,9 +13,9 @@
         <div class="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8">
 
             {{-- Resumo da proposta --}}
-            <div class="bg-indigo-50 border border-indigo-200 rounded-lg p-4 mb-6 text-sm">
-                <p class="font-medium text-indigo-800">Proposta aprovada</p>
-                <div class="grid grid-cols-3 gap-4 mt-2 text-indigo-700">
+            <div class="bg-brand-50 border border-brand-200 rounded-lg p-4 mb-6 text-sm">
+                <p class="font-medium text-brand-800">Proposta aprovada</p>
+                <div class="grid grid-cols-3 gap-4 mt-2 text-brand-700">
                     <div>OSC: <span class="font-medium">{{ $proposta->osc->name }}</span></div>
                     <div>Valor solicitado: <span class="font-medium">R$ {{ number_format($proposta->valor_solicitado, 2, ',', '.') }}</span></div>
                     <div>Contrapartida: <span class="font-medium">R$ {{ number_format($proposta->valor_proprio, 2, ',', '.') }}</span></div>
@@ -48,7 +48,7 @@
                     <div class="flex items-center justify-end gap-4 pt-2">
                         <a href="{{ route('propostas.show', $proposta) }}" class="text-sm text-gray-600 hover:text-gray-900">Cancelar</a>
                         <button type="submit"
-                                class="px-4 py-2 text-sm font-medium text-white bg-indigo-600 rounded-md hover:bg-indigo-700">
+                                class="px-4 py-2 text-sm font-medium text-white bg-brand-600 rounded-md hover:bg-brand-700">
                             Criar Instrumento
                         </button>
                     </div>

@@ -43,7 +43,7 @@
 <div>
     <x-input-label for="setor" value="Setor de lotação" />
     <select id="setor" name="setor"
-            class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 text-sm">
+            class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-brand-500 focus:border-brand-500 text-sm">
         <option value="">Nenhum</option>
         @foreach(\App\Models\User::LOTACOES as $key => $label)
             <option value="{{ $key }}" {{ old('setor', $user?->setor) === $key ? 'selected' : '' }}>
@@ -62,7 +62,7 @@
 <div>
     <x-input-label for="orgao_id" value="Unidade Gestora (Secretaria)" />
     <select id="orgao_id" name="orgao_id"
-            class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 text-sm">
+            class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-brand-500 focus:border-brand-500 text-sm">
         <option value="">Nenhuma</option>
         @foreach(\App\Models\Orgao::whereNotNull('codigo')->orderBy('codigo')->get() as $org)
             <option value="{{ $org->id }}" {{ (string) old('orgao_id', $user?->orgao_id) === (string) $org->id ? 'selected' : '' }}>
@@ -85,7 +85,7 @@
             @php $excl = \App\Models\User::PERFIS_EXCLUSIVOS[$role->name] ?? null; @endphp
             <label class="flex items-start gap-2 text-sm text-gray-700">
                 <input type="checkbox" name="roles[]" value="{{ $role->name }}"
-                       class="mt-0.5 rounded border-gray-300 text-indigo-600 shadow-sm focus:ring-indigo-500"
+                       class="mt-0.5 rounded border-gray-300 text-brand-600 shadow-sm focus:ring-brand-500"
                        {{ in_array($role->name, $perfisAtuais) ? 'checked' : '' }}>
                 <span>
                     {{ \App\Models\User::$roleLabels[$role->name] ?? $role->name }}
@@ -117,7 +117,7 @@
 {{-- Status --}}
 <div class="flex items-center gap-3">
     <input id="status" name="status" type="checkbox" value="1"
-           class="rounded border-gray-300 text-indigo-600 shadow-sm focus:ring-indigo-500"
+           class="rounded border-gray-300 text-brand-600 shadow-sm focus:ring-brand-500"
            {{ old('status', $user ? ($user->status ? '1' : '0') : '1') === '1' ? 'checked' : '' }}>
     <x-input-label for="status" value="Usuário ativo" />
 </div>

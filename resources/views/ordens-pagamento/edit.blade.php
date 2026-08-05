@@ -68,7 +68,7 @@
                 @if($op->temDadosBancarios())
                     <div class="flex items-center justify-between gap-4 text-sm">
                         <span class="text-gray-700">📎 {{ $op->dados_bancarios_nome }}</span>
-                        <a href="{{ route('ordens-pagamento.dados-bancarios.download', $op) }}" class="text-indigo-600 hover:text-indigo-900">Baixar</a>
+                        <a href="{{ route('ordens-pagamento.dados-bancarios.download', $op) }}" class="text-brand-600 hover:text-brand-900">Baixar</a>
                     </div>
                 @else
                     <p class="text-sm text-gray-400 mb-3">Nenhum arquivo anexado.</p>
@@ -77,8 +77,8 @@
                       enctype="multipart/form-data" class="flex items-center gap-3 mt-3">
                     @csrf
                     <input type="file" name="arquivo" required accept=".pdf,.jpg,.jpeg,.png"
-                           class="text-sm text-gray-600 file:mr-3 file:py-1.5 file:px-3 file:rounded-md file:border-0 file:text-sm file:bg-indigo-50 file:text-indigo-700 hover:file:bg-indigo-100" />
-                    <button type="submit" class="px-3 py-1.5 text-sm font-medium text-white bg-indigo-600 rounded-md hover:bg-indigo-700">Anexar</button>
+                           class="text-sm text-gray-600 file:mr-3 file:py-1.5 file:px-3 file:rounded-md file:border-0 file:text-sm file:bg-brand-50 file:text-brand-700 hover:file:bg-brand-100" />
+                    <button type="submit" class="px-3 py-1.5 text-sm font-medium text-white bg-brand-600 rounded-md hover:bg-brand-700">Anexar</button>
                 </form>
                 <x-input-error :messages="$errors->get('arquivo')" class="mt-2" />
             </div>
@@ -86,7 +86,7 @@
             {{-- Ações --}}
             <div class="flex flex-wrap items-center justify-between gap-3">
                 <a href="{{ route('ordens-pagamento.imprimir', $op) }}" target="_blank"
-                   class="px-4 py-2 text-sm font-medium text-indigo-700 border border-indigo-300 rounded-lg hover:bg-indigo-50">
+                   class="px-4 py-2 text-sm font-medium text-brand-700 border border-brand-300 rounded-lg hover:bg-brand-50">
                     Imprimir / PDF
                 </a>
 

@@ -3,7 +3,7 @@
         <div class="flex items-center justify-between">
             <h2 class="text-xl font-semibold text-gray-800">Programas Governamentais</h2>
             <a href="{{ route('programas.create') }}"
-               class="px-4 py-2 text-sm font-medium text-white bg-indigo-600 rounded-md hover:bg-indigo-700">
+               class="px-4 py-2 text-sm font-medium text-white bg-brand-600 rounded-md hover:bg-brand-700">
                 + Novo Programa
             </a>
         </div>
@@ -21,12 +21,12 @@
                     <label for="busca" class="block text-xs font-medium text-gray-500 mb-1">Pesquisar</label>
                     <input type="text" name="busca" id="busca" value="{{ $filtros['busca'] ?? '' }}"
                            placeholder="Nome ou sigla do programa"
-                           class="block w-full border-gray-300 rounded-md shadow-sm text-sm focus:ring-indigo-500 focus:border-indigo-500">
+                           class="block w-full border-gray-300 rounded-md shadow-sm text-sm focus:ring-brand-500 focus:border-brand-500">
                 </div>
                 <div>
                     <label for="orgao_id" class="block text-xs font-medium text-gray-500 mb-1">Órgão</label>
                     <select name="orgao_id" id="orgao_id"
-                            class="block w-full border-gray-300 rounded-md shadow-sm text-sm focus:ring-indigo-500 focus:border-indigo-500">
+                            class="block w-full border-gray-300 rounded-md shadow-sm text-sm focus:ring-brand-500 focus:border-brand-500">
                         <option value="">Todos</option>
                         @foreach($orgaos as $orgao)
                             <option value="{{ $orgao->id }}" {{ (string) ($filtros['orgao_id'] ?? '') === (string) $orgao->id ? 'selected' : '' }}>
@@ -38,7 +38,7 @@
                 <div>
                     <label for="tipo" class="block text-xs font-medium text-gray-500 mb-1">Tipo</label>
                     <select name="tipo" id="tipo"
-                            class="block w-full border-gray-300 rounded-md shadow-sm text-sm focus:ring-indigo-500 focus:border-indigo-500">
+                            class="block w-full border-gray-300 rounded-md shadow-sm text-sm focus:ring-brand-500 focus:border-brand-500">
                         <option value="">Todos</option>
                         @foreach(\App\Models\Programa::TIPOS as $key => $label)
                             <option value="{{ $key }}" {{ ($filtros['tipo'] ?? '') === $key ? 'selected' : '' }}>{{ $label }}</option>
@@ -48,7 +48,7 @@
                 <div>
                     <label for="status" class="block text-xs font-medium text-gray-500 mb-1">Status</label>
                     <select name="status" id="status"
-                            class="block w-full border-gray-300 rounded-md shadow-sm text-sm focus:ring-indigo-500 focus:border-indigo-500">
+                            class="block w-full border-gray-300 rounded-md shadow-sm text-sm focus:ring-brand-500 focus:border-brand-500">
                         <option value="">Todos</option>
                         @foreach(\App\Models\Programa::STATUS as $key => $label)
                             <option value="{{ $key }}" {{ ($filtros['status'] ?? '') === $key ? 'selected' : '' }}>{{ $label }}</option>
@@ -57,7 +57,7 @@
                 </div>
                 <div class="sm:col-span-2 lg:col-span-5 flex items-center gap-3">
                     <button type="submit"
-                            class="px-4 py-2 text-sm font-medium text-white bg-indigo-600 rounded-md hover:bg-indigo-700">
+                            class="px-4 py-2 text-sm font-medium text-white bg-brand-600 rounded-md hover:bg-brand-700">
                         Filtrar
                     </button>
                     @if($temFiltro)
@@ -99,7 +99,7 @@
                                 </td>
                                 <td class="px-6 py-4 text-sm">
                                     @php
-                                        $colors = ['ativo' => 'green', 'encerrado' => 'indigo', 'suspenso' => 'red'];
+                                        $colors = ['ativo' => 'green', 'encerrado' => 'brand', 'suspenso' => 'red'];
                                         $color = $colors[$programa->status] ?? 'gray';
                                     @endphp
                                     <span class="px-2 py-1 text-xs font-medium bg-{{ $color }}-100 text-{{ $color }}-800 rounded-full">
@@ -108,11 +108,11 @@
                                 </td>
                                 <td class="px-6 py-4 text-right text-sm font-medium space-x-3 whitespace-nowrap">
                                     <a href="{{ route('programas.chamamentos.index', $programa) }}"
-                                       class="inline-flex items-center gap-1 px-3 py-1 text-xs font-medium text-white bg-indigo-600 rounded-md hover:bg-indigo-700">
+                                       class="inline-flex items-center gap-1 px-3 py-1 text-xs font-medium text-white bg-brand-600 rounded-md hover:bg-brand-700">
                                         Chamamentos
-                                        <span class="bg-indigo-500 text-white rounded px-1">{{ $programa->chamamentos_count ?? 0 }}</span>
+                                        <span class="bg-brand-500 text-white rounded px-1">{{ $programa->chamamentos_count ?? 0 }}</span>
                                     </a>
-                                    <a href="{{ route('programas.edit', $programa) }}" class="text-indigo-600 hover:text-indigo-900">Editar</a>
+                                    <a href="{{ route('programas.edit', $programa) }}" class="text-brand-600 hover:text-brand-900">Editar</a>
                                     <form action="{{ route('programas.destroy', $programa) }}" method="POST" class="inline"
                                           data-confirm="Deseja remover este programa?">
                                         @csrf

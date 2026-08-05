@@ -26,7 +26,7 @@
                             </div>
                         @else
                             <select id="orgao_id" name="orgao_id" required
-                                    class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 text-sm">
+                                    class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-brand-500 focus:border-brand-500 text-sm">
                                 <option value="">Selecione...</option>
                                 @foreach($orgaos as $orgao)
                                     <option value="{{ $orgao->id }}" {{ old('orgao_id') == $orgao->id ? 'selected' : '' }}>
@@ -40,7 +40,7 @@
                     <div>
                         <x-input-label for="esfera" value="Esfera do Concedente *" />
                         <select id="esfera" name="esfera" required
-                                class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 text-sm">
+                                class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-brand-500 focus:border-brand-500 text-sm">
                             @foreach($esferas as $cod => $label)
                                 <option value="{{ $cod }}" {{ old('esfera', '01') === $cod ? 'selected' : '' }}>
                                     {{ $cod }} — {{ $label }}
@@ -52,7 +52,7 @@
                     <div class="flex items-center justify-end gap-4 pt-2">
                         <a href="{{ route('processos.index') }}" class="text-sm text-gray-600 hover:text-gray-900">Cancelar</a>
                         <button type="submit"
-                                class="px-4 py-2 text-sm font-medium text-white bg-indigo-600 rounded-md hover:bg-indigo-700">
+                                class="px-4 py-2 text-sm font-medium text-white bg-brand-600 rounded-md hover:bg-brand-700">
                             Abrir Processo
                         </button>
                     </div>

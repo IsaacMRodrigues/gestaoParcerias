@@ -13,7 +13,7 @@
                 <!-- Logo -->
                 <div class="shrink-0 flex items-center">
                     <a href="{{ route('dashboard') }}" class="flex items-center gap-2.5">
-                        <span class="w-9 h-9 bg-indigo-600 rounded-lg flex items-center justify-center text-white font-black text-sm shadow-sm">PGP</span>
+                        <x-marca class="h-9" />
                     </a>
                 </div>
 
@@ -131,7 +131,7 @@
                 <x-dropdown align="right" width="64">
                     <x-slot name="trigger">
                         <button title="{{ Auth::user()->name }}"
-                                class="flex items-center justify-center w-9 h-9 rounded-full bg-indigo-100 text-indigo-700 text-xs font-bold hover:bg-indigo-200 focus:outline-none focus:ring-2 focus:ring-indigo-300 transition">
+                                class="flex items-center justify-center w-9 h-9 rounded-full bg-brand-100 text-brand-700 text-xs font-bold hover:bg-brand-200 focus:outline-none focus:ring-2 focus:ring-brand-300 transition">
                             {{ $navInitials }}
                         </button>
                     </x-slot>
@@ -141,7 +141,7 @@
                             <div class="text-sm font-semibold text-gray-900">{{ Auth::user()->name }}</div>
                             <div class="text-xs text-gray-500 truncate">{{ Auth::user()->email }}</div>
                             @if($navUser?->setor)
-                                <div class="mt-1.5 inline-flex items-center gap-1 text-[11px] font-medium text-indigo-700 bg-indigo-50 px-2 py-0.5 rounded-full">
+                                <div class="mt-1.5 inline-flex items-center gap-1 text-[11px] font-medium text-brand-700 bg-brand-50 px-2 py-0.5 rounded-full">
                                     {{ $navUser->setorLabel() }}
                                 </div>
                             @endif

@@ -11,7 +11,7 @@
     <div>
         <x-input-label for="tipo" value="Tipo *" />
         <select id="tipo" name="tipo" required
-                class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 text-sm">
+                class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-brand-500 focus:border-brand-500 text-sm">
             <option value="">Selecione...</option>
             @foreach(\App\Models\Instrumento::TIPOS as $key => $label)
                 <option value="{{ $key }}" {{ old('tipo', $instrumento?->tipo) === $key ? 'selected' : '' }}>
@@ -24,7 +24,7 @@
     <div>
         <x-input-label for="status" value="Status *" />
         <select id="status" name="status" required
-                class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 text-sm">
+                class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-brand-500 focus:border-brand-500 text-sm">
             @foreach(\App\Models\Instrumento::STATUS as $key => $label)
                 <option value="{{ $key }}" {{ old('status', $instrumento?->status ?? 'minuta') === $key ? 'selected' : '' }}>
                     {{ $label }}
@@ -37,7 +37,7 @@
 <div class="mt-4">
     <x-input-label for="objeto" value="Objeto *" />
     <textarea id="objeto" name="objeto" rows="3" required
-              class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 text-sm">{{ old('objeto', $instrumento?->objeto) }}</textarea>
+              class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-brand-500 focus:border-brand-500 text-sm">{{ old('objeto', $instrumento?->objeto) }}</textarea>
     <x-input-error :messages="$errors->get('objeto')" class="mt-2" />
 </div>
 
@@ -82,7 +82,7 @@
     <div class="flex items-center gap-3 mb-4">
         <input id="publicado_doe" name="publicado_doe" type="checkbox" value="1"
                x-model="pub"
-               class="rounded border-gray-300 text-indigo-600 shadow-sm focus:ring-indigo-500"
+               class="rounded border-gray-300 text-brand-600 shadow-sm focus:ring-brand-500"
                {{ old('publicado_doe', $instrumento?->publicado_doe) ? 'checked' : '' }}>
         <x-input-label for="publicado_doe" value="Publicado no Diário Oficial" />
     </div>

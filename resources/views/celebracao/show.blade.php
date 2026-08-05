@@ -35,7 +35,7 @@
 
             @if($ehOsc)
                 <div>
-                    <p class="text-sm text-indigo-600">
+                    <p class="text-sm text-brand-600">
                         <a href="{{ route('portal.minhas-propostas') }}" class="hover:underline">← Minhas Propostas</a>
                     </p>
                     <h1 class="text-2xl font-bold text-gray-900 mt-1">Celebração da Parceria</h1>
@@ -130,9 +130,9 @@
                                 <form action="{{ route('celebracao.avancar', $proposta) }}" method="POST" class="space-y-2">
                                     @csrf
                                     <textarea name="parecer" rows="2" placeholder="Observação (opcional)"
-                                              class="block w-full border-gray-300 rounded-md shadow-sm text-sm focus:ring-indigo-500 focus:border-indigo-500"></textarea>
+                                              class="block w-full border-gray-300 rounded-md shadow-sm text-sm focus:ring-brand-500 focus:border-brand-500"></textarea>
                                     <button type="submit" @disabled($pendencias)
-                                            class="px-4 py-2 text-sm font-medium text-white bg-indigo-600 rounded-md hover:bg-indigo-700 disabled:opacity-50 disabled:cursor-not-allowed">
+                                            class="px-4 py-2 text-sm font-medium text-white bg-brand-600 rounded-md hover:bg-brand-700 disabled:opacity-50 disabled:cursor-not-allowed">
                                         Encaminhar para
                                         {{ $setorLabel(\App\Models\Proposta::ETAPAS_CELEBRACAO[$etapaAtual + 1]['setor']) }}
                                     </button>
@@ -162,7 +162,7 @@
 
                 @if($proposta->celebracaoTramitacoes->isNotEmpty())
                     <details class="mt-4 pt-4 border-t border-gray-100">
-                        <summary class="text-xs text-indigo-600 cursor-pointer hover:underline">
+                        <summary class="text-xs text-brand-600 cursor-pointer hover:underline">
                             Histórico de movimentações ({{ $proposta->celebracaoTramitacoes->count() }})
                         </summary>
                         <ul class="mt-2 space-y-2">

@@ -38,5 +38,5 @@
 <div class="mt-4">
     <x-input-label for="recursos" value="Recursos Necessários" />
     <textarea id="recursos" name="recursos" rows="2"
-              class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 text-sm">{{ old('recursos', $etapa?->recursos) }}</textarea>
+              class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-brand-500 focus:border-brand-500 text-sm">{{ old('recursos', $etapa?->recursos) }}</textarea>
 </div>

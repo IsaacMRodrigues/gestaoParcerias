@@ -3,7 +3,7 @@
         <div class="flex items-center justify-between">
             <h2 class="text-xl font-semibold text-gray-800">Processos de Planejamento</h2>
             <a href="{{ route('processos.create') }}"
-               class="px-4 py-2 text-sm font-medium text-white bg-indigo-600 rounded-md hover:bg-indigo-700">
+               class="px-4 py-2 text-sm font-medium text-white bg-brand-600 rounded-md hover:bg-brand-700">
                 + Novo Processo
             </a>
         </div>
@@ -30,7 +30,7 @@
                             @php $color = \App\Models\Processo::STATUS_COLORS[$processo->status] ?? 'gray'; @endphp
                             <tr>
                                 <td class="px-6 py-4 text-sm font-medium text-gray-900">
-                                    <a href="{{ route('processos.show', $processo) }}" class="text-indigo-600 hover:underline">
+                                    <a href="{{ route('processos.show', $processo) }}" class="text-brand-600 hover:underline">
                                         {{ $processo->numero }}
                                     </a>
                                 </td>
@@ -47,7 +47,7 @@
                                 </td>
                                 <td class="px-6 py-4 text-sm text-gray-500">{{ $processo->created_at->format('d/m/Y') }}</td>
                                 <td class="px-6 py-4 text-right text-sm font-medium space-x-3 whitespace-nowrap">
-                                    <a href="{{ route('processos.show', $processo) }}" class="text-indigo-600 hover:text-indigo-900">Abrir</a>
+                                    <a href="{{ route('processos.show', $processo) }}" class="text-brand-600 hover:text-brand-900">Abrir</a>
                                     <form action="{{ route('processos.destroy', $processo) }}" method="POST" class="inline"
                                           data-confirm="Remover este processo?">
                                         @csrf @method('DELETE')

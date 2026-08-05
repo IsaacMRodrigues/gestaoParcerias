@@ -18,7 +18,7 @@
 <div class="mt-4">
     <x-input-label for="objeto" value="Objeto *" />
     <textarea id="objeto" name="objeto" rows="3" required
-              class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 text-sm">{{ old('objeto', $chamamento?->objeto) }}</textarea>
+              class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-brand-500 focus:border-brand-500 text-sm">{{ old('objeto', $chamamento?->objeto) }}</textarea>
     <x-input-error :messages="$errors->get('objeto')" class="mt-2" />
 </div>
 
@@ -26,7 +26,7 @@
     <div>
         <x-input-label for="tipo" value="Tipo *" />
         <select id="tipo" name="tipo" required
-                class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 text-sm">
+                class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-brand-500 focus:border-brand-500 text-sm">
             <option value="">Selecione...</option>
             @foreach(\App\Models\Chamamento::TIPOS as $key => $label)
                 <option value="{{ $key }}" {{ old('tipo', $chamamento?->tipo) === $key ? 'selected' : '' }}>
@@ -45,7 +45,7 @@
     <div>
         <x-input-label for="status" value="Status *" />
         <select id="status" name="status" required
-                class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 text-sm">
+                class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-brand-500 focus:border-brand-500 text-sm">
             @foreach(\App\Models\Chamamento::STATUS as $key => $label)
                 <option value="{{ $key }}" {{ old('status', $chamamento?->status ?? 'rascunho') === $key ? 'selected' : '' }}>
                     {{ $label }}
@@ -87,6 +87,6 @@
 <div class="mt-4">
     <x-input-label for="requisitos" value="Requisitos para Participação" />
     <textarea id="requisitos" name="requisitos" rows="4"
-              class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 text-sm">{{ old('requisitos', $chamamento?->requisitos) }}</textarea>
+              class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-brand-500 focus:border-brand-500 text-sm">{{ old('requisitos', $chamamento?->requisitos) }}</textarea>
     <x-input-error :messages="$errors->get('requisitos')" class="mt-2" />
 </div>

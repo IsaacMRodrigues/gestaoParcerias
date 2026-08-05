@@ -32,7 +32,7 @@
                                 <span>Solicitado em {{ $u->created_at->format('d/m/Y H:i') }}</span>
                             </div>
                             @if($u->criadoPor)
-                                <p class="mt-1 text-xs text-indigo-600">Subusuário criado por {{ $u->criadoPor->name }} (UG).</p>
+                                <p class="mt-1 text-xs text-brand-600">Subusuário criado por {{ $u->criadoPor->name }} (UG).</p>
                             @endif
                             @if($u->solicitacao_obs)
                                 <p class="mt-2 text-sm text-gray-600 bg-gray-50 rounded p-2">"{{ $u->solicitacao_obs }}"</p>
@@ -47,7 +47,7 @@
                         <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
                             <div>
                                 <x-input-label value="Setor de lotação" />
-                                <select name="setor" class="mt-1 w-full border-gray-300 rounded-md shadow-sm text-sm focus:ring-indigo-500 focus:border-indigo-500">
+                                <select name="setor" class="mt-1 w-full border-gray-300 rounded-md shadow-sm text-sm focus:ring-brand-500 focus:border-brand-500">
                                     <option value="">—</option>
                                     @foreach(\App\Models\User::LOTACOES as $valor => $rotulo)
                                         <option value="{{ $valor }}" @selected($u->setor === $valor)>{{ $rotulo }}</option>
@@ -56,7 +56,7 @@
                             </div>
                             <div>
                                 <x-input-label value="Secretaria / Unidade Gestora" />
-                                <select name="orgao_id" class="mt-1 w-full border-gray-300 rounded-md shadow-sm text-sm focus:ring-indigo-500 focus:border-indigo-500">
+                                <select name="orgao_id" class="mt-1 w-full border-gray-300 rounded-md shadow-sm text-sm focus:ring-brand-500 focus:border-brand-500">
                                     <option value="">—</option>
                                     @foreach($orgaos as $orgao)
                                         <option value="{{ $orgao->id }}" @selected($u->orgao_id === $orgao->id)>
@@ -73,7 +73,7 @@
                                 @foreach($roles as $role)
                                     <label class="flex items-center gap-2 text-sm text-gray-700">
                                         <input type="checkbox" name="roles[]" value="{{ $role->name }}"
-                                               class="rounded border-gray-300 text-indigo-600 focus:ring-indigo-500">
+                                               class="rounded border-gray-300 text-brand-600 focus:ring-brand-500">
                                         {{ \App\Models\User::$roleLabels[$role->name] ?? $role->name }}
                                     </label>
                                 @endforeach

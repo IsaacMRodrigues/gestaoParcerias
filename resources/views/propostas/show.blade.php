@@ -21,7 +21,7 @@
                 @endif
                 @if($proposta->temTramiteCelebracao())
                     <a href="{{ route('celebracao.show', $proposta) }}"
-                       class="px-4 py-2 text-sm font-medium text-white bg-indigo-600 rounded-md hover:bg-indigo-700">
+                       class="px-4 py-2 text-sm font-medium text-white bg-brand-600 rounded-md hover:bg-brand-700">
                         Celebração
                     </a>
                 @endif
@@ -64,7 +64,7 @@
                     <div class="flex gap-2">
                         @if(!$parecerTecnico && in_array($proposta->status, ['submetida', 'em_analise']))
                             <a href="{{ route('propostas.pareceres.create', [$proposta, 'tipo' => 'tecnico']) }}"
-                               class="px-3 py-1.5 text-sm font-medium text-white bg-indigo-600 rounded-md hover:bg-indigo-700">
+                               class="px-3 py-1.5 text-sm font-medium text-white bg-brand-600 rounded-md hover:bg-brand-700">
                                 + Parecer Técnico
                             </a>
                         @endif
@@ -119,7 +119,7 @@
                                                 {{ \App\Models\Diligencia::STATUS[$diligencia->status] }}
                                             </span>
                                             <a href="{{ route('propostas.diligencias.show', [$proposta, $diligencia]) }}"
-                                               class="text-xs text-indigo-600 hover:underline">
+                                               class="text-xs text-brand-600 hover:underline">
                                                 {{ $diligencia->status === 'pendente' ? 'Responder' : 'Ver' }}
                                             </a>
                                         </div>
@@ -214,7 +214,7 @@
                         <div class="flex-1 min-w-[180px]">
                             <label class="block text-xs font-medium text-gray-600 mb-1">Tipo</label>
                             <select name="tipo" required
-                                    class="block w-full border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 text-sm">
+                                    class="block w-full border-gray-300 rounded-md shadow-sm focus:ring-brand-500 focus:border-brand-500 text-sm">
                                 @foreach(\App\Models\Documento::TIPOS as $key => $label)
                                     <option value="{{ $key }}">{{ $label }}</option>
                                 @endforeach
@@ -223,10 +223,10 @@
                         <div class="flex-1 min-w-[180px]">
                             <label class="block text-xs font-medium text-gray-600 mb-1">Arquivo</label>
                             <input type="file" name="arquivo" required
-                                   class="block w-full text-sm text-gray-600 file:mr-3 file:py-1 file:px-3 file:rounded file:border-0 file:text-xs file:bg-indigo-50 file:text-indigo-700 hover:file:bg-indigo-100">
+                                   class="block w-full text-sm text-gray-600 file:mr-3 file:py-1 file:px-3 file:rounded file:border-0 file:text-xs file:bg-brand-50 file:text-brand-700 hover:file:bg-brand-100">
                         </div>
                         <button type="submit"
-                                class="px-3 py-2 text-sm font-medium text-white bg-indigo-600 rounded-md hover:bg-indigo-700">
+                                class="px-3 py-2 text-sm font-medium text-white bg-brand-600 rounded-md hover:bg-brand-700">
                             Enviar
                         </button>
                     </form>
@@ -236,7 +236,7 @@
                 @forelse($proposta->documentos as $doc)
                     <div class="flex items-center justify-between px-6 py-3 border-b border-gray-50 last:border-0">
                         <div class="flex items-center gap-3">
-                            <div class="w-8 h-8 bg-indigo-50 rounded flex items-center justify-center text-xs font-bold text-indigo-600">
+                            <div class="w-8 h-8 bg-brand-50 rounded flex items-center justify-center text-xs font-bold text-brand-600">
                                 {{ strtoupper(pathinfo($doc->nome_original, PATHINFO_EXTENSION)) }}
                             </div>
                             <div>
@@ -251,7 +251,7 @@
                         </div>
                         <div class="flex items-center gap-3">
                             <a href="{{ route('documentos.download', $doc) }}"
-                               class="text-xs text-indigo-600 hover:text-indigo-800">Baixar</a>
+                               class="text-xs text-brand-600 hover:text-brand-800">Baixar</a>
                             <form action="{{ route('documentos.destroy', [$proposta, $doc]) }}" method="POST"
                                   data-confirm="Remover este documento?">
                                 @csrf @method('DELETE')
@@ -269,7 +269,7 @@
                 <div class="flex items-center justify-between px-6 py-4 border-b border-gray-200">
                     <h3 class="text-base font-semibold text-gray-800">Plano de Trabalho</h3>
                     <a href="{{ route('propostas.metas.create', $proposta) }}"
-                       class="px-3 py-1.5 text-sm font-medium text-white bg-indigo-600 rounded-md hover:bg-indigo-700">
+                       class="px-3 py-1.5 text-sm font-medium text-white bg-brand-600 rounded-md hover:bg-brand-700">
                         + Nova Meta
                     </a>
                 </div>
@@ -296,7 +296,7 @@
                             </div>
                             <div class="flex items-center gap-3 ml-4 shrink-0">
                                 <a href="{{ route('propostas.metas.etapas.create', [$proposta, $meta]) }}"
-                                   class="text-xs text-indigo-600 hover:text-indigo-900 font-medium">+ Etapa</a>
+                                   class="text-xs text-brand-600 hover:text-brand-900 font-medium">+ Etapa</a>
                                 <a href="{{ route('propostas.metas.edit', [$proposta, $meta]) }}"
                                    class="text-xs text-gray-500 hover:text-gray-800">Editar</a>
                                 <form action="{{ route('propostas.metas.destroy', [$proposta, $meta]) }}"

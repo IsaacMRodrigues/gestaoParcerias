@@ -28,7 +28,7 @@
                             @php $atual = $processo->tramitacaoAtual(); @endphp
                             <tr>
                                 <td class="px-6 py-4 text-sm font-medium text-gray-900">
-                                    <a href="{{ route('processos.show', $processo) }}" class="text-indigo-600 hover:underline">
+                                    <a href="{{ route('processos.show', $processo) }}" class="text-brand-600 hover:underline">
                                         {{ $processo->numero }}
                                     </a>
                                 </td>
@@ -46,7 +46,7 @@
                                     @endif
                                 </td>
                                 <td class="px-6 py-4 text-right text-sm font-medium whitespace-nowrap">
-                                    <a href="{{ route('processos.show', $processo) }}" class="text-indigo-600 hover:text-indigo-900">Abrir</a>
+                                    <a href="{{ route('processos.show', $processo) }}" class="text-brand-600 hover:text-brand-900">Abrir</a>
                                 </td>
                             </tr>
                         @empty

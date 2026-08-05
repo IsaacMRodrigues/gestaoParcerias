@@ -7,7 +7,7 @@
                 <p class="text-sm text-gray-500 mt-0.5">{{ $osc->name }} — CNPJ: {{ $osc->cnpj }}</p>
             </div>
             <a href="{{ route('portal.index') }}"
-               class="px-4 py-2 text-sm font-medium text-indigo-700 border border-indigo-300 rounded-lg hover:bg-indigo-50 transition">
+               class="px-4 py-2 text-sm font-medium text-brand-700 border border-brand-300 rounded-lg hover:bg-brand-50 transition">
                 Ver Chamamentos
             </a>
         </div>
@@ -41,7 +41,7 @@
                     </span>
                     @if($proposta->temTramiteCelebracao())
                         <a href="{{ route('celebracao.show', $proposta) }}"
-                           class="px-3 py-1.5 text-xs font-semibold text-white bg-indigo-600 rounded-md hover:bg-indigo-700 whitespace-nowrap">
+                           class="px-3 py-1.5 text-xs font-semibold text-white bg-brand-600 rounded-md hover:bg-brand-700 whitespace-nowrap">
                             Celebração
                             @if($proposta->celebracao_setor === 'osc' && !$proposta->celebracaoConcluida())
                                 <span class="ml-1 px-1 py-0.5 bg-amber-300 text-amber-900 rounded">sua vez</span>
@@ -49,7 +49,7 @@
                         </a>
                     @endif
                     <a href="{{ route('portal.proposta.show', $proposta) }}"
-                       class="text-sm text-indigo-600 hover:text-indigo-800 font-medium">
+                       class="text-sm text-brand-600 hover:text-brand-800 font-medium">
                         {{ $proposta->status === 'rascunho' ? 'Continuar' : 'Ver' }}
                     </a>
                 </div>
@@ -57,7 +57,7 @@
         @empty
             <div class="text-center py-20 text-gray-400">
                 <p class="text-lg font-medium">Nenhuma proposta enviada ainda.</p>
-                <a href="{{ route('portal.index') }}" class="text-indigo-600 hover:underline text-sm mt-2 inline-block">
+                <a href="{{ route('portal.index') }}" class="text-brand-600 hover:underline text-sm mt-2 inline-block">
                     Ver chamamentos disponíveis
                 </a>
             </div>

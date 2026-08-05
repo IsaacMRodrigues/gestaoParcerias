@@ -13,7 +13,7 @@
                     </span>
                 </h2>
             </div>
-            <span class="px-3 py-1.5 text-sm font-medium bg-indigo-50 text-indigo-700 rounded-full">
+            <span class="px-3 py-1.5 text-sm font-medium bg-brand-50 text-brand-700 rounded-full">
                 {{ \App\Models\Peca::CATEGORIA_LABELS[$categoria] ?? $categoria }}
             </span>
         </div>

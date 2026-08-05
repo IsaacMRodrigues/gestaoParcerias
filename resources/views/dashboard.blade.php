@@ -41,7 +41,7 @@
             {{-- Caixa de entrada do setor --}}
             @if(!is_null($minhaCaixa))
                 <a href="{{ route('processos.caixa') }}"
-                   class="flex items-center justify-between gap-4 p-5 rounded-xl bg-gradient-to-r from-indigo-600 to-indigo-700 text-white shadow-sm hover:from-indigo-700 hover:to-indigo-800 transition">
+                   class="flex items-center justify-between gap-4 p-5 rounded-xl bg-gradient-to-r from-brand-600 to-brand-700 text-white shadow-sm hover:from-brand-700 hover:to-brand-800 transition">
                     <div class="flex items-center gap-4">
                         <span class="w-12 h-12 rounded-lg bg-white/15 flex items-center justify-center">
                             <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.8">
@@ -49,7 +49,7 @@
                             </svg>
                         </span>
                         <div>
-                            <p class="text-sm text-indigo-100">Caixa de Entrada · {{ $u->setorLabel() }}</p>
+                            <p class="text-sm text-brand-100">Caixa de Entrada · {{ $u->setorLabel() }}</p>
                             <p class="text-lg font-semibold">
                                 {{ $minhaCaixa }} {{ $minhaCaixa === 1 ? 'processo aguardando' : 'processos aguardando' }}
                             </p>
@@ -63,7 +63,7 @@
             <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
                 @can('planejamento')
                     <x-stat-card label="Processos em trâmite" :value="$processosTramite" :sub="$processosTotal.' no total'"
-                                 color="indigo" :href="route('processos.index')" />
+                                 color="brand" :href="route('processos.index')" />
                 @endcan
 
                 @can('chamamentos')

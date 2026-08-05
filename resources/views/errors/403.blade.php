@@ -38,7 +38,7 @@
                 ← Voltar
             </a>
             <a href="{{ url('/dashboard') }}"
-               class="px-5 py-2.5 text-sm font-semibold text-white bg-indigo-600 rounded-lg hover:bg-indigo-700 transition">
+               class="px-5 py-2.5 text-sm font-semibold text-white bg-brand-600 rounded-lg hover:bg-brand-700 transition">
                 Ir para o início
             </a>
         </div>

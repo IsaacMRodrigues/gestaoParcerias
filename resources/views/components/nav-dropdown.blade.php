@@ -5,8 +5,8 @@
     <button type="button" @click="open = !open" @click.outside="open = false"
             class="inline-flex items-center gap-1 whitespace-nowrap px-1 pt-1 text-sm border-b-2 transition duration-150 ease-in-out
                    {{ $active
-                        ? 'border-indigo-600 text-gray-900 font-semibold'
-                        : 'border-transparent text-gray-500 font-medium hover:text-gray-900 hover:border-indigo-300' }}">
+                        ? 'border-brand-600 text-gray-900 font-semibold'
+                        : 'border-transparent text-gray-500 font-medium hover:text-gray-900 hover:border-brand-300' }}">
         {{ $label }}
         @isset($badge){{ $badge }}@endisset
         <svg class="h-4 w-4 text-gray-400" fill="currentColor" viewBox="0 0 20 20">

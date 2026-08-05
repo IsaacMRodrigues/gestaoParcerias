@@ -27,7 +27,7 @@ class Chamamento extends Model
         'publicado'    => 'blue',
         'em_inscricao' => 'green',
         'em_analise'   => 'yellow',
-        'encerrado'    => 'indigo',
+        'encerrado'    => 'brand',
         'cancelado'    => 'red',
     ];
 

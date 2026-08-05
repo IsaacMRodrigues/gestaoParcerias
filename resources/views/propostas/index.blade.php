@@ -3,7 +3,7 @@
         <div class="flex items-center justify-between">
             <h2 class="text-xl font-semibold text-gray-800">Propostas</h2>
             <a href="{{ route('propostas.create') }}"
-               class="px-4 py-2 text-sm font-medium text-white bg-indigo-600 rounded-md hover:bg-indigo-700">
+               class="px-4 py-2 text-sm font-medium text-white bg-brand-600 rounded-md hover:bg-brand-700">
                 + Nova Proposta
             </a>
         </div>
@@ -30,7 +30,7 @@
                             <tr class="{{ $proposta->status === 'submetida' ? 'bg-amber-50/60' : '' }}">
                                 <td class="px-6 py-4 text-sm font-medium text-gray-900">
                                     <a href="{{ route('propostas.show', $proposta) }}"
-                                       class="text-indigo-600 hover:underline">
+                                       class="text-brand-600 hover:underline">
                                         {{ $proposta->titulo }}
                                     </a>
                                     @if($proposta->status === 'submetida')
@@ -53,7 +53,7 @@
                                 </td>
                                 <td class="px-6 py-4 text-right text-sm font-medium space-x-3 whitespace-nowrap">
                                     <a href="{{ route('propostas.show', $proposta) }}" class="text-gray-500 hover:text-gray-800">Ver</a>
-                                    <a href="{{ route('propostas.edit', $proposta) }}" class="text-indigo-600 hover:text-indigo-900">Editar</a>
+                                    <a href="{{ route('propostas.edit', $proposta) }}" class="text-brand-600 hover:text-brand-900">Editar</a>
                                     <form action="{{ route('propostas.destroy', $proposta) }}" method="POST" class="inline"
                                           data-confirm="Deseja remover esta proposta?">
                                         @csrf

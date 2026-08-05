@@ -22,7 +22,7 @@
                         <x-input-label for="resultado" value="Resultado *" />
                         <select id="resultado" name="resultado" required
                                 x-model="resultado"
-                                class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 text-sm">
+                                class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-brand-500 focus:border-brand-500 text-sm">
                             <option value="">Selecione...</option>
                             @foreach(\App\Models\Parecer::RESULTADOS as $key => $label)
                                 <option value="{{ $key }}" {{ old('resultado') === $key ? 'selected' : '' }}>
@@ -36,7 +36,7 @@
                     <div>
                         <x-input-label for="texto" value="Texto do Parecer *" />
                         <textarea id="texto" name="texto" rows="6" required
-                                  class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 text-sm">{{ old('texto') }}</textarea>
+                                  class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-brand-500 focus:border-brand-500 text-sm">{{ old('texto') }}</textarea>
                         <x-input-error :messages="$errors->get('texto')" class="mt-2" />
                     </div>
 
@@ -58,7 +58,7 @@
                     <div>
                         <x-input-label for="observacoes" value="Observações" />
                         <textarea id="observacoes" name="observacoes" rows="3"
-                                  class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 text-sm">{{ old('observacoes') }}</textarea>
+                                  class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-brand-500 focus:border-brand-500 text-sm">{{ old('observacoes') }}</textarea>
                     </div>
 
                     {{-- Campos de diligência: aparecem apenas quando resultado = diligencia --}}
@@ -68,7 +68,7 @@
                         <div>
                             <x-input-label for="diligencia_descricao" value="O que está sendo solicitado *" />
                             <textarea id="diligencia_descricao" name="diligencia_descricao" rows="3"
-                                      class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 text-sm">{{ old('diligencia_descricao') }}</textarea>
+                                      class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-brand-500 focus:border-brand-500 text-sm">{{ old('diligencia_descricao') }}</textarea>
                             <x-input-error :messages="$errors->get('diligencia_descricao')" class="mt-2" />
                         </div>
                         <div>
@@ -83,7 +83,7 @@
                         <a href="{{ route('propostas.show', $proposta) }}"
                            class="text-sm text-gray-600 hover:text-gray-900">Cancelar</a>
                         <button type="submit"
-                                class="px-4 py-2 text-sm font-medium text-white bg-indigo-600 rounded-md hover:bg-indigo-700">
+                                class="px-4 py-2 text-sm font-medium text-white bg-brand-600 rounded-md hover:bg-brand-700">
                             Registrar Parecer
                         </button>
                     </div>
