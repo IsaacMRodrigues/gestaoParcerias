@@ -654,8 +654,8 @@ São 21 perfis. Um usuário pode ter **vários**; os marcados 🔒 são **exclus
   - **Navegação por sidebar**: a área administrativa deixou a barra horizontal (que espremia a trilha de
     6 etapas) e passou a `layouts/sidebar` — coluna fixa de 256px com a marca, o ciclo da parceria
     numerado, Cadastros e os badges de pendências; no topo restou apenas o menu do usuário (avatar).
-    No celular vira gaveta com sobreposição (Alpine). `layouts/navigation` (barra horizontal) **continua
-    em uso** no portal, para o usuário interno não perder o menu do sistema ao navegar por lá
+    No celular vira gaveta com sobreposição (Alpine). A sidebar vale **também no portal** para o usuário interno; visitante e OSC seguem
+    com o cabeçalho verde da marca. A barra horizontal (`layouts/navigation`) foi **removida**
 
 - [2026-07-30] Conferência dos 8 modelos da pasta `Modelos novos` contra os `.docx` originais
   - Verificação trecho a trecho de cada modelo já incorporado. **Uma divergência encontrada e
