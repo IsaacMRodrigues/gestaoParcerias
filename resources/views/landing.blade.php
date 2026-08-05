@@ -7,97 +7,124 @@
     <title>Parcerias com as OSCs — PGP · São Gonçalo do Rio Abaixo</title>
     @vite(['resources/css/app.css', 'resources/js/app.js'])
 </head>
-<body class="antialiased text-gray-800">
+<body class="antialiased text-gray-800 bg-gray-50">
 
-    {{-- Splash: escolha do perfil de acesso --}}
-    <div class="min-h-screen flex flex-col bg-gradient-to-br from-brand-900 via-brand-900 to-brand-800 text-white">
+    {{-- Faixa institucional: as duas cores da marca, sem dominar a tela --}}
+    <div class="h-1 bg-gradient-to-r from-brand-600 via-brand-500 to-accent-500"></div>
 
-        {{-- textura sutil --}}
-        <div class="absolute inset-0 opacity-[0.07] pointer-events-none"
-             style="background-image:radial-gradient(circle at 1px 1px,#fff 1px,transparent 0);background-size:26px 26px;"></div>
+    <div class="min-h-screen flex flex-col">
 
-        <div class="relative flex-1 flex items-center justify-center px-4 py-14">
-            <div class="w-full max-w-5xl text-center">
+        <header class="bg-white border-b border-gray-200">
+            <div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 h-20 flex items-center gap-3">
+                <x-marca class="h-11" />
+                <span class="leading-tight">
+                    <span class="block font-semibold text-gray-900">Gestão de Parcerias</span>
+                    <span class="block text-xs text-gray-500">Prefeitura de São Gonçalo do Rio Abaixo</span>
+                </span>
+            </div>
+        </header>
 
-                <div class="flex items-center justify-center gap-3 mb-8">
-                    <x-marca variant="branco" class="h-12" />
-                    <span class="text-left leading-tight">
-                        <span class="block font-semibold text-lg">Gestão de Parcerias</span>
-                        <span class="block text-xs text-brand-300">Prefeitura de São Gonçalo do Rio Abaixo</span>
+        <main class="flex-1">
+            <div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-12 sm:py-16">
+
+                <div class="max-w-3xl">
+                    <span class="inline-block text-xs font-semibold uppercase tracking-wider text-brand-700 bg-brand-50 px-2.5 py-1 rounded">
+                        Lei Federal nº 13.019/2014
                     </span>
+                    <h1 class="mt-4 text-3xl sm:text-4xl font-bold tracking-tight text-gray-900">
+                        Parcerias com as Organizações da Sociedade Civil
+                    </h1>
+                    <p class="mt-4 text-gray-600 leading-relaxed">
+                        Plataforma de acesso e controle dos repasses de recursos financeiros do Município
+                        ao Terceiro Setor. Aqui ficam disponíveis os chamamentos públicos e as parcerias
+                        celebradas.
+                    </p>
                 </div>
 
-                <h1 class="text-3xl sm:text-4xl lg:text-5xl font-bold tracking-tight leading-tight">
-                    PARCERIAS COM AS OSCs
-                </h1>
-                <p class="mt-2 text-lg sm:text-xl text-brand-200 font-medium">
-                    Organizações da Sociedade Civil
-                </p>
+                {{-- Acesso ao sistema --}}
+                <section class="mt-12">
+                    <h2 class="text-xs font-semibold uppercase tracking-wider text-gray-400">Acesso ao sistema</h2>
+                    <div class="mt-4 grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        <a href="{{ route('login') }}"
+                           class="group bg-white border border-gray-200 rounded-xl p-5 flex items-start gap-4
+                                  hover:border-brand-300 hover:shadow-sm transition">
+                            <span class="w-11 h-11 shrink-0 rounded-lg bg-brand-50 text-brand-600 flex items-center justify-center">
+                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.8">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M3 21h18M5 21V7l7-4 7 4v14M9 21v-6h6v6"/>
+                                </svg>
+                            </span>
+                            <span class="min-w-0">
+                                <span class="block font-semibold text-gray-900 group-hover:text-brand-700 transition">Prefeitura</span>
+                                <span class="block text-sm text-gray-500 mt-0.5">
+                                    Servidores das Secretarias, SCP, SEPLAN e Procuradoria.
+                                </span>
+                            </span>
+                        </a>
 
-                <p class="mt-6 max-w-3xl mx-auto text-sm sm:text-base text-brand-100/90 leading-relaxed">
-                    Esta é uma plataforma que permite o acesso e o controle dos repasses de recursos
-                    financeiros do Município ao Terceiro Setor. Aqui encontram-se disponíveis os
-                    chamamentos públicos e as parcerias celebradas, nos termos da Lei Federal
-                    nº 13.019/2014.
-                </p>
+                        <a href="{{ route('login') }}"
+                           class="group bg-white border border-gray-200 rounded-xl p-5 flex items-start gap-4
+                                  hover:border-brand-300 hover:shadow-sm transition">
+                            <span class="w-11 h-11 shrink-0 rounded-lg bg-brand-50 text-brand-600 flex items-center justify-center">
+                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.8">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M17 20h5v-2a3 3 0 0 0-5.36-1.86M17 20H7m10 0v-2c0-.66-.13-1.3-.36-1.86m0 0A5 5 0 0 0 7.36 16.14M7 20H2v-2a3 3 0 0 1 5.36-1.86M7 20v-2c0-.66.13-1.3.36-1.86m0 0a5 5 0 0 1 9.28 0M15 7a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z"/>
+                                </svg>
+                            </span>
+                            <span class="min-w-0">
+                                <span class="block font-semibold text-gray-900 group-hover:text-brand-700 transition">OSC</span>
+                                <span class="block text-sm text-gray-500 mt-0.5">
+                                    Propostas, plano de trabalho e acompanhamento da parceria.
+                                </span>
+                            </span>
+                        </a>
+                    </div>
+                </section>
 
-                {{-- Acessos que exigem login --}}
-                <div class="mt-10 grid grid-cols-1 sm:grid-cols-2 gap-4 max-w-3xl mx-auto">
-                    <a href="{{ route('login') }}"
-                       class="group flex items-center justify-center gap-3 px-6 py-4 rounded-full bg-white/95 text-brand-900 font-semibold shadow-lg hover:bg-white hover:-translate-y-0.5 transition">
-                        <svg class="w-5 h-5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.8">
-                            <path stroke-linecap="round" stroke-linejoin="round" d="M3 21h18M5 21V7l7-4 7 4v14M9 21v-6h6v6"/>
-                        </svg>
-                        Acesso Prefeitura
-                    </a>
-                    <a href="{{ route('login') }}"
-                       class="group flex items-center justify-center gap-3 px-6 py-4 rounded-full bg-white/95 text-brand-900 font-semibold shadow-lg hover:bg-white hover:-translate-y-0.5 transition">
-                        <svg class="w-5 h-5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.8">
-                            <path stroke-linecap="round" stroke-linejoin="round" d="M17 20h5v-2a3 3 0 0 0-5.36-1.86M17 20H7m10 0v-2c0-.66-.13-1.3-.36-1.86m0 0A5 5 0 0 0 7.36 16.14M7 20H2v-2a3 3 0 0 1 5.36-1.86M7 20v-2c0-.66.13-1.3.36-1.86m0 0a5 5 0 0 1 9.28 0M15 7a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z"/>
-                        </svg>
-                        Acesso OSC
-                    </a>
-                </div>
+                {{-- Consulta pública --}}
+                <section class="mt-10">
+                    <div class="flex items-baseline justify-between gap-3">
+                        <h2 class="text-xs font-semibold uppercase tracking-wider text-gray-400">Consulta pública</h2>
+                        <span class="text-xs text-gray-400">sem necessidade de cadastro</span>
+                    </div>
+                    <div class="mt-4 grid grid-cols-1 sm:grid-cols-3 gap-4">
+                        @foreach([
+                            ['Cidadão', 'Chamamentos abertos e parcerias em andamento.', route('portal.index')],
+                            ['Parlamentar', 'Repasses, valores e vigência das parcerias.', route('transparencia')],
+                            ['Conselho', 'Acompanhamento das parcerias da política setorial.', route('transparencia')],
+                        ] as [$titulo, $desc, $url])
+                            <a href="{{ $url }}"
+                               class="group bg-white border border-gray-200 border-t-2 border-t-accent-500 rounded-xl p-5
+                                      hover:border-accent-300 hover:border-t-accent-500 hover:shadow-sm transition">
+                                <span class="block font-semibold text-gray-900 group-hover:text-accent-700 transition">
+                                    {{ $titulo }}
+                                </span>
+                                <span class="block text-sm text-gray-500 mt-1">{{ $desc }}</span>
+                                <span class="inline-flex items-center gap-1 text-xs font-medium text-accent-600 mt-3">
+                                    Consultar
+                                    <svg class="w-3.5 h-3.5 group-hover:translate-x-0.5 transition" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.2">
+                                        <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/>
+                                    </svg>
+                                </span>
+                            </a>
+                        @endforeach
+                    </div>
+                </section>
 
-                {{-- Consulta pública (sem login) --}}
-                <div class="mt-4 grid grid-cols-1 sm:grid-cols-3 gap-4 max-w-3xl mx-auto">
-                    <a href="{{ route('portal.index') }}"
-                       class="px-5 py-3.5 rounded-full bg-accent-500 text-white font-semibold text-sm shadow-lg hover:bg-accent-600 hover:-translate-y-0.5 transition">
-                        Acesso Cidadão
-                    </a>
-                    <a href="{{ route('transparencia') }}"
-                       class="px-5 py-3.5 rounded-full bg-accent-500 text-white font-semibold text-sm shadow-lg hover:bg-accent-600 hover:-translate-y-0.5 transition">
-                        Acesso Parlamentar
-                    </a>
-                    <a href="{{ route('transparencia') }}"
-                       class="px-5 py-3.5 rounded-full bg-accent-500 text-white font-semibold text-sm shadow-lg hover:bg-accent-600 hover:-translate-y-0.5 transition">
-                        Acesso Conselho
-                    </a>
-                </div>
-
-                <p class="mt-4 text-xs text-brand-300">
-                    Cidadão, Parlamentar e Conselho consultam livremente, sem necessidade de cadastro.
-                </p>
-
-                {{-- Atalhos secundários --}}
-                <div class="mt-10 flex flex-wrap items-center justify-center gap-x-6 gap-y-2 text-sm text-brand-200">
-                    <a href="{{ route('portal.osc.create') }}" class="hover:text-white hover:underline">
+                {{-- Atalhos --}}
+                <div class="mt-10 pt-6 border-t border-gray-200 flex flex-wrap items-center gap-x-6 gap-y-2 text-sm">
+                    <a href="{{ route('portal.osc.create') }}" class="text-brand-700 hover:underline font-medium">
                         Cadastrar minha OSC
                     </a>
-                    <span class="text-brand-500">·</span>
-                    <a href="{{ route('portal.index') }}" class="hover:text-white hover:underline">
-                        Chamamentos abertos
-                    </a>
-                    <span class="text-brand-500">·</span>
-                    <a href="{{ route('validacao.index') }}" class="hover:text-white hover:underline">
-                        Validar documento
-                    </a>
+                    <a href="{{ route('portal.index') }}" class="text-gray-600 hover:text-gray-900">Chamamentos abertos</a>
+                    <a href="{{ route('validacao.index') }}" class="text-gray-600 hover:text-gray-900">Validar documento</a>
                 </div>
             </div>
-        </div>
+        </main>
 
-        <footer class="relative border-t border-white/10 py-5 text-center text-xs text-brand-300">
-            Plataforma de Gestão de Parcerias — Sistema público municipal · PGP {{ now()->year }}
+        <footer class="bg-white border-t border-gray-200">
+            <div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-5 flex flex-col sm:flex-row items-center justify-between gap-2 text-xs text-gray-400">
+                <span>Plataforma de Gestão de Parcerias — Sistema público municipal</span>
+                <span>PGP · {{ now()->year }}</span>
+            </div>
         </footer>
     </div>
 </body>

@@ -639,6 +639,21 @@ São 21 perfis. Um usuário pode ter **vários**; os marcados 🔒 são **exclus
   - Menu do usuário reduzido a **apenas o avatar** (iniciais), com o nome no `title`; nome completo e
     perfil saíram do topo (continuam dentro do dropdown)
 
+- [2026-07-30] Ajuste do uso da cor — **neutro na base, marca nos detalhes**
+  - Os blocos grandes de verde saturado (splash da tela principal, hero do portal, cabeçalho da
+    Transparência, fundo do login e header/footer do portal) davam ar de site de campanha, não de
+    ferramenta institucional. Todos passaram a **fundo neutro** (branco / `gray-50`) com texto escuro
+  - A marca aparece agora como **detalhe**: faixa institucional de 4px no topo de todos os layouts
+    (gradiente **verde → laranja**, mostrando as duas cores sem dominar), botões, estados ativos,
+    links, ícones em chips `brand-50` e bordas de destaque
+  - **O laranja ganhou função**, em vez de enfeite: identifica a **consulta pública** (cartões Cidadão /
+    Parlamentar / Conselho na tela principal, com borda superior laranja), o selo da **Transparência**,
+    o total de valor pactuado e os **badges de pendência** na sidebar
+  - Tela principal redesenhada como página institucional: cabeçalho com a marca, chamada, e os acessos
+    em **cartões** separados por finalidade (Acesso ao sistema × Consulta pública) em vez de pílulas
+    sobre um fundo colorido
+  - A sidebar passou a `top-1` para não cobrir a faixa institucional
+
 - [2026-07-30] **Identidade visual da Prefeitura** e **sidebar** no lugar da navbar
   - **Paleta oficial** no `tailwind.config.js`: `brand` (verde **#00A859**, escuro **#008A48**, claro
     **#E6F9F0**) e `accent` (laranja **#EE7736**, escuro **#D4622A**, claro **#FEF3EC**), com as escalas

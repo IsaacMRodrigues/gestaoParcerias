@@ -14,7 +14,7 @@
     $etapaOff = 'border-gray-300 text-gray-400';
 @endphp
 
-<aside class="fixed inset-y-0 left-0 z-40 w-64 bg-white border-r border-gray-200 flex flex-col
+<aside class="fixed top-1 bottom-0 left-0 z-40 w-64 bg-white border-r border-gray-200 flex flex-col
               transform transition-transform duration-200 lg:translate-x-0"
        :class="sidebarOpen ? 'translate-x-0' : '-translate-x-full'">
 

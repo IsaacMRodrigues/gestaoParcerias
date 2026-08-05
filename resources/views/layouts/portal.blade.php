@@ -18,6 +18,7 @@
 @if($portalInterno)
     {{-- Usuário interno da Administração: navega o portal com a mesma sidebar
          do sistema, para não perder o menu nem trocar de padrão visual. --}}
+    <div class="h-1 bg-gradient-to-r from-brand-600 via-brand-500 to-accent-500"></div>
     <div class="min-h-screen" x-data="{ sidebarOpen: false }">
         @include('layouts.sidebar')
 
@@ -86,40 +87,45 @@
         </div>
     </div>
 @else
-    {{-- Visitante e OSC: portal público, com o cabeçalho da marca. --}}
+    {{-- Visitante e OSC: portal público, com cabeçalho claro e a cor nos detalhes. --}}
     <div class="min-h-screen flex flex-col">
-        <header class="bg-brand-800 text-white shadow">
+        <div class="h-1 bg-gradient-to-r from-brand-600 via-brand-500 to-accent-500"></div>
+
+        <header class="bg-white border-b border-gray-200">
             <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
-                <div class="flex items-center justify-between h-16">
-                    <a href="{{ route('portal.index') }}" class="flex items-center gap-3">
-                        <x-marca variant="branco" class="h-8" />
-                        <span class="font-semibold text-lg tracking-tight hidden sm:block">
+                <div class="flex items-center justify-between h-16 gap-4">
+                    <a href="{{ route('portal.index') }}" class="flex items-center gap-3 min-w-0">
+                        <x-marca class="h-9" />
+                        <span class="font-semibold text-gray-900 tracking-tight hidden sm:block">
                             Portal de Parcerias
                         </span>
                     </a>
 
-                    <nav class="flex items-center gap-6 text-sm">
+                    <nav class="flex items-center gap-5 text-sm">
                         <a href="{{ route('portal.index') }}"
-                           class="text-brand-200 hover:text-white transition {{ request()->routeIs('portal.index') ? 'text-white font-medium' : '' }}">
+                           class="{{ request()->routeIs('portal.index') ? 'text-brand-700 font-semibold' : 'text-gray-600 hover:text-brand-700' }} transition">
                             Chamamentos
                         </a>
                         <a href="{{ route('transparencia') }}"
-                           class="text-brand-200 hover:text-white transition {{ request()->routeIs('transparencia') ? 'text-white font-medium' : '' }}">
+                           class="{{ request()->routeIs('transparencia') ? 'text-brand-700 font-semibold' : 'text-gray-600 hover:text-brand-700' }} transition">
                             Transparência
                         </a>
 
                         @auth
                             @if(auth()->user()->osc)
                                 <a href="{{ route('portal.minhas-propostas') }}"
-                                   class="text-brand-200 hover:text-white transition {{ request()->routeIs('portal.minhas*') ? 'text-white font-medium' : '' }}">
+                                   class="{{ request()->routeIs('portal.minhas*') ? 'text-brand-700 font-semibold' : 'text-gray-600 hover:text-brand-700' }} transition">
                                     Minhas Propostas
                                 </a>
                             @endif
 
                             <div x-data="{ open: false }" class="relative">
                                 <button @click="open = !open" @click.outside="open = false"
-                                        class="flex items-center gap-1 text-brand-200 hover:text-white transition">
-                                    {{ auth()->user()->name }}
+                                        class="flex items-center gap-1 text-gray-600 hover:text-gray-900 transition">
+                                    <span class="hidden sm:inline">{{ auth()->user()->name }}</span>
+                                    <span class="sm:hidden w-8 h-8 rounded-full bg-brand-100 text-brand-700 text-xs font-bold flex items-center justify-center">
+                                        {{ $navInitials }}
+                                    </span>
                                     <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
                                         <path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd"/>
                                     </svg>
@@ -137,11 +143,11 @@
                             </div>
                         @else
                             <a href="{{ route('portal.osc.create') }}"
-                               class="text-brand-200 hover:text-white transition">
+                               class="text-gray-600 hover:text-brand-700 transition hidden sm:inline">
                                 Cadastrar OSC
                             </a>
                             <a href="{{ route('login') }}"
-                               class="bg-white text-brand-800 px-4 py-1.5 rounded-md font-medium text-sm hover:bg-brand-50 transition">
+                               class="bg-brand-600 text-white px-4 py-1.5 rounded-md font-medium text-sm hover:bg-brand-700 transition">
                                 Entrar
                             </a>
                         @endauth
@@ -154,9 +160,9 @@
             {{ $slot }}
         </main>
 
-        <footer class="bg-brand-900 text-brand-300 text-sm py-6 mt-12">
-            <div class="max-w-6xl mx-auto px-4 text-center">
-                Plataforma de Gestão de Parcerias — Sistema público municipal
+        <footer class="bg-white border-t border-gray-200 mt-12">
+            <div class="max-w-6xl mx-auto px-4 py-5 text-center text-xs text-gray-400">
+                Plataforma de Gestão de Parcerias — Sistema público municipal · PGP {{ now()->year }}
             </div>
         </footer>
     </div>

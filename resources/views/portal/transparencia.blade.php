@@ -1,24 +1,24 @@
 <x-portal-layout>
     {{-- Cabeçalho --}}
-    <div class="bg-gradient-to-br from-brand-800 via-brand-700 to-brand-900 text-white px-4">
-        <div class="max-w-6xl mx-auto py-12 text-center">
-            <span class="inline-block text-xs font-semibold uppercase tracking-wider text-brand-200 bg-white/10 px-3 py-1 rounded-full mb-4">
+    <div class="bg-white border-b border-gray-200 px-4">
+        <div class="max-w-6xl mx-auto py-12">
+            <span class="inline-block text-xs font-semibold uppercase tracking-wider text-accent-700 bg-accent-50 px-2.5 py-1 rounded">
                 Transparência
             </span>
-            <h1 class="text-3xl font-bold tracking-tight">Parcerias Celebradas</h1>
-            <p class="text-brand-200 mt-2 max-w-2xl mx-auto text-sm">
+            <h1 class="text-3xl font-bold tracking-tight text-gray-900 mt-4">Parcerias Celebradas</h1>
+            <p class="text-gray-600 mt-2 max-w-2xl text-sm">
                 Repasses de recursos municipais ao Terceiro Setor, nos termos da Lei Federal nº 13.019/2014.
                 Consulta livre, sem necessidade de cadastro.
             </p>
 
-            <div class="mt-8 grid grid-cols-1 sm:grid-cols-2 gap-4 max-w-lg mx-auto">
-                <div class="bg-white/10 rounded-xl px-5 py-4">
-                    <p class="text-2xl font-bold">{{ number_format($totais['parcerias'], 0, ',', '.') }}</p>
-                    <p class="text-xs text-brand-200 mt-0.5">parcerias celebradas</p>
+            <div class="mt-8 grid grid-cols-1 sm:grid-cols-2 gap-4 max-w-xl">
+                <div class="bg-white border border-gray-200 border-l-4 border-l-brand-600 rounded-xl px-5 py-4">
+                    <p class="text-2xl font-bold text-gray-900">{{ number_format($totais['parcerias'], 0, ',', '.') }}</p>
+                    <p class="text-xs text-gray-500 mt-0.5">parcerias celebradas</p>
                 </div>
-                <div class="bg-white/10 rounded-xl px-5 py-4">
-                    <p class="text-2xl font-bold">R$ {{ number_format($totais['repassado'], 2, ',', '.') }}</p>
-                    <p class="text-xs text-brand-200 mt-0.5">valor total pactuado</p>
+                <div class="bg-white border border-gray-200 border-l-4 border-l-accent-500 rounded-xl px-5 py-4">
+                    <p class="text-2xl font-bold text-gray-900">R$ {{ number_format($totais['repassado'], 2, ',', '.') }}</p>
+                    <p class="text-xs text-gray-500 mt-0.5">valor total pactuado</p>
                 </div>
             </div>
         </div>

@@ -1,23 +1,30 @@
 <x-portal-layout>
-    {{-- Hero --}}
-    <div class="relative bg-gradient-to-br from-brand-800 via-brand-700 to-brand-900 text-white px-4 overflow-hidden">
-        <div class="absolute inset-0 opacity-10" style="background-image:radial-gradient(circle at 1px 1px,#fff 1px,transparent 0);background-size:28px 28px;"></div>
-        <div class="relative max-w-3xl mx-auto text-center py-16">
-            <span class="inline-block text-xs font-semibold uppercase tracking-wider text-brand-200 bg-white/10 px-3 py-1 rounded-full mb-4">Portal Público de Parcerias</span>
-            <h1 class="text-4xl font-bold mb-3 tracking-tight">Chamamentos Públicos Abertos</h1>
-            <p class="text-brand-200 text-lg">
+    {{-- Abertura --}}
+    <div class="bg-white border-b border-gray-200 px-4">
+        <div class="max-w-6xl mx-auto py-12">
+            <span class="inline-block text-xs font-semibold uppercase tracking-wider text-brand-700 bg-brand-50 px-2.5 py-1 rounded">
+                Portal Público de Parcerias
+            </span>
+            <h1 class="text-3xl sm:text-4xl font-bold tracking-tight text-gray-900 mt-4">
+                Chamamentos Públicos Abertos
+            </h1>
+            <p class="text-gray-600 mt-3 max-w-2xl">
                 Organizações da Sociedade Civil podem submeter propostas para os chamamentos disponíveis.
             </p>
-            <div class="flex flex-wrap items-center justify-center gap-3 mt-7">
+            <div class="flex flex-wrap items-center gap-3 mt-7">
                 @guest
                     <a href="{{ route('portal.osc.create') }}"
-                       class="px-5 py-2.5 text-sm font-semibold text-brand-800 bg-white rounded-lg shadow hover:bg-brand-50 transition">
+                       class="px-5 py-2.5 text-sm font-semibold text-white bg-brand-600 rounded-lg hover:bg-brand-700 transition">
                         Cadastre sua OSC
                     </a>
                 @endguest
                 <a href="#chamamentos"
-                   class="px-5 py-2.5 text-sm font-semibold text-white border border-white/40 rounded-lg hover:bg-white/10 transition">
+                   class="px-5 py-2.5 text-sm font-semibold text-gray-700 border border-gray-300 rounded-lg hover:bg-gray-50 transition">
                     Ver chamamentos
+                </a>
+                <a href="{{ route('transparencia') }}"
+                   class="text-sm font-medium text-accent-600 hover:text-accent-700 hover:underline">
+                    Parcerias já celebradas →
                 </a>
             </div>
         </div>

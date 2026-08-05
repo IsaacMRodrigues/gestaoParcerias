@@ -16,23 +16,29 @@
         <!-- Scripts -->
         @vite(['resources/css/app.css', 'resources/js/app.js'])
     </head>
-    <body class="font-sans text-gray-900 antialiased">
-        <div class="min-h-screen flex flex-col sm:justify-center items-center pt-6 sm:pt-0 bg-gradient-to-br from-brand-800 via-brand-700 to-brand-900 px-4">
-            <div class="flex flex-col items-center mb-6">
+    <body class="font-sans text-gray-900 antialiased bg-gray-50">
+        {{-- Faixa institucional --}}
+        <div class="h-1 bg-gradient-to-r from-brand-600 via-brand-500 to-accent-500"></div>
+
+        <div class="min-h-screen flex flex-col sm:justify-center items-center pt-10 sm:pt-0 px-4">
+            <div class="flex flex-col items-center mb-7">
                 <a href="/" class="flex items-center gap-3">
-                    <x-marca variant="branco" class="h-12" />
-                    <span class="text-white text-2xl font-bold tracking-tight">Gestão de Parcerias</span>
+                    <x-marca class="h-12" />
+                    <span class="text-gray-900 text-2xl font-bold tracking-tight">Gestão de Parcerias</span>
                 </a>
-                <p class="text-brand-200 text-sm mt-2">Plataforma pública municipal — Secretarias &amp; OSCs</p>
+                <p class="text-gray-500 text-sm mt-2">Plataforma pública municipal — Secretarias &amp; OSCs</p>
             </div>
 
-            <div class="w-full sm:max-w-md px-6 py-8 bg-white shadow-2xl overflow-hidden rounded-2xl ring-1 ring-black/5">
-                <h1 class="text-lg font-semibold text-gray-900 mb-1">Acessar o sistema</h1>
-                <p class="text-sm text-gray-500 mb-6">Use suas credenciais institucionais.</p>
-                {{ $slot }}
+            <div class="w-full sm:max-w-md bg-white rounded-2xl border border-gray-200 shadow-sm overflow-hidden">
+                <div class="h-1 bg-brand-600"></div>
+                <div class="px-6 py-8">
+                    <h1 class="text-lg font-semibold text-gray-900 mb-1">Acessar o sistema</h1>
+                    <p class="text-sm text-gray-500 mb-6">Use suas credenciais institucionais.</p>
+                    {{ $slot }}
+                </div>
             </div>
 
-            <p class="text-brand-200/70 text-xs mt-8">© {{ now()->year }} Plataforma de Gestão de Parcerias</p>
+            <p class="text-gray-400 text-xs mt-8">© {{ now()->year }} Plataforma de Gestão de Parcerias</p>
         </div>
     </body>
 </html>

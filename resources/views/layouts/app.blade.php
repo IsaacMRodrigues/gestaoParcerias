@@ -25,6 +25,9 @@
                 ->explode(' ')->filter()->take(2)->map(fn ($w) => mb_strtoupper(mb_substr($w, 0, 1)))->implode('');
         @endphp
 
+        {{-- Faixa institucional: as duas cores da marca --}}
+        <div class="h-1 bg-gradient-to-r from-brand-600 via-brand-500 to-accent-500"></div>
+
         <div class="min-h-screen bg-gray-50" x-data="{ sidebarOpen: false }">
 
             @include('layouts.sidebar')
