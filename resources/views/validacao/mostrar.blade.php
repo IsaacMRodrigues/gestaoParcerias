@@ -40,7 +40,7 @@
                 @if(!empty($doc['conteudo']))
                     <div class="mt-8 pt-6 border-t border-gray-100">
                         <h2 class="text-sm font-semibold text-gray-700 mb-3">Cópia do documento</h2>
-                        <div class="documento-copia border border-gray-200 rounded-lg bg-white p-6 sm:p-8 overflow-x-auto text-[13px] text-gray-900 leading-relaxed">
+                        <div class="documento-copia border border-gray-200 rounded-lg bg-white p-6 sm:p-8 overflow-x-auto text-[14px] text-gray-900 leading-relaxed">
                             {!! $doc['conteudo'] !!}
                         </div>
                         <p class="mt-3 text-xs text-gray-400">

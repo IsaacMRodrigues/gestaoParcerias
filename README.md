@@ -162,6 +162,30 @@ São 21 perfis. Um usuário pode ter **vários**; os marcados 🔒 são **exclus
 
 ## O que foi feito
 
+- [2026-08-12] **Revisão visual de todas as telas** — contraste, identidade e densidade
+  - **Identidade ocupando espaço**: a paleta (verde `#00A859`, laranja `#EE7736`) só aparecia numa
+    listra de 4px. Agora: hero verde-escuro na tela inicial, **sidebar em `brand-900`**, painel
+    institucional no login (tela dividida). Laranja fica como cor de ação (consulta pública, badges)
+  - **Camada compartilhada** (reflete nas 113 views): 227 substituições nos padrões repetidos —
+    cabeçalhos de tabela, cards, botões, ações de editar/remover e badges de status. Novos
+    componentes `x-empty-state` (12 listagens) e `pecas/_cabecalho`; `x-flash-message` reescrito e
+    agora exibe `info`/`warning`, que o `EnsureIsStaff` já disparava sem ter onde aparecer
+  - **Tipografia +10%**: escala do Tailwind redefinida em `tailwind.config.js` (só o texto cresce;
+    espaçamentos e larguras mantêm a densidade). Os 61 tamanhos literais em px acompanharam
+  - **Layout interno**: as duas faixas brancas empilhadas viraram uma só (título + ações + avatar)
+  - **Peças do processo** (`pecas/_checklist`, usado em Seleção, Celebração e Aditivos): a tela abria
+    o editor rico de toda peça preenchida-e-não-assinada de uma vez — 8237px de altura. Tudo passou
+    a abrir sob demanda (**2301px**), badges de tipo saíram e o card de progresso foi fundido ao
+    cabeçalho da lista
+  - **Correções de bug encontradas no caminho**: `x-dropdown` devolvia `'64'` cru em vez de `w-64`,
+    deixando o menu do usuário sem largura; o `capitalize` do CSS gerava "Quarta-Feira, 05 De Agosto
+    De 2026"; a sidebar tinha o título cortado e uma fresta de 2px sob a faixa institucional
+  - **Navegação**: "Seleção" era um `<p>` idêntico a um link e não clicava — virou link de verdade.
+    Itens sem permissão ganharam cadeado e os não construídos (Monitoramento, Prestação de Contas),
+    ícone de "em breve" — antes só ficavam apagados, passando por botão quebrado
+  - Verificação: 29/32 rotas GET estáticas em 200 (as 3 restantes são negação de permissão correta)
+    e detector de estouro de texto sem ocorrências nas telas revisadas
+
 - [2026-07-29] **Modais no lugar de `alert()`/`confirm()` nativos** — UX consistente em todo o sistema
   - Módulo global `resources/js/confirm-modal.js` + estilos `.cmodal-*` em `resources/css/app.css`
     (tema claro/escuro, variante *danger* vermelho, animação, fecha por Esc/backdrop/Cancelar)
@@ -836,7 +860,24 @@ São 21 perfis. Um usuário pode ter **vários**; os marcados 🔒 são **exclus
 
 ## O que está sendo feito
 
-### 📌 Última entrega — `Docs. Desenvolvimento/Modelos novos/` e `Atualizações.txt`
+### 📌 Última entrega — Revisão visual de todas as telas (12/08/2026)
+
+Passagem de acabamento sobre as 113 views, sem mexer em regra de negócio: identidade visual da
+Prefeitura ocupando espaço de verdade, tipografia 10% maior, densidade revista nas telas mais
+carregadas e a camada de componentes compartilhados padronizada. No caminho apareceram bugs reais
+(largura do `x-dropdown`, capitalização da data, texto cortado na sidebar, "Seleção" que parecia
+link e não era) — todos corrigidos. Detalhes na primeira entrada de `## O que foi feito`.
+
+**Pendências conhecidas desta passagem:**
+
+- `programas.show` **não existe** — o `ProgramaController@show` aponta para uma view que nunca foi
+  criada, então `/programas/{id}` devolve 500. Nada na interface leva até lá (é rota órfã,
+  alcançável só digitando a URL), por isso a tela não foi inventada nesta entrega
+- O logotipo sobre fundo escuro é rebatido para branco monocromático via CSS (`brightness-0
+  invert`). Se o manual de identidade da Prefeitura exigir o cata-vento colorido, a alternativa é
+  um bloco de fundo branco no topo da coluna
+
+### Entrega anterior — `Docs. Desenvolvimento/Modelos novos/` e `Atualizações.txt`
 
 O trabalho mais recente do projeto foi a implementação **completa** da pasta **`Modelos novos`** e do
 arquivo **`Atualizações.txt`** que o cliente entregou (30/07/2026). Foi executado nesta ordem — as

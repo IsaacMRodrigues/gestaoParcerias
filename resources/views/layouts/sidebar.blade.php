@@ -4,28 +4,31 @@
         : 0;
     $navPendentes = auth()->user()->can('cadastros') ? \App\Models\User::pendentes()->count() : 0;
 
-    $sec   = 'px-3 pt-5 pb-1 text-[11px] font-semibold uppercase tracking-wider text-gray-400';
-    $link  = 'flex items-center gap-2.5 px-3 py-2 rounded-lg text-sm text-gray-600 hover:bg-brand-50 hover:text-brand-800 transition';
-    $on    = 'bg-brand-50 text-brand-800 font-semibold';
-    $soon  = 'flex items-center gap-2.5 px-3 py-2 rounded-lg text-sm text-gray-300 cursor-default';
-    $badge = 'ml-auto px-1.5 py-0.5 text-[11px] font-semibold bg-accent-100 text-accent-800 rounded-full';
-    $etapa = 'w-5 h-5 shrink-0 rounded-full border text-[11px] font-bold flex items-center justify-center';
-    $etapaOn  = 'border-brand-300 bg-brand-100 text-brand-700';
-    $etapaOff = 'border-gray-300 text-gray-400';
+    // Sidebar em verde escuro: dá contraste ao conteúdo (que fica no branco) e
+    // amarra a área interna ao hero da tela inicial.
+    $sec   = 'px-3 pt-5 pb-1.5 text-[12px] font-semibold uppercase tracking-wider text-brand-300/80';
+    $link  = 'relative flex items-center gap-2.5 px-3 py-2 rounded-lg text-sm text-brand-50/80 hover:bg-white/10 hover:text-white transition';
+    $on    = '!text-white bg-white/15 font-semibold';
+    $soon  = 'flex items-center gap-2.5 px-3 py-2 rounded-lg text-sm text-white/30 cursor-default';
+    $badge = 'ml-auto px-1.5 py-0.5 text-[12px] font-bold bg-accent-500 text-white rounded-full';
+    $etapa = 'w-5 h-5 shrink-0 rounded-full border text-[12px] font-bold flex items-center justify-center';
+    $etapaOn  = 'border-white bg-white text-brand-800';
+    $etapaOff = 'border-white/30 text-white/60';
 @endphp
 
-<aside class="fixed top-1 bottom-0 left-0 z-40 w-64 bg-white border-r border-gray-200 flex flex-col
+<aside class="fixed top-1.5 bottom-0 left-0 z-40 w-64 bg-brand-900 flex flex-col
               transform transition-transform duration-200 lg:translate-x-0"
        :class="sidebarOpen ? 'translate-x-0' : '-translate-x-full'">
 
-    {{-- Marca --}}
-    <div class="h-16 flex items-center px-4 border-b border-gray-100 shrink-0">
-        <a href="{{ route('dashboard') }}" class="flex items-center gap-2.5 min-w-0">
-            <x-marca class="h-9" />
-            <span class="flex flex-col leading-none min-w-0">
-                <span class="font-semibold text-gray-900 text-sm truncate">Gestão de Parcerias</span>
-                <span class="text-[11px] text-gray-400 truncate">Sistema público municipal</span>
-            </span>
+    {{-- Marca: empilhada porque o logotipo já traz o nome do Município e, lado a
+         lado com o título, não cabe nos 256px da coluna (o texto era cortado).
+         px-6 alinha o logotipo à mesma margem dos ícones do menu abaixo. --}}
+    <div class="px-6 py-5 border-b border-white/10 shrink-0">
+        <a href="{{ route('landing') }}"
+           class="block rounded-lg focus:outline-none focus-visible:ring-2 focus-visible:ring-white/60">
+            <x-marca variant="branco" class="h-12" />
+            <span class="mt-3 block text-sm font-bold text-white leading-tight">Gestão de Parcerias</span>
+            <span class="block text-[12px] text-brand-200/70">Sistema público municipal</span>
         </a>
     </div>
 
@@ -59,17 +62,25 @@
                 </a>
             @endif
         @else
-            <span class="{{ $soon }}"><span class="{{ $etapa }} border-gray-200">1</span> Planejamento</span>
+            <span class="{{ $soon }}" title="Seu perfil não tem acesso ao Planejamento."><span class="{{ $etapa }} border-white/20 text-white/30">1</span> Planejamento<svg class="ml-auto w-3.5 h-3.5 text-white/25 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M16.5 10.5V6.75a4.5 4.5 0 10-9 0v3.75m-.75 11.25h10.5a2.25 2.25 0 002.25-2.25v-6.75a2.25 2.25 0 00-2.25-2.25H6.75a2.25 2.25 0 00-2.25 2.25v6.75a2.25 2.25 0 002.25 2.25z"/></svg></span>
         @endcan
 
         {{-- 2. Seleção --}}
         @canany(['chamamentos', 'propostas'])
-            @php $emSelecao = request()->routeIs('programas.*') || request()->routeIs('chamamentos.*') || request()->routeIs('propostas.*'); @endphp
-            <p class="{{ $link }} !cursor-default hover:!bg-transparent hover:!text-gray-600">
+            @php
+                $emSelecao = request()->routeIs('programas.*') || request()->routeIs('chamamentos.*') || request()->routeIs('propostas.*');
+                // Era um <p>: tinha a aparência exata de um link, mas clicar não
+                // fazia nada. Agora leva ao primeiro subitem a que o usuário
+                // tem acesso — o @canany acima garante que existe pelo menos um.
+                $urlSelecao = auth()->user()->can('chamamentos')
+                    ? route('programas.index')
+                    : route('propostas.index');
+            @endphp
+            <a href="{{ $urlSelecao }}" class="{{ $link }} {{ $emSelecao ? $on : '' }}">
                 <span class="{{ $etapa }} {{ $emSelecao ? $etapaOn : $etapaOff }}">2</span>
                 Seleção
                 @if($navPropostasNovas > 0)<span class="{{ $badge }}">{{ $navPropostasNovas }}</span>@endif
-            </p>
+            </a>
             @can('chamamentos')
                 <a href="{{ route('programas.index') }}"
                    class="{{ $link }} pl-10 {{ request()->routeIs('programas.*') || request()->routeIs('chamamentos.*') ? $on : '' }}">
@@ -84,7 +95,7 @@
                 </a>
             @endcan
         @else
-            <span class="{{ $soon }}"><span class="{{ $etapa }} border-gray-200">2</span> Seleção</span>
+            <span class="{{ $soon }}" title="Seu perfil não tem acesso à Seleção."><span class="{{ $etapa }} border-white/20 text-white/30">2</span> Seleção<svg class="ml-auto w-3.5 h-3.5 text-white/25 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M16.5 10.5V6.75a4.5 4.5 0 10-9 0v3.75m-.75 11.25h10.5a2.25 2.25 0 002.25-2.25v-6.75a2.25 2.25 0 00-2.25-2.25H6.75a2.25 2.25 0 00-2.25 2.25v6.75a2.25 2.25 0 002.25 2.25z"/></svg></span>
         @endcanany
 
         {{-- 3. Celebração --}}
@@ -95,7 +106,7 @@
                 Celebração
             </a>
         @else
-            <span class="{{ $soon }}"><span class="{{ $etapa }} border-gray-200">3</span> Celebração</span>
+            <span class="{{ $soon }}" title="Seu perfil não tem acesso à Celebração."><span class="{{ $etapa }} border-white/20 text-white/30">3</span> Celebração<svg class="ml-auto w-3.5 h-3.5 text-white/25 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M16.5 10.5V6.75a4.5 4.5 0 10-9 0v3.75m-.75 11.25h10.5a2.25 2.25 0 002.25-2.25v-6.75a2.25 2.25 0 00-2.25-2.25H6.75a2.25 2.25 0 00-2.25 2.25v6.75a2.25 2.25 0 002.25 2.25z"/></svg></span>
         @endcan
 
         {{-- 4. Execução — lista as parcerias e abre a execução de cada uma --}}
@@ -108,12 +119,12 @@
             </a>
         @else
             <span class="{{ $soon }}" title="Repasses, despesas e saldo: abra pela tela do Instrumento.">
-                <span class="{{ $etapa }} border-gray-200">4</span> Execução
+                <span class="{{ $etapa }} border-white/20 text-white/30">4</span> Execução<svg class="ml-auto w-3.5 h-3.5 text-white/25 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M16.5 10.5V6.75a4.5 4.5 0 10-9 0v3.75m-.75 11.25h10.5a2.25 2.25 0 002.25-2.25v-6.75a2.25 2.25 0 00-2.25-2.25H6.75a2.25 2.25 0 00-2.25 2.25v6.75a2.25 2.25 0 002.25 2.25z"/></svg>
             </span>
         @endcan
 
-        <span class="{{ $soon }}" title="Em breve"><span class="{{ $etapa }} border-gray-200">5</span> Monitoramento</span>
-        <span class="{{ $soon }}" title="Em breve"><span class="{{ $etapa }} border-gray-200">6</span> Prestação de Contas</span>
+        <span class="{{ $soon }}" title="Em breve — módulo ainda não construído"><span class="{{ $etapa }} border-white/20 text-white/30">5</span> Monitoramento<svg class="ml-auto w-3.5 h-3.5 text-white/30 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 6v6h4.5m4.5 0a9 9 0 11-18 0 9 9 0 0118 0z"/></svg></span>
+        <span class="{{ $soon }}" title="Em breve — módulo ainda não construído"><span class="{{ $etapa }} border-white/20 text-white/30">6</span> Prestação de Contas<svg class="ml-auto w-3.5 h-3.5 text-white/30 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 6v6h4.5m4.5 0a9 9 0 11-18 0 9 9 0 0118 0z"/></svg></span>
 
         {{-- Cadastros --}}
         @can('cadastros')
@@ -152,7 +163,7 @@
         @endrole
     </nav>
 
-    <div class="border-t border-gray-100 px-4 py-3 text-[11px] text-gray-400 shrink-0">
+    <div class="border-t border-white/10 px-4 py-3 text-[12px] text-brand-200/50 shrink-0">
         PGP · {{ now()->year }}
     </div>
 </aside>

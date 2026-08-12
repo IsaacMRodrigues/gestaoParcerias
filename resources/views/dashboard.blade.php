@@ -26,12 +26,19 @@
 
 <x-app-layout>
     <x-slot name="header">
-        <div class="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-2">
+        <div class="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-3">
             <div>
                 <h2 class="font-bold text-2xl text-gray-900 leading-tight">Olá, {{ \Illuminate\Support\Str::of($u->name)->explode(' ')->first() }} 👋</h2>
                 <p class="text-sm text-gray-500 mt-0.5">Visão geral da Plataforma de Gestão de Parcerias.</p>
             </div>
-            <span class="text-sm text-gray-400 capitalize">{{ now()->translatedFormat('l, d \d\e F \d\e Y') }}</span>
+            {{-- Só a primeira letra sobe: o 'capitalize' do CSS virava
+                 "Quarta-Feira, 05 De Agosto De 2026". --}}
+            <span class="inline-flex items-center gap-2 text-sm text-gray-600 bg-gray-100 px-3 py-1.5 rounded-lg shrink-0">
+                <svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.8">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/>
+                </svg>
+                {{ \Illuminate\Support\Str::ucfirst(now()->translatedFormat('l, d \d\e F \d\e Y')) }}
+            </span>
         </div>
     </x-slot>
 
@@ -62,29 +69,29 @@
             {{-- Cards de métricas --}}
             <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
                 @can('planejamento')
-                    <x-stat-card label="Processos em trâmite" :value="$processosTramite" :sub="$processosTotal.' no total'"
+                    <x-stat-card label="Processos em trâmite" icon="processos" :value="$processosTramite" :sub="$processosTotal.' no total'"
                                  color="brand" :href="route('processos.index')" />
                 @endcan
 
                 @can('chamamentos')
-                    <x-stat-card label="Chamamentos abertos" :value="$chamamentosAbertos" :sub="$chamamentosTotal.' cadastrados'"
+                    <x-stat-card label="Chamamentos abertos" icon="chamamentos" :value="$chamamentosAbertos" :sub="$chamamentosTotal.' cadastrados'"
                                  color="emerald" :href="route('programas.index')" />
                 @endcan
 
                 @can('propostas')
-                    <x-stat-card label="Propostas em análise" :value="$propostasAnalise" :sub="$propostasTotal.' no total'"
+                    <x-stat-card label="Propostas em análise" icon="propostas" :value="$propostasAnalise" :sub="$propostasTotal.' no total'"
                                  color="amber" :href="route('propostas.index')" />
                 @endcan
 
                 @can('formalizacao')
-                    <x-stat-card label="Instrumentos vigentes" :value="$instrumentosVigentes" :sub="$instrumentosTotal.' no total'"
+                    <x-stat-card label="Instrumentos vigentes" icon="instrumentos" :value="$instrumentosVigentes" :sub="$instrumentosTotal.' no total'"
                                  color="violet" :href="route('instrumentos.index')" />
                 @endcan
 
                 @can('cadastros')
-                    <x-stat-card label="Órgãos / Secretarias" :value="Orgao::count()" sub="Unidades Gestoras"
+                    <x-stat-card label="Órgãos / Secretarias" icon="orgaos" :value="Orgao::count()" sub="Unidades Gestoras"
                                  color="slate" :href="route('orgaos.index')" />
-                    <x-stat-card label="OSCs cadastradas" :value="Osc::count()" sub="Organizações da Sociedade Civil"
+                    <x-stat-card label="OSCs cadastradas" icon="oscs" :value="Osc::count()" sub="Organizações da Sociedade Civil"
                                  color="sky" :href="route('oscs.index')" />
                 @endcan
             </div>

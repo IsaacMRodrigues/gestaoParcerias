@@ -7,10 +7,10 @@ $alignmentClasses = match ($align) {
     default => 'ltr:origin-top-right rtl:origin-top-left end-0',
 };
 
-$width = match ($width) {
-    '48' => 'w-48',
-    default => $width,
-};
+// Aceita tanto o número da escala do Tailwind ('48', '72') quanto a classe
+// pronta ('w-full'). Sem o prefixo o valor sai como classe inexistente e o
+// menu fica sem largura, espremendo o conteúdo.
+$width = str_starts_with($width, 'w-') ? $width : 'w-'.$width;
 @endphp
 
 <div class="relative" x-data="{ open: false }" @click.outside="open = false" @close.stop="open = false">

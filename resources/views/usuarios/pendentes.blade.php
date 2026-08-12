@@ -5,7 +5,7 @@
                 <p class="text-sm text-gray-500">
                     <a href="{{ route('usuarios.index') }}" class="hover:underline">Usuários</a>
                 </p>
-                <h2 class="text-xl font-semibold text-gray-800 mt-0.5">Cadastros pendentes de aprovação</h2>
+                <h2 class="text-2xl font-bold text-gray-900 mt-0.5">Cadastros pendentes de aprovação</h2>
             </div>
             <span class="px-3 py-1.5 text-sm font-medium bg-amber-50 text-amber-700 rounded-full">
                 {{ $pendentes->total() }} pendente(s)
@@ -18,7 +18,7 @@
             <x-flash-message />
 
             @forelse($pendentes as $u)
-                <div class="bg-white shadow rounded-lg p-6">
+                <div class="bg-white rounded-xl border border-gray-200 shadow-sm p-6">
                     <div class="flex items-start justify-between gap-4">
                         <div>
                             <p class="text-base font-semibold text-gray-900">{{ $u->name }}</p>
@@ -105,7 +105,7 @@
                     </form>
                 </div>
             @empty
-                <div class="bg-white shadow rounded-lg p-10 text-center">
+                <div class="bg-white rounded-xl border border-gray-200 shadow-sm p-10 text-center">
                     <span class="text-3xl">✅</span>
                     <p class="mt-2 text-gray-600">Nenhum cadastro pendente de aprovação.</p>
                 </div>

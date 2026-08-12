@@ -5,7 +5,7 @@
                 <p class="text-sm text-gray-500">
                     <a href="{{ route('processos.index') }}" class="hover:underline">Processos</a>
                 </p>
-                <h2 class="text-xl font-semibold text-gray-800 mt-0.5">
+                <h2 class="text-2xl font-bold text-gray-900 mt-0.5">
                     Processo {{ $processo->numero }}
                     <span class="text-sm font-normal text-gray-500 ml-1">— {{ $processo->orgao->name }}</span>
                 </h2>
@@ -36,7 +36,7 @@
             @endphp
 
             {{-- Stepper do fluxo --}}
-            <div class="bg-white shadow rounded-lg p-6">
+            <div class="bg-white rounded-xl border border-gray-200 shadow-sm p-6">
                 <h3 class="text-base font-semibold text-gray-800 mb-4">Fluxo do Planejamento</h3>
                 <ol class="flex flex-wrap gap-y-3">
                     @foreach($processo->etapas() as $i => $et)
@@ -50,7 +50,7 @@
                                     {{ $feita ? 'bg-green-500 text-white' : ($atualEtapa ? 'bg-brand-600 text-white ring-4 ring-brand-100' : 'bg-gray-200 text-gray-500') }}">
                                     {{ $feita ? '✓' : $i + 1 }}
                                 </div>
-                                <span class="mt-1 text-[11px] leading-tight {{ $atualEtapa ? 'text-brand-700 font-semibold' : 'text-gray-500' }}">
+                                <span class="mt-1 text-[12px] leading-tight {{ $atualEtapa ? 'text-brand-700 font-semibold' : 'text-gray-500' }}">
                                     {{ strtoupper($et['setor']) }}
                                 </span>
                             </div>
@@ -79,7 +79,7 @@
 
             {{-- Publicação → Chamamento no módulo Programas --}}
             @if($processo->status === 'concluido')
-                <div class="bg-white shadow rounded-lg p-6">
+                <div class="bg-white rounded-xl border border-gray-200 shadow-sm p-6">
                     <h3 class="text-base font-semibold text-gray-800 mb-2">Publicação / Chamamento</h3>
                     @if($processo->chamamento)
                         <p class="text-sm text-gray-600 mb-3">
@@ -140,7 +140,7 @@
                                 </div>
                             @endunless
                             <button type="submit"
-                                    class="px-4 py-2 text-sm font-medium text-white bg-brand-600 rounded-md hover:bg-brand-700">
+                                    class="inline-flex items-center gap-2 px-4 py-2.5 text-sm font-semibold text-white bg-brand-600 rounded-lg shadow-sm hover:bg-brand-700 transition">
                                 Gerar Publicação / Chamamento
                             </button>
                         </form>
@@ -151,7 +151,7 @@
             {{-- Atalho para o(s) Termo(s)/Instrumento(s) formalizados desta parceria --}}
             @php $instrumentosParceria = $processo->instrumentosDaParceria(); @endphp
             @if($instrumentosParceria->isNotEmpty())
-                <div class="bg-white shadow rounded-lg p-6">
+                <div class="bg-white rounded-xl border border-gray-200 shadow-sm p-6">
                     <h3 class="text-base font-semibold text-gray-800 mb-3">Instrumento(s) formalizado(s)</h3>
                     <ul class="divide-y divide-gray-100">
                         @foreach($instrumentosParceria as $inst)
@@ -177,7 +177,7 @@
             @endif
 
             {{-- Alertas automáticos --}}
-            <div class="bg-white shadow rounded-lg p-6">
+            <div class="bg-white rounded-xl border border-gray-200 shadow-sm p-6">
                 <h3 class="text-base font-semibold text-gray-800 mb-3">Conformidade do Planejamento</h3>
                 <ul class="space-y-1.5">
                     @foreach($processo->alertas() as $alerta)
@@ -220,7 +220,7 @@
                     ? array_merge($comum, ['justificativa_dispensa', 'parecer_cnas'])
                     : array_merge($comum, ['edital', 'portaria_comissao', 'solicitacao_parecer_juridico', 'parecer_juridico', 'comprovante_publicacao']);
             @endphp
-            <div class="bg-white shadow rounded-lg">
+            <div class="bg-white rounded-xl border border-gray-200 shadow-sm">
                 <form method="GET" action="{{ route('processos.pecas.imprimir-lote', $processo) }}"
                       data-require-checked="pecas[]"
                       data-require-checked-message="Selecione ao menos um documento para baixar.">
@@ -249,14 +249,14 @@
                                             <p class="text-sm font-semibold text-gray-800">{{ $i + 1 }}. {{ \App\Models\ProcessoPeca::TIPOS[$tipo] }}
                                                 <span class="text-xs font-normal text-gray-400">— {{ strtoupper($p->setorResponsavel()) }}</span>
                                                 @if(in_array($tipo, \App\Models\ProcessoPeca::OPCIONAIS))
-                                                    <span class="ml-1 text-[10px] font-medium text-gray-500 bg-gray-100 px-1.5 py-0.5 rounded-full">opcional</span>
+                                                    <span class="ml-1 text-[11px] font-medium text-gray-500 bg-gray-100 px-1.5 py-0.5 rounded-full">opcional</span>
                                                 @endif
                                             </p>
                                             <p class="text-xs text-gray-400">{{ $statusPeca($p) }}</p>
                                         </div>
                                     </div>
                                     <a href="{{ route('processos.pecas.edit', [$processo, $p]) }}"
-                                       class="text-sm text-brand-600 hover:text-brand-900">
+                                       class="text-sm font-semibold text-brand-700 hover:text-brand-800 transition">
                                         {{ $rotuloPeca($p) }}
                                     </a>
                                 </div>
@@ -267,7 +267,7 @@
             </div>
 
             {{-- Trâmite --}}
-            <div class="bg-white shadow rounded-lg">
+            <div class="bg-white rounded-xl border border-gray-200 shadow-sm">
                 <div class="px-6 py-4 border-b border-gray-200 flex items-center justify-between">
                     <h3 class="text-base font-semibold text-gray-800">Trâmite entre Setores</h3>
                 </div>
@@ -407,7 +407,7 @@
                                     </div>
                                     <button type="submit"
                                             @disabled(!empty($pendencias))
-                                            class="px-4 py-2 text-sm font-medium text-white bg-brand-600 rounded-md hover:bg-brand-700 disabled:opacity-50 disabled:cursor-not-allowed">
+                                            class="inline-flex items-center gap-2 px-4 py-2.5 text-sm font-semibold text-white bg-brand-600 rounded-lg shadow-sm hover:bg-brand-700 transition disabled:opacity-50 disabled:cursor-not-allowed">
                                         Encaminhar para {{ \App\Models\Processo::SETORES[$processo->proximoSetor()] ?? $processo->proximoSetor() }}
                                     </button>
                                 </form>

@@ -26,7 +26,7 @@
         @endphp
 
         {{-- Faixa institucional: as duas cores da marca --}}
-        <div class="h-1 bg-gradient-to-r from-brand-600 via-brand-500 to-accent-500"></div>
+        <div class="h-1.5 bg-gradient-to-r from-brand-600 via-brand-500 to-accent-500"></div>
 
         <div class="min-h-screen bg-gray-50" x-data="{ sidebarOpen: false }">
 
@@ -38,8 +38,11 @@
 
             <div class="lg:pl-64 flex flex-col min-h-screen">
 
-                {{-- Barra superior enxuta: gaveta (mobile) + menu do usuário --}}
-                <div class="sticky top-0 z-20 bg-white border-b border-gray-200 h-16 flex items-center gap-3 px-4 sm:px-6">
+                {{-- Uma faixa só: gaveta (mobile) + título da página + menu do
+                     usuário. Antes eram duas barras brancas empilhadas, e a de
+                     cima ficava vazia. --}}
+                <header class="sticky top-0 z-20 bg-white border-b border-gray-200">
+                  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex items-center gap-4 py-4 min-h-[4rem]">
                     <button @click="sidebarOpen = true"
                             class="lg:hidden p-2 -ml-2 rounded-md text-gray-500 hover:text-gray-700 hover:bg-gray-100">
                         <svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
@@ -47,9 +50,13 @@
                         </svg>
                     </button>
 
-                    <div class="flex-1"></div>
+                    <div class="flex-1 min-w-0">
+                        @isset($header)
+                            {{ $header }}
+                        @endisset
+                    </div>
 
-                    <x-dropdown align="right" width="64">
+                    <x-dropdown align="right" width="72">
                         <x-slot name="trigger">
                             <button title="{{ Auth::user()->name }}"
                                     class="flex items-center justify-center w-9 h-9 rounded-full bg-brand-100 text-brand-700 text-xs font-bold hover:bg-brand-200 focus:outline-none focus:ring-2 focus:ring-brand-300 transition">
@@ -58,14 +65,24 @@
                         </x-slot>
 
                         <x-slot name="content">
-                            <div class="px-4 py-3 border-b border-gray-100">
-                                <div class="text-sm font-semibold text-gray-900">{{ Auth::user()->name }}</div>
-                                <div class="text-xs text-gray-500 truncate">{{ Auth::user()->email }}</div>
+                            <div class="px-4 py-3.5 border-b border-gray-100 bg-gray-50/70">
+                                <div class="flex items-center gap-3">
+                                    <span class="w-10 h-10 shrink-0 rounded-full bg-brand-600 text-white text-sm font-bold flex items-center justify-center">
+                                        {{ $navInitials }}
+                                    </span>
+                                    <div class="min-w-0">
+                                        <div class="text-sm font-semibold text-gray-900 truncate">{{ Auth::user()->name }}</div>
+                                        <div class="text-xs text-gray-500 truncate">{{ Auth::user()->email }}</div>
+                                    </div>
+                                </div>
                                 @if($navRoleLabel)
-                                    <div class="text-[11px] text-gray-400 mt-0.5">{{ $navRoleLabel }}</div>
+                                    <div class="text-[12px] font-medium text-gray-500 mt-2.5">{{ $navRoleLabel }}</div>
                                 @endif
                                 @if($navUser?->setor)
-                                    <div class="mt-1.5 inline-flex items-center gap-1 text-[11px] font-medium text-brand-700 bg-brand-50 px-2 py-0.5 rounded-full">
+                                    {{-- Bloco, não pílula: o nome do setor é longo e uma pílula
+                                         arredondada fica deformada ao quebrar em duas linhas. --}}
+                                    <div class="mt-1.5 text-[12px] font-semibold text-brand-800 bg-brand-50 border border-brand-100
+                                                px-2 py-1 rounded-lg leading-snug">
                                         {{ $navUser->setorLabel() }}
                                     </div>
                                 @endif
@@ -84,16 +101,8 @@
                             </form>
                         </x-slot>
                     </x-dropdown>
-                </div>
-
-                <!-- Page Heading -->
-                @isset($header)
-                    <header class="bg-white border-b border-gray-200">
-                        <div class="max-w-7xl mx-auto py-5 px-4 sm:px-6 lg:px-8">
-                            {{ $header }}
-                        </div>
-                    </header>
-                @endisset
+                  </div>
+                </header>
 
                 <!-- Page Content -->
                 <main class="flex-1">
@@ -103,7 +112,9 @@
                 <footer class="border-t border-gray-200 bg-white">
                     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 flex flex-col sm:flex-row items-center justify-between gap-2 text-xs text-gray-400">
                         <span>Plataforma de Gestão de Parcerias — Sistema público municipal</span>
-                        <span>PGP · {{ now()->year }}</span>
+                        <a href="{{ route('transparencia') }}" class="hover:text-brand-700 transition">
+                            Transparência pública
+                        </a>
                     </div>
                 </footer>
             </div>

@@ -16,29 +16,100 @@
         <!-- Scripts -->
         @vite(['resources/css/app.css', 'resources/js/app.js'])
     </head>
-    <body class="font-sans text-gray-900 antialiased bg-gray-50">
-        {{-- Faixa institucional --}}
-        <div class="h-1 bg-gradient-to-r from-brand-600 via-brand-500 to-accent-500"></div>
+    <body class="font-sans text-gray-900 antialiased bg-white">
 
-        <div class="min-h-screen flex flex-col sm:justify-center items-center pt-10 sm:pt-0 px-4">
-            <div class="flex flex-col items-center mb-7">
-                <a href="/" class="flex items-center gap-3">
-                    <x-marca class="h-12" />
-                    <span class="text-gray-900 text-2xl font-bold tracking-tight">Gestão de Parcerias</span>
+        <div class="min-h-screen lg:grid lg:grid-cols-2">
+
+            {{-- Painel institucional: mesma linguagem do hero da tela inicial.
+                 Escondido no celular, onde só o formulário importa. --}}
+            <div class="relative hidden lg:flex flex-col justify-between bg-brand-900 p-12 overflow-hidden">
+                <div aria-hidden="true" class="absolute inset-0">
+                    <svg class="absolute inset-0 w-full h-full opacity-[0.07]">
+                        <defs>
+                            <pattern id="pgp-login-dots" width="28" height="28" patternUnits="userSpaceOnUse">
+                                <circle cx="2" cy="2" r="1.5" fill="#fff" />
+                            </pattern>
+                        </defs>
+                        <rect width="100%" height="100%" fill="url(#pgp-login-dots)" />
+                    </svg>
+                    <div class="absolute -top-28 -right-28 w-[26rem] h-[26rem] rounded-full bg-brand-500/25 blur-3xl"></div>
+                    <div class="absolute -bottom-36 -left-24 w-[24rem] h-[24rem] rounded-full bg-accent-500/20 blur-3xl"></div>
+                </div>
+
+                <a href="{{ route('landing') }}" class="relative inline-block w-fit rounded-lg
+                          focus:outline-none focus-visible:ring-2 focus-visible:ring-white/60">
+                    <x-marca variant="branco" class="h-11" />
                 </a>
-                <p class="text-gray-500 text-sm mt-2">Plataforma pública municipal — Secretarias &amp; OSCs</p>
+
+                <div class="relative max-w-md">
+                    <span class="inline-flex items-center gap-2 text-xs font-semibold uppercase tracking-wider
+                                 text-white bg-white/10 ring-1 ring-inset ring-white/25 px-3 py-1.5 rounded-full">
+                        <span class="w-1.5 h-1.5 rounded-full bg-accent-400"></span>
+                        Lei Federal nº 13.019/2014
+                    </span>
+
+                    <h2 class="mt-6 text-3xl font-bold text-white leading-tight tracking-tight">
+                        Gestão de Parcerias com as
+                        <span class="text-brand-200">Organizações da Sociedade Civil</span>
+                    </h2>
+
+                    <ul class="mt-8 space-y-3.5 text-sm text-brand-50/85">
+                        @foreach([
+                            'Chamamentos públicos, propostas e planos de trabalho',
+                            'Trâmite eletrônico dos processos entre as Secretarias',
+                            'Repasses, despesas e transparência das parcerias',
+                        ] as $item)
+                            <li class="flex items-start gap-3">
+                                <span class="w-5 h-5 mt-px shrink-0 rounded-full bg-white/15 flex items-center justify-center">
+                                    <svg class="w-3 h-3 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="3">
+                                        <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/>
+                                    </svg>
+                                </span>
+                                {{ $item }}
+                            </li>
+                        @endforeach
+                    </ul>
+                </div>
+
+                <p class="relative text-xs text-brand-100/75">
+                    Prefeitura de São Gonçalo do Rio Abaixo · Sistema público municipal
+                </p>
             </div>
 
-            <div class="w-full sm:max-w-md bg-white rounded-2xl border border-gray-200 shadow-sm overflow-hidden">
-                <div class="h-1 bg-brand-600"></div>
-                <div class="px-6 py-8">
-                    <h1 class="text-lg font-semibold text-gray-900 mb-1">Acessar o sistema</h1>
-                    <p class="text-sm text-gray-500 mb-6">Use suas credenciais institucionais.</p>
-                    {{ $slot }}
+            {{-- Formulário --}}
+            <div class="flex flex-col min-h-screen">
+                <div class="h-1.5 bg-gradient-to-r from-brand-600 via-brand-500 to-accent-500 lg:hidden"></div>
+
+                <div class="flex-1 flex flex-col justify-center px-5 py-12 sm:px-12">
+                    <div class="w-full max-w-md mx-auto">
+
+                        {{-- No celular o painel some, então a marca aparece aqui --}}
+                        <a href="{{ route('landing') }}" class="lg:hidden flex items-center gap-3 mb-8">
+                            <x-marca class="h-11" />
+                            <span class="leading-tight">
+                                <span class="block font-bold text-gray-900">Gestão de Parcerias</span>
+                                <span class="block text-xs text-gray-500">Prefeitura de São Gonçalo do Rio Abaixo</span>
+                            </span>
+                        </a>
+
+                        <h1 class="text-3xl font-bold tracking-tight text-gray-900">Acessar o sistema</h1>
+                        <p class="text-sm text-gray-500 mt-2">
+                            Use suas credenciais institucionais.
+                        </p>
+
+                        <div class="mt-8">
+                            {{ $slot }}
+                        </div>
+
+                        <p class="text-xs text-gray-400 mt-10 pt-6 border-t border-gray-100">
+                            © {{ now()->year }} Plataforma de Gestão de Parcerias
+                            <a href="{{ route('landing') }}" class="text-brand-700 font-medium hover:underline ml-1">
+                                Voltar ao início
+                            </a>
+                        </p>
+                    </div>
                 </div>
             </div>
-
-            <p class="text-gray-400 text-xs mt-8">© {{ now()->year }} Plataforma de Gestão de Parcerias</p>
         </div>
     </body>
 </html>

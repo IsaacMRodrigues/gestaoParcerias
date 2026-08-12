@@ -2,13 +2,13 @@
     <x-slot name="header">
         <div class="flex items-center justify-between">
             <div>
-                <h2 class="text-xl font-semibold text-gray-800">Meus usuários</h2>
+                <h2 class="text-2xl font-bold text-gray-900">Meus usuários</h2>
                 <p class="text-sm text-gray-500 mt-0.5">
                     Usuários da sua Secretaria. Cada cadastro é liberado após aprovação do administrador.
                 </p>
             </div>
             <a href="{{ route('subusuarios.create') }}"
-               class="px-4 py-2 text-sm font-medium text-white bg-brand-600 rounded-md hover:bg-brand-700">
+               class="inline-flex items-center gap-2 px-4 py-2.5 text-sm font-semibold text-white bg-brand-600 rounded-lg shadow-sm hover:bg-brand-700 transition">
                 + Novo usuário
             </a>
         </div>
@@ -18,7 +18,7 @@
         <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 space-y-6">
             <x-flash-message />
 
-            <div class="bg-white shadow rounded-lg overflow-hidden">
+            <div class="bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden">
                 @php
                     $cores = ['pendente' => 'amber', 'aprovado' => 'green', 'recusado' => 'red'];
                 @endphp
@@ -51,8 +51,8 @@
                             </tr>
                         @empty
                             <tr>
-                                <td colspan="4" class="px-6 py-10 text-center text-sm text-gray-500">
-                                    Você ainda não cadastrou nenhum usuário.
+                                <td colspan="4" class="px-6 py-12">
+                                    <x-empty-state icone="pessoas">Você ainda não cadastrou nenhum usuário.</x-empty-state>
                                 </td>
                             </tr>
                         @endforelse

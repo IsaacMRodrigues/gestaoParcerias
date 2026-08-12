@@ -1,6 +1,6 @@
 {{-- Seção de anexos de uma peça do processo.
      Espera: $processo, $peca, $anexos (Collection), $podeAnexar (bool) --}}
-<div class="bg-white shadow rounded-lg p-6 space-y-4">
+<div class="bg-white rounded-xl border border-gray-200 shadow-sm p-6 space-y-4">
     <div>
         <p class="text-sm font-semibold text-gray-800">Arquivos anexados</p>
         <p class="text-xs text-gray-400">

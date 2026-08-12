@@ -29,16 +29,11 @@ use App\Http\Controllers\UserController;
 use Illuminate\Support\Facades\Route;
 
 // Tela principal: escolha do perfil de acesso (Prefeitura, OSC, Cidadão,
-// Parlamentar e Conselho). Quem já está logado vai direto ao seu destino.
-Route::get('/', function () {
-    if (auth()->check()) {
-        return auth()->user()->temAcessoInterno()
-            ? redirect()->route('dashboard')
-            : redirect()->route('portal.index');
-    }
-
-    return view('landing');
-})->name('landing');
+// Parlamentar e Conselho). É o "início do site" — o logotipo aponta para cá em
+// todas as telas, inclusive para quem já está logado, por isso a raiz sempre
+// renderiza a landing. O destino de quem acabou de entrar continua sendo
+// definido no AuthenticatedSessionController, não aqui.
+Route::get('/', fn () => view('landing'))->name('landing');
 
 // Portal público
 Route::get('/portal', [PortalController::class, 'index'])->name('portal.index');

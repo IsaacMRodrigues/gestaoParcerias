@@ -5,14 +5,14 @@
             &rsaquo;
             <a href="{{ route('propostas.show', $proposta) }}" class="hover:underline">{{ $proposta->titulo }}</a>
         </p>
-        <h2 class="text-xl font-semibold text-gray-800 mt-0.5">Diligência</h2>
+        <h2 class="text-2xl font-bold text-gray-900 mt-0.5">Diligência</h2>
     </x-slot>
 
     <div class="py-8">
         <div class="max-w-2xl mx-auto px-4 sm:px-6 lg:px-8 space-y-6">
             <x-flash-message />
 
-            <div class="bg-white shadow rounded-lg p-6 space-y-4">
+            <div class="bg-white rounded-xl border border-gray-200 shadow-sm p-6 space-y-4">
                 <dl class="space-y-3 text-sm">
                     <div>
                         <dt class="text-gray-500">O que foi solicitado</dt>
@@ -46,7 +46,7 @@
             </div>
 
             @if($diligencia->status === 'pendente')
-                <div class="bg-white shadow rounded-lg p-6">
+                <div class="bg-white rounded-xl border border-gray-200 shadow-sm p-6">
                     <h3 class="text-base font-semibold text-gray-800 mb-4">Responder Diligência</h3>
                     <form action="{{ route('propostas.diligencias.responder', [$proposta, $diligencia]) }}"
                           method="POST" class="space-y-4">
@@ -60,7 +60,7 @@
                         </div>
                         <div class="flex justify-end">
                             <button type="submit"
-                                    class="px-4 py-2 text-sm font-medium text-white bg-brand-600 rounded-md hover:bg-brand-700">
+                                    class="inline-flex items-center gap-2 px-4 py-2.5 text-sm font-semibold text-white bg-brand-600 rounded-lg shadow-sm hover:bg-brand-700 transition">
                                 Enviar Resposta
                             </button>
                         </div>

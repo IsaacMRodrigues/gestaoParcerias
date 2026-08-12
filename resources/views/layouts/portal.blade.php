@@ -18,7 +18,7 @@
 @if($portalInterno)
     {{-- Usuário interno da Administração: navega o portal com a mesma sidebar
          do sistema, para não perder o menu nem trocar de padrão visual. --}}
-    <div class="h-1 bg-gradient-to-r from-brand-600 via-brand-500 to-accent-500"></div>
+    <div class="h-1.5 bg-gradient-to-r from-brand-600 via-brand-500 to-accent-500"></div>
     <div class="min-h-screen" x-data="{ sidebarOpen: false }">
         @include('layouts.sidebar')
 
@@ -35,21 +35,42 @@
                     </svg>
                 </button>
 
-                <nav class="flex items-center gap-5 text-sm">
-                    <span class="hidden sm:inline text-xs font-semibold uppercase tracking-wide text-gray-400">Portal</span>
-                    <a href="{{ route('portal.index') }}"
-                       class="{{ request()->routeIs('portal.index') ? 'text-brand-700 font-semibold' : 'text-gray-600 hover:text-brand-700' }} transition">
-                        Chamamentos
-                    </a>
-                    <a href="{{ route('transparencia') }}"
-                       class="{{ request()->routeIs('transparencia') ? 'text-brand-700 font-semibold' : 'text-gray-600 hover:text-brand-700' }} transition">
-                        Transparência
-                    </a>
+                {{-- Deixa explícito que aqui é a face pública do sistema, e não a
+                     área administrativa: rótulo com ícone + abas de verdade. --}}
+                <span class="hidden sm:flex items-center gap-2 pr-4 mr-1 border-r border-gray-200 shrink-0">
+                    <svg class="w-[18px] h-[18px] text-brand-600" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.8">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z M3.6 9h16.8 M3.6 15h16.8 M12 3a15 15 0 010 18 M12 3a15 15 0 000 18"/>
+                    </svg>
+                    <span class="text-sm font-bold text-gray-900">Portal Público</span>
+                </span>
+
+                <nav class="flex items-center gap-1.5 text-sm">
+                    @foreach([
+                        ['portal.index', route('portal.index'), 'Chamamentos'],
+                        ['transparencia', route('transparencia'), 'Transparência'],
+                    ] as [$rota, $url, $rotulo])
+                        <a href="{{ $url }}"
+                           class="px-3 py-2 rounded-lg font-medium transition
+                                  {{ request()->routeIs($rota)
+                                     ? 'bg-brand-50 text-brand-800 font-semibold'
+                                     : 'text-gray-600 hover:bg-gray-100 hover:text-gray-900' }}">
+                            {{ $rotulo }}
+                        </a>
+                    @endforeach
                 </nav>
 
                 <div class="flex-1"></div>
 
-                <x-dropdown align="right" width="64">
+                <a href="{{ route('dashboard') }}"
+                   class="hidden sm:inline-flex items-center gap-1.5 text-sm font-medium text-gray-600
+                          hover:text-brand-700 transition shrink-0">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M10 19l-7-7m0 0l7-7m-7 7h18"/>
+                    </svg>
+                    Área administrativa
+                </a>
+
+                <x-dropdown align="right" width="72">
                     <x-slot name="trigger">
                         <button title="{{ auth()->user()->name }}"
                                 class="flex items-center justify-center w-9 h-9 rounded-full bg-brand-100 text-brand-700 text-xs font-bold hover:bg-brand-200 focus:outline-none focus:ring-2 focus:ring-brand-300 transition">
@@ -57,9 +78,16 @@
                         </button>
                     </x-slot>
                     <x-slot name="content">
-                        <div class="px-4 py-3 border-b border-gray-100">
-                            <div class="text-sm font-semibold text-gray-900">{{ auth()->user()->name }}</div>
-                            <div class="text-xs text-gray-500 truncate">{{ auth()->user()->email }}</div>
+                        <div class="px-4 py-3.5 border-b border-gray-100 bg-gray-50/70">
+                            <div class="flex items-center gap-3">
+                                <span class="w-10 h-10 shrink-0 rounded-full bg-brand-600 text-white text-sm font-bold flex items-center justify-center">
+                                    {{ $navInitials }}
+                                </span>
+                                <div class="min-w-0">
+                                    <div class="text-sm font-semibold text-gray-900 truncate">{{ auth()->user()->name }}</div>
+                                    <div class="text-xs text-gray-500 truncate">{{ auth()->user()->email }}</div>
+                                </div>
+                            </div>
                         </div>
                         <x-dropdown-link :href="route('dashboard')">Área Administrativa</x-dropdown-link>
                         <x-dropdown-link :href="route('profile.edit')">{{ __('Perfil') }}</x-dropdown-link>
@@ -80,8 +108,9 @@
             </main>
 
             <footer class="border-t border-gray-200 bg-white">
-                <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 text-center text-xs text-gray-400">
-                    Plataforma de Gestão de Parcerias — Sistema público municipal
+                <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 flex flex-col sm:flex-row items-center justify-between gap-2 text-xs text-gray-400">
+                    <span>Plataforma de Gestão de Parcerias — Sistema público municipal</span>
+                    <a href="{{ route('validacao.index') }}" class="hover:text-brand-700 transition">Validar documento</a>
                 </div>
             </footer>
         </div>
@@ -89,12 +118,12 @@
 @else
     {{-- Visitante e OSC: portal público, com cabeçalho claro e a cor nos detalhes. --}}
     <div class="min-h-screen flex flex-col">
-        <div class="h-1 bg-gradient-to-r from-brand-600 via-brand-500 to-accent-500"></div>
+        <div class="h-1.5 bg-gradient-to-r from-brand-600 via-brand-500 to-accent-500"></div>
 
         <header class="bg-white border-b border-gray-200">
             <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
                 <div class="flex items-center justify-between h-16 gap-4">
-                    <a href="{{ route('portal.index') }}" class="flex items-center gap-3 min-w-0">
+                    <a href="{{ route('landing') }}" class="flex items-center gap-3 min-w-0">
                         <x-marca class="h-9" />
                         <span class="font-semibold text-gray-900 tracking-tight hidden sm:block">
                             Portal de Parcerias
@@ -147,7 +176,7 @@
                                 Cadastrar OSC
                             </a>
                             <a href="{{ route('login') }}"
-                               class="bg-brand-600 text-white px-4 py-1.5 rounded-md font-medium text-sm hover:bg-brand-700 transition">
+                               class="bg-brand-600 text-white px-4 py-2 rounded-lg font-semibold text-sm shadow-sm hover:bg-brand-700 transition">
                                 Entrar
                             </a>
                         @endauth
@@ -160,10 +189,17 @@
             {{ $slot }}
         </main>
 
-        <footer class="bg-white border-t border-gray-200 mt-12">
-            <div class="max-w-6xl mx-auto px-4 py-5 text-center text-xs text-gray-400">
-                Plataforma de Gestão de Parcerias — Sistema público municipal · PGP {{ now()->year }}
+        <footer class="bg-gray-900 text-gray-400 mt-12">
+            <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8
+                        flex flex-col sm:flex-row items-center justify-between gap-3 text-xs">
+                <span>Plataforma de Gestão de Parcerias — Sistema público municipal</span>
+                <span class="flex items-center gap-5">
+                    <a href="{{ route('transparencia') }}" class="hover:text-white transition">Transparência</a>
+                    <a href="{{ route('validacao.index') }}" class="hover:text-white transition">Validar documento</a>
+                    <span class="text-gray-500">PGP · {{ now()->year }}</span>
+                </span>
             </div>
+            <div class="h-1.5 bg-gradient-to-r from-brand-600 via-brand-500 to-accent-500"></div>
         </footer>
     </div>
 @endif

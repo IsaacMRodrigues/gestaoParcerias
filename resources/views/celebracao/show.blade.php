@@ -21,7 +21,7 @@
                     <a href="{{ route('propostas.index') }}" class="hover:underline">Propostas</a>
                     &rsaquo; Celebração
                 </p>
-                <h2 class="text-xl font-semibold text-gray-800 mt-0.5">
+                <h2 class="text-2xl font-bold text-gray-900 mt-0.5">
                     Celebração da Parceria
                     <span class="text-sm font-normal text-gray-500 ml-1">— {{ $proposta->osc->name }}</span>
                 </h2>
@@ -44,7 +44,7 @@
             @endif
 
             {{-- Identificação --}}
-            <div class="bg-white shadow rounded-lg p-6">
+            <div class="bg-white rounded-xl border border-gray-200 shadow-sm p-6">
                 <dl class="grid grid-cols-2 sm:grid-cols-4 gap-4 text-sm">
                     <div>
                         <dt class="text-xs font-medium text-gray-500 uppercase tracking-wide">OSC</dt>
@@ -64,9 +64,9 @@
                         <dt class="text-xs font-medium text-gray-500 uppercase tracking-wide">Situação</dt>
                         <dd class="mt-0.5">
                             @if($concluida)
-                                <span class="px-2 py-1 text-xs font-medium bg-green-100 text-green-800 rounded-full">Concluída</span>
+                                <span class="px-2.5 py-1 text-xs font-semibold bg-green-50 text-green-800 border border-green-200 rounded-md">Concluída</span>
                             @else
-                                <span class="px-2 py-1 text-xs font-medium bg-amber-100 text-amber-800 rounded-full">
+                                <span class="px-2.5 py-1 text-xs font-semibold bg-amber-50 text-amber-800 border border-amber-200 rounded-md">
                                     Com {{ $setorLabel($proposta->celebracao_setor) }}
                                 </span>
                             @endif
@@ -82,7 +82,7 @@
             </div>
 
             {{-- Trâmite --}}
-            <div class="bg-white shadow rounded-lg p-6">
+            <div class="bg-white rounded-xl border border-gray-200 shadow-sm p-6">
                 <div class="flex items-start justify-between gap-3 mb-4">
                     <div>
                         <h3 class="text-base font-semibold text-gray-800">Trâmite da Celebração</h3>
@@ -132,7 +132,7 @@
                                     <textarea name="parecer" rows="2" placeholder="Observação (opcional)"
                                               class="block w-full border-gray-300 rounded-md shadow-sm text-sm focus:ring-brand-500 focus:border-brand-500"></textarea>
                                     <button type="submit" @disabled($pendencias)
-                                            class="px-4 py-2 text-sm font-medium text-white bg-brand-600 rounded-md hover:bg-brand-700 disabled:opacity-50 disabled:cursor-not-allowed">
+                                            class="inline-flex items-center gap-2 px-4 py-2.5 text-sm font-semibold text-white bg-brand-600 rounded-lg shadow-sm hover:bg-brand-700 transition disabled:opacity-50 disabled:cursor-not-allowed">
                                         Encaminhar para
                                         {{ $setorLabel(\App\Models\Proposta::ETAPAS_CELEBRACAO[$etapaAtual + 1]['setor']) }}
                                     </button>
@@ -185,25 +185,13 @@
                 @endif
             </div>
 
-            {{-- Progresso --}}
-            <div class="bg-white shadow rounded-lg p-6">
-                <div class="flex items-center justify-between mb-2">
-                    <h3 class="text-base font-semibold text-gray-800">Progresso da Documentação</h3>
-                    <span class="text-sm text-gray-500">{{ $progresso['ok'] }}/{{ $progresso['total'] }} obrigatórias</span>
-                </div>
-                <div class="w-full bg-gray-100 rounded-full h-2.5">
-                    <div class="bg-green-500 h-2.5 rounded-full transition-all" style="width: {{ $progresso['percent'] }}%"></div>
-                </div>
-            </div>
-
-            {{-- Checklist --}}
-            <div class="bg-white shadow rounded-lg">
-                <div class="px-6 py-4 border-b border-gray-200">
-                    <h3 class="text-base font-semibold text-gray-800">Documentos da Celebração</h3>
-                    <p class="text-xs text-gray-400 mt-0.5">
-                        Cada documento é liberado ao setor responsável na etapa correspondente do trâmite.
-                    </p>
-                </div>
+            {{-- Documentos, com o progresso no próprio cabeçalho --}}
+            <div class="bg-white rounded-xl border border-gray-200 shadow-sm">
+                @include('pecas._cabecalho', [
+                    'titulo' => 'Documentos da Celebração',
+                    'descricao' => 'Cada documento é liberado ao setor responsável na etapa correspondente do trâmite.',
+                    'progresso' => $progresso,
+                ])
                 @include('pecas._checklist', ['pecas' => $pecas])
             </div>
         </div>

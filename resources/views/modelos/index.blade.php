@@ -3,7 +3,7 @@
         <div class="flex items-center justify-between gap-4">
             <div>
                 <p class="text-sm text-gray-500">Tecnologia da Informação</p>
-                <h2 class="text-xl font-semibold text-gray-800 mt-0.5">Modelos padrão</h2>
+                <h2 class="text-2xl font-bold text-gray-900 mt-0.5">Modelos padrão</h2>
             </div>
             <div class="text-right shrink-0">
                 <p class="text-sm text-gray-500">

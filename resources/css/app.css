@@ -2,6 +2,28 @@
 @tailwind components;
 @tailwind utilities;
 
+/* ===== Listagens =====
+   Vale para as tabelas do sistema (todas usam .min-w-full); as tabelas
+   renderizadas dentro de um documento (.documento-html) ficam de fora. */
+table.min-w-full tbody tr {
+    transition: background-color .15s ease;
+}
+table.min-w-full tbody tr:hover {
+    background-color: #f9fafb;
+}
+table.min-w-full thead th {
+    white-space: nowrap;
+}
+
+/* Foco visível e consistente em tudo que é interativo — acessibilidade */
+a:focus-visible,
+button:focus-visible,
+[role="button"]:focus-visible {
+    outline: 2px solid #00A859;
+    outline-offset: 2px;
+    border-radius: .4rem;
+}
+
 /* ===== Modal de confirmação global (substitui alert/confirm nativos) ===== */
 .cmodal-backdrop {
     position: fixed;

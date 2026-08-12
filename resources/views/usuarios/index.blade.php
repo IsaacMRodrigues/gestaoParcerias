@@ -1,9 +1,9 @@
 <x-app-layout>
     <x-slot name="header">
         <div class="flex items-center justify-between">
-            <h2 class="text-xl font-semibold text-gray-800">Usuários</h2>
+            <h2 class="text-2xl font-bold text-gray-900">Usuários</h2>
             <a href="{{ route('usuarios.create') }}"
-               class="px-4 py-2 text-sm font-medium text-white bg-brand-600 rounded-md hover:bg-brand-700">
+               class="inline-flex items-center gap-2 px-4 py-2.5 text-sm font-semibold text-white bg-brand-600 rounded-lg shadow-sm hover:bg-brand-700 transition">
                 + Novo Usuário
             </a>
         </div>
@@ -24,19 +24,19 @@
                 </a>
             @endif
 
-            <div class="bg-white shadow rounded-lg overflow-hidden">
-                <table class="min-w-full divide-y divide-gray-200">
+            <div class="bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden">
+                <table class="min-w-full divide-y divide-gray-100">
                     <thead class="bg-gray-50">
                         <tr>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Nome</th>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">E-mail</th>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">CPF</th>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Perfil</th>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
+                            <th class="px-6 py-3.5 text-left text-[12px] font-bold text-gray-500 uppercase tracking-wider">Nome</th>
+                            <th class="px-6 py-3.5 text-left text-[12px] font-bold text-gray-500 uppercase tracking-wider">E-mail</th>
+                            <th class="px-6 py-3.5 text-left text-[12px] font-bold text-gray-500 uppercase tracking-wider">CPF</th>
+                            <th class="px-6 py-3.5 text-left text-[12px] font-bold text-gray-500 uppercase tracking-wider">Perfil</th>
+                            <th class="px-6 py-3.5 text-left text-[12px] font-bold text-gray-500 uppercase tracking-wider">Status</th>
                             <th class="px-6 py-3"></th>
                         </tr>
                     </thead>
-                    <tbody class="bg-white divide-y divide-gray-200">
+                    <tbody class="bg-white divide-y divide-gray-100">
                         @forelse($users as $user)
                             <tr>
                                 <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
@@ -51,7 +51,9 @@
                                 <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-600">
                                     @php $role = $user->roles->first() @endphp
                                     @if($role)
-                                        <span class="px-2 py-1 text-xs font-medium bg-brand-100 text-brand-800 rounded-full">
+                                        {{-- Perfil em cinza: a cor fica reservada ao status,
+                                             que é o que precisa saltar aos olhos. --}}
+                                        <span class="px-2.5 py-1 text-xs font-semibold bg-gray-100 text-gray-700 border border-gray-200 rounded-md">
                                             {{ \App\Models\User::$roleLabels[$role->name] ?? $role->name }}
                                         </span>
                                     @else
@@ -60,27 +62,27 @@
                                 </td>
                                 <td class="px-6 py-4 whitespace-nowrap text-sm">
                                     @if($user->status)
-                                        <span class="px-2 py-1 text-xs font-medium bg-green-100 text-green-800 rounded-full">Ativo</span>
+                                        <span class="px-2.5 py-1 text-xs font-semibold bg-green-50 text-green-800 border border-green-200 rounded-md">Ativo</span>
                                     @else
-                                        <span class="px-2 py-1 text-xs font-medium bg-red-100 text-red-800 rounded-full">Inativo</span>
+                                        <span class="px-2.5 py-1 text-xs font-semibold bg-red-50 text-red-800 border border-red-200 rounded-md">Inativo</span>
                                     @endif
                                 </td>
                                 <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium space-x-3">
                                     <a href="{{ route('usuarios.edit', $user) }}"
-                                       class="text-brand-600 hover:text-brand-900">Editar</a>
+                                       class="font-semibold text-brand-700 hover:text-brand-800 transition">Editar</a>
 
                                     <form action="{{ route('usuarios.destroy', $user) }}" method="POST" class="inline"
                                           data-confirm="Deseja remover este usuário?">
                                         @csrf
                                         @method('DELETE')
-                                        <button type="submit" class="text-red-600 hover:text-red-900">Remover</button>
+                                        <button type="submit" class="font-medium text-gray-500 hover:text-red-700 transition">Remover</button>
                                     </form>
                                 </td>
                             </tr>
                         @empty
                             <tr>
-                                <td colspan="6" class="px-6 py-8 text-center text-sm text-gray-500">
-                                    Nenhum usuário cadastrado.
+                                <td colspan="6" class="px-6 py-12">
+                                    <x-empty-state icone="pessoas">Nenhum usuário cadastrado.</x-empty-state>
                                 </td>
                             </tr>
                         @endforelse

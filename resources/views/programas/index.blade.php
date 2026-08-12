@@ -1,9 +1,9 @@
 <x-app-layout>
     <x-slot name="header">
         <div class="flex items-center justify-between">
-            <h2 class="text-xl font-semibold text-gray-800">Programas Governamentais</h2>
+            <h2 class="text-2xl font-bold text-gray-900">Programas Governamentais</h2>
             <a href="{{ route('programas.create') }}"
-               class="px-4 py-2 text-sm font-medium text-white bg-brand-600 rounded-md hover:bg-brand-700">
+               class="inline-flex items-center gap-2 px-4 py-2.5 text-sm font-semibold text-white bg-brand-600 rounded-lg shadow-sm hover:bg-brand-700 transition">
                 + Novo Programa
             </a>
         </div>
@@ -16,7 +16,7 @@
             {{-- Filtros --}}
             @php $temFiltro = collect($filtros)->filter(fn ($v) => $v !== null && $v !== '')->isNotEmpty(); @endphp
             <form method="GET" action="{{ route('programas.index') }}"
-                  class="bg-white shadow rounded-lg p-4 mb-4 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3 items-end">
+                  class="bg-white rounded-xl border border-gray-200 shadow-sm p-4 mb-4 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3 items-end">
                 <div class="lg:col-span-2">
                     <label for="busca" class="block text-xs font-medium text-gray-500 mb-1">Pesquisar</label>
                     <input type="text" name="busca" id="busca" value="{{ $filtros['busca'] ?? '' }}"
@@ -57,7 +57,7 @@
                 </div>
                 <div class="sm:col-span-2 lg:col-span-5 flex items-center gap-3">
                     <button type="submit"
-                            class="px-4 py-2 text-sm font-medium text-white bg-brand-600 rounded-md hover:bg-brand-700">
+                            class="inline-flex items-center gap-2 px-4 py-2.5 text-sm font-semibold text-white bg-brand-600 rounded-lg shadow-sm hover:bg-brand-700 transition">
                         Filtrar
                     </button>
                     @if($temFiltro)
@@ -67,19 +67,19 @@
                 </div>
             </form>
 
-            <div class="bg-white shadow rounded-lg overflow-hidden">
-                <table class="min-w-full divide-y divide-gray-200">
+            <div class="bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden">
+                <table class="min-w-full divide-y divide-gray-100">
                     <thead class="bg-gray-50">
                         <tr>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Programa</th>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Órgão</th>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Tipo</th>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Valor Total</th>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
+                            <th class="px-6 py-3.5 text-left text-[12px] font-bold text-gray-500 uppercase tracking-wider">Programa</th>
+                            <th class="px-6 py-3.5 text-left text-[12px] font-bold text-gray-500 uppercase tracking-wider">Órgão</th>
+                            <th class="px-6 py-3.5 text-left text-[12px] font-bold text-gray-500 uppercase tracking-wider">Tipo</th>
+                            <th class="px-6 py-3.5 text-left text-[12px] font-bold text-gray-500 uppercase tracking-wider">Valor Total</th>
+                            <th class="px-6 py-3.5 text-left text-[12px] font-bold text-gray-500 uppercase tracking-wider">Status</th>
                             <th class="px-6 py-3"></th>
                         </tr>
                     </thead>
-                    <tbody class="bg-white divide-y divide-gray-200">
+                    <tbody class="bg-white divide-y divide-gray-100">
                         @forelse($programas as $programa)
                             <tr>
                                 <td class="px-6 py-4 text-sm font-medium text-gray-900">
@@ -112,19 +112,19 @@
                                         Chamamentos
                                         <span class="bg-brand-500 text-white rounded px-1">{{ $programa->chamamentos_count ?? 0 }}</span>
                                     </a>
-                                    <a href="{{ route('programas.edit', $programa) }}" class="text-brand-600 hover:text-brand-900">Editar</a>
+                                    <a href="{{ route('programas.edit', $programa) }}" class="font-semibold text-brand-700 hover:text-brand-800 transition">Editar</a>
                                     <form action="{{ route('programas.destroy', $programa) }}" method="POST" class="inline"
                                           data-confirm="Deseja remover este programa?">
                                         @csrf
                                         @method('DELETE')
-                                        <button type="submit" class="text-red-600 hover:text-red-900">Remover</button>
+                                        <button type="submit" class="font-medium text-gray-500 hover:text-red-700 transition">Remover</button>
                                     </form>
                                 </td>
                             </tr>
                         @empty
                             <tr>
-                                <td colspan="6" class="px-6 py-8 text-center text-sm text-gray-500">
-                                    {{ $temFiltro ? 'Nenhum programa encontrado com os filtros aplicados.' : 'Nenhum programa cadastrado.' }}
+                                <td colspan="6" class="px-6 py-12">
+                                    <x-empty-state icone="lista">{{ $temFiltro ? 'Nenhum programa encontrado com os filtros aplicados.' : 'Nenhum programa cadastrado.' }}</x-empty-state>
                                 </td>
                             </tr>
                         @endforelse

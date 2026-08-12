@@ -5,7 +5,7 @@
                 <p class="text-sm text-gray-500">
                     <a href="{{ route('instrumentos.index') }}" class="hover:underline">Instrumentos</a>
                 </p>
-                <h2 class="text-xl font-semibold text-gray-800 mt-0.5">
+                <h2 class="text-2xl font-bold text-gray-900 mt-0.5">
                     {{ $instrumento->numero }}
                     <span class="text-sm font-normal text-gray-500 ml-1">
                         — {{ \App\Models\Instrumento::TIPOS[$instrumento->tipo] ?? $instrumento->tipo }}
@@ -56,7 +56,7 @@
             <x-flash-message />
 
             {{-- Dados do instrumento --}}
-            <div class="bg-white shadow rounded-lg p-6">
+            <div class="bg-white rounded-xl border border-gray-200 shadow-sm p-6">
                 <h3 class="text-base font-semibold text-gray-800 mb-4">Dados do Instrumento</h3>
                 <dl class="grid grid-cols-2 gap-x-6 gap-y-3 text-sm">
                     <div>
@@ -121,7 +121,7 @@
             </div>
 
             {{-- Termos Aditivos --}}
-            <div class="bg-white shadow rounded-lg">
+            <div class="bg-white rounded-xl border border-gray-200 shadow-sm">
                 <div class="flex items-center justify-between px-6 py-4 border-b border-gray-200">
                     <h3 class="text-base font-semibold text-gray-800">Termos Aditivos / Apostilamentos</h3>
                     @if(in_array($instrumento->status, ['assinado', 'vigente']))
@@ -153,7 +153,7 @@
                                 <a href="{{ route('instrumentos.aditivos.documentacao', [$instrumento, $aditivo]) }}"
                                    class="text-xs text-gray-600 hover:text-gray-900">Documentação</a>
                                 <a href="{{ route('instrumentos.aditivos.edit', [$instrumento, $aditivo]) }}"
-                                   class="text-xs text-brand-600 hover:text-brand-900">Editar</a>
+                                   class="text-xs font-semibold text-brand-700 hover:text-brand-800 transition">Editar</a>
                                 <form action="{{ route('instrumentos.aditivos.destroy', [$instrumento, $aditivo]) }}"
                                       method="POST" class="inline"
                                       data-confirm="Remover este aditivo?">
@@ -170,7 +170,7 @@
 
             {{-- 2.3.1 Ordens de Pagamento --}}
             @can('ordem_pagamento')
-            <div class="bg-white shadow rounded-lg">
+            <div class="bg-white rounded-xl border border-gray-200 shadow-sm">
                 <div class="flex items-center justify-between px-6 py-4 border-b border-gray-200">
                     <h3 class="text-base font-semibold text-gray-800">Ordens de Pagamento</h3>
                     @if($instrumento->status === 'vigente')
@@ -201,7 +201,7 @@
                             <div>
                                 <p class="text-sm font-semibold text-gray-800">
                                     OP nº {{ $op->numero }}
-                                    <span class="ml-1 px-1.5 py-0.5 text-[11px] font-medium rounded {{ $op->ehGlobal() ? 'bg-purple-50 text-purple-700' : 'bg-blue-50 text-blue-700' }}">
+                                    <span class="ml-1 px-1.5 py-0.5 text-[12px] font-medium rounded {{ $op->ehGlobal() ? 'bg-purple-50 text-purple-700' : 'bg-blue-50 text-blue-700' }}">
                                         {{ $op->ehGlobal() ? 'Global' : 'Parcial' }}
                                     </span>
                                     @if($op->favorecido) <span class="font-normal text-gray-600">— {{ $op->favorecido }}</span> @endif
@@ -214,11 +214,11 @@
                             </div>
                             <div class="flex items-center gap-3 ml-4 shrink-0">
                                 @if($op->assinado())
-                                    <span class="px-2 py-1 text-xs font-medium bg-green-100 text-green-800 rounded-full">Assinada</span>
+                                    <span class="px-2.5 py-1 text-xs font-semibold bg-green-50 text-green-800 border border-green-200 rounded-md">Assinada</span>
                                 @else
                                     <span class="px-2 py-1 text-xs font-medium bg-gray-100 text-gray-600 rounded-full">Rascunho</span>
                                 @endif
-                                <a href="{{ route('ordens-pagamento.edit', $op) }}" class="text-xs text-brand-600 hover:text-brand-900">{{ $op->assinado() ? 'Abrir' : 'Editar' }}</a>
+                                <a href="{{ route('ordens-pagamento.edit', $op) }}" class="text-xs font-semibold text-brand-700 hover:text-brand-800 transition">{{ $op->assinado() ? 'Abrir' : 'Editar' }}</a>
                                 <a href="{{ route('ordens-pagamento.imprimir', $op) }}" target="_blank" class="text-xs text-gray-600 hover:text-gray-900">Imprimir</a>
                                 @unless($op->assinado())
                                     <form action="{{ route('ordens-pagamento.destroy', $op) }}" method="POST" class="inline"

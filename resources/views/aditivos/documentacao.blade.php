@@ -6,7 +6,7 @@
                     <a href="{{ route('instrumentos.show', $instrumento) }}" class="hover:underline">{{ $instrumento->numero }}</a>
                     &rsaquo; Aditivos
                 </p>
-                <h2 class="text-xl font-semibold text-gray-800 mt-0.5">
+                <h2 class="text-2xl font-bold text-gray-900 mt-0.5">
                     Documentação — {{ $aditivo->numero }}º Aditivo
                     <span class="text-sm font-normal text-gray-500 ml-1">
                         ({{ \App\Models\Aditivo::TIPOS[$aditivo->tipo] ?? $aditivo->tipo }})
@@ -23,26 +23,12 @@
         <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 space-y-6">
             <x-flash-message />
 
-            <div class="bg-white shadow rounded-lg p-6">
-                <div class="flex items-center justify-between mb-2">
-                    <h3 class="text-base font-semibold text-gray-800">Progresso da Documentação</h3>
-                    <span class="text-sm text-gray-500">{{ $progresso['ok'] }}/{{ $progresso['total'] }} obrigatórias</span>
-                </div>
-                <div class="w-full bg-gray-100 rounded-full h-2.5">
-                    <div class="bg-green-500 h-2.5 rounded-full transition-all" style="width: {{ $progresso['percent'] }}%"></div>
-                </div>
-                @if($progresso['percent'] === 100)
-                    <p class="text-sm text-green-700 mt-2">🟢 Documentação obrigatória completa.</p>
-                @endif
-            </div>
-
-            <div class="bg-white shadow rounded-lg">
-                <div class="px-6 py-4 border-b border-gray-200">
-                    <h3 class="text-base font-semibold text-gray-800">Documentos do Processo</h3>
-                    <p class="text-xs text-gray-400 mt-0.5">
-                        Itens "puxar do módulo Gestão de Parcerias" podem ser anexados manualmente nesta versão.
-                    </p>
-                </div>
+            <div class="bg-white rounded-xl border border-gray-200 shadow-sm">
+                @include('pecas._cabecalho', [
+                    'titulo' => 'Documentos do Processo',
+                    'descricao' => 'Itens "puxar do módulo Gestão de Parcerias" podem ser anexados manualmente nesta versão.',
+                    'progresso' => $progresso,
+                ])
                 @include('pecas._checklist', ['pecas' => $pecas])
             </div>
         </div>

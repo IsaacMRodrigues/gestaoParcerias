@@ -5,7 +5,7 @@
                 <a href="{{ route('modelos.index') }}" class="hover:underline">Modelos padrão</a>
                 &rsaquo; {{ \App\Http\Controllers\ModeloController::ORIGENS[$origem] }}
             </p>
-            <h2 class="text-xl font-semibold text-gray-800 mt-0.5">{{ $modelo['rotulo'] }}</h2>
+            <h2 class="text-2xl font-bold text-gray-900 mt-0.5">{{ $modelo['rotulo'] }}</h2>
         </div>
     </x-slot>
 

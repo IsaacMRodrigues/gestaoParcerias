@@ -2,7 +2,7 @@
     <x-slot name="header">
         <div>
             <p class="text-sm text-gray-500">4 · Execução</p>
-            <h2 class="text-xl font-semibold text-gray-800 mt-0.5">Parcerias em Execução</h2>
+            <h2 class="text-2xl font-bold text-gray-900 mt-0.5">Parcerias em Execução</h2>
         </div>
     </x-slot>
 
@@ -33,7 +33,7 @@
                     </select>
                 </div>
                 <div class="sm:col-span-3 flex items-center gap-3">
-                    <button type="submit" class="px-4 py-2 text-sm font-medium text-white bg-brand-600 rounded-md hover:bg-brand-700">
+                    <button type="submit" class="inline-flex items-center gap-2 px-4 py-2.5 text-sm font-semibold text-white bg-brand-600 rounded-lg shadow-sm hover:bg-brand-700 transition">
                         Filtrar
                     </button>
                     @if($temFiltro)

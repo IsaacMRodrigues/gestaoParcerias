@@ -8,7 +8,7 @@
                     </a>
                     &rsaquo; Chamamentos
                 </p>
-                <h2 class="text-xl font-semibold text-gray-800 mt-0.5">
+                <h2 class="text-2xl font-bold text-gray-900 mt-0.5">
                     Seleção e Celebração
                     <span class="text-sm font-normal text-gray-500 ml-1">
                         — {{ $chamamento->numero ? $chamamento->numero . ' · ' : '' }}{{ $chamamento->titulo }}
@@ -26,7 +26,7 @@
             <x-flash-message />
 
             {{-- Dados do Chamamento --}}
-            <div class="bg-white shadow rounded-lg p-6">
+            <div class="bg-white rounded-xl border border-gray-200 shadow-sm p-6">
                 <div class="flex items-start justify-between gap-3 mb-4">
                     <div>
                         <h3 class="text-base font-semibold text-gray-800">
@@ -112,7 +112,7 @@
                     $concluida    = $chamamento->selecaoConcluida();
                     $pendencias   = $concluida ? [] : $chamamento->pendenciasSelecao();
                 @endphp
-                <div class="bg-white shadow rounded-lg p-6">
+                <div class="bg-white rounded-xl border border-gray-200 shadow-sm p-6">
                     <div class="flex items-start justify-between gap-3 mb-4">
                         <div>
                             <h3 class="text-base font-semibold text-gray-800">Trâmite da Seleção</h3>
@@ -139,7 +139,7 @@
                                 $agora = !$concluida && $i === $etapaAtual;
                             @endphp
                             <li class="flex items-start gap-3 text-sm">
-                                <span class="mt-0.5 w-5 h-5 shrink-0 rounded-full border text-[11px] font-bold flex items-center justify-center
+                                <span class="mt-0.5 w-5 h-5 shrink-0 rounded-full border text-[12px] font-bold flex items-center justify-center
                                     {{ $feita ? 'bg-green-100 border-green-300 text-green-700'
                                              : ($agora ? 'bg-brand-100 border-brand-300 text-brand-700'
                                                        : 'bg-white border-gray-300 text-gray-400') }}">
@@ -187,7 +187,7 @@
                                         <textarea name="parecer" rows="2" placeholder="Observação (opcional)"
                                                   class="block w-full border-gray-300 rounded-md shadow-sm text-sm focus:ring-brand-500 focus:border-brand-500"></textarea>
                                         <button type="submit" @disabled($pendencias)
-                                                class="px-4 py-2 text-sm font-medium text-white bg-brand-600 rounded-md hover:bg-brand-700 disabled:opacity-50 disabled:cursor-not-allowed">
+                                                class="inline-flex items-center gap-2 px-4 py-2.5 text-sm font-semibold text-white bg-brand-600 rounded-lg shadow-sm hover:bg-brand-700 transition disabled:opacity-50 disabled:cursor-not-allowed">
                                             Encaminhar para
                                             {{ \App\Models\Chamamento::SETORES_SELECAO[\App\Models\Chamamento::ETAPAS_SELECAO[$etapaAtual + 1]['setor']] }}
                                         </button>
@@ -246,7 +246,7 @@
 
             {{-- Recursos contra o resultado provisório --}}
             @if($chamamento->temTramiteSelecao() && ($chamamento->recursos->isNotEmpty() || $chamamento->faseRecursalAberta()))
-                <div class="bg-white shadow rounded-lg">
+                <div class="bg-white rounded-xl border border-gray-200 shadow-sm">
                     <div class="px-6 py-4 border-b border-gray-200 flex items-start justify-between gap-3">
                         <div>
                             <h3 class="text-base font-semibold text-gray-800">Recursos</h3>
@@ -340,28 +340,13 @@
                 </div>
             @endif
 
-            {{-- Progresso --}}
-            <div class="bg-white shadow rounded-lg p-6">
-                <div class="flex items-center justify-between mb-2">
-                    <h3 class="text-base font-semibold text-gray-800">Progresso da Documentação</h3>
-                    <span class="text-sm text-gray-500">{{ $progresso['ok'] }}/{{ $progresso['total'] }} obrigatórias</span>
-                </div>
-                <div class="w-full bg-gray-100 rounded-full h-2.5">
-                    <div class="bg-green-500 h-2.5 rounded-full transition-all" style="width: {{ $progresso['percent'] }}%"></div>
-                </div>
-                @if($progresso['percent'] === 100)
-                    <p class="text-sm text-green-700 mt-2">🟢 Documentação obrigatória completa.</p>
-                @endif
-            </div>
-
-            {{-- Checklist --}}
-            <div class="bg-white shadow rounded-lg">
-                <div class="px-6 py-4 border-b border-gray-200">
-                    <h3 class="text-base font-semibold text-gray-800">Peças do Processo de Seleção</h3>
-                    <p class="text-xs text-gray-400 mt-0.5">
-                        "Modelo padrão" usa editor rico com brasão e assinatura digital. Demais itens são arquivos anexados.
-                    </p>
-                </div>
+            {{-- Peças, com o progresso no próprio cabeçalho --}}
+            <div class="bg-white rounded-xl border border-gray-200 shadow-sm">
+                @include('pecas._cabecalho', [
+                    'titulo' => 'Peças do Processo de Seleção',
+                    'descricao' => 'Documentos do editor saem com brasão e assinatura digital; os demais são arquivos anexados.',
+                    'progresso' => $progresso,
+                ])
                 @include('pecas._checklist', ['pecas' => $pecas])
             </div>
         </div>

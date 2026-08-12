@@ -23,6 +23,26 @@ export default {
             fontFamily: {
                 sans: ['Figtree', ...defaultTheme.fontFamily.sans],
             },
+
+            // Escala tipográfica do Tailwind com +10% em cada degrau (o padrão
+            // ficou pequeno demais na tela). Só o texto cresce: espaçamentos,
+            // larguras e ícones seguem a escala original, então a densidade da
+            // interface não muda. Altura de linha acompanha na mesma proporção.
+            fontSize: {
+                xs:   ['0.825rem',  { lineHeight: '1.1rem'   }],
+                sm:   ['0.9625rem', { lineHeight: '1.375rem' }],
+                base: ['1.1rem',    { lineHeight: '1.65rem'  }],
+                lg:   ['1.2375rem', { lineHeight: '1.925rem' }],
+                xl:   ['1.375rem',  { lineHeight: '1.925rem' }],
+                '2xl': ['1.65rem',   { lineHeight: '2.2rem'   }],
+                '3xl': ['2.0625rem', { lineHeight: '2.475rem' }],
+                '4xl': ['2.475rem',  { lineHeight: '2.75rem'  }],
+                '5xl': ['3.3rem',    { lineHeight: '1'        }],
+                '6xl': ['4.125rem',  { lineHeight: '1'        }],
+                '7xl': ['4.95rem',   { lineHeight: '1'        }],
+                '8xl': ['6.6rem',    { lineHeight: '1'        }],
+                '9xl': ['8.8rem',    { lineHeight: '1'        }],
+            },
             colors: {
                 // Identidade visual da Prefeitura de São Gonçalo do Rio Abaixo.
                 // brand-600 é o verde principal; brand-700 o verde escuro;

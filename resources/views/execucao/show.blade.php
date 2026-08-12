@@ -63,7 +63,7 @@
                     <div class="sm:col-span-2"><x-input-label for="documento" value="Documento / OB" /><x-text-input id="documento" name="documento" type="text" class="mt-1 block w-full" /></div>
                     <div><x-primary-button class="w-full justify-center">Registrar</x-primary-button></div>
                 </form>
-                <table class="min-w-full divide-y divide-gray-200 text-sm">
+                <table class="min-w-full divide-y divide-gray-100 text-sm">
                     <thead class="bg-gray-50 text-xs uppercase text-gray-500">
                         <tr><th class="px-6 py-2 text-left">Parcela</th><th class="px-6 py-2 text-left">Data</th><th class="px-6 py-2 text-right">Valor</th><th class="px-6 py-2 text-left">Documento</th><th class="px-6 py-2"></th></tr>
                     </thead>
@@ -128,7 +128,7 @@
                         </tbody>
                     @empty
                         <tbody>
-                            <tr><td colspan="5" class="px-6 py-6 text-center text-gray-400">Nenhum repasse registrado.</td></tr>
+                            <tr><td colspan="5" class="px-6 py-10"><x-empty-state icone="dinheiro">Nenhum repasse registrado.</x-empty-state></td></tr>
                         </tbody>
                     @endforelse
                 </table>
@@ -160,7 +160,7 @@
                     </div>
                     <div><x-primary-button class="w-full justify-center">Lançar</x-primary-button></div>
                 </form>
-                <table class="min-w-full divide-y divide-gray-200 text-sm">
+                <table class="min-w-full divide-y divide-gray-100 text-sm">
                     <thead class="bg-gray-50 text-xs uppercase text-gray-500">
                         <tr><th class="px-6 py-2 text-left">Data</th><th class="px-6 py-2 text-left">Natureza</th><th class="px-6 py-2 text-left">Fornecedor</th><th class="px-6 py-2 text-right">Valor</th><th class="px-6 py-2 text-left">NF</th><th class="px-6 py-2"></th></tr>
                     </thead>
@@ -173,7 +173,7 @@
                                 <td class="px-6 py-2 text-right font-medium">R$ {{ number_format($d->valor, 2, ',', '.') }}</td>
                                 <td class="px-6 py-2">
                                     @if($d->temNotaFiscal())
-                                        <a href="{{ route('despesas.nota.download', $d) }}" class="text-brand-600 hover:text-brand-900">📎 {{ $d->nota_fiscal_numero ?? 'baixar' }}</a>
+                                        <a href="{{ route('despesas.nota.download', $d) }}" class="font-semibold text-brand-700 hover:text-brand-800 transition">📎 {{ $d->nota_fiscal_numero ?? 'baixar' }}</a>
                                     @else
                                         <button type="button" @click="editando = true"
                                                 class="text-xs text-amber-700 bg-amber-50 border border-amber-200 px-2 py-0.5 rounded hover:bg-amber-100">
@@ -259,7 +259,7 @@
                         </tbody>
                     @empty
                         <tbody>
-                            <tr><td colspan="6" class="px-6 py-6 text-center text-gray-400">Nenhuma despesa lançada.</td></tr>
+                            <tr><td colspan="6" class="px-6 py-10"><x-empty-state icone="dinheiro">Nenhuma despesa lançada.</x-empty-state></td></tr>
                         </tbody>
                     @endforelse
                     </tbody>

@@ -3,7 +3,7 @@
         <p class="text-sm text-gray-500">
             <a href="{{ route('processos.show', $processo) }}" class="hover:underline">Processo {{ $processo->numero }}</a>
         </p>
-        <h2 class="text-xl font-semibold text-gray-800 mt-0.5">
+        <h2 class="text-2xl font-bold text-gray-900 mt-0.5">
             {{ \App\Models\ProcessoPeca::TIPOS[$peca->tipo] ?? $peca->tipo }}
         </h2>
     </x-slot>
@@ -37,7 +37,7 @@
             @endif
 
             @unless($peca->ehArquivo())
-            <div class="bg-white shadow rounded-lg p-6">
+            <div class="bg-white rounded-xl border border-gray-200 shadow-sm p-6">
                 <x-input-label value="Conteúdo (modelo padrão)" class="mb-1" />
                 @if($podeEditar)
                     <form action="{{ route('processos.pecas.update', [$processo, $peca]) }}" method="POST" class="space-y-4">
@@ -103,7 +103,7 @@
             @endif
 
             @if(!$peca->ehArquivo() && ($podeAssinar || $peca->assinado()))
-                <div class="bg-white shadow rounded-lg p-6 flex items-center justify-between">
+                <div class="bg-white rounded-xl border border-gray-200 shadow-sm p-6 flex items-center justify-between">
                     <div>
                         <p class="text-sm font-semibold text-gray-800">Assinatura digital</p>
                         @if($peca->assinado())

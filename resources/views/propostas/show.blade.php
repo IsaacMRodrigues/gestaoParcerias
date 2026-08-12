@@ -5,7 +5,7 @@
                 <p class="text-sm text-gray-500">
                     <a href="{{ route('propostas.index') }}" class="hover:underline">Propostas</a>
                 </p>
-                <h2 class="text-xl font-semibold text-gray-800 mt-0.5">{{ $proposta->titulo }}</h2>
+                <h2 class="text-2xl font-bold text-gray-900 mt-0.5">{{ $proposta->titulo }}</h2>
             </div>
             <div class="flex items-center gap-3">
                 @if($proposta->status === 'rascunho')
@@ -21,7 +21,7 @@
                 @endif
                 @if($proposta->temTramiteCelebracao())
                     <a href="{{ route('celebracao.show', $proposta) }}"
-                       class="px-4 py-2 text-sm font-medium text-white bg-brand-600 rounded-md hover:bg-brand-700">
+                       class="inline-flex items-center gap-2 px-4 py-2.5 text-sm font-semibold text-white bg-brand-600 rounded-lg shadow-sm hover:bg-brand-700 transition">
                         Celebração
                     </a>
                 @endif
@@ -58,7 +58,7 @@
 
             {{-- Seção de Análise --}}
             @if(in_array($proposta->status, ['submetida', 'em_analise', 'em_negociacao', 'aprovada', 'reprovada']))
-            <div class="bg-white shadow rounded-lg">
+            <div class="bg-white rounded-xl border border-gray-200 shadow-sm">
                 <div class="flex items-center justify-between px-6 py-4 border-b border-gray-200">
                     <h3 class="text-base font-semibold text-gray-800">Análise da Proposta</h3>
                     <div class="flex gap-2">
@@ -138,7 +138,7 @@
             @endif
 
             {{-- Dados da Proposta --}}
-            <div class="bg-white shadow rounded-lg p-6">
+            <div class="bg-white rounded-xl border border-gray-200 shadow-sm p-6">
                 <h3 class="text-base font-semibold text-gray-800 mb-4">Dados da Proposta</h3>
 
                 <dl class="grid grid-cols-2 gap-x-6 gap-y-3 text-sm">
@@ -201,7 +201,7 @@
             </div>
 
             {{-- Documentos --}}
-            <div class="bg-white shadow rounded-lg">
+            <div class="bg-white rounded-xl border border-gray-200 shadow-sm">
                 <div class="flex items-center justify-between px-6 py-4 border-b border-gray-200">
                     <h3 class="text-base font-semibold text-gray-800">Documentos</h3>
                     <span class="text-xs text-gray-400">Máx. 10 MB — PDF, Word, Excel, JPG, PNG</span>
@@ -265,7 +265,7 @@
             </div>
 
             {{-- Plano de Trabalho --}}
-            <div class="bg-white shadow rounded-lg">
+            <div class="bg-white rounded-xl border border-gray-200 shadow-sm">
                 <div class="flex items-center justify-between px-6 py-4 border-b border-gray-200">
                     <h3 class="text-base font-semibold text-gray-800">Plano de Trabalho</h3>
                     <a href="{{ route('propostas.metas.create', $proposta) }}"
@@ -296,7 +296,7 @@
                             </div>
                             <div class="flex items-center gap-3 ml-4 shrink-0">
                                 <a href="{{ route('propostas.metas.etapas.create', [$proposta, $meta]) }}"
-                                   class="text-xs text-brand-600 hover:text-brand-900 font-medium">+ Etapa</a>
+                                   class="text-xs font-semibold text-brand-700 hover:text-brand-800 transition font-medium">+ Etapa</a>
                                 <a href="{{ route('propostas.metas.edit', [$proposta, $meta]) }}"
                                    class="text-xs text-gray-500 hover:text-gray-800">Editar</a>
                                 <form action="{{ route('propostas.metas.destroy', [$proposta, $meta]) }}"

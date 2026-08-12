@@ -68,7 +68,7 @@
                 @if($op->temDadosBancarios())
                     <div class="flex items-center justify-between gap-4 text-sm">
                         <span class="text-gray-700">📎 {{ $op->dados_bancarios_nome }}</span>
-                        <a href="{{ route('ordens-pagamento.dados-bancarios.download', $op) }}" class="text-brand-600 hover:text-brand-900">Baixar</a>
+                        <a href="{{ route('ordens-pagamento.dados-bancarios.download', $op) }}" class="font-semibold text-brand-700 hover:text-brand-800 transition">Baixar</a>
                     </div>
                 @else
                     <p class="text-sm text-gray-400 mb-3">Nenhum arquivo anexado.</p>

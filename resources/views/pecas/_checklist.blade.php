@@ -1,4 +1,12 @@
-{{-- Espera: $pecas (Collection de App\Models\Peca) --}}
+{{-- Espera: $pecas (Collection de App\Models\Peca)
+
+     A lista é longa (10+ peças), então cada linha mostra só o essencial:
+     estado, nome e uma ação. Formulários de upload/edição ficam recolhidos —
+     abertos de uma vez, viravam uma parede de campos repetidos.
+
+     Os badges de tipo ("modelo padrão" / "arquivo") saíram: a própria ação
+     ("Preencher conteúdo" x "Enviar arquivo") já diz qual é. E como quase toda
+     peça é obrigatória, marcamos só a exceção ("opcional"). --}}
 <div class="divide-y divide-gray-100">
     @foreach($pecas as $peca)
         @php
@@ -7,188 +15,233 @@
             $podePreencher = $peca->podePreencher(auth()->user());
             $podeAssinar   = $peca->podeAssinar(auth()->user());
             $trava         = $peca->motivoTrava(auth()->user());
+
+            $ehModelo   = $peca->tipo === 'modelo';
+            $emAndamento = $peca->preenchido() && ! $peca->assinado();
+
+            // Estilo do "botão" que abre/fecha o bloco de trabalho da peça
+            $acao = 'inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold
+                     cursor-pointer select-none transition marker:content-none';
         @endphp
-        <div class="px-6 py-4">
-            <div class="flex items-start justify-between gap-4">
-                <div class="flex items-start gap-3">
-                    {{-- indicador de status --}}
+
+        <div class="px-6 py-3.5">
+            <div class="flex items-start gap-3">
+
+                {{-- Estado da peça --}}
+                <span class="mt-0.5 shrink-0" title="{{ $peca->assinado() ? 'Assinado' : ($peca->preenchido() ? 'Preenchido, aguardando assinatura' : 'Pendente') }}">
                     @if($peca->assinado())
-                        <span class="mt-0.5 text-green-500" title="Assinado">✅</span>
+                        <span class="w-5 h-5 rounded-full bg-brand-600 text-white flex items-center justify-center">
+                            <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="3.5">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/>
+                            </svg>
+                        </span>
                     @elseif($peca->preenchido())
-                        <span class="mt-0.5 text-blue-500" title="Preenchido">📄</span>
+                        <span class="w-5 h-5 rounded-full border-2 border-amber-400 flex items-center justify-center">
+                            <span class="w-1.5 h-1.5 rounded-full bg-amber-400"></span>
+                        </span>
                     @else
-                        <span class="mt-0.5 text-gray-300" title="Pendente">⬜</span>
+                        <span class="block w-5 h-5 rounded-full border-2 border-gray-200"></span>
                     @endif
+                </span>
 
-                    <div>
-                        <p class="text-sm font-medium text-gray-800">
-                            {{ $peca->rotulo }}
-                            @if($peca->obrigatorio)
-                                <span class="ml-1 text-xs px-1.5 py-0.5 rounded bg-red-50 text-red-600 font-medium">obrigatório</span>
-                            @else
-                                <span class="ml-1 text-xs px-1.5 py-0.5 rounded bg-gray-100 text-gray-500 font-normal">opcional</span>
-                            @endif
-                            <span class="ml-1 text-xs px-1.5 py-0.5 rounded {{ $peca->tipo === 'modelo' ? 'bg-purple-50 text-purple-600' : 'bg-amber-50 text-amber-600' }}">
-                                {{ $peca->tipo === 'modelo' ? 'modelo padrão' : 'arquivo' }}
-                            </span>
-                        </p>
-                        @if($peca->assinado())
-                            <p class="text-xs text-gray-400 mt-0.5">
-                                Assinado por {{ $peca->assinante->name }} em {{ $peca->assinado_em->format('d/m/Y H:i') }}
+                <div class="flex-1 min-w-0">
+                    <div class="flex items-start justify-between gap-3 flex-wrap">
+                        <div class="min-w-0">
+                            <p class="text-sm font-semibold {{ $peca->assinado() ? 'text-gray-500' : 'text-gray-900' }}">
+                                {{ $peca->rotulo }}
+                                {{-- Alguns rótulos já trazem "(opcional)" no texto; não repete --}}
+                                @if(! $peca->obrigatorio && ! \Illuminate\Support\Str::contains($peca->rotulo, 'opcional', true))
+                                    <span class="ml-1.5 text-xs font-medium text-gray-400">opcional</span>
+                                @endif
                             </p>
-                            @if($peca->exigeContraAssinatura())
-                                <p class="text-xs mt-0.5 {{ $peca->contraAssinado() ? 'text-gray-400' : 'text-amber-600' }}">
-                                    @if($peca->contraAssinado())
-                                        Contra-assinado pela OSC — {{ $peca->contraAssinante->name ?? '—' }}
-                                        em {{ $peca->contra_assinado_em->format('d/m/Y H:i') }}
-                                    @else
-                                        ⏳ Aguardando a contra-assinatura da OSC (assinatura das partes)
-                                    @endif
-                                </p>
-                            @endif
-                        @elseif($trava)
-                            <p class="text-xs text-amber-600 mt-0.5">🔒 {{ $trava }}</p>
-                        @endif
-                    </div>
-                </div>
-            </div>
 
-            {{-- TIPO MODELO: editor rico (brasão + HTML) + assinar --}}
-            @if($peca->tipo === 'modelo')
-                <details class="mt-3" {{ $peca->preenchido() && !$peca->assinado() ? 'open' : '' }}>
-                    <summary class="text-xs text-brand-600 cursor-pointer hover:underline">
-                        {{ $peca->assinado() ? 'Ver conteúdo' : ($peca->preenchido() ? 'Editar conteúdo' : 'Preencher conteúdo') }}
-                    </summary>
-                    <div class="mt-2">
-                        @if($peca->assinado())
-                            <div class="documento-html border border-gray-200 rounded-md p-4 bg-white text-gray-800 text-sm">
-                                {!! $peca->conteudo ?: '<p class="text-gray-400">Documento ainda não preenchido.</p>' !!}
-                                @php
-                                    $qrValidacao = null;
-                                    if ($peca->codigo_validacao) {
-                                        $qrValidacao = \SimpleSoftwareIO\QrCode\Facades\QrCode::size(110)
-                                            ->generate(route('validacao.mostrar', $peca->codigo_validacao));
-                                    }
-                                @endphp
-                                @include('processos._carimbo', ['peca' => $peca, 'qrValidacao' => $qrValidacao])
-                            </div>
-                            @if($peca->codigo_validacao)
-                                <p class="mt-2 text-xs text-gray-500">
-                                    Código de validação:
-                                    <strong class="font-mono">{{ $peca->codigo_validacao }}</strong>
-                                    · <a href="{{ route('validacao.mostrar', $peca->codigo_validacao) }}" target="_blank" class="text-brand-600 hover:underline">Validar</a>
+                            {{-- Linha secundária: só aparece quando há o que informar --}}
+                            @if($peca->assinado())
+                                <p class="text-xs text-gray-400 mt-0.5">
+                                    Assinado por {{ $peca->assinante->name }} em {{ $peca->assinado_em->format('d/m/Y H:i') }}
                                 </p>
-                            @endif
-                            @if($peca->contraAssinado() && $peca->codigo_validacao_contra)
-                                <p class="mt-1 text-xs text-gray-500">
-                                    Contra-assinatura da OSC:
-                                    <strong class="font-mono">{{ $peca->codigo_validacao_contra }}</strong>
+                                @if($peca->exigeContraAssinatura())
+                                    <p class="text-xs mt-0.5 {{ $peca->contraAssinado() ? 'text-gray-400' : 'text-amber-700' }}">
+                                        @if($peca->contraAssinado())
+                                            Contra-assinado pela OSC — {{ $peca->contraAssinante->name ?? '—' }}
+                                            em {{ $peca->contra_assinado_em->format('d/m/Y H:i') }}
+                                        @else
+                                            Aguardando a contra-assinatura da OSC
+                                        @endif
+                                    </p>
+                                @endif
+                            @elseif($trava)
+                                <p class="text-xs text-amber-700 mt-0.5 flex items-center gap-1">
+                                    <svg class="w-3.5 h-3.5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
+                                        <path stroke-linecap="round" stroke-linejoin="round" d="M16.5 10.5V6.75a4.5 4.5 0 10-9 0v3.75m-.75 11.25h10.5a2.25 2.25 0 002.25-2.25v-6.75a2.25 2.25 0 00-2.25-2.25H6.75a2.25 2.25 0 00-2.25 2.25v6.75a2.25 2.25 0 002.25 2.25z"/>
+                                    </svg>
+                                    {{ $trava }}
                                 </p>
+                            @elseif($emAndamento)
+                                <p class="text-xs text-amber-700 mt-0.5">Preenchido — falta assinar</p>
                             @endif
-                            @if($peca->podeContraAssinar(auth()->user()))
-                                <form action="{{ route('pecas.contra-assinar', $peca) }}" method="POST" class="mt-3"
-                                      data-confirm="Confirma a assinatura deste Termo pela OSC?">
-                                    @csrf @method('PATCH')
-                                    <button type="submit"
-                                            class="px-3 py-1.5 text-xs font-medium text-white bg-emerald-600 rounded-md hover:bg-emerald-700">
-                                        Assinar como OSC (contra-assinatura)
-                                    </button>
-                                </form>
-                            @endif
-                        @elseif($podePreencher)
-                            <form action="{{ route('pecas.salvar', $peca) }}" method="POST">
-                                @csrf @method('PUT')
-                                <textarea name="conteudo" data-editor-rico>{!! old('conteudo', $peca->conteudo) !!}</textarea>
-                                <button type="submit"
-                                        class="mt-2 px-3 py-1.5 text-xs font-medium text-white bg-brand-600 rounded-md hover:bg-brand-700">
-                                    Salvar
-                                </button>
-                            </form>
-                        @else
-                            <div class="documento-html border border-gray-200 rounded-md p-4 bg-gray-50 text-gray-700 text-sm">
-                                {!! $peca->conteudo ?: '<p class="text-gray-400">Documento ainda não preenchido.</p>' !!}
-                            </div>
-                        @endif
-                        @if($peca->preenchido() && $podeAssinar)
-                            <form action="{{ route('pecas.assinar', $peca) }}" method="POST" class="mt-2"
-                                  data-confirm="Confirma a assinatura digital deste documento?">
-                                @csrf @method('PATCH')
-                                <button type="submit"
-                                        class="px-3 py-1.5 text-xs font-medium text-white bg-blue-600 rounded-md hover:bg-blue-700">
-                                    Assinar
-                                </button>
-                            </form>
-                        @endif
-                    </div>
-                </details>
+                        </div>
 
-            {{-- TIPO ARQUIVO: upload / download / remover --}}
-            @else
-                <div class="mt-3">
-                    @if($peca->temArquivo())
-                        <div class="flex items-center justify-between bg-gray-50 rounded-md px-3 py-2">
-                            <div class="flex items-center gap-2">
-                                <span class="text-xs font-bold text-brand-600 uppercase">
-                                    {{ strtoupper(pathinfo($peca->arquivo_nome, PATHINFO_EXTENSION)) }}
+                        {{-- Arquivo já enviado: chip compacto no lugar do formulário --}}
+                        @if(! $ehModelo && $peca->temArquivo())
+                            <div class="flex items-center gap-2 shrink-0">
+                                <span class="inline-flex items-center gap-2 bg-gray-50 border border-gray-200 rounded-lg px-2.5 py-1.5 max-w-xs">
+                                    <span class="text-[11px] font-bold text-brand-700 uppercase shrink-0">
+                                        {{ strtoupper(pathinfo($peca->arquivo_nome, PATHINFO_EXTENSION)) }}
+                                    </span>
+                                    <span class="text-xs text-gray-700 truncate">{{ $peca->arquivo_nome }}</span>
+                                    <span class="text-xs text-gray-400 shrink-0">{{ $peca->tamanhoFormatado() }}</span>
                                 </span>
-                                <span class="text-sm text-gray-700">{{ $peca->arquivo_nome }}</span>
-                                <span class="text-xs text-gray-400">({{ $peca->tamanhoFormatado() }})</span>
-                            </div>
-                            <div class="flex items-center gap-3">
-                                <a href="{{ route('pecas.download', $peca) }}" class="text-xs text-brand-600 hover:text-brand-900">Baixar</a>
+                                <a href="{{ route('pecas.download', $peca) }}"
+                                   class="text-xs font-semibold text-brand-700 hover:text-brand-800 transition">Baixar</a>
                                 @if($podePreencher)
                                     <form action="{{ route('pecas.arquivo.remover', $peca) }}" method="POST"
                                           data-confirm="Remover este arquivo?">
                                         @csrf @method('DELETE')
-                                        <button type="submit" class="text-xs text-red-500 hover:text-red-700">Remover</button>
+                                        <button type="submit" class="text-xs text-gray-400 hover:text-red-700 transition">Remover</button>
                                     </form>
                                 @endif
                             </div>
-                        </div>
-                    @elseif(!$podePreencher)
-                        <p class="text-xs text-gray-400">Nenhum arquivo enviado.</p>
-                    @else
-                        <form action="{{ route('pecas.upload', $peca) }}" method="POST" enctype="multipart/form-data"
-                              class="flex items-center gap-2">
-                            @csrf
-                            <input type="file" name="arquivo" required
-                                   class="block text-sm text-gray-600 file:mr-3 file:py-1 file:px-3 file:rounded file:border-0 file:text-xs file:bg-brand-50 file:text-brand-700 hover:file:bg-brand-100">
-                            <button type="submit"
-                                    class="px-3 py-1.5 text-xs font-medium text-white bg-brand-600 rounded-md hover:bg-brand-700">
-                                Enviar
-                            </button>
-                        </form>
+                        @elseif(! $ehModelo && ! $podePreencher)
+                            <span class="text-xs text-gray-400 shrink-0">Nenhum arquivo enviado</span>
+                        @endif
+                    </div>
 
-                        @if($peca->puxavel())
-                            @php $docsDisponiveis = $peca->documentosDisponiveis(); @endphp
-                            @if($docsDisponiveis->isNotEmpty())
-                                <form action="{{ route('pecas.puxar', $peca) }}" method="POST"
-                                      class="mt-2 flex items-center gap-2 flex-wrap">
+                    {{-- ===== Bloco de trabalho, recolhido por padrão ===== --}}
+
+                    {{-- MODELO: editor rico (brasão + HTML) + assinar --}}
+                    @if($ehModelo)
+                        {{-- Sempre recolhido: com várias peças preenchidas e não
+                             assinadas, abrir todas empilhava um editor rico atrás do
+                             outro e a lista virava uma parede de documentos. --}}
+                        <details class="mt-2 group">
+                            <summary class="{{ $acao }} {{ $peca->assinado()
+                                        ? 'text-gray-600 bg-gray-100 hover:bg-gray-200'
+                                        : 'text-brand-800 bg-brand-50 hover:bg-brand-100' }}">
+                                <svg class="w-3.5 h-3.5 transition group-open:rotate-90" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.6">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/>
+                                </svg>
+                                {{ $peca->assinado() ? 'Ver documento' : ($peca->preenchido() ? 'Editar conteúdo' : 'Preencher conteúdo') }}
+                            </summary>
+
+                            <div class="mt-3">
+                                @if($peca->assinado())
+                                    <div class="documento-html border border-gray-200 rounded-lg p-4 bg-white text-gray-800 text-sm">
+                                        {!! $peca->conteudo ?: '<p class="text-gray-400">Documento ainda não preenchido.</p>' !!}
+                                        @php
+                                            $qrValidacao = null;
+                                            if ($peca->codigo_validacao) {
+                                                $qrValidacao = \SimpleSoftwareIO\QrCode\Facades\QrCode::size(110)
+                                                    ->generate(route('validacao.mostrar', $peca->codigo_validacao));
+                                            }
+                                        @endphp
+                                        @include('processos._carimbo', ['peca' => $peca, 'qrValidacao' => $qrValidacao])
+                                    </div>
+                                    @if($peca->codigo_validacao)
+                                        <p class="mt-2 text-xs text-gray-500">
+                                            Código de validação:
+                                            <strong class="font-mono">{{ $peca->codigo_validacao }}</strong>
+                                            · <a href="{{ route('validacao.mostrar', $peca->codigo_validacao) }}" target="_blank" class="text-brand-700 font-medium hover:underline">Validar</a>
+                                        </p>
+                                    @endif
+                                    @if($peca->contraAssinado() && $peca->codigo_validacao_contra)
+                                        <p class="mt-1 text-xs text-gray-500">
+                                            Contra-assinatura da OSC:
+                                            <strong class="font-mono">{{ $peca->codigo_validacao_contra }}</strong>
+                                        </p>
+                                    @endif
+                                    @if($peca->podeContraAssinar(auth()->user()))
+                                        <form action="{{ route('pecas.contra-assinar', $peca) }}" method="POST" class="mt-3"
+                                              data-confirm="Confirma a assinatura deste Termo pela OSC?">
+                                            @csrf @method('PATCH')
+                                            <button type="submit"
+                                                    class="px-3 py-2 text-xs font-semibold text-white bg-emerald-600 rounded-lg hover:bg-emerald-700 transition">
+                                                Assinar como OSC (contra-assinatura)
+                                            </button>
+                                        </form>
+                                    @endif
+                                @elseif($podePreencher)
+                                    <form action="{{ route('pecas.salvar', $peca) }}" method="POST">
+                                        @csrf @method('PUT')
+                                        <textarea name="conteudo" data-editor-rico>{!! old('conteudo', $peca->conteudo) !!}</textarea>
+                                        <button type="submit"
+                                                class="mt-2 px-3 py-2 text-xs font-semibold text-white bg-brand-600 rounded-lg hover:bg-brand-700 transition">
+                                            Salvar
+                                        </button>
+                                    </form>
+                                @else
+                                    <div class="documento-html border border-gray-200 rounded-lg p-4 bg-gray-50 text-gray-700 text-sm">
+                                        {!! $peca->conteudo ?: '<p class="text-gray-400">Documento ainda não preenchido.</p>' !!}
+                                    </div>
+                                @endif
+
+                                @if($peca->preenchido() && $podeAssinar)
+                                    <form action="{{ route('pecas.assinar', $peca) }}" method="POST" class="mt-2"
+                                          data-confirm="Confirma a assinatura digital deste documento?">
+                                        @csrf @method('PATCH')
+                                        <button type="submit"
+                                                class="px-3 py-2 text-xs font-semibold text-white bg-blue-600 rounded-lg hover:bg-blue-700 transition">
+                                            Assinar
+                                        </button>
+                                    </form>
+                                @endif
+                            </div>
+                        </details>
+
+                    {{-- ARQUIVO pendente: upload recolhido --}}
+                    @elseif($podePreencher && ! $peca->temArquivo())
+                        <details class="mt-2 group">
+                            <summary class="{{ $acao }} text-brand-800 bg-brand-50 hover:bg-brand-100">
+                                <svg class="w-3.5 h-3.5 transition group-open:rotate-90" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.6">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/>
+                                </svg>
+                                Enviar arquivo
+                            </summary>
+
+                            <div class="mt-3">
+                                <form action="{{ route('pecas.upload', $peca) }}" method="POST" enctype="multipart/form-data"
+                                      class="flex flex-wrap items-center gap-2">
                                     @csrf
-                                    <span class="text-xs text-gray-500">ou puxar do módulo Gestão de Parcerias:</span>
-                                    <select name="documento_id" required
-                                            class="text-xs border-gray-300 rounded-md shadow-sm focus:ring-brand-500 focus:border-brand-500 max-w-xs">
-                                        <option value="">Selecione um documento…</option>
-                                        @foreach($docsDisponiveis as $doc)
-                                            <option value="{{ $doc->id }}">
-                                                {{ \App\Models\Documento::TIPOS[$doc->tipo] ?? $doc->tipo }} — {{ $doc->nome_original }}{{ $doc->proposta->osc ? ' · ' . $doc->proposta->osc->name : '' }}
-                                            </option>
-                                        @endforeach
-                                    </select>
+                                    <input type="file" name="arquivo" required
+                                           class="block text-sm text-gray-600 file:mr-3 file:py-1.5 file:px-3 file:rounded-lg file:border-0 file:text-xs file:font-semibold file:bg-brand-50 file:text-brand-700 hover:file:bg-brand-100">
                                     <button type="submit"
-                                            class="px-3 py-1.5 text-xs font-medium text-brand-700 border border-brand-300 rounded-md hover:bg-brand-50">
-                                        Puxar
+                                            class="px-3 py-2 text-xs font-semibold text-white bg-brand-600 rounded-lg hover:bg-brand-700 transition">
+                                        Enviar
                                     </button>
                                 </form>
-                            @else
-                                <p class="mt-2 text-xs text-gray-400">
-                                    Nenhum documento disponível para puxar do módulo Gestão de Parcerias.
-                                </p>
-                            @endif
-                        @endif
+
+                                @if($peca->puxavel())
+                                    @php $docsDisponiveis = $peca->documentosDisponiveis(); @endphp
+                                    @if($docsDisponiveis->isNotEmpty())
+                                        <form action="{{ route('pecas.puxar', $peca) }}" method="POST"
+                                              class="mt-3 pt-3 border-t border-gray-100 flex items-center gap-2 flex-wrap">
+                                            @csrf
+                                            <span class="text-xs text-gray-500">ou puxar do módulo Gestão de Parcerias:</span>
+                                            <select name="documento_id" required
+                                                    class="text-xs border-gray-300 rounded-lg shadow-sm focus:ring-brand-500 focus:border-brand-500 max-w-xs">
+                                                <option value="">Selecione um documento…</option>
+                                                @foreach($docsDisponiveis as $doc)
+                                                    <option value="{{ $doc->id }}">
+                                                        {{ \App\Models\Documento::TIPOS[$doc->tipo] ?? $doc->tipo }} — {{ $doc->nome_original }}{{ $doc->proposta->osc ? ' · ' . $doc->proposta->osc->name : '' }}
+                                                    </option>
+                                                @endforeach
+                                            </select>
+                                            <button type="submit"
+                                                    class="px-3 py-2 text-xs font-semibold text-brand-800 border border-brand-300 rounded-lg hover:bg-brand-50 transition">
+                                                Puxar
+                                            </button>
+                                        </form>
+                                    @else
+                                        <p class="mt-3 text-xs text-gray-400">
+                                            Nenhum documento disponível para puxar do módulo Gestão de Parcerias.
+                                        </p>
+                                    @endif
+                                @endif
+                            </div>
+                        </details>
                     @endif
                 </div>
-            @endif
+            </div>
         </div>
     @endforeach
 </div>
