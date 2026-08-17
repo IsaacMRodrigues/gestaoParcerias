@@ -3,7 +3,7 @@
         <div class="flex items-center justify-between">
             <h2 class="text-2xl font-bold text-gray-900">OSCs</h2>
             <a href="{{ route('oscs.create') }}"
-               class="inline-flex items-center gap-2 px-4 py-2.5 text-sm font-semibold text-white bg-brand-600 rounded-lg shadow-sm hover:bg-brand-700 transition">
+               class="btn btn-primary">
                 + Nova OSC
             </a>
         </div>
@@ -36,7 +36,7 @@
                                 <td class="px-6 py-4 text-sm text-gray-600">{{ $osc->resp_nome ?? '—' }}</td>
                                 <td class="px-6 py-4 text-sm">
                                     @if($osc->status)
-                                        <span class="px-2.5 py-1 text-xs font-semibold bg-green-50 text-green-800 border border-green-200 rounded-md">Ativa</span>
+                                        <span class="px-2.5 py-1 text-xs font-semibold bg-brand-50 text-brand-800 border border-brand-200 rounded-md">Ativa</span>
                                     @else
                                         <span class="px-2.5 py-1 text-xs font-semibold bg-red-50 text-red-800 border border-red-200 rounded-md">Inativa</span>
                                     @endif

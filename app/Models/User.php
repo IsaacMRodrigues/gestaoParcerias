@@ -6,6 +6,7 @@ namespace App\Models;
 use Database\Factories\UserFactory;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Attributes\Hidden;
+use App\Models\Concerns\ImpedeExclusaoComVinculos;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Foundation\Auth\User as Authenticatable;
@@ -17,7 +18,7 @@ use Spatie\Permission\Traits\HasRoles;
 class User extends Authenticatable
 {
     /** @use HasFactory<UserFactory> */
-    use HasFactory, Notifiable, HasRoles;
+    use HasFactory, Notifiable, HasRoles, ImpedeExclusaoComVinculos;
 
     /**
      * Get the attributes that should be cast.
@@ -163,6 +164,73 @@ class User extends Authenticatable
         return $this->hasOne(Osc::class);
     }
 
+    // ------------------------------------------------------------------
+    // Rastros do usuário no sistema.
+    //
+    // Todas estas colunas têm FK sem CASCADE: são o registro de quem fez o
+    // quê, e o banco impede que sumam junto com a conta. Existem aqui para o
+    // motivoParaNaoExcluir() poder contá-las antes de tentar o delete.
+    // ------------------------------------------------------------------
+
+    public function processosCriados(): \Illuminate\Database\Eloquent\Relations\HasMany
+    {
+        return $this->hasMany(Processo::class, 'created_by');
+    }
+
+    public function pecasAssinadas(): \Illuminate\Database\Eloquent\Relations\HasMany
+    {
+        return $this->hasMany(Peca::class, 'assinado_por');
+    }
+
+    public function processoPecasAssinadas(): \Illuminate\Database\Eloquent\Relations\HasMany
+    {
+        return $this->hasMany(ProcessoPeca::class, 'assinado_por');
+    }
+
+    public function documentosEnviados(): \Illuminate\Database\Eloquent\Relations\HasMany
+    {
+        return $this->hasMany(Documento::class, 'uploaded_by');
+    }
+
+    public function anexosEnviados(): \Illuminate\Database\Eloquent\Relations\HasMany
+    {
+        return $this->hasMany(ProcessoPecaAnexo::class, 'enviado_por');
+    }
+
+    public function tramitacoesEnviadas(): \Illuminate\Database\Eloquent\Relations\HasMany
+    {
+        return $this->hasMany(Tramitacao::class, 'enviado_por');
+    }
+
+    public function tramitacoesRecebidas(): \Illuminate\Database\Eloquent\Relations\HasMany
+    {
+        return $this->hasMany(Tramitacao::class, 'recebido_por');
+    }
+
+    protected function vinculosBloqueantes(): array
+    {
+        return [
+            'processosCriados'       => ['processo aberto', 'processos abertos'],
+            'pecasAssinadas'         => ['peça assinada', 'peças assinadas'],
+            'processoPecasAssinadas' => ['peça de processo assinada', 'peças de processo assinadas'],
+            'documentosEnviados'     => ['documento enviado', 'documentos enviados'],
+            'anexosEnviados'         => ['anexo enviado', 'anexos enviados'],
+            'tramitacoesEnviadas'    => ['tramitação enviada', 'tramitações enviadas'],
+            'tramitacoesRecebidas'   => ['tramitação recebida', 'tramitações recebidas'],
+        ];
+    }
+
+    protected function fraseDeBloqueio(): string
+    {
+        return 'Este usuário não pode ser excluído';
+    }
+
+    protected function sugestaoParaNaoExcluir(): string
+    {
+        return 'Desative a conta em vez de excluí-la: o histórico do processo precisa '
+            .'continuar mostrando quem assinou e quem tramitou.';
+    }
+
     public function orgao(): \Illuminate\Database\Eloquent\Relations\BelongsTo
     {
         return $this->belongsTo(Orgao::class);
@@ -187,6 +255,27 @@ class User extends Authenticatable
     public function temAcessoInterno(): bool
     {
         return $this->roles->contains(fn ($role) => $role->name !== 'responsavel_legal');
+    }
+
+    /**
+     * Atua como OSC? Definição única de quem pode participar de chamamentos,
+     * submeter propostas e mexer nos documentos da própria proposta.
+     *
+     * Exige as duas coisas: o papel de responsável legal E o vínculo com a OSC.
+     * Só o vínculo não basta — servidor é usuário interno dos setores, não
+     * representa entidade, e um registro em oscs.user_id apontando para a conta
+     * de um servidor (por engano ou má-fé) não pode virar permissão. Por isso
+     * as telas e os controllers perguntam por este método, nunca por ->osc.
+     */
+    public function ehRepresentanteOsc(): bool
+    {
+        return !$this->temAcessoInterno() && $this->osc()->exists();
+    }
+
+    /** A OSC que o usuário representa — null para todo usuário interno. */
+    public function oscVinculada(): ?Osc
+    {
+        return $this->ehRepresentanteOsc() ? $this->osc : null;
     }
 
     /**

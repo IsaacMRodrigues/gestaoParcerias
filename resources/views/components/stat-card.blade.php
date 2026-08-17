@@ -8,16 +8,25 @@
 ])
 
 @php
+    /**
+     * Paleta da Prefeitura: verde, laranja e cinzas — só isso.
+     *
+     * Com duas matizes não dá para dar uma identidade a cada módulo, então a
+     * cor aqui diz o ESTADO da métrica, que é informação melhor de qualquer
+     * forma: laranja = trabalho em curso esperando alguém, verde = o que está
+     * ativo e saudável, cinza = cadastro de referência, que só se consulta.
+     *
+     * A tentativa anterior de uma cor por módulo trouxe azul, roxo, rosa e
+     * verde-azulado — bonito, mas fora da identidade da Prefeitura.
+     */
     $accents = [
-        'brand'   => 'bg-brand-50 text-brand-700 ring-brand-100',
-        'accent'  => 'bg-accent-50 text-accent-700 ring-accent-100',
-        'emerald' => 'bg-emerald-50 text-emerald-700 ring-emerald-100',
-        'amber'   => 'bg-amber-50 text-amber-700 ring-amber-100',
-        'violet'  => 'bg-violet-50 text-violet-700 ring-violet-100',
-        'slate'   => 'bg-slate-100 text-slate-700 ring-slate-200',
-        'sky'     => 'bg-sky-50 text-sky-700 ring-sky-100',
+        'accent' => ['bg-accent-50 text-accent-700 ring-accent-100', 'hover:border-accent-300', 'group-hover:text-accent-600', 'border-t-accent-500'],
+        'brand'  => ['bg-brand-50 text-brand-700 ring-brand-100',    'hover:border-brand-300',  'group-hover:text-brand-600',  'border-t-brand-600'],
+        'slate'  => ['bg-slate-100 text-slate-600 ring-slate-200',   'hover:border-slate-400',  'group-hover:text-slate-600',  'border-t-slate-400'],
     ];
-    $accent = $accents[$color] ?? $accents['brand'];
+    // A faixa do topo é o que se enxerga de longe: dá para varrer a fileira e
+    // separar "precisa de mim" de "está rodando" sem ler rótulo nenhum.
+    [$accent, $hoverBorda, $hoverSeta, $faixa] = $accents[$color] ?? $accents['slate'];
 
     // Traço do ícone (heroicons, outline). 'default' vale para qualquer chave
     // não mapeada, para o card nunca ficar sem símbolo.
@@ -36,8 +45,8 @@
 @endphp
 
 <{{ $tag }} @if($href) href="{{ $href }}" @endif
-    class="group block bg-white rounded-xl border border-gray-200 p-5 transition duration-200
-           @if($href) hover:border-brand-300 hover:shadow-md hover:-translate-y-0.5
+    class="group block bg-white rounded-xl border border-gray-200 border-t-4 {{ $faixa }} p-5 transition duration-200
+           @if($href) {{ $hoverBorda }} hover:shadow-md hover:-translate-y-0.5
                       focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-500 @endif">
     <div class="flex items-start justify-between">
         <span class="w-11 h-11 rounded-xl ring-1 {{ $accent }} flex items-center justify-center
@@ -47,7 +56,7 @@
             </svg>
         </span>
         @if($href)
-            <svg class="w-4 h-4 text-gray-300 group-hover:text-brand-600 group-hover:translate-x-0.5 transition"
+            <svg class="w-4 h-4 text-gray-300 {{ $hoverSeta }} group-hover:translate-x-0.5 transition"
                  fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.4">
                 <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/>
             </svg>

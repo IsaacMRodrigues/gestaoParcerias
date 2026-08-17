@@ -56,6 +56,8 @@
                         @endisset
                     </div>
 
+                    <x-busca-trigger />
+
                     <x-dropdown align="right" width="72">
                         <x-slot name="trigger">
                             <button title="{{ Auth::user()->name }}"
@@ -118,6 +120,10 @@
                     </div>
                 </footer>
             </div>
+
+            {{-- Fora do <main> porque cobre a tela inteira; ouve o evento
+                 'abrir-paleta' disparado pela lupa do cabeçalho. --}}
+            <x-busca-global />
         </div>
     </body>
 </html>

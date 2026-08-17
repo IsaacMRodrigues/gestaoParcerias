@@ -7,14 +7,106 @@
      Os badges de tipo ("modelo padrão" / "arquivo") saíram: a própria ação
      ("Preencher conteúdo" x "Enviar arquivo") já diz qual é. E como quase toda
      peça é obrigatória, marcamos só a exceção ("opcional"). --}}
-<div class="divide-y divide-gray-100">
-    @foreach($pecas as $peca)
+@php
+    /* Agrupamento por etapa do trâmite.
+     *
+     * A lista saía na ordem do template, misturando etapas: um documento da
+     * etapa 4 aparecia entre dois da etapa 1, todos com a mesma aparência. Quem
+     * abria a tela não tinha como saber o que preencher agora e o que é de
+     * depois — a informação existia (cada peça sabe a sua etapa), mas a tela não
+     * usava para nada.
+     *
+     * Agora cada etapa é um bloco, na ordem do fluxo, e o bloco diz em que pé
+     * está: concluída, agora, ou depois. Os documentos fora do trâmite
+     * (Dispensa, Aditivo, Apostilamento — onde selecaoSetor() é null) vão para
+     * um bloco próprio no topo e a tela degrada para a lista simples de antes
+     * quando NENHUMA peça é governada por trâmite. */
+    $governadas = $pecas->filter->emTramite();
+    $agrupar    = $governadas->isNotEmpty();
+    $etapaAtual = $governadas->first()?->etapaAtualDoTramite();
+    $encerrado  = (bool) $governadas->first()?->tramiteJaEncerrado();
+
+    $SEM_ETAPA = 'livre';
+    $grupos = $agrupar
+        ? $pecas->groupBy(fn ($p) => $p->emTramite() ? $p->etapaDaProximaAcao() : $SEM_ETAPA)
+                ->sortKeysUsing(fn ($a, $b) => // o bloco sem etapa vem primeiro
+                    ($a === $SEM_ETAPA ? -1 : (int) $a) <=> ($b === $SEM_ETAPA ? -1 : (int) $b))
+        : collect([$SEM_ETAPA => $pecas]);
+@endphp
+
+@foreach($grupos as $chaveGrupo => $pecasDoGrupo)
+    @php
+        $semEtapa = $chaveGrupo === $SEM_ETAPA;
+        $nEtapa   = $semEtapa ? null : (int) $chaveGrupo;
+
+        // Três estados possíveis, e só um deles pede ação agora.
+        $grupoFeito  = !$semEtapa && ($encerrado || $nEtapa < $etapaAtual);
+        $grupoAgora  = !$semEtapa && !$encerrado && $nEtapa === $etapaAtual;
+        $grupoFuturo = !$semEtapa && !$encerrado && $nEtapa > $etapaAtual;
+
+        $setoresDoGrupo = $pecasDoGrupo->map->setorDaProximaAcao()->filter()->unique()
+            ->map(fn ($s) => $pecasDoGrupo->first()->rotuloDoSetor($s))->implode(' e ');
+
+        // Alguma peça deste grupo é minha para fazer agora?
+        $minhaVez = $pecasDoGrupo->contains(fn ($p) =>
+            $p->podePreencher(auth()->user()) || $p->podeAssinar(auth()->user()));
+    @endphp
+
+    @if($agrupar)
+        <div class="flex flex-wrap items-center gap-x-3 gap-y-1 px-6 py-2.5 border-t border-gray-100
+                    {{ $grupoAgora ? 'bg-accent-50' : 'bg-gray-50' }}">
+            <span class="text-[12px] font-bold uppercase tracking-wider
+                         {{ $grupoAgora ? 'text-accent-800' : ($grupoFuturo ? 'text-gray-400' : 'text-gray-500') }}">
+                @if($semEtapa)
+                    {{-- Rótulo neutro: o mesmo partial serve Seleção, Celebração e
+                         Aditivos, e "do chamamento" só faria sentido no primeiro. --}}
+                    Documentos gerais
+                @else
+                    Etapa {{ $nEtapa + 1 }} · {{ $setoresDoGrupo }}
+                @endif
+            </span>
+
+            @if($semEtapa)
+                <span class="text-xs text-gray-400">disponíveis a qualquer momento</span>
+            @elseif($grupoFeito)
+                <span class="inline-flex items-center gap-1 text-xs font-semibold text-brand-700">
+                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.6">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/>
+                    </svg>
+                    Etapa vencida
+                </span>
+            @elseif($grupoAgora)
+                <span class="px-2 py-0.5 text-[11px] font-bold uppercase tracking-wide bg-accent-500 text-white rounded">
+                    Etapa atual
+                </span>
+                @if($minhaVez)
+                    <span class="text-xs font-semibold text-accent-800">— é a sua vez</span>
+                @else
+                    <span class="text-xs text-accent-700">— aguardando {{ $setoresDoGrupo }}</span>
+                @endif
+            @else
+                <span class="text-xs text-gray-400">depois</span>
+            @endif
+        </div>
+    @endif
+
+    {{-- Etapa futura recua: continua legível e clicável, mas para de disputar
+         atenção com o que precisa ser feito agora. --}}
+    <div class="divide-y divide-gray-100 {{ $grupoFuturo ? 'opacity-60' : '' }}">
+    @foreach($pecasDoGrupo as $peca)
         @php
             // No trâmite da Seleção só o setor da etapa atual preenche/assina;
             // fora dele (Dispensa, Aditivo, Apostilamento) tudo segue liberado.
             $podePreencher = $peca->podePreencher(auth()->user());
             $podeAssinar   = $peca->podeAssinar(auth()->user());
             $trava         = $peca->motivoTrava(auth()->user());
+
+            // Agrupado, a trava "Disponível na etapa 2 (SCP)" repete palavra por
+            // palavra o cabeçalho logo acima. Fica só nas travas que acrescentam
+            // algo — as da etapa corrente, que dizem de quem é a vez.
+            if ($agrupar && !$semEtapa && $nEtapa !== $etapaAtual) {
+                $trava = null;
+            }
 
             $ehModelo   = $peca->tipo === 'modelo';
             $emAndamento = $peca->preenchido() && ! $peca->assinado();
@@ -36,8 +128,8 @@
                             </svg>
                         </span>
                     @elseif($peca->preenchido())
-                        <span class="w-5 h-5 rounded-full border-2 border-amber-400 flex items-center justify-center">
-                            <span class="w-1.5 h-1.5 rounded-full bg-amber-400"></span>
+                        <span class="w-5 h-5 rounded-full border-2 border-accent-400 flex items-center justify-center">
+                            <span class="w-1.5 h-1.5 rounded-full bg-accent-400"></span>
                         </span>
                     @else
                         <span class="block w-5 h-5 rounded-full border-2 border-gray-200"></span>
@@ -61,7 +153,7 @@
                                     Assinado por {{ $peca->assinante->name }} em {{ $peca->assinado_em->format('d/m/Y H:i') }}
                                 </p>
                                 @if($peca->exigeContraAssinatura())
-                                    <p class="text-xs mt-0.5 {{ $peca->contraAssinado() ? 'text-gray-400' : 'text-amber-700' }}">
+                                    <p class="text-xs mt-0.5 {{ $peca->contraAssinado() ? 'text-gray-400' : 'text-accent-700' }}">
                                         @if($peca->contraAssinado())
                                             Contra-assinado pela OSC — {{ $peca->contraAssinante->name ?? '—' }}
                                             em {{ $peca->contra_assinado_em->format('d/m/Y H:i') }}
@@ -71,14 +163,14 @@
                                     </p>
                                 @endif
                             @elseif($trava)
-                                <p class="text-xs text-amber-700 mt-0.5 flex items-center gap-1">
+                                <p class="text-xs text-accent-700 mt-0.5 flex items-center gap-1">
                                     <svg class="w-3.5 h-3.5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
                                         <path stroke-linecap="round" stroke-linejoin="round" d="M16.5 10.5V6.75a4.5 4.5 0 10-9 0v3.75m-.75 11.25h10.5a2.25 2.25 0 002.25-2.25v-6.75a2.25 2.25 0 00-2.25-2.25H6.75a2.25 2.25 0 00-2.25 2.25v6.75a2.25 2.25 0 002.25 2.25z"/>
                                     </svg>
                                     {{ $trava }}
                                 </p>
                             @elseif($emAndamento)
-                                <p class="text-xs text-amber-700 mt-0.5">Preenchido — falta assinar</p>
+                                <p class="text-xs text-accent-700 mt-0.5">Preenchido — falta assinar</p>
                             @endif
                         </div>
 
@@ -155,7 +247,7 @@
                                               data-confirm="Confirma a assinatura deste Termo pela OSC?">
                                             @csrf @method('PATCH')
                                             <button type="submit"
-                                                    class="px-3 py-2 text-xs font-semibold text-white bg-emerald-600 rounded-lg hover:bg-emerald-700 transition">
+                                                    class="btn btn-primary btn-sm">
                                                 Assinar como OSC (contra-assinatura)
                                             </button>
                                         </form>
@@ -165,11 +257,21 @@
                                         @csrf @method('PUT')
                                         <textarea name="conteudo" data-editor-rico>{!! old('conteudo', $peca->conteudo) !!}</textarea>
                                         <button type="submit"
-                                                class="mt-2 px-3 py-2 text-xs font-semibold text-white bg-brand-600 rounded-lg hover:bg-brand-700 transition">
+                                                class="mt-2 btn btn-primary btn-sm">
                                             Salvar
                                         </button>
                                     </form>
                                 @else
+                                    {{-- Antes o bloco cinza aparecia sozinho, sem dizer por que
+                                         não dava para editar. Agora o motivo vem junto. --}}
+                                    @if($motivo = $peca->motivoNaoPodePreencher(auth()->user()))
+                                        <p class="mb-2 flex items-start gap-2 text-xs text-accent-800 bg-accent-50 border border-accent-200 rounded-lg px-3 py-2">
+                                            <svg class="w-4 h-4 shrink-0 mt-px" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.8">
+                                                <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m9-.75a9 9 0 11-18 0 9 9 0 0118 0zm-9 3.75h.008v.008H12v-.008z"/>
+                                            </svg>
+                                            <span><strong>Modo leitura.</strong> {{ $motivo }}</span>
+                                        </p>
+                                    @endif
                                     <div class="documento-html border border-gray-200 rounded-lg p-4 bg-gray-50 text-gray-700 text-sm">
                                         {!! $peca->conteudo ?: '<p class="text-gray-400">Documento ainda não preenchido.</p>' !!}
                                     </div>
@@ -180,7 +282,7 @@
                                           data-confirm="Confirma a assinatura digital deste documento?">
                                         @csrf @method('PATCH')
                                         <button type="submit"
-                                                class="px-3 py-2 text-xs font-semibold text-white bg-blue-600 rounded-lg hover:bg-blue-700 transition">
+                                                class="btn btn-primary btn-sm">
                                             Assinar
                                         </button>
                                     </form>
@@ -205,7 +307,7 @@
                                     <input type="file" name="arquivo" required
                                            class="block text-sm text-gray-600 file:mr-3 file:py-1.5 file:px-3 file:rounded-lg file:border-0 file:text-xs file:font-semibold file:bg-brand-50 file:text-brand-700 hover:file:bg-brand-100">
                                     <button type="submit"
-                                            class="px-3 py-2 text-xs font-semibold text-white bg-brand-600 rounded-lg hover:bg-brand-700 transition">
+                                            class="btn btn-primary btn-sm">
                                         Enviar
                                     </button>
                                 </form>
@@ -227,7 +329,7 @@
                                                 @endforeach
                                             </select>
                                             <button type="submit"
-                                                    class="px-3 py-2 text-xs font-semibold text-brand-800 border border-brand-300 rounded-lg hover:bg-brand-50 transition">
+                                                    class="btn btn-outline btn-sm">
                                                 Puxar
                                             </button>
                                         </form>
@@ -239,9 +341,47 @@
                                 @endif
                             </div>
                         </details>
+
+                    {{-- ARQUIVO sem envio liberado.
+                         Precisa existir: as peças de modelo SEMPRE mostram um botão
+                         (que abre em leitura quando bloqueado), e as de arquivo não
+                         mostravam nada — a linha virava um beco sem saída, e quem
+                         precisava enviar o documento achava que a interface estava
+                         quebrada, sem nada em que clicar. --}}
+                    @elseif(! $ehModelo && ! $podePreencher)
+                        {{-- Só quando o usuário não pode agir: com envio liberado e
+                             arquivo presente, o cabeçalho da linha já traz o chip com
+                             Baixar e Remover, e repetir aqui seria ruído. --}}
+                        <details class="mt-2 group">
+                            <summary class="{{ $acao }} text-gray-600 bg-gray-100 hover:bg-gray-200">
+                                <svg class="w-3.5 h-3.5 transition group-open:rotate-90" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.6">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/>
+                                </svg>
+                                Por que não posso enviar?
+                            </summary>
+
+                            <div class="mt-3">
+                                <p class="flex items-start gap-2 text-xs text-accent-800 bg-accent-50 border border-accent-200 rounded-lg px-3 py-2">
+                                    <svg class="w-4 h-4 shrink-0 mt-px" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.8">
+                                        <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m9-.75a9 9 0 11-18 0 9 9 0 0118 0zm-9 3.75h.008v.008H12v-.008z"/>
+                                    </svg>
+                                    <span>
+                                        <strong>Envio bloqueado.</strong>
+                                        {{ $peca->motivoNaoPodePreencher(auth()->user()) }}
+                                    </span>
+                                </p>
+                                @unless($peca->temArquivo())
+                                    <p class="mt-2 text-xs text-gray-500">
+                                        Nada foi enviado ainda. Assim que a vez chegar ao seu setor,
+                                        o botão de envio aparece aqui.
+                                    </p>
+                                @endunless
+                            </div>
+                        </details>
                     @endif
                 </div>
             </div>
         </div>
     @endforeach
-</div>
+    </div>
+@endforeach

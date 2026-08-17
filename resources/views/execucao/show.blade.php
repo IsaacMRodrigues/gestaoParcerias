@@ -12,9 +12,9 @@
             <x-flash-message />
 
             @if(count($alertas))
-                <div class="p-4 rounded-lg bg-amber-50 border border-amber-200">
-                    <p class="text-sm font-semibold text-amber-800 mb-1">⚠️ Alertas de inconsistência</p>
-                    <ul class="list-disc list-inside text-sm text-amber-700 space-y-0.5">
+                <div class="p-4 rounded-lg bg-accent-50 border border-accent-200">
+                    <p class="text-sm font-semibold text-accent-800 mb-1">⚠️ Alertas de inconsistência</p>
+                    <ul class="list-disc list-inside text-sm text-accent-700 space-y-0.5">
                         @foreach($alertas as $a) <li>{{ $a }}</li> @endforeach
                     </ul>
                 </div>
@@ -38,7 +38,7 @@
                 </div>
                 <div class="bg-white rounded-xl border {{ $saldo < 0 ? 'border-red-300' : 'border-gray-200' }} p-5">
                     <p class="text-sm text-gray-500">Saldo</p>
-                    <p class="mt-1 text-2xl font-bold {{ $saldo < 0 ? 'text-red-600' : 'text-emerald-600' }}">R$ {{ number_format($saldo, 2, ',', '.') }}</p>
+                    <p class="mt-1 text-2xl font-bold {{ $saldo < 0 ? 'text-red-600' : 'text-brand-600' }}">R$ {{ number_format($saldo, 2, ',', '.') }}</p>
                 </div>
                 <div class="bg-white rounded-xl border border-gray-200 p-5">
                     <p class="text-sm text-gray-500">Executado</p>
@@ -114,7 +114,7 @@
                                         </div>
                                         <div class="flex items-center gap-2">
                                             <button type="submit"
-                                                    class="px-3 py-2 text-sm font-medium text-white bg-brand-600 rounded-md hover:bg-brand-700">
+                                                    class="btn btn-primary btn-sm">
                                                 Salvar
                                             </button>
                                             <button type="button" @click="editando = false"
@@ -176,7 +176,7 @@
                                         <a href="{{ route('despesas.nota.download', $d) }}" class="font-semibold text-brand-700 hover:text-brand-800 transition">📎 {{ $d->nota_fiscal_numero ?? 'baixar' }}</a>
                                     @else
                                         <button type="button" @click="editando = true"
-                                                class="text-xs text-amber-700 bg-amber-50 border border-amber-200 px-2 py-0.5 rounded hover:bg-amber-100">
+                                                class="text-xs text-accent-700 bg-accent-50 border border-accent-200 px-2 py-0.5 rounded hover:bg-accent-100">
                                             anexar NF
                                         </button>
                                     @endif
@@ -245,7 +245,7 @@
                                         </div>
                                         <div class="sm:col-span-6 flex items-center gap-2">
                                             <button type="submit"
-                                                    class="px-3 py-2 text-sm font-medium text-white bg-brand-600 rounded-md hover:bg-brand-700">
+                                                    class="btn btn-primary btn-sm">
                                                 Salvar
                                             </button>
                                             <button type="button" @click="editando = false"

@@ -14,31 +14,31 @@
                         @csrf
                         @method('PATCH')
                         <button type="submit"
-                                class="px-4 py-2 text-sm font-medium text-white bg-green-600 rounded-md hover:bg-green-700">
+                                class="btn btn-primary">
                             Submeter Proposta
                         </button>
                     </form>
                 @endif
                 @if($proposta->temTramiteCelebracao())
                     <a href="{{ route('celebracao.show', $proposta) }}"
-                       class="inline-flex items-center gap-2 px-4 py-2.5 text-sm font-semibold text-white bg-brand-600 rounded-lg shadow-sm hover:bg-brand-700 transition">
+                       class="btn btn-primary">
                         Celebração
                     </a>
                 @endif
                 @if($proposta->status === 'aprovada' && !$proposta->instrumento)
                     <a href="{{ route('instrumentos.create', $proposta) }}"
-                       class="px-4 py-2 text-sm font-medium text-white bg-teal-600 rounded-md hover:bg-teal-700">
+                       class="btn btn-primary">
                         Formalizar Instrumento
                     </a>
                 @endif
                 @if($proposta->instrumento)
                     <a href="{{ route('instrumentos.show', $proposta->instrumento) }}"
-                       class="px-4 py-2 text-sm font-medium text-teal-700 bg-teal-50 border border-teal-300 rounded-md hover:bg-teal-100">
+                       class="btn btn-outline">
                         Ver Instrumento
                     </a>
                 @endif
                 <a href="{{ route('propostas.edit', $proposta) }}"
-                   class="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50">
+                   class="btn btn-secondary">
                     Editar
                 </a>
             </div>
@@ -64,19 +64,19 @@
                     <div class="flex gap-2">
                         @if(!$parecerTecnico && in_array($proposta->status, ['submetida', 'em_analise']))
                             <a href="{{ route('propostas.pareceres.create', [$proposta, 'tipo' => 'tecnico']) }}"
-                               class="px-3 py-1.5 text-sm font-medium text-white bg-brand-600 rounded-md hover:bg-brand-700">
+                               class="btn btn-primary btn-sm">
                                 + Parecer Técnico
                             </a>
                         @endif
                         @if($parecerTecnico && in_array($parecerTecnico->resultado, $aprovados) && !$parecerJuridico)
                             <a href="{{ route('propostas.pareceres.create', [$proposta, 'tipo' => 'juridico']) }}"
-                               class="px-3 py-1.5 text-sm font-medium text-white bg-purple-600 rounded-md hover:bg-purple-700">
+                               class="px-3 py-1.5 text-sm font-medium text-white bg-brand-600 rounded-md hover:bg-brand-700">
                                 + Parecer Jurídico
                             </a>
                         @endif
                         @if($parecerJuridico && in_array($parecerJuridico->resultado, $aprovados) && !$parecerDecisao)
                             <a href="{{ route('propostas.pareceres.create', [$proposta, 'tipo' => 'decisao']) }}"
-                               class="px-3 py-1.5 text-sm font-medium text-white bg-green-600 rounded-md hover:bg-green-700">
+                               class="btn btn-primary btn-sm">
                                 + Decisão Final
                             </a>
                         @endif
@@ -109,9 +109,9 @@
                             {{-- Diligências vinculadas ao parecer --}}
                             @foreach($parecer->diligencias as $diligencia)
                                 @php $dc = \App\Models\Diligencia::STATUS_COLORS[$diligencia->status] ?? 'gray'; @endphp
-                                <div class="mt-3 pl-4 border-l-2 border-blue-300">
+                                <div class="mt-3 pl-4 border-l-2 border-slate-300">
                                     <div class="flex items-center justify-between">
-                                        <p class="text-xs font-medium text-blue-700">
+                                        <p class="text-xs font-medium text-slate-700">
                                             Diligência — prazo: {{ $diligencia->prazo->format('d/m/Y') }}
                                         </p>
                                         <div class="flex items-center gap-2">
@@ -226,7 +226,7 @@
                                    class="block w-full text-sm text-gray-600 file:mr-3 file:py-1 file:px-3 file:rounded file:border-0 file:text-xs file:bg-brand-50 file:text-brand-700 hover:file:bg-brand-100">
                         </div>
                         <button type="submit"
-                                class="px-3 py-2 text-sm font-medium text-white bg-brand-600 rounded-md hover:bg-brand-700">
+                                class="btn btn-primary btn-sm">
                             Enviar
                         </button>
                     </form>
@@ -269,7 +269,7 @@
                 <div class="flex items-center justify-between px-6 py-4 border-b border-gray-200">
                     <h3 class="text-base font-semibold text-gray-800">Plano de Trabalho</h3>
                     <a href="{{ route('propostas.metas.create', $proposta) }}"
-                       class="px-3 py-1.5 text-sm font-medium text-white bg-brand-600 rounded-md hover:bg-brand-700">
+                       class="btn btn-primary btn-sm">
                         + Nova Meta
                     </a>
                 </div>

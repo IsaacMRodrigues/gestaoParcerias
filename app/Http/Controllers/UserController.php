@@ -159,6 +159,10 @@ class UserController extends Controller
 
     public function destroy(User $usuario): RedirectResponse
     {
+        if ($bloqueio = $this->bloqueioDeExclusao($usuario)) {
+            return $bloqueio;
+        }
+
         $usuario->delete();
 
         return redirect()->route('usuarios.index')

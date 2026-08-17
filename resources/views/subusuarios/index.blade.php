@@ -8,7 +8,7 @@
                 </p>
             </div>
             <a href="{{ route('subusuarios.create') }}"
-               class="inline-flex items-center gap-2 px-4 py-2.5 text-sm font-semibold text-white bg-brand-600 rounded-lg shadow-sm hover:bg-brand-700 transition">
+               class="btn btn-primary">
                 + Novo usuário
             </a>
         </div>

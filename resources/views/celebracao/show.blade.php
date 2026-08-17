@@ -8,7 +8,7 @@
     $concluida  = $proposta->celebracaoConcluida();
     $souDoSetor = auth()->user()->setor === $proposta->celebracao_setor
         && ($proposta->celebracao_setor !== 'osc'
-            || (auth()->user()->osc && auth()->user()->osc->id === $proposta->osc_id));
+            || (auth()->user()->ehRepresentanteOsc() && auth()->user()->osc->id === $proposta->osc_id));
     $pendencias = $concluida ? [] : $proposta->pendenciasCelebracao();
     $setorLabel = fn ($s) => \App\Models\Proposta::SETORES_CELEBRACAO[$s] ?? $s;
 @endphp
@@ -64,9 +64,9 @@
                         <dt class="text-xs font-medium text-gray-500 uppercase tracking-wide">Situação</dt>
                         <dd class="mt-0.5">
                             @if($concluida)
-                                <span class="px-2.5 py-1 text-xs font-semibold bg-green-50 text-green-800 border border-green-200 rounded-md">Concluída</span>
+                                <span class="px-2.5 py-1 text-xs font-semibold bg-brand-50 text-brand-800 border border-brand-200 rounded-md">Concluída</span>
                             @else
-                                <span class="px-2.5 py-1 text-xs font-semibold bg-amber-50 text-amber-800 border border-amber-200 rounded-md">
+                                <span class="px-2.5 py-1 text-xs font-semibold bg-accent-50 text-accent-800 border border-accent-200 rounded-md">
                                     Com {{ $setorLabel($proposta->celebracao_setor) }}
                                 </span>
                             @endif
@@ -91,7 +91,7 @@
                         </p>
                     </div>
                     @if($concluida)
-                        <span class="px-2.5 py-1 text-xs font-medium bg-green-100 text-green-800 rounded-full whitespace-nowrap">
+                        <span class="px-2.5 py-1 text-xs font-medium bg-brand-100 text-brand-800 rounded-full whitespace-nowrap">
                             Concluída em {{ $proposta->celebracao_concluida_em->format('d/m/Y H:i') }}
                         </span>
                     @endif
@@ -105,9 +105,9 @@
 
                 @unless($concluida)
                     @if($pendencias)
-                        <div class="mt-4 bg-amber-50 border border-amber-200 rounded-md p-3">
-                            <p class="text-xs font-semibold text-amber-800">Pendências desta etapa:</p>
-                            <ul class="mt-1 text-xs text-amber-700 list-disc list-inside space-y-0.5">
+                        <div class="mt-4 bg-accent-50 border border-accent-200 rounded-md p-3">
+                            <p class="text-xs font-semibold text-accent-800">Pendências desta etapa:</p>
+                            <ul class="mt-1 text-xs text-accent-700 list-disc list-inside space-y-0.5">
                                 @foreach($pendencias as $p)
                                     <li>{{ $p }}</li>
                                 @endforeach
@@ -122,7 +122,7 @@
                                       data-confirm="Concluir a Celebração? A parceria estará apta a iniciar a execução.">
                                     @csrf
                                     <button type="submit" @disabled($pendencias)
-                                            class="px-4 py-2 text-sm font-medium text-white bg-green-600 rounded-md hover:bg-green-700 disabled:opacity-50 disabled:cursor-not-allowed">
+                                            class="btn btn-primary">
                                         Concluir Celebração
                                     </button>
                                 </form>
@@ -132,7 +132,7 @@
                                     <textarea name="parecer" rows="2" placeholder="Observação (opcional)"
                                               class="block w-full border-gray-300 rounded-md shadow-sm text-sm focus:ring-brand-500 focus:border-brand-500"></textarea>
                                     <button type="submit" @disabled($pendencias)
-                                            class="inline-flex items-center gap-2 px-4 py-2.5 text-sm font-semibold text-white bg-brand-600 rounded-lg shadow-sm hover:bg-brand-700 transition disabled:opacity-50 disabled:cursor-not-allowed">
+                                            class="btn btn-primary">
                                         Encaminhar para
                                         {{ $setorLabel(\App\Models\Proposta::ETAPAS_CELEBRACAO[$etapaAtual + 1]['setor']) }}
                                     </button>
@@ -146,7 +146,7 @@
                                     <textarea name="parecer" rows="2" required placeholder="Motivo da devolução (obrigatório)"
                                               class="block w-full border-gray-300 rounded-md shadow-sm text-sm focus:ring-red-500 focus:border-red-500"></textarea>
                                     <button type="submit"
-                                            class="px-4 py-2 text-sm font-medium text-red-700 border border-red-300 rounded-md hover:bg-red-50">
+                                            class="btn btn-danger-outline">
                                         Devolver para {{ $setorLabel($proposta->setorAnteriorCelebracao()) }}
                                     </button>
                                 </form>

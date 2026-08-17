@@ -141,7 +141,7 @@
                         </a>
 
                         @auth
-                            @if(auth()->user()->osc)
+                            @if(auth()->user()->ehRepresentanteOsc())
                                 <a href="{{ route('portal.minhas-propostas') }}"
                                    class="{{ request()->routeIs('portal.minhas*') ? 'text-brand-700 font-semibold' : 'text-gray-600 hover:text-brand-700' }} transition">
                                     Minhas Propostas
@@ -176,7 +176,7 @@
                                 Cadastrar OSC
                             </a>
                             <a href="{{ route('login') }}"
-                               class="bg-brand-600 text-white px-4 py-2 rounded-lg font-semibold text-sm shadow-sm hover:bg-brand-700 transition">
+                               class="btn btn-primary">
                                 Entrar
                             </a>
                         @endauth

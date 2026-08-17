@@ -46,33 +46,57 @@
                         @endphp
                         <li class="flex items-center">
                             <div class="flex flex-col items-center text-center w-24">
+                                {{-- Etapa vencida fica em verde suave (é histórico); a etapa
+                                     ATUAL é a única em cor forte, no laranja de pendência.
+                                     Antes vencida era 'green-500' e atual 'brand-600' — dois
+                                     verdes quase idênticos, e a fileira não dizia onde o
+                                     processo estava, que é a única coisa que se quer saber. --}}
                                 <div class="w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold
-                                    {{ $feita ? 'bg-green-500 text-white' : ($atualEtapa ? 'bg-brand-600 text-white ring-4 ring-brand-100' : 'bg-gray-200 text-gray-500') }}">
+                                    {{ $feita ? 'bg-brand-100 text-brand-700 ring-1 ring-brand-200'
+                                              : ($atualEtapa ? 'bg-accent-500 text-white ring-4 ring-accent-100'
+                                                             : 'bg-gray-100 text-gray-400 ring-1 ring-gray-200') }}">
                                     {{ $feita ? '✓' : $i + 1 }}
                                 </div>
-                                <span class="mt-1 text-[12px] leading-tight {{ $atualEtapa ? 'text-brand-700 font-semibold' : 'text-gray-500' }}">
+                                <span class="mt-1 text-[12px] leading-tight {{ $atualEtapa ? 'text-accent-700 font-semibold' : 'text-gray-500' }}">
                                     {{ strtoupper($et['setor']) }}
                                 </span>
                             </div>
                             @if(!$loop->last)
-                                <div class="w-6 h-px {{ $feita ? 'bg-green-400' : 'bg-gray-200' }}"></div>
+                                <div class="w-6 h-px {{ $feita ? 'bg-brand-200' : 'bg-gray-200' }}"></div>
                             @endif
                         </li>
                     @endforeach
                 </ol>
                 @if($emAndamento)
                     <p class="text-sm text-gray-600 mt-4">
-                        <span class="font-medium text-brand-700">Etapa {{ $processo->etapa + 1 }}/{{ $processo->totalEtapas() }}
+                        <span class="font-medium text-accent-700">Etapa {{ $processo->etapa + 1 }}/{{ $processo->totalEtapas() }}
                         — {{ \App\Models\Processo::SETORES[$etapaInfo['setor']] ?? $etapaInfo['setor'] }}:</span>
                         {{ $etapaInfo['acao'] }}
                     </p>
                 @else
-                    <p class="text-sm text-green-700 mt-4 font-medium">Trâmite concluído — encaminhado para publicação no site oficial.</p>
+                    {{-- O sinal de concluído é o ícone; a frase fica em texto normal.
+                         Uma linha inteira em verde competia com a trilha logo acima,
+                         que já dizia a mesma coisa com sete vistos. --}}
+                    <p class="text-sm text-gray-700 mt-4 flex items-center gap-2">
+                        <svg class="w-4 h-4 shrink-0 text-brand-600" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.2">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                        </svg>
+                        Trâmite concluído — encaminhado para publicação no site oficial.
+                    </p>
                 @endif
                 @if($processo->modalidade)
-                    <p class="text-sm text-gray-600 mt-2">
+                    @php
+                        // Selo colorido por modalidade: são três categorias com efeitos
+                        // jurídicos diferentes. Antes o nome vinha no verde da marca,
+                        // que só servia de negrito e não distinguia uma da outra.
+                        $mCor = \App\Models\Processo::MODALIDADES_COLORS[$processo->modalidade] ?? 'slate';
+                    @endphp
+                    <p class="text-sm text-gray-600 mt-3 flex flex-wrap items-center gap-2">
                         Modalidade definida pelo SCP:
-                        <span class="font-medium text-brand-700">{{ \App\Models\Processo::MODALIDADES[$processo->modalidade] ?? $processo->modalidade }}</span>
+                        <span class="px-2.5 py-1 text-xs font-semibold rounded-md
+                                     bg-{{ $mCor }}-50 text-{{ $mCor }}-700 ring-1 ring-{{ $mCor }}-200">
+                            {{ \App\Models\Processo::MODALIDADES[$processo->modalidade] ?? $processo->modalidade }}
+                        </span>
                     </p>
                 @endif
             </div>
@@ -86,9 +110,7 @@
                             Este processo gerou o registro no módulo Programas:
                         </p>
                         <div class="flex flex-wrap items-center gap-3">
-                            <span class="px-2.5 py-1 text-xs font-medium bg-green-100 text-green-800 rounded-full">
-                                {{ \App\Models\Chamamento::TIPOS[$processo->chamamento->tipo] ?? $processo->chamamento->tipo }}
-                            </span>
+                            <x-selo-modalidade :tipo="$processo->chamamento->tipo" />
                             <span class="text-sm text-gray-800 font-medium">{{ $processo->chamamento->titulo }}</span>
                         </div>
                         <div class="mt-3 flex flex-wrap gap-3 text-sm">
@@ -108,14 +130,14 @@
                             @endif
                         </div>
                         @if($processo->chamamento->tipo === 'chamamento_publico' && ! $processo->chamamento->data_inicio_inscricao)
-                            <p class="mt-3 text-sm text-amber-700 bg-amber-50 border border-amber-100 rounded-md px-3 py-2">
+                            <p class="mt-3 text-sm text-accent-700 bg-accent-50 border border-accent-100 rounded-md px-3 py-2">
                                 ⚠️ Defina o <strong>período de inscrição</strong> no chamamento para abri-lo a propostas das OSCs.
                                 <a href="{{ route('programas.chamamentos.edit', [$processo->chamamento->programa, $processo->chamamento]) }}"
                                    class="underline font-medium">Definir datas &rarr;</a>
                             </p>
                         @endif
                     @else
-                        <p class="text-sm text-amber-700 mb-3">
+                        <p class="text-sm text-accent-700 mb-3">
                             O trâmite está concluído, mas o chamamento ainda não foi gerado no módulo Programas.
                         </p>
                         <form action="{{ route('processos.publicar-chamamento', $processo) }}" method="POST" class="space-y-3">
@@ -140,7 +162,7 @@
                                 </div>
                             @endunless
                             <button type="submit"
-                                    class="inline-flex items-center gap-2 px-4 py-2.5 text-sm font-semibold text-white bg-brand-600 rounded-lg shadow-sm hover:bg-brand-700 transition">
+                                    class="btn btn-primary">
                                 Gerar Publicação / Chamamento
                             </button>
                         </form>
@@ -186,87 +208,20 @@
                                 <span class="text-red-500">🔴</span>
                                 <span class="text-red-700">{{ $alerta['texto'] }}</span>
                             @else
-                                <span class="text-green-500">🟢</span>
-                                <span class="text-green-700 font-medium">{{ $alerta['texto'] }}</span>
+                                <span class="text-brand-500">🟢</span>
+                                <span class="text-brand-700 font-medium">{{ $alerta['texto'] }}</span>
                             @endif
                         </li>
                     @endforeach
                 </ul>
             </div>
 
-            {{-- Peças do processo --}}
-            @php
-                $u = auth()->user();
-                $rotuloPeca = function ($p) use ($processo, $u) {
-                    if (!$p) return 'Ver';
-                    if ($p->ehArquivo()) return $p->podeAnexar($processo, $u) ? 'Anexar' : 'Ver';
-                    if ($p->assinado()) return 'Ver';
-                    if ($p->podeEditarConteudo($processo, $u)) return 'Preencher';
-                    if ($p->podeAssinar($processo, $u)) return 'Assinar';
-                    return 'Ver';
-                };
-                $statusPeca = function ($p) {
-                    if (!$p) return 'Não criada';
-                    if ($p->ehArquivo()) {
-                        $n = $p->anexos()->count();
-                        return $n ? $n . ' ' . ($n === 1 ? 'arquivo anexado' : 'arquivos anexados') : 'Nenhum arquivo anexado';
-                    }
-                    if ($p->assinado()) return 'Assinado por ' . $p->assinante->name . ' em ' . $p->assinado_em->format('d/m/Y H:i');
-                    if (!empty($p->conteudo)) return 'Preenchido — não assinado';
-                    return 'Não preenchido';
-                };
-                $comum = ['oficio', 'termo_referencia', 'pedido_parecer', 'parecer_financeiro', 'abertura'];
-                $ordem = $processo->ehDispensa()
-                    ? array_merge($comum, ['justificativa_dispensa', 'parecer_cnas'])
-                    : array_merge($comum, ['edital', 'portaria_comissao', 'solicitacao_parecer_juridico', 'parecer_juridico', 'comprovante_publicacao']);
-            @endphp
-            <div class="bg-white rounded-xl border border-gray-200 shadow-sm">
-                <form method="GET" action="{{ route('processos.pecas.imprimir-lote', $processo) }}"
-                      data-require-checked="pecas[]"
-                      data-require-checked-message="Selecione ao menos um documento para baixar.">
-                    <div class="px-6 py-4 border-b border-gray-200 flex items-center justify-between gap-3">
-                        <h3 class="text-base font-semibold text-gray-800">Documentos do Processo</h3>
-                        <button type="submit"
-                                class="text-sm px-3 py-1.5 bg-brand-600 text-white rounded-md hover:bg-brand-700 whitespace-nowrap">
-                            ⬇ Baixar selecionados (PDF)
-                        </button>
-                    </div>
-
-                    <div class="divide-y divide-gray-100">
-                        @foreach($ordem as $i => $tipo)
-                            @php $p = $processo->peca($tipo); @endphp
-                            @if($p)
-                                <div class="flex items-center justify-between px-6 py-4">
-                                    <div class="flex items-center gap-3">
-                                        @if(!empty($p->conteudo))
-                                            <input type="checkbox" name="pecas[]" value="{{ $p->id }}"
-                                                   class="rounded border-gray-300 text-brand-600 focus:ring-brand-500"
-                                                   title="Selecionar para download">
-                                        @else
-                                            <span class="inline-block w-4" title="Documento ainda não preenchido"></span>
-                                        @endif
-                                        <div>
-                                            <p class="text-sm font-semibold text-gray-800">{{ $i + 1 }}. {{ \App\Models\ProcessoPeca::TIPOS[$tipo] }}
-                                                <span class="text-xs font-normal text-gray-400">— {{ strtoupper($p->setorResponsavel()) }}</span>
-                                                @if(in_array($tipo, \App\Models\ProcessoPeca::OPCIONAIS))
-                                                    <span class="ml-1 text-[11px] font-medium text-gray-500 bg-gray-100 px-1.5 py-0.5 rounded-full">opcional</span>
-                                                @endif
-                                            </p>
-                                            <p class="text-xs text-gray-400">{{ $statusPeca($p) }}</p>
-                                        </div>
-                                    </div>
-                                    <a href="{{ route('processos.pecas.edit', [$processo, $p]) }}"
-                                       class="text-sm font-semibold text-brand-700 hover:text-brand-800 transition">
-                                        {{ $rotuloPeca($p) }}
-                                    </a>
-                                </div>
-                            @endif
-                        @endforeach
-                    </div>
-                </form>
-            </div>
-
-            {{-- Trâmite --}}
+            {{-- Trâmite — vem ANTES dos documentos de propósito.
+                 É aqui que fica a ação que destrava a tela: enquanto o
+                 recebimento não é registrado, as peças abaixo ficam todas em
+                 modo leitura. No fim da página, o usuário percorria os dez
+                 documentos sem conseguir mexer em nenhum e só descobria o
+                 motivo depois de rolar tudo. --}}
             <div class="bg-white rounded-xl border border-gray-200 shadow-sm">
                 <div class="px-6 py-4 border-b border-gray-200 flex items-center justify-between">
                     <h3 class="text-base font-semibold text-gray-800">Trâmite entre Setores</h3>
@@ -312,12 +267,12 @@
                             Apenas usuários desse setor podem movimentá-lo.
                         </div>
                     @elseif($aguardandoRecebimento)
-                        <div class="px-6 py-4 border-t border-gray-100 bg-blue-50 flex items-center justify-between">
-                            <p class="text-sm text-blue-800">Registre o recebimento para iniciar a etapa.</p>
+                        <div class="px-6 py-4 border-t border-gray-100 bg-accent-50 flex items-center justify-between">
+                            <p class="text-sm text-accent-800">Registre o recebimento para iniciar a etapa.</p>
                             <form action="{{ route('processos.receber', $processo) }}" method="POST">
                                 @csrf @method('PATCH')
                                 <button type="submit"
-                                        class="px-3 py-1.5 text-sm font-medium text-white bg-blue-600 rounded-md hover:bg-blue-700">
+                                        class="btn btn-primary btn-sm">
                                     Registrar Recebimento
                                 </button>
                             </form>
@@ -327,7 +282,7 @@
                         <div class="px-6 py-4 border-t border-gray-100 bg-gray-50 space-y-4">
                             {{-- Aviso consultivo de conformidade (não bloqueia) --}}
                             @if(!$processo->estaApto())
-                                <p class="text-sm text-amber-700">
+                                <p class="text-sm text-accent-700">
                                     ⚠️ Há alertas de conformidade acima (consultivos). Você pode encaminhar mesmo assim.
                                 </p>
                             @endif
@@ -345,7 +300,7 @@
                                       data-confirm="Concluir o processo e encaminhar para publicação?">
                                     @csrf @method('PATCH')
                                     <button type="submit"
-                                            class="px-4 py-2 text-sm font-medium text-white bg-green-600 rounded-md hover:bg-green-700">
+                                            class="btn btn-primary">
                                         Concluir (encaminhar para publicação)
                                     </button>
                                 </form>
@@ -374,7 +329,7 @@
                                         <x-input-error :messages="$errors->get('modalidade')" class="mt-1" />
                                     </div>
                                     <button type="submit"
-                                            class="px-4 py-2 text-sm font-medium text-white bg-green-600 rounded-md hover:bg-green-700">
+                                            class="btn btn-primary">
                                         ✓ Aprovar e liberar para a {{ strtoupper($processo->proximoSetor()) }}
                                     </button>
                                 </form>
@@ -387,7 +342,7 @@
                                                class="flex-1 border-gray-300 rounded-md shadow-sm focus:ring-red-500 focus:border-red-500 text-sm"
                                                placeholder="Motivo da rejeição / correções necessárias...">
                                         <button type="submit"
-                                                class="px-3 py-1.5 text-sm font-medium text-white bg-red-600 rounded-md hover:bg-red-700 whitespace-nowrap">
+                                                class="btn btn-danger btn-sm">
                                             ✕ Rejeitar
                                         </button>
                                     </div>
@@ -407,7 +362,7 @@
                                     </div>
                                     <button type="submit"
                                             @disabled(!empty($pendencias))
-                                            class="inline-flex items-center gap-2 px-4 py-2.5 text-sm font-semibold text-white bg-brand-600 rounded-lg shadow-sm hover:bg-brand-700 transition disabled:opacity-50 disabled:cursor-not-allowed">
+                                            class="btn btn-primary">
                                         Encaminhar para {{ \App\Models\Processo::SETORES[$processo->proximoSetor()] ?? $processo->proximoSetor() }}
                                     </button>
                                 </form>
@@ -420,10 +375,10 @@
                                         <x-input-label for="motivo" value="Devolver para {{ \App\Models\Processo::SETORES[$processo->setorAnterior()] ?? $processo->setorAnterior() }} (informe o motivo)" />
                                         <div class="flex gap-2">
                                             <input id="motivo" name="parecer" type="text"
-                                                   class="flex-1 border-gray-300 rounded-md shadow-sm focus:ring-amber-500 focus:border-amber-500 text-sm"
+                                                   class="flex-1 border-gray-300 rounded-md shadow-sm focus:ring-accent-500 focus:border-accent-500 text-sm"
                                                    placeholder="Motivo da devolução...">
                                             <button type="submit"
-                                                    class="px-3 py-1.5 text-sm font-medium text-amber-700 border border-amber-300 rounded-md hover:bg-amber-50 whitespace-nowrap">
+                                                    class="btn btn-secondary btn-sm !text-accent-800 !border-accent-300 hover:!bg-accent-50">
                                                 Devolver
                                             </button>
                                         </div>
@@ -434,6 +389,78 @@
                         </div>
                     @endif
                 @endif
+            </div>
+
+            {{-- Peças do processo --}}
+            @php
+                $u = auth()->user();
+                $rotuloPeca = function ($p) use ($processo, $u) {
+                    if (!$p) return 'Ver';
+                    if ($p->ehArquivo()) return $p->podeAnexar($processo, $u) ? 'Anexar' : 'Ver';
+                    if ($p->assinado()) return 'Ver';
+                    if ($p->podeEditarConteudo($processo, $u)) return 'Preencher';
+                    if ($p->podeAssinar($processo, $u)) return 'Assinar';
+                    return 'Ver';
+                };
+                $statusPeca = function ($p) {
+                    if (!$p) return 'Não criada';
+                    if ($p->ehArquivo()) {
+                        $n = $p->anexos()->count();
+                        return $n ? $n . ' ' . ($n === 1 ? 'arquivo anexado' : 'arquivos anexados') : 'Nenhum arquivo anexado';
+                    }
+                    if ($p->assinado()) return 'Assinado por ' . $p->assinante->name . ' em ' . $p->assinado_em->format('d/m/Y H:i');
+                    if (!empty($p->conteudo)) return 'Preenchido — não assinado';
+                    return 'Não preenchido';
+                };
+                $comum = ['oficio', 'termo_referencia', 'pedido_parecer', 'parecer_financeiro', 'abertura'];
+                $ordem = $processo->ehDispensa()
+                    ? array_merge($comum, ['justificativa_dispensa', 'parecer_cnas'])
+                    : array_merge($comum, ['edital', 'portaria_comissao', 'solicitacao_parecer_juridico', 'parecer_juridico', 'comprovante_publicacao']);
+            @endphp
+            <div class="bg-white rounded-xl border border-gray-200 shadow-sm">
+                <form method="GET" action="{{ route('processos.pecas.imprimir-lote', $processo) }}"
+                      data-require-checked="pecas[]"
+                      data-require-checked-message="Selecione ao menos um documento para baixar.">
+                    <div class="px-6 py-4 border-b border-gray-200 flex items-center justify-between gap-3">
+                        <h3 class="text-base font-semibold text-gray-800">Documentos do Processo</h3>
+                        <button type="submit"
+                                class="btn btn-primary btn-sm">
+                            ⬇ Baixar selecionados (PDF)
+                        </button>
+                    </div>
+
+                    <div class="divide-y divide-gray-100">
+                        @foreach($ordem as $i => $tipo)
+                            @php $p = $processo->peca($tipo); @endphp
+                            @if($p)
+                                <div class="flex items-center justify-between px-6 py-4">
+                                    <div class="flex items-center gap-3">
+                                        @if(!empty($p->conteudo))
+                                            <input type="checkbox" name="pecas[]" value="{{ $p->id }}"
+                                                   class="rounded border-gray-300 text-brand-600 focus:ring-brand-500"
+                                                   title="Selecionar para download">
+                                        @else
+                                            <span class="inline-block w-4" title="Documento ainda não preenchido"></span>
+                                        @endif
+                                        <div>
+                                            <p class="text-sm font-semibold text-gray-800">{{ $i + 1 }}. {{ \App\Models\ProcessoPeca::TIPOS[$tipo] }}
+                                                <span class="text-xs font-normal text-gray-400">— {{ strtoupper($p->setorResponsavel()) }}</span>
+                                                @if(in_array($tipo, \App\Models\ProcessoPeca::OPCIONAIS))
+                                                    <span class="ml-1 text-[11px] font-medium text-gray-500 bg-gray-100 px-1.5 py-0.5 rounded-full">opcional</span>
+                                                @endif
+                                            </p>
+                                            <p class="text-xs text-gray-400">{{ $statusPeca($p) }}</p>
+                                        </div>
+                                    </div>
+                                    <a href="{{ route('processos.pecas.edit', [$processo, $p]) }}"
+                                       class="text-sm font-semibold text-brand-700 hover:text-brand-800 transition">
+                                        {{ $rotuloPeca($p) }}
+                                    </a>
+                                </div>
+                            @endif
+                        @endforeach
+                    </div>
+                </form>
             </div>
 
         </div>

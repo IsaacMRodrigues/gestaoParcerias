@@ -60,11 +60,11 @@
                                 <div class="shrink-0">
                                     @if($m['tem_texto'])
                                         <a href="{{ route('modelos.show', [$origem, $m['chave']]) }}"
-                                           class="px-3 py-1.5 text-xs font-medium text-brand-700 border border-brand-300 rounded-md hover:bg-brand-50 transition">
+                                           class="btn btn-outline btn-sm">
                                             Ver modelo
                                         </a>
                                     @else
-                                        <span class="px-2 py-1 text-xs font-medium bg-amber-50 text-amber-700 rounded-full">
+                                        <span class="px-2 py-1 text-xs font-medium bg-accent-50 text-accent-700 rounded-full">
                                             sem texto
                                         </span>
                                     @endif

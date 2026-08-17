@@ -9,7 +9,7 @@
                 <h2 class="text-2xl font-bold text-gray-900 mt-0.5">Chamamentos Públicos</h2>
             </div>
             <a href="{{ route('programas.chamamentos.create', $programa) }}"
-               class="inline-flex items-center gap-2 px-4 py-2.5 text-sm font-semibold text-white bg-brand-600 rounded-lg shadow-sm hover:bg-brand-700 transition">
+               class="btn btn-primary">
                 + Novo Chamamento
             </a>
         </div>
@@ -47,7 +47,7 @@
                                     @endif
                                 </td>
                                 <td class="px-6 py-4 text-sm text-gray-600">
-                                    {{ \App\Models\Chamamento::TIPOS[$chamamento->tipo] ?? $chamamento->tipo }}
+                                    <x-selo-modalidade :tipo="$chamamento->tipo" />
                                 </td>
                                 <td class="px-6 py-4 text-sm text-gray-600">
                                     {{ $chamamento->valor_disponivel ? 'R$ ' . number_format($chamamento->valor_disponivel, 2, ',', '.') : '—' }}

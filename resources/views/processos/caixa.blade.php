@@ -40,9 +40,9 @@
                                 </td>
                                 <td class="px-6 py-4 text-sm">
                                     @if($atual && is_null($atual->recebido_em))
-                                        <span class="px-2.5 py-1 text-xs font-semibold bg-blue-50 text-blue-800 border border-blue-200 rounded-md">Novo — aguardando recebimento</span>
+                                        <span class="px-2.5 py-1 text-xs font-semibold bg-accent-50 text-accent-800 border border-accent-200 rounded-md">Novo — aguardando recebimento</span>
                                     @else
-                                        <span class="px-2.5 py-1 text-xs font-semibold bg-yellow-50 text-yellow-800 border border-yellow-200 rounded-md">Em análise</span>
+                                        <span class="px-2.5 py-1 text-xs font-semibold bg-accent-50 text-accent-800 border border-accent-200 rounded-md">Em análise</span>
                                     @endif
                                 </td>
                                 <td class="px-6 py-4 text-right text-sm font-medium whitespace-nowrap">

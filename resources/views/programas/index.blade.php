@@ -3,7 +3,7 @@
         <div class="flex items-center justify-between">
             <h2 class="text-2xl font-bold text-gray-900">Programas Governamentais</h2>
             <a href="{{ route('programas.create') }}"
-               class="inline-flex items-center gap-2 px-4 py-2.5 text-sm font-semibold text-white bg-brand-600 rounded-lg shadow-sm hover:bg-brand-700 transition">
+               class="btn btn-primary">
                 + Novo Programa
             </a>
         </div>
@@ -57,7 +57,7 @@
                 </div>
                 <div class="sm:col-span-2 lg:col-span-5 flex items-center gap-3">
                     <button type="submit"
-                            class="inline-flex items-center gap-2 px-4 py-2.5 text-sm font-semibold text-white bg-brand-600 rounded-lg shadow-sm hover:bg-brand-700 transition">
+                            class="btn btn-primary">
                         Filtrar
                     </button>
                     @if($temFiltro)
@@ -108,7 +108,7 @@
                                 </td>
                                 <td class="px-6 py-4 text-right text-sm font-medium space-x-3 whitespace-nowrap">
                                     <a href="{{ route('programas.chamamentos.index', $programa) }}"
-                                       class="inline-flex items-center gap-1 px-3 py-1 text-xs font-medium text-white bg-brand-600 rounded-md hover:bg-brand-700">
+                                       class="btn btn-primary btn-sm">
                                         Chamamentos
                                         <span class="bg-brand-500 text-white rounded px-1">{{ $programa->chamamentos_count ?? 0 }}</span>
                                     </a>

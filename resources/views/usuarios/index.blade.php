@@ -3,7 +3,7 @@
         <div class="flex items-center justify-between">
             <h2 class="text-2xl font-bold text-gray-900">Usuários</h2>
             <a href="{{ route('usuarios.create') }}"
-               class="inline-flex items-center gap-2 px-4 py-2.5 text-sm font-semibold text-white bg-brand-600 rounded-lg shadow-sm hover:bg-brand-700 transition">
+               class="btn btn-primary">
                 + Novo Usuário
             </a>
         </div>
@@ -16,11 +16,11 @@
 
             @if(($pendentesCount ?? 0) > 0)
                 <a href="{{ route('usuarios.pendentes') }}"
-                   class="flex items-center justify-between mb-4 px-4 py-3 bg-amber-50 border border-amber-200 rounded-lg text-sm hover:bg-amber-100">
-                    <span class="text-amber-800">
+                   class="flex items-center justify-between mb-4 px-4 py-3 bg-accent-50 border border-accent-200 rounded-lg text-sm hover:bg-accent-100">
+                    <span class="text-accent-800">
                         <strong>{{ $pendentesCount }}</strong> cadastro(s) aguardando aprovação.
                     </span>
-                    <span class="text-amber-700 font-medium">Revisar →</span>
+                    <span class="text-accent-700 font-medium">Revisar →</span>
                 </a>
             @endif
 
@@ -62,7 +62,7 @@
                                 </td>
                                 <td class="px-6 py-4 whitespace-nowrap text-sm">
                                     @if($user->status)
-                                        <span class="px-2.5 py-1 text-xs font-semibold bg-green-50 text-green-800 border border-green-200 rounded-md">Ativo</span>
+                                        <span class="px-2.5 py-1 text-xs font-semibold bg-brand-50 text-brand-800 border border-brand-200 rounded-md">Ativo</span>
                                     @else
                                         <span class="px-2.5 py-1 text-xs font-semibold bg-red-50 text-red-800 border border-red-200 rounded-md">Inativo</span>
                                     @endif

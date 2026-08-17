@@ -12,7 +12,7 @@
             <x-flash-message />
 
             @if($op->assinado())
-                <div class="flex items-center gap-3 p-4 rounded-lg bg-green-50 border border-green-200 text-sm text-green-800">
+                <div class="flex items-center gap-3 p-4 rounded-lg bg-brand-50 border border-brand-200 text-sm text-brand-800">
                     <span class="text-lg">🔏</span>
                     <div>
                         Assinada eletronicamente por <strong>{{ $op->assinante?->name }}</strong>
@@ -78,7 +78,7 @@
                     @csrf
                     <input type="file" name="arquivo" required accept=".pdf,.jpg,.jpeg,.png"
                            class="text-sm text-gray-600 file:mr-3 file:py-1.5 file:px-3 file:rounded-md file:border-0 file:text-sm file:bg-brand-50 file:text-brand-700 hover:file:bg-brand-100" />
-                    <button type="submit" class="px-3 py-1.5 text-sm font-medium text-white bg-brand-600 rounded-md hover:bg-brand-700">Anexar</button>
+                    <button type="submit" class="btn btn-primary btn-sm">Anexar</button>
                 </form>
                 <x-input-error :messages="$errors->get('arquivo')" class="mt-2" />
             </div>
@@ -86,7 +86,7 @@
             {{-- Ações --}}
             <div class="flex flex-wrap items-center justify-between gap-3">
                 <a href="{{ route('ordens-pagamento.imprimir', $op) }}" target="_blank"
-                   class="px-4 py-2 text-sm font-medium text-brand-700 border border-brand-300 rounded-lg hover:bg-brand-50">
+                   class="btn btn-outline">
                     Imprimir / PDF
                 </a>
 
@@ -94,7 +94,7 @@
                     <form method="POST" action="{{ route('ordens-pagamento.assinar', $op) }}"
                           data-confirm="Assinar eletronicamente esta ordem de pagamento? Após assinar não será possível editá-la.">
                         @csrf @method('PATCH')
-                        <button type="submit" class="px-4 py-2 text-sm font-semibold text-white bg-green-600 rounded-lg hover:bg-green-700">
+                        <button type="submit" class="btn btn-primary">
                             🔏 Assinar
                         </button>
                     </form>

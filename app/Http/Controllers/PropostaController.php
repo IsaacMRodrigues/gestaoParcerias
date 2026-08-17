@@ -69,6 +69,10 @@ class PropostaController extends Controller
 
     public function destroy(Proposta $proposta): RedirectResponse
     {
+        if ($bloqueio = $this->bloqueioDeExclusao($proposta)) {
+            return $bloqueio;
+        }
+
         $proposta->delete();
 
         return redirect()->route('propostas.index')

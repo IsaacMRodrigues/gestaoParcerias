@@ -98,7 +98,7 @@
                 <div class="flex items-center justify-end gap-4 pt-2 border-t border-gray-100">
                     <a href="{{ route('portal.chamamento', $chamamento) }}" class="text-sm text-gray-500 hover:text-gray-800">Cancelar</a>
                     <button type="submit"
-                            class="px-6 py-2.5 text-sm font-semibold text-white bg-brand-600 rounded-lg hover:bg-brand-700 transition">
+                            class="btn btn-primary">
                         Salvar Proposta
                     </button>
                 </div>

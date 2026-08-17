@@ -24,10 +24,10 @@ class Parecer extends Model
     ];
 
     public const RESULTADO_COLORS = [
-        'aprovado'           => 'green',
-        'aprovado_ressalvas' => 'yellow',
+        'aprovado'           => 'brand',
+        'aprovado_ressalvas' => 'accent',
         'reprovado'          => 'red',
-        'diligencia'         => 'blue',
+        'diligencia'         => 'accent',
     ];
 
     // Mapa: tipo + resultado → novo status da proposta

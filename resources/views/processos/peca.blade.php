@@ -20,19 +20,27 @@
                     @endunless
                 </div>
             @elseif($peca->assinado())
-                <div class="bg-green-50 border border-green-200 text-green-800 px-4 py-3 rounded-lg text-sm">
+                <div class="bg-brand-50 border border-brand-200 text-brand-800 px-4 py-3 rounded-lg text-sm">
                     Assinado por {{ $peca->assinante->name }} em {{ $peca->assinado_em->format('d/m/Y H:i') }}.
                 </div>
             @elseif($podeAssinar && !$podeEditar)
-                <div class="bg-blue-50 border border-blue-200 text-blue-800 px-4 py-3 rounded-lg text-sm">
+                <div class="bg-slate-50 border border-slate-200 text-slate-800 px-4 py-3 rounded-lg text-sm">
                     Documento elaborado pela {{ \App\Models\Processo::SETORES[$peca->setorResponsavel()] ?? $peca->setorResponsavel() }}.
                     Revise e <strong>assine</strong> abaixo.
                 </div>
             @elseif(!$podeEditar)
-                <div class="bg-amber-50 border border-amber-200 text-amber-800 px-4 py-3 rounded-lg text-sm">
-                    Esta peça é preenchida pelo setor
-                    <strong>{{ \App\Models\Processo::SETORES[$peca->setorResponsavel()] ?? $peca->setorResponsavel() }}</strong>
-                    na etapa correspondente. Você está no modo leitura.
+                {{-- O motivo vem do model, com os fatos do caso: qual etapa preenche
+                     este documento, em que etapa o processo está e com quem. A versão
+                     anterior só dizia "preenchida pelo setor X na etapa correspondente",
+                     que soa como contradição para quem é do próprio setor X. --}}
+                <div class="bg-accent-50 border border-accent-200 text-accent-800 px-4 py-3 rounded-lg text-sm flex gap-3">
+                    <svg class="w-5 h-5 shrink-0 mt-px" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.8">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m9-.75a9 9 0 11-18 0 9 9 0 0118 0zm-9 3.75h.008v.008H12v-.008z"/>
+                    </svg>
+                    <span>
+                        <strong>Modo leitura.</strong>
+                        {{ $peca->motivoNaoPodeEditar($processo, auth()->user()) }}
+                    </span>
                 </div>
             @endif
 
@@ -46,14 +54,14 @@
                         <textarea name="conteudo" data-editor-rico>{!! old('conteudo', $peca->conteudo) !!}</textarea>
                         <div class="flex items-center justify-end gap-3 pt-2">
                             <a href="{{ route('processos.show', $processo) }}"
-                               class="inline-flex items-center gap-2 px-4 py-2.5 text-sm font-semibold text-gray-700 bg-white border border-gray-300 rounded-lg shadow-sm hover:bg-gray-50 hover:border-gray-400 transition">
+                               class="btn btn-secondary">
                                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
                                 </svg>
                                 Voltar
                             </a>
                             <button type="submit"
-                                    class="px-5 py-2.5 text-sm font-semibold text-white bg-brand-600 rounded-lg shadow-sm hover:bg-brand-700 transition">
+                                    class="btn btn-primary">
                                 Salvar
                             </button>
                         </div>
@@ -66,14 +74,14 @@
                     </div>
                     <div class="flex items-center justify-between mt-6 pt-4 border-t border-gray-200">
                         <a href="{{ route('processos.show', $processo) }}"
-                           class="inline-flex items-center gap-2 px-4 py-2.5 text-sm font-semibold text-gray-700 bg-white border border-gray-300 rounded-lg shadow-sm hover:bg-gray-50 hover:border-gray-400 transition">
+                           class="btn btn-secondary">
                             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
                             </svg>
                             Voltar
                         </a>
                         <a href="{{ route('processos.pecas.imprimir', [$processo, $peca]) }}" target="_blank"
-                           class="inline-flex items-center gap-2 px-5 py-2.5 text-sm font-semibold text-white bg-brand-600 rounded-lg shadow-sm hover:bg-brand-700 transition">
+                           class="btn btn-primary">
                             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z" />
                             </svg>
@@ -92,7 +100,7 @@
                 @if($peca->ehArquivo())
                     <div>
                         <a href="{{ route('processos.show', $processo) }}"
-                           class="inline-flex items-center gap-2 px-4 py-2.5 text-sm font-semibold text-gray-700 bg-white border border-gray-300 rounded-lg shadow-sm hover:bg-gray-50 hover:border-gray-400 transition">
+                           class="btn btn-secondary">
                             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
                             </svg>
@@ -121,7 +129,7 @@
                               data-confirm="Confirma a assinatura deste documento?">
                             @csrf @method('PATCH')
                             <button type="submit"
-                                    class="px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-md hover:bg-blue-700">
+                                    class="btn btn-primary">
                                 Assinar
                             </button>
                         </form>

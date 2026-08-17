@@ -14,7 +14,14 @@ export default {
     // removidas na purga. O safelist garante que as famílias usadas existam.
     safelist: [
         {
-            pattern: /(bg|text|border)-(gray|green|red|blue|amber|yellow|purple|brand|accent)-(50|100|200|300|600|700|800)/,
+            // Só a paleta da Prefeitura: verde (brand), laranja (accent) e os
+            // cinzas (gray/slate). 'red' fica de fora da identidade de
+            // propósito — sinal de desfecho negativo é convenção de segurança,
+            // não escolha de marca, e não tem substituto legível em verde ou
+            // laranja. As famílias antigas (blue, amber, sky, violet, rose,
+            // teal…) saíram daqui para não voltarem por descuido: se alguém
+            // escrever bg-sky-50, a classe simplesmente não existirá.
+            pattern: /(bg|text|border|ring)-(gray|slate|red|brand|accent)-(50|100|200|300|600|700|800)/,
         },
     ],
 

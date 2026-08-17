@@ -14,13 +14,13 @@
             </div>
             <div class="flex gap-2">
                 <a href="{{ route('instrumentos.minuta', $instrumento) }}" target="_blank"
-                   class="px-3 py-1.5 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50">
+                   class="btn btn-secondary btn-sm">
                     Imprimir Minuta
                 </a>
                 @can('execucao')
                     @if($instrumento->status === 'vigente')
                         <a href="{{ route('instrumentos.execucao', $instrumento) }}"
-                           class="px-3 py-1.5 text-sm font-medium text-white bg-brand-600 rounded-md hover:bg-brand-700">
+                           class="btn btn-primary btn-sm">
                             Execução Financeira
                         </a>
                     @endif
@@ -29,7 +29,7 @@
                     <form action="{{ route('instrumentos.assinar', $instrumento) }}" method="POST">
                         @csrf @method('PATCH')
                         <button type="submit"
-                                class="px-3 py-1.5 text-sm font-medium text-white bg-blue-600 rounded-md hover:bg-blue-700">
+                                class="btn btn-primary btn-sm">
                             Marcar como Assinado
                         </button>
                     </form>
@@ -38,13 +38,13 @@
                     <form action="{{ route('instrumentos.publicar', $instrumento) }}" method="POST">
                         @csrf @method('PATCH')
                         <button type="submit"
-                                class="px-3 py-1.5 text-sm font-medium text-white bg-green-600 rounded-md hover:bg-green-700">
+                                class="btn btn-primary btn-sm">
                             Registrar Publicação (DOE)
                         </button>
                     </form>
                 @endif
                 <a href="{{ route('instrumentos.edit', $instrumento) }}"
-                   class="px-3 py-1.5 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50">
+                   class="btn btn-secondary btn-sm">
                     Editar
                 </a>
             </div>
@@ -126,7 +126,7 @@
                     <h3 class="text-base font-semibold text-gray-800">Termos Aditivos / Apostilamentos</h3>
                     @if(in_array($instrumento->status, ['assinado', 'vigente']))
                         <a href="{{ route('instrumentos.aditivos.create', $instrumento) }}"
-                           class="px-3 py-1.5 text-sm font-medium text-white bg-brand-600 rounded-md hover:bg-brand-700">
+                           class="btn btn-primary btn-sm">
                             + Novo Aditivo
                         </a>
                     @endif
@@ -147,7 +147,7 @@
                                 <p class="text-sm text-gray-600 mt-1">{{ $aditivo->descricao }}</p>
                             </div>
                             <div class="flex items-center gap-3 ml-4 shrink-0">
-                                <span class="px-2 py-1 text-xs font-medium {{ $aditivo->status === 'assinado' ? 'bg-blue-100 text-blue-800' : 'bg-gray-100 text-gray-600' }} rounded-full">
+                                <span class="px-2 py-1 text-xs font-medium {{ $aditivo->status === 'assinado' ? 'bg-accent-100 text-accent-800' : 'bg-gray-100 text-gray-600' }} rounded-full">
                                     {{ \App\Models\Aditivo::STATUS[$aditivo->status] }}
                                 </span>
                                 <a href="{{ route('instrumentos.aditivos.documentacao', [$instrumento, $aditivo]) }}"
@@ -186,7 +186,7 @@
                                     </option>
                                 @endforeach
                             </select>
-                            <button type="submit" class="px-3 py-1.5 text-sm font-medium text-white bg-brand-600 rounded-md hover:bg-brand-700 whitespace-nowrap">
+                            <button type="submit" class="btn btn-primary btn-sm whitespace-nowrap">
                                 + Nova OP
                             </button>
                         </form>
@@ -201,7 +201,7 @@
                             <div>
                                 <p class="text-sm font-semibold text-gray-800">
                                     OP nº {{ $op->numero }}
-                                    <span class="ml-1 px-1.5 py-0.5 text-[12px] font-medium rounded {{ $op->ehGlobal() ? 'bg-purple-50 text-purple-700' : 'bg-blue-50 text-blue-700' }}">
+                                    <span class="ml-1 px-1.5 py-0.5 text-[12px] font-medium rounded {{ $op->ehGlobal() ? 'bg-brand-50 text-brand-700' : 'bg-slate-100 text-slate-600' }}">
                                         {{ $op->ehGlobal() ? 'Global' : 'Parcial' }}
                                     </span>
                                     @if($op->favorecido) <span class="font-normal text-gray-600">— {{ $op->favorecido }}</span> @endif
@@ -214,7 +214,7 @@
                             </div>
                             <div class="flex items-center gap-3 ml-4 shrink-0">
                                 @if($op->assinado())
-                                    <span class="px-2.5 py-1 text-xs font-semibold bg-green-50 text-green-800 border border-green-200 rounded-md">Assinada</span>
+                                    <span class="px-2.5 py-1 text-xs font-semibold bg-brand-50 text-brand-800 border border-brand-200 rounded-md">Assinada</span>
                                 @else
                                     <span class="px-2 py-1 text-xs font-medium bg-gray-100 text-gray-600 rounded-full">Rascunho</span>
                                 @endif

@@ -11,7 +11,7 @@
                     @include('orgaos._form')
                     <div class="flex items-center justify-end gap-4 pt-2">
                         <a href="{{ route('orgaos.index') }}" class="text-sm text-gray-600 hover:text-gray-900">Cancelar</a>
-                        <button type="submit" class="inline-flex items-center gap-2 px-4 py-2.5 text-sm font-semibold text-white bg-brand-600 rounded-lg shadow-sm hover:bg-brand-700 transition">
+                        <button type="submit" class="btn btn-primary">
                             Cadastrar
                         </button>
                     </div>

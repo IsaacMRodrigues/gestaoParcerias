@@ -31,7 +31,7 @@ class CelebracaoController extends Controller
             'Apenas o setor que está com a Celebração pode movimentá-la.');
 
         if ($proposta->celebracao_setor === 'osc') {
-            abort_unless($user->osc && $user->osc->id === $proposta->osc_id, 403,
+            abort_unless($user->ehRepresentanteOsc() && $user->osc->id === $proposta->osc_id, 403,
                 'Esta parceria pertence a outra OSC.');
         }
     }

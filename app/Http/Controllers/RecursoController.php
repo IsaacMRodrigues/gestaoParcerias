@@ -108,7 +108,7 @@ class RecursoController extends Controller
     public function download(Recurso $recurso): StreamedResponse
     {
         $user = auth()->user();
-        $daOsc = $user->osc && $user->osc->id === $recurso->osc_id;
+        $daOsc = $user->ehRepresentanteOsc() && $user->osc->id === $recurso->osc_id;
 
         abort_unless($daOsc || $user->can('chamamentos'), 403);
         abort_unless($recurso->arquivo_path && Storage::disk('local')->exists($recurso->arquivo_path), 404);

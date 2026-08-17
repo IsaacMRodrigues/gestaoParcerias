@@ -18,7 +18,7 @@
     </div>
 
     <div class="mt-3 w-full bg-gray-100 rounded-full h-2 overflow-hidden">
-        <div class="h-2 rounded-full transition-all {{ $progresso['percent'] === 100 ? 'bg-brand-600' : 'bg-amber-400' }}"
+        <div class="h-2 rounded-full transition-all {{ $progresso['percent'] === 100 ? 'bg-brand-600' : 'bg-accent-400' }}"
              style="width: {{ $progresso['percent'] }}%"></div>
     </div>
 

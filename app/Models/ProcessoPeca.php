@@ -357,6 +357,70 @@ HTML,
     }
 
     /**
+     * Por que este usuário não pode editar agora — em português, com os fatos.
+     *
+     * A tela dizia só "esta peça é preenchida pelo setor X na etapa
+     * correspondente", o que vira uma contradição justamente para quem É do
+     * setor X: a pessoa lê o próprio setor no aviso e não entende o bloqueio.
+     * O que faltava era dizer QUAL etapa, onde o processo está agora e com
+     * quem — que é o que responde "então por que não posso?".
+     *
+     * Retorna null quando a edição está liberada.
+     */
+    public function motivoNaoPodeEditar(Processo $processo, ?User $user): ?string
+    {
+        if ($this->podeEditarConteudo($processo, $user)) {
+            return null;
+        }
+
+        $rotulo = fn (?string $s) => Processo::SETORES[$s] ?? (string) $s;
+        $meuSetor = $rotulo($this->setorResponsavel());
+
+        if (!$user) {
+            return 'Entre no sistema para editar este documento.';
+        }
+
+        if (!$this->emAndamento($processo)) {
+            return 'O processo está '.mb_strtolower(Processo::STATUS[$processo->status] ?? $processo->status)
+                .' e não aceita mais edição.';
+        }
+
+        if ($processo->aguardandoRecebimento()) {
+            return 'O processo chegou ao seu setor mas ainda não foi recebido. '
+                .'Registre o recebimento na tela do processo para liberar a edição.';
+        }
+
+        if ($this->assinado()) {
+            return 'Este documento já foi assinado e não pode mais ser alterado.';
+        }
+
+        if ($user->setor !== $this->setorResponsavel()) {
+            return "Este documento é preenchido pelo setor {$meuSetor}, e o seu é "
+                .$user->setorLabel().'.';
+        }
+
+        // Daqui para baixo o usuário É do setor responsável — só não chegou a vez.
+        $etapaDoc  = $this->etapaDesignada() + 1;   // as etapas são exibidas a partir de 1
+        $etapaAtual = $processo->etapa + 1;
+        $total     = $processo->totalEtapas();
+        $acao      = $processo->etapaInfo($this->etapaDesignada())['acao'] ?? null;
+        $ondeEsta  = "O processo está na etapa {$etapaAtual}/{$total}, com o setor "
+            .$rotulo($processo->setor_atual).'.';
+
+        if ($processo->etapa < $this->etapaDesignada()) {
+            return "Ainda não é a vez deste documento: ele é preenchido na etapa {$etapaDoc}"
+                .($acao ? " ({$acao})" : '').". {$ondeEsta}";
+        }
+
+        if ($processo->etapa > $this->etapaDesignada()) {
+            return "A etapa deste documento (etapa {$etapaDoc}) já passou. {$ondeEsta}";
+        }
+
+        // Mesma etapa, setor certo, mas o processo está com outro setor.
+        return $ondeEsta." Ele volta para o setor {$meuSetor} para este documento ser preenchido.";
+    }
+
+    /**
      * Pode ANEXAR arquivos a esta peça? (peça ARQUIVO ou de texto que aceita anexos,
      * pelo setor responsável, na etapa dela, antes de assinar/encaminhar).
      */

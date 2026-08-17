@@ -19,7 +19,7 @@
                        placeholder="Ex.: A1B2-C3D4-E5"
                        class="flex-1 border-gray-300 rounded-lg shadow-sm focus:ring-brand-500 focus:border-brand-500 text-sm uppercase">
                 <button type="submit"
-                        class="px-5 py-2 text-sm font-semibold text-white bg-brand-600 rounded-lg hover:bg-brand-700">
+                        class="btn btn-primary">
                     Validar
                 </button>
             </form>

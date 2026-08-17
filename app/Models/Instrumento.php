@@ -22,11 +22,16 @@ class Instrumento extends Model
         'rescindido' => 'Rescindido',
     ];
 
+    /**
+     * Ver Processo::STATUS_COLORS para a regra. 'assinado' é etapa de passagem
+     * (assinado mas ainda não em vigor) e fica no laranja; o verde é da
+     * parceria efetivamente vigente.
+     */
     public const STATUS_COLORS = [
         'minuta'     => 'gray',
-        'assinado'   => 'blue',
-        'vigente'    => 'green',
-        'encerrado'  => 'brand',
+        'assinado'   => 'accent',
+        'vigente'    => 'brand',
+        'encerrado'  => 'slate',
         'rescindido' => 'red',
     ];
 

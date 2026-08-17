@@ -16,10 +16,21 @@ class Processo extends Model
         'arquivado'       => 'Arquivado',
     ];
 
+    /**
+     * Paleta da Prefeitura: verde, laranja e cinzas. A cor diz o ESTADO, não a
+     * entidade — com duas matizes não há como dar identidade a cada módulo, e
+     * tentar isso é o que trouxe azul, roxo e dois verdes diferentes para cá.
+     *
+     *   cinza    → inerte: não começou ou já saiu de cena
+     *   laranja  → em andamento, esperando alguém agir
+     *   verde    → ativo/positivo, ou concluído com êxito
+     *   vermelho → desfecho negativo (fora da paleta de propósito: sinal de
+     *              alerta é convenção de segurança, não escolha de marca)
+     */
     public const STATUS_COLORS = [
         'em_planejamento' => 'gray',
-        'em_tramite'      => 'yellow',
-        'concluido'       => 'green',
+        'em_tramite'      => 'accent',
+        'concluido'       => 'brand',
         'arquivado'       => 'red',
     ];
 
@@ -90,6 +101,20 @@ class Processo extends Model
         'chamamento_publico' => 'Chamamento Público',
         'dispensa'           => 'Dispensa de Chamamento Público',
         'inexigibilidade'    => 'Inexigibilidade de Chamamento Público',
+    ];
+
+    /**
+     * Cor de cada modalidade, dentro da paleta da Prefeitura.
+     *
+     * O critério é a regra do marco regulatório: o Chamamento Público é a via
+     * ordinária (competitiva) e fica no verde; Dispensa e Inexigibilidade são
+     * as exceções à competição — a primeira no laranja, a segunda no cinza
+     * escuro, para as duas não se confundirem entre si.
+     */
+    public const MODALIDADES_COLORS = [
+        'chamamento_publico' => 'brand',
+        'dispensa'           => 'accent',
+        'inexigibilidade'    => 'slate',
     ];
 
     public const MODALIDADES_DESC = [

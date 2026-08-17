@@ -21,8 +21,8 @@ class Recurso extends Model
     ];
 
     public const RESULTADO_COLORS = [
-        'provido'   => 'green',
-        'parcial'   => 'amber',
+        'provido'   => 'brand',
+        'parcial'   => 'accent',
         'improvido' => 'red',
     ];
 

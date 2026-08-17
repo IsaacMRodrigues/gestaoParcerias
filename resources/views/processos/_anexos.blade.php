@@ -48,7 +48,7 @@
             <input type="file" name="arquivo" required
                    class="text-sm text-gray-600 file:mr-3 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-medium file:bg-brand-50 file:text-brand-700 hover:file:bg-brand-100">
             <button type="submit"
-                    class="px-4 py-2 text-sm font-semibold text-white bg-brand-600 rounded-md hover:bg-brand-700">
+                    class="btn btn-primary">
                 Anexar
             </button>
             <x-input-error :messages="$errors->get('arquivo')" class="w-full mt-1" />

@@ -74,6 +74,10 @@ class ProgramaController extends Controller
 
     public function destroy(Programa $programa): RedirectResponse
     {
+        if ($bloqueio = $this->bloqueioDeExclusao($programa)) {
+            return $bloqueio;
+        }
+
         $programa->delete();
 
         return redirect()->route('programas.index')

@@ -2,12 +2,15 @@
 
 namespace App\Models;
 
+use App\Models\Concerns\ImpedeExclusaoComVinculos;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Programa extends Model
 {
+    use ImpedeExclusaoComVinculos;
+
     public const TIPOS = [
         'termo_fomento'      => 'Termo de Fomento',
         'termo_colaboracao'  => 'Termo de Colaboração',
@@ -42,5 +45,17 @@ class Programa extends Model
     public function chamamentos(): HasMany
     {
         return $this->hasMany(Chamamento::class);
+    }
+
+    protected function vinculosBloqueantes(): array
+    {
+        return [
+            'chamamentos' => ['chamamento', 'chamamentos'],
+        ];
+    }
+
+    protected function fraseDeBloqueio(): string
+    {
+        return 'Este programa não pode ser excluído';
     }
 }

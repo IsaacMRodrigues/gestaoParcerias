@@ -44,6 +44,10 @@ class OrgaoController extends Controller
 
     public function destroy(Orgao $orgao): RedirectResponse
     {
+        if ($bloqueio = $this->bloqueioDeExclusao($orgao)) {
+            return $bloqueio;
+        }
+
         $orgao->delete();
 
         return redirect()->route('orgaos.index')

@@ -54,7 +54,12 @@ class OscController extends Controller
 
     public function destroy(Osc $osc): RedirectResponse
     {
-        // Remove os arquivos privados da OSC antes de apagar o registro.
+        if ($bloqueio = $this->bloqueioDeExclusao($osc)) {
+            return $bloqueio;
+        }
+
+        // Só depois de garantir que o delete vai passar: se apagasse a pasta
+        // antes e o banco recusasse, os anexos sumiriam e o cadastro ficaria.
         Storage::disk('local')->deleteDirectory("oscs/{$osc->id}");
         $osc->delete();
 

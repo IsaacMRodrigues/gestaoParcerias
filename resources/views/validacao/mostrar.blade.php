@@ -1,11 +1,11 @@
 <x-portal-layout>
     <div class="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
         @if($doc)
-            <div class="bg-white rounded-xl shadow-sm border border-green-200 p-8">
+            <div class="bg-white rounded-xl shadow-sm border border-brand-200 p-8">
                 <div class="flex items-center gap-3 mb-4">
                     <span class="text-3xl">✅</span>
                     <div>
-                        <h1 class="text-xl font-bold text-green-800">Documento autêntico</h1>
+                        <h1 class="text-xl font-bold text-brand-800">Documento autêntico</h1>
                         <p class="text-sm text-gray-500">Assinatura eletrônica verificada com sucesso.</p>
                     </div>
                 </div>
@@ -74,7 +74,7 @@
                     Confira o código e tente novamente.
                 </p>
                 <a href="{{ route('validacao.index') }}"
-                   class="inline-block mt-6 px-5 py-2 text-sm font-medium text-white bg-brand-600 rounded-lg hover:bg-brand-700">
+                   class="btn btn-primary mt-6">
                     Tentar novamente
                 </a>
             </div>

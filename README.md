@@ -162,6 +162,225 @@ São 21 perfis. Um usuário pode ter **vários**; os marcados 🔒 são **exclus
 
 ## O que foi feito
 
+- [2026-08-17] **Etapa do Gabinete do Prefeito ativada** (encerramento da Seleção)
+  - O fluxo já previa tudo: `Chamamento::ETAPAS_SELECAO[4]` = PM, `Peca::SELECAO_ASSINATURA` manda o
+    Termo de Adjudicação e Homologação ser assinado pelo setor `pm` na etapa 5, `SelecaoController`
+    é genérico e a view já troca o botão por *"Encerrar Seleção (homologar)"* na última etapa
+  - **O que faltava era só o papel no banco**: `prefeito_municipal` está no `RolesSeeder` (com
+    `chamamentos` e `formalizacao`) mas nunca foi semeado — 21 papéis no banco, 22 no seeder. Sem
+    ele ninguém podia ocupar o setor `pm`, e a etapa 5 era inalcançável
+  - Antes de rodar o seeder, conferi papel a papel que a matriz bate com o banco (o `syncPermissions`
+    sobrescreveria ajustes manuais): **nenhuma divergência**, então a semeadura só acrescentou
+  - Criado o usuário de teste `prefeito@gmail.com` (setor `pm`), no mesmo padrão dos demais
+  - **Defeito encontrado no agrupamento novo do checklist**: as peças eram agrupadas pela etapa de
+    PREENCHIMENTO, e o Termo é emitido pela SCP na etapa 4 mas assinado pelo Prefeito na etapa 5.
+    Com o trâmite na etapa 5, o Prefeito abria a tela e via **todos os blocos como "etapa vencida"**,
+    sem nada marcado como dele — justamente a assinatura que ele precisa dar. `Peca::etapaDaProximaAcao()`
+    e `setorDaProximaAcao()` corrigem: peça preenchida e não assinada é agrupada pela etapa da
+    ASSINATURA. Agora aparece *"Etapa 5 · Gabinete do Prefeito (PM) — ETAPA ATUAL — é a sua vez"*
+  - Fluxo verificado de ponta a ponta num chamamento de teste na etapa 5, depois removido:
+    assinar o Termo → **403 para SCP, 302 para o Prefeito**; encerrar a Seleção → **403 para a UG,
+    302 para o Prefeito**; chamamento passa a `encerrado` com `selecao_concluida_em` e o trâmite
+    `pm → ug (concluído)` registrado
+
+- [2026-08-17] **Checklist de peças passa a ter ordem e leitura de estado** (`pecas/_checklist`)
+  - Relato: não dava para saber, batendo o olho, qual documento preencher agora e qual é de depois —
+    "não tem uma ordem definida na tela e tudo tem as cores iguais"
+  - Diagnóstico: a lista saía na ordem do template, **misturando etapas** (um documento da etapa 4
+    entre dois da etapa 1), todos com a mesma aparência. A informação existia — cada peça sabe a sua
+    etapa —, mas a tela não a usava para nada, porque não sabia em que etapa o trâmite está
+  - `Peca::etapaAtualDoTramite()`, `tramiteJaEncerrado()` e `rotuloDoSetor()` expõem o que faltava
+    (o dono do trâmite era privado)
+  - A lista virou **blocos por etapa, na ordem do fluxo**, e cada bloco declara o seu estado:
+    `Etapa vencida` (verde) · `ETAPA ATUAL — é a sua vez` / `— aguardando SCP` (faixa laranja) ·
+    `depois` (recuado a 60% de opacidade). Documentos fora do trâmite ficam num bloco "Documentos
+    gerais" no topo
+  - A trava por linha ("Disponível na etapa 2 do trâmite (SCP)") **sumiu quando repete o cabeçalho**
+    do grupo; segue apenas nas travas da etapa corrente, que dizem de quem é a vez
+  - **Degrada para a lista simples de antes** quando nenhuma peça é governada por trâmite (Dispensa,
+    Aditivo, Apostilamento). Verificado nos dois caminhos: Dispensa → 0 cabeçalhos, 16 peças em
+    lista corrida; Chamamento Público → 5 blocos, com a etapa atual destacada e a futura recuada
+
+- [2026-08-17] **Peça de arquivo bloqueada deixa de ser beco sem saída** (`pecas/_checklist`)
+  - Sintoma: nas linhas *Publicação do resultado provisório* e *definitivo* não havia nada em que
+    clicar — nem botão, nem link. Só o cadeado e "Nenhum arquivo enviado"
+  - Causa: assimetria entre os dois tipos de peça. As de **modelo** sempre renderizam o botão (que
+    abre em leitura quando bloqueado); as de **arquivo** só renderizavam o bloco de envio sob
+    `@elseif($podePreencher && ! $peca->temArquivo())` — sem permissão e sem arquivo, **nada era
+    renderizado**. Ao lado de linhas bloqueadas que *tinham* botão, lia-se como interface quebrada
+  - Novo ramo `@elseif(! $ehModelo && ! $podePreencher)`: botão *"Por que não posso enviar?"* com o
+    motivo vindo de `Peca::motivoNaoPodePreencher()`. Só quando o usuário não pode agir — com envio
+    liberado e arquivo presente, o cabeçalho da linha já traz Baixar/Remover e repetir seria ruído
+  - Medido no navegador contando as ações de cada linha (não só `<details>`): **0 linhas sem
+    nenhuma saída**, antes 2, para SCP e para UG
+  - No caso relatado o bloqueio estava correto: o trâmite está na **etapa 1, com a UG**, e as duas
+    peças são da **SCP nas etapas 2 e 4**
+
+- [2026-08-17] **Caixa de entrada passa a servir todos os setores** — e aos três trâmites
+  - A caixa nasceu olhando só para o **Planejamento** (`Processo::where('setor_atual', ...)`), então
+    servia aos quatro setores daquele fluxo e **mentia para todos os demais**: quem tinha trabalho
+    parado na Seleção ou na Celebração lia "nenhum processo aguardando"
+  - Caso mais claro: o **Gabinete do Prefeito** assina o Termo de Adjudicação e Homologação na
+    Seleção e nunca teve caixa nenhuma — não aparece em `Processo::SETORES`
+  - **`App\Support\CaixaDeEntrada`** consulta os três trâmites (`setor_atual`, `selecao_setor`,
+    `celebracao_setor`) e devolve uma lista só, do que espera há mais tempo para o mais recente
+  - Rota nova **`/caixa`**, fora dos grupos `permission:` — o que define a caixa é a **lotação**, não
+    a permissão de um módulo. Amarrada a `permission:planejamento`, ela excluía o Responsável pela
+    Publicação (só tem `chamamentos`), que nem abria a tela. `processos/caixa` redireciona para lá
+  - Na sidebar deixou de ser subitem do Planejamento e virou item próprio, com contador — ela
+    atravessa os três trâmites, não pertence a um
+  - **Furo encontrado no próprio código novo**: filtrei a Celebração por `can('propostas')` e a **PJ
+    voltou a zero**, embora emita o Parecer Jurídico na etapa 8 — ela só tem `pareceres_juridico`.
+    Como `celebracao.show` exige apenas `auth`, o filtro saiu. Planejamento e Seleção mantêm o
+    filtro porque as rotas de destino exigem permissão: sem ele o item apareceria e daria 403
+  - Verificado numa transação desfeita ao final, com trabalho plantado em cada trâmite:
+    SCP 1 (Seleção) · **PJ 1 (Celebração)** · SEPLAN 2 (Planejamento + Celebração) · UG 0.
+    Auditoria e OSC, que não têm lotação, seguem sem caixa (403/302)
+
+- [2026-08-17] **Trâmite sobe para cima dos documentos** (`processos/show`)
+  - O bloco *Trâmite entre Setores* ficava no fim da página, e é ele que contém a ação que
+    **destrava a tela**: sem registrar o recebimento, as dez peças acima ficam todas em modo
+    leitura. O usuário percorria os documentos sem conseguir mexer em nenhum e só descobria o
+    motivo depois de rolar tudo
+  - O botão *Registrar Recebimento* saiu de ~1800px para **725px** — passa a aparecer na primeira
+    tela, acima da lista de documentos
+  - Celebração e Seleção já traziam o trâmite antes dos documentos; a tela de Processo era a
+    exceção e agora segue o mesmo arranjo
+
+- [2026-08-14] **"Modo leitura" passa a dizer POR QUE** — nas peças do Processo e do checklist
+  - Sintoma relatado: usuário da SCP abre o *Pedido de Parecer Financeiro*, que é **da SCP**, e a
+    tela responde *"esta peça é preenchida pelo setor SCP na etapa correspondente. Você está no
+    modo leitura."* — lê-se como contradição
+  - **Não era bug de permissão.** O processo estava na etapa 1/10 com a UG; o documento é preenchido
+    pela SCP na etapa 3. A regra estava certa; a mensagem é que nomeava o setor e **omitia a etapa**,
+    justamente o dado que explica o bloqueio
+  - `ProcessoPeca::motivoNaoPodeEditar()` devolve o motivo real, com os fatos do caso — qual etapa
+    preenche o documento, em que etapa o processo está e com quem. Cobre os seis bloqueios:
+    processo encerrado, recebimento não registrado, já assinado, setor errado, etapa ainda por vir e
+    etapa já passada
+  - `Peca::motivoNaoPodePreencher()` faz o mesmo no checklist de Seleção/Celebração, que era pior:
+    mostrava o documento num bloco cinza **sem explicação nenhuma**
+  - As frases se ancoram em *"o setor X"*, e não em *"pelo X"*, porque o nome do setor tem gênero
+    variável ("pelo Unidade Gestora" saía errado)
+  - Verificado com o processo real do relato (SCP, UG, SEPLAN e PJ) e, numa transação desfeita ao
+    final, os casos de etapa certa (libera a edição), etapa já passada e processo concluído
+
+- [2026-08-14] **Exclusão bloqueada por vínculo deixa de virar erro 500**
+  - Sintoma: apagar um chamamento com propostas devolvia a tela de erro do Laravel com o SQL do
+    `SQLSTATE[23000] ... 1451` na cara do usuário. O banco estava certo — o `ON DELETE RESTRICT`
+    protegeu propostas que OSCs enviaram. Errado era o controller chamar `delete()` sem perguntar
+  - Não era um caso isolado: **os 14 métodos `destroy` do sistema** apagavam sem checar nada.
+    Levantando as FKs no `information_schema`, **seis tabelas** podem barrar a exclusão —
+    `chamamentos`, `programas`, `orgaos`, `oscs`, `propostas` e `users` (esta com 7 FKs de histórico)
+  - **Trait `ImpedeExclusaoComVinculos`**: cada model declara o que o segura, e a checagem acontece
+    ANTES do delete — então a mensagem diz o motivo e a quantidade, não só que falhou.
+    Ex.: *"Este órgão não pode ser excluído: há 1 programa e 2 processos."*
+  - A frase de abertura vem inteira do model, não montada a partir de um rótulo: português exige
+    concordância, e "Esta OSC não pode ser excluída" não sai da mesma fôrma que "Este chamamento
+    não pode ser excluído"
+  - Para **usuário** a saída sugerida é outra — *desative a conta* —, porque o histórico do processo
+    precisa continuar mostrando quem assinou e quem tramitou. Excluir seria perder a trilha
+  - **Rede de segurança global** em `bootstrap/app.php`: qualquer 1451 que escape (FK nova, vínculo
+    não mapeado, caminho de exclusão criado depois) vira redirect com aviso em vez de 500. Filtra
+    pelo **errno 1451**, não pelo texto — o SQLSTATE 23000 também cobre chave duplicada (1062), que
+    é outro problema e não pode ser silenciado aqui
+  - **Bug encontrado no caminho**: `OscController::destroy` apagava a pasta de anexos da OSC *antes*
+    do `delete()`. Com o banco recusando a exclusão, os documentos já teriam sido destruídos e o
+    cadastro continuaria lá. A checagem agora vem antes de tocar no disco
+  - Verificado por HTTP: o `DELETE /programas/6/chamamentos/9` que gerava o 500 agora devolve 302
+    com a explicação e **não apaga nada**; os 6 casos bloqueiam com mensagem específica; exclusões
+    legítimas continuam funcionando (programa e órgão descartáveis criados e removidos); e a rede
+    global foi testada desativando a guarda de um controller de propósito
+
+- [2026-08-14] **Paleta restrita à identidade da Prefeitura** — verde, laranja e cinzas
+  - Pedido do cliente: só as cores do Município. A passagem anterior tinha dado uma cor a cada
+    módulo (azul, roxo, rosa, verde-azulado) — resolvia a monotonia, mas fora da identidade
+  - **Consequência de projeto:** com duas matizes não existe "uma cor por módulo". A cor passou a
+    dizer o **estado**, que é informação melhor de qualquer forma:
+    `cinza` inerte · `laranja` em andamento, esperando alguém · `verde` ativo/concluído ·
+    `vermelho` desfecho negativo (única fora da identidade, de propósito: alerta é convenção de
+    segurança, não escolha de marca)
+  - Regra aplicada nos sete mapas de cor dos models (`Processo`, `Proposta`, `Chamamento`,
+    `Instrumento`, `Parecer`, `Diligencia`, `Recurso`), eliminando azul, roxo e amarelo
+  - **Os dois verdes acabaram**: o `green` do Tailwind (#16a34a) não é o verde da Prefeitura
+    (#00A859). 63 ocorrências em 19 views migraram para `brand`; mais 100 classes de
+    amber/yellow/blue/purple/teal/emerald remapeadas por significado
+  - Último resquício estava fora do alcance de qualquer busca por classe: o **índigo do modal de
+    confirmação**, escrito em hexadecimal no `app.css`
+  - `safelist` do Tailwind reduzida a `gray|slate|red|brand|accent` — quem escrever `bg-sky-50`
+    agora não recebe classe nenhuma, então a paleta não volta a se espalhar por descuido.
+    **CSS caiu de 278kB para 236kB**
+  - Verificado no navegador varrendo `color`/`backgroundColor`/`borderTopColor` de todos os
+    elementos e convertendo para matiz: **nenhuma cor fora de verde, laranja, cinza e vermelho**
+
+- [2026-08-14] **Cor com função** — verde deixa de ser o fundo de tudo e passa a significar algo
+  - **Regra adotada:** verde da marca = **onde você está** (item ativo do menu) e ação primária;
+    **laranja = pendência que espera por você**; verde suave = concluído. (A ideia de "uma cor por
+    módulo" desta passagem foi substituída no mesmo dia pela restrição à paleta da Prefeitura —
+    ver a entrada acima.)
+  - **Sidebar deixou de ser verde** (`brand-900` → `slate-900`). Ela ocupa 256px de altura inteira em
+    toda tela: pintada de verde, era a maior mancha de cor da interface, puxava tudo para o mesmo tom
+    e o item ativo (branco sobre verde) mal se distinguia dos demais. Neutra, o verde do item ativo
+    finalmente salta
+  - **"Seção atual" ≠ "página atual"** no menu: pai e filho ativos recebiam o mesmo destaque e viravam
+    um bloco verde de duas linhas, sem dizer em qual das duas telas o usuário estava. Agora só a
+    página aberta leva verde sólido; a seção fica num realce discreto. Conferido nas três rotas
+  - **Trilha de etapas** (`processos/show` e `x-tramite-trilha`): etapa vencida era `green-500` e a
+    atual `brand-600` — dois verdes quase idênticos, e a fileira não dizia onde o processo estava,
+    que é a única coisa que se quer saber ali. Vencida passou a verde suave (histórico) e a **etapa
+    atual é a única em cor forte, no laranja de pendência**
+  - **`x-selo-modalidade`** (novo), via `Processo::MODALIDADES_COLORS` /
+    `Chamamento::TIPOS_COLORS` — hoje verde (via ordinária), laranja (Dispensa) e cinza
+    (Inexigibilidade), depois da restrição à paleta. A mesma informação
+    aparecia em **cinco telas com quatro aparências** (verde claro no portal, verde forte no processo,
+    cinza na seleção, texto puro na listagem) e o verde não distinguia uma modalidade da outra — são
+    três categorias com efeitos jurídicos diferentes
+  - O verde estava sendo usado como **negrito**: "Modalidade definida pelo SCP: <verde>" virou selo
+    colorido, e "Trâmite concluído" virou texto normal com um ícone de visto — a linha inteira em
+    verde competia com a trilha logo acima, que já dizia o mesmo com sete vistos
+  - `safelist` do Tailwind ampliada com `ring-`, porque os selos usam anel no lugar de borda e a
+    classe é montada em tempo de execução a partir dos mapas de cor dos models
+
+- [2026-08-14] **OSC e usuário interno separados de vez** — regra fechada na rota, não na tela
+  - Regra do cliente: **servidor é usuário interno dos setores**. Não participa de chamamento, não
+    tem OSC e não interage como OSC — ele analisa, tramita e decide sobre a proposta alheia
+  - Definição única em `User::ehRepresentanteOsc()` (**papel `responsavel_legal` E vínculo com a
+    OSC**) e `User::oscVinculada()`. Os 11 pontos que perguntavam por `->osc` passaram a usá-la: só o
+    vínculo não basta, e um `oscs.user_id` apontando para a conta de um servidor deixa de virar
+    permissão
+  - Novo middleware **`osc`** (`EnsureIsOsc`, espelho do `EnsureIsStaff`) no grupo de rotas do portal
+    logado — participar, submeter, acompanhar proposta e protocolar recurso. Antes cada controller
+    checava por conta própria e uma rota nova podia esquecer
+  - **`/cadastro/osc` agora é `guest`**: o `store` cria conta nova e faz login nela, então um servidor
+    logado que chegasse ali sairia da própria conta e passaria a existir como OSC
+  - **Falha de autorização corrigida** — `DocumentoController::autorizarAcesso()` só sabia negar para
+    a OSC dona de *outra* proposta; quem não tinha OSC (**todo usuário interno**) passava sem checagem
+    nenhuma, e **qualquer servidor autenticado baixava e apagava documentos de qualquer proposta do
+    município**. Agora há `autorizarLeitura()` (OSC → só a própria; servidor → permissão `propostas`
+    + escopo `visiveisPara`) e `autorizarEscrita()`, que ainda barra os perfis de auditoria — estas
+    rotas ficam fora do grupo `readonly` porque a OSC também as usa. Verificado: `analista_juridico`
+    passou de 200 para 403; auditoria lê (200) e não apaga (403)
+  - Telas: "Quero Participar" some para o servidor no `portal/index` (antes o botão existia e levava
+    a um aviso de bloqueio) e a chamada "Cadastrar minha OSC" da landing virou `@guest`
+
+- [2026-08-14] **Navegação dinâmica** — barra de comandos, busca global e resposta ao clique
+  - **Barra de comandos (Ctrl+K / Cmd+K, ou `/`)**: encurta o caminho `menu → listagem → filtro →
+    paginação` para digitar o que se procura. Gatilho com cara de campo de busca no cabeçalho, que
+    ensina o atalho. Setas navegam, Enter abre, Esc fecha
+  - **Busca global** (`BuscaController`, rota `/busca`): processos, propostas, chamamentos, programas,
+    instrumentos e OSCs. Cada bloco **só é consultado se o usuário tem a permissão do módulo** e usa
+    o mesmo `visiveisPara` das listagens — a busca nunca revela o que a tela esconde. Conferido por
+    perfil: `analista_juridico` não recebe nada; a UG recebe propostas e programas, mas não OSCs
+  - **Telas visitadas recentemente** (localStorage) quando o campo está vazio, que é o que quase
+    sempre se quer reabrir; o nome vem da lista de atalhos, não do cabeçalho (o Painel cumprimenta
+    pelo nome do usuário e não serviria como item de navegação)
+  - Busca de telas por **começo de palavra**, com substring como reserva: com substring pura, duas
+    letras achavam seis telas e empurravam os registros para fora da tela
+  - **Barra de progresso da navegação** (`nav-progress.js`): o sistema recarrega a página inteira a
+    cada clique e nada mudava entre o clique e a resposta — o usuário clicava de novo. A faixa de 3px
+    responde na hora e avança em passos decrescentes, sem nunca fingir que terminou. Ignora âncora,
+    link externo, download, nova aba, ctrl+clique e `data-confirm` (7 casos verificados)
+
 - [2026-08-12] **Revisão visual de todas as telas** — contraste, identidade e densidade
   - **Identidade ocupando espaço**: a paleta (verde `#00A859`, laranja `#EE7736`) só aparecia numa
     listra de 4px. Agora: hero verde-escuro na tela inicial, **sidebar em `brand-900`**, painel
@@ -860,7 +1079,31 @@ São 21 perfis. Um usuário pode ter **vários**; os marcados 🔒 são **exclus
 
 ## O que está sendo feito
 
-### 📌 Última entrega — Revisão visual de todas as telas (12/08/2026)
+### 📌 Última entrega — Navegação, permissões, paleta e exclusões seguras (14/08/2026)
+
+Quatro frentes, detalhadas nas primeiras entradas de `## O que foi feito`:
+
+0. **Exclusão com vínculo**: os 14 `destroy` do sistema apagavam sem checar; seis tabelas podiam
+   estourar 500 com SQL na tela. Agora há checagem antes, mensagem específica e rede de segurança.
+
+1. **Navegação**: barra de comandos com Ctrl+K, busca global respeitando permissão e escopo por
+   órgão, telas recentes e barra de progresso a cada clique.
+2. **Regra de perfil**: servidor não participa de chamamento nem age como OSC. Fechado na rota
+   (middleware `osc`), não na tela.
+3. **Cor com função, dentro da identidade**: a sidebar deixa de ser verde; o verde passa a marcar
+   onde você está e o que deu certo; o laranja significa pendência; o resto é cinza. Paleta
+   restrita a verde, laranja e cinzas — os dois verdes diferentes que conviviam no sistema
+   (`green` do Tailwind × `brand` da Prefeitura) foram unificados.
+
+**Achado de segurança corrigido no caminho:** qualquer servidor autenticado — mesmo sem a permissão
+`propostas` — baixava e apagava documentos de **qualquer** proposta do município, porque a checagem
+do `DocumentoController` só sabia negar para a OSC dona de outra proposta e passava direto quando o
+usuário não tinha OSC. Vale conferir se algum documento foi removido indevidamente em produção.
+
+**Pendências:** a barra de comandos é da área administrativa; o portal da OSC tem poucas telas e
+ficou de fora. `/busca` responde 302 para a OSC (rota `staff`), como esperado.
+
+### Entrega anterior — Revisão visual de todas as telas (12/08/2026)
 
 Passagem de acabamento sobre as 113 views, sem mexer em regra de negócio: identidade visual da
 Prefeitura ocupando espaço de verdade, tipografia 10% maior, densidade revista nas telas mais
@@ -877,7 +1120,7 @@ link e não era) — todos corrigidos. Detalhes na primeira entrada de `## O que
   invert`). Se o manual de identidade da Prefeitura exigir o cata-vento colorido, a alternativa é
   um bloco de fundo branco no topo da coluna
 
-### Entrega anterior — `Docs. Desenvolvimento/Modelos novos/` e `Atualizações.txt`
+### Entregas anteriores — `Docs. Desenvolvimento/Modelos novos/` e `Atualizações.txt`
 
 O trabalho mais recente do projeto foi a implementação **completa** da pasta **`Modelos novos`** e do
 arquivo **`Atualizações.txt`** que o cliente entregou (30/07/2026). Foi executado nesta ordem — as

@@ -49,6 +49,10 @@ class ChamamentoController extends Controller
 
     public function destroy(Programa $programa, Chamamento $chamamento): RedirectResponse
     {
+        if ($bloqueio = $this->bloqueioDeExclusao($chamamento)) {
+            return $bloqueio;
+        }
+
         $chamamento->delete();
 
         return redirect()->route('programas.chamamentos.index', $programa)

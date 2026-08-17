@@ -37,9 +37,7 @@
                         @endif
                     </div>
                     <div class="flex items-center gap-2 whitespace-nowrap">
-                        <span class="px-2.5 py-1 text-xs font-medium bg-gray-100 text-gray-700 rounded-full">
-                            {{ \App\Models\Chamamento::TIPOS[$chamamento->tipo] ?? $chamamento->tipo }}
-                        </span>
+                        <x-selo-modalidade :tipo="$chamamento->tipo" />
                         @php $cor = \App\Models\Chamamento::STATUS_COLORS[$chamamento->status] ?? 'gray'; @endphp
                         <span class="px-2.5 py-1 text-xs font-medium bg-{{ $cor }}-100 text-{{ $cor }}-800 rounded-full">
                             {{ \App\Models\Chamamento::STATUS[$chamamento->status] ?? $chamamento->status }}
@@ -121,11 +119,11 @@
                             </p>
                         </div>
                         @if($concluida)
-                            <span class="px-2.5 py-1 text-xs font-medium bg-green-100 text-green-800 rounded-full whitespace-nowrap">
+                            <span class="px-2.5 py-1 text-xs font-medium bg-brand-100 text-brand-800 rounded-full whitespace-nowrap">
                                 Encerrada em {{ $chamamento->selecao_concluida_em->format('d/m/Y H:i') }}
                             </span>
                         @else
-                            <span class="px-2.5 py-1 text-xs font-medium bg-amber-100 text-amber-800 rounded-full whitespace-nowrap">
+                            <span class="px-2.5 py-1 text-xs font-medium bg-accent-100 text-accent-800 rounded-full whitespace-nowrap">
                                 Com {{ \App\Models\Chamamento::SETORES_SELECAO[$chamamento->selecao_setor] ?? $chamamento->selecao_setor }}
                             </span>
                         @endif
@@ -140,7 +138,7 @@
                             @endphp
                             <li class="flex items-start gap-3 text-sm">
                                 <span class="mt-0.5 w-5 h-5 shrink-0 rounded-full border text-[12px] font-bold flex items-center justify-center
-                                    {{ $feita ? 'bg-green-100 border-green-300 text-green-700'
+                                    {{ $feita ? 'bg-brand-100 border-brand-300 text-brand-700'
                                              : ($agora ? 'bg-brand-100 border-brand-300 text-brand-700'
                                                        : 'bg-white border-gray-300 text-gray-400') }}">
                                     {{ $feita ? '✓' : $i + 1 }}
@@ -159,9 +157,9 @@
                     @unless($concluida)
                         {{-- Pendências da etapa --}}
                         @if($pendencias)
-                            <div class="mt-4 bg-amber-50 border border-amber-200 rounded-md p-3">
-                                <p class="text-xs font-semibold text-amber-800">Pendências desta etapa:</p>
-                                <ul class="mt-1 text-xs text-amber-700 list-disc list-inside space-y-0.5">
+                            <div class="mt-4 bg-accent-50 border border-accent-200 rounded-md p-3">
+                                <p class="text-xs font-semibold text-accent-800">Pendências desta etapa:</p>
+                                <ul class="mt-1 text-xs text-accent-700 list-disc list-inside space-y-0.5">
                                     @foreach($pendencias as $p)
                                         <li>{{ $p }}</li>
                                     @endforeach
@@ -177,7 +175,7 @@
                                           data-confirm="Encerrar a Seleção? O chamamento será homologado e seguirá para a Celebração.">
                                         @csrf
                                         <button type="submit" @disabled($pendencias)
-                                                class="px-4 py-2 text-sm font-medium text-white bg-green-600 rounded-md hover:bg-green-700 disabled:opacity-50 disabled:cursor-not-allowed">
+                                                class="btn btn-primary">
                                             Encerrar Seleção (homologar)
                                         </button>
                                     </form>
@@ -187,7 +185,7 @@
                                         <textarea name="parecer" rows="2" placeholder="Observação (opcional)"
                                                   class="block w-full border-gray-300 rounded-md shadow-sm text-sm focus:ring-brand-500 focus:border-brand-500"></textarea>
                                         <button type="submit" @disabled($pendencias)
-                                                class="inline-flex items-center gap-2 px-4 py-2.5 text-sm font-semibold text-white bg-brand-600 rounded-lg shadow-sm hover:bg-brand-700 transition disabled:opacity-50 disabled:cursor-not-allowed">
+                                                class="btn btn-primary">
                                             Encaminhar para
                                             {{ \App\Models\Chamamento::SETORES_SELECAO[\App\Models\Chamamento::ETAPAS_SELECAO[$etapaAtual + 1]['setor']] }}
                                         </button>
@@ -201,7 +199,7 @@
                                         <textarea name="parecer" rows="2" required placeholder="Motivo da devolução (obrigatório)"
                                                   class="block w-full border-gray-300 rounded-md shadow-sm text-sm focus:ring-red-500 focus:border-red-500"></textarea>
                                         <button type="submit"
-                                                class="px-4 py-2 text-sm font-medium text-red-700 border border-red-300 rounded-md hover:bg-red-50">
+                                                class="btn btn-danger-outline">
                                             Devolver para
                                             {{ \App\Models\Chamamento::SETORES_SELECAO[$chamamento->setorAnteriorSelecao()] }}
                                         </button>
@@ -257,7 +255,7 @@
                         </div>
                         @php $semResp = $chamamento->recursos->whereNull('respondido_em')->count(); @endphp
                         @if($semResp > 0)
-                            <span class="px-2.5 py-1 text-xs font-medium bg-amber-100 text-amber-800 rounded-full whitespace-nowrap">
+                            <span class="px-2.5 py-1 text-xs font-medium bg-accent-100 text-accent-800 rounded-full whitespace-nowrap">
                                 {{ $semResp }} sem resposta
                             </span>
                         @endif
@@ -326,7 +324,7 @@
                                               placeholder="Fundamentação da decisão sobre o recurso"
                                               class="block w-full border-gray-300 rounded-md shadow-sm text-sm focus:ring-brand-500 focus:border-brand-500"></textarea>
                                     <button type="submit"
-                                            class="px-3 py-1.5 text-xs font-medium text-white bg-brand-600 rounded-md hover:bg-brand-700">
+                                            class="btn btn-primary btn-sm">
                                         Responder recurso
                                     </button>
                                 </form>

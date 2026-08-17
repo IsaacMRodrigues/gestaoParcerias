@@ -21,7 +21,7 @@
                           data-confirm="Confirma a submissão? Após isso não será possível editar.">
                         @csrf @method('PATCH')
                         <button type="submit"
-                                class="px-4 py-2 text-sm font-semibold text-white bg-green-600 rounded-lg hover:bg-green-700 transition">
+                                class="btn btn-primary">
                             Submeter Proposta
                         </button>
                     </form>
@@ -30,12 +30,12 @@
         </div>
 
         @if(session('success'))
-            <div class="bg-green-50 border border-green-200 text-green-800 px-4 py-3 rounded-lg text-sm">
+            <div class="bg-brand-50 border border-brand-200 text-brand-800 px-4 py-3 rounded-lg text-sm">
                 {{ session('success') }}
             </div>
         @endif
         @if(session('info'))
-            <div class="bg-blue-50 border border-blue-200 text-blue-800 px-4 py-3 rounded-lg text-sm">
+            <div class="bg-slate-50 border border-slate-200 text-slate-800 px-4 py-3 rounded-lg text-sm">
                 {{ session('info') }}
             </div>
         @endif
@@ -104,7 +104,7 @@
                                    class="block w-full text-sm text-gray-600 file:mr-3 file:py-1.5 file:px-3 file:rounded file:border-0 file:text-xs file:bg-brand-50 file:text-brand-700 hover:file:bg-brand-100">
                         </div>
                         <button type="submit"
-                                class="px-4 py-2 text-sm font-medium text-white bg-brand-600 rounded-lg hover:bg-brand-700 transition">
+                                class="btn btn-primary">
                             Enviar
                         </button>
                     </form>
@@ -166,7 +166,7 @@
                         </div>
                         <p class="text-xs text-gray-400">{{ $parecer->data_parecer->format('d/m/Y') }}</p>
                         @if($parecer->resultado === 'diligencia')
-                            <p class="text-sm text-yellow-700 mt-2 bg-yellow-50 px-3 py-2 rounded">
+                            <p class="text-sm text-accent-700 mt-2 bg-accent-50 px-3 py-2 rounded">
                                 O órgão solicitou informações adicionais. Entre em contato com a Secretaria responsável.
                             </p>
                         @endif

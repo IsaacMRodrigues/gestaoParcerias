@@ -7,7 +7,7 @@
                 </p>
                 <h2 class="text-2xl font-bold text-gray-900 mt-0.5">Cadastros pendentes de aprovação</h2>
             </div>
-            <span class="px-3 py-1.5 text-sm font-medium bg-amber-50 text-amber-700 rounded-full">
+            <span class="px-3 py-1.5 text-sm font-medium bg-accent-50 text-accent-700 rounded-full">
                 {{ $pendentes->total() }} pendente(s)
             </span>
         </div>
@@ -82,7 +82,7 @@
                         </div>
 
                         <button type="submit"
-                                class="px-4 py-2 text-sm font-medium text-white bg-green-600 rounded-md hover:bg-green-700">
+                                class="btn btn-primary">
                             ✓ Aprovar e liberar acesso
                         </button>
                     </form>
@@ -97,7 +97,7 @@
                                    class="flex-1 border-gray-300 rounded-md shadow-sm text-sm focus:ring-red-500 focus:border-red-500"
                                    placeholder="Motivo da recusa...">
                             <button type="submit"
-                                    class="px-3 py-1.5 text-sm font-medium text-red-700 border border-red-300 rounded-md hover:bg-red-50 whitespace-nowrap">
+                                    class="btn btn-danger-outline btn-sm">
                                 Recusar
                             </button>
                         </div>

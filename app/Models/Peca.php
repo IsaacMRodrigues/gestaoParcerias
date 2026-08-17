@@ -849,11 +849,60 @@ HTML,
     }
 
     /**
+     * Etapa da PRÓXIMA ação pendente desta peça — que nem sempre é a etapa em
+     * que ela é preenchida.
+     *
+     * O Termo de Adjudicação e Homologação é o caso: a SCP o emite na etapa 4 e
+     * o Prefeito o assina na etapa 5. Agrupado pela etapa de preenchimento, ele
+     * caía no bloco da SCP; com o trâmite já na etapa 5, o Prefeito abria a tela
+     * e via TODOS os blocos como "etapa vencida", sem nada marcado como dele —
+     * justamente a assinatura que ele precisa dar.
+     */
+    public function etapaDaProximaAcao(): ?int
+    {
+        return $this->preenchido() && !$this->assinado()
+            ? $this->selecaoEtapaAssinatura()
+            : $this->selecaoEtapa();
+    }
+
+    /** Setor da próxima ação pendente — ver etapaDaProximaAcao(). */
+    public function setorDaProximaAcao(): ?string
+    {
+        return $this->preenchido() && !$this->assinado()
+            ? $this->selecaoSetorAssinatura()
+            : $this->selecaoSetor();
+    }
+
+    /**
+     * Em que etapa o trâmite dono desta peça está AGORA — null quando a peça
+     * não é governada por trâmite nenhum.
+     *
+     * O checklist precisa disto para separar o que é a vez de agora do que só
+     * chega depois: sem esse número, a lista sabe a etapa de cada documento mas
+     * não sabe onde o processo está, e não tem como ordenar nada.
+     */
+    public function etapaAtualDoTramite(): ?int
+    {
+        return $this->donoEmTramite()?->tramiteEtapaAtual();
+    }
+
+    public function tramiteJaEncerrado(): bool
+    {
+        return (bool) $this->donoEmTramite()?->tramiteEncerrado();
+    }
+
+    /** Nome por extenso de um setor, pelo mapa do trâmite dono. */
+    public function rotuloDoSetor(?string $setor): string
+    {
+        return $this->donoEmTramite()?->tramiteSetorLabel($setor) ?? strtoupper((string) $setor);
+    }
+
+    /**
      * Quando a vez é da OSC, ela só atua nas peças da própria parceria.
      */
     private function oscDona(?User $user, Chamamento|Proposta|null $dono): bool
     {
-        return $user?->osc
+        return $user?->ehRepresentanteOsc()
             && $dono instanceof Proposta
             && $user->osc->id === $dono->osc_id;
     }
@@ -879,6 +928,62 @@ HTML,
         }
 
         return $this->selecaoSetor() !== 'osc' || $this->oscDona($user, $dono);
+    }
+
+    /**
+     * Por que não dá para preencher agora — em português, com os fatos.
+     *
+     * O checklist mostrava o documento num bloco cinza e mais nada: nem quem é
+     * o responsável, nem em que etapa o trâmite está, nem o que falta. Quem
+     * abria a peça não tinha como saber se era falta de permissão, se a vez era
+     * de outro setor ou se a etapa ainda não havia chegado.
+     *
+     * Retorna null quando o preenchimento está liberado.
+     */
+    public function motivoNaoPodePreencher(?User $user): ?string
+    {
+        if ($this->podePreencher($user)) {
+            return null;
+        }
+
+        $dono = $this->donoEmTramite();
+        $rotulo = fn (?string $s) => $dono?->tramiteSetorLabel($s) ?? (string) $s;
+
+        if (!$user) {
+            return 'Entre no sistema para preencher este documento.';
+        }
+
+        if ($this->assinado()) {
+            return 'Este documento já foi assinado e não pode mais ser alterado.';
+        }
+
+        if ($dono?->tramiteEncerrado()) {
+            return 'O trâmite já foi concluído — os documentos ficam apenas para consulta.';
+        }
+
+        $setorDaPeca = $this->selecaoSetor();
+
+        if ($user->setor !== $setorDaPeca) {
+            // A OSC vê o próprio setor como 'osc', mas não é lotação de servidor.
+            return $setorDaPeca === 'osc'
+                ? 'Este documento é preenchido pela OSC parceira.'
+                : 'Este documento é preenchido pelo setor '.$rotulo($setorDaPeca)
+                    .', e o seu é '.$user->setorLabel().'.';
+        }
+
+        // Setor certo, mas a OSC não é a dona desta parceria.
+        if ($setorDaPeca === 'osc' && !$this->oscDona($user, $dono)) {
+            return 'Este documento pertence a outra OSC.';
+        }
+
+        // Setor certo — só não chegou a vez.
+        $etapaDoc   = $this->selecaoEtapa() + 1;
+        $etapaAtual = ($dono?->tramiteEtapaAtual() ?? 0) + 1;
+
+        return $etapaDoc > $etapaAtual
+            ? "Ainda não é a vez deste documento: ele é preenchido na etapa {$etapaDoc} do trâmite, "
+                ."que está na etapa {$etapaAtual}."
+            : "A etapa deste documento (etapa {$etapaDoc}) já passou — o trâmite está na etapa {$etapaAtual}.";
     }
 
     /**

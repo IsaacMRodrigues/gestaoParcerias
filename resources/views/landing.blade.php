@@ -177,7 +177,10 @@
                     </div>
                 </section>
 
-                {{-- Chamada para a OSC ainda não cadastrada --}}
+                {{-- Chamada para a OSC ainda não cadastrada. Só para visitante: o
+                     auto-cadastro abre conta nova, e quem já está logado (servidor
+                     ou OSC) não tem o que fazer aqui. --}}
+                @guest
                 <section class="mt-14 mb-16">
                     <div class="bg-white rounded-2xl border border-gray-200 p-6 sm:p-8
                                 flex flex-col sm:flex-row sm:items-center justify-between gap-6">
@@ -190,22 +193,20 @@
                         </div>
                         <div class="flex flex-wrap items-center gap-3 shrink-0">
                             <a href="{{ route('portal.osc.create') }}"
-                               class="inline-flex items-center gap-2 bg-brand-600 hover:bg-brand-700 text-white
-                                      font-semibold text-sm px-5 py-3 rounded-xl shadow-sm hover:shadow transition
-                                      focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-600 focus-visible:ring-offset-2">
+                               class="btn btn-primary">
                                 Cadastrar minha OSC
                                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.4">
                                     <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/>
                                 </svg>
                             </a>
                             <a href="{{ route('validacao.index') }}"
-                               class="inline-flex items-center text-sm font-semibold text-gray-700 hover:text-brand-700
-                                      px-4 py-3 rounded-xl border border-gray-300 hover:border-brand-300 transition">
+                               class="btn btn-secondary">
                                 Validar documento
                             </a>
                         </div>
                     </div>
                 </section>
+                @endguest
             </div>
         </main>
 

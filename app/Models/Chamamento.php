@@ -2,15 +2,28 @@
 
 namespace App\Models;
 
+use App\Models\Concerns\ImpedeExclusaoComVinculos;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class Chamamento extends Model
 {
+    use ImpedeExclusaoComVinculos;
+
     public const TIPOS = [
         'chamamento_publico' => 'Chamamento Público',
         'dispensa'           => 'Dispensa de Chamamento',
         'inexigibilidade'    => 'Inexigibilidade de Chamamento',
+    ];
+
+    /**
+     * Mesmas cores de Processo::MODALIDADES_COLORS — é a mesma categoria vista
+     * do outro lado do fluxo, e a cor tem de bater nas duas telas.
+     */
+    public const TIPOS_COLORS = [
+        'chamamento_publico' => 'brand',
+        'dispensa'           => 'accent',
+        'inexigibilidade'    => 'slate',
     ];
 
     public const STATUS = [
@@ -22,12 +35,17 @@ class Chamamento extends Model
         'cancelado'    => 'Cancelado',
     ];
 
+    /**
+     * Ver Processo::STATUS_COLORS para a regra. 'em_inscricao' é o único verde
+     * vivo — é o estado em que o chamamento está de fato aberto ao público —, e
+     * 'encerrado' recua para o cinza, porque já saiu de cena.
+     */
     public const STATUS_COLORS = [
         'rascunho'     => 'gray',
-        'publicado'    => 'blue',
-        'em_inscricao' => 'green',
-        'em_analise'   => 'yellow',
-        'encerrado'    => 'brand',
+        'publicado'    => 'accent',
+        'em_inscricao' => 'brand',
+        'em_analise'   => 'accent',
+        'encerrado'    => 'slate',
         'cancelado'    => 'red',
     ];
 
@@ -279,5 +297,17 @@ class Chamamento extends Model
         return $this->relationLoaded('pecas')
             ? $this->pecas->firstWhere('chave', $chave)
             : $this->pecas()->where('chave', $chave)->first();
+    }
+
+    protected function vinculosBloqueantes(): array
+    {
+        return [
+            'propostas' => ['proposta de OSC', 'propostas de OSC'],
+        ];
+    }
+
+    protected function fraseDeBloqueio(): string
+    {
+        return 'Este chamamento não pode ser excluído';
     }
 }

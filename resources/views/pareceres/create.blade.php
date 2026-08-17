@@ -63,8 +63,8 @@
 
                     {{-- Campos de diligência: aparecem apenas quando resultado = diligencia --}}
                     <div x-show="resultado === 'diligencia'" x-cloak
-                         class="border border-blue-200 bg-blue-50 rounded-lg p-4 space-y-4">
-                        <p class="text-sm font-medium text-blue-800">Dados da Diligência</p>
+                         class="border border-slate-200 bg-slate-50 rounded-lg p-4 space-y-4">
+                        <p class="text-sm font-medium text-slate-800">Dados da Diligência</p>
                         <div>
                             <x-input-label for="diligencia_descricao" value="O que está sendo solicitado *" />
                             <textarea id="diligencia_descricao" name="diligencia_descricao" rows="3"
@@ -83,7 +83,7 @@
                         <a href="{{ route('propostas.show', $proposta) }}"
                            class="text-sm text-gray-600 hover:text-gray-900">Cancelar</a>
                         <button type="submit"
-                                class="inline-flex items-center gap-2 px-4 py-2.5 text-sm font-semibold text-white bg-brand-600 rounded-lg shadow-sm hover:bg-brand-700 transition">
+                                class="btn btn-primary">
                             Registrar Parecer
                         </button>
                     </div>

@@ -33,7 +33,7 @@
                     </select>
                 </div>
                 <div class="sm:col-span-3 flex items-center gap-3">
-                    <button type="submit" class="inline-flex items-center gap-2 px-4 py-2.5 text-sm font-semibold text-white bg-brand-600 rounded-lg shadow-sm hover:bg-brand-700 transition">
+                    <button type="submit" class="btn btn-primary">
                         Filtrar
                     </button>
                     @if($temFiltro)

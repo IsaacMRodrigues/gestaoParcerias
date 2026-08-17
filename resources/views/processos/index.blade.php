@@ -3,7 +3,7 @@
         <div class="flex items-center justify-between">
             <h2 class="text-2xl font-bold text-gray-900">Processos de Planejamento</h2>
             <a href="{{ route('processos.create') }}"
-               class="inline-flex items-center gap-2 px-4 py-2.5 text-sm font-semibold text-white bg-brand-600 rounded-lg shadow-sm hover:bg-brand-700 transition">
+               class="btn btn-primary">
                 + Novo Processo
             </a>
         </div>

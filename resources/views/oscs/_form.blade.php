@@ -130,7 +130,7 @@
             <p class="text-xs text-gray-400">CPF, nome, contato e cargo de cada membro do quadro.</p>
         </div>
         <button type="button" @click="membros.push({nome:'',cpf:'',phone:'',email:'',cargo:''})"
-                class="px-3 py-1.5 text-xs font-medium text-brand-700 border border-brand-300 rounded-md hover:bg-brand-50">
+                class="btn btn-outline btn-sm">
             + Adicionar membro
         </button>
     </div>

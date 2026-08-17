@@ -2,12 +2,15 @@
 
 namespace App\Models;
 
+use App\Models\Concerns\ImpedeExclusaoComVinculos;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Osc extends Model
 {
+    use ImpedeExclusaoComVinculos;
+
     public const TIPOS = [
         'associacao'  => 'Associação',
         'fundacao'    => 'Fundação',
@@ -56,5 +59,17 @@ class Osc extends Model
     public function membros(): HasMany
     {
         return $this->hasMany(OscMembro::class);
+    }
+
+    protected function vinculosBloqueantes(): array
+    {
+        return [
+            'propostas' => ['proposta', 'propostas'],
+        ];
+    }
+
+    protected function fraseDeBloqueio(): string
+    {
+        return 'Esta OSC não pode ser excluída';
     }
 }

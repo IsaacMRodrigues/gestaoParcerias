@@ -162,7 +162,7 @@
             <div class="flex items-center justify-between">
                 <a href="{{ route('portal.index') }}" class="text-sm text-gray-500 hover:text-gray-800">Cancelar</a>
                 <button type="submit"
-                        class="px-6 py-3 text-sm font-semibold text-white bg-brand-600 rounded-lg hover:bg-brand-700 transition">
+                        class="btn btn-primary">
                     Criar Cadastro e Entrar
                 </button>
             </div>

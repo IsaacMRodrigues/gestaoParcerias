@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Models\Concerns\ImpedeExclusaoComVinculos;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
@@ -9,6 +10,8 @@ use Illuminate\Database\Eloquent\Relations\HasOne;
 
 class Proposta extends Model
 {
+    use ImpedeExclusaoComVinculos;
+
     public const STATUS = [
         'rascunho'      => 'Rascunho',
         'submetida'     => 'Submetida',
@@ -19,12 +22,21 @@ class Proposta extends Model
         'cancelada'     => 'Cancelada',
     ];
 
+    /**
+     * Ver Processo::STATUS_COLORS para a regra (cinza inerte, laranja em
+     * andamento, verde positivo, vermelho negativo).
+     *
+     * Submetida, em análise e em negociação dividem o laranja: são três
+     * momentos do mesmo estado — a proposta está com a Administração e espera
+     * alguém agir. A paleta da Prefeitura tem duas matizes, então quem separa
+     * esses três é o rótulo do selo, não a cor.
+     */
     public const STATUS_COLORS = [
         'rascunho'      => 'gray',
-        'submetida'     => 'blue',
-        'em_analise'    => 'yellow',
-        'em_negociacao' => 'purple',
-        'aprovada'      => 'green',
+        'submetida'     => 'accent',
+        'em_analise'    => 'accent',
+        'em_negociacao' => 'accent',
+        'aprovada'      => 'brand',
         'reprovada'     => 'red',
         'cancelada'     => 'red',
     ];
@@ -271,5 +283,17 @@ class Proposta extends Model
     public function tramiteSetorLabel(?string $setor): string
     {
         return self::SETORES_CELEBRACAO[$setor] ?? (string) $setor;
+    }
+
+    protected function vinculosBloqueantes(): array
+    {
+        return [
+            'instrumento' => ['instrumento celebrado', 'instrumentos celebrados'],
+        ];
+    }
+
+    protected function fraseDeBloqueio(): string
+    {
+        return 'Esta proposta não pode ser excluída';
     }
 }

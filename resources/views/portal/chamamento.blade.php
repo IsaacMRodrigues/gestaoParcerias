@@ -6,7 +6,7 @@
         </p>
 
         @if(session('info'))
-            <div class="mb-4 bg-amber-50 border border-amber-200 text-amber-800 px-4 py-3 rounded-lg text-sm">
+            <div class="mb-4 bg-accent-50 border border-accent-200 text-accent-800 px-4 py-3 rounded-lg text-sm">
                 {{ session('info') }}
             </div>
         @endif
@@ -15,9 +15,7 @@
 
             <div class="flex items-start justify-between gap-4 mb-6">
                 <div>
-                    <span class="text-xs font-medium text-brand-600 bg-brand-50 px-2 py-0.5 rounded">
-                        {{ \App\Models\Chamamento::TIPOS[$chamamento->tipo] ?? $chamamento->tipo }}
-                    </span>
+                    <x-selo-modalidade :tipo="$chamamento->tipo" />
                     <h1 class="text-2xl font-bold text-gray-900 mt-2">
                         @if($chamamento->numero) {{ $chamamento->numero }} — @endif
                         {{ $chamamento->titulo }}
@@ -31,9 +29,9 @@
                 <div class="shrink-0">
                     @if($chamamento->aceitaPropostas())
                         @auth
-                            @if(auth()->user()->osc)
+                            @if(auth()->user()->ehRepresentanteOsc())
                                 <a href="{{ route('portal.participar', $chamamento) }}"
-                                   class="inline-block px-5 py-2.5 text-sm font-semibold text-white bg-brand-600 rounded-lg hover:bg-brand-700 transition">
+                                   class="btn btn-primary">
                                     Submeter Proposta
                                 </a>
                             @elseif(auth()->user()->temAcessoInterno())
@@ -43,16 +41,16 @@
                             @endif
                         @else
                             <a href="{{ route('login') }}"
-                               class="inline-block px-5 py-2.5 text-sm font-semibold text-white bg-brand-600 rounded-lg hover:bg-brand-700 transition">
+                               class="btn btn-primary">
                                 Entrar para Participar
                             </a>
                         @endauth
                     @elseif($chamamento->ehDispensa())
-                        <span class="inline-block px-5 py-2.5 text-sm font-semibold text-green-700 bg-green-50 border border-green-200 rounded-lg">
+                        <span class="inline-block px-5 py-2.5 text-sm font-semibold text-brand-700 bg-brand-50 border border-brand-200 rounded-lg">
                             Publicado
                         </span>
                     @elseif($chamamento->status === 'publicado')
-                        <span class="inline-block px-5 py-2.5 text-sm font-semibold text-blue-700 bg-blue-50 border border-blue-200 rounded-lg">
+                        <span class="inline-block px-5 py-2.5 text-sm font-semibold text-slate-700 bg-slate-50 border border-slate-200 rounded-lg">
                             Inscrições em breve
                         </span>
                     @endif
@@ -199,7 +197,7 @@
                                     <x-input-error :messages="$errors->get('arquivo')" class="mt-1" />
                                 </div>
                                 <button type="submit"
-                                        class="px-5 py-2.5 text-sm font-semibold text-white bg-brand-600 rounded-lg hover:bg-brand-700 transition">
+                                        class="btn btn-primary">
                                     Protocolar recurso
                                 </button>
                             </form>
@@ -215,9 +213,9 @@
                             Sua OSC pode submeter uma proposta para este chamamento.
                         </p>
                         @auth
-                            @if(auth()->user()->osc)
+                            @if(auth()->user()->ehRepresentanteOsc())
                                 <a href="{{ route('portal.participar', $chamamento) }}"
-                                   class="inline-block px-6 py-2.5 text-sm font-semibold text-white bg-brand-600 rounded-lg hover:bg-brand-700 transition">
+                                   class="btn btn-primary">
                                     Submeter Proposta
                                 </a>
                             @elseif(auth()->user()->temAcessoInterno())
@@ -228,24 +226,24 @@
                         @else
                             <div class="flex justify-center gap-3">
                                 <a href="{{ route('login') }}"
-                                   class="px-5 py-2 text-sm font-medium text-white bg-brand-600 rounded-lg hover:bg-brand-700 transition">
+                                   class="btn btn-primary">
                                     Entrar
                                 </a>
                                 <a href="{{ route('portal.osc.create') }}"
-                                   class="px-5 py-2 text-sm font-medium text-brand-700 border border-brand-300 rounded-lg hover:bg-brand-50 transition">
+                                   class="btn btn-outline">
                                     Cadastrar OSC
                                 </a>
                             </div>
                         @endauth
                     @else
-                        <p class="text-sm text-blue-800 font-medium">
+                        <p class="text-sm text-slate-800 font-medium">
                             Este chamamento foi publicado. As inscrições abrirão em breve.
                             @if($chamamento->data_inicio_inscricao)
                                 Previsão: {{ $chamamento->data_inicio_inscricao->format('d/m/Y') }}.
                             @endif
                         </p>
                         @guest
-                            <p class="text-xs text-blue-600 mt-1">
+                            <p class="text-xs text-slate-600 mt-1">
                                 <a href="{{ route('portal.osc.create') }}" class="underline">Cadastre sua OSC</a>
                                 para estar pronto quando as inscrições abrirem.
                             </p>

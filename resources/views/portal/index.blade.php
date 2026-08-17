@@ -14,12 +14,12 @@
             <div class="flex flex-wrap items-center gap-3 mt-7">
                 @guest
                     <a href="{{ route('portal.osc.create') }}"
-                       class="px-5 py-2.5 text-sm font-semibold text-white bg-brand-600 rounded-lg hover:bg-brand-700 transition">
+                       class="btn btn-primary">
                         Cadastre sua OSC
                     </a>
                 @endguest
                 <a href="#chamamentos"
-                   class="px-5 py-2.5 text-sm font-semibold text-gray-700 border border-gray-300 rounded-lg hover:bg-gray-50 transition">
+                   class="btn btn-secondary">
                     Ver chamamentos
                 </a>
                 <a href="{{ route('transparencia') }}"
@@ -33,12 +33,12 @@
     <div id="chamamentos" class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
 
         @if(session('success'))
-            <div class="mb-6 bg-green-50 border border-green-200 text-green-800 px-4 py-3 rounded-lg text-sm">
+            <div class="mb-6 bg-brand-50 border border-brand-200 text-brand-800 px-4 py-3 rounded-lg text-sm">
                 {{ session('success') }}
             </div>
         @endif
         @if(session('info'))
-            <div class="mb-6 bg-blue-50 border border-blue-200 text-blue-800 px-4 py-3 rounded-lg text-sm">
+            <div class="mb-6 bg-slate-50 border border-slate-200 text-slate-800 px-4 py-3 rounded-lg text-sm">
                 {{ session('info') }}
             </div>
         @endif
@@ -55,9 +55,7 @@
                 <div class="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4">
                     <div class="flex-1">
                         <div class="flex items-center gap-2 mb-1">
-                            <span class="text-xs font-medium text-brand-600 bg-brand-50 px-2 py-0.5 rounded">
-                                {{ \App\Models\Chamamento::TIPOS[$chamamento->tipo] ?? $chamamento->tipo }}
-                            </span>
+                            <x-selo-modalidade :tipo="$chamamento->tipo" />
                             <span class="text-xs text-gray-400">
                                 {{ $chamamento->programa->orgao->sigla ?? $chamamento->programa->orgao->name }}
                             </span>
@@ -84,7 +82,7 @@
                             @if($chamamento->data_fim_inscricao)
                                 <span>
                                     Inscrições até:
-                                    <strong class="{{ $chamamento->data_fim_inscricao->isPast() ? 'text-red-600' : 'text-green-700' }}">
+                                    <strong class="{{ $chamamento->data_fim_inscricao->isPast() ? 'text-red-600' : 'text-brand-700' }}">
                                         {{ $chamamento->data_fim_inscricao->format('d/m/Y') }}
                                     </strong>
                                 </span>
@@ -94,27 +92,33 @@
 
                     <div class="flex flex-col gap-2 shrink-0">
                         <a href="{{ route('portal.chamamento', $chamamento) }}"
-                           class="px-4 py-2 text-sm font-medium text-brand-700 border border-brand-300 rounded-lg hover:bg-brand-50 text-center transition">
+                           class="btn btn-outline">
                             Ver Detalhes
                         </a>
                         @if($chamamento->aceitaPropostas())
+                            {{-- Participar é ação de OSC. O servidor navega no portal
+                                 para consultar, e o convite não se aplica a ele: em vez
+                                 de um botão que só levaria a um aviso de bloqueio, não
+                                 aparece botão nenhum. --}}
                             @auth
-                                <a href="{{ route('portal.participar', $chamamento) }}"
-                                   class="px-4 py-2 text-sm font-medium text-white bg-brand-600 rounded-lg hover:bg-brand-700 text-center transition">
-                                    Quero Participar
-                                </a>
+                                @if(auth()->user()->ehRepresentanteOsc())
+                                    <a href="{{ route('portal.participar', $chamamento) }}"
+                                       class="btn btn-primary">
+                                        Quero Participar
+                                    </a>
+                                @endif
                             @else
                                 <a href="{{ route('login') }}"
-                                   class="px-4 py-2 text-sm font-medium text-white bg-brand-600 rounded-lg hover:bg-brand-700 text-center transition">
+                                   class="btn btn-primary">
                                     Entrar para Participar
                                 </a>
                             @endauth
                         @elseif($chamamento->ehDispensa())
-                            <span class="px-4 py-2 text-sm font-medium text-green-700 bg-green-50 border border-green-200 rounded-lg text-center">
+                            <span class="px-4 py-2 text-sm font-medium text-brand-700 bg-brand-50 border border-brand-200 rounded-lg text-center">
                                 Publicado
                             </span>
                         @else
-                            <span class="px-4 py-2 text-sm font-medium text-blue-600 bg-blue-50 border border-blue-200 rounded-lg text-center">
+                            <span class="px-4 py-2 text-sm font-medium text-slate-600 bg-slate-50 border border-slate-200 rounded-lg text-center">
                                 Inscrições em breve
                             </span>
                         @endif
@@ -135,11 +139,11 @@
                 @guest
                     <div class="flex flex-wrap items-center justify-center gap-3 mt-6">
                         <a href="{{ route('portal.osc.create') }}"
-                           class="px-5 py-2.5 text-sm font-semibold text-white bg-brand-600 rounded-lg hover:bg-brand-700 transition">
+                           class="btn btn-primary">
                             Cadastrar minha OSC
                         </a>
                         <a href="{{ route('login') }}"
-                           class="px-5 py-2.5 text-sm font-semibold text-brand-700 border border-brand-300 rounded-lg hover:bg-brand-50 transition">
+                           class="btn btn-outline">
                             Já tenho cadastro
                         </a>
                     </div>

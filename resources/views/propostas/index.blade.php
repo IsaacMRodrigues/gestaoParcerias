@@ -3,7 +3,7 @@
         <div class="flex items-center justify-between">
             <h2 class="text-2xl font-bold text-gray-900">Propostas</h2>
             <a href="{{ route('propostas.create') }}"
-               class="inline-flex items-center gap-2 px-4 py-2.5 text-sm font-semibold text-white bg-brand-600 rounded-lg shadow-sm hover:bg-brand-700 transition">
+               class="btn btn-primary">
                 + Nova Proposta
             </a>
         </div>
@@ -27,14 +27,14 @@
                     </thead>
                     <tbody class="bg-white divide-y divide-gray-100">
                         @forelse($propostas as $proposta)
-                            <tr class="{{ $proposta->status === 'submetida' ? 'bg-amber-50/60' : '' }}">
+                            <tr class="{{ $proposta->status === 'submetida' ? 'bg-accent-50/60' : '' }}">
                                 <td class="px-6 py-4 text-sm font-medium text-gray-900">
                                     <a href="{{ route('propostas.show', $proposta) }}"
                                        class="text-brand-600 hover:underline">
                                         {{ $proposta->titulo }}
                                     </a>
                                     @if($proposta->status === 'submetida')
-                                        <span class="ml-1.5 px-1.5 py-0.5 text-[11px] font-semibold bg-amber-100 text-amber-700 rounded-full align-middle">nova</span>
+                                        <span class="ml-1.5 px-1.5 py-0.5 text-[11px] font-semibold bg-accent-100 text-accent-700 rounded-full align-middle">nova</span>
                                     @endif
                                 </td>
                                 <td class="px-6 py-4 text-sm text-gray-600">{{ $proposta->osc->name }}</td>

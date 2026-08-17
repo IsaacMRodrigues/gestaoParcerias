@@ -14,8 +14,8 @@ class Diligencia extends Model
     ];
 
     public const STATUS_COLORS = [
-        'pendente'   => 'yellow',
-        'respondida' => 'blue',
+        'pendente'   => 'accent',
+        'respondida' => 'brand',
         'encerrada'  => 'gray',
     ];
 

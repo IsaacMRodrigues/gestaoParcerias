@@ -90,7 +90,7 @@
                 <span>
                     {{ \App\Models\User::$roleLabels[$role->name] ?? $role->name }}
                     @if($excl)
-                        <span class="text-xs text-amber-600">(exclusivo: {{ \App\Models\User::LOTACOES[$excl] ?? $excl }})</span>
+                        <span class="text-xs text-accent-600">(exclusivo: {{ \App\Models\User::LOTACOES[$excl] ?? $excl }})</span>
                     @endif
                 </span>
             </label>

@@ -70,7 +70,7 @@ class PortalController extends Controller
         // de origem (Edital ou Justificativa de Dispensa) — têm página pública de
         // validação, onde a OSC lê o teor completo e confere a assinatura.
         // Recurso da OSC logada neste chamamento (para protocolar ou ver a resposta)
-        $osc = auth()->user()?->osc;
+        $osc = auth()->user()?->oscVinculada();
         $meuRecurso = $osc
             ? $chamamento->recursos()->where('osc_id', $osc->id)->first()
             : null;
@@ -93,7 +93,7 @@ class PortalController extends Controller
 
     public function minhasPropostas(): View
     {
-        $osc = auth()->user()->osc;
+        $osc = auth()->user()->oscVinculada();
         abort_unless($osc, 403, 'Sua conta não está vinculada a uma OSC.');
 
         $propostas = $osc->propostas()
@@ -108,17 +108,9 @@ class PortalController extends Controller
     {
         abort_unless($chamamento->aceitaPropostas(), 403, 'Este chamamento não está aberto para inscrições.');
 
-        $osc = auth()->user()->osc;
-        if (!$osc) {
-            // Usuário interno da Administração não participa como OSC.
-            if (auth()->user()->temAcessoInterno()) {
-                return redirect()->route('portal.chamamento', $chamamento)
-                    ->with('info', 'Você está conectado como usuário do sistema. A submissão de propostas é exclusiva das OSCs.');
-            }
-
-            return redirect()->route('portal.osc.create')
-                ->with('info', 'Cadastre sua OSC antes de submeter uma proposta.');
-        }
+        // Quem chega aqui já passou pelo middleware 'osc': é representante legal
+        // com OSC vinculada. Usuário interno é barrado antes, na rota.
+        $osc = auth()->user()->oscVinculada();
 
         $existente = Proposta::where('chamamento_id', $chamamento->id)
             ->where('osc_id', $osc->id)
@@ -136,7 +128,7 @@ class PortalController extends Controller
     {
         abort_unless($chamamento->aceitaPropostas(), 403);
 
-        $osc = auth()->user()->osc;
+        $osc = auth()->user()->oscVinculada();
         abort_unless($osc, 403);
 
         $data = $request->validate([
@@ -162,7 +154,7 @@ class PortalController extends Controller
 
     public function showProposta(Proposta $proposta): View
     {
-        $osc = auth()->user()->osc;
+        $osc = auth()->user()->oscVinculada();
         abort_unless($osc && $proposta->osc_id === $osc->id, 403);
 
         $proposta->load(['chamamento.programa.orgao', 'documentos.uploader', 'pareceres']);
@@ -171,7 +163,7 @@ class PortalController extends Controller
 
     public function submeterProposta(Proposta $proposta): RedirectResponse
     {
-        $osc = auth()->user()->osc;
+        $osc = auth()->user()->oscVinculada();
         abort_unless($osc && $proposta->osc_id === $osc->id && $proposta->status === 'rascunho', 403);
 
         $proposta->update(['status' => 'submetida', 'submitted_at' => now()]);

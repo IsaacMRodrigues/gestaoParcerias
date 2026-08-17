@@ -1,6 +1,8 @@
 <?php
 
 use App\Http\Controllers\AditivoController;
+use App\Http\Controllers\BuscaController;
+use App\Http\Controllers\CaixaController;
 use App\Http\Controllers\CelebracaoController;
 use App\Http\Controllers\ChamamentoController;
 use App\Http\Controllers\SelecaoController;
@@ -40,17 +42,22 @@ Route::get('/portal', [PortalController::class, 'index'])->name('portal.index');
 Route::get('/portal/chamamentos/{chamamento}', [PortalController::class, 'chamamento'])->name('portal.chamamento');
 Route::get('/transparencia', [PortalController::class, 'transparencia'])->name('transparencia');
 
-// Auto-cadastro de OSC
-Route::get('/cadastro/osc', [OscRegistroController::class, 'create'])->name('portal.osc.create');
-Route::post('/cadastro/osc', [OscRegistroController::class, 'store'])->name('portal.osc.store');
+// Auto-cadastro de OSC — só para visitante. O store abre uma conta nova e faz
+// login nela; se um servidor logado chegasse aqui, sairia da própria conta e
+// passaria a existir como OSC, que é exatamente o que não pode acontecer.
+Route::middleware('guest')->group(function () {
+    Route::get('/cadastro/osc', [OscRegistroController::class, 'create'])->name('portal.osc.create');
+    Route::post('/cadastro/osc', [OscRegistroController::class, 'store'])->name('portal.osc.store');
+});
 
 // Validação pública de documentos assinados
 Route::get('/validar', [\App\Http\Controllers\ValidacaoController::class, 'index'])->name('validacao.index');
 Route::post('/validar', [\App\Http\Controllers\ValidacaoController::class, 'verificar'])->name('validacao.verificar');
 Route::get('/validar/{codigo}', [\App\Http\Controllers\ValidacaoController::class, 'mostrar'])->name('validacao.mostrar');
 
-// Área da OSC logada (portal)
-Route::middleware('auth')->group(function () {
+// Área da OSC logada (portal) — 'osc' barra o usuário interno: servidor analisa
+// e decide sobre a proposta, nunca a apresenta.
+Route::middleware(['auth', 'osc'])->group(function () {
     Route::get('/portal/minhas-propostas', [PortalController::class, 'minhasPropostas'])->name('portal.minhas-propostas');
     Route::get('/portal/chamamentos/{chamamento}/participar', [PortalController::class, 'participar'])->name('portal.participar');
     Route::post('/portal/chamamentos/{chamamento}/proposta', [PortalController::class, 'storeProposta'])->name('portal.proposta.store');
@@ -80,6 +87,14 @@ Route::middleware(['auth', 'staff', 'readonly'])->group(function () {
     Route::get('/dashboard', function () {
         return view('dashboard');
     })->name('dashboard');
+
+    // Busca global da barra de comandos (Ctrl+K). Cada módulo só entra no
+    // resultado se o usuário tiver a permissão — a checagem é no controller.
+    Route::get('/busca', BuscaController::class)->name('busca');
+
+    // Caixa de entrada do setor — vale para TODOS os setores, por isso fica
+    // aqui e não dentro de um grupo `permission:`. Ver CaixaController.
+    Route::get('/caixa', CaixaController::class)->name('caixa');
 
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
@@ -113,7 +128,9 @@ Route::middleware(['auth', 'staff', 'readonly'])->group(function () {
 
     // Módulo Unidade Gestora — Planejamento (Processos)
     Route::middleware('permission:planejamento')->group(function () {
-        Route::get('processos/caixa', [ProcessoController::class, 'caixa'])->name('processos.caixa');
+        // A caixa virou única (os três trâmites) e mudou de lugar. O nome antigo
+        // continua respondendo para não quebrar link salvo nem histórico.
+        Route::get('processos/caixa', fn () => redirect()->route('caixa'))->name('processos.caixa');
         Route::resource('processos', ProcessoController::class)->except(['edit', 'update']);
         Route::get('processos/{processo}/imprimir-pecas', [ProcessoPecaController::class, 'imprimirLote'])->name('processos.pecas.imprimir-lote');
         Route::get('processos/{processo}/pecas/{peca}', [ProcessoPecaController::class, 'edit'])->name('processos.pecas.edit');
