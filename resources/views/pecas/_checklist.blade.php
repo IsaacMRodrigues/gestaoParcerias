@@ -109,7 +109,9 @@
             }
 
             $ehModelo   = $peca->tipo === 'modelo';
-            $emAndamento = $peca->preenchido() && ! $peca->assinado();
+            // Arquivo não se assina: enviado, está pronto. Medir tudo por
+            // assinado() deixava todo anexo preso em "falta assinar".
+            $emAndamento = $peca->preenchido() && ! $peca->concluida();
 
             // Estilo do "botão" que abre/fecha o bloco de trabalho da peça
             $acao = 'inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold
@@ -120,8 +122,8 @@
             <div class="flex items-start gap-3">
 
                 {{-- Estado da peça --}}
-                <span class="mt-0.5 shrink-0" title="{{ $peca->assinado() ? 'Assinado' : ($peca->preenchido() ? 'Preenchido, aguardando assinatura' : 'Pendente') }}">
-                    @if($peca->assinado())
+                <span class="mt-0.5 shrink-0" title="{{ $peca->concluida() ? ($ehModelo ? 'Assinado' : 'Arquivo enviado') : ($peca->preenchido() ? 'Preenchido, aguardando assinatura' : 'Pendente') }}">
+                    @if($peca->concluida())
                         <span class="w-5 h-5 rounded-full bg-brand-600 text-white flex items-center justify-center">
                             <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="3.5">
                                 <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/>
@@ -139,7 +141,7 @@
                 <div class="flex-1 min-w-0">
                     <div class="flex items-start justify-between gap-3 flex-wrap">
                         <div class="min-w-0">
-                            <p class="text-sm font-semibold {{ $peca->assinado() ? 'text-gray-500' : 'text-gray-900' }}">
+                            <p class="text-sm font-semibold {{ $peca->concluida() ? 'text-gray-500' : 'text-gray-900' }}">
                                 {{ $peca->rotulo }}
                                 {{-- Alguns rótulos já trazem "(opcional)" no texto; não repete --}}
                                 @if(! $peca->obrigatorio && ! \Illuminate\Support\Str::contains($peca->rotulo, 'opcional', true))

@@ -211,7 +211,11 @@ class Chamamento extends Model
 
     public function tramiteSetorLabel(?string $setor): string
     {
-        return self::SETORES_SELECAO[$setor] ?? (string) $setor;
+        // Setores de fora deste trâmite (a PJ, por exemplo, que atua nas peças
+        // da fase do edital) não estão no mapa: cai na lotação, senão a tela
+        // escreveria a sigla crua — "o setor pj".
+        return self::SETORES_SELECAO[$setor]
+            ?? (User::LOTACOES[$setor] ?? strtoupper((string) $setor));
     }
 
     public function etapaSelecaoInfo(?int $i = null): array

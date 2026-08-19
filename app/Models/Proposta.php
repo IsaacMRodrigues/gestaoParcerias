@@ -282,7 +282,11 @@ class Proposta extends Model
 
     public function tramiteSetorLabel(?string $setor): string
     {
-        return self::SETORES_CELEBRACAO[$setor] ?? (string) $setor;
+        // Setores de fora deste trâmite (a PJ, por exemplo, que atua nas peças
+        // da fase do edital) não estão no mapa: cai na lotação, senão a tela
+        // escreveria a sigla crua — "o setor pj".
+        return self::SETORES_CELEBRACAO[$setor]
+            ?? (User::LOTACOES[$setor] ?? strtoupper((string) $setor));
     }
 
     protected function vinculosBloqueantes(): array

@@ -146,6 +146,26 @@ class Peca extends Model
         'termo_homologacao'        => 'scp',  // a SCP emite; o Prefeito assina
     ];
 
+    /**
+     * Setor responsável pelas peças ANTERIORES ao julgamento.
+     *
+     * Elas continuam fora do trâmite (não têm etapa: precisam estar prontas
+     * antes de a Seleção começar, para o edital ser publicado). O que faltava
+     * era dizer de QUEM é cada uma — sem isso, qualquer usuário com permissão
+     * de chamamentos preenchia e assinava todas, e na prática a Unidade Gestora
+     * acabou assinando o próprio parecer jurídico: quem pede o parecer o emitia.
+     *
+     * Aqui vale só o setor, nunca a ordem — é a diferença entre "não é a sua
+     * vez" (trâmite) e "não é o seu papel" (segregação de função).
+     */
+    public const SELECAO_SETOR_PREVIO = [
+        'edital'             => 'ug',
+        'anexos'             => 'ug',
+        'comissao_selecao'   => 'ug',   // portaria de designação da Comissão
+        'parecer_juridico'   => 'pj',
+        'pub_extrato_edital' => 'scp',  // publicações são da SCP, como as demais
+    ];
+
     public const SELECAO_ETAPA = [
         'relatorio_comissao'       => 0,
         'ata_comissao'             => 0,
@@ -779,6 +799,23 @@ HTML,
         return $this->tipo === 'modelo' ? !empty($this->conteudo) : $this->temArquivo();
     }
 
+    /**
+     * A peça está pronta? Depende do tipo — e é isso que a tela confundia.
+     *
+     * Modelo é texto que alguém assina; arquivo é documento que já vem assinado
+     * (ou publicado) de fora, e o sistema não o assina nunca — podeAssinar()
+     * exige tipo 'modelo'. Ainda assim o checklist media todas as peças por
+     * assinado(), então todo anexo ficava para sempre em "Preenchido — falta
+     * assinar", cobrando uma ação que não existe e para a qual não há botão.
+     *
+     * O avanço do trâmite (Chamamento::pendenciasDaEtapa) sempre soube da
+     * diferença; quem não sabia era a exibição.
+     */
+    public function concluida(): bool
+    {
+        return $this->tipo === 'modelo' ? $this->assinado() : $this->preenchido();
+    }
+
     // ------------------------------------------------------------------
     // Trâmite da Seleção — quem pode preencher/assinar e quando
     // ------------------------------------------------------------------
@@ -826,6 +863,26 @@ HTML,
     public function selecaoEtapa(): ?int
     {
         return $this->mapaEtapa()[$this->chave] ?? null;
+    }
+
+    /**
+     * Setor dono da peça fora do trâmite (fase do edital) — null quando a peça
+     * não é dessas ou a categoria não é chamamento público (dispensa e
+     * inexigibilidade seguem sem designação, como sempre estiveram).
+     */
+    public function setorPrevio(): ?string
+    {
+        return $this->categoria === 'chamamento_publico'
+            ? (self::SELECAO_SETOR_PREVIO[$this->chave] ?? null)
+            : null;
+    }
+
+    /** Fora do trâmite: sem etapa, só o setor decide. */
+    private function podeAgirNaFasePrevia(?User $user): bool
+    {
+        $setor = $this->setorPrevio();
+
+        return $setor === null || $user?->setor === $setor;
     }
 
     public function selecaoSetorAssinatura(): ?string
@@ -911,9 +968,9 @@ HTML,
     {
         $dono = $this->donoEmTramite();
 
-        // Sem trâmite (ou peça fora do fluxo): mantém o comportamento anterior.
+        // Fora do trâmite (fase do edital): sem etapa, mas com dono.
         if (!$dono || $this->selecaoSetor() === null) {
-            return true;
+            return $this->podeAgirNaFasePrevia($user);
         }
 
         if ($dono->tramiteEncerrado() || $this->assinado()) {
@@ -947,7 +1004,10 @@ HTML,
         }
 
         $dono = $this->donoEmTramite();
-        $rotulo = fn (?string $s) => $dono?->tramiteSetorLabel($s) ?? (string) $s;
+        // Peça da fase do edital não tem trâmite de onde tirar o rótulo — cai
+        // na lotação, senão a frase sairia com a sigla crua ("o setor pj").
+        $rotulo = fn (?string $s) => $dono?->tramiteSetorLabel($s)
+            ?? (User::LOTACOES[$s] ?? strtoupper((string) $s));
 
         if (!$user) {
             return 'Entre no sistema para preencher este documento.';
@@ -961,7 +1021,8 @@ HTML,
             return 'O trâmite já foi concluído — os documentos ficam apenas para consulta.';
         }
 
-        $setorDaPeca = $this->selecaoSetor();
+        // Fora do trâmite, quem manda é o setor prévio (fase do edital).
+        $setorDaPeca = $this->selecaoSetor() ?? $this->setorPrevio();
 
         if ($user->setor !== $setorDaPeca) {
             // A OSC vê o próprio setor como 'osc', mas não é lotação de servidor.
@@ -974,6 +1035,11 @@ HTML,
         // Setor certo, mas a OSC não é a dona desta parceria.
         if ($setorDaPeca === 'osc' && !$this->oscDona($user, $dono)) {
             return 'Este documento pertence a outra OSC.';
+        }
+
+        // Peça fora do trâmite: não há etapa a explicar.
+        if ($this->selecaoEtapa() === null) {
+            return 'Este documento já foi assinado e não pode mais ser alterado.';
         }
 
         // Setor certo — só não chegou a vez.
@@ -1016,7 +1082,7 @@ HTML,
         $dono = $this->donoEmTramite();
 
         if (!$dono || $this->selecaoSetor() === null) {
-            return true;
+            return $this->podeAgirNaFasePrevia($user);
         }
 
         if ($dono->tramiteEncerrado()) {

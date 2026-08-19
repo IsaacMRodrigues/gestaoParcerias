@@ -1066,8 +1066,19 @@ OSC é organização, e organização tem equipe. O vínculo mora em **`users.os
     (o Termo é emitido pela **SCP** na etapa 4 e assinado pelo **Prefeito** na 5). `podePreencher()`,
     `podeAssinar()` e `motivoTrava()` travam a peça fora da vez — validado também no `PecaController`
     (salvar/assinar/upload/puxar/remover), não só na interface
+  - **Peças anteriores ao julgamento** (fase do edital) seguem **fora do trâmite** — precisam estar
+    prontas antes de a Seleção começar, então não têm etapa. Mas têm dono, em
+    **`Peca::SELECAO_SETOR_PREVIO`**: Edital, Anexos e Comissão → **UG**; Parecer jurídico → **PJ**;
+    Publicação do extrato → **SCP**. Sem esse mapa qualquer usuário com a permissão de chamamentos
+    assinava todas, e a UG acabava assinando o próprio parecer jurídico — quem pede o parecer o emitia.
+    É segregação de função ("não é o seu papel"), não ordem ("não é a sua vez")
+  - **`Peca::concluida()`** decide o estado por tipo: *modelo* exige assinatura, *arquivo* basta estar
+    anexado (o sistema nunca assina upload — `podeAssinar()` exige `tipo === 'modelo'`). O checklist
+    media tudo por `assinado()` e deixava todo anexo preso em *"Preenchido — falta assinar"*, cobrando
+    uma ação inexistente. `Chamamento::pendenciasDaEtapa()` sempre soube a diferença
   - Fora do Chamamento Público (Dispensa, Aditivo, Apostilamento) **nada muda**: sem trâmite, quem tem
-    a permissão da tela continua editando
+    a permissão da tela continua editando — inclusive as peças da fase do edital, que só têm setor
+    designado no Chamamento Público
   - Interface: **trilha das 5 etapas** com etapa atual/concluídas, lista de pendências, botões
     Encaminhar/Devolver/Encerrar e histórico de movimentações na tela de Seleção; no checklist as peças
     travadas mostram 🔒 com o motivo
