@@ -6,7 +6,6 @@ use App\Http\Requests\UserRequest;
 use App\Models\User;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
-use Illuminate\Validation\Rule;
 use Illuminate\View\View;
 use Spatie\Permission\Models\Role;
 
@@ -26,51 +25,52 @@ class UserController extends Controller
     public function pendentes(): View
     {
         $pendentes = User::pendentes()
-            ->with(['orgao', 'criadoPor'])
+            ->with(['orgao', 'criadoPor', 'roles'])
             ->orderBy('created_at')
             ->paginate(15);
 
-        $roles  = Role::where('name', '!=', 'responsavel_legal')->orderBy('name')->get();
-        $orgaos = \App\Models\Orgao::where('status', true)->orderBy('name')->get();
-
-        return view('usuarios.pendentes', compact('pendentes', 'roles', 'orgaos'));
+        // A tela virou aprovar/recusar: não monta mais formulário de perfis
+        // nem de lotação, então não precisa das listas.
+        return view('usuarios.pendentes', compact('pendentes'));
     }
 
     /**
      * Aprova o cadastro: define os perfis (e confirma setor/UG) e libera o acesso.
      */
+    /**
+     * Aprovar é decidir sobre o cadastro, não montá-lo.
+     *
+     * Os perfis são escolhidos por quem cadastra — o responsável do setor, que
+     * sabe a função da pessoa — e o setor/órgão vêm do próprio cadastro. Aqui
+     * ficou só aprovar ou recusar. Quando não há perfil indicado (auto-cadastro,
+     * que não passa por chefe), a conta é liberada sem acesso a módulo algum e
+     * os perfis se definem em Cadastros → Usuários, onde eles moram.
+     */
     public function aprovar(Request $request, User $usuario): RedirectResponse
     {
         abort_unless($usuario->isPendente(), 422, 'Este cadastro não está pendente.');
 
-        $data = $request->validate([
-            'roles'    => ['required', 'array', 'min:1'],
-            'roles.*'  => ['string', 'exists:roles,name'],
-            'setor'    => ['nullable', Rule::in(array_keys(User::LOTACOES))],
-            'orgao_id' => ['nullable', 'exists:orgaos,id'],
-        ]);
-
-        // Perfis exclusivos exigem o setor de lotação correspondente.
-        $setor = $data['setor'] ?? $usuario->setor;
-        foreach ($data['roles'] as $role) {
+        // Invariante que a tela antiga garantia ao atribuir os perfis: perfil
+        // exclusivo exige o setor correspondente. Continua valendo — só que
+        // agora como conferência do que já foi escolhido, não como formulário.
+        foreach ($usuario->roles->pluck('name') as $role) {
             $exigido = User::PERFIS_EXCLUSIVOS[$role] ?? null;
-            if ($exigido && $setor !== $exigido) {
+            if ($exigido && $usuario->setor !== $exigido) {
                 $label = User::$roleLabels[$role] ?? $role;
                 $lot   = User::LOTACOES[$exigido] ?? $exigido;
-                return back()->withErrors(['roles' => "O perfil \"{$label}\" é exclusivo do setor \"{$lot}\" — ajuste o setor para atribuí-lo."]);
+                return back()->withErrors(['roles' =>
+                    "O perfil \"{$label}\" é exclusivo do setor \"{$lot}\", e este cadastro está em "
+                    .'"'.($usuario->setorLabel() ?: '—').'". Ajuste em Cadastros → Usuários antes de aprovar.']);
             }
         }
 
         $usuario->update([
-            'setor'            => $data['setor'] ?? $usuario->setor,
-            'orgao_id'         => $data['orgao_id'] ?? $usuario->orgao_id,
             'status'           => true,
             'approval_status'  => 'aprovado',
             'approved_at'      => now(),
             'approved_by'      => auth()->id(),
             'rejeitado_motivo' => null,
         ]);
-        $usuario->syncRoles($data['roles']);
 
         return back()->with('success', "Acesso de {$usuario->name} aprovado.");
     }
@@ -101,7 +101,7 @@ class UserController extends Controller
 
     public function create(): View
     {
-        $roles = Role::where('name', '!=', 'responsavel_legal')->orderBy('name')->get();
+        $roles = Role::whereNotIn('name', User::PAPEIS_OSC)->orderBy('name')->get();
 
         return view('usuarios.create', compact('roles'));
     }
@@ -128,7 +128,7 @@ class UserController extends Controller
 
     public function edit(User $usuario): View
     {
-        $roles = Role::where('name', '!=', 'responsavel_legal')->orderBy('name')->get();
+        $roles = Role::whereNotIn('name', User::PAPEIS_OSC)->orderBy('name')->get();
 
         return view('usuarios.edit', compact('usuario', 'roles'));
     }

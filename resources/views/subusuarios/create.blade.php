@@ -66,8 +66,27 @@
                         <x-input-label for="solicitacao_obs" value="Função / observação" />
                         <textarea id="solicitacao_obs" name="solicitacao_obs" rows="2" required
                                   class="block mt-1 w-full border-gray-300 rounded-md shadow-sm text-sm focus:ring-brand-500 focus:border-brand-500"
-                                  placeholder="Ex.: função do usuário, perfis sugeridos...">{{ old('solicitacao_obs') }}</textarea>
+                                  placeholder="Ex.: coordena o almoxarifado da Secretaria">{{ old('solicitacao_obs') }}</textarea>
                         <x-input-error :messages="$errors->get('solicitacao_obs')" class="mt-1" />
+                    </div>
+
+                    <div>
+                        <x-input-label value="Perfis do usuário" />
+                        <p class="text-xs text-gray-500 mt-0.5 mb-2">
+                            Você define o que a pessoa faz no setor — o administrador apenas confere e libera.
+                            Perfis de acesso total, auditoria e Gabinete continuam sendo atribuídos só pela TI.
+                        </p>
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-x-4 gap-y-1.5">
+                            @foreach($perfis as $slug => $rotulo)
+                                <label class="flex items-center gap-2 text-sm text-gray-700">
+                                    <input type="checkbox" name="perfis[]" value="{{ $slug }}"
+                                           @checked(in_array($slug, old('perfis', [])))
+                                           class="rounded border-gray-300 text-brand-600 focus:ring-brand-500">
+                                    {{ $rotulo }}
+                                </label>
+                            @endforeach
+                        </div>
+                        <x-input-error :messages="$errors->get('perfis')" class="mt-1" />
                     </div>
 
                     <div class="flex items-center justify-end gap-3 pt-2">

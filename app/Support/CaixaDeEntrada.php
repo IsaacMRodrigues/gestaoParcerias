@@ -9,7 +9,7 @@ use App\Models\User;
 use Illuminate\Support\Collection;
 
 /**
- * O que está parado esperando o setor do usuário — nos três trâmites.
+ * O que está parado esperando o setor do usuário.
  *
  * A caixa de entrada nasceu olhando só para o Planejamento (Processo), e por
  * isso servia apenas aos quatro setores daquele fluxo. Quem atua na Seleção ou
@@ -19,8 +19,9 @@ use Illuminate\Support\Collection;
  * Processo::SETORES.
  *
  * Cada trâmite guarda o setor da vez numa coluna própria (setor_atual,
- * selecao_setor, celebracao_setor); esta classe pergunta as três e devolve uma
- * lista só, ordenada pelo que espera há mais tempo.
+ * selecao_setor, celebracao_setor); a análise de proposta não tem coluna
+ * nenhuma — é da UG do órgão do chamamento. Esta classe pergunta as quatro
+ * fontes e devolve uma lista só, ordenada pelo que espera há mais tempo.
  */
 class CaixaDeEntrada
 {
@@ -38,6 +39,7 @@ class CaixaDeEntrada
         $itens = collect()
             ->concat(self::processos($user))
             ->concat(self::selecoes($user))
+            ->concat(self::analiseDePropostas($user))
             ->concat(self::celebracoes($user))
             ->sortBy('desde')   // o mais antigo primeiro: é o que está esperando há mais tempo
             ->values();
@@ -111,6 +113,50 @@ class CaixaDeEntrada
                 'aguardaRecebimento' => false,
                 'url'   => route('chamamentos.selecao', $c),
                 'desde' => $c->updated_at,
+            ]);
+    }
+
+    /**
+     * Análise: propostas que a OSC submeteu e ainda esperam a Unidade Gestora.
+     *
+     * Era o único trabalho do sistema que não tinha fila: a proposta chegava
+     * pelo portal, caía na listagem de Propostas e ficava lá, sem que nada
+     * avisasse ninguém — nem a caixa (que só olhava os três trâmites) nem o
+     * painel (cujo card conta apenas 'em_analise'). Quem submetia esperava
+     * análise que ninguém sabia estar pendente.
+     *
+     * Análise de proposta é da UG do órgão que abriu o chamamento — por isso o
+     * filtro por setor, e não a caixa inteira para todo mundo. O recorte por
+     * órgão vem de visiveisPara(), o mesmo da listagem, para a caixa nunca
+     * mostrar o que a tela esconde.
+     *
+     * Fica na fila enquanto houver o que fazer: 'submetida' (ninguém pegou) e
+     * 'em_analise' (alguém pegou e não terminou). Sair da fila é decidir —
+     * aprovar, reprovar ou cancelar.
+     */
+    private static function analiseDePropostas(User $user): Collection
+    {
+        if ($user->setor !== 'ug' || !$user->can('propostas')) {
+            return collect();
+        }
+
+        return Proposta::with(['osc', 'chamamento.programa.orgao'])
+            ->visiveisPara($user)
+            ->whereIn('status', ['submetida', 'em_analise'])
+            ->get()
+            ->map(fn (Proposta $p) => [
+                'tramite'   => 'Análise',
+                'titulo'    => $p->titulo,
+                'subtitulo' => collect([
+                    $p->osc?->name,
+                    $p->chamamento?->titulo,
+                    $p->status === 'submetida' ? 'Aguardando análise' : 'Em análise',
+                ])->filter()->implode(' · '),
+                'aguardaRecebimento' => false,
+                'url'   => route('propostas.show', $p),
+                // submitted_at é quando a espera começou; updated_at mudaria a
+                // cada edição e faria a proposta parecer recém-chegada.
+                'desde' => $p->submitted_at ?? $p->updated_at,
             ]);
     }
 

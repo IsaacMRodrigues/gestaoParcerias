@@ -76,6 +76,24 @@ class User extends Authenticatable
     /**
      * Perfis exclusivos de um setor: só podem ser atribuídos a quem é lotado nele.
      */
+    /**
+     * Perfis que o chefe de setor NÃO concede — só o administrador do sistema.
+     *
+     * São os que ultrapassam a própria Secretaria: acesso total (TI), leitura
+     * de todos os órgãos (auditorias), o Gabinete, e o próprio posto de chefia
+     * (senão um responsável de UG nomearia outro). Sem essa lista, delegar a
+     * atribuição de perfis viraria escalada de privilégio: quem cadastra
+     * poderia conceder a si mesmo, por interposta conta, mais do que tem.
+     */
+    public const PERFIS_VEDADOS_AO_CHEFE = [
+        'administrador_setorial',
+        'auditor_externo',
+        'auditor_geral',
+        'prefeito_municipal',
+        'responsavel_unidade_gestora',
+        'analista',   // em descontinuação: não se concede mais
+    ];
+
     public const PERFIS_EXCLUSIVOS = [
         'administrador_setorial'           => 'ti',
         'responsavel_unidade_gestora'      => 'ug',
@@ -266,6 +284,30 @@ class User extends Authenticatable
      * portal público. Usado para manter o menu administrativo no topo mesmo
      * quando o interno navega pelo portal.
      */
+    /**
+     * Perfis que este usuário pode conceder ao cadastrar alguém.
+     *
+     * Deriva das regras em vez de repetir uma lista: tira os papéis de OSC, os
+     * vedados ao chefe e os que são exclusivos de OUTRO setor — o subusuário
+     * herda a lotação de quem o cadastra, então conceder um perfil de outro
+     * setor seria atribuir algo que o cadastrado não poderia exercer.
+     *
+     * @return array<string,string> slug => rótulo
+     */
+    public function perfisQuePodeConceder(): array
+    {
+        $meuSetor = $this->setor;
+
+        return collect(self::$roleLabels)
+            ->reject(fn ($rotulo, $slug) => in_array($slug, self::PAPEIS_OSC, true))
+            ->reject(fn ($rotulo, $slug) => in_array($slug, self::PERFIS_VEDADOS_AO_CHEFE, true))
+            ->reject(function ($rotulo, $slug) use ($meuSetor) {
+                $exigido = self::PERFIS_EXCLUSIVOS[$slug] ?? null;
+                return $exigido !== null && $exigido !== $meuSetor;
+            })
+            ->all();
+    }
+
     public function temAcessoInterno(): bool
     {
         return $this->roles->contains(fn ($role) => !in_array($role->name, self::PAPEIS_OSC, true));

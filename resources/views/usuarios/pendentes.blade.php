@@ -40,44 +40,37 @@
                         </div>
                     </div>
 
-                    {{-- Aprovar: atribuir perfis + confirmar setor/UG --}}
+                    {{-- Aprovar/recusar apenas. Os perfis vêm de quem cadastrou
+                         (que sabe a função da pessoa) e o setor, do cadastro. Aqui
+                         o administrador confere e decide — não redefine. --}}
                     <form action="{{ route('usuarios.aprovar', $u) }}" method="POST" class="mt-4 border-t border-gray-100 pt-4 space-y-3">
                         @csrf @method('PATCH')
 
-                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                            <div>
-                                <x-input-label value="Setor de lotação" />
-                                <select name="setor" class="mt-1 w-full border-gray-300 rounded-md shadow-sm text-sm focus:ring-brand-500 focus:border-brand-500">
-                                    <option value="">—</option>
-                                    @foreach(\App\Models\User::LOTACOES as $valor => $rotulo)
-                                        <option value="{{ $valor }}" @selected($u->setor === $valor)>{{ $rotulo }}</option>
-                                    @endforeach
-                                </select>
-                            </div>
-                            <div>
-                                <x-input-label value="Secretaria / Unidade Gestora" />
-                                <select name="orgao_id" class="mt-1 w-full border-gray-300 rounded-md shadow-sm text-sm focus:ring-brand-500 focus:border-brand-500">
-                                    <option value="">—</option>
-                                    @foreach($orgaos as $orgao)
-                                        <option value="{{ $orgao->id }}" @selected($u->orgao_id === $orgao->id)>
-                                            {{ $orgao->sigla ? $orgao->sigla . ' — ' : '' }}{{ $orgao->name }}
-                                        </option>
-                                    @endforeach
-                                </select>
-                            </div>
-                        </div>
+                        @php $perfis = $u->roles->pluck('name')->all(); @endphp
 
                         <div>
-                            <x-input-label value="Perfis a atribuir" />
-                            <div class="mt-1 grid grid-cols-1 sm:grid-cols-2 gap-x-4 gap-y-1.5">
-                                @foreach($roles as $role)
-                                    <label class="flex items-center gap-2 text-sm text-gray-700">
-                                        <input type="checkbox" name="roles[]" value="{{ $role->name }}"
-                                               class="rounded border-gray-300 text-brand-600 focus:ring-brand-500">
-                                        {{ \App\Models\User::$roleLabels[$role->name] ?? $role->name }}
-                                    </label>
-                                @endforeach
-                            </div>
+                            <x-input-label value="Perfis solicitados" />
+                            @if($perfis)
+                                <div class="mt-1 flex flex-wrap gap-1.5">
+                                    @foreach($perfis as $perfil)
+                                        <span class="px-2 py-1 text-xs font-medium bg-brand-50 text-brand-800 ring-1 ring-brand-100 rounded-full">
+                                            {{ \App\Models\User::$roleLabels[$perfil] ?? $perfil }}
+                                        </span>
+                                    @endforeach
+                                </div>
+                                @if($u->criadoPor)
+                                    <p class="text-xs text-gray-500 mt-1.5">Indicados por {{ $u->criadoPor->name }}.</p>
+                                @endif
+                            @else
+                                {{-- Auto-cadastro não passa por chefe: ninguém indicou perfis.
+                                     Aprovar aqui libera o login; os perfis se definem depois em
+                                     Cadastros → Usuários, que é onde eles moram. --}}
+                                <p class="mt-1 text-sm text-accent-800 bg-accent-50 border border-accent-200 rounded-lg px-3 py-2">
+                                    Nenhum perfil indicado — este cadastro não veio de um responsável de setor.
+                                    Ao aprovar, a pessoa entra sem acesso a nenhum módulo; defina os perfis em
+                                    <a href="{{ route('usuarios.edit', $u) }}" class="underline font-medium">Cadastros → Usuários</a>.
+                                </p>
+                            @endif
                             <x-input-error :messages="$errors->get('roles')" class="mt-1" />
                         </div>
 

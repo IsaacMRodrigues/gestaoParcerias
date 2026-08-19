@@ -6,6 +6,7 @@ use App\Models\User;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Validation\Rule;
 use Illuminate\Validation\Rules;
 use Illuminate\View\View;
 
@@ -31,7 +32,11 @@ class SubusuarioController extends Controller
         abort_if(! auth()->user()->orgao_id, 403,
             'Seu usuário não está vinculado a uma Secretaria/Unidade Gestora.');
 
-        return view('subusuarios.create');
+        // Quem cadastra escolhe os perfis: é quem sabe o que a pessoa vai
+        // fazer no setor. O administrador deixa de adivinhar isso na aprovação.
+        $perfis = auth()->user()->perfisQuePodeConceder();
+
+        return view('subusuarios.create', compact('perfis'));
     }
 
     public function store(Request $request): RedirectResponse
@@ -41,6 +46,8 @@ class SubusuarioController extends Controller
         abort_if(! $ug->orgao_id, 403,
             'Seu usuário não está vinculado a uma Secretaria/Unidade Gestora.');
 
+        $permitidos = $ug->perfisQuePodeConceder();
+
         $request->validate([
             'name'            => ['required', 'string', 'max:255'],
             'email'           => ['required', 'string', 'lowercase', 'email', 'max:255', 'unique:users,email'],
@@ -49,12 +56,18 @@ class SubusuarioController extends Controller
             'phone'           => ['nullable', 'string', 'max:20'],
             'password'        => ['required', 'confirmed', Rules\Password::defaults()],
             'solicitacao_obs' => ['required', 'string', 'max:1000'],
+            // A lista permitida vem do servidor, não do formulário: sem isso
+            // bastaria forjar o POST para conceder 'administrador_setorial'.
+            'perfis'          => ['required', 'array', 'min:1'],
+            'perfis.*'        => ['string', Rule::in(array_keys($permitidos))],
         ], [
             'matricula.required'       => 'Informe a matrícula do servidor.',
             'solicitacao_obs.required' => 'Informe a função / observação do usuário.',
+            'perfis.required'          => 'Escolha ao menos um perfil para o usuário.',
+            'perfis.*.in'              => 'Perfil fora do que você pode conceder.',
         ]);
 
-        User::create([
+        $usuario = User::create([
             'name'            => $request->name,
             'email'           => $request->email,
             'matricula'       => $request->matricula,
@@ -69,7 +82,13 @@ class SubusuarioController extends Controller
             'solicitacao_obs' => $request->solicitacao_obs,
         ]);
 
+        // Os perfis já ficam no usuário, mas ele segue 'pendente' e não
+        // autentica (podeAutenticar exige aprovado + ativo). Assim a tela de
+        // aprovação mostra a escolha de quem cadastrou, em vez de o
+        // administrador ter de adivinhar a função da pessoa.
+        $usuario->syncRoles($request->perfis);
+
         return redirect()->route('subusuarios.index')->with('success',
-            'Subusuário criado. Aguarde a aprovação do administrador para liberar o acesso.');
+            'Subusuário criado com os perfis escolhidos. Aguarde a aprovação do administrador para liberar o acesso.');
     }
 }

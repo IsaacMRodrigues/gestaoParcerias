@@ -20,8 +20,11 @@
     $chamamentosTotal   = Chamamento::count();
     $chamamentosAbertos = Chamamento::whereIn('status', ['publicado', 'em_inscricao'])->count();
 
-    $propostasTotal   = Proposta::count();
-    $propostasAnalise = Proposta::where('status', 'em_analise')->count();
+    $propostasTotal = Proposta::count();
+    // Contava só 'em_analise', então a proposta recém-submetida — o trabalho
+    // que mais espera alguém — ficava fora do número e o card marcava zero com
+    // proposta parada na fila. As duas situações são pendência da UG.
+    $propostasAnalise = Proposta::whereIn('status', ['submetida', 'em_analise'])->count();
 
     $instrumentosTotal    = Instrumento::count();
     $instrumentosVigentes = Instrumento::where('status', 'vigente')->count();
@@ -119,7 +122,7 @@
                 @endcan
 
                 @can('propostas')
-                    <x-stat-card label="Propostas em análise" icon="propostas" :value="$propostasAnalise" :sub="$propostasTotal.' no total'"
+                    <x-stat-card label="Propostas a analisar" icon="propostas" :value="$propostasAnalise" :sub="$propostasTotal.' no total'"
                                  color="accent" :href="route('propostas.index')" />
                 @endcan
 

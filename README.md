@@ -137,6 +137,34 @@ São 22 perfis. Um usuário pode ter **vários**; os marcados 🔒 são **exclus
 | `responsavel_legal` | Responsável Legal | OSC | só portal |
 | `membro_osc` | Membro da OSC | OSC | só portal (prepara; **não submete nem recorre**) |
 
+### Quem atribui os perfis
+
+Quem **cadastra** escolhe os perfis — é quem sabe o que a pessoa vai fazer no setor. A tela
+`usuarios/pendentes` virou **apenas aprovar ou recusar**: mostra os perfis indicados (somente
+leitura) e quem os indicou, sem formulário de perfis nem de lotação. Atribuir perfil acontece em
+dois lugares, nunca na aprovação — na **criação** (responsável do setor) e em
+**Cadastros → Usuários** (administrador).
+
+- `User::perfisQuePodeConceder()` deriva a lista das regras, em vez de repetir um rol: tira os
+  papéis de OSC, os de `PERFIS_VEDADOS_AO_CHEFE` e os exclusivos de **outro** setor (o subusuário
+  herda a lotação de quem o cadastra, então conceder perfil de outro setor seria dar algo
+  inexercível). Para um chefe de UG sobram 9 perfis operacionais.
+- **`User::PERFIS_VEDADOS_AO_CHEFE`** — só a TI concede: `administrador_setorial`,
+  `auditor_externo`, `auditor_geral`, `prefeito_municipal`, `responsavel_unidade_gestora`
+  (senão um chefe nomearia outro) e `analista` (em descontinuação).
+- A validação usa a lista **do servidor**, não a do formulário: forjar o POST com
+  `administrador_setorial` é rejeitado, não ignorado em silêncio.
+- O usuário nasce com os perfis mas `approval_status = 'pendente'`, e `podeAutenticar()` exige
+  aprovado **e** ativo — ter papel antes da aprovação não dá acesso a nada.
+- `aprovar()` não recebe mais perfis; confere a invariante que a tela antiga garantia (perfil
+  exclusivo exige o setor correspondente) e recusa a aprovação com instrução, em vez de corrigir
+  em silêncio.
+- **Auto-cadastro (`/register`) não passa por chefe**, então chega sem perfil algum. A tela avisa
+  que a pessoa entrará sem acesso a módulo nenhum e aponta para a edição do usuário — antes esse
+  caso era resolvido no próprio formulário de aprovação, que deixou de existir.
+- `membro_osc` não pode ser oferecido a servidor (o tornaria externo). As listas de perfis do
+  admin excluem `User::PAPEIS_OSC`, não um nome de papel específico.
+
 ### Equipe da OSC (contas da organização)
 
 OSC é organização, e organização tem equipe. O vínculo mora em **`users.osc_id`**
@@ -248,7 +276,17 @@ OSC é organização, e organização tem equipe. O vínculo mora em **`users.os
   - Caso mais claro: o **Gabinete do Prefeito** assina o Termo de Adjudicação e Homologação na
     Seleção e nunca teve caixa nenhuma — não aparece em `Processo::SETORES`
   - **`App\Support\CaixaDeEntrada`** consulta os três trâmites (`setor_atual`, `selecao_setor`,
-    `celebracao_setor`) e devolve uma lista só, do que espera há mais tempo para o mais recente
+    `celebracao_setor`) **e a análise de propostas**, devolvendo uma lista só, do que espera há mais
+    tempo para o mais recente
+  - **Quarta fonte — "Análise"**: proposta submetida pela OSC era o único trabalho do sistema **sem
+    fila nenhuma**. Chegava pelo portal, caía na listagem de Propostas e ficava lá: a caixa só olhava
+    os três trâmites e o card do painel contava apenas `em_analise`, marcando **zero** com proposta
+    parada. Agora entram `submetida` e `em_analise` (as duas são pendência; sair da fila é decidir),
+    para quem é `setor === 'ug'` e tem `can('propostas')`, recortadas por `visiveisPara()` — o mesmo
+    escopo da listagem, para a caixa nunca mostrar o que a tela esconde. A espera conta de
+    `submitted_at`, não de `updated_at`, que faria a proposta parecer recém-chegada a cada edição
+  - O card do painel virou **"Propostas a analisar"** (`submetida` + `em_analise`). Marcar "Em
+    Análise" continua sendo ato explícito de quem analisa — abrir a proposta não muda status
   - Rota nova **`/caixa`**, fora dos grupos `permission:` — o que define a caixa é a **lotação**, não
     a permissão de um módulo. Amarrada a `permission:planejamento`, ela excluía o Responsável pela
     Publicação (só tem `chamamentos`), que nem abria a tela. `processos/caixa` redireciona para lá
