@@ -174,6 +174,13 @@
                                     </p>
                                 @endif
                             </div>
+                        @elseif(! auth()->user()->ehResponsavelLegalOsc())
+                            {{-- Membro da OSC vê que há prazo aberto, mas o
+                                 protocolo é do responsável legal. --}}
+                            <p class="text-sm text-gray-600 bg-gray-50 border border-gray-200 rounded-lg p-4">
+                                A fase recursal está aberta. O recurso precisa ser protocolado pelo
+                                <strong>responsável legal</strong> da organização.
+                            </p>
                         @else
                             <form action="{{ route('recursos.store', $chamamento) }}" method="POST"
                                   enctype="multipart/form-data" class="space-y-3"

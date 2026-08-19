@@ -8,12 +8,12 @@ use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Attributes\Hidden;
 use App\Models\Concerns\ImpedeExclusaoComVinculos;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
-use Illuminate\Database\Eloquent\Relations\HasOne;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Spatie\Permission\Traits\HasRoles;
 
-#[Fillable(['name', 'email', 'cpf', 'matricula', 'phone', 'status', 'setor', 'orgao_id', 'password', 'approval_status', 'approved_at', 'approved_by', 'created_by', 'solicitacao_obs', 'rejeitado_motivo'])]
+#[Fillable(['name', 'email', 'cpf', 'matricula', 'phone', 'status', 'setor', 'orgao_id', 'osc_id', 'password', 'approval_status', 'approved_at', 'approved_by', 'created_by', 'solicitacao_obs', 'rejeitado_motivo'])]
 #[Hidden(['password', 'remember_token'])]
 class User extends Authenticatable
 {
@@ -47,8 +47,15 @@ class User extends Authenticatable
         'prefeito_municipal'               => 'Prefeito Municipal',
         'responsavel_unidade_gestora'      => 'Responsável da Unidade Gestora',
         'responsavel_legal'                => 'Responsável Legal',
+        'membro_osc'                       => 'Membro da OSC',
         'responsavel_publicacao'           => 'Responsável pela Publicação',
     ];
+
+    /**
+     * Papéis que NÃO são da Administração: gente da OSC, que só acessa o
+     * portal. Quem tiver qualquer papel fora desta lista é usuário interno.
+     */
+    public const PAPEIS_OSC = ['responsavel_legal', 'membro_osc'];
 
     /**
      * Setores de lotação do usuário (mais amplo que os setores do trâmite).
@@ -159,9 +166,16 @@ class User extends Authenticatable
         return $this->hasMany(User::class, 'created_by');
     }
 
-    public function osc(): HasOne
+    /**
+     * A OSC de que este usuário faz parte.
+     *
+     * Era um hasOne sobre oscs.user_id, o que limitava cada OSC a uma única
+     * conta. Agora o vínculo mora em users.osc_id e a organização pode ter
+     * equipe; oscs.user_id ficou reservado ao responsável legal.
+     */
+    public function osc(): BelongsTo
     {
-        return $this->hasOne(Osc::class);
+        return $this->belongsTo(Osc::class);
     }
 
     // ------------------------------------------------------------------
@@ -254,7 +268,7 @@ class User extends Authenticatable
      */
     public function temAcessoInterno(): bool
     {
-        return $this->roles->contains(fn ($role) => $role->name !== 'responsavel_legal');
+        return $this->roles->contains(fn ($role) => !in_array($role->name, self::PAPEIS_OSC, true));
     }
 
     /**
@@ -269,7 +283,21 @@ class User extends Authenticatable
      */
     public function ehRepresentanteOsc(): bool
     {
-        return !$this->temAcessoInterno() && $this->osc()->exists();
+        return !$this->temAcessoInterno() && $this->osc_id !== null;
+    }
+
+    /**
+     * É o responsável legal da OSC — quem responde juridicamente por ela.
+     *
+     * Distinção que passou a existir quando a OSC ganhou equipe: todo mundo da
+     * organização prepara a proposta, mas submeter, recorrer e administrar os
+     * acessos são atos que vinculam a entidade, e ficam com uma pessoa só.
+     * A fonte da verdade é oscs.user_id, não o papel: papel se atribui por
+     * engano, a titularidade do cadastro não.
+     */
+    public function ehResponsavelLegalOsc(): bool
+    {
+        return $this->ehRepresentanteOsc() && $this->osc?->user_id === $this->id;
     }
 
     /** A OSC que o usuário representa — null para todo usuário interno. */

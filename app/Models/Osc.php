@@ -56,6 +56,22 @@ class Osc extends Model
         return $this->hasMany(Proposta::class);
     }
 
+    /**
+     * Contas de acesso da organização — o responsável legal e a equipe que ele
+     * cadastrou. Não confundir com membros(), que é o quadro/diretoria
+     * declarado no cadastro (documental, sem login).
+     */
+    public function usuarios(): HasMany
+    {
+        return $this->hasMany(User::class);
+    }
+
+    /** Quem responde legalmente pela OSC (dono do cadastro). */
+    public function responsavelLegal(): BelongsTo
+    {
+        return $this->user();
+    }
+
     public function membros(): HasMany
     {
         return $this->hasMany(OscMembro::class);

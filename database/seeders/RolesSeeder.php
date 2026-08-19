@@ -55,6 +55,7 @@ class RolesSeeder extends Seeder
         'aprovador_assinatura_eletronica'  => [], // módulo de assinatura (futuro)
         'analista'                         => [], // acesso básico, em descontinuação
         'responsavel_legal'                => [], // só portal
+        'membro_osc'                       => [], // equipe da OSC: portal, sem submeter/recorrer
     ];
 
     public function run(): void

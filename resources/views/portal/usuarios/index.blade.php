@@ -1,0 +1,109 @@
+<x-portal-layout>
+    <div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
+
+        <div class="flex items-center justify-between gap-4 mb-6">
+            <div>
+                <h1 class="text-2xl font-bold text-gray-900">Usuários da Organização</h1>
+                <p class="text-sm text-gray-500 mt-0.5">{{ $osc->name }} — CNPJ: {{ $osc->cnpj }}</p>
+            </div>
+            <a href="{{ route('portal.usuarios.create') }}" class="btn btn-primary shrink-0">
+                Cadastrar usuário
+            </a>
+        </div>
+
+        @if(session('success'))
+            <div class="mb-4 bg-brand-50 border border-brand-200 text-brand-800 px-4 py-3 rounded-lg text-sm">
+                {{ session('success') }}
+            </div>
+        @endif
+        @if(session('error'))
+            <div class="mb-4 bg-red-50 border border-red-200 text-red-800 px-4 py-3 rounded-lg text-sm">
+                {{ session('error') }}
+            </div>
+        @endif
+
+        {{-- Diz de saída o que cada tipo de conta pode fazer. Sem isso, a
+             diferença só apareceria quando o membro clicasse em "Submeter" e
+             levasse um 403 sem explicação. --}}
+        <div class="bg-gray-50 border border-gray-200 rounded-xl p-4 mb-6 text-sm text-gray-600">
+            <p class="font-medium text-gray-900 mb-1">Como funcionam os acessos</p>
+            <p>
+                Os <strong>membros</strong> preparam propostas, anexam documentos e acompanham o andamento.
+                <strong>Submeter proposta</strong> e <strong>protocolar recurso</strong> continuam com você,
+                responsável legal — são atos que vinculam a organização.
+            </p>
+        </div>
+
+        <div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+            <table class="min-w-full divide-y divide-gray-200 text-sm">
+                <thead class="bg-gray-50 text-left text-xs uppercase tracking-wide text-gray-500">
+                    <tr>
+                        <th class="px-5 py-3 font-medium">Usuário</th>
+                        <th class="px-5 py-3 font-medium">Função</th>
+                        <th class="px-5 py-3 font-medium">Acesso</th>
+                        <th class="px-5 py-3 font-medium text-right">Ação</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-gray-100">
+                    @foreach($usuarios as $usuario)
+                        @php $ehDono = $usuario->id === $osc->user_id; @endphp
+                        <tr class="{{ $usuario->status ? '' : 'bg-gray-50/70' }}">
+                            <td class="px-5 py-4">
+                                <p class="font-medium text-gray-900">{{ $usuario->name }}</p>
+                                <p class="text-xs text-gray-500">{{ $usuario->email }}</p>
+                            </td>
+                            <td class="px-5 py-4">
+                                @if($ehDono)
+                                    <span class="px-2 py-1 text-xs font-medium bg-brand-100 text-brand-800 rounded-full">
+                                        Responsável Legal
+                                    </span>
+                                @else
+                                    <span class="px-2 py-1 text-xs font-medium bg-slate-100 text-slate-700 rounded-full">
+                                        Membro
+                                    </span>
+                                    @if($usuario->solicitacao_obs)
+                                        <p class="text-xs text-gray-500 mt-1">{{ $usuario->solicitacao_obs }}</p>
+                                    @endif
+                                @endif
+                            </td>
+                            <td class="px-5 py-4">
+                                @if($usuario->status)
+                                    <span class="inline-flex items-center gap-1.5 text-brand-700">
+                                        <span class="w-1.5 h-1.5 rounded-full bg-brand-500"></span> Ativo
+                                    </span>
+                                @else
+                                    <span class="inline-flex items-center gap-1.5 text-gray-500">
+                                        <span class="w-1.5 h-1.5 rounded-full bg-gray-400"></span> Suspenso
+                                    </span>
+                                @endif
+                            </td>
+                            <td class="px-5 py-4 text-right">
+                                @if($ehDono)
+                                    {{-- Sem ação: a conta do responsável legal é
+                                         o próprio cadastro da OSC. --}}
+                                    <span class="text-xs text-gray-400">—</span>
+                                @else
+                                    <form method="POST" action="{{ route('portal.usuarios.acesso', $usuario) }}">
+                                        @csrf
+                                        @method('PATCH')
+                                        <button type="submit" class="btn btn-outline btn-sm">
+                                            {{ $usuario->status ? 'Suspender' : 'Reativar' }}
+                                        </button>
+                                    </form>
+                                @endif
+                            </td>
+                        </tr>
+                    @endforeach
+                </tbody>
+            </table>
+        </div>
+
+        @if($usuarios->count() === 1)
+            <p class="text-sm text-gray-500 mt-4">
+                Só a sua conta por enquanto. Cadastre quem trabalha nas propostas para que cada pessoa
+                entre com o próprio login — assim fica registrado quem enviou cada documento.
+            </p>
+        @endif
+
+    </div>
+</x-portal-layout>

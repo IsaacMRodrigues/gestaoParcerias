@@ -148,6 +148,14 @@
                                 </a>
                             @endif
 
+                            {{-- Só o responsável legal administra a equipe da OSC. --}}
+                            @if(auth()->user()->ehResponsavelLegalOsc())
+                                <a href="{{ route('portal.usuarios.index') }}"
+                                   class="{{ request()->routeIs('portal.usuarios.*') ? 'text-brand-700 font-semibold' : 'text-gray-600 hover:text-brand-700' }} transition">
+                                    Usuários
+                                </a>
+                            @endif
+
                             <div x-data="{ open: false }" class="relative">
                                 <button @click="open = !open" @click.outside="open = false"
                                         class="flex items-center gap-1 text-gray-600 hover:text-gray-900 transition">

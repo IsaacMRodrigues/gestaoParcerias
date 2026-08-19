@@ -166,6 +166,11 @@ class PortalController extends Controller
         $osc = auth()->user()->oscVinculada();
         abort_unless($osc && $proposta->osc_id === $osc->id && $proposta->status === 'rascunho', 403);
 
+        // Submeter é ato que vincula a entidade ao que foi proposto. A equipe
+        // monta a proposta; quem a apresenta é quem responde por ela.
+        abort_unless(auth()->user()->ehResponsavelLegalOsc(), 403,
+            'Somente o responsável legal da OSC pode submeter a proposta.');
+
         $proposta->update(['status' => 'submetida', 'submitted_at' => now()]);
 
         return redirect()->route('portal.proposta.show', $proposta)

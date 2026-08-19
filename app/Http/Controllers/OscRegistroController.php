@@ -32,7 +32,7 @@ class OscRegistroController extends Controller
 
             $user->assignRole('responsavel_legal');
 
-            Osc::create([
+            $osc = Osc::create([
                 'user_id'     => $user->id,
                 'name'        => $request->osc_name,
                 'cnpj'        => $request->cnpj,
@@ -52,6 +52,11 @@ class OscRegistroController extends Controller
                 'cep'         => $request->cep,
                 'status'      => true,
             ]);
+
+            // Os dois lados do vínculo: oscs.user_id marca quem responde
+            // legalmente; users.osc_id é o que dá acesso ao portal (e o que
+            // permite à organização ter mais de uma conta).
+            $user->update(['osc_id' => $osc->id]);
 
             Auth::login($user);
         });

@@ -17,14 +17,25 @@
                     {{ \App\Models\Proposta::STATUS[$proposta->status] }}
                 </span>
                 @if($proposta->status === 'rascunho')
-                    <form action="{{ route('portal.proposta.submeter', $proposta) }}" method="POST"
-                          data-confirm="Confirma a submissão? Após isso não será possível editar.">
-                        @csrf @method('PATCH')
-                        <button type="submit"
-                                class="btn btn-primary">
-                            Submeter Proposta
-                        </button>
-                    </form>
+                    {{-- A equipe monta a proposta; apresentá-la é ato do
+                         responsável legal. Em vez de esconder o botão e deixar
+                         o membro sem saber o que falta, a tela diz de quem é a
+                         vez — mesmo princípio do checklist dos trâmites. --}}
+                    @if(auth()->user()->ehResponsavelLegalOsc())
+                        <form action="{{ route('portal.proposta.submeter', $proposta) }}" method="POST"
+                              data-confirm="Confirma a submissão? Após isso não será possível editar.">
+                            @csrf @method('PATCH')
+                            <button type="submit"
+                                    class="btn btn-primary">
+                                Submeter Proposta
+                            </button>
+                        </form>
+                    @else
+                        <span class="inline-block px-3 py-2 text-xs font-medium text-gray-600 bg-gray-100 border border-gray-200 rounded-lg">
+                            Pronta para submissão —
+                            {{ $proposta->osc->resp_nome ?: 'o responsável legal' }} precisa submeter
+                        </span>
+                    @endif
                 @endif
             </div>
         </div>

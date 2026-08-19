@@ -19,6 +19,7 @@ use App\Http\Controllers\OscController;
 use App\Http\Controllers\OscRegistroController;
 use App\Http\Controllers\ParecerController;
 use App\Http\Controllers\PecaController;
+use App\Http\Controllers\OscUsuarioController;
 use App\Http\Controllers\PortalController;
 use App\Http\Controllers\ProcessoController;
 use App\Http\Controllers\ProcessoPecaController;
@@ -65,6 +66,16 @@ Route::middleware(['auth', 'osc'])->group(function () {
     Route::patch('/portal/propostas/{proposta}/submeter', [PortalController::class, 'submeterProposta'])->name('portal.proposta.submeter');
     // Recurso contra o resultado provisório (protocolo eletrônico pela OSC)
     Route::post('/portal/chamamentos/{chamamento}/recurso', [RecursoController::class, 'store'])->name('recursos.store');
+
+    // Equipe da OSC — o responsável legal cadastra as contas da organização.
+    // O controller confere a titularidade (oscs.user_id); o papel aqui é a
+    // primeira barreira, para o membro comum nem ver a rota.
+    Route::middleware('role:responsavel_legal')->group(function () {
+        Route::get('/portal/usuarios', [OscUsuarioController::class, 'index'])->name('portal.usuarios.index');
+        Route::get('/portal/usuarios/novo', [OscUsuarioController::class, 'create'])->name('portal.usuarios.create');
+        Route::post('/portal/usuarios', [OscUsuarioController::class, 'store'])->name('portal.usuarios.store');
+        Route::patch('/portal/usuarios/{usuario}/acesso', [OscUsuarioController::class, 'alternarAcesso'])->name('portal.usuarios.acesso');
+    });
 });
 
 // Recursos: download pela OSC autora ou pela equipe; resposta pela Unidade Gestora

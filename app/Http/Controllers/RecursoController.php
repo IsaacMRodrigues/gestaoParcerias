@@ -26,6 +26,11 @@ class RecursoController extends Controller
         $osc = auth()->user()->osc;
         abort_unless($osc, 403, 'Sua conta não está vinculada a uma OSC.');
 
+        // Recurso é peça que a entidade assina — mesma regra da submissão:
+        // a equipe prepara, o responsável legal protocola.
+        abort_unless(auth()->user()->ehResponsavelLegalOsc(), 403,
+            'Somente o responsável legal da OSC pode protocolar recurso.');
+
         abort_unless($chamamento->faseRecursalAberta(), 422,
             'A fase recursal deste chamamento não está aberta.');
 

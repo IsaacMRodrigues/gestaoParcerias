@@ -109,7 +109,7 @@ flowchart LR
 
 ## Perfis de usuário (lista oficial — Módulo 1)
 
-São 21 perfis. Um usuário pode ter **vários**; os marcados 🔒 são **exclusivos** de um setor
+São 22 perfis. Um usuário pode ter **vários**; os marcados 🔒 são **exclusivos** de um setor
 (só atribuíveis a quem é lotado nele).
 
 | Slug | Perfil | 🔒 Setor | Permissões |
@@ -135,6 +135,31 @@ São 21 perfis. Um usuário pode ter **vários**; os marcados 🔒 são **exclus
 | `auditor_geral` | Auditor Geral | — | todas (**somente leitura**) |
 | `analista` | Analista (em descontinuação) | — | acesso básico |
 | `responsavel_legal` | Responsável Legal | OSC | só portal |
+| `membro_osc` | Membro da OSC | OSC | só portal (prepara; **não submete nem recorre**) |
+
+### Equipe da OSC (contas da organização)
+
+OSC é organização, e organização tem equipe. O vínculo mora em **`users.osc_id`**
+(vários usuários → uma OSC); **`oscs.user_id`** ficou com o sentido estrito de
+*responsável legal* — quem responde juridicamente pela entidade.
+
+> Antes o vínculo existia só em `oscs.user_id`, o que amarrava cada OSC a uma conta:
+> cadastrar um segundo usuário significaria reapontar a coluna e desvincular o primeiro.
+> Na prática a saída era compartilhar a senha, e todo mundo atuava sob a mesma identidade.
+
+| Quem | Faz | Não faz |
+|---|---|---|
+| **Responsável legal** (`oscs.user_id`) | tudo do portal + **cadastra e suspende** a equipe | — |
+| **Membro** (`membro_osc`) | prepara proposta, anexa documentos, acompanha | **submeter proposta**, **protocolar recurso**, administrar acessos |
+
+- Tela: **Portal → Usuários** (`portal.usuarios.*`), visível só para o responsável legal.
+- O acesso vale na hora — a Prefeitura não gerencia o quadro de pessoal de entidade privada,
+  e o alcance é contido: o membro só enxerga a OSC a que pertence.
+- Em vez de excluir, **suspende-se** (`status`): a conta continua respondendo pelo que
+  enviou e assinou, mas para de autenticar.
+- Quem decide se alguém é "de dentro" é **`User::temAcessoInterno()`** — os middlewares
+  `staff` e `osc` são espelhos que perguntam a ele. Ao criar outro papel de OSC, some-o a
+  **`User::PAPEIS_OSC`** e os dois portões acompanham sozinhos.
 
 ### O que cada área de permissão libera (em telas)
 
