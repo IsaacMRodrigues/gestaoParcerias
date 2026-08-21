@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Chamamento;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Validation\Rule;
 
 /**
  * Trâmite da Seleção (Fluxo Seleção do cliente):
@@ -100,7 +101,93 @@ class SelecaoController extends Controller
      * Encerra a Seleção na última etapa (Prefeito, após assinar a homologação)
      * e devolve o chamamento à Unidade Gestora para a Celebração.
      */
-    public function concluir(Chamamento $chamamento): RedirectResponse
+    /**
+     * Propostas ainda sem decisão neste chamamento.
+     *
+     * Quem já foi aprovada ou reprovada saiu do julgamento; rascunho nunca
+     * chegou a ser apresentado.
+     */
+    private function propostasEmJulgamento(Chamamento $chamamento)
+    {
+        return $chamamento->propostas()
+            ->whereIn('status', ['submetida', 'em_analise'])
+            ->with('osc')
+            ->get();
+    }
+
+    /**
+     * Adjudicar: declarar quem venceu.
+     *
+     * O Termo que encerra a Seleção é de *Adjudicação* e Homologação —
+     * adjudicar é justamente atribuir o objeto ao vencedor. Até aqui esse ato
+     * não existia no sistema: a Seleção era encerrada, a mensagem prometia "segue
+     * para a Celebração" e nenhuma proposta mudava de status. Como a Celebração
+     * exige proposta 'aprovada', o fluxo morria num vão — o chamamento ficava
+     * encerrado e a parceria não tinha por onde continuar.
+     *
+     * As não escolhidas são reprovadas no mesmo ato: o resultado do julgamento
+     * é um só, e deixá-las 'submetida' significaria mantê-las na fila de
+     * análise para sempre.
+     */
+    private function adjudicarPropostas(Chamamento $chamamento, array $vencedoras): void
+    {
+        foreach ($this->propostasEmJulgamento($chamamento) as $proposta) {
+            $proposta->update([
+                'status' => in_array($proposta->id, $vencedoras) ? 'aprovada' : 'reprovada',
+            ]);
+        }
+    }
+
+    /**
+     * Regras da declaração de vencedoras, comuns ao encerramento e à
+     * declaração posterior (chamamentos encerrados antes deste ato existir).
+     */
+    private function validarVencedoras(Request $request, Chamamento $chamamento): array
+    {
+        $candidatas = $this->propostasEmJulgamento($chamamento);
+
+        if ($candidatas->isEmpty()) {
+            return [];   // chamamento deserto ou já julgado
+        }
+
+        $data = $request->validate([
+            // Ao menos uma: reprovar todas não pode ser efeito silencioso de um
+            // clique em "Encerrar". Chamamento fracassado se resolve reprovando
+            // as propostas uma a uma antes, na tela de cada uma.
+            'vencedoras'   => ['required', 'array', 'min:1'],
+            'vencedoras.*' => ['integer', Rule::in($candidatas->pluck('id')->all())],
+        ], [
+            'vencedoras.required' => 'Selecione a(s) proposta(s) vencedora(s) para adjudicar.',
+            'vencedoras.*.in'     => 'Proposta que não está em julgamento neste chamamento.',
+        ]);
+
+        return $data['vencedoras'];
+    }
+
+    /**
+     * Declara as vencedoras de um chamamento cuja Seleção já foi encerrada —
+     * o caso dos que foram homologados antes de a adjudicação existir.
+     */
+    public function adjudicar(Request $request, Chamamento $chamamento): RedirectResponse
+    {
+        abort_unless($chamamento->temTramiteSelecao(), 422,
+            'Dispensa/Inexigibilidade não passa por julgamento de propostas.');
+        abort_unless($chamamento->selecaoConcluida(), 422,
+            'A Seleção ainda não foi encerrada — a adjudicação acontece no encerramento.');
+        abort_unless(auth()->user()->setor === 'ug', 403,
+            'Apenas a Unidade Gestora declara o resultado do julgamento.');
+
+        $vencedoras = $this->validarVencedoras($request, $chamamento);
+        abort_if(empty($vencedoras), 422, 'Não há propostas em julgamento neste chamamento.');
+
+        $this->adjudicarPropostas($chamamento, $vencedoras);
+
+        return back()->with('success', count($vencedoras) === 1
+            ? 'Proposta adjudicada. A Celebração já pode ser iniciada.'
+            : count($vencedoras).' propostas adjudicadas. A Celebração já pode ser iniciada.');
+    }
+
+    public function concluir(Request $request, Chamamento $chamamento): RedirectResponse
     {
         $this->autorizarSetor($chamamento);
         abort_unless($chamamento->ultimaEtapaSelecao(), 422,
@@ -109,6 +196,10 @@ class SelecaoController extends Controller
         $pendentes = $chamamento->pendenciasSelecao();
         abort_unless(empty($pendentes), 422,
             'Conclua antes de encerrar: ' . implode(', ', $pendentes) . '.');
+
+        // Homologar sem dizer quem venceu era o que deixava a parceria sem
+        // continuidade — ver adjudicarPropostas().
+        $vencedoras = $this->validarVencedoras($request, $chamamento);
 
         $chamamento->selecaoTramitacoes()->create([
             'de_setor'    => $chamamento->selecao_setor,
@@ -125,7 +216,11 @@ class SelecaoController extends Controller
             'data_resultado'       => $chamamento->data_resultado ?: now()->toDateString(),
         ]);
 
+        $this->adjudicarPropostas($chamamento, $vencedoras);
+
         return redirect()->route('chamamentos.selecao', $chamamento)
-            ->with('success', 'Seleção encerrada e homologada. O chamamento segue para a Celebração.');
+            ->with('success', $vencedoras
+                ? 'Seleção encerrada e homologada. A Celebração já pode ser iniciada.'
+                : 'Seleção encerrada e homologada (sem propostas em julgamento).');
     }
 }

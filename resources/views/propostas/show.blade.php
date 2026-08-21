@@ -207,30 +207,14 @@
                     <span class="text-xs text-gray-400">Máx. 10 MB — PDF, Word, Excel, JPG, PNG</span>
                 </div>
 
-                <div class="px-6 py-4 border-b border-gray-100 bg-gray-50">
-                    <form action="{{ route('documentos.store', $proposta) }}" method="POST" enctype="multipart/form-data"
-                          class="flex flex-wrap items-end gap-3">
-                        @csrf
-                        <div class="flex-1 min-w-[180px]">
-                            <label class="block text-xs font-medium text-gray-600 mb-1">Tipo</label>
-                            <select name="tipo" required
-                                    class="block w-full border-gray-300 rounded-md shadow-sm focus:ring-brand-500 focus:border-brand-500 text-sm">
-                                @foreach(\App\Models\Documento::TIPOS as $key => $label)
-                                    <option value="{{ $key }}">{{ $label }}</option>
-                                @endforeach
-                            </select>
-                        </div>
-                        <div class="flex-1 min-w-[180px]">
-                            <label class="block text-xs font-medium text-gray-600 mb-1">Arquivo</label>
-                            <input type="file" name="arquivo" required
-                                   class="block w-full text-sm text-gray-600 file:mr-3 file:py-1 file:px-3 file:rounded file:border-0 file:text-xs file:bg-brand-50 file:text-brand-700 hover:file:bg-brand-100">
-                        </div>
-                        <button type="submit"
-                                class="btn btn-primary btn-sm">
-                            Enviar
-                        </button>
-                    </form>
-                    @error('arquivo') <p class="text-red-600 text-xs mt-2">{{ $message }}</p> @enderror
+                {{-- Sem formulário de envio: os documentos são da OSC e só ela
+                     os apresenta. Ao município cabe conferir — baixar, aprovar
+                     ou recusar. --}}
+                <div class="px-6 py-3 border-b border-gray-100 bg-gray-50">
+                    <p class="text-xs text-gray-500">
+                        Enviados pela OSC. Confira cada documento: aprovar o mantém na instrução do
+                        processo; recusar devolve à OSC com o motivo, para reenvio.
+                    </p>
                 </div>
 
                 @forelse($proposta->documentos as $doc)
@@ -247,16 +231,54 @@
                                     &middot; {{ $doc->created_at->format('d/m/Y H:i') }}
                                     @if($doc->uploader) &middot; {{ $doc->uploader->name }} @endif
                                 </p>
+                                @if($doc->analisado_em)
+                                    <p class="text-xs {{ $doc->recusado() ? 'text-red-600' : 'text-gray-400' }} mt-0.5">
+                                        {{ $doc->aprovado() ? 'Aprovado' : 'Recusado' }} por
+                                        {{ $doc->analista?->name ?? '—' }} em {{ $doc->analisado_em->format('d/m/Y H:i') }}
+                                        @if($doc->recusado() && $doc->analise_motivo)
+                                            — {{ $doc->analise_motivo }}
+                                        @endif
+                                    </p>
+                                @endif
                             </div>
                         </div>
-                        <div class="flex items-center gap-3">
+                        <div class="flex items-center gap-3 shrink-0">
+                            @php $corAnalise = \App\Models\Documento::ANALISE_COLORS[$doc->analise_status] ?? 'gray'; @endphp
+                            <span class="px-2 py-1 text-xs font-medium bg-{{ $corAnalise }}-100 text-{{ $corAnalise }}-800 rounded-full whitespace-nowrap">
+                                {{ \App\Models\Documento::ANALISE[$doc->analise_status] ?? $doc->analise_status }}
+                            </span>
                             <a href="{{ route('documentos.download', $doc) }}"
                                class="text-xs text-brand-600 hover:text-brand-800">Baixar</a>
-                            <form action="{{ route('documentos.destroy', [$proposta, $doc]) }}" method="POST"
-                                  data-confirm="Remover este documento?">
-                                @csrf @method('DELETE')
-                                <button type="submit" class="text-xs text-red-500 hover:text-red-700">Remover</button>
-                            </form>
+
+                            @if($doc->pendenteDeAnalise())
+                                <form action="{{ route('documentos.analisar', [$proposta, $doc]) }}" method="POST">
+                                    @csrf @method('PATCH')
+                                    <input type="hidden" name="decisao" value="aprovado">
+                                    <button type="submit" class="text-xs font-medium text-brand-600 hover:text-brand-800">Aprovar</button>
+                                </form>
+                                {{-- Recusa exige motivo: é o que diz à OSC o que corrigir. --}}
+                                <details class="relative">
+                                    <summary class="text-xs text-red-500 hover:text-red-700 cursor-pointer select-none marker:content-none">Recusar</summary>
+                                    <form action="{{ route('documentos.analisar', [$proposta, $doc]) }}" method="POST"
+                                          class="absolute right-0 z-10 mt-1 w-72 bg-white border border-gray-200 rounded-lg shadow-lg p-3 space-y-2">
+                                        @csrf @method('PATCH')
+                                        <input type="hidden" name="decisao" value="recusado">
+                                        <textarea name="motivo" rows="3" required
+                                                  placeholder="O que a OSC precisa corrigir?"
+                                                  class="block w-full border-gray-300 rounded-md shadow-sm text-xs focus:ring-brand-500 focus:border-brand-500"></textarea>
+                                        <button type="submit" class="btn btn-danger btn-sm w-full">Confirmar recusa</button>
+                                    </form>
+                                </details>
+                            @else
+                                <form action="{{ route('documentos.analisar', [$proposta, $doc]) }}" method="POST">
+                                    @csrf @method('PATCH')
+                                    <input type="hidden" name="decisao" value="{{ $doc->aprovado() ? 'recusado' : 'aprovado' }}">
+                                    <input type="hidden" name="motivo" value="{{ $doc->aprovado() ? 'Revisão da análise anterior.' : '' }}">
+                                    <button type="submit" class="text-xs text-gray-500 hover:text-gray-700">
+                                        {{ $doc->aprovado() ? 'Reverter' : 'Aprovar' }}
+                                    </button>
+                                </form>
+                            @endif
                         </div>
                     </div>
                 @empty

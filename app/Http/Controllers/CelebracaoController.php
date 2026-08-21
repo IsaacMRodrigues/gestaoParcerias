@@ -27,13 +27,39 @@ class CelebracaoController extends Controller
         abort_if($proposta->celebracaoConcluida(), 422, 'A Celebração desta parceria já foi concluída.');
 
         $user = auth()->user();
-        abort_unless($user->setor === $proposta->celebracao_setor, 403,
+        // setorNoTramite(): a OSC atua como setor 'osc' e não tem lotação.
+        abort_unless($user->setorNoTramite() === $proposta->celebracao_setor, 403,
             'Apenas o setor que está com a Celebração pode movimentá-la.');
 
         if ($proposta->celebracao_setor === 'osc') {
             abort_unless($user->ehRepresentanteOsc() && $user->osc->id === $proposta->osc_id, 403,
                 'Esta parceria pertence a outra OSC.');
         }
+    }
+
+    /**
+     * Listagem do trâmite — a porta de entrada da Celebração no menu.
+     *
+     * Existe porque o item "Celebração" do menu apontava para a lista de
+     * Instrumentos, protegida por `formalizacao`: SCP, SEPLAN e PJ conduzem
+     * etapas do fluxo e mesmo assim viam cadeado. Aqui a régua é participar do
+     * trâmite; o recorte por órgão continua sendo o de sempre (visiveisPara).
+     */
+    public function index(): View
+    {
+        $user = auth()->user();
+        abort_unless($user->participaDaCelebracao(), 403,
+            'Seu setor não participa do trâmite da Celebração.');
+
+        $propostas = Proposta::with(['osc', 'chamamento.programa.orgao'])
+            ->visiveisPara($user)
+            ->comTramiteCelebracao()
+            // Em andamento primeiro; dentro de cada grupo, o que se moveu por último.
+            ->orderByRaw('celebracao_concluida_em IS NULL DESC')
+            ->orderByDesc('updated_at')
+            ->paginate(15);
+
+        return view('celebracao.index', compact('propostas'));
     }
 
     /**
@@ -54,6 +80,8 @@ class CelebracaoController extends Controller
         $proposta->load([
             'chamamento.programa.orgao', 'osc',
             'pecas.assinante.roles', 'pecas.assinante.orgao',
+            // O carimbo do Termo nomeia também quem contra-assinou pela OSC.
+            'pecas.contraAssinante.roles', 'pecas.contraAssinante.osc',
             'celebracaoTramitacoes.remetente',
         ]);
 

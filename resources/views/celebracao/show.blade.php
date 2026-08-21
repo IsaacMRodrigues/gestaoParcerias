@@ -6,9 +6,12 @@
 
     $etapaAtual = (int) $proposta->celebracao_etapa;
     $concluida  = $proposta->celebracaoConcluida();
-    $souDoSetor = auth()->user()->setor === $proposta->celebracao_setor
+    // setorNoTramite(): a OSC atua como setor 'osc' e não tem lotação — comparar
+    // com users.setor dava sempre falso e escondia dela o botão de encaminhar,
+    // deixando a parceria parada sem que ninguém pudesse movimentá-la.
+    $souDoSetor = auth()->user()->setorNoTramite() === $proposta->celebracao_setor
         && ($proposta->celebracao_setor !== 'osc'
-            || (auth()->user()->ehRepresentanteOsc() && auth()->user()->osc->id === $proposta->osc_id));
+            || auth()->user()->osc?->id === $proposta->osc_id);
     $pendencias = $concluida ? [] : $proposta->pendenciasCelebracao();
     $setorLabel = fn ($s) => \App\Models\Proposta::SETORES_CELEBRACAO[$s] ?? $s;
 @endphp
@@ -63,10 +66,14 @@
                     <div>
                         <dt class="text-xs font-medium text-gray-500 uppercase tracking-wide">Situação</dt>
                         <dd class="mt-0.5">
+                            {{-- inline-block: como <span> inline, o rótulo longo ("Com Setor de
+                                 Convênios e Parcerias (SCP)") quebrava em duas linhas e a moldura
+                                 se partia junto — duas meias caixas, cada uma com metade da borda.
+                                 Em bloco, o texto quebra dentro de uma caixa só. --}}
                             @if($concluida)
-                                <span class="px-2.5 py-1 text-xs font-semibold bg-brand-50 text-brand-800 border border-brand-200 rounded-md">Concluída</span>
+                                <span class="inline-block px-2.5 py-1 text-xs font-semibold leading-snug bg-brand-50 text-brand-800 border border-brand-200 rounded-md">Concluída</span>
                             @else
-                                <span class="px-2.5 py-1 text-xs font-semibold bg-accent-50 text-accent-800 border border-accent-200 rounded-md">
+                                <span class="inline-block px-2.5 py-1 text-xs font-semibold leading-snug bg-accent-50 text-accent-800 border border-accent-200 rounded-md">
                                     Com {{ $setorLabel($proposta->celebracao_setor) }}
                                 </span>
                             @endif
@@ -196,4 +203,8 @@
             </div>
         </div>
     </div>
+
+    {{-- Tela longa: trilha de 15 etapas + 18 documentos. As setas levam ao topo
+         (onde ficam o trâmite e os botões de encaminhar) e ao fim da lista. --}}
+    <x-atalhos-rolagem />
 </x-dynamic-component>

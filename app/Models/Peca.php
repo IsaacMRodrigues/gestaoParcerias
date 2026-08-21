@@ -722,6 +722,18 @@ HTML,
     /**
      * Pode contra-assinar agora? Exige a assinatura do Município já lançada e,
      * como é a vez da OSC, que seja a OSC daquela parceria.
+     *
+     * A comparação de setor é por `setorNoTramite()`, como em podePreencher() e
+     * podeAssinar(). Era o único ponto do motor que lia `$user->setor` direto:
+     * a OSC não tem lotação (users.setor é NULL), então `NULL !== 'osc'` era
+     * sempre verdadeiro e o botão de contra-assinar nunca aparecia para
+     * ninguém — o Termo ficava eternamente "aguardando a contra-assinatura da
+     * OSC", travando a etapa 10 da Celebração.
+     *
+     * E quem assina pela OSC é o responsável legal: o próprio Termo diz
+     * "representada por seu(sua) representante legal". A equipe prepara os
+     * documentos; o ato que vincula a entidade é de uma pessoa só — a mesma
+     * régua de submeter proposta e interpor recurso.
      */
     public function podeContraAssinar(?User $user): bool
     {
@@ -736,11 +748,59 @@ HTML,
 
         $regra = self::CELEBRACAO_CONTRA_ASSINATURA[$this->chave];
 
-        if (!$user || $user->setor !== $regra['setor'] || $dono->tramiteEtapaAtual() !== $regra['etapa']) {
+        if (!$user
+            || $user->setorNoTramite() !== $regra['setor']
+            || $dono->tramiteEtapaAtual() !== $regra['etapa']
+        ) {
             return false;
         }
 
-        return $regra['setor'] !== 'osc' || $this->oscDona($user, $dono);
+        return $regra['setor'] !== 'osc'
+            || ($this->oscDona($user, $dono) && $user->ehResponsavelLegalOsc());
+    }
+
+    /**
+     * Por que não dá para contra-assinar agora — em português, com os fatos.
+     * Null quando está liberado. Mesmo princípio de motivoNaoPodePreencher():
+     * em vez de sumir com o botão, a tela diz de quem é a vez e o que falta.
+     */
+    public function motivoNaoPodeContraAssinar(?User $user): ?string
+    {
+        if (!$this->exigeContraAssinatura() || $this->contraAssinado() || $this->podeContraAssinar($user)) {
+            return null;
+        }
+
+        if (!$this->assinado()) {
+            return 'O Município ainda não assinou este documento.';
+        }
+
+        $dono  = $this->donoEmTramite();
+        $regra = self::CELEBRACAO_CONTRA_ASSINATURA[$this->chave];
+
+        if (!$dono || $dono->tramiteEncerrado()) {
+            return 'O trâmite já foi concluído — os documentos ficam apenas para consulta.';
+        }
+
+        if (!$user || $user->setorNoTramite() !== $regra['setor']) {
+            return 'A assinatura das partes é da OSC parceira.';
+        }
+
+        if (!$this->oscDona($user, $dono)) {
+            return 'Este documento pertence a outra OSC.';
+        }
+
+        if (!$user->ehResponsavelLegalOsc()) {
+            return 'Somente o responsável legal da OSC pode assinar o Termo.';
+        }
+
+        $etapaDoc   = $regra['etapa'] + 1;
+        $etapaAtual = $dono->tramiteEtapaAtual() + 1;
+
+        return $etapaDoc > $etapaAtual
+            ? "Ainda não é a vez da assinatura das partes: ela ocorre na etapa {$etapaDoc}, "
+                ."e o trâmite está na etapa {$etapaAtual}."
+            : "A etapa da assinatura das partes (etapa {$etapaDoc}) já passou — "
+                ."o trâmite está na etapa {$etapaAtual}.";
     }
 
     /** Gera um código de validação único (ex.: A1B2-C3D4-E5). */
@@ -882,7 +942,7 @@ HTML,
     {
         $setor = $this->setorPrevio();
 
-        return $setor === null || $user?->setor === $setor;
+        return $setor === null || $user?->setorNoTramite() === $setor;
     }
 
     public function selecaoSetorAssinatura(): ?string
@@ -917,17 +977,40 @@ HTML,
      */
     public function etapaDaProximaAcao(): ?int
     {
-        return $this->preenchido() && !$this->assinado()
-            ? $this->selecaoEtapaAssinatura()
-            : $this->selecaoEtapa();
+        if ($this->preenchido() && !$this->assinado()) {
+            return $this->selecaoEtapaAssinatura();
+        }
+
+        // Assinado pelo Município e à espera da OSC: a ação pendente é a
+        // contra-assinatura, na etapa dela. Sem isto o Termo ficava no bloco de
+        // quem já assinou — "etapa vencida" — enquanto a OSC, na etapa seguinte,
+        // não via nada marcado como seu. Mesmo defeito que a assinatura do
+        // Prefeito tinha na Seleção.
+        if ($this->contraAssinaturaPendente()) {
+            return self::CELEBRACAO_CONTRA_ASSINATURA[$this->chave]['etapa'];
+        }
+
+        return $this->selecaoEtapa();
     }
 
     /** Setor da próxima ação pendente — ver etapaDaProximaAcao(). */
     public function setorDaProximaAcao(): ?string
     {
-        return $this->preenchido() && !$this->assinado()
-            ? $this->selecaoSetorAssinatura()
-            : $this->selecaoSetor();
+        if ($this->preenchido() && !$this->assinado()) {
+            return $this->selecaoSetorAssinatura();
+        }
+
+        if ($this->contraAssinaturaPendente()) {
+            return self::CELEBRACAO_CONTRA_ASSINATURA[$this->chave]['setor'];
+        }
+
+        return $this->selecaoSetor();
+    }
+
+    /** Assinado pela Administração e ainda esperando a assinatura das partes. */
+    public function contraAssinaturaPendente(): bool
+    {
+        return $this->exigeContraAssinatura() && $this->assinado() && !$this->contraAssinado();
     }
 
     /**
@@ -946,6 +1029,20 @@ HTML,
     public function tramiteJaEncerrado(): bool
     {
         return (bool) $this->donoEmTramite()?->tramiteEncerrado();
+    }
+
+    /**
+     * As etapas do trâmite dono, na ordem — vazio fora de trâmite.
+     *
+     * O checklist agrupa as peças por etapa, e só desenhava os blocos que
+     * tinham documento: quando a única peça de uma etapa migrava para a etapa
+     * da assinatura, o bloco sumia e a numeração pulava (12 → 14). Com a lista
+     * completa do fluxo, a tela desenha todas as etapas, na mesma sequência da
+     * trilha do trâmite.
+     */
+    public function etapasDoTramite(): array
+    {
+        return $this->donoEmTramite()?->tramiteEtapas() ?? [];
     }
 
     /** Nome por extenso de um setor, pelo mapa do trâmite dono. */
@@ -978,7 +1075,7 @@ HTML,
         }
 
         if (!$user
-            || $user->setor !== $this->selecaoSetor()
+            || $user->setorNoTramite() !== $this->selecaoSetor()
             || $dono->tramiteEtapaAtual() !== $this->selecaoEtapa()
         ) {
             return false;
@@ -1024,7 +1121,7 @@ HTML,
         // Fora do trâmite, quem manda é o setor prévio (fase do edital).
         $setorDaPeca = $this->selecaoSetor() ?? $this->setorPrevio();
 
-        if ($user->setor !== $setorDaPeca) {
+        if ($user->setorNoTramite() !== $setorDaPeca) {
             // A OSC vê o próprio setor como 'osc', mas não é lotação de servidor.
             return $setorDaPeca === 'osc'
                 ? 'Este documento é preenchido pela OSC parceira.'
@@ -1040,6 +1137,19 @@ HTML,
         // Peça fora do trâmite: não há etapa a explicar.
         if ($this->selecaoEtapa() === null) {
             return 'Este documento já foi assinado e não pode mais ser alterado.';
+        }
+
+        // Preenchido, à espera de assinatura de OUTRA etapa (a Ordem de
+        // Pagamento Global: a SCP elabora, a UG assina). Dizer que "a etapa
+        // deste documento já passou" era desnorteante — nada passou, o
+        // documento está exatamente onde deveria, esperando quem assina.
+        if ($this->preenchido()
+            && !$this->assinado()
+            && $this->selecaoEtapaAssinatura() !== $this->selecaoEtapa()
+        ) {
+            return 'Este documento já foi preenchido — falta a assinatura de '
+                . $rotulo($this->selecaoSetorAssinatura())
+                . ', na etapa ' . ($this->selecaoEtapaAssinatura() + 1) . '.';
         }
 
         // Setor certo — só não chegou a vez.
@@ -1090,7 +1200,7 @@ HTML,
         }
 
         if (!$user
-            || $user->setor !== $this->selecaoSetorAssinatura()
+            || $user->setorNoTramite() !== $this->selecaoSetorAssinatura()
             || $dono->tramiteEtapaAtual() !== $this->selecaoEtapaAssinatura()
         ) {
             return false;
@@ -1120,10 +1230,14 @@ HTML,
             return $this->categoria === 'celebracao' ? 'Celebração concluída.' : 'Seleção encerrada.';
         }
 
-        $setor = $dono->tramiteSetorLabel($this->selecaoSetorAssinatura());
-        $etapa = $this->selecaoEtapa();
+        // Etapa e setor da MESMA ação pendente. Antes o número vinha do
+        // preenchimento e o setor, da assinatura: no bloco da Ordem de
+        // Pagamento lia-se "Disponível na etapa 13 do trâmite (Unidade
+        // Gestora)" — a etapa é da SCP, que elabora; a UG só assina, na 14.
+        $etapa = $this->etapaDaProximaAcao();
+        $setor = $dono->tramiteSetorLabel($this->setorDaProximaAcao());
 
-        if ($dono->tramiteEtapaAtual() !== $etapa) {
+        if ($etapa !== null && $dono->tramiteEtapaAtual() !== $etapa) {
             return 'Disponível na etapa ' . ($etapa + 1) . ' do trâmite (' . $setor . ').';
         }
 
@@ -1145,6 +1259,7 @@ HTML,
     public static function sincronizar(Model $pecaable, string $categoria, string $relacao = 'pecas'): void
     {
         $template = self::TEMPLATES[$categoria] ?? [];
+        $tokens   = self::tokensDe($pecaable);
 
         foreach ($template as $i => $item) {
             $novos = [
@@ -1155,17 +1270,81 @@ HTML,
             ];
 
             // semeia o texto-modelo das peças "modelo" que possuem template
-            if (($item['tipo'] ?? null) === 'modelo'
-                && ($texto = self::modeloTexto($categoria, $item['chave'])) !== null
-            ) {
+            $bruto = ($item['tipo'] ?? null) === 'modelo'
+                ? self::modeloTexto($categoria, $item['chave'])
+                : null;
+            $texto = $bruto === null ? null : \App\Support\Modelo::preencher($bruto, $tokens);
+
+            if ($texto !== null) {
                 $novos['conteudo'] = $texto;
             }
 
-            $pecaable->{$relacao}()->firstOrCreate(
+            $peca = $pecaable->{$relacao}()->firstOrCreate(
                 ['categoria' => $categoria, 'chave' => $item['chave']],
                 $novos
             );
+
+            // Peça semeada antes desta correção: guardou o modelo cru, com os
+            // {{marcadores}} à mostra. Se ninguém mexeu nela (conteúdo idêntico
+            // ao modelo) e ela não está assinada, recebe o texto preenchido.
+            if ($texto !== null
+                && !$peca->wasRecentlyCreated
+                && !$peca->assinado()
+                && $peca->conteudo === $bruto
+            ) {
+                $peca->update(['conteudo' => $texto]);
+            }
         }
+    }
+
+    /**
+     * Dados que o sistema já conhece, para entrar no lugar dos {{marcadores}}
+     * dos modelos padrão.
+     *
+     * Os modelos emprestados de outros módulos (o ofício da Ordem de Pagamento
+     * Global, o pedido de parecer e o parecer financeiro) trazem marcadores; a
+     * semeadura das peças gravava o texto cru e eles chegavam à tela como
+     * "{{favorecido}}", "{{ano}}" — ProcessoPeca e OrdemPagamento já preenchiam
+     * os seus, só o motor de peças não.
+     *
+     * O que o sistema não tem como saber (o número do ofício, quem assina)
+     * recebe o mesmo "XXXXX" que o resto do modelo usa para o que se digita —
+     * apagar o marcador deixaria a frase truncada ("parceria com a , Termo").
+     */
+    private static function tokensDe(Model $pecaable): array
+    {
+        $osc = $instrumento = $orgao = $processo = null;
+
+        if ($pecaable instanceof Proposta) {
+            $osc         = $pecaable->osc?->name;
+            $instrumento = $pecaable->instrumento?->numero;
+            $orgao       = $pecaable->chamamento?->programa?->orgao?->name;
+            $processo    = $pecaable->chamamento?->processo?->numero;
+        } elseif ($pecaable instanceof Chamamento) {
+            $orgao    = $pecaable->programa?->orgao?->name;
+            $processo = $pecaable->processo?->numero;
+        } elseif ($pecaable instanceof Aditivo) {
+            $proposta    = $pecaable->instrumento?->proposta;
+            $osc         = $proposta?->osc?->name;
+            $instrumento = $pecaable->instrumento?->numero;
+            $orgao       = $proposta?->chamamento?->programa?->orgao?->name;
+        }
+
+        $tokens = [
+            'favorecido'      => $osc,
+            'instrumento'     => $instrumento,
+            'unidade_gestora' => $orgao,
+            'numero_processo' => $processo,
+            'cidade'          => 'São Gonçalo do Rio Abaixo',
+            'data'            => now()->format('d/m/Y'),
+            'ano'             => now()->year,
+            // Sem dado no sistema: o número do ofício e o nome de quem assina
+            // são preenchidos por quem redige.
+            'op_numero'        => null,
+            'responsavel_nome' => null,
+        ];
+
+        return array_map(fn ($v) => filled($v) ? $v : 'XXXXX', $tokens);
     }
 
     /**

@@ -169,10 +169,30 @@ class Proposta extends Model
         return $this->hasMany(CelebracaoTramitacao::class)->latest('id');
     }
 
+    /**
+     * A OSC ainda pode apresentar documentos nesta proposta?
+     *
+     * Era limitado a 'rascunho', o que fechava a porta justamente quando ela
+     * mais precisa estar aberta: para reenviar o que o município recusou e para
+     * anexar a habilitação na Celebração (etapa 2 do fluxo), quando a proposta
+     * já está aprovada. Só encerra quando o caminho acabou.
+     */
+    public function aceitaDocumentosDaOsc(): bool
+    {
+        return !in_array($this->status, ['reprovada', 'cancelada'], true);
+    }
+
     /** A Celebração só existe para a proposta aprovada. */
     public function temTramiteCelebracao(): bool
     {
         return $this->status === 'aprovada' || !is_null($this->celebracao_iniciada_em);
+    }
+
+    /** Versão em consulta de temTramiteCelebracao() — para a listagem do trâmite. */
+    public function scopeComTramiteCelebracao($query)
+    {
+        return $query->where(fn ($q) => $q->where('status', 'aprovada')
+            ->orWhereNotNull('celebracao_iniciada_em'));
     }
 
     public function celebracaoIniciada(): bool
@@ -273,6 +293,12 @@ class Proposta extends Model
     public function tramiteEtapaAtual(): int
     {
         return (int) $this->celebracao_etapa;
+    }
+
+    /** As etapas do trâmite, na ordem — cada uma ['setor' => ..., 'acao' => ...]. */
+    public function tramiteEtapas(): array
+    {
+        return self::ETAPAS_CELEBRACAO;
     }
 
     public function tramiteEncerrado(): bool

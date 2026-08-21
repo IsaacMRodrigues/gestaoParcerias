@@ -31,6 +31,20 @@ class PecaController extends Controller
         }
     }
 
+    /**
+     * Volta para a linha da peça, não para o topo da página.
+     *
+     * O checklist da Celebração tem 18 itens; assinar o de baixo devolvia a
+     * tela ao cabeçalho e obrigava a rolar de novo até onde se estava — a cada
+     * documento. `back()` reconstrói a URL anterior sem fragmento porque o
+     * navegador nunca o envia ao servidor; a âncora é reposta aqui, e a linha
+     * correspondente a carrega em `pecas/_checklist`.
+     */
+    private function voltarParaPeca(Peca $peca, string $mensagem): RedirectResponse
+    {
+        return back()->withFragment('peca-' . $peca->id)->with('success', $mensagem);
+    }
+
     public function salvar(Request $request, Peca $peca): RedirectResponse
     {
         abort_if($peca->tipo !== 'modelo', 422);
@@ -42,7 +56,7 @@ class PecaController extends Controller
 
         $peca->update($data);
 
-        return back()->with('success', $peca->rotulo . ' salvo.');
+        return $this->voltarParaPeca($peca, $peca->rotulo . ' salvo.');
     }
 
     public function assinar(Peca $peca): RedirectResponse
@@ -57,7 +71,7 @@ class PecaController extends Controller
             'codigo_validacao' => $peca->codigo_validacao ?: Peca::gerarCodigoValidacao(),
         ]);
 
-        return back()->with('success', $peca->rotulo . ' assinado.');
+        return $this->voltarParaPeca($peca, $peca->rotulo . ' assinado.');
     }
 
     /**
@@ -71,7 +85,8 @@ class PecaController extends Controller
         abort_unless($peca->assinado(), 422,
             'O documento ainda não foi assinado pela Administração.');
         abort_unless($peca->podeContraAssinar(auth()->user()), 403,
-            'Você não pode contra-assinar este documento agora.');
+            $peca->motivoNaoPodeContraAssinar(auth()->user())
+                ?? 'Você não pode contra-assinar este documento agora.');
 
         $peca->update([
             'contra_assinado_por'     => auth()->id(),
@@ -79,7 +94,7 @@ class PecaController extends Controller
             'codigo_validacao_contra' => $peca->codigo_validacao_contra ?: Peca::gerarCodigoValidacao(),
         ]);
 
-        return back()->with('success', $peca->rotulo . ' contra-assinado pela OSC.');
+        return $this->voltarParaPeca($peca, $peca->rotulo . ' contra-assinado pela OSC.');
     }
 
     public function upload(Request $request, Peca $peca): RedirectResponse
@@ -109,7 +124,7 @@ class PecaController extends Controller
             'mime_type'    => $arquivo->getMimeType(),
         ]);
 
-        return back()->with('success', $peca->rotulo . ' enviado.');
+        return $this->voltarParaPeca($peca, $peca->rotulo . ' enviado.');
     }
 
     /**
@@ -144,7 +159,7 @@ class PecaController extends Controller
             'mime_type'    => $documento->mime_type,
         ]);
 
-        return back()->with('success', $peca->rotulo . ' puxado do módulo Gestão de Parcerias.');
+        return $this->voltarParaPeca($peca, $peca->rotulo . ' puxado do módulo Gestão de Parcerias.');
     }
 
     public function download(Peca $peca): StreamedResponse
@@ -170,6 +185,6 @@ class PecaController extends Controller
             'mime_type'    => null,
         ]);
 
-        return back()->with('success', 'Arquivo removido.');
+        return $this->voltarParaPeca($peca, 'Arquivo removido.');
     }
 }

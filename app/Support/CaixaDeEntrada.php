@@ -32,7 +32,21 @@ class CaixaDeEntrada
 
     public static function para(?User $user): self
     {
-        if (!$user?->setor || !$user->temAcessoInterno()) {
+        if (!$user) {
+            return new self(collect());
+        }
+
+        // A OSC também tem vez nos trâmites — na Celebração ela elabora o Plano
+        // de Trabalho, assina o Termo e informa os dados bancários. Como não tem
+        // lotação, caía fora desta classe inteira: quando a UG encaminhava, o
+        // item saía da caixa do município e não entrava em lugar nenhum. O
+        // trabalho parecia ter sumido, e a OSC não tinha como saber que era a
+        // sua vez.
+        if ($user->ehRepresentanteOsc()) {
+            return new self(self::celebracoesDaOsc($user)->sortBy('desde')->values());
+        }
+
+        if (!$user->setor || !$user->temAcessoInterno()) {
             return new self(collect());
         }
 
@@ -157,6 +171,28 @@ class CaixaDeEntrada
                 // submitted_at é quando a espera começou; updated_at mudaria a
                 // cada edição e faria a proposta parecer recém-chegada.
                 'desde' => $p->submitted_at ?? $p->updated_at,
+            ]);
+    }
+
+    /**
+     * Celebração parada com a OSC — a vez dela, nas suas próprias parcerias.
+     */
+    private static function celebracoesDaOsc(User $user): Collection
+    {
+        return Proposta::with('chamamento')
+            ->where('osc_id', $user->osc_id)
+            ->where('celebracao_setor', 'osc')
+            ->whereNotNull('celebracao_iniciada_em')
+            ->whereNull('celebracao_concluida_em')
+            ->get()
+            ->map(fn (Proposta $p) => [
+                'tramite'   => 'Celebração',
+                'titulo'    => $p->titulo,
+                'subtitulo' => 'Etapa '.($p->celebracao_etapa + 1).'/'.$p->totalEtapasCelebracao()
+                    .' — '.($p->etapaCelebracaoInfo()['acao'] ?? ''),
+                'aguardaRecebimento' => false,
+                'url'   => route('celebracao.show', $p),
+                'desde' => $p->updated_at,
             ]);
     }
 

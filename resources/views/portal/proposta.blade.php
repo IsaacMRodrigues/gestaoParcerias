@@ -95,7 +95,7 @@
                 <span class="text-xs text-gray-400">Máx. 10 MB por arquivo — PDF, Word, Excel, JPG, PNG</span>
             </div>
 
-            @if($proposta->status === 'rascunho')
+            @if($proposta->aceitaDocumentosDaOsc())
                 <div class="px-6 py-4 border-b border-gray-100 bg-gray-50">
                     <form action="{{ route('documentos.store', $proposta) }}" method="POST" enctype="multipart/form-data"
                           class="flex flex-wrap items-end gap-3">
@@ -136,12 +136,30 @@
                                 &middot; {{ $doc->tamanhoFormatado() }}
                                 &middot; {{ $doc->created_at->format('d/m/Y H:i') }}
                             </p>
+                            {{-- A recusa só serve se disser o que corrigir. --}}
+                            @if($doc->recusado())
+                                <p class="text-xs text-red-600 mt-0.5">
+                                    Recusado em {{ $doc->analisado_em?->format('d/m/Y') }}
+                                    @if($doc->analise_motivo) — {{ $doc->analise_motivo }} @endif
+                                    <span class="text-gray-500">Envie o documento corrigido.</span>
+                                </p>
+                            @elseif($doc->aprovado())
+                                <p class="text-xs text-gray-400 mt-0.5">
+                                    Aprovado pelo município em {{ $doc->analisado_em?->format('d/m/Y') }}
+                                </p>
+                            @endif
                         </div>
                     </div>
-                    <div class="flex items-center gap-3">
+                    <div class="flex items-center gap-3 shrink-0">
+                        @php $corAnalise = \App\Models\Documento::ANALISE_COLORS[$doc->analise_status] ?? 'gray'; @endphp
+                        <span class="px-2 py-1 text-xs font-medium bg-{{ $corAnalise }}-100 text-{{ $corAnalise }}-800 rounded-full whitespace-nowrap">
+                            {{ \App\Models\Documento::ANALISE[$doc->analise_status] ?? $doc->analise_status }}
+                        </span>
                         <a href="{{ route('documentos.download', $doc) }}"
                            class="text-xs text-brand-600 hover:text-brand-800">Baixar</a>
-                        @if($proposta->status === 'rascunho')
+                        {{-- Retirar enquanto ninguém decidiu, ou depois de recusado
+                             (parte de corrigir). Aprovado já integra a instrução. --}}
+                        @if($doc->podeSerRemovido())
                             <form action="{{ route('documentos.destroy', [$proposta, $doc]) }}" method="POST"
                                   data-confirm="Remover este documento?">
                                 @csrf @method('DELETE')
@@ -153,7 +171,7 @@
             @empty
                 <p class="px-6 py-6 text-sm text-gray-400 text-center">
                     Nenhum documento anexado.
-                    @if($proposta->status === 'rascunho') Use o formulário acima para enviar. @endif
+                    @if($proposta->aceitaDocumentosDaOsc()) Use o formulário acima para enviar. @endif
                 </p>
             @endforelse
         </div>
@@ -187,4 +205,8 @@
         @endif
 
     </div>
+
+    {{-- Tela de trabalho da OSC: plano, metas, etapas e documentos numa coluna
+         só. As setas somem sozinhas quando a página cabe na janela. --}}
+    <x-atalhos-rolagem />
 </x-portal-layout>

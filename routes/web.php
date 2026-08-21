@@ -89,6 +89,8 @@ Route::middleware('auth')->group(function () {
     Route::post('propostas/{proposta}/documentos', [DocumentoController::class, 'store'])->name('documentos.store');
     Route::delete('propostas/{proposta}/documentos/{documento}', [DocumentoController::class, 'destroy'])->name('documentos.destroy');
     Route::get('documentos/{documento}/download', [DocumentoController::class, 'download'])->name('documentos.download');
+    // Conferência pelo município: aprovar ou recusar o documento da OSC.
+    Route::patch('propostas/{proposta}/documentos/{documento}/analisar', [DocumentoController::class, 'analisar'])->name('documentos.analisar');
 });
 
 // Área administrativa — bloqueada para representante_legal.
@@ -167,6 +169,9 @@ Route::middleware(['auth', 'staff', 'readonly'])->group(function () {
         Route::post('chamamentos/{chamamento}/selecao/avancar', [SelecaoController::class, 'avancar'])->name('chamamentos.selecao.avancar');
         Route::post('chamamentos/{chamamento}/selecao/devolver', [SelecaoController::class, 'devolver'])->name('chamamentos.selecao.devolver');
         Route::post('chamamentos/{chamamento}/selecao/concluir', [SelecaoController::class, 'concluir'])->name('chamamentos.selecao.concluir');
+        // Declara as vencedoras de uma Seleção já encerrada (chamamentos
+        // homologados antes de a adjudicação existir no encerramento).
+        Route::post('chamamentos/{chamamento}/selecao/adjudicar', [SelecaoController::class, 'adjudicar'])->name('chamamentos.selecao.adjudicar');
     });
 
     // Propostas + Plano de Trabalho
@@ -248,6 +253,9 @@ Route::middleware('auth')->group(function () {
     Route::delete('pecas/{peca}/arquivo', [PecaController::class, 'removerArquivo'])->name('pecas.arquivo.remover');
 
     // Trâmite da Celebração — acessível aos setores internos e à OSC da parceria
+    // A listagem é só dos setores que participam do fluxo (checagem no controller);
+    // as telas por proposta seguem abertas à OSC da parceria.
+    Route::get('celebracao', [CelebracaoController::class, 'index'])->name('celebracao.index');
     Route::get('celebracao/{proposta}', [CelebracaoController::class, 'show'])->name('celebracao.show');
     Route::post('celebracao/{proposta}/avancar', [CelebracaoController::class, 'avancar'])->name('celebracao.avancar');
     Route::post('celebracao/{proposta}/devolver', [CelebracaoController::class, 'devolver'])->name('celebracao.devolver');

@@ -165,6 +165,41 @@ dois lugares, nunca na aprovação — na **criação** (responsável do setor) 
 - `membro_osc` não pode ser oferecido a servidor (o tornaria externo). As listas de perfis do
   admin excluem `User::PAPEIS_OSC`, não um nome de papel específico.
 
+### A OSC como setor do trâmite (`User::setorNoTramite()`)
+
+Os fluxos designam etapas a setores, e **um deles é a própria OSC** — na Celebração ela elabora
+o Plano de Trabalho, anexa a habilitação, assina o Termo e informa os dados bancários (4 peças e
+3 das 15 etapas). Mas OSC não tem lotação: `users.setor` é **NULL**.
+
+Quem comparava `$user->setor === 'osc'` obtinha sempre falso. Efeito: quando a UG encaminhava a
+Celebração à OSC, o item saía da caixa do município e **não entrava em lugar nenhum** — o trâmite
+parecia ter sumido, a OSC não via que era a sua vez, não podia preencher nenhuma das suas peças e
+não tinha botão para devolver. Beco sem saída: ninguém no sistema podia movimentar a parceria.
+
+`setorNoTramite()` é o único lugar que traduz isso — devolve `'osc'` para representante de OSC e
+`setor` para o resto. Aplicado em `CelebracaoController::autorizarSetor()`, em `Peca`
+(`podePreencher`, `podeAssinar`, `motivoNaoPodePreencher`, fase prévia) e no guard da view
+`celebracao/show`. Planejamento e Seleção seguem com `setor` cru: 'osc' não é setor daqueles fluxos.
+
+- **Caixa de Entrada agora serve a OSC**: `CaixaDeEntrada::para()` devolvia vazio para não-interno.
+  Passa a listar as Celebrações paradas com ela, nas suas próprias parcerias.
+- **Faixa "É a sua vez"** no layout do portal, em qualquer página — não dá para supor que a OSC vá
+  procurar. Mostra a etapa, a ação esperada e o link para continuar.
+
+### Documentos da proposta: a OSC apresenta, o município confere
+
+São documentos **da OSC** (estatuto, certidões, ata, habilitação). O envio é exclusivo dela;
+ao município cabe **baixar, aprovar ou recusar** — `documentos.analisar` (PATCH).
+
+- Antes os dois lados viam o mesmo botão **Remover**: o servidor apagava o documento da OSC,
+  sem registro de quem apagou nem por quê, e a OSC não sabia o que refazer. Recusar guarda o
+  arquivo, o autor da decisão e o **motivo** (obrigatório na recusa: `required_if`).
+- `Documento::podeSerRemovido()` — a OSC retira enquanto está pendente ou recusado (retirar é
+  parte de corrigir); **aprovado** já integra a instrução do processo e sai do alcance dela.
+- `Proposta::aceitaDocumentosDaOsc()` — o envio era limitado a `rascunho`, o que fechava a porta
+  justamente quando ela precisa estar aberta: reenviar o que foi recusado e anexar a habilitação
+  na **Celebração etapa 2**, com a proposta já aprovada. Agora só fecha em `reprovada`/`cancelada`.
+
 ### Equipe da OSC (contas da organização)
 
 OSC é organização, e organização tem equipe. O vínculo mora em **`users.osc_id`**
@@ -200,11 +235,16 @@ OSC é organização, e organização tem equipe. O vínculo mora em **`users.os
 | `pareceres_tecnico` | Emitir **Parecer Técnico** na análise da proposta |
 | `pareceres_juridico` | Emitir **Parecer Jurídico** na análise da proposta |
 | `pareceres_decisao` | Emitir a **Decisão/Seleção** final da proposta |
-| `formalizacao` | Menu **Instrumentos**: Instrumentos, Aditivos, Apostilamento e Documentação (2.3) |
+| `formalizacao` | Submenu **Instrumentos**: Instrumentos, Aditivos, Apostilamento e Documentação (2.3) |
 | `ordem_pagamento` | Emitir **Ordens de Pagamento** no instrumento vigente (2.3.1) |
 | `execucao` | **Execução Financeira**: repasses, despesas, notas fiscais e saldo (4.4) |
 | `monitoramento` | Monitoramento e Fiscalização *(módulo futuro)* |
 | `prestacao_contas` | Prestação de Contas *(módulo futuro)* |
+
+> O menu **Celebração** é a exceção à régua por permissão: quem o abre é quem participa do
+> trâmite (`User::participaDaCelebracao()` — os setores de `Proposta::ETAPAS_CELEBRACAO` mais
+> quem tem `formalizacao`), porque SCP, SEPLAN e PJ conduzem etapas do fluxo sem ter aquela
+> permissão. **Instrumentos** é subitem dele e continua exigindo `formalizacao`.
 
 > As permissões são definidas em `RolesSeeder`, aplicadas por middleware nas rotas + `@can`
 > na navegação (o usuário só vê no menu o que pode acessar). **Auditores** veem tudo mas não
@@ -214,6 +254,137 @@ OSC é organização, e organização tem equipe. O vínculo mora em **`users.os
 ---
 
 ## O que foi feito
+
+- [2026-08-21] **Modelos chegavam com `{{marcadores}}` à mostra** (`Peca::sincronizar`)
+  - Sintoma: a Ordem de Pagamento Global abria escrita *"Ofício n.: {{op_numero}}/{{ano}}"*,
+    *"parceria com a {{favorecido}}"*, *"{{responsavel_nome}}"*
+  - Causa: `ProcessoPeca::conteudoInicial()` e `OrdemPagamento::conteudoInicial()` passam o modelo
+    por `Support\Modelo::preencher()`; **o motor de peças não passava**. Gravava o texto cru. Só
+    aparecia nos modelos emprestados de outros módulos (o ofício da OP Global, o pedido de parecer
+    e o parecer financeiro) — os modelos próprios do motor não usam marcador
+  - `Peca::tokensDe()` resolve o que o sistema sabe, conforme o dono da peça (Proposta, Chamamento
+    ou Aditivo): OSC favorecida, número do instrumento, Unidade Gestora, número do processo, cidade,
+    data e ano
+  - O que o sistema não tem como saber — número do ofício, nome de quem assina — vira **"XXXXX"**,
+    o mesmo marcador de digitação do resto do modelo. Apagar deixaria a frase truncada
+    ("parceria com a , Termo de")
+  - **Peças já semeadas** com o texto cru são corrigidas na próxima abertura da tela, desde que
+    ninguém as tenha editado (conteúdo idêntico ao modelo) e **não estejam assinadas** — documento
+    assinado não se reescreve. O Parecer Financeiro da parceria de teste, assinado com `{{ano}}` no
+    corpo, ficou como está: corrigi-lo exigiria reemissão
+  - Idempotente: conferido que a segunda passada não reescreve nada (a data não fica mudando) e que
+    a Seleção, cujos modelos não têm marcador, não teve peça nenhuma tocada
+
+- [2026-08-21] **Checklist parava de pular etapas** (`pecas/_checklist`, `Peca::etapaDaProximaAcao`)
+  - Sintoma: na Celebração a lista ia da **etapa 12 para a 14** — e, antes, da 9 para a 11. O fluxo
+    tem 15 etapas na trilha logo acima, então parecia buraco no trâmite
+  - Causa: o checklist só desenhava blocos que tinham documento. A Ordem de Pagamento é elaborada
+    pela SCP (etapa 13) e assinada pela UG (etapa 14); quando ela migra para o bloco da assinatura,
+    a etapa 13 fica sem peça nenhuma e **sumia da tela**. Mesma coisa na etapa 10, cuja única ação é
+    a OSC contra-assinar o Termo emitido na 9
+  - Agora a lista desenha **todas as etapas do fluxo** (`tramiteEtapas()` na interface uniforme de
+    trâmite, em `Proposta` e `Chamamento`). A etapa sem documento próprio aparece dizendo o que se
+    faz nela — *"Elaborar a Ordem de Pagamento Global e encaminhar à UG"* —, em cinza
+  - **Contra-assinatura pendente virou próxima ação**: o Termo assinado e à espera da OSC ficava no
+    bloco de quem já assinou, marcado "etapa vencida", enquanto a OSC não via nada como seu na etapa
+    dela. É o mesmo defeito que a assinatura do Prefeito teve na Seleção. `minhaVez` do cabeçalho
+    passa a contar `podeContraAssinar()`
+  - Duas frases que se contradiziam no mesmo bloco: a trava dizia *"Disponível na etapa 13 do
+    trâmite (Unidade Gestora)"* — número do preenchimento (SCP) com setor da assinatura (UG); e o
+    modo leitura dizia *"a etapa deste documento já passou"* de um documento que estava justamente
+    na vez. Agora: *"Ação do setor responsável: Unidade Gestora"* e *"já foi preenchido — falta a
+    assinatura de Unidade Gestora, na etapa 14"*
+  - Conferido: Celebração com 15 blocos contínuos; Seleção com 5; a UG vê "é a sua vez" e o botão de
+    assinar na etapa 14
+
+- [2026-08-21] **Selo de situação parava de se partir ao meio** (`celebracao/show`)
+  - Com um setor de nome longo — *"Com Setor de Convênios e Parcerias (SCP)"* — o selo quebrava em
+    duas linhas e a moldura quebrava junto: duas meias caixas, cada uma com metade da borda e do
+    arredondamento, uma sobrando para fora do card
+  - Era um `<span>` inline: o navegador desenha uma caixa por linha ocupada. Com `inline-block` o
+    texto quebra dentro de uma caixa só, e `leading-snug` fecha o espaço entre as duas linhas
+  - Os selos irmãos do sistema ("Ativa", "Em análise", "Assinada") são curtos e ficam em células
+    largas — conferi e nenhum corre o mesmo risco
+
+- [2026-08-21] **Atalhos de rolagem na Celebração** (`components/atalhos-rolagem`)
+  - A tela tem trilha de 15 etapas, histórico e checklist de 18 documentos: depois de descer até o
+    último item, voltar ao trâmite — onde ficam encaminhar e devolver — era rolagem cega
+  - Par de setas fixo na lateral direita, centralizado na altura da janela. Cada uma **some quando
+    não teria efeito**: sem "subir" no topo, sem "descer" no fim (Alpine, ouvindo `scroll`/`resize`)
+  - Oculto abaixo de `lg` (no celular o botão flutuante cobriria o texto) e em impressão
+  - **No fluxo da OSC também**: as duas telas de trabalho dela no portal — a proposta (plano, metas,
+    etapas e documentos) e o chamamento (edital, cronograma, fase recursal). A Celebração já valia
+    para os dois lados, que compartilham a mesma view
+  - Numa página que cabe na janela as duas setas somem sozinhas, então o componente não incomoda
+    telas curtas
+  - Reaproveitável — a Seleção e o Processo têm telas igualmente longas
+  - Exigiu `npm run build`: as classes de posicionamento (`right-5`, `top-1/2`, `-translate-y-1/2`,
+    `lg:flex`, `print:hidden`) não existiam no CSS compilado
+
+- [2026-08-21] **Carimbo do Termo passa a mostrar as duas assinaturas** (`processos/_carimbo`)
+  - O Termo de Parceria é assinado pelas **duas partes**, mas o carimbo ao pé do documento nomeava
+    só o Município. Quem lia o Termo não via de quem era a contra-assinatura nem quando foi dada —
+    o código da OSC aparecia solto, fora do documento, numa linha do checklist
+  - O partial virou um laço sobre as assinaturas do documento: cada uma com nome, cargo, data, hora,
+    fundamento legal, código e QR Code próprios. A segunda encosta na primeira com filete leve, para
+    ler como o mesmo carimbo. `method_exists` porque `ProcessoPeca` e `OrdemPagamento` usam o mesmo
+    partial e não têm assinatura das partes — conferido que continuam idênticos
+  - Quem assina pela OSC agora aparece com a **entidade**: *"Responsável Legal — TESTE OSC"*. Antes o
+    cargo saía da lotação e do órgão, que a OSC não tem, e o carimbo diria só o nome da pessoa
+  - **Furo que isso revelou**: o código da contra-assinatura **não validava**. `ValidacaoController`
+    buscava apenas por `codigo_validacao`, então o portal respondia *"documento não encontrado"* para
+    um código autêntico impresso no próprio documento. Agora a busca aceita os dois códigos e a
+    página de validação mostra quem contra-assinou, quando e sob qual código
+  - De quebra: peça de Celebração tem `Proposta` como dona, caso que faltava no `match` da
+    referência — a validação exibia "—" no lugar do nome da parceria
+
+- [2026-08-21] **Contra-assinatura da OSC destravada** (`Peca::podeContraAssinar`)
+  - Sintoma: o Termo de Parceria ficava parado em *"Aguardando a contra-assinatura da OSC"* e **não
+    havia botão para assinar** — para ninguém, nem para a OSC
+  - Causa: `podeContraAssinar()` comparava `$user->setor !== 'osc'`. Era o **último ponto do motor
+    de peças a ler `users.setor` direto** — e a OSC não tem lotação (`setor` é NULL), então a
+    comparação era sempre verdadeira e o botão nunca renderizava. Mesmo defeito que
+    `setorNoTramite()` já tinha corrigido em `podePreencher()`, `podeAssinar()` e no botão de
+    encaminhar da Celebração; este passou despercebido
+  - Junto: **quem assina pela OSC é o responsável legal**, não qualquer membro da equipe. O próprio
+    Termo diz "representada por seu(sua) representante legal", e é a mesma régua de submeter
+    proposta e interpor recurso (`ehResponsavelLegalOsc()`)
+  - `motivoNaoPodeContraAssinar()` dá o motivo em português, no lugar do botão ausente: o membro da
+    OSC lê *"Somente o responsável legal da OSC pode assinar o Termo"* e o servidor, *"A assinatura
+    das partes é da OSC parceira"*. O 403 do controller passa a usar a mesma frase
+  - O bloco do documento **abre sozinho** quando é a vez de contra-assinar — o botão mora dentro
+    dele, e recolhido não havia nada visível em que clicar
+  - Conferido na parceria de teste (etapa 10, vez da OSC): responsável legal vê o botão e um único
+    bloco aberto; membro da OSC e SCP veem o aviso, sem botão
+
+- [2026-08-21] **Assinar um documento deixa de jogar a tela para o topo** (`PecaController`, `pecas/_checklist`)
+  - O checklist da Celebração tem **18 itens**: assinar o de baixo devolvia a página ao cabeçalho e
+    obrigava a rolar tudo de novo — a cada documento
+  - Causa: as seis ações da peça terminavam em `back()`, e a URL anterior nunca traz fragmento (o
+    navegador não o envia ao servidor). Sem âncora, o navegador carrega no topo
+  - Cada linha do checklist virou **`id="peca-{id}"`** e `voltarParaPeca()` repõe o fragmento com
+    `withFragment()` — salvar, assinar, contra-assinar, enviar, puxar e remover arquivo
+  - `scroll-margin-top: 7rem` na linha para o cabeçalho fixo não cobrir o item de destino
+  - Vale também para a Seleção e a Documentação de Aditivos, que usam o mesmo partial
+
+- [2026-08-21] **Celebração deixa de ser cadeado para quem conduz o trâmite** (`layouts/sidebar`)
+  - Sintoma: a SCP recebia na caixa de entrada *"Etapa 7/15 — conferir o processo e emitir o
+    Protocolo na Unidade Jurídica"* e, no menu ao lado, via **Celebração com cadeado**
+  - Causa: o item era gateado por `@can('formalizacao')` e apontava para `instrumentos.index`.
+    Mas a Celebração passa por setores que não têm essa permissão — a **SCP conduz 7 das 15
+    etapas**, a **SEPLAN** emite o Parecer Financeiro e a **PJ** o Parecer Jurídico. Era o mesmo
+    defeito que a caixa de entrada já tinha corrigido, sobrevivendo no menu
+  - `User::participaDaCelebracao()`: participa quem aparece em `ETAPAS_CELEBRACAO` (fora a OSC,
+    que chega pelo portal) ou quem tem `formalizacao`. Uma régua só, usada no menu e no controller
+  - Novo **`/celebracao`** (`CelebracaoController@index`): lista as parcerias com trâmite de
+    Celebração visíveis ao usuário — em andamento primeiro, com a etapa/setor da vez e o selo
+    *"Com o seu setor"*. Recorte por órgão pelo mesmo `visiveisPara()` das outras telas
+  - **Instrumentos** virou subitem de Celebração (padrão da Seleção), ainda sob `formalizacao` —
+    era ele, e não o trâmite, que a permissão sempre governou
+  - Conferido nos usuários reais: SCP, SEPLAN, PJ e UG abrem a lista; só a UG (que tem
+    `formalizacao`) vê o subitem Instrumentos; a PJ, com a vez, vê o selo *"Com o seu setor"*
+  - De quebra: `instrumentos.execucao` é rota do trâmite 4 e acendia **Celebração e Execução ao
+    mesmo tempo** no menu — agora é excluída do casamento de `instrumentos.*`
 
 - [2026-08-17] **Etapa do Gabinete do Prefeito ativada** (encerramento da Seleção)
   - O fluxo já previa tudo: `Chamamento::ETAPAS_SELECAO[4]` = PM, `Peca::SELECAO_ASSINATURA` manda o
@@ -1104,6 +1275,15 @@ OSC é organização, e organização tem equipe. O vínculo mora em **`users.os
     (o Termo é emitido pela **SCP** na etapa 4 e assinado pelo **Prefeito** na 5). `podePreencher()`,
     `podeAssinar()` e `motivoTrava()` travam a peça fora da vez — validado também no `PecaController`
     (salvar/assinar/upload/puxar/remover), não só na interface
+  - **Adjudicação no encerramento**: o Termo que encerra a Seleção é de *Adjudicação* e
+    Homologação — adjudicar é atribuir o objeto ao vencedor. Esse ato não existia: a Seleção era
+    encerrada, a mensagem prometia "segue para a Celebração" e **nenhuma proposta mudava de
+    status**; como a Celebração exige `aprovada`, o fluxo morria num vão. Agora o encerramento
+    exige declarar a(s) vencedora(s) (`vencedoras[]`), que viram `aprovada`, e as demais em
+    julgamento viram `reprovada` no mesmo ato. Exigir ao menos uma evita que reprovar todo mundo
+    seja efeito silencioso de um clique — chamamento fracassado se resolve reprovando as propostas
+    uma a uma antes. `selecao/adjudicar` cobre os chamamentos encerrados antes disso existir, e a
+    tela passa a mostrar **"Abrir Celebração →"** para cada vencedora
   - **Peças anteriores ao julgamento** (fase do edital) seguem **fora do trâmite** — precisam estar
     prontas antes de a Seleção começar, então não têm etapa. Mas têm dono, em
     **`Peca::SELECAO_SETOR_PREVIO`**: Edital, Anexos e Comissão → **UG**; Parecer jurídico → **PJ**;
@@ -1153,7 +1333,36 @@ OSC é organização, e organização tem equipe. O vínculo mora em **`users.os
 
 ## O que está sendo feito
 
-### 📌 Última entrega — Navegação, permissões, paleta e exclusões seguras (14/08/2026)
+### 📌 Última entrega — Celebração: acesso, assinatura das partes e leitura do trâmite (21/08/2026)
+
+Frentes desta rodada, detalhadas nas primeiras entradas de `## O que foi feito`:
+
+1. **Quem entra na Celebração**: o menu era gateado por `formalizacao` e mostrava cadeado à SCP, à
+   SEPLAN e à PJ — que conduzem etapas do fluxo. Agora a régua é participar do trâmite, e existe
+   `/celebracao` listando as parcerias em formalização.
+2. **Assinatura das partes destravada**: `podeContraAssinar()` comparava `users.setor` (NULL para a
+   OSC) com `'osc'`, e o botão nunca aparecia — o Termo ficava eternamente "aguardando a
+   contra-assinatura". Junto, o ato ficou reservado ao responsável legal, e o carimbo do documento
+   passou a nomear as duas assinaturas. O código da contra-assinatura, que o carimbo imprime, não
+   validava no portal público — agora valida.
+3. **Checklist legível**: a numeração pulava etapas (12 → 14) porque a lista só desenhava blocos com
+   documento; passa a desenhar todo o fluxo. Contra-assinatura pendente virou "próxima ação", e as
+   frases que se contradiziam no mesmo bloco foram acertadas.
+4. **Modelos preenchidos**: o motor de peças gravava o texto cru e os `{{marcadores}}` chegavam à
+   tela. Auditados os 35 modelos do sistema: nenhum outro escapa.
+5. **Acabamento**: assinar não joga mais a tela para o topo, atalhos de rolagem na Celebração e nas
+   telas da OSC, e o selo de situação parou de se partir ao meio.
+
+**Documentos da proposta ganharam conferência** (trabalho da véspera, 19/08): a OSC envia, o
+município aprova ou recusa com motivo registrado — antes só existia "Remover", que apagava a prova
+sem deixar rastro.
+
+**Pendência conhecida:** os modelos só têm marcador para 9 campos. Dados que o sistema já tem — CNPJ
+e sede da OSC, representante legal, objeto, valor, vigência — continuam como "XXXXX" para digitar no
+Termo de Parceria e em três documentos da Celebração, enquanto a minuta do Instrumento (view Blade)
+já monta tudo do banco. Vale unificar.
+
+### Entrega anterior — Navegação, permissões, paleta e exclusões seguras (14/08/2026)
 
 Quatro frentes, detalhadas nas primeiras entradas de `## O que foi feito`:
 

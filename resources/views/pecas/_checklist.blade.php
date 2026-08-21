@@ -27,11 +27,23 @@
     $encerrado  = (bool) $governadas->first()?->tramiteJaEncerrado();
 
     $SEM_ETAPA = 'livre';
+    // Etapas do fluxo, para desenhar TODAS — inclusive as que não têm documento
+    // próprio. Sem isto a numeração pulava: a etapa 13 (SCP elabora a Ordem de
+    // Pagamento) some da lista quando a peça migra para a etapa 14 (UG assina),
+    // e a tela ia de 12 para 14 como se o fluxo tivesse buraco.
+    $etapasTramite = $agrupar ? $governadas->first()->etapasDoTramite() : [];
+
     $grupos = $agrupar
         ? $pecas->groupBy(fn ($p) => $p->emTramite() ? $p->etapaDaProximaAcao() : $SEM_ETAPA)
-                ->sortKeysUsing(fn ($a, $b) => // o bloco sem etapa vem primeiro
-                    ($a === $SEM_ETAPA ? -1 : (int) $a) <=> ($b === $SEM_ETAPA ? -1 : (int) $b))
         : collect([$SEM_ETAPA => $pecas]);
+
+    if ($agrupar) {
+        foreach (array_keys($etapasTramite) as $i) {
+            $grupos->has($i) or $grupos->put($i, collect());
+        }
+        $grupos = $grupos->sortKeysUsing(fn ($a, $b) => // o bloco sem etapa vem primeiro
+            ($a === $SEM_ETAPA ? -1 : (int) $a) <=> ($b === $SEM_ETAPA ? -1 : (int) $b));
+    }
 @endphp
 
 @foreach($grupos as $chaveGrupo => $pecasDoGrupo)
@@ -44,12 +56,20 @@
         $grupoAgora  = !$semEtapa && !$encerrado && $nEtapa === $etapaAtual;
         $grupoFuturo = !$semEtapa && !$encerrado && $nEtapa > $etapaAtual;
 
-        $setoresDoGrupo = $pecasDoGrupo->map->setorDaProximaAcao()->filter()->unique()
-            ->map(fn ($s) => $pecasDoGrupo->first()->rotuloDoSetor($s))->implode(' e ');
+        // Etapa sem documento próprio: o setor e a ação vêm do fluxo, não das peças.
+        $acaoDaEtapa = $semEtapa ? null : ($etapasTramite[$nEtapa]['acao'] ?? null);
 
-        // Alguma peça deste grupo é minha para fazer agora?
+        $setoresDoGrupo = $pecasDoGrupo->isNotEmpty()
+            ? $pecasDoGrupo->map->setorDaProximaAcao()->filter()->unique()
+                ->map(fn ($s) => $pecasDoGrupo->first()->rotuloDoSetor($s))->implode(' e ')
+            : $governadas->first()->rotuloDoSetor($etapasTramite[$nEtapa]['setor'] ?? null);
+
+        // Alguma peça deste grupo é minha para fazer agora? Contra-assinar conta:
+        // é a única ação pendente do Termo quando ele espera a OSC.
         $minhaVez = $pecasDoGrupo->contains(fn ($p) =>
-            $p->podePreencher(auth()->user()) || $p->podeAssinar(auth()->user()));
+            $p->podePreencher(auth()->user())
+            || $p->podeAssinar(auth()->user())
+            || $p->podeContraAssinar(auth()->user()));
     @endphp
 
     @if($agrupar)
@@ -90,6 +110,16 @@
         </div>
     @endif
 
+    {{-- Etapa que não tem documento próprio: em vez de sumir da lista (e abrir
+         buraco na numeração), aparece dizendo o que se faz nela. É o caso da
+         assinatura das partes e da assinatura da Ordem de Pagamento, cujos
+         documentos ficam no bloco de quem os emitiu. --}}
+    @if($pecasDoGrupo->isEmpty() && $acaoDaEtapa)
+        <p class="px-6 py-3 text-xs text-gray-400 {{ $grupoFuturo ? 'opacity-60' : '' }}">
+            {{ $acaoDaEtapa }}.
+        </p>
+    @endif
+
     {{-- Etapa futura recua: continua legível e clicável, mas para de disputar
          atenção com o que precisa ser feito agora. --}}
     <div class="divide-y divide-gray-100 {{ $grupoFuturo ? 'opacity-60' : '' }}">
@@ -118,7 +148,12 @@
                      cursor-pointer select-none transition marker:content-none';
         @endphp
 
-        <div class="px-6 py-3.5">
+        {{-- Âncora da linha: salvar/assinar/enviar redirecionam para
+             #peca-{id}, senão a página voltava ao topo a cada ação e o usuário
+             tinha de reencontrar, numa lista de 18 itens, onde estava.
+             scroll-margin-top desconta o cabeçalho fixo (inline: classe nova
+             obrigaria a recompilar o CSS só por causa de uma margem). --}}
+        <div id="peca-{{ $peca->id }}" style="scroll-margin-top:7rem" class="px-6 py-3.5">
             <div class="flex items-start gap-3">
 
                 {{-- Estado da peça --}}
@@ -205,10 +240,13 @@
 
                     {{-- MODELO: editor rico (brasão + HTML) + assinar --}}
                     @if($ehModelo)
-                        {{-- Sempre recolhido: com várias peças preenchidas e não
+                        {{-- Recolhido por padrão: com várias peças preenchidas e não
                              assinadas, abrir todas empilhava um editor rico atrás do
-                             outro e a lista virava uma parede de documentos. --}}
-                        <details class="mt-2 group">
+                             outro e a lista virava uma parede de documentos.
+                             A exceção é a vez de contra-assinar — o botão da OSC mora
+                             dentro do documento, e recolhido a tela dizia "aguardando a
+                             contra-assinatura da OSC" sem nada visível em que clicar. --}}
+                        <details class="mt-2 group" @if($peca->podeContraAssinar(auth()->user())) open @endif>
                             <summary class="{{ $acao }} {{ $peca->assinado()
                                         ? 'text-gray-600 bg-gray-100 hover:bg-gray-200'
                                         : 'text-brand-800 bg-brand-50 hover:bg-brand-100' }}">
@@ -223,13 +261,19 @@
                                     <div class="documento-html border border-gray-200 rounded-lg p-4 bg-white text-gray-800 text-sm">
                                         {!! $peca->conteudo ?: '<p class="text-gray-400">Documento ainda não preenchido.</p>' !!}
                                         @php
-                                            $qrValidacao = null;
-                                            if ($peca->codigo_validacao) {
-                                                $qrValidacao = \SimpleSoftwareIO\QrCode\Facades\QrCode::size(110)
-                                                    ->generate(route('validacao.mostrar', $peca->codigo_validacao));
-                                            }
+                                            $qr = fn (?string $codigo) => $codigo
+                                                ? \SimpleSoftwareIO\QrCode\Facades\QrCode::size(110)
+                                                    ->generate(route('validacao.mostrar', $codigo))
+                                                : null;
+                                            $qrValidacao = $qr($peca->codigo_validacao);
+                                            // Assinatura das partes: a contra-assinatura tem código próprio.
+                                            $qrContra = $qr($peca->contraAssinado() ? $peca->codigo_validacao_contra : null);
                                         @endphp
-                                        @include('processos._carimbo', ['peca' => $peca, 'qrValidacao' => $qrValidacao])
+                                        @include('processos._carimbo', [
+                                            'peca'        => $peca,
+                                            'qrValidacao' => $qrValidacao,
+                                            'qrContra'    => $qrContra,
+                                        ])
                                     </div>
                                     @if($peca->codigo_validacao)
                                         <p class="mt-2 text-xs text-gray-500">
@@ -242,6 +286,7 @@
                                         <p class="mt-1 text-xs text-gray-500">
                                             Contra-assinatura da OSC:
                                             <strong class="font-mono">{{ $peca->codigo_validacao_contra }}</strong>
+                                            · <a href="{{ route('validacao.mostrar', $peca->codigo_validacao_contra) }}" target="_blank" class="text-brand-700 font-medium hover:underline">Validar</a>
                                         </p>
                                     @endif
                                     @if($peca->podeContraAssinar(auth()->user()))
@@ -253,6 +298,16 @@
                                                 Assinar como OSC (contra-assinatura)
                                             </button>
                                         </form>
+                                    {{-- Sem botão, a tela dizia só "aguardando a contra-assinatura
+                                         da OSC" e ninguém sabia o que falta. Agora diz — inclusive
+                                         ao membro da OSC, que vê o Termo mas não o assina. --}}
+                                    @elseif($motivoContra = $peca->motivoNaoPodeContraAssinar(auth()->user()))
+                                        <p class="mt-3 flex items-start gap-2 text-xs text-accent-800 bg-accent-50 border border-accent-200 rounded-lg px-3 py-2">
+                                            <svg class="w-4 h-4 shrink-0 mt-px" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.8">
+                                                <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m9-.75a9 9 0 11-18 0 9 9 0 0118 0zm-9 3.75h.008v.008H12v-.008z"/>
+                                            </svg>
+                                            <span><strong>Assinatura das partes.</strong> {{ $motivoContra }}</span>
+                                        </p>
                                     @endif
                                 @elseif($podePreencher)
                                     <form action="{{ route('pecas.salvar', $peca) }}" method="POST">

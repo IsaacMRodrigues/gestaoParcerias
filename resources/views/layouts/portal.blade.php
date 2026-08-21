@@ -193,6 +193,35 @@
             </div>
         </header>
 
+        {{-- Sua vez. Quando a UG encaminha a Celebração à OSC, o item sai da
+             caixa do município e a OSC não tinha onde ver que a bola era dela —
+             o trâmite parecia ter sumido. A faixa aparece em qualquer página do
+             portal, porque não dá para supor que ela vá procurar. --}}
+        @auth
+            @if(auth()->user()->ehRepresentanteOsc())
+                @php $minhaVez = \App\Support\CaixaDeEntrada::para(auth()->user()); @endphp
+                @if($minhaVez->total() > 0)
+                    <div class="bg-accent-50 border-b border-accent-200">
+                        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3 space-y-2">
+                            @foreach($minhaVez->itens as $item)
+                                <div class="flex items-center justify-between gap-4 flex-wrap">
+                                    <div class="min-w-0">
+                                        <p class="text-sm font-semibold text-accent-900">
+                                            É a sua vez — {{ $item['titulo'] }}
+                                        </p>
+                                        <p class="text-xs text-accent-800">{{ $item['subtitulo'] }}</p>
+                                    </div>
+                                    <a href="{{ $item['url'] }}" class="btn btn-primary btn-sm shrink-0">
+                                        Continuar →
+                                    </a>
+                                </div>
+                            @endforeach
+                        </div>
+                    </div>
+                @endif
+            @endif
+        @endauth
+
         <main class="flex-1">
             {{ $slot }}
         </main>

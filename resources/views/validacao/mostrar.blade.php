@@ -35,6 +35,29 @@
                         <dt class="text-gray-500">Código de validação</dt>
                         <dd class="text-gray-900 font-mono text-right">{{ $doc['codigo'] }}</dd>
                     </div>
+
+                    {{-- Assinatura das partes: o Termo de Parceria só está completo
+                         com a contra-assinatura da OSC, e quem valida precisa ver
+                         quem assinou pelos dois lados. --}}
+                    @if(!empty($doc['contra_assinante']))
+                        <div class="py-2 flex justify-between gap-4">
+                            <dt class="text-gray-500">Contra-assinado pela OSC</dt>
+                            <dd class="text-gray-900 font-medium text-right">
+                                {{ $doc['contra_assinante'] }}
+                                @if(!empty($doc['contra_osc']))
+                                    <span class="block text-xs font-normal text-gray-500">{{ $doc['contra_osc'] }}</span>
+                                @endif
+                            </dd>
+                        </div>
+                        <div class="py-2 flex justify-between gap-4">
+                            <dt class="text-gray-500">Data da contra-assinatura</dt>
+                            <dd class="text-gray-900 text-right">{{ $doc['contra_assinado_em']->format('d/m/Y \à\s H:i') }}</dd>
+                        </div>
+                        <div class="py-2 flex justify-between gap-4">
+                            <dt class="text-gray-500">Código da contra-assinatura</dt>
+                            <dd class="text-gray-900 font-mono text-right">{{ $doc['contra_codigo'] }}</dd>
+                        </div>
+                    @endif
                 </dl>
 
                 @if(!empty($doc['conteudo']))
@@ -44,7 +67,7 @@
                             {!! $doc['conteudo'] !!}
                         </div>
                         <p class="mt-3 text-xs text-gray-400">
-                            Cópia fiel do documento assinado eletronicamente (código {{ $doc['codigo'] }}).
+                            Cópia fiel do documento assinado eletronicamente (código {{ $doc['codigo'] }}@if(!empty($doc['contra_codigo'])); contra-assinatura da OSC: {{ $doc['contra_codigo'] }}@endif).
                         </p>
                     </div>
                 @endif

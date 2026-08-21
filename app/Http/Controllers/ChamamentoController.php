@@ -72,10 +72,18 @@ class ChamamentoController extends Controller
             'pecas.assinante.roles', 'pecas.assinante.orgao',
             'selecaoTramitacoes.remetente',
             'recursos.osc', 'recursos.respondente',
+            'propostas.osc',
         ]);
         $pecas = $chamamento->pecas;
         $progresso = Peca::progresso($pecas);
 
-        return view('chamamentos.selecao', compact('chamamento', 'pecas', 'categoria', 'progresso'));
+        // Julgamento: quem ainda não teve decisão (para adjudicar) e quem
+        // venceu (para a tela apontar o caminho da Celebração).
+        $emJulgamento = $chamamento->propostas->whereIn('status', ['submetida', 'em_analise']);
+        $vencedoras   = $chamamento->propostas->where('status', 'aprovada');
+
+        return view('chamamentos.selecao', compact(
+            'chamamento', 'pecas', 'categoria', 'progresso', 'emJulgamento', 'vencedoras'
+        ));
     }
 }

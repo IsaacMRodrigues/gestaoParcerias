@@ -342,6 +342,51 @@ class User extends Authenticatable
         return $this->ehRepresentanteOsc() && $this->osc?->user_id === $this->id;
     }
 
+    /**
+     * O "setor" deste usuário para efeito de trâmite.
+     *
+     * Os fluxos designam etapas a setores, e um desses setores é a própria OSC
+     * (na Celebração ela elabora o Plano de Trabalho, anexa a habilitação,
+     * assina o Termo e informa os dados bancários). Só que OSC não tem lotação:
+     * users.setor é NULL para ela. Quem comparava `$user->setor === 'osc'`
+     * obtinha sempre falso, e o trâmite entrava num beco — a parceria chegava à
+     * OSC e não podia ser movimentada por ninguém, nem por ela.
+     *
+     * Daí este acessor: um lugar só para dizer que, no trâmite, quem representa
+     * a OSC atua como setor 'osc'.
+     */
+    public function setorNoTramite(): ?string
+    {
+        return $this->ehRepresentanteOsc() ? 'osc' : $this->setor;
+    }
+
+    /**
+     * Toma parte no trâmite da Celebração?
+     *
+     * A permissão `formalizacao` responde por quem lavra o instrumento, mas a
+     * Celebração passa por setores que não a têm: a SCP conduz sete das quinze
+     * etapas (protocolo na PJ, termo, publicação, ordem de pagamento, empenho),
+     * a SEPLAN emite o Parecer Financeiro, a PJ o Parecer Jurídico. Gateando o
+     * menu só por `formalizacao`, esses setores viam a Celebração cadeado —
+     * enquanto a caixa de entrada lhes entregava, no mesmo instante, parceria
+     * parada esperando a sua etapa.
+     *
+     * Quem participa é, então, quem aparece no fluxo: os setores de
+     * ETAPAS_CELEBRACAO. A OSC fica de fora porque não navega pelo menu
+     * interno — chega à sua etapa pelo portal e pela caixa.
+     */
+    public function participaDaCelebracao(): bool
+    {
+        if (!$this->temAcessoInterno()) {
+            return false;
+        }
+
+        $setoresDoTramite = array_diff(array_keys(Proposta::SETORES_CELEBRACAO), ['osc']);
+
+        return $this->can('formalizacao')
+            || in_array($this->setor, $setoresDoTramite, true);
+    }
+
     /** A OSC que o usuário representa — null para todo usuário interno. */
     public function oscVinculada(): ?Osc
     {

@@ -204,6 +204,12 @@ class Chamamento extends Model
         return (int) $this->selecao_etapa;
     }
 
+    /** As etapas do trâmite, na ordem — cada uma ['setor' => ..., 'acao' => ...]. */
+    public function tramiteEtapas(): array
+    {
+        return self::ETAPAS_SELECAO;
+    }
+
     public function tramiteEncerrado(): bool
     {
         return $this->selecaoConcluida();

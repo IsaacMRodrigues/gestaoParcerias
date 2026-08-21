@@ -260,4 +260,7 @@
             @endif
         </div>
     </div>
+
+    {{-- Edital, cronograma, documentos e fase recursal: rolagem longa. --}}
+    <x-atalhos-rolagem />
 </x-portal-layout>

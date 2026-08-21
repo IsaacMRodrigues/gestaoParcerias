@@ -125,15 +125,33 @@
         @endcanany
 
         {{-- 3. Celebração --}}
-        @can('formalizacao')
-            @php $emCelebracao = request()->routeIs('instrumentos.*') || request()->routeIs('celebracao.*'); @endphp
-            <a href="{{ route('instrumentos.index') }}" class="{{ $link }} {{ $emCelebracao ? $on : '' }}">
+        {{-- Quem abre o trâmite não é só quem tem `formalizacao`: SCP, SEPLAN e
+             PJ conduzem etapas do fluxo e, gateados por aquela permissão, viam
+             cadeado aqui com parceria parada esperando o seu setor na caixa de
+             entrada. O item leva ao trâmite; a lista de Instrumentos, que é o
+             que de fato exige `formalizacao`, virou subitem. --}}
+        @if(auth()->user()->participaDaCelebracao())
+            @php
+                // instrumentos.execucao é rota do trâmite 4: sem excluí-la, os
+                // dois itens acendiam juntos.
+                $emInstrumentos = request()->routeIs('instrumentos.*') && !request()->routeIs('instrumentos.execucao');
+                $emCelebracao = request()->routeIs('celebracao.*') || $emInstrumentos;
+                $ehCelebracao = request()->routeIs('celebracao.index');
+            @endphp
+            <a href="{{ route('celebracao.index') }}"
+               class="{{ $link }} {{ $ehCelebracao ? $on : ($emCelebracao ? $naSecao : '') }}">
                 <span class="{{ $etapa }} {{ $emCelebracao ? $etapaOn : $etapaOff }}">3</span>
                 Celebração
             </a>
+            @can('formalizacao')
+                <a href="{{ route('instrumentos.index') }}"
+                   class="{{ $link }} pl-10 {{ $emInstrumentos ? $on : '' }}">
+                    Instrumentos
+                </a>
+            @endcan
         @else
-            <span class="{{ $soon }}" title="Seu perfil não tem acesso à Celebração."><span class="{{ $etapa }} border-slate-700 text-slate-600">3</span> Celebração<svg class="ml-auto w-3.5 h-3.5 text-slate-600 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M16.5 10.5V6.75a4.5 4.5 0 10-9 0v3.75m-.75 11.25h10.5a2.25 2.25 0 002.25-2.25v-6.75a2.25 2.25 0 00-2.25-2.25H6.75a2.25 2.25 0 00-2.25 2.25v6.75a2.25 2.25 0 002.25 2.25z"/></svg></span>
-        @endcan
+            <span class="{{ $soon }}" title="Seu setor não participa do trâmite da Celebração."><span class="{{ $etapa }} border-slate-700 text-slate-600">3</span> Celebração<svg class="ml-auto w-3.5 h-3.5 text-slate-600 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M16.5 10.5V6.75a4.5 4.5 0 10-9 0v3.75m-.75 11.25h10.5a2.25 2.25 0 002.25-2.25v-6.75a2.25 2.25 0 00-2.25-2.25H6.75a2.25 2.25 0 00-2.25 2.25v6.75a2.25 2.25 0 002.25 2.25z"/></svg></span>
+        @endif
 
         {{-- 4. Execução — lista as parcerias e abre a execução de cada uma --}}
         @can('execucao')

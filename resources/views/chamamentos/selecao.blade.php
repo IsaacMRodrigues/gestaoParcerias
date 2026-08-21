@@ -129,6 +129,56 @@
                         @endif
                     </div>
 
+                    {{-- Resultado do julgamento. Antes a tela dizia "segue para a
+                         Celebração" e não havia como chegar lá: nenhuma proposta
+                         ficava aprovada, e a Celebração exige isso. --}}
+                    @if($concluida)
+                        @if($vencedoras->isNotEmpty())
+                            <div class="mb-4 bg-brand-50 border border-brand-200 rounded-lg p-3">
+                                <p class="text-sm font-semibold text-brand-900">Adjudicado — seguir para a Celebração</p>
+                                <div class="mt-2 space-y-1.5">
+                                    @foreach($vencedoras as $proposta)
+                                        <div class="flex items-center justify-between gap-3 flex-wrap">
+                                            <span class="text-sm text-gray-700">
+                                                {{ $proposta->titulo }}
+                                                <span class="text-gray-500">— {{ $proposta->osc?->name }}</span>
+                                            </span>
+                                            <a href="{{ route('celebracao.show', $proposta) }}" class="btn btn-primary btn-sm">
+                                                Abrir Celebração →
+                                            </a>
+                                        </div>
+                                    @endforeach
+                                </div>
+                            </div>
+                        @elseif($emJulgamento->isNotEmpty() && $meuSetor === 'ug')
+                            {{-- Encerrado antes de a adjudicação existir: o resultado
+                                 nunca foi registrado, então a parceria não tem por onde
+                                 seguir. Declarar aqui destrava. --}}
+                            <form action="{{ route('chamamentos.selecao.adjudicar', $chamamento) }}" method="POST"
+                                  data-confirm="Declarar as vencedoras? As demais propostas serão reprovadas."
+                                  class="mb-4 bg-accent-50 border border-accent-200 rounded-lg p-3">
+                                @csrf
+                                <p class="text-sm font-semibold text-accent-900">Seleção encerrada sem vencedora declarada</p>
+                                <p class="text-xs text-accent-800 mt-0.5 mb-2">
+                                    A Celebração só abre para proposta aprovada. Marque quem venceu o julgamento
+                                    — as demais serão reprovadas.
+                                </p>
+                                @foreach($emJulgamento as $proposta)
+                                    <label class="flex items-start gap-2 text-sm text-gray-700 py-1">
+                                        <input type="checkbox" name="vencedoras[]" value="{{ $proposta->id }}"
+                                               class="mt-0.5 rounded border-gray-300 text-brand-600 focus:ring-brand-500">
+                                        <span>
+                                            {{ $proposta->titulo }}
+                                            <span class="text-gray-500">— {{ $proposta->osc?->name }}</span>
+                                        </span>
+                                    </label>
+                                @endforeach
+                                <x-input-error :messages="$errors->get('vencedoras')" class="mt-1" />
+                                <button type="submit" class="btn btn-primary btn-sm mt-2">Declarar vencedora(s)</button>
+                            </form>
+                        @endif
+                    @endif
+
                     {{-- Trilha das etapas --}}
                     <ol class="space-y-2">
                         @foreach(\App\Models\Chamamento::ETAPAS_SELECAO as $i => $etapa)
@@ -172,11 +222,38 @@
                             <div class="mt-4 pt-4 border-t border-gray-100 space-y-3">
                                 @if($chamamento->ultimaEtapaSelecao())
                                     <form action="{{ route('chamamentos.selecao.concluir', $chamamento) }}" method="POST"
-                                          data-confirm="Encerrar a Seleção? O chamamento será homologado e seguirá para a Celebração.">
+                                          data-confirm="Encerrar a Seleção? O chamamento será homologado e as propostas não escolhidas serão reprovadas.">
                                         @csrf
+
+                                        {{-- Adjudicar: o Termo que encerra a Seleção é de
+                                             ADJUDICAÇÃO e homologação. Sem dizer quem venceu,
+                                             o chamamento era encerrado e nenhuma proposta ficava
+                                             'aprovada' — e a Celebração, que exige isso, nunca
+                                             abria. --}}
+                                        @if($emJulgamento->isNotEmpty())
+                                            <div class="mb-3 border border-gray-200 rounded-lg p-3">
+                                                <p class="text-sm font-semibold text-gray-900">Proposta(s) vencedora(s)</p>
+                                                <p class="text-xs text-gray-500 mt-0.5 mb-2">
+                                                    O que for marcado é adjudicado e segue para a Celebração;
+                                                    o restante é reprovado neste mesmo ato.
+                                                </p>
+                                                @foreach($emJulgamento as $proposta)
+                                                    <label class="flex items-start gap-2 text-sm text-gray-700 py-1">
+                                                        <input type="checkbox" name="vencedoras[]" value="{{ $proposta->id }}"
+                                                               class="mt-0.5 rounded border-gray-300 text-brand-600 focus:ring-brand-500">
+                                                        <span>
+                                                            {{ $proposta->titulo }}
+                                                            <span class="text-gray-500">— {{ $proposta->osc?->name }}</span>
+                                                        </span>
+                                                    </label>
+                                                @endforeach
+                                                <x-input-error :messages="$errors->get('vencedoras')" class="mt-1" />
+                                            </div>
+                                        @endif
+
                                         <button type="submit" @disabled($pendencias)
                                                 class="btn btn-primary">
-                                            Encerrar Seleção (homologar)
+                                            Encerrar Seleção (adjudicar e homologar)
                                         </button>
                                     </form>
                                 @else

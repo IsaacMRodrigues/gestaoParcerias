@@ -67,10 +67,16 @@ class ValidacaoController extends Controller
                     'conteudo'    => $op->conteudo,
                 ];
             } else {
-                $selecao = Peca::with(['assinante', 'pecaable'])
+                // Documento com assinatura das partes (o Termo de Parceria) tem
+                // dois códigos: o do Município e o da contra-assinatura da OSC.
+                // O carimbo imprime ambos, então ambos precisam validar — pelo
+                // código da OSC a busca não encontrava nada e o portal dizia
+                // "documento não encontrado" para um documento autêntico.
+                $selecao = Peca::with(['assinante', 'contraAssinante', 'pecaable'])
                     ->where('tipo', 'modelo')
                     ->whereNotNull('assinado_em')
-                    ->where('codigo_validacao', $codigo)
+                    ->where(fn ($q) => $q->where('codigo_validacao', $codigo)
+                        ->orWhere('codigo_validacao_contra', $codigo))
                     ->first();
 
                 if ($selecao) {
@@ -78,6 +84,7 @@ class ValidacaoController extends Controller
                     $ref = match (true) {
                         $alvo instanceof \App\Models\Processo   => $alvo->numero,
                         $alvo instanceof \App\Models\Chamamento => $alvo->numero ?: $alvo->titulo,
+                        $alvo instanceof \App\Models\Proposta   => $alvo->titulo,
                         $alvo instanceof \App\Models\Aditivo    => 'Aditivo #' . $alvo->id,
                         default                                 => '—',
                     };
@@ -93,6 +100,13 @@ class ValidacaoController extends Controller
                         'codigo'      => $selecao->codigo_validacao,
                         'conteudo'    => $selecao->conteudo,
                     ];
+
+                    if ($selecao->contraAssinado()) {
+                        $doc['contra_assinante']   = $selecao->contraAssinante?->name;
+                        $doc['contra_osc']         = $selecao->contraAssinante?->osc?->name;
+                        $doc['contra_assinado_em'] = $selecao->contra_assinado_em;
+                        $doc['contra_codigo']      = $selecao->codigo_validacao_contra;
+                    }
                 }
             }
         }
