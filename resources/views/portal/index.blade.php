@@ -25,7 +25,7 @@
                 @auth
                     {{-- Sem chamamento aberto na sua área, o caminho é a manifestação
                          de interesse: é o que a lei prevê e o que este portal aceita. --}}
-                    @if(auth()->user()->ehRepresentanteOsc())
+                    @if(auth()->user()->ehRepresentanteOsc() && auth()->user()->can('osc_manifestacoes'))
                         <a href="{{ route('portal.manifestacoes.create') }}"
                            class="btn btn-secondary">
                             Manifestar interesse
@@ -111,7 +111,7 @@
                                  de um botão que só levaria a um aviso de bloqueio, não
                                  aparece botão nenhum. --}}
                             @auth
-                                @if(auth()->user()->ehRepresentanteOsc())
+                                @if(auth()->user()->ehRepresentanteOsc() && auth()->user()->can('osc_propostas'))
                                     <a href="{{ route('portal.participar', $chamamento) }}"
                                        class="btn btn-primary">
                                         Quero Participar

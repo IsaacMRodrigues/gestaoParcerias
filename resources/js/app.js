@@ -9,5 +9,6 @@ Alpine.data('paletaComandos', paletaComandos);
 Alpine.start();
 
 import './editor';
+import './money';
 import './confirm-modal';
 import './nav-progress';

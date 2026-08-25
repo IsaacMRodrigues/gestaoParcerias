@@ -95,7 +95,17 @@
                 <span class="text-xs text-gray-400">Máx. 10 MB por arquivo — PDF, Word, Excel, JPG, PNG</span>
             </div>
 
-            @if($proposta->aceitaDocumentosDaOsc())
+            {{-- Anexar é função marcada na equipe da OSC: quem escreve o projeto
+                 não é necessariamente quem cuida das certidões. Sem a função, a
+                 lista abaixo continua à vista — acompanhar é de todos. --}}
+            @if($proposta->aceitaDocumentosDaOsc() && ! auth()->user()->can('osc_documentos'))
+                <p class="px-6 py-3 border-b border-gray-100 bg-gray-50 text-xs text-gray-500">
+                    Sua conta não tem a função <strong>Documentos da organização</strong>. Peça ao
+                    responsável legal da OSC para marcá-la em <em>Usuários da Organização</em>.
+                </p>
+            @endif
+
+            @if($proposta->aceitaDocumentosDaOsc() && auth()->user()->can('osc_documentos'))
                 <div class="px-6 py-4 border-b border-gray-100 bg-gray-50">
                     <form action="{{ route('documentos.store', $proposta) }}" method="POST" enctype="multipart/form-data"
                           class="flex flex-wrap items-end gap-3">
@@ -159,7 +169,7 @@
                            class="text-xs text-brand-600 hover:text-brand-800">Baixar</a>
                         {{-- Retirar enquanto ninguém decidiu, ou depois de recusado
                              (parte de corrigir). Aprovado já integra a instrução. --}}
-                        @if($doc->podeSerRemovido())
+                        @if($doc->podeSerRemovido() && auth()->user()->can('osc_documentos'))
                             <form action="{{ route('documentos.destroy', [$proposta, $doc]) }}" method="POST"
                                   data-confirm="Remover este documento?">
                                 @csrf @method('DELETE')

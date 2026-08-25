@@ -56,14 +56,12 @@
 <div class="grid grid-cols-2 gap-4 mt-4">
     <div>
         <x-input-label for="valor_solicitado" value="Valor Solicitado (R$) *" />
-        <x-text-input id="valor_solicitado" name="valor_solicitado" type="number" step="0.01" min="0"
-                      class="mt-1 block w-full" value="{{ old('valor_solicitado', $proposta?->valor_solicitado) }}" required />
+        <x-input-dinheiro name="valor_solicitado" :value="$proposta?->valor_solicitado" required class="mt-1" />
         <x-input-error :messages="$errors->get('valor_solicitado')" class="mt-2" />
     </div>
     <div>
         <x-input-label for="valor_proprio" value="Contrapartida da OSC (R$)" />
-        <x-text-input id="valor_proprio" name="valor_proprio" type="number" step="0.01" min="0"
-                      class="mt-1 block w-full" value="{{ old('valor_proprio', $proposta?->valor_proprio ?? 0) }}" />
+        <x-input-dinheiro name="valor_proprio" :value="$proposta?->valor_proprio ?? 0" class="mt-1" />
         <x-input-error :messages="$errors->get('valor_proprio')" class="mt-2" />
     </div>
 </div>

@@ -13,6 +13,12 @@ return Application::configure(basePath: dirname(__DIR__))
         health: '/up',
     )
     ->withMiddleware(function (Middleware $middleware): void {
+        // Dinheiro chega da tela com máscara ("40.000,00"); o resto do sistema
+        // (validação `numeric`, casts decimais) fala em número.
+        $middleware->web(append: [
+            \App\Http\Middleware\NormalizaValoresMonetarios::class,
+        ]);
+
         $middleware->alias([
             'staff'    => \App\Http\Middleware\EnsureIsStaff::class,
             'osc'      => \App\Http\Middleware\EnsureIsOsc::class,

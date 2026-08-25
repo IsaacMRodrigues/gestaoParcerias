@@ -8,9 +8,11 @@
                     analisa, ouve a Secretaria da área e decide o encaminhamento.
                 </p>
             </div>
-            <a href="{{ route('portal.manifestacoes.create') }}" class="btn btn-primary shrink-0">
-                + Nova manifestação
-            </a>
+            @can('osc_manifestacoes')
+                <a href="{{ route('portal.manifestacoes.create') }}" class="btn btn-primary shrink-0">
+                    + Nova manifestação
+                </a>
+            @endcan
         </div>
 
         <x-flash-message />

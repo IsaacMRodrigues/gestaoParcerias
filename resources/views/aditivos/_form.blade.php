@@ -55,9 +55,7 @@
     </div>
     <div>
         <x-input-label for="valor_adicional" value="Valor Adicional (R$)" />
-        <x-text-input id="valor_adicional" name="valor_adicional" type="number" step="0.01" min="0"
-                      class="mt-1 block w-full"
-                      value="{{ old('valor_adicional', $aditivo?->valor_adicional) }}" />
+        <x-input-dinheiro name="valor_adicional" :value="$aditivo?->valor_adicional" class="mt-1" />
         <x-input-error :messages="$errors->get('valor_adicional')" class="mt-2" />
     </div>
 </div>

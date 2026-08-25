@@ -110,7 +110,15 @@ class DocumentoController extends Controller
     /** Ato reservado à OSC dona da proposta. */
     private function somenteOsc(string $mensagem): void
     {
-        abort_unless(auth()->user()->ehRepresentanteOsc(), 403, $mensagem);
+        $user = auth()->user();
+
+        abort_unless($user->ehRepresentanteOsc(), 403, $mensagem);
+
+        // Dentro da organização, mexer nos documentos é função marcada: quem
+        // escreve o projeto não é necessariamente quem cuida das certidões.
+        abort_if($user->oscSemFuncao('osc_documentos'), 403,
+            'Sua conta não tem a função "Documentos da organização". '
+            .'Peça ao responsável legal da OSC para marcá-la em Usuários da Organização.');
     }
 
     /**

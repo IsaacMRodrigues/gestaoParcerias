@@ -422,7 +422,12 @@
                     'descricao' => 'Documentos do editor saem com brasão e assinatura digital; os demais são arquivos anexados.',
                     'progresso' => $progresso,
                 ])
-                @include('pecas._checklist', ['pecas' => $pecas])
+                {{-- A rota habilita o botão de criar espaço de anexo: quantas
+                     publicações um chamamento exige varia de um para outro. --}}
+                @include('pecas._checklist', [
+                    'pecas'          => $pecas,
+                    'rotaAnexoExtra' => route('chamamentos.selecao.anexos.store', $chamamento),
+                ])
             </div>
         </div>
     </div>

@@ -120,64 +120,85 @@
     <div class="min-h-screen flex flex-col">
         <div class="h-1.5 bg-gradient-to-r from-brand-600 via-brand-500 to-accent-500"></div>
 
-        <header class="bg-white border-b border-gray-200">
-            <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
-                <div class="flex items-center justify-between h-16 gap-4">
-                    <a href="{{ route('landing') }}" class="flex items-center gap-3 min-w-0">
+        {{-- Barra do portal.
+             Os rótulos longos ("Chamamentos abertos", "Minhas participações")
+             quebravam em duas linhas: cinco links não cabiam na largura, e cada
+             um terminava com uma altura, desalinhando a barra inteira.
+
+             Agora a barra tem três zonas de largura previsível — marca, links e
+             conta —, os links não quebram (`whitespace-nowrap`) e o que é
+             administração da OSC ("Meus usuários") saiu da barra para o menu da
+             conta, onde configuração costuma morar. Abaixo de `md`, os links
+             viram gaveta em vez de espremer. --}}
+        @php
+            $navItens = [
+                ['url' => route('portal.index'),   'rotulo' => 'Chamamentos abertos', 'ativo' => request()->routeIs('portal.index')],
+                ['url' => route('transparencia'), 'rotulo' => 'Transparência',       'ativo' => request()->routeIs('transparencia')],
+            ];
+
+            if (auth()->check() && auth()->user()->ehRepresentanteOsc()) {
+                $navItens[] = ['url' => route('portal.minhas-propostas'), 'rotulo' => 'Minhas participações', 'ativo' => request()->routeIs('portal.minhas*')];
+                $navItens[] = ['url' => route('portal.manifestacoes.index'), 'rotulo' => 'Manifestar interesse', 'ativo' => request()->routeIs('portal.manifestacoes.*')];
+            }
+
+            $navLink = fn (bool $ativo) => $ativo
+                ? 'text-brand-700 font-semibold'
+                : 'text-gray-600 hover:text-brand-700';
+        @endphp
+
+        <header class="bg-white border-b border-gray-200" x-data="{ menu: false }">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                <div class="flex items-center justify-between h-16 gap-6">
+
+                    <a href="{{ route('landing') }}" class="flex items-center gap-3 min-w-0 shrink-0">
                         <x-marca class="h-9" />
-                        <span class="font-semibold text-gray-900 tracking-tight hidden sm:block">
+                        <span class="font-semibold text-gray-900 tracking-tight whitespace-nowrap hidden sm:block">
                             Portal de Parcerias
                         </span>
                     </a>
 
-                    <nav class="flex items-center gap-5 text-sm">
-                        <a href="{{ route('portal.index') }}"
-                           class="{{ request()->routeIs('portal.index') ? 'text-brand-700 font-semibold' : 'text-gray-600 hover:text-brand-700' }} transition">
-                            Chamamentos abertos
-                        </a>
-                        <a href="{{ route('transparencia') }}"
-                           class="{{ request()->routeIs('transparencia') ? 'text-brand-700 font-semibold' : 'text-gray-600 hover:text-brand-700' }} transition">
-                            Transparência
-                        </a>
+                    <nav class="hidden md:flex items-center gap-6 text-sm whitespace-nowrap">
+                        @foreach($navItens as $item)
+                            <a href="{{ $item['url'] }}" class="{{ $navLink($item['ativo']) }} transition">
+                                {{ $item['rotulo'] }}
+                            </a>
+                        @endforeach
+                    </nav>
 
+                    <div class="flex items-center gap-3 shrink-0">
                         @auth
-                            @if(auth()->user()->ehRepresentanteOsc())
-                                <a href="{{ route('portal.minhas-propostas') }}"
-                                   class="{{ request()->routeIs('portal.minhas*') ? 'text-brand-700 font-semibold' : 'text-gray-600 hover:text-brand-700' }} transition">
-                                    Minhas participações
-                                </a>
-                                {{-- Propor parceria sem chamamento aberto (MROSC, arts. 18–21) --}}
-                                <a href="{{ route('portal.manifestacoes.index') }}"
-                                   class="{{ request()->routeIs('portal.manifestacoes.*') ? 'text-brand-700 font-semibold' : 'text-gray-600 hover:text-brand-700' }} transition">
-                                    Manifestar Interesse
-                                </a>
-                            @endif
-
-                            {{-- Só o responsável legal administra a equipe da OSC. --}}
-                            @if(auth()->user()->ehResponsavelLegalOsc())
-                                <a href="{{ route('portal.usuarios.index') }}"
-                                   class="{{ request()->routeIs('portal.usuarios.*') ? 'text-brand-700 font-semibold' : 'text-gray-600 hover:text-brand-700' }} transition">
-                                    Usuários
-                                </a>
-                            @endif
-
                             <div x-data="{ open: false }" class="relative">
                                 <button @click="open = !open" @click.outside="open = false"
-                                        class="flex items-center gap-1 text-gray-600 hover:text-gray-900 transition">
-                                    <span class="hidden sm:inline">{{ auth()->user()->name }}</span>
-                                    <span class="sm:hidden w-8 h-8 rounded-full bg-brand-100 text-brand-700 text-xs font-bold flex items-center justify-center">
+                                        class="flex items-center gap-2 text-sm text-gray-600 hover:text-gray-900 transition">
+                                    <span class="w-8 h-8 rounded-full bg-brand-100 text-brand-700 text-xs font-bold flex items-center justify-center shrink-0">
                                         {{ $navInitials }}
                                     </span>
-                                    <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                                    <span class="hidden lg:inline max-w-[10rem] truncate">{{ auth()->user()->name }}</span>
+                                    <svg class="w-4 h-4 shrink-0" fill="currentColor" viewBox="0 0 20 20">
                                         <path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd"/>
                                     </svg>
                                 </button>
-                                <div x-show="open" x-transition
-                                     class="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg ring-1 ring-black ring-opacity-5 z-50 text-gray-700">
+
+                                <div x-show="open" x-transition x-cloak
+                                     class="absolute right-0 mt-2 w-56 bg-white rounded-lg shadow-lg ring-1 ring-black/5 z-50 py-1 text-gray-700">
+                                    <div class="px-4 py-2 border-b border-gray-100">
+                                        <p class="text-sm font-semibold text-gray-900 truncate">{{ auth()->user()->name }}</p>
+                                        @if(auth()->user()->oscVinculada())
+                                            <p class="text-xs text-gray-500 truncate">{{ auth()->user()->oscVinculada()->name }}</p>
+                                        @endif
+                                    </div>
+
+                                    {{-- Administrar a equipe é configuração, não navegação diária. --}}
+                                    @if(auth()->user()->ehResponsavelLegalOsc())
+                                        <a href="{{ route('portal.usuarios.index') }}"
+                                           class="block px-4 py-2 text-sm hover:bg-gray-50 {{ request()->routeIs('portal.usuarios.*') ? 'text-brand-700 font-semibold' : '' }}">
+                                            Usuários da OSC
+                                        </a>
+                                    @endif
+
                                     <form method="POST" action="{{ route('logout') }}">
                                         @csrf
-                                        <button type="submit"
-                                                class="w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-gray-100">
+                                        <button type="submit" class="w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-gray-50">
                                             Sair
                                         </button>
                                     </form>
@@ -185,15 +206,29 @@
                             </div>
                         @else
                             <a href="{{ route('portal.osc.create') }}"
-                               class="text-gray-600 hover:text-brand-700 transition hidden sm:inline">
+                               class="text-sm text-gray-600 hover:text-brand-700 transition whitespace-nowrap hidden sm:inline">
                                 Cadastrar OSC
                             </a>
-                            <a href="{{ route('login') }}"
-                               class="btn btn-primary">
-                                Entrar
-                            </a>
+                            <a href="{{ route('login') }}" class="btn btn-primary">Entrar</a>
                         @endauth
-                    </nav>
+
+                        <button @click="menu = !menu" aria-label="Menu"
+                                class="md:hidden p-2 -mr-2 rounded-md text-gray-500 hover:text-gray-800 hover:bg-gray-100 transition">
+                            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M4 6h16M4 12h16M4 18h16"/>
+                            </svg>
+                        </button>
+                    </div>
+                </div>
+
+                {{-- Gaveta: os mesmos itens, em coluna, quando não cabem em linha --}}
+                <div x-show="menu" x-cloak x-transition class="md:hidden pb-3 -mt-1 space-y-1">
+                    @foreach($navItens as $item)
+                        <a href="{{ $item['url'] }}"
+                           class="block px-3 py-2 rounded-lg text-sm {{ $item['ativo'] ? 'bg-brand-50 text-brand-800 font-semibold' : 'text-gray-600 hover:bg-gray-50' }}">
+                            {{ $item['rotulo'] }}
+                        </a>
+                    @endforeach
                 </div>
             </div>
         </header>

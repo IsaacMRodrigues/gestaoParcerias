@@ -26,6 +26,27 @@ class RolesSeeder extends Seeder
         'ordem_pagamento'   => 'Ordem de Pagamento (execução do concedente)',
         'execucao'          => 'Execução financeira (repasses, despesas, notas fiscais)',
         'usuarios_setor'    => 'Cadastrar usuários do próprio setor (o administrador aprova)',
+
+        /*
+         * Funções da equipe da OSC.
+         *
+         * Prefixadas `osc_` de propósito: são de outro mundo que as permissões
+         * acima, que abrem módulos da Prefeitura. Assim o responsável legal
+         * escolhe o que cada integrante faz sem que nada do que ele marque
+         * possa, por descuido de nomenclatura, valer dentro da Administração.
+         */
+        'osc_propostas'     => 'Propostas e plano de trabalho',
+        'osc_documentos'    => 'Documentos da organização',
+        'osc_manifestacoes' => 'Manifestações de interesse',
+        'osc_celebracao'    => 'Celebração da parceria',
+    ];
+
+    /** As quatro funções que o responsável legal distribui na equipe. */
+    public const FUNCOES_OSC = [
+        'osc_propostas',
+        'osc_documentos',
+        'osc_manifestacoes',
+        'osc_celebracao',
     ];
 
     /**
@@ -60,7 +81,11 @@ class RolesSeeder extends Seeder
         'operador_ordem_pagamento'         => ['ordem_pagamento'],
         'aprovador_assinatura_eletronica'  => [], // módulo de assinatura (futuro)
         'analista'                         => [], // acesso básico, em descontinuação
-        'responsavel_legal'                => [], // só portal
+        // Responde pela entidade: faz tudo no portal, e só ele submete, recorre
+        // e contra-assina (isso não é permissão marcável — ver ehResponsavelLegalOsc).
+        'responsavel_legal'                => self::FUNCOES_OSC,
+        // O papel é a identidade "sou da equipe desta OSC"; o que cada um faz
+        // vem marcado por pessoa, no cadastro, e não pelo papel.
         'membro_osc'                       => [], // equipe da OSC: portal, sem submeter/recorrer
     ];
 

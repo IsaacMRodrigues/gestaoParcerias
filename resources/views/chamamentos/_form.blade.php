@@ -38,8 +38,7 @@
     </div>
     <div>
         <x-input-label for="valor_disponivel" value="Valor Disponível (R$)" />
-        <x-text-input id="valor_disponivel" name="valor_disponivel" type="number" step="0.01" min="0"
-                      class="mt-1 block w-full" value="{{ old('valor_disponivel', $chamamento?->valor_disponivel) }}" />
+        <x-input-dinheiro name="valor_disponivel" :value="$chamamento?->valor_disponivel" class="mt-1" />
         <x-input-error :messages="$errors->get('valor_disponivel')" class="mt-2" />
     </div>
     <div>

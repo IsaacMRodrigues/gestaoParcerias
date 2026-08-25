@@ -28,9 +28,11 @@
         <div class="bg-gray-50 border border-gray-200 rounded-xl p-4 mb-6 text-sm text-gray-600">
             <p class="font-medium text-gray-900 mb-1">Como funcionam os acessos</p>
             <p>
-                Os <strong>membros</strong> preparam propostas, anexam documentos e acompanham o andamento.
-                <strong>Submeter proposta</strong> e <strong>protocolar recurso</strong> continuam com você,
-                responsável legal — são atos que vinculam a organização.
+                Acompanhar as propostas e o andamento é de toda a equipe. O que cada pessoa pode
+                <strong>fazer</strong> são as funções marcadas na linha dela — dá para mudar a qualquer momento.
+                <strong>Submeter proposta</strong>, <strong>protocolar recurso</strong> e
+                <strong>assinar o Termo</strong> continuam com você, responsável legal — são atos que
+                vinculam juridicamente a organização.
             </p>
         </div>
 
@@ -39,7 +41,8 @@
                 <thead class="bg-gray-50 text-left text-xs uppercase tracking-wide text-gray-500">
                     <tr>
                         <th class="px-5 py-3 font-medium">Usuário</th>
-                        <th class="px-5 py-3 font-medium">Função</th>
+                        <th class="px-5 py-3 font-medium">Papel</th>
+                        <th class="px-5 py-3 font-medium">Funções</th>
                         <th class="px-5 py-3 font-medium">Acesso</th>
                         <th class="px-5 py-3 font-medium text-right">Ação</th>
                     </tr>
@@ -64,6 +67,41 @@
                                     @if($usuario->solicitacao_obs)
                                         <p class="text-xs text-gray-500 mt-1">{{ $usuario->solicitacao_obs }}</p>
                                     @endif
+                                @endif
+                            </td>
+                            <td class="px-5 py-4">
+                                @if($ehDono)
+                                    {{-- O responsável legal faz tudo o que a OSC pode:
+                                         não há o que marcar nem por que desmarcar. --}}
+                                    <span class="text-xs text-gray-500">Todas as funções</span>
+                                @else
+                                    @php $marcadas = $usuario->permissions->pluck('name')->all(); @endphp
+                                    <details class="group">
+                                        <summary class="cursor-pointer select-none marker:content-none
+                                                        text-xs text-gray-600 hover:text-gray-900">
+                                            @forelse($marcadas as $chave)
+                                                <span class="inline-block px-2 py-0.5 mb-1 mr-1 bg-slate-100 text-slate-700 rounded">
+                                                    {{ $funcoes[$chave]['rotulo'] ?? $chave }}
+                                                </span>
+                                            @empty
+                                                <span class="italic text-gray-400">Só acompanha</span>
+                                            @endforelse
+                                            <span class="block mt-0.5 font-semibold text-brand-700 group-open:hidden">Alterar</span>
+                                        </summary>
+                                        <form method="POST" action="{{ route('portal.usuarios.funcoes', $usuario) }}"
+                                              class="mt-2 space-y-1.5">
+                                            @csrf @method('PATCH')
+                                            @foreach($funcoes as $chave => $funcao)
+                                                <label class="flex items-center gap-2 text-xs text-gray-700">
+                                                    <input type="checkbox" name="funcoes[]" value="{{ $chave }}"
+                                                           @checked(in_array($chave, $marcadas))
+                                                           class="rounded border-gray-300 text-brand-600 focus:ring-brand-500">
+                                                    {{ $funcao['rotulo'] }}
+                                                </label>
+                                            @endforeach
+                                            <button type="submit" class="btn btn-secondary btn-sm mt-1">Salvar funções</button>
+                                        </form>
+                                    </details>
                                 @endif
                             </td>
                             <td class="px-5 py-4">

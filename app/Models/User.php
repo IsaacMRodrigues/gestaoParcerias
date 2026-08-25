@@ -59,6 +59,39 @@ class User extends Authenticatable
     public const PAPEIS_OSC = ['responsavel_legal', 'membro_osc'];
 
     /**
+     * O que cada integrante da OSC pode fazer — marcado pelo responsável legal
+     * no cadastro da equipe.
+     *
+     * Até aqui a equipe era um bloco só: quem entrava podia tudo o que a OSC
+     * pode. Uma entidade não trabalha assim — quem escreve o projeto não é
+     * quem cuida das certidões, e os dados bancários da Celebração não são
+     * assunto de todo mundo. As chaves são permissões Spatie (prefixo `osc_`),
+     * concedidas por pessoa e não pelo papel.
+     *
+     * O que NÃO está aqui é deliberado: submeter proposta, protocolar recurso
+     * e contra-assinar o Termo vinculam juridicamente a entidade e seguem com
+     * o responsável legal — não são delegáveis por caixa marcada.
+     */
+    public const FUNCOES_OSC = [
+        'osc_propostas' => [
+            'rotulo' => 'Propostas e plano de trabalho',
+            'ajuda'  => 'Participar de chamamento aberto e montar a proposta, com metas e etapas.',
+        ],
+        'osc_documentos' => [
+            'rotulo' => 'Documentos da organização',
+            'ajuda'  => 'Anexar e retirar estatuto, certidões e demais documentos.',
+        ],
+        'osc_manifestacoes' => [
+            'rotulo' => 'Manifestações de interesse',
+            'ajuda'  => 'Propor parceria quando não há chamamento aberto.',
+        ],
+        'osc_celebracao' => [
+            'rotulo' => 'Celebração da parceria',
+            'ajuda'  => 'Enviar o plano final, a habilitação e os dados bancários no trâmite.',
+        ],
+    ];
+
+    /**
      * Setores de lotação do usuário (mais amplo que os setores do trâmite).
      */
     public const LOTACOES = [
@@ -363,6 +396,18 @@ class User extends Authenticatable
     public function ehResponsavelLegalOsc(): bool
     {
         return $this->ehRepresentanteOsc() && $this->osc?->user_id === $this->id;
+    }
+
+    /**
+     * Integrante da OSC a quem esta função NÃO foi marcada.
+     *
+     * A pergunta é feita em telas que servem aos dois lados (documentos da
+     * proposta, peças do trâmite), onde o servidor tem as próprias permissões e
+     * não pode ser medido por esta régua — daí a checagem vir junto.
+     */
+    public function oscSemFuncao(string $funcao): bool
+    {
+        return $this->ehRepresentanteOsc() && ! $this->can($funcao);
     }
 
     /**

@@ -59,7 +59,7 @@
                     @csrf
                     <div><x-input-label for="parcela" value="Parcela" /><x-text-input id="parcela" name="parcela" type="number" min="1" class="mt-1 block w-full" /></div>
                     <div><x-input-label for="data_repasse" value="Data *" /><x-text-input id="data_repasse" name="data_repasse" type="date" required class="mt-1 block w-full" /></div>
-                    <div><x-input-label for="valor_r" value="Valor (R$) *" /><x-text-input id="valor_r" name="valor" type="number" step="0.01" min="0.01" required class="mt-1 block w-full" /></div>
+                    <div><x-input-label for="valor_r" value="Valor (R$) *" /><x-input-dinheiro name="valor" id="valor_r" required class="mt-1" /></div>
                     <div class="sm:col-span-2"><x-input-label for="documento" value="Documento / OB" /><x-text-input id="documento" name="documento" type="text" class="mt-1 block w-full" /></div>
                     <div><x-primary-button class="w-full justify-center">Registrar</x-primary-button></div>
                 </form>
@@ -104,8 +104,10 @@
                                         </div>
                                         <div>
                                             <x-input-label value="Valor (R$) *" />
-                                            <x-text-input name="valor" type="number" step="0.01" min="0.01" required
-                                                          class="mt-1 block w-full" value="{{ $r->valor }}" />
+                                            {{-- id próprio: são vários repasses na mesma página, e o
+                                                 campo oculto se liga ao visível pelo id --}}
+                                            <x-input-dinheiro name="valor" id="valor_repasse_{{ $r->id }}"
+                                                              :value="$r->valor" required class="mt-1" />
                                         </div>
                                         <div class="sm:col-span-2">
                                             <x-input-label value="Documento / OB" />
@@ -143,7 +145,7 @@
                       class="px-6 py-4 border-b border-gray-100 grid grid-cols-2 sm:grid-cols-6 gap-3 items-end">
                     @csrf
                     <div><x-input-label for="data_despesa" value="Data *" /><x-text-input id="data_despesa" name="data_despesa" type="date" required class="mt-1 block w-full" /></div>
-                    <div><x-input-label for="valor_d" value="Valor (R$) *" /><x-text-input id="valor_d" name="valor" type="number" step="0.01" min="0.01" required class="mt-1 block w-full" /></div>
+                    <div><x-input-label for="valor_d" value="Valor (R$) *" /><x-input-dinheiro name="valor" id="valor_d" required class="mt-1" /></div>
                     <div class="sm:col-span-2">
                         <x-input-label for="natureza" value="Natureza *" />
                         <select id="natureza" name="natureza" required class="mt-1 block w-full border-gray-300 rounded-md shadow-sm text-sm focus:ring-brand-500 focus:border-brand-500">
@@ -204,8 +206,8 @@
                                         </div>
                                         <div>
                                             <x-input-label value="Valor (R$) *" />
-                                            <x-text-input name="valor" type="number" step="0.01" min="0.01" required
-                                                          class="mt-1 block w-full" value="{{ $d->valor }}" />
+                                            <x-input-dinheiro name="valor" id="valor_despesa_{{ $d->id }}"
+                                                              :value="$d->valor" required class="mt-1" />
                                         </div>
                                         <div class="sm:col-span-2">
                                             <x-input-label value="Natureza *" />

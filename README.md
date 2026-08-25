@@ -256,6 +256,90 @@ OSC é organização, e organização tem equipe. O vínculo mora em **`users.os
 
 ## O que foi feito
 
+- [2026-08-25] **Equipe da OSC: cada integrante com as funções que lhe cabem** (`User::FUNCOES_OSC`)
+  - A equipe da OSC era um bloco só: quem entrava podia tudo o que a organização pode. Entidade não
+    trabalha assim — quem escreve o projeto não é quem cuida das certidões, e os dados bancários da
+    Celebração não são assunto de todo mundo
+  - No cadastro do integrante, e depois na listagem, o responsável legal marca **quatro funções**:
+    Propostas e plano de trabalho, Documentos da organização, Manifestações de interesse e Celebração
+    da parceria. São permissões Spatie com prefixo `osc_`, concedidas **por pessoa** e não pelo papel —
+    um papel por combinação não terminaria nunca
+  - **Ver é de toda a equipe; agir é do que estiver marcado.** Sem nenhuma função, a pessoa acompanha
+    as propostas e o andamento e não altera nada. A régua fica na rota, em grupos `permission:osc_*`;
+    onde a tela é compartilhada com o município (documentos da proposta, peças do trâmite) a checagem
+    é no controller, com `User::oscSemFuncao()`, para que o servidor continue medido pelas permissões dele
+  - **O que não virou caixa é deliberado**: submeter proposta, protocolar recurso e contra-assinar o
+    Termo vinculam juridicamente a entidade e seguem com o responsável legal, que tem as quatro pelo papel
+  - Botões que a pessoa não pode usar somem, e onde havia espaço entrou o motivo — clicar e levar 403
+    sem explicação é o que a tela existe para evitar
+  - **Migração de compatibilidade**: quem já está cadastrado como membro recebe as quatro. Ligar a
+    checagem sem isso tiraria acesso de gente que trabalha, inclusive no meio de uma Celebração em
+    andamento; quem deve perder função perde pela tela, por decisão do responsável legal
+  - Conferido: membro só com "propostas" passa no gate dela e é barrado nas outras (rota e controller),
+    a tela do chamamento troca o botão pelo aviso, POST forjado com `cadastros` é recusado na validação,
+    as funções do responsável legal não são alteráveis nem por ele, e servidor da SCP/UG segue atuando
+    normalmente nas peças
+
+- [2026-08-25] **Espaço extra de anexo também na Seleção e na Dispensa** (`SelecaoController::adicionarAnexo`)
+  - O botão de abrir mais um espaço de anexo existia só na Celebração. Nos comprovantes de
+    publicação do chamamento — extrato do edital, resultado provisório, resultado definitivo — o
+    template prevê um campo cada, e quantas publicações um chamamento exige não é regra fixa:
+    republicação, errata, segunda edição do Diário. Anexar a segunda apagava a primeira
+  - O botão aparece em **dois lugares, com regras diferentes**: na etapa corrente do trâmite, para
+    quem está com a vez (mesma régua de avançar e devolver); e nos **documentos gerais**, onde moram
+    as peças sem etapa — a fase do edital e a Dispensa inteira, que não passa por julgamento. O
+    formulário diz em qual bloco nasce, porque não dá para deduzir: o mesmo usuário pode estar com a
+    vez na etapa e ainda assim querer um documento geral
+  - Fora da etapa, o anexo **segue a regra dos vizinhos**: no chamamento público as peças prévias têm
+    dono (segregação de função — quem pede o parecer não o emite), na Dispensa nunca tiveram. Dar
+    dono ali travaria justamente quem a pessoa abriu o espaço para atender
+  - `Peca::emTramite()` passou a exigir setor **e** etapa. Nos mapas do template as duas andam
+    juntas, mas o anexo avulso da fase prévia guarda só o setor: sem esse ajuste ele cairia no bloco
+    da etapa 1 por falta de número. Os três testes de "está fora do trâmite?" espalhados pelo model
+    viraram uma chamada a `emTramite()`, para não divergirem de novo
+  - Conferido: SCP com a vez vê os dois botões, quem não está com a vez vê só o dos gerais, UG
+    tentando criar na etapa da SCP leva 403, re-sincronizar não apaga nem move os extras, e a
+    numeração das etapas continua sem buraco (Seleção 1–5, Celebração 1–15)
+
+- [2026-08-25] **Dinheiro se digita como se escreve** (`x-input-dinheiro`, `NormalizaValoresMonetarios`)
+  - Os 12 campos monetários do sistema eram `type="number"`: sem "R$" à vista, com ponto no lugar da
+    vírgula e sem separador de milhar. Quem digitava 40000 não tinha como conferir a ordem de
+    grandeza, e a vírgula do teclado numérico simplesmente não entrava
+  - **Componente `<x-input-dinheiro>`**: prefixo R$ fixo, digitação da direita para a esquerda (como
+    caixa eletrônico) e o valor formatado em português enquanto se escreve. Campo visível com
+    máscara + campo oculto com o número — o que a pessoa lê não é o que o banco guarda
+  - **`resources/js/money.js`**: o padrão `data-money` já existia, mas o script vivia dentro de UMA
+    view. Agora é comportamento do sistema, por delegação no documento — pega inclusive campos que
+    aparecem depois, como os das linhas de repasse e despesa
+  - **Middleware `NormalizaValoresMonetarios`** converte no servidor o que chegar em português
+    ("R$ 1.234,56" → 1234.56), então o campo funciona mesmo sem JavaScript e ninguém precisa
+    lembrar de tratar isso em cada FormRequest. Conservador com o ponto, que é milhar em português e
+    decimal em inglês: "40.000" vira 40000; "40.00" fica 40.00
+  - Convertidos: proposta, chamamento, programa, instrumento, aditivo, manifestação, ordem de
+    pagamento, repasse e despesa — incluindo as edições em linha, onde cada campo ganhou id próprio
+    porque há vários na mesma página
+  - **Defeito encontrado no caminho**: em `portal/participar` o par visível+oculto existia com o
+    script no rodapé — mas era a única tela com ele. Passou a usar o componente
+  - `disabled` passa a valer também para o campo oculto: desabilitar só o visível deixava o valor
+    sendo enviado num formulário que a tela mostra como bloqueado (é o caso da OP assinada)
+  - Conferido: oito formatos de entrada convertem certo, campos que parecem número mas não são
+    dinheiro (`parcela`, `meta_quantitativa`: "1.200 atendimentos") ficam intactos, e a edição de
+    instrumento mostra 1.251,25 para o 1251.25 do banco
+
+- [2026-08-25] **Barra do portal parou de quebrar em duas linhas** (`layouts/portal`)
+  - Com os itens novos, eram cinco links mais o nome do usuário em `max-w-6xl`: os rótulos longos
+    ("Chamamentos abertos", "Minhas participações") quebravam no meio, cada um terminava com uma
+    altura e a barra inteira saía desalinhada
+  - Três zonas de largura previsível — marca, links, conta —, `whitespace-nowrap` nos links e
+    `max-w-7xl` no container. O nome do usuário virou avatar com iniciais, e o nome por extenso só
+    aparece a partir de `lg`
+  - **Usuários da OSC saiu da barra para o menu da conta**, com o nome da organização por cima:
+    administrar equipe é configuração, não navegação diária — e era o quinto link a disputar espaço
+  - Abaixo de `md` os links viram gaveta (botão de menu), em vez de espremer. Um único array `$navItens`
+    alimenta as duas formas, então não há lista duplicada para divergir
+  - Conferido nos quatro casos: responsável legal, membro da OSC, servidor navegando o portal e
+    visitante — cada um vê o que lhe cabe
+
 - [2026-08-25] **Portal da OSC: a vitrine e as participações, separadas** (`portal.index`, `minhas-propostas`)
   - "Minhas Propostas" listava tudo numa fila só, sem dizer de onde cada coisa vinha — e desde a
     manifestação de interesse são **três caminhos com regras diferentes**: chamamento público
@@ -1466,8 +1550,16 @@ Frentes desta rodada, detalhadas nas primeiras entradas de `## O que foi feito`:
 5. **Acabamento**: assinar não joga mais a tela para o topo, atalhos de rolagem na Celebração e nas
    telas da OSC, e o selo de situação parou de se partir ao meio.
 
+13. **Funções da equipe da OSC** (25/08): o responsável legal marca, por pessoa, quais das quatro
+   funções o integrante exerce — propostas, documentos, manifestações e Celebração. Ver segue sendo
+   de toda a equipe; submeter, recorrer e assinar continuam com quem responde pela entidade.
+12. **Espaço extra de anexo na Seleção e na Dispensa** (25/08): o botão que só existia na Celebração
+   passou a valer nos comprovantes do chamamento, onde o número de publicações varia caso a caso.
+11. **Dinheiro com R$ e vírgula** (25/08): os 12 campos monetários do sistema passaram a ter máscara
+   em português, com conversão no servidor para quem não tem JavaScript.
 10. **Portal da OSC** (25/08): vitrine dos chamamentos abertos e "Minhas participações" separando
-   chamamento público, dispensa/inexigibilidade e manifestações.
+   chamamento público, dispensa/inexigibilidade e manifestações — com a barra do portal
+   reorganizada para caber sem quebrar.
 9. **Manifestação de Interesse** (25/08): a OSC propõe parceria sem chamamento aberto; a SCP ouve a
    Secretaria e decide entre dispensa e inexigibilidade — e o deferimento cria o chamamento e a
    proposta com o plano de trabalho que a OSC já entregou.

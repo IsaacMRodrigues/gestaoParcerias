@@ -61,26 +61,45 @@ Route::get('/validar/{codigo}', [\App\Http\Controllers\ValidacaoController::clas
 // Área da OSC logada (portal) — 'osc' barra o usuário interno: servidor analisa
 // e decide sobre a proposta, nunca a apresenta.
 Route::middleware(['auth', 'osc'])->group(function () {
+    /*
+     * Ver é de toda a equipe da OSC; agir é de quem tem a função marcada.
+     *
+     * A régua está aqui, na rota, e não espalhada nos controllers: o
+     * responsável legal marca as funções no cadastro do integrante (ver
+     * User::FUNCOES_OSC) e cada grupo abaixo diz qual delas abre o quê.
+     */
     Route::get('/portal/minhas-propostas', [PortalController::class, 'minhasPropostas'])->name('portal.minhas-propostas');
-    Route::get('/portal/chamamentos/{chamamento}/participar', [PortalController::class, 'participar'])->name('portal.participar');
-    Route::post('/portal/chamamentos/{chamamento}/proposta', [PortalController::class, 'storeProposta'])->name('portal.proposta.store');
     Route::get('/portal/propostas/{proposta}', [PortalController::class, 'showProposta'])->name('portal.proposta.show');
     Route::patch('/portal/propostas/{proposta}/submeter', [PortalController::class, 'submeterProposta'])->name('portal.proposta.submeter');
+
+    Route::middleware('permission:osc_propostas')->group(function () {
+        Route::get('/portal/chamamentos/{chamamento}/participar', [PortalController::class, 'participar'])->name('portal.participar');
+        Route::post('/portal/chamamentos/{chamamento}/proposta', [PortalController::class, 'storeProposta'])->name('portal.proposta.store');
+    });
+
     // Manifestação de Interesse: propor parceria sem chamamento aberto.
     // Montar é da equipe da OSC; submeter, do responsável legal (no controller).
+    Route::middleware('permission:osc_manifestacoes')->group(function () {
+        Route::get('/portal/manifestacoes/nova', [ManifestacaoController::class, 'create'])->name('portal.manifestacoes.create');
+        Route::post('/portal/manifestacoes', [ManifestacaoController::class, 'store'])->name('portal.manifestacoes.store');
+        Route::put('/portal/manifestacoes/{manifestacao}', [ManifestacaoController::class, 'update'])->name('portal.manifestacoes.update');
+        Route::post('/portal/manifestacoes/{manifestacao}/metas', [ManifestacaoController::class, 'storeMeta'])->name('portal.manifestacoes.metas.store');
+        Route::delete('/portal/manifestacoes/{manifestacao}/metas/{meta}', [ManifestacaoController::class, 'destroyMeta'])->name('portal.manifestacoes.metas.destroy');
+        Route::post('/portal/manifestacoes/{manifestacao}/metas/{meta}/etapas', [ManifestacaoController::class, 'storeEtapa'])->name('portal.manifestacoes.etapas.store');
+        Route::delete('/portal/manifestacoes/{manifestacao}/metas/{meta}/etapas/{etapa}', [ManifestacaoController::class, 'destroyEtapa'])->name('portal.manifestacoes.etapas.destroy');
+    });
+
     Route::get('/portal/manifestacoes', [ManifestacaoController::class, 'index'])->name('portal.manifestacoes.index');
-    Route::get('/portal/manifestacoes/nova', [ManifestacaoController::class, 'create'])->name('portal.manifestacoes.create');
-    Route::post('/portal/manifestacoes', [ManifestacaoController::class, 'store'])->name('portal.manifestacoes.store');
     Route::get('/portal/manifestacoes/{manifestacao}', [ManifestacaoController::class, 'show'])->name('portal.manifestacoes.show');
-    Route::put('/portal/manifestacoes/{manifestacao}', [ManifestacaoController::class, 'update'])->name('portal.manifestacoes.update');
-    Route::patch('/portal/manifestacoes/{manifestacao}/submeter', [ManifestacaoController::class, 'submeter'])->name('portal.manifestacoes.submeter');
-    Route::post('/portal/manifestacoes/{manifestacao}/metas', [ManifestacaoController::class, 'storeMeta'])->name('portal.manifestacoes.metas.store');
-    Route::delete('/portal/manifestacoes/{manifestacao}/metas/{meta}', [ManifestacaoController::class, 'destroyMeta'])->name('portal.manifestacoes.metas.destroy');
-    Route::post('/portal/manifestacoes/{manifestacao}/metas/{meta}/etapas', [ManifestacaoController::class, 'storeEtapa'])->name('portal.manifestacoes.etapas.store');
-    Route::delete('/portal/manifestacoes/{manifestacao}/metas/{meta}/etapas/{etapa}', [ManifestacaoController::class, 'destroyEtapa'])->name('portal.manifestacoes.etapas.destroy');
-    Route::post('/portal/manifestacoes/{manifestacao}/documentos', [ManifestacaoController::class, 'storeDocumento'])->name('portal.manifestacoes.documentos.store');
     Route::get('/portal/manifestacoes/{manifestacao}/documentos/{documento}', [ManifestacaoController::class, 'downloadDocumento'])->name('portal.manifestacoes.documentos.download');
-    Route::delete('/portal/manifestacoes/{manifestacao}/documentos/{documento}', [ManifestacaoController::class, 'destroyDocumento'])->name('portal.manifestacoes.documentos.destroy');
+    Route::patch('/portal/manifestacoes/{manifestacao}/submeter', [ManifestacaoController::class, 'submeter'])->name('portal.manifestacoes.submeter');
+
+    // O documento da manifestação é documento da organização: mesma função que
+    // governa os anexos da proposta, não a de montar a manifestação.
+    Route::middleware('permission:osc_documentos')->group(function () {
+        Route::post('/portal/manifestacoes/{manifestacao}/documentos', [ManifestacaoController::class, 'storeDocumento'])->name('portal.manifestacoes.documentos.store');
+        Route::delete('/portal/manifestacoes/{manifestacao}/documentos/{documento}', [ManifestacaoController::class, 'destroyDocumento'])->name('portal.manifestacoes.documentos.destroy');
+    });
 
     // Recurso contra o resultado provisório (protocolo eletrônico pela OSC)
     Route::post('/portal/chamamentos/{chamamento}/recurso', [RecursoController::class, 'store'])->name('recursos.store');
@@ -92,6 +111,7 @@ Route::middleware(['auth', 'osc'])->group(function () {
         Route::get('/portal/usuarios', [OscUsuarioController::class, 'index'])->name('portal.usuarios.index');
         Route::get('/portal/usuarios/novo', [OscUsuarioController::class, 'create'])->name('portal.usuarios.create');
         Route::post('/portal/usuarios', [OscUsuarioController::class, 'store'])->name('portal.usuarios.store');
+        Route::patch('/portal/usuarios/{usuario}/funcoes', [OscUsuarioController::class, 'funcoes'])->name('portal.usuarios.funcoes');
         Route::patch('/portal/usuarios/{usuario}/acesso', [OscUsuarioController::class, 'alternarAcesso'])->name('portal.usuarios.acesso');
     });
 });
@@ -198,6 +218,9 @@ Route::middleware(['auth', 'staff', 'readonly'])->group(function () {
         Route::post('chamamentos/{chamamento}/selecao/avancar', [SelecaoController::class, 'avancar'])->name('chamamentos.selecao.avancar');
         Route::post('chamamentos/{chamamento}/selecao/devolver', [SelecaoController::class, 'devolver'])->name('chamamentos.selecao.devolver');
         Route::post('chamamentos/{chamamento}/selecao/concluir', [SelecaoController::class, 'concluir'])->name('chamamentos.selecao.concluir');
+        // Espaço extra de anexo: o número de publicações varia de um chamamento
+        // para outro (republicação, errata, segunda edição do Diário).
+        Route::post('chamamentos/{chamamento}/selecao/anexos', [SelecaoController::class, 'adicionarAnexo'])->name('chamamentos.selecao.anexos.store');
         // Declara as vencedoras de uma Seleção já encerrada (chamamentos
         // homologados antes de a adjudicação existir no encerramento).
         Route::post('chamamentos/{chamamento}/selecao/adjudicar', [SelecaoController::class, 'adjudicar'])->name('chamamentos.selecao.adjudicar');

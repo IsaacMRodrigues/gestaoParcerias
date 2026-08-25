@@ -3,8 +3,10 @@
 namespace App\Http\Controllers;
 
 use App\Models\Chamamento;
+use App\Models\Peca;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Str;
 use Illuminate\Validation\Rule;
 
 /**
@@ -95,6 +97,70 @@ class SelecaoController extends Controller
 
         return redirect()->route('chamamentos.selecao', $chamamento)
             ->with('success', 'Seleção devolvida para ' . Chamamento::SETORES_SELECAO[$setorAnterior] . '.');
+    }
+
+    /**
+     * Abre mais um espaço de anexo no checklist.
+     *
+     * Quantas publicações um chamamento exige não é regra fixa: republicação,
+     * errata, uma segunda edição do Diário Oficial. O template prevê o comum;
+     * este botão cobre o resto, sem inventar campos que a maioria não usa.
+     *
+     * Dois lugares possíveis, e a diferença importa. Na etapa corrente do
+     * trâmite, o anexo é da vez de quem o cria — mesma régua de avançar e
+     * devolver. Nos documentos gerais (a fase do edital, e a Dispensa inteira,
+     * que não passa por julgamento), não há etapa: grava-se o setor de quem
+     * abriu o espaço, e só ele preenche.
+     */
+    public function adicionarAnexo(Request $request, Chamamento $chamamento): RedirectResponse
+    {
+        $data = $request->validate([
+            'rotulo' => ['required', 'string', 'max:120'],
+            'escopo' => ['required', Rule::in(['etapa', 'geral'])],
+        ], [
+            'rotulo.required' => 'Dê um nome ao anexo (ex.: "Publicação — 2ª edição").',
+        ]);
+
+        $naEtapa = $data['escopo'] === 'etapa';
+
+        if ($naEtapa) {
+            $this->autorizarSetor($chamamento);
+        }
+
+        $etapa = $naEtapa ? (int) $chamamento->selecao_etapa : null;
+
+        // Fora da etapa o anexo segue a regra dos vizinhos: no chamamento
+        // público as peças prévias têm dono (é segregação de função — quem pede
+        // o parecer não o emite), na Dispensa nunca tiveram. Dar dono ali
+        // travaria justamente quem a pessoa abriu o espaço para atender.
+        $setor = match (true) {
+            $naEtapa => $chamamento->selecao_setor,
+            $chamamento->categoriaPecas() === 'chamamento_publico' => auth()->user()->setorNoTramite(),
+            default  => null,
+        };
+
+        // Entra no fim do bloco onde nasce: a maior ordem de lá, que o desempate
+        // por id resolve entre anexos criados na mesma etapa.
+        $pecas = $chamamento->pecas()->get();
+        $ordem = $pecas->filter(fn (Peca $p) => $p->selecaoEtapa() === $etapa)->max('ordem')
+            ?? $pecas->max('ordem')
+            ?? 0;
+
+        $peca = $chamamento->pecas()->create([
+            'categoria'   => $chamamento->categoriaPecas(),
+            'chave'       => 'extra_' . Str::uuid()->toString(),
+            'rotulo'      => $data['rotulo'],
+            'tipo'        => 'arquivo',
+            'obrigatorio' => false,
+            'ordem'       => $ordem,
+            'extra'       => true,
+            'setor'       => $setor,
+            'etapa'       => $etapa,
+            'criado_por'  => auth()->id(),
+        ]);
+
+        return back()->withFragment('peca-' . $peca->id)
+            ->with('success', 'Espaço de anexo criado. Envie o arquivo abaixo.');
     }
 
     /**

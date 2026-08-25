@@ -956,6 +956,12 @@ HTML,
      */
     public function setorPrevio(): ?string
     {
+        // Anexo avulso não está em mapa nenhum (a chave é um uuid): o dono vai
+        // gravado na própria linha, no ato de criar o espaço.
+        if ($this->extra && $this->setor !== null) {
+            return $this->setor;
+        }
+
         return $this->categoria === 'chamamento_publico'
             ? (self::SELECAO_SETOR_PREVIO[$this->chave] ?? null)
             : null;
@@ -983,10 +989,19 @@ HTML,
      * Pode preencher (texto ou upload) agora? Só o setor designado, na etapa
      * designada, enquanto a Seleção não estiver encerrada.
      */
-    /** A peça é governada por um trâmite (Seleção ou Celebração)? */
+    /**
+     * A peça é governada por um trâmite (Seleção ou Celebração)?
+     *
+     * Precisa das duas coisas: setor E etapa. Nos mapas do template as duas
+     * andam juntas (mesmas chaves), mas um anexo avulso criado na fase prévia
+     * guarda só o setor de quem o criou — sem etapa, ele fica onde nasceu, nos
+     * documentos gerais, em vez de cair no bloco da etapa 1 por falta de número.
+     */
     public function emTramite(): bool
     {
-        return $this->donoEmTramite() !== null && $this->selecaoSetor() !== null;
+        return $this->donoEmTramite() !== null
+            && $this->selecaoSetor() !== null
+            && $this->selecaoEtapa() !== null;
     }
 
     /**
@@ -1089,8 +1104,8 @@ HTML,
     {
         $dono = $this->donoEmTramite();
 
-        // Fora do trâmite (fase do edital): sem etapa, mas com dono.
-        if (!$dono || $this->selecaoSetor() === null) {
+        // Fora do trâmite (fase do edital, dispensa, anexo avulso sem etapa).
+        if (!$this->emTramite()) {
             return $this->podeAgirNaFasePrevia($user);
         }
 
@@ -1215,7 +1230,7 @@ HTML,
 
         $dono = $this->donoEmTramite();
 
-        if (!$dono || $this->selecaoSetor() === null) {
+        if (!$this->emTramite()) {
             return $this->podeAgirNaFasePrevia($user);
         }
 
@@ -1241,7 +1256,7 @@ HTML,
     {
         $dono = $this->donoEmTramite();
 
-        if (!$dono || $this->selecaoSetor() === null || $this->assinado()) {
+        if (!$this->emTramite() || $this->assinado()) {
             return null;
         }
 

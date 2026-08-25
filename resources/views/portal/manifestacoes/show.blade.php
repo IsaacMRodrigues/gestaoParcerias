@@ -2,6 +2,12 @@
     $rascunho = $manifestacao->ehRascunho();
     $cor = \App\Models\ManifestacaoInteresse::STATUS_COLORS[$manifestacao->status] ?? 'gray';
     $pendencias = $rascunho ? $manifestacao->pendenciasParaSubmeter() : [];
+
+    /* Montar a manifestação e cuidar da habilitação são funções distintas na
+       equipe da OSC (ver User::FUNCOES_OSC): o rascunho abre a porta, a função
+       marcada pelo responsável legal diz quem entra por ela. */
+    $podeEditar = $rascunho && auth()->user()->can('osc_manifestacoes');
+    $podeAnexar = $rascunho && auth()->user()->can('osc_documentos');
 @endphp
 
 <x-portal-layout>
@@ -20,6 +26,17 @@
         </div>
 
         <x-flash-message />
+
+        {{-- Rascunho aberto e a pessoa sem a função: melhor dizer aqui do que
+             deixá-la procurar um botão de editar que não vai aparecer. --}}
+        @if($rascunho && ! ($podeEditar && $podeAnexar))
+            <p class="text-sm text-gray-600 bg-gray-50 border border-gray-200 rounded-lg p-4">
+                Esta manifestação ainda é rascunho.
+                @unless($podeEditar) Sua conta não tem a função <strong>Manifestações de interesse</strong>. @endunless
+                @unless($podeAnexar) Sua conta não tem a função <strong>Documentos da organização</strong>. @endunless
+                Peça ao responsável legal da OSC em <em>Usuários da Organização</em>.
+            </p>
+        @endif
 
         {{-- Decisão do município: o que a OSC precisa saber primeiro --}}
         @if($manifestacao->decidida())
@@ -44,7 +61,7 @@
         {{-- 1. Dados gerais --}}
         <div class="bg-white rounded-xl border border-gray-200 shadow-sm p-6">
             <h2 class="text-base font-semibold text-gray-800 mb-4">Dados da proposta</h2>
-            @if($rascunho)
+            @if($podeEditar)
                 <form action="{{ route('portal.manifestacoes.update', $manifestacao) }}" method="POST" class="space-y-4">
                     @csrf @method('PUT')
                     @include('portal.manifestacoes._campos')
@@ -82,7 +99,7 @@
                                     {{ collect([$meta->indicador, $meta->meta_quantitativa])->filter()->implode(' · ') ?: 'Sem indicador informado' }}
                                 </p>
                             </div>
-                            @if($rascunho)
+                            @if($podeEditar)
                                 <form action="{{ route('portal.manifestacoes.metas.destroy', [$manifestacao, $meta]) }}" method="POST"
                                       data-confirm="Remover a meta {{ $meta->numero }} e suas etapas?">
                                     @csrf @method('DELETE')
@@ -97,7 +114,7 @@
                                     <span>{{ $etapa->numero }}. {{ $etapa->descricao }}
                                         @if($etapa->responsavel)<span class="text-gray-400"> · {{ $etapa->responsavel }}</span>@endif
                                     </span>
-                                    @if($rascunho)
+                                    @if($podeEditar)
                                         <form action="{{ route('portal.manifestacoes.etapas.destroy', [$manifestacao, $meta, $etapa]) }}" method="POST">
                                             @csrf @method('DELETE')
                                             <button class="text-gray-400 hover:text-red-700 transition">×</button>
@@ -107,7 +124,7 @@
                             @endforeach
                         </ul>
 
-                        @if($rascunho)
+                        @if($podeEditar)
                             <form action="{{ route('portal.manifestacoes.etapas.store', [$manifestacao, $meta]) }}" method="POST"
                                   class="mt-3 flex flex-wrap gap-2">
                                 @csrf
@@ -124,7 +141,7 @@
                 @endforelse
             </div>
 
-            @if($rascunho)
+            @if($podeEditar)
                 <form action="{{ route('portal.manifestacoes.metas.store', $manifestacao) }}" method="POST"
                       class="mt-4 pt-4 border-t border-gray-100 grid sm:grid-cols-2 gap-3">
                     @csrf
@@ -161,7 +178,7 @@
                                class="text-sm text-brand-700 hover:underline">{{ $doc->nome_original }}</a>
                             <span class="block text-xs text-gray-400">{{ \App\Models\Documento::TIPOS[$doc->tipo] ?? $doc->tipo }}</span>
                         </span>
-                        @if($rascunho)
+                        @if($podeAnexar)
                             <form action="{{ route('portal.manifestacoes.documentos.destroy', [$manifestacao, $doc]) }}" method="POST"
                                   data-confirm="Remover este documento?">
                                 @csrf @method('DELETE')
@@ -174,7 +191,7 @@
                 @endforelse
             </ul>
 
-            @if($rascunho)
+            @if($podeAnexar)
                 <form action="{{ route('portal.manifestacoes.documentos.store', $manifestacao) }}" method="POST"
                       enctype="multipart/form-data" class="mt-4 pt-4 border-t border-gray-100 flex flex-wrap items-end gap-3">
                     @csrf

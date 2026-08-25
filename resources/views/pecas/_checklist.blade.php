@@ -111,9 +111,14 @@
     @endif
 
     @php
-        // Espaço extra de anexo: só na etapa corrente, só para quem está com a
-        // vez, e só onde a tela dona ofereceu a rota (a Celebração, hoje).
-        $podeAnexarExtra = ($rotaAnexoExtra ?? null) && $grupoAgora && $minhaVez;
+        /* Espaço extra de anexo, onde a tela dona ofereceu a rota.
+         *
+         * Vale nos dois tipos de bloco, e por motivos diferentes: na etapa
+         * corrente, porque é ali que se está trabalhando; nos documentos
+         * gerais, porque é onde moram as peças sem etapa — a fase do edital e
+         * a Dispensa inteira, que não passa por julgamento. Em ambos, $minhaVez
+         * já responde se a pessoa pode agir no bloco. */
+        $podeAnexarExtra = ($rotaAnexoExtra ?? null) && $minhaVez && ($grupoAgora || $semEtapa);
     @endphp
 
     {{-- Etapa que não tem documento próprio: em vez de sumir da lista (e abrir
@@ -470,10 +475,14 @@
                     <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.4">
                         <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15"/>
                     </svg>
-                    Adicionar espaço de anexo nesta etapa
+                    Adicionar espaço de anexo {{ $semEtapa ? 'nos documentos gerais' : 'nesta etapa' }}
                 </summary>
                 <form action="{{ $rotaAnexoExtra }}" method="POST" class="mt-3 flex flex-wrap items-start gap-2">
                     @csrf
+                    {{-- Em qual bloco o anexo nasce: o servidor precisa saber, e
+                         não dá para deduzir — o mesmo usuário pode estar com a
+                         vez na etapa e ainda assim querer um documento geral. --}}
+                    <input type="hidden" name="escopo" value="{{ $semEtapa ? 'geral' : 'etapa' }}">
                     <div class="flex-1 min-w-[16rem]">
                         <input type="text" name="rotulo" maxlength="120" required
                                placeholder="Nome do anexo (ex.: Publicação — 2ª edição)"

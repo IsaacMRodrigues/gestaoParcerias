@@ -15,7 +15,9 @@
             </div>
             <div class="flex flex-wrap gap-2">
                 <a href="{{ route('portal.index') }}" class="btn btn-outline">Chamamentos abertos</a>
-                <a href="{{ route('portal.manifestacoes.create') }}" class="btn btn-primary">+ Manifestar interesse</a>
+                @can('osc_manifestacoes')
+                    <a href="{{ route('portal.manifestacoes.create') }}" class="btn btn-primary">+ Manifestar interesse</a>
+                @endcan
             </div>
         </div>
 
@@ -97,10 +99,12 @@
                         <p class="text-sm text-gray-500">
                             Nenhuma manifestação. É por ela que se propõe uma parceria quando não há chamamento aberto.
                         </p>
-                        <a href="{{ route('portal.manifestacoes.create') }}"
-                           class="text-sm font-semibold text-brand-700 hover:underline mt-1 inline-block">
-                            Manifestar interesse →
-                        </a>
+                        @can('osc_manifestacoes')
+                            <a href="{{ route('portal.manifestacoes.create') }}"
+                               class="text-sm font-semibold text-brand-700 hover:underline mt-1 inline-block">
+                                Manifestar interesse →
+                            </a>
+                        @endcan
                     </div>
                 @endforelse
             </div>

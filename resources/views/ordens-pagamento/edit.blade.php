@@ -34,8 +34,7 @@
                     </div>
                     <div>
                         <x-input-label for="valor" value="Valor (R$)" />
-                        <x-text-input id="valor" name="valor" type="number" step="0.01" min="0" class="mt-1 block w-full"
-                                      value="{{ old('valor', $op->valor) }}" :disabled="$op->assinado()" />
+                        <x-input-dinheiro name="valor" :value="$op->valor" class="mt-1" :disabled="$op->assinado()" />
                     </div>
                     <div>
                         <x-input-label for="data_emissao" value="Data de emissão" />

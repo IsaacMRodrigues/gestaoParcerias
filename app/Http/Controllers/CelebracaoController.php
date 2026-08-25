@@ -35,6 +35,11 @@ class CelebracaoController extends Controller
         if ($proposta->celebracao_setor === 'osc') {
             abort_unless($user->ehRepresentanteOsc() && $user->osc->id === $proposta->osc_id, 403,
                 'Esta parceria pertence a outra OSC.');
+
+            // E, dentro da OSC, quem tem a função da Celebração marcada.
+            abort_if($user->oscSemFuncao('osc_celebracao'), 403,
+                'Sua conta não tem a função "Celebração da parceria". '
+                .'Peça ao responsável legal da OSC para marcá-la em Usuários da Organização.');
         }
     }
 

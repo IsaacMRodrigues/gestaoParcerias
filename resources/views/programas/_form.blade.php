@@ -54,8 +54,7 @@
 <div class="grid grid-cols-3 gap-4 mt-4">
     <div>
         <x-input-label for="valor_total" value="Valor Total (R$)" />
-        <x-text-input id="valor_total" name="valor_total" type="number" step="0.01" min="0"
-                      class="mt-1 block w-full" value="{{ old('valor_total', $programa?->valor_total) }}" />
+        <x-input-dinheiro name="valor_total" :value="$programa?->valor_total" class="mt-1" />
         <x-input-error :messages="$errors->get('valor_total')" class="mt-2" />
     </div>
     <div>

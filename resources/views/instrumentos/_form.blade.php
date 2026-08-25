@@ -44,16 +44,12 @@
 <div class="grid grid-cols-2 gap-4 mt-4">
     <div>
         <x-input-label for="valor_repasse" value="Valor de Repasse (R$) *" />
-        <x-text-input id="valor_repasse" name="valor_repasse" type="number" step="0.01" min="0"
-                      class="mt-1 block w-full"
-                      value="{{ old('valor_repasse', $instrumento?->valor_repasse) }}" required />
+        <x-input-dinheiro name="valor_repasse" :value="$instrumento?->valor_repasse" required class="mt-1" />
         <x-input-error :messages="$errors->get('valor_repasse')" class="mt-2" />
     </div>
     <div>
         <x-input-label for="valor_proprio" value="Contrapartida da OSC (R$)" />
-        <x-text-input id="valor_proprio" name="valor_proprio" type="number" step="0.01" min="0"
-                      class="mt-1 block w-full"
-                      value="{{ old('valor_proprio', $instrumento?->valor_proprio ?? 0) }}" />
+        <x-input-dinheiro name="valor_proprio" :value="$instrumento?->valor_proprio ?? 0" class="mt-1" />
     </div>
 </div>
 

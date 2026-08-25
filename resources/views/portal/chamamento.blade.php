@@ -29,11 +29,17 @@
                 <div class="shrink-0">
                     @if($chamamento->aceitaPropostas())
                         @auth
-                            @if(auth()->user()->ehRepresentanteOsc())
+                            @if(auth()->user()->ehRepresentanteOsc() && auth()->user()->can('osc_propostas'))
                                 <a href="{{ route('portal.participar', $chamamento) }}"
                                    class="btn btn-primary">
                                     Submeter Proposta
                                 </a>
+                            @elseif(auth()->user()->ehRepresentanteOsc())
+                                {{-- Integrante sem a função de propostas: o botão levaria
+                                     a um bloqueio, e o motivo não está no chamamento. --}}
+                                <span class="inline-block px-4 py-2 text-xs font-medium text-gray-500 bg-gray-100 border border-gray-200 rounded-lg">
+                                    Sua conta não monta propostas — fale com o responsável legal
+                                </span>
                             @elseif(auth()->user()->temAcessoInterno())
                                 <span class="inline-block px-4 py-2 text-xs font-medium text-gray-500 bg-gray-100 border border-gray-200 rounded-lg">
                                     Usuário do sistema — a submissão é feita por OSCs
@@ -220,11 +226,16 @@
                             Sua OSC pode submeter uma proposta para este chamamento.
                         </p>
                         @auth
-                            @if(auth()->user()->ehRepresentanteOsc())
+                            @if(auth()->user()->ehRepresentanteOsc() && auth()->user()->can('osc_propostas'))
                                 <a href="{{ route('portal.participar', $chamamento) }}"
                                    class="btn btn-primary">
                                     Submeter Proposta
                                 </a>
+                            @elseif(auth()->user()->ehRepresentanteOsc())
+                                <p class="text-xs text-brand-600">
+                                    Sua conta não tem a função de montar propostas. Fale com o responsável
+                                    legal da organização.
+                                </p>
                             @elseif(auth()->user()->temAcessoInterno())
                                 <p class="text-xs text-brand-600">
                                     Você está conectado como usuário do sistema. A submissão de propostas é exclusiva das OSCs.

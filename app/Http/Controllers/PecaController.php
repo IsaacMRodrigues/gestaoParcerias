@@ -29,6 +29,13 @@ class PecaController extends Controller
         if (!$peca->emTramite()) {
             abort_unless($user?->can('chamamentos') || $user?->can('formalizacao'), 403);
         }
+
+        // Do lado da OSC, a vez é da organização mas a mão é de quem o
+        // responsável legal marcou — os dados bancários da Celebração não são
+        // assunto de toda a equipe.
+        abort_if($user?->oscSemFuncao('osc_celebracao'), 403,
+            'Sua conta não tem a função "Celebração da parceria". '
+            .'Peça ao responsável legal da OSC para marcá-la em Usuários da Organização.');
     }
 
     /**
