@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Chamamento;
 use App\Models\Instrumento;
+use App\Models\ManifestacaoInteresse;
 use App\Models\Proposta;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -91,17 +92,35 @@ class PortalController extends Controller
         ));
     }
 
+    /**
+     * Onde a OSC está envolvida, nas três origens possíveis.
+     *
+     * A tela listava só propostas, sem dizer de onde vinham — e desde a
+     * manifestação de interesse são três caminhos distintos, com regras
+     * distintas: o chamamento público (concorrência), a dispensa ou
+     * inexigibilidade (parceria direta) e a manifestação, que ainda não é
+     * proposta. Numa lista só, a OSC não distinguia o que estava disputando do
+     * que já era seu.
+     */
     public function minhasPropostas(): View
     {
         $osc = auth()->user()->oscVinculada();
         abort_unless($osc, 403, 'Sua conta não está vinculada a uma OSC.');
 
         $propostas = $osc->propostas()
-            ->with(['chamamento.programa'])
+            ->with(['chamamento.programa.orgao', 'instrumento'])
             ->latest()
-            ->paginate(10);
+            ->get();
 
-        return view('portal.minhas-propostas', compact('propostas', 'osc'));
+        $emChamamento = $propostas->filter(fn ($p) => $p->chamamento?->tipo === 'chamamento_publico')->values();
+        $emDispensa   = $propostas->reject(fn ($p) => $p->chamamento?->tipo === 'chamamento_publico')->values();
+
+        $manifestacoes = ManifestacaoInteresse::with('orgao')
+            ->where('osc_id', $osc->id)
+            ->latest()
+            ->get();
+
+        return view('portal.minhas-propostas', compact('osc', 'emChamamento', 'emDispensa', 'manifestacoes'));
     }
 
     public function participar(Chamamento $chamamento): View|RedirectResponse

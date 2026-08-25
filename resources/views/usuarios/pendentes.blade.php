@@ -32,7 +32,10 @@
                                 <span>Solicitado em {{ $u->created_at->format('d/m/Y H:i') }}</span>
                             </div>
                             @if($u->criadoPor)
-                                <p class="mt-1 text-xs text-brand-600">Subusuário criado por {{ $u->criadoPor->name }} (UG).</p>
+                                <p class="mt-1 text-xs text-brand-600">
+                                    Cadastrado por {{ $u->criadoPor->name }} — chefia do setor
+                                    {{ $u->criadoPor->setorLabel() ?: '—' }}.
+                                </p>
                             @endif
                             @if($u->solicitacao_obs)
                                 <p class="mt-2 text-sm text-gray-600 bg-gray-50 rounded p-2">"{{ $u->solicitacao_obs }}"</p>

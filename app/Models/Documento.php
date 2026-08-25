@@ -33,13 +33,20 @@ class Documento extends Model
     ];
 
     protected $fillable = [
-        'proposta_id', 'uploaded_by', 'nome_original', 'path', 'tipo', 'tamanho', 'mime_type',
+        // Como as metas: o documento pode chegar pela manifestação de interesse,
+        // antes de existir proposta, e passa a ela quando a SCP defere.
+        'proposta_id', 'manifestacao_id', 'uploaded_by', 'nome_original', 'path', 'tipo', 'tamanho', 'mime_type',
         'analise_status', 'analisado_por', 'analisado_em', 'analise_motivo',
     ];
 
     protected function casts(): array
     {
         return ['analisado_em' => 'datetime'];
+    }
+
+    public function manifestacao(): BelongsTo
+    {
+        return $this->belongsTo(ManifestacaoInteresse::class, 'manifestacao_id');
     }
 
     public function proposta(): BelongsTo

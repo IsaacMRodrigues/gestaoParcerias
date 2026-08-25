@@ -238,6 +238,7 @@ OSC é organização, e organização tem equipe. O vínculo mora em **`users.os
 | `formalizacao` | Submenu **Instrumentos**: Instrumentos, Aditivos, Apostilamento e Documentação (2.3) |
 | `ordem_pagamento` | Emitir **Ordens de Pagamento** no instrumento vigente (2.3.1) |
 | `execucao` | **Execução Financeira**: repasses, despesas, notas fiscais e saldo (4.4) |
+| `usuarios_setor` | Menu **Meus usuários**: cadastrar a equipe do próprio setor (o administrador aprova) |
 | `monitoramento` | Monitoramento e Fiscalização *(módulo futuro)* |
 | `prestacao_contas` | Prestação de Contas *(módulo futuro)* |
 
@@ -254,6 +255,118 @@ OSC é organização, e organização tem equipe. O vínculo mora em **`users.os
 ---
 
 ## O que foi feito
+
+- [2026-08-25] **Portal da OSC: a vitrine e as participações, separadas** (`portal.index`, `minhas-propostas`)
+  - "Minhas Propostas" listava tudo numa fila só, sem dizer de onde cada coisa vinha — e desde a
+    manifestação de interesse são **três caminhos com regras diferentes**: chamamento público
+    (concorrência), dispensa/inexigibilidade (parceria direta) e manifestação (que ainda não é
+    proposta). Na lista corrida, a OSC não distinguia o que estava disputando do que já era seu
+  - A tela virou **Minhas participações**, com um bloco para cada origem, contador e vazio próprio —
+    o de dispensa explica que ela nasce de manifestação deferida ou de convite do município; o de
+    manifestações leva a criar uma
+  - A **vitrine pública** (`/portal`) segue sendo a lista de tudo o que está aberto publicamente, e
+    ganhou o convite que faltava: sem chamamento aberto na área da OSC, o caminho previsto em lei é
+    manifestar interesse — agora há botão para isso ali, para quem está logado como OSC
+  - Menu do portal renomeado para dizer o que cada tela é: **Chamamentos abertos** e
+    **Minhas participações**
+  - Card de proposta virou partial (`portal/_card-proposta`), reaproveitado nos dois blocos, e passou
+    a mostrar o número do Termo quando já existe instrumento, com atalho para a Celebração
+
+- [2026-08-25] **Manifestação de Interesse: a OSC propõe sem chamamento aberto** (MROSC, arts. 18–21)
+  - Faltava a porta de entrada para a parceria que nasce da sociedade civil: sem chamamento
+    publicado, a OSC não tinha como apresentar nada, e a dispensa/inexigibilidade só existia como
+    processo aberto por dentro do município
+  - **Portal da OSC** (`Manifestar Interesse`): dossiê completo — dados, Secretaria a que se dirige,
+    plano de trabalho (metas e etapas) e documentos de habilitação. Enquanto é rascunho, edita-se
+    tudo; **submeter é ato do responsável legal**, e só com o dossiê fechado (a Secretaria não tem
+    como opinar sobre interesse público sem plano nem habilitação)
+  - **Município**: a SCP recebe → encaminha à Secretaria da área → a Secretaria emite manifestação
+    técnica (favorável ou não, com fundamentação) → a SCP decide. Entra na caixa de entrada dos dois
+    setores, pelo mesmo `setor_atual` dos demais trâmites
+  - **O deferimento é que faz o fluxo nascer**: cria o Chamamento no tipo escolhido (dispensa ou
+    inexigibilidade), dentro de um programa da mesma Secretaria, e a Proposta já submetida — com as
+    **mesmas** metas e documentos, que trocam de dono em vez de serem copiados. Daí em diante corre
+    o fluxo de sempre, com o checklist de dispensa/inexigibilidade
+  - Indeferimento exige motivo, e é ele que a OSC lê no portal
+  - **Tabela própria, não proposta sem chamamento**: `propostas.chamamento_id` é a espinha por onde o
+    sistema descobre o órgão dono (visibilidade, caixa, Celebração, minuta). Proposta órfã de
+    chamamento seria proposta órfã de órgão em todas essas telas
+  - `metas` e `documentos` ganharam `manifestacao_id` (e `proposta_id` virou anulável): duas chaves
+    em vez de relação polimórfica, para as dezenas de telas que consultam `proposta_id` seguirem
+    funcionando sem uma linha alterada
+  - Conferido de ponta a ponta em transação: criar → montar dossiê → submeter → caixa da SCP →
+    encaminhar → parecer da UG → deferir como inexigibilidade → chamamento e proposta criados com o
+    plano migrado. E as travas: outra OSC não abre, membro da OSC não submete, e a SCP não defere
+    antes de ouvir a Secretaria
+
+- [2026-08-24] **Devolução dirigida: volta para a etapa que errou** (`CelebracaoController@devolver`)
+  - A devolução andava um passo por vez. Com o trâmite na etapa 9 e o erro na 6, a SCP teria de
+    devolver três vezes, e três setores reprocessariam o que estava certo — ou passariam o problema
+    adiante para não refazer trabalho alheio
+  - O formulário ganhou um **seletor com as etapas já vencidas** (número, setor e ação), começando na
+    imediatamente anterior: sem escolha, o comportamento é o de sempre
+  - Volta só para trás — `lt:etapa_atual` na validação, e a lista da tela só mostra o que já passou
+  - O salto entra no histórico por escrito ("Devolvido da etapa 9 para a etapa 6." antes do motivo),
+    senão quem lesse depois veria o trâmite reaparecer três etapas atrás sem explicação
+  - Vale para qualquer setor interno com a vez, não só a SCP — a OSC segue sem devolver, como antes
+
+- [2026-08-24] **Comprovante de publicação vira dois campos + anexos avulsos** (Celebração, etapa 11)
+  - Diário Oficial e site do Município são veículos distintos e exigidos em separado, mas havia **um
+    campo só**: anexar o segundo comprovante apagava o primeiro. Agora são
+    `comprovante_publicacao_doe` e `comprovante_publicacao_site`, ambos obrigatórios. A migration
+    renomeia a peça existente para a do Diário Oficial, **preservando o arquivo já enviado**
+  - **Espaço de anexo sob demanda**: o checklist é fechado — vem do template — e quando a etapa pede
+    um documento não previsto (a publicação saiu em duas edições, a Procuradoria pediu mais um
+    ofício), o servidor anexava por fora do sistema ou sobrescrevia outro campo. O botão *"Adicionar
+    espaço de anexo nesta etapa"* cria o campo com o nome que a pessoa der
+  - Só aparece na **etapa corrente** e para **quem está com a vez**; o anexo nasce **opcional**, de
+    propósito: complementa a instrução e não pode travar o encaminhamento. Vem marcado como
+    *"anexo avulso"* e quem pode preencher pode excluí-lo — peça de template não se apaga, voltaria
+    na próxima sincronização
+  - `pecas` ganhou `extra`, `setor`, `etapa` e `criado_por`: setor e etapa moram na linha porque os
+    mapas de `Peca` são indexados pela chave do template, que o anexo avulso não tem
+  - Conferido em transação: os dois comprovantes na etapa 11 (com o arquivo antigo no do Diário
+    Oficial e a pendência cobrando o do site), anexo criado cai no bloco da própria etapa, não entra
+    nas pendências, e o botão só aparece uma vez na tela
+
+- [2026-08-24] **Dispensa/Inexigibilidade: as vias que instruem o pedido de parecer** (`Peca::TEMPLATES`)
+  - A minuta do termo e a certidão de autuação só existiam como documento **gerado** no PGP, e a
+    publicação do extrato ficava no topo da lista — longe do Protocolo na Unidade Jurídica, que é
+    onde as três precisam estar à mão para instruir o pedido
+  - Cada uma ganhou **campo de anexo** ao lado do documento gerado (`minuta_termo_anexo`,
+    `certidao_autuacao_anexo`): o PGP produz a via, e a via oficial que volta assinada entra como
+    arquivo. A publicação do extrato foi **movida** para o mesmo bloco, sem duplicar
+  - A ordem do checklist passou a ser: … Parecer técnico → Minuta (modelo) → Certidão (modelo) →
+    **Publicação do extrato da justificativa · Minuta (arquivo) · Certidão (arquivo)** → Protocolo na
+    Unidade Jurídica → Parecer jurídico → Termo → Publicação do extrato do termo
+  - Os dois "Publicação do extrato" homônimos viraram *"da justificativa"* e *"do termo"*
+  - **`Peca::sincronizar()` passou a sincronizar rótulo, ordem e obrigatoriedade** das peças já
+    criadas. Antes eles só valiam no `firstOrCreate`: mudar o template reordenava apenas os
+    registros novos e deixava os chamamentos antigos embaralhados, metade em cada ordem. Conteúdo,
+    arquivo e assinatura seguem intocados — o que se sincroniza é a regra, não o trabalho
+  - Conferido em transação com um chamamento de dispensa: 18 itens na ordem nova, os três anexos
+    imediatamente antes do Protocolo, e uma peça com ordem/rótulo antigos volta ao lugar sozinha
+
+- [2026-08-24] **Cada setor cadastra a própria equipe** (`chefe_setor`, `SubusuarioController`)
+  - A porta "Meus usuários" existia só para o chefe da Unidade Gestora. SCP, SEPLAN, PJ, Gabinete e
+    Gestoria dependiam do administrador criar conta por conta — quem conhece a equipe não era quem
+    cadastrava, e o TI virava gargalo de um trabalho que não é dele
+  - Nova permissão **`usuarios_setor`** e novo perfil **`chefe_setor`** ("Chefe de Setor"), que **não
+    concede módulo nenhum**: acumula-se com o perfil técnico da pessoa (o chefe da PJ é
+    `analista_juridico` + `chefe_setor`), para a chefia não virar atalho de permissão. A chefia da UG
+    já traz a permissão, então nada muda para as Secretarias
+  - A trava da tela deixou de ser o **órgão** e passou a ser a **lotação**: fora da UG ninguém tem
+    `orgao_id` (SCP, SEPLAN, PJ e Gabinete são transversais), e exigir órgão trancava a tela
+    justamente para os setores que ela veio atender. O usuário criado herda setor e órgão de quem
+    cadastra — não há campo para escolher outro
+  - O administrador **só aprova**: o cadastro nasce `pendente`, não autentica, e os perfis são os que
+    a chefia escolheu. `chefe_setor` entrou em `PERFIS_VEDADOS_AO_CHEFE` — chefe não nomeia chefe; e
+    o perfil exige lotação na validação, senão seria concedido para uma tela que não abre
+  - Conferido em transação: chefe do SCP vê o menu, abre a tela com o nome do seu setor, cria usuário
+    `pendente` com `setor=scp` e o perfil escolhido, e a tentativa de forjar `administrador_setorial`
+    no POST é barrada ("Perfil fora do que você pode conceder")
+  - **Para valer em cada setor, o administrador precisa atribuir "Chefe de Setor"** a alguém em
+    Cadastros → Usuários. Em produção, exige rodar o `RolesSeeder` (já faz parte do deploy)
 
 - [2026-08-21] **Modelos chegavam com `{{marcadores}}` à mostra** (`Peca::sincronizar`)
   - Sintoma: a Ordem de Pagamento Global abria escrita *"Ofício n.: {{op_numero}}/{{ano}}"*,
@@ -1352,6 +1465,19 @@ Frentes desta rodada, detalhadas nas primeiras entradas de `## O que foi feito`:
    tela. Auditados os 35 modelos do sistema: nenhum outro escapa.
 5. **Acabamento**: assinar não joga mais a tela para o topo, atalhos de rolagem na Celebração e nas
    telas da OSC, e o selo de situação parou de se partir ao meio.
+
+10. **Portal da OSC** (25/08): vitrine dos chamamentos abertos e "Minhas participações" separando
+   chamamento público, dispensa/inexigibilidade e manifestações.
+9. **Manifestação de Interesse** (25/08): a OSC propõe parceria sem chamamento aberto; a SCP ouve a
+   Secretaria e decide entre dispensa e inexigibilidade — e o deferimento cria o chamamento e a
+   proposta com o plano de trabalho que a OSC já entregou.
+8. **Celebração, etapa 11 e devolução** (24/08): comprovante de publicação virou dois campos
+   (Diário Oficial e site), a etapa ganhou botão para criar espaços de anexo sob demanda, e a
+   devolução passou a escolher para qual etapa vencida voltar.
+7. **Dispensa/Inexigibilidade** (24/08): publicação, minuta e certidão de autuação agora se anexam
+   no bloco do pedido de parecer jurídico, ao lado dos documentos que o PGP gera.
+6. **Cada setor cadastra a própria equipe** (24/08): "Meus usuários" era só da UG; agora qualquer
+   setor tem a porta, por meio do perfil **Chefe de Setor**, e ao administrador cabe só aprovar.
 
 **Documentos da proposta ganharam conferência** (trabalho da véspera, 19/08): a OSC envia, o
 município aprova ou recusa com motivo registrado — antes só existia "Remover", que apagava a prova

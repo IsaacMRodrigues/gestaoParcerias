@@ -3,6 +3,7 @@
 namespace App\Support;
 
 use App\Models\Chamamento;
+use App\Models\ManifestacaoInteresse;
 use App\Models\Processo;
 use App\Models\Proposta;
 use App\Models\User;
@@ -55,6 +56,7 @@ class CaixaDeEntrada
             ->concat(self::selecoes($user))
             ->concat(self::analiseDePropostas($user))
             ->concat(self::celebracoes($user))
+            ->concat(self::manifestacoes($user))
             ->sortBy('desde')   // o mais antigo primeiro: é o que está esperando há mais tempo
             ->values();
 
@@ -171,6 +173,40 @@ class CaixaDeEntrada
                 // submitted_at é quando a espera começou; updated_at mudaria a
                 // cada edição e faria a proposta parecer recém-chegada.
                 'desde' => $p->submitted_at ?? $p->updated_at,
+            ]);
+    }
+
+    /**
+     * Manifestações de interesse paradas no setor.
+     *
+     * A SCP conduz (recebe e decide) e a Secretaria opina: as duas pontas
+     * entram aqui pelo mesmo campo `setor_atual`. Fora do trâmite — deferida,
+     * indeferida ou ainda em rascunho na OSC — não há o que esperar.
+     */
+    private static function manifestacoes(User $user): Collection
+    {
+        if (!$user->can('chamamentos')) {
+            return collect();
+        }
+
+        return ManifestacaoInteresse::with(['osc', 'orgao'])
+            ->visiveisPara($user)
+            ->emTramite()
+            ->where('setor_atual', $user->setor)
+            ->get()
+            ->map(fn (ManifestacaoInteresse $m) => [
+                'tramite'   => 'Manifestação',
+                'titulo'    => $m->titulo,
+                'subtitulo' => collect([
+                    $m->osc?->name,
+                    $m->orgao?->sigla ?: $m->orgao?->name,
+                    $m->status === 'em_analise'
+                        ? 'Manifestação técnica da Secretaria'
+                        : ($m->status === 'analisada' ? 'Decisão do SCP' : 'Recebida — encaminhar à Secretaria'),
+                ])->filter()->implode(' · '),
+                'aguardaRecebimento' => false,
+                'url'   => route('manifestacoes.show', $m),
+                'desde' => $m->updated_at,
             ]);
     }
 

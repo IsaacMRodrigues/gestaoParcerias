@@ -25,6 +25,7 @@ class RolesSeeder extends Seeder
         'prestacao_contas'  => 'Prestação de Contas',
         'ordem_pagamento'   => 'Ordem de Pagamento (execução do concedente)',
         'execucao'          => 'Execução financeira (repasses, despesas, notas fiscais)',
+        'usuarios_setor'    => 'Cadastrar usuários do próprio setor (o administrador aprova)',
     ];
 
     /**
@@ -35,7 +36,12 @@ class RolesSeeder extends Seeder
         'administrador_setorial'           => ['*'],
         'auditor_externo'                  => ['*'], // somente leitura
         'auditor_geral'                    => ['*'], // somente leitura
-        'responsavel_unidade_gestora'      => ['planejamento', 'chamamentos', 'propostas', 'pareceres_decisao', 'formalizacao', 'ordem_pagamento', 'execucao'],
+        'responsavel_unidade_gestora'      => ['planejamento', 'chamamentos', 'propostas', 'pareceres_decisao', 'formalizacao', 'ordem_pagamento', 'execucao', 'usuarios_setor'],
+        // Chefia de setor: não abre módulo nenhum, só a porta de cadastrar a
+        // própria equipe. Acumula-se com o perfil técnico da pessoa (o chefe da
+        // PJ é 'analista_juridico' + 'chefe_setor'), para que a chefia não vire
+        // atalho para permissões que o setor não tem.
+        'chefe_setor'                      => ['usuarios_setor'],
         // Prefeito: assina o Termo de Adjudicação e Homologação que encerra a Seleção.
         'prefeito_municipal'               => ['chamamentos', 'formalizacao'],
         'analista_tecnico_scp'             => ['planejamento', 'chamamentos'],

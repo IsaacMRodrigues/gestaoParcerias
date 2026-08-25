@@ -4,16 +4,23 @@
             <p class="text-sm text-gray-500">
                 <a href="{{ route('subusuarios.index') }}" class="hover:underline">Meus usuários</a>
             </p>
-            <h2 class="text-2xl font-bold text-gray-900 mt-0.5">Novo usuário da Secretaria</h2>
+            <h2 class="text-2xl font-bold text-gray-900 mt-0.5">
+                Novo usuário do setor
+                <span class="text-sm font-normal text-gray-500 ml-1">— {{ auth()->user()->setorLabel() }}</span>
+            </h2>
         </div>
     </x-slot>
 
     <div class="py-8">
         <div class="max-w-2xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="bg-white rounded-xl border border-gray-200 shadow-sm p-6">
+                {{-- Os perfis são escolhidos aqui, por quem conhece a função da pessoa;
+                     ao administrador cabe aprovar ou recusar. O texto dizia que ele
+                     "define os perfis", o que deixou de ser verdade. --}}
                 <p class="text-sm text-gray-500 mb-5">
-                    O usuário herda a sua Secretaria/Unidade Gestora e fica <strong>pendente</strong> até o
-                    administrador do sistema aprovar e definir os perfis. Informe uma senha inicial para repassar a ele.
+                    O usuário herda o seu setor{{ auth()->user()->orgao ? ' e a sua Secretaria' : '' }} e fica
+                    <strong>pendente</strong> até o administrador do sistema aprovar o acesso — os perfis são os que
+                    você escolher abaixo. Informe uma senha inicial para repassar a ele.
                 </p>
 
                 <form action="{{ route('subusuarios.store') }}" method="POST" class="space-y-4">

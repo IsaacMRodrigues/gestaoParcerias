@@ -3,6 +3,13 @@
         ? \App\Models\Proposta::visiveisPara(auth()->user())->where('status', 'submetida')->count()
         : 0;
     $navPendentes = auth()->user()->can('cadastros') ? \App\Models\User::pendentes()->count() : 0;
+    // Manifestações paradas esperando o setor de quem está vendo o menu.
+    $navManifestacoes = auth()->user()->can('chamamentos')
+        ? \App\Models\ManifestacaoInteresse::visiveisPara(auth()->user())
+            ->emTramite()
+            ->where('setor_atual', auth()->user()->setorNoTramite())
+            ->count()
+        : 0;
     // Atravessa os três trâmites, então é item próprio do menu — não subitem do
     // Planejamento, como era quando só contava processos.
     $navCaixa = \App\Support\CaixaDeEntrada::para(auth()->user())->total();
@@ -92,7 +99,8 @@
         {{-- 2. Seleção --}}
         @canany(['chamamentos', 'propostas'])
             @php
-                $emSelecao = request()->routeIs('programas.*') || request()->routeIs('chamamentos.*') || request()->routeIs('propostas.*');
+                $emSelecao = request()->routeIs('programas.*') || request()->routeIs('chamamentos.*')
+                    || request()->routeIs('propostas.*') || request()->routeIs('manifestacoes.*');
                 // Era um <p>: tinha a aparência exata de um link, mas clicar não
                 // fazia nada. Agora leva ao primeiro subitem a que o usuário
                 // tem acesso — o @canany acima garante que existe pelo menos um.
@@ -111,6 +119,14 @@
                 <a href="{{ route('programas.index') }}"
                    class="{{ $link }} pl-10 {{ request()->routeIs('programas.*') || request()->routeIs('chamamentos.*') ? $on : '' }}">
                     Programas e Chamamentos
+                </a>
+            @endcan
+            @can('chamamentos')
+                {{-- Antessala da Seleção: proposta de OSC sem chamamento aberto --}}
+                <a href="{{ route('manifestacoes.index') }}"
+                   class="{{ $link }} pl-10 {{ request()->routeIs('manifestacoes.*') ? $on : '' }}">
+                    Manifestações de Interesse
+                    @if($navManifestacoes > 0)<span class="{{ $badge }}">{{ $navManifestacoes }}</span>@endif
                 </a>
             @endcan
             @can('propostas')
@@ -189,11 +205,12 @@
             </a>
         @endcan
 
-        @role('responsavel_unidade_gestora')
+        {{-- Cadastro da equipe do próprio setor: qualquer chefia, não só a da UG --}}
+        @if(auth()->user()->podeCadastrarNoSetor())
             <a href="{{ route('subusuarios.index') }}" class="{{ $link }} {{ request()->routeIs('subusuarios.*') ? $on : '' }}">
                 Meus usuários
             </a>
-        @endrole
+        @endif
 
         {{-- Apoio do TI --}}
         @role('administrador_setorial')

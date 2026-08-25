@@ -6,6 +6,7 @@ use App\Models\Peca;
 use App\Models\Proposta;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Str;
 use Illuminate\View\View;
 
 /**
@@ -91,6 +92,54 @@ class CelebracaoController extends Controller
         return view('celebracao.show', compact('proposta', 'pecas', 'progresso'));
     }
 
+    /**
+     * Anexo avulso na etapa corrente.
+     *
+     * O checklist é fechado — vem do template — e a etapa da publicação é o
+     * caso claro do que faltava: são dois veículos previstos (Diário Oficial e
+     * site), mas às vezes a publicação sai em mais de uma edição, ou a
+     * Procuradoria pede um documento a mais. Sem espaço no checklist, isso
+     * ficava fora do sistema.
+     *
+     * O anexo nasce opcional de propósito: complementa a instrução, não pode
+     * travar o encaminhamento como as peças obrigatórias do fluxo.
+     */
+    public function adicionarAnexo(Request $request, Proposta $proposta): RedirectResponse
+    {
+        $this->autorizarSetor($proposta);
+
+        $data = $request->validate([
+            'rotulo' => ['required', 'string', 'max:120'],
+        ], [
+            'rotulo.required' => 'Dê um nome ao anexo (ex.: "Publicação — 2ª edição").',
+        ]);
+
+        $etapa = (int) $proposta->celebracao_etapa;
+        $pecas = $proposta->pecas()->get();
+
+        // Entra no fim do bloco da própria etapa: a ordem da última peça de lá,
+        // que o desempate por id resolve.
+        $ordem = $pecas->filter(fn (Peca $p) => $p->selecaoEtapa() === $etapa)->max('ordem')
+            ?? $pecas->max('ordem')
+            ?? 0;
+
+        $peca = $proposta->pecas()->create([
+            'categoria'   => 'celebracao',
+            'chave'       => 'extra_' . Str::uuid()->toString(),
+            'rotulo'      => $data['rotulo'],
+            'tipo'        => 'arquivo',
+            'obrigatorio' => false,
+            'ordem'       => $ordem,
+            'extra'       => true,
+            'setor'       => $proposta->celebracao_setor,
+            'etapa'       => $etapa,
+            'criado_por'  => auth()->id(),
+        ]);
+
+        return back()->withFragment('peca-' . $peca->id)
+            ->with('success', 'Espaço de anexo criado. Envie o arquivo abaixo.');
+    }
+
     public function avancar(Request $request, Proposta $proposta): RedirectResponse
     {
         $this->autorizarSetor($proposta);
@@ -132,29 +181,46 @@ class CelebracaoController extends Controller
         abort_if($proposta->celebracao_setor === 'osc', 403,
             'A OSC não devolve o trâmite; conclua a sua etapa e encaminhe.');
 
-        $data = $request->validate(['parecer' => ['required', 'string']], [
-            'parecer.required' => 'Informe o motivo da devolução.',
+        $atual = (int) $proposta->celebracao_etapa;
+
+        $data = $request->validate([
+            'parecer' => ['required', 'string'],
+            // Devolução dirigida: o erro nem sempre está na etapa anterior. Se o
+            // documento da etapa 6 saiu errado e o trâmite já vai na 9, voltar de
+            // uma em uma obrigaria três setores a reprocessar o que estava certo.
+            'etapa_destino' => ['nullable', 'integer', 'min:0', 'lt:' . $atual],
+        ], [
+            'parecer.required'   => 'Informe o motivo da devolução.',
+            'etapa_destino.lt'   => 'A devolução só volta para uma etapa já vencida.',
+            'etapa_destino.min'  => 'Etapa de destino inválida.',
         ]);
 
-        $etapaAnterior = (int) $proposta->celebracao_etapa - 1;
-        $setorAnterior = Proposta::ETAPAS_CELEBRACAO[$etapaAnterior]['setor'];
+        // Sem escolha, devolve para a etapa imediatamente anterior — o
+        // comportamento de sempre.
+        $destino     = $data['etapa_destino'] ?? $atual - 1;
+        $setorDestino = Proposta::ETAPAS_CELEBRACAO[$destino]['setor'];
 
         $proposta->celebracaoTramitacoes()->create([
             'de_setor'    => $proposta->celebracao_setor,
-            'para_setor'  => $setorAnterior,
+            'para_setor'  => $setorDestino,
             'enviado_por' => auth()->id(),
             'enviado_em'  => now(),
-            'parecer'     => $data['parecer'],
+            // O salto fica escrito no histórico: quem lê depois precisa saber
+            // que não foi uma devolução de um passo.
+            'parecer'     => $destino < $atual - 1
+                ? 'Devolvido da etapa ' . ($atual + 1) . ' para a etapa ' . ($destino + 1) . '. ' . $data['parecer']
+                : $data['parecer'],
             'status'      => 'devolvido',
         ]);
 
         $proposta->update([
-            'celebracao_etapa' => $etapaAnterior,
-            'celebracao_setor' => $setorAnterior,
+            'celebracao_etapa' => $destino,
+            'celebracao_setor' => $setorDestino,
         ]);
 
         return redirect()->route('celebracao.show', $proposta)
-            ->with('success', 'Celebração devolvida para ' . Proposta::SETORES_CELEBRACAO[$setorAnterior] . '.');
+            ->with('success', 'Celebração devolvida para a etapa ' . ($destino + 1) . ' — '
+                . Proposta::SETORES_CELEBRACAO[$setorDestino] . '.');
     }
 
     /**

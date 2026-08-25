@@ -147,14 +147,33 @@
                             @endif
 
                             @if($etapaAtual > 0 && !$ehOsc)
+                                {{-- Devolução dirigida: o erro nem sempre está na etapa
+                                     anterior. Se o documento da etapa 6 saiu errado e o
+                                     trâmite já vai na 9, voltar de uma em uma faria três
+                                     setores reprocessarem o que estava certo. --}}
                                 <form action="{{ route('celebracao.devolver', $proposta) }}" method="POST"
                                       class="space-y-2 pt-2 border-t border-gray-100">
                                     @csrf
+                                    <div>
+                                        <label for="etapa_destino" class="block text-xs font-medium text-gray-600 mb-1">
+                                            Devolver para a etapa
+                                        </label>
+                                        <select name="etapa_destino" id="etapa_destino"
+                                                class="block w-full border-gray-300 rounded-md shadow-sm text-sm focus:ring-red-500 focus:border-red-500">
+                                            @foreach(\App\Models\Proposta::ETAPAS_CELEBRACAO as $i => $et)
+                                                @continue($i >= $etapaAtual)
+                                                <option value="{{ $i }}" @selected($i === $etapaAtual - 1)>
+                                                    Etapa {{ $i + 1 }} · {{ $setorLabel($et['setor']) }} — {{ \Illuminate\Support\Str::limit($et['acao'], 70) }}
+                                                </option>
+                                            @endforeach
+                                        </select>
+                                        <x-input-error :messages="$errors->get('etapa_destino')" class="mt-1" />
+                                    </div>
                                     <textarea name="parecer" rows="2" required placeholder="Motivo da devolução (obrigatório)"
                                               class="block w-full border-gray-300 rounded-md shadow-sm text-sm focus:ring-red-500 focus:border-red-500"></textarea>
-                                    <button type="submit"
-                                            class="btn btn-danger-outline">
-                                        Devolver para {{ $setorLabel($proposta->setorAnteriorCelebracao()) }}
+                                    <x-input-error :messages="$errors->get('parecer')" class="mt-1" />
+                                    <button type="submit" class="btn btn-danger-outline">
+                                        Devolver
                                     </button>
                                 </form>
                             @endif
@@ -199,7 +218,12 @@
                     'descricao' => 'Cada documento é liberado ao setor responsável na etapa correspondente do trâmite.',
                     'progresso' => $progresso,
                 ])
-                @include('pecas._checklist', ['pecas' => $pecas])
+                {{-- A rota habilita o botão de criar espaço de anexo na etapa
+                     corrente; o partial serve outras telas que não têm isso. --}}
+                @include('pecas._checklist', [
+                    'pecas'          => $pecas,
+                    'rotaAnexoExtra' => route('celebracao.anexos.store', $proposta),
+                ])
             </div>
         </div>
     </div>

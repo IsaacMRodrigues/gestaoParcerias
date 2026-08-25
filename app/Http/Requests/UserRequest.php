@@ -49,6 +49,14 @@ class UserRequest extends FormRequest
                             "O perfil \"{$label}\" é exclusivo do setor \"{$lot}\" — selecione esse setor para atribuí-lo.");
                     }
                 }
+
+                // Chefia serve para cadastrar a equipe do setor, e o usuário
+                // criado herda o setor de quem cadastra: sem lotação, o perfil
+                // seria concedido para uma tela que não abre.
+                if (in_array('chefe_setor', (array) $this->input('roles', []), true) && !$setor) {
+                    $validator->errors()->add('roles',
+                        'O perfil "Chefe de Setor" exige lotação: informe o setor que essa pessoa chefia.');
+                }
             },
         ];
     }

@@ -4,7 +4,8 @@
             <div>
                 <h2 class="text-2xl font-bold text-gray-900">Meus usuários</h2>
                 <p class="text-sm text-gray-500 mt-0.5">
-                    Usuários da sua Secretaria. Cada cadastro é liberado após aprovação do administrador.
+                    Usuários do seu setor ({{ auth()->user()->setorLabel() }}). Cada cadastro é liberado após
+                    aprovação do administrador.
                 </p>
             </div>
             <a href="{{ route('subusuarios.create') }}"

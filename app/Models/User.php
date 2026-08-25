@@ -38,6 +38,7 @@ class User extends Authenticatable
         'auditor_externo'                  => 'Auditor Externo',
         'auditor_geral'                    => 'Auditor Geral',
         'cadastrador'                      => 'Cadastrador',
+        'chefe_setor'                      => 'Chefe de Setor',
         'contador'                         => 'Contador',
         'comissao_monitoramento_avaliacao' => 'Comissão de Monitoramento e Avaliação',
         'comissao_selecao'                 => 'Comissão de Seleção',
@@ -91,6 +92,7 @@ class User extends Authenticatable
         'auditor_geral',
         'prefeito_municipal',
         'responsavel_unidade_gestora',
+        'chefe_setor',   // chefe não nomeia outro chefe: quem designa chefia é o administrador
         'analista',   // em descontinuação: não se concede mais
     ];
 
@@ -294,6 +296,27 @@ class User extends Authenticatable
      *
      * @return array<string,string> slug => rótulo
      */
+    /**
+     * Cadastra a equipe do próprio setor?
+     *
+     * A porta existia só para o chefe da Unidade Gestora; SCP, SEPLAN, PJ e
+     * Gabinete dependiam do administrador criar cada conta. Agora vale para
+     * qualquer setor, por meio da permissão `usuarios_setor` — que o perfil
+     * `chefe_setor` concede e a chefia da UG já traz.
+     *
+     * Exige lotação: o usuário criado herda o setor de quem cadastra, então sem
+     * setor não há o que herdar (é o caso das auditorias, transversais).
+     * Quem tem `cadastros` não usa esta porta — cria e aprova direto em
+     * Cadastros → Usuários, e ver as duas na tela só confundiria.
+     */
+    public function podeCadastrarNoSetor(): bool
+    {
+        return $this->setor
+            && $this->can('usuarios_setor')
+            && !$this->can('cadastros')
+            && !$this->somenteLeitura();
+    }
+
     public function perfisQuePodeConceder(): array
     {
         $meuSetor = $this->setor;

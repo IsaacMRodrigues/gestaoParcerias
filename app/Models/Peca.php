@@ -13,6 +13,7 @@ class Peca extends Model
     protected $fillable = [
         'pecaable_type', 'pecaable_id', 'categoria', 'chave', 'rotulo',
         'tipo', 'obrigatorio', 'ordem',
+        'extra', 'setor', 'etapa', 'criado_por',
         'conteudo', 'arquivo_path', 'arquivo_nome', 'tamanho', 'mime_type',
         'assinado_por', 'assinado_em', 'codigo_validacao',
         'contra_assinado_por', 'contra_assinado_em', 'codigo_validacao_contra',
@@ -22,6 +23,8 @@ class Peca extends Model
     {
         return [
             'obrigatorio'        => 'boolean',
+            'extra'              => 'boolean',
+            'etapa'              => 'integer',
             'assinado_em'        => 'datetime',
             'contra_assinado_em' => 'datetime',
         ];
@@ -55,7 +58,6 @@ class Peca extends Model
         'dispensa_inexigibilidade' => [
             ['chave' => 'parecer_tecnico_cnas',      'rotulo' => 'Parecer técnico (CNAS) — SUAS (opcional)','tipo' => 'modelo',  'obrigatorio' => false],
             ['chave' => 'justificativa',             'rotulo' => 'Justificativa de dispensa/inexigibilidade','tipo' => 'modelo', 'obrigatorio' => true],
-            ['chave' => 'pub_extrato',               'rotulo' => 'Publicação do extrato',                   'tipo' => 'arquivo', 'obrigatorio' => true],
             ['chave' => 'plano_trabalho',            'rotulo' => 'Plano de trabalho',                       'tipo' => 'arquivo', 'obrigatorio' => true],
             ['chave' => 'aprovacao_plano',           'rotulo' => 'Aprovação do plano de trabalho',          'tipo' => 'modelo',  'obrigatorio' => true],
             ['chave' => 'docs_habilitacao',          'rotulo' => 'Documentos de habilitação',               'tipo' => 'arquivo', 'obrigatorio' => true],
@@ -63,12 +65,18 @@ class Peca extends Model
             ['chave' => 'gestor_parceria',           'rotulo' => 'Gestor da parceria',                      'tipo' => 'arquivo', 'obrigatorio' => true],
             ['chave' => 'comissao_monitoramento',    'rotulo' => 'Comissão de Monitoramento e Avaliação',   'tipo' => 'arquivo', 'obrigatorio' => true],
             ['chave' => 'parecer_tecnico_celebracao','rotulo' => 'Parecer técnico para celebração',         'tipo' => 'modelo',  'obrigatorio' => true],
-            ['chave' => 'minuta_termo',              'rotulo' => 'Minuta do termo',                         'tipo' => 'modelo',  'obrigatorio' => true],
-            ['chave' => 'certidao_autuacao',         'rotulo' => 'Certidão de autuação',                    'tipo' => 'modelo',  'obrigatorio' => true],
+            ['chave' => 'minuta_termo',              'rotulo' => 'Minuta do termo (modelo padrão)',         'tipo' => 'modelo',  'obrigatorio' => true],
+            ['chave' => 'certidao_autuacao',         'rotulo' => 'Certidão de autuação (modelo padrão)',    'tipo' => 'modelo',  'obrigatorio' => true],
+            // Instrução do pedido de parecer: as vias que seguem à Procuradoria
+            // junto com o Protocolo. A publicação do extrato veio do topo da
+            // lista — ela é emitida antes, mas é aqui que precisa estar à mão.
+            ['chave' => 'pub_extrato',               'rotulo' => 'Publicação do extrato da justificativa',  'tipo' => 'arquivo', 'obrigatorio' => true],
+            ['chave' => 'minuta_termo_anexo',        'rotulo' => 'Minuta do termo (arquivo)',               'tipo' => 'arquivo', 'obrigatorio' => true],
+            ['chave' => 'certidao_autuacao_anexo',   'rotulo' => 'Certidão de autuação (arquivo)',          'tipo' => 'arquivo', 'obrigatorio' => true],
             ['chave' => 'protocolo_juridico',        'rotulo' => 'Protocolo na Unidade Jurídica',           'tipo' => 'modelo',  'obrigatorio' => true],
             ['chave' => 'parecer_juridico',          'rotulo' => 'Parecer jurídico',                        'tipo' => 'modelo',  'obrigatorio' => true],
             ['chave' => 'termo',                     'rotulo' => 'Termo',                                   'tipo' => 'modelo',  'obrigatorio' => true],
-            ['chave' => 'pub_extrato_final',         'rotulo' => 'Publicação do extrato',                   'tipo' => 'arquivo', 'obrigatorio' => true],
+            ['chave' => 'pub_extrato_final',         'rotulo' => 'Publicação do extrato do termo',          'tipo' => 'arquivo', 'obrigatorio' => true],
         ],
 
         // Celebração (Fluxo Etapa de Celebração) — ancorada na proposta aprovada
@@ -86,7 +94,11 @@ class Peca extends Model
             ['chave' => 'parecer_juridico',      'rotulo' => 'Parecer Jurídico (modelo padrão)',                       'tipo' => 'modelo',  'obrigatorio' => true],
             ['chave' => 'parecer_scp',           'rotulo' => 'Parecer da SCP — conferência final (modelo padrão)',    'tipo' => 'modelo',  'obrigatorio' => true],
             ['chave' => 'termo',                 'rotulo' => 'Termo de Parceria (modelo padrão)',                      'tipo' => 'modelo',  'obrigatorio' => true],
-            ['chave' => 'comprovante_publicacao','rotulo' => 'Comprovante de publicação (Diário Oficial e site)',      'tipo' => 'arquivo', 'obrigatorio' => true],
+            // Duas publicações, dois comprovantes: o Diário Oficial e o site do
+            // Município são veículos distintos e exigidos em separado. Num campo
+            // só, cabia um arquivo — anexar o segundo apagava o primeiro.
+            ['chave' => 'comprovante_publicacao_doe',  'rotulo' => 'Comprovante de publicação no Diário Oficial',        'tipo' => 'arquivo', 'obrigatorio' => true],
+            ['chave' => 'comprovante_publicacao_site', 'rotulo' => 'Comprovante de publicação no site oficial',          'tipo' => 'arquivo', 'obrigatorio' => true],
             ['chave' => 'autorizacao_inicio',    'rotulo' => 'Autorização de Início de Execução (modelo padrão)',      'tipo' => 'modelo',  'obrigatorio' => true],
             ['chave' => 'dados_bancarios',       'rotulo' => 'Dados bancários (enviados pela OSC)',                    'tipo' => 'arquivo', 'obrigatorio' => true],
             ['chave' => 'op_global',             'rotulo' => 'Ordem de Pagamento Global (modelo padrão)',              'tipo' => 'modelo',  'obrigatorio' => true],
@@ -211,7 +223,8 @@ class Peca extends Model
         'parecer_juridico'       => 'pj',
         'parecer_scp'            => 'scp',
         'termo'                  => 'scp',  // Município assina; a OSC contra-assina
-        'comprovante_publicacao' => 'scp',
+        'comprovante_publicacao_doe'  => 'scp',
+        'comprovante_publicacao_site' => 'scp',
         'autorizacao_inicio'     => 'scp',
         'dados_bancarios'        => 'osc',
         'op_global'              => 'scp',  // a SCP elabora; a UG assina
@@ -232,7 +245,8 @@ class Peca extends Model
         'parecer_juridico'       => 7,
         'parecer_scp'            => 8,
         'termo'                  => 8,
-        'comprovante_publicacao' => 10,
+        'comprovante_publicacao_doe'  => 10,
+        'comprovante_publicacao_site' => 10,
         'autorizacao_inicio'     => 10,
         'dados_bancarios'        => 11,
         'op_global'              => 12,
@@ -702,6 +716,12 @@ HTML,
         return !is_null($this->assinado_em);
     }
 
+    /** Quem criou o anexo avulso — null nas peças que vêm do template. */
+    public function criadoPor(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'criado_por');
+    }
+
     public function contraAssinante(): BelongsTo
     {
         return $this->belongsTo(User::class, 'contra_assinado_por');
@@ -915,14 +935,18 @@ HTML,
     }
 
     /** Setor designado para preencher a peça no trâmite. */
+    /**
+     * Setor designado para preencher. O anexo avulso guarda o seu na linha —
+     * ele não está nos mapas, que são indexados pela chave do template.
+     */
     public function selecaoSetor(): ?string
     {
-        return $this->mapaSetor()[$this->chave] ?? null;
+        return $this->setor ?? $this->mapaSetor()[$this->chave] ?? null;
     }
 
     public function selecaoEtapa(): ?int
     {
-        return $this->mapaEtapa()[$this->chave] ?? null;
+        return $this->etapa ?? $this->mapaEtapa()[$this->chave] ?? null;
     }
 
     /**
@@ -1283,6 +1307,22 @@ HTML,
                 ['categoria' => $categoria, 'chave' => $item['chave']],
                 $novos
             );
+
+            // Rótulo, ordem e obrigatoriedade moram no template: são a regra, e
+            // não algo que se edite por peça. Sem isto, mudar o template só
+            // valia para registros novos — reordenar a lista deixava os
+            // chamamentos antigos embaralhados, com metade na ordem velha.
+            $metadados = collect(['rotulo', 'ordem', 'obrigatorio'])
+                ->mapWithKeys(fn ($campo) => [$campo => $novos[$campo]])
+                // Comparação frouxa de propósito: `ordem` volta do banco como
+                // string em alguns drivers, e `===` reescreveria a linha a cada
+                // acesso à tela.
+                ->reject(fn ($valor, $campo) => $peca->{$campo} == $valor)
+                ->all();
+
+            if (!$peca->wasRecentlyCreated && $metadados) {
+                $peca->update($metadados);
+            }
 
             // Peça semeada antes desta correção: guardou o modelo cru, com os
             // {{marcadores}} à mostra. Se ninguém mexeu nela (conteúdo idêntico

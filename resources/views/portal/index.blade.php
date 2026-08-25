@@ -22,6 +22,16 @@
                    class="btn btn-secondary">
                     Ver chamamentos
                 </a>
+                @auth
+                    {{-- Sem chamamento aberto na sua área, o caminho é a manifestação
+                         de interesse: é o que a lei prevê e o que este portal aceita. --}}
+                    @if(auth()->user()->ehRepresentanteOsc())
+                        <a href="{{ route('portal.manifestacoes.create') }}"
+                           class="btn btn-secondary">
+                            Manifestar interesse
+                        </a>
+                    @endif
+                @endauth
                 <a href="{{ route('transparencia') }}"
                    class="text-sm font-medium text-accent-600 hover:text-accent-700 hover:underline">
                     Parcerias já celebradas →

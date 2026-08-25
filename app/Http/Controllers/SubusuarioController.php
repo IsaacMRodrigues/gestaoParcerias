@@ -11,9 +11,16 @@ use Illuminate\Validation\Rules;
 use Illuminate\View\View;
 
 /**
- * Gestão de subusuários pela Unidade Gestora. A UG cadastra usuários da sua
- * Secretaria, que ficam PENDENTES até o administrador do sistema aprovar e
- * atribuir os perfis.
+ * Cadastro da equipe do setor pela própria chefia.
+ *
+ * Nasceu só para a Unidade Gestora; SCP, SEPLAN, PJ e Gabinete dependiam do
+ * administrador criar cada conta — quem conhece a equipe não era quem
+ * cadastrava. Agora vale para qualquer setor, por meio da permissão
+ * `usuarios_setor` (perfil `chefe_setor`), e o administrador segue sendo quem
+ * libera: o usuário nasce PENDENTE e não autentica antes da aprovação.
+ *
+ * Cada chefia cadastra apenas o próprio setor — o usuário criado herda setor e
+ * órgão de quem o cadastrou, sem campo no formulário para escolher outro.
  */
 class SubusuarioController extends Controller
 {
@@ -29,8 +36,11 @@ class SubusuarioController extends Controller
 
     public function create(): View
     {
-        abort_if(! auth()->user()->orgao_id, 403,
-            'Seu usuário não está vinculado a uma Secretaria/Unidade Gestora.');
+        // A trava é a lotação, não o órgão: fora da UG ninguém tem orgao_id
+        // (SCP, SEPLAN, PJ e Gabinete são transversais) e a exigência de órgão
+        // trancava a tela justamente para os setores que ela veio atender.
+        abort_if(! auth()->user()->setor, 403,
+            'Seu usuário não está lotado em nenhum setor.');
 
         // Quem cadastra escolhe os perfis: é quem sabe o que a pessoa vai
         // fazer no setor. O administrador deixa de adivinhar isso na aprovação.
@@ -41,12 +51,12 @@ class SubusuarioController extends Controller
 
     public function store(Request $request): RedirectResponse
     {
-        $ug = auth()->user();
+        $chefe = auth()->user();
 
-        abort_if(! $ug->orgao_id, 403,
-            'Seu usuário não está vinculado a uma Secretaria/Unidade Gestora.');
+        abort_if(! $chefe->setor, 403,
+            'Seu usuário não está lotado em nenhum setor.');
 
-        $permitidos = $ug->perfisQuePodeConceder();
+        $permitidos = $chefe->perfisQuePodeConceder();
 
         $request->validate([
             'name'            => ['required', 'string', 'max:255'],
@@ -73,12 +83,12 @@ class SubusuarioController extends Controller
             'matricula'       => $request->matricula,
             'cpf'             => $request->cpf,
             'phone'           => $request->phone,
-            'setor'           => $ug->setor,      // herda o setor da UG
-            'orgao_id'        => $ug->orgao_id,    // herda a Secretaria/UG
+            'setor'           => $chefe->setor,     // herda o setor de quem cadastra
+            'orgao_id'        => $chefe->orgao_id,  // e a Secretaria, quando houver
             'password'        => Hash::make($request->password),
             'status'          => true,
             'approval_status' => 'pendente',
-            'created_by'      => $ug->id,
+            'created_by'      => $chefe->id,
             'solicitacao_obs' => $request->solicitacao_obs,
         ]);
 
@@ -89,6 +99,6 @@ class SubusuarioController extends Controller
         $usuario->syncRoles($request->perfis);
 
         return redirect()->route('subusuarios.index')->with('success',
-            'Subusuário criado com os perfis escolhidos. Aguarde a aprovação do administrador para liberar o acesso.');
+            'Usuário criado com os perfis escolhidos. Aguarde a aprovação do administrador para liberar o acesso.');
     }
 }

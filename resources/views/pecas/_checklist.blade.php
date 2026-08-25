@@ -110,6 +110,12 @@
         </div>
     @endif
 
+    @php
+        // Espaço extra de anexo: só na etapa corrente, só para quem está com a
+        // vez, e só onde a tela dona ofereceu a rota (a Celebração, hoje).
+        $podeAnexarExtra = ($rotaAnexoExtra ?? null) && $grupoAgora && $minhaVez;
+    @endphp
+
     {{-- Etapa que não tem documento próprio: em vez de sumir da lista (e abrir
          buraco na numeração), aparece dizendo o que se faz nela. É o caso da
          assinatura das partes e da assinatura da Ordem de Pagamento, cujos
@@ -182,6 +188,12 @@
                                 @if(! $peca->obrigatorio && ! \Illuminate\Support\Str::contains($peca->rotulo, 'opcional', true))
                                     <span class="ml-1.5 text-xs font-medium text-gray-400">opcional</span>
                                 @endif
+                                {{-- Distingue o que alguém acrescentou do checklist oficial do fluxo --}}
+                                @if($peca->extra)
+                                    <span class="ml-1.5 px-1.5 py-0.5 text-[11px] font-semibold text-slate-600 bg-slate-100 ring-1 ring-slate-200 rounded">
+                                        anexo avulso
+                                    </span>
+                                @endif
                             </p>
 
                             {{-- Linha secundária: só aparece quando há o que informar --}}
@@ -233,6 +245,16 @@
                             </div>
                         @elseif(! $ehModelo && ! $podePreencher)
                             <span class="text-xs text-gray-400 shrink-0">Nenhum arquivo enviado</span>
+                        @endif
+
+                        {{-- Criado à mão, apagado à mão: as peças do template são
+                             a regra do fluxo e voltariam na próxima sincronização. --}}
+                        @if($peca->extra && $podePreencher)
+                            <form action="{{ route('pecas.extra.destruir', $peca) }}" method="POST" class="shrink-0"
+                                  data-confirm="Excluir o espaço &quot;{{ $peca->rotulo }}&quot;? O arquivo enviado nele, se houver, também sai.">
+                                @csrf @method('DELETE')
+                                <button type="submit" class="text-xs text-gray-400 hover:text-red-700 transition">Excluir espaço</button>
+                            </form>
                         @endif
                     </div>
 
@@ -440,5 +462,32 @@
             </div>
         </div>
     @endforeach
+    @if($podeAnexarExtra)
+        <div class="px-6 py-3 border-t border-gray-100 bg-gray-50/60">
+            <details class="group">
+                <summary class="inline-flex items-center gap-1.5 text-xs font-semibold text-brand-800
+                                cursor-pointer select-none marker:content-none hover:text-brand-900">
+                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.4">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15"/>
+                    </svg>
+                    Adicionar espaço de anexo nesta etapa
+                </summary>
+                <form action="{{ $rotaAnexoExtra }}" method="POST" class="mt-3 flex flex-wrap items-start gap-2">
+                    @csrf
+                    <div class="flex-1 min-w-[16rem]">
+                        <input type="text" name="rotulo" maxlength="120" required
+                               placeholder="Nome do anexo (ex.: Publicação — 2ª edição)"
+                               class="block w-full border-gray-300 rounded-md shadow-sm text-sm
+                                      focus:ring-brand-500 focus:border-brand-500">
+                        <x-input-error :messages="$errors->get('rotulo')" class="mt-1" />
+                    </div>
+                    <button type="submit" class="btn btn-secondary btn-sm">Criar espaço</button>
+                </form>
+                <p class="mt-2 text-xs text-gray-400">
+                    Anexo complementar: entra como opcional e não trava o encaminhamento da etapa.
+                </p>
+            </details>
+        </div>
+    @endif
     </div>
 @endforeach

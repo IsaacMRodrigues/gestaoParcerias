@@ -133,7 +133,7 @@
                     <nav class="flex items-center gap-5 text-sm">
                         <a href="{{ route('portal.index') }}"
                            class="{{ request()->routeIs('portal.index') ? 'text-brand-700 font-semibold' : 'text-gray-600 hover:text-brand-700' }} transition">
-                            Chamamentos
+                            Chamamentos abertos
                         </a>
                         <a href="{{ route('transparencia') }}"
                            class="{{ request()->routeIs('transparencia') ? 'text-brand-700 font-semibold' : 'text-gray-600 hover:text-brand-700' }} transition">
@@ -144,7 +144,12 @@
                             @if(auth()->user()->ehRepresentanteOsc())
                                 <a href="{{ route('portal.minhas-propostas') }}"
                                    class="{{ request()->routeIs('portal.minhas*') ? 'text-brand-700 font-semibold' : 'text-gray-600 hover:text-brand-700' }} transition">
-                                    Minhas Propostas
+                                    Minhas participações
+                                </a>
+                                {{-- Propor parceria sem chamamento aberto (MROSC, arts. 18–21) --}}
+                                <a href="{{ route('portal.manifestacoes.index') }}"
+                                   class="{{ request()->routeIs('portal.manifestacoes.*') ? 'text-brand-700 font-semibold' : 'text-gray-600 hover:text-brand-700' }} transition">
+                                    Manifestar Interesse
                                 </a>
                             @endif
 

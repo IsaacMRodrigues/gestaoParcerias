@@ -162,6 +162,29 @@ class PecaController extends Controller
         return $this->voltarParaPeca($peca, $peca->rotulo . ' puxado do módulo Gestão de Parcerias.');
     }
 
+    /**
+     * Apaga um anexo avulso (o campo inteiro, não só o arquivo).
+     *
+     * Só vale para os criados à mão: as peças do template são a regra do fluxo
+     * e voltariam na próxima sincronização. Quem pode preencher pode remover —
+     * é a mesma vez, no mesmo setor.
+     */
+    public function destruirExtra(Peca $peca): RedirectResponse
+    {
+        abort_unless($peca->extra, 403, 'Este item faz parte do checklist e não pode ser removido.');
+        $this->autorizar($peca);
+        abort_if($peca->assinado(), 422, 'Documento assinado não é removido.');
+
+        if ($peca->arquivo_path) {
+            Storage::disk('local')->delete($peca->arquivo_path);
+        }
+
+        $rotulo = $peca->rotulo;
+        $peca->delete();
+
+        return back()->with('success', '"' . $rotulo . '" removido do checklist.');
+    }
+
     public function download(Peca $peca): StreamedResponse
     {
         abort_unless($peca->podeVer(auth()->user()), 403);

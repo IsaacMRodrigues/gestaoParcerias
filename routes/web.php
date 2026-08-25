@@ -20,6 +20,8 @@ use App\Http\Controllers\OscRegistroController;
 use App\Http\Controllers\ParecerController;
 use App\Http\Controllers\PecaController;
 use App\Http\Controllers\OscUsuarioController;
+use App\Http\Controllers\ManifestacaoAnaliseController;
+use App\Http\Controllers\ManifestacaoController;
 use App\Http\Controllers\PortalController;
 use App\Http\Controllers\ProcessoController;
 use App\Http\Controllers\ProcessoPecaController;
@@ -64,6 +66,22 @@ Route::middleware(['auth', 'osc'])->group(function () {
     Route::post('/portal/chamamentos/{chamamento}/proposta', [PortalController::class, 'storeProposta'])->name('portal.proposta.store');
     Route::get('/portal/propostas/{proposta}', [PortalController::class, 'showProposta'])->name('portal.proposta.show');
     Route::patch('/portal/propostas/{proposta}/submeter', [PortalController::class, 'submeterProposta'])->name('portal.proposta.submeter');
+    // Manifestação de Interesse: propor parceria sem chamamento aberto.
+    // Montar é da equipe da OSC; submeter, do responsável legal (no controller).
+    Route::get('/portal/manifestacoes', [ManifestacaoController::class, 'index'])->name('portal.manifestacoes.index');
+    Route::get('/portal/manifestacoes/nova', [ManifestacaoController::class, 'create'])->name('portal.manifestacoes.create');
+    Route::post('/portal/manifestacoes', [ManifestacaoController::class, 'store'])->name('portal.manifestacoes.store');
+    Route::get('/portal/manifestacoes/{manifestacao}', [ManifestacaoController::class, 'show'])->name('portal.manifestacoes.show');
+    Route::put('/portal/manifestacoes/{manifestacao}', [ManifestacaoController::class, 'update'])->name('portal.manifestacoes.update');
+    Route::patch('/portal/manifestacoes/{manifestacao}/submeter', [ManifestacaoController::class, 'submeter'])->name('portal.manifestacoes.submeter');
+    Route::post('/portal/manifestacoes/{manifestacao}/metas', [ManifestacaoController::class, 'storeMeta'])->name('portal.manifestacoes.metas.store');
+    Route::delete('/portal/manifestacoes/{manifestacao}/metas/{meta}', [ManifestacaoController::class, 'destroyMeta'])->name('portal.manifestacoes.metas.destroy');
+    Route::post('/portal/manifestacoes/{manifestacao}/metas/{meta}/etapas', [ManifestacaoController::class, 'storeEtapa'])->name('portal.manifestacoes.etapas.store');
+    Route::delete('/portal/manifestacoes/{manifestacao}/metas/{meta}/etapas/{etapa}', [ManifestacaoController::class, 'destroyEtapa'])->name('portal.manifestacoes.etapas.destroy');
+    Route::post('/portal/manifestacoes/{manifestacao}/documentos', [ManifestacaoController::class, 'storeDocumento'])->name('portal.manifestacoes.documentos.store');
+    Route::get('/portal/manifestacoes/{manifestacao}/documentos/{documento}', [ManifestacaoController::class, 'downloadDocumento'])->name('portal.manifestacoes.documentos.download');
+    Route::delete('/portal/manifestacoes/{manifestacao}/documentos/{documento}', [ManifestacaoController::class, 'destroyDocumento'])->name('portal.manifestacoes.documentos.destroy');
+
     // Recurso contra o resultado provisório (protocolo eletrônico pela OSC)
     Route::post('/portal/chamamentos/{chamamento}/recurso', [RecursoController::class, 'store'])->name('recursos.store');
 
@@ -119,8 +137,9 @@ Route::middleware(['auth', 'staff', 'readonly'])->group(function () {
         Route::get('modelos/{origem}/{chave}', [ModeloController::class, 'show'])->name('modelos.show');
     });
 
-    // Subusuários da Unidade Gestora (a UG cadastra; o admin aprova)
-    Route::middleware('role:responsavel_unidade_gestora')->group(function () {
+    // Equipe do setor: o chefe cadastra, o administrador aprova. Vale para
+    // qualquer setor — era exclusivo da Unidade Gestora.
+    Route::middleware('permission:usuarios_setor')->group(function () {
         Route::get('meus-usuarios', [\App\Http\Controllers\SubusuarioController::class, 'index'])->name('subusuarios.index');
         Route::get('meus-usuarios/novo', [\App\Http\Controllers\SubusuarioController::class, 'create'])->name('subusuarios.create');
         Route::post('meus-usuarios', [\App\Http\Controllers\SubusuarioController::class, 'store'])->name('subusuarios.store');
@@ -164,6 +183,16 @@ Route::middleware(['auth', 'staff', 'readonly'])->group(function () {
     Route::middleware('permission:chamamentos')->group(function () {
         Route::resource('programas', ProgramaController::class);
         Route::resource('programas.chamamentos', ChamamentoController::class)->except(['show']);
+        // Manifestação de Interesse: antessala do chamamento — a SCP conduz, a
+        // Secretaria opina, e o deferimento cria a dispensa/inexigibilidade.
+        Route::get('manifestacoes', [ManifestacaoAnaliseController::class, 'index'])->name('manifestacoes.index');
+        Route::get('manifestacoes/{manifestacao}', [ManifestacaoAnaliseController::class, 'show'])->name('manifestacoes.show');
+        Route::get('manifestacoes/{manifestacao}/documentos/{documento}', [ManifestacaoAnaliseController::class, 'downloadDocumento'])->name('manifestacoes.documentos.download');
+        Route::post('manifestacoes/{manifestacao}/encaminhar', [ManifestacaoAnaliseController::class, 'encaminhar'])->name('manifestacoes.encaminhar');
+        Route::post('manifestacoes/{manifestacao}/parecer', [ManifestacaoAnaliseController::class, 'parecer'])->name('manifestacoes.parecer');
+        Route::post('manifestacoes/{manifestacao}/deferir', [ManifestacaoAnaliseController::class, 'deferir'])->name('manifestacoes.deferir');
+        Route::post('manifestacoes/{manifestacao}/indeferir', [ManifestacaoAnaliseController::class, 'indeferir'])->name('manifestacoes.indeferir');
+
         Route::get('chamamentos/{chamamento}/selecao', [ChamamentoController::class, 'selecao'])->name('chamamentos.selecao');
         // Trâmite da Seleção: UG → SCP → UG → SCP → Prefeito
         Route::post('chamamentos/{chamamento}/selecao/avancar', [SelecaoController::class, 'avancar'])->name('chamamentos.selecao.avancar');
@@ -251,12 +280,15 @@ Route::middleware('auth')->group(function () {
     Route::post('pecas/{peca}/puxar', [PecaController::class, 'puxar'])->name('pecas.puxar');
     Route::get('pecas/{peca}/arquivo', [PecaController::class, 'download'])->name('pecas.download');
     Route::delete('pecas/{peca}/arquivo', [PecaController::class, 'removerArquivo'])->name('pecas.arquivo.remover');
+    // Anexo avulso: só o campo criado à mão é removível (ver PecaController)
+    Route::delete('pecas/{peca}', [PecaController::class, 'destruirExtra'])->name('pecas.extra.destruir');
 
     // Trâmite da Celebração — acessível aos setores internos e à OSC da parceria
     // A listagem é só dos setores que participam do fluxo (checagem no controller);
     // as telas por proposta seguem abertas à OSC da parceria.
     Route::get('celebracao', [CelebracaoController::class, 'index'])->name('celebracao.index');
     Route::get('celebracao/{proposta}', [CelebracaoController::class, 'show'])->name('celebracao.show');
+    Route::post('celebracao/{proposta}/anexos', [CelebracaoController::class, 'adicionarAnexo'])->name('celebracao.anexos.store');
     Route::post('celebracao/{proposta}/avancar', [CelebracaoController::class, 'avancar'])->name('celebracao.avancar');
     Route::post('celebracao/{proposta}/devolver', [CelebracaoController::class, 'devolver'])->name('celebracao.devolver');
     Route::post('celebracao/{proposta}/concluir', [CelebracaoController::class, 'concluir'])->name('celebracao.concluir');
