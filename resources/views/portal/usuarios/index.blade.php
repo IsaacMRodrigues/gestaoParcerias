@@ -51,25 +51,29 @@
                     @foreach($usuarios as $usuario)
                         @php $ehDono = $usuario->id === $osc->user_id; @endphp
                         <tr class="{{ $usuario->status ? '' : 'bg-gray-50/70' }}">
-                            <td class="px-5 py-4">
+                            <td class="px-5 py-4 align-top">
                                 <p class="font-medium text-gray-900">{{ $usuario->name }}</p>
                                 <p class="text-xs text-gray-500">{{ $usuario->email }}</p>
                             </td>
-                            <td class="px-5 py-4">
+                            {{-- O selo é uma pílula: quebrado em duas linhas ele
+                                 deixa de parecer um selo. "Responsável Legal" não
+                                 cabe na largura que a coluna recebe, então a coluna
+                                 é que cede. --}}
+                            <td class="px-5 py-4 whitespace-nowrap align-top">
                                 @if($ehDono)
-                                    <span class="px-2 py-1 text-xs font-medium bg-brand-100 text-brand-800 rounded-full">
+                                    <span class="inline-block px-2 py-1 text-xs font-medium bg-brand-100 text-brand-800 rounded-full">
                                         Responsável Legal
                                     </span>
                                 @else
-                                    <span class="px-2 py-1 text-xs font-medium bg-slate-100 text-slate-700 rounded-full">
+                                    <span class="inline-block px-2 py-1 text-xs font-medium bg-slate-100 text-slate-700 rounded-full">
                                         Membro
                                     </span>
                                     @if($usuario->solicitacao_obs)
-                                        <p class="text-xs text-gray-500 mt-1">{{ $usuario->solicitacao_obs }}</p>
+                                        <p class="text-xs text-gray-500 mt-1 whitespace-normal max-w-[12rem]">{{ $usuario->solicitacao_obs }}</p>
                                     @endif
                                 @endif
                             </td>
-                            <td class="px-5 py-4">
+                            <td class="px-5 py-4 align-top">
                                 @if($ehDono)
                                     {{-- O responsável legal faz tudo o que a OSC pode:
                                          não há o que marcar nem por que desmarcar. --}}
@@ -104,7 +108,7 @@
                                     </details>
                                 @endif
                             </td>
-                            <td class="px-5 py-4">
+                            <td class="px-5 py-4 align-top whitespace-nowrap">
                                 @if($usuario->status)
                                     <span class="inline-flex items-center gap-1.5 text-brand-700">
                                         <span class="w-1.5 h-1.5 rounded-full bg-brand-500"></span> Ativo
@@ -115,7 +119,7 @@
                                     </span>
                                 @endif
                             </td>
-                            <td class="px-5 py-4 text-right">
+                            <td class="px-5 py-4 text-right align-top">
                                 @if($ehDono)
                                     {{-- Sem ação: a conta do responsável legal é
                                          o próprio cadastro da OSC. --}}

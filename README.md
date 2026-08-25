@@ -256,6 +256,13 @@ OSC é organização, e organização tem equipe. O vínculo mora em **`users.os
 
 ## O que foi feito
 
+- [2026-08-25] **Selo de papel parou de quebrar ao meio** (`portal/usuarios/index`)
+  - "Responsável Legal" não cabia na largura que a coluna recebia e a pílula quebrava em duas linhas,
+    com metade do fundo verde em cada — quebrado assim, deixa de parecer selo
+  - A coluna passa a ceder (`whitespace-nowrap`), não o selo; a função por extenso abaixo dele
+    continua quebrando, com largura máxima própria. As cinco colunas ganharam `align-top`, para as
+    linhas não flutuarem no meio quando a de Funções cresce
+
 - [2026-08-25] **Equipe da OSC: cada integrante com as funções que lhe cabem** (`User::FUNCOES_OSC`)
   - A equipe da OSC era um bloco só: quem entrava podia tudo o que a organização pode. Entidade não
     trabalha assim — quem escreve o projeto não é quem cuida das certidões, e os dados bancários da
