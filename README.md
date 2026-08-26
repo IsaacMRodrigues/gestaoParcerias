@@ -256,6 +256,16 @@ OSC é organização, e organização tem equipe. O vínculo mora em **`users.os
 
 ## O que foi feito
 
+- [2026-08-26] **O administrador passa a ver quais setores não têm quem cadastre a equipe** (`usuarios.index`)
+  - Cadastrar a própria equipe deixou de ser exclusividade da UG em 24/08, mas depende de alguém
+    receber o perfil **Chefe de Setor** — e nada avisava que isso não tinha sido feito. O resultado
+    era uma porta que existe e ninguém encontra: o servidor da SCP entrava, não via "Meus usuários",
+    e não tinha como saber que faltava um clique na tela do administrador
+  - A listagem de Usuários agora nomeia os setores em que ninguém pode cadastrar, e diz o que fazer.
+    Só conta setor que já tem gente lotada e ativa: designar chefia de setor vazio não é pendência
+  - O TI fica de fora da conta por definição — quem tem `cadastros` cria e aprova direto ali, e a
+    porta do setor nem aparece para ele (ver `User::podeCadastrarNoSetor`)
+
 - [2026-08-26] **A Seleção deixou de pedir de novo o que o Planejamento já fez** (`Peca::ORIGEM_PLANEJAMENTO`)
   - O Edital nasce, é revisado, assinado pela UG e publicado dentro do processo de Planejamento. Ao
     chegar na Seleção, o checklist pedia tudo outra vez — o mesmo edital, a mesma portaria da
@@ -1586,6 +1596,9 @@ Frentes desta rodada, detalhadas nas primeiras entradas de `## O que foi feito`:
 5. **Acabamento**: assinar não joga mais a tela para o topo, atalhos de rolagem na Celebração e nas
    telas da OSC, e o selo de situação parou de se partir ao meio.
 
+15. **Chefia de setor visível** (26/08): a tela de Usuários passa a apontar os setores em que
+   ninguém cadastra a própria equipe — a porta existia desde 24/08 e ninguém sabia que faltava
+   designar quem a abre.
 14. **Seleção não repete o Planejamento** (26/08): o edital, a portaria da comissão, o parecer
    jurídico e o comprovante de publicação passam a ser exibidos a partir do processo, com a
    assinatura que já têm, em vez de serem pedidos de novo.

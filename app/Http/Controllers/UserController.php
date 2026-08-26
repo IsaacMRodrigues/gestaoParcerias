@@ -16,7 +16,43 @@ class UserController extends Controller
         $users = User::with('roles')->orderBy('name')->paginate(15);
         $pendentesCount = User::pendentes()->count();
 
-        return view('usuarios.index', compact('users', 'pendentesCount'));
+        return view('usuarios.index', [
+            'users'          => $users,
+            'pendentesCount' => $pendentesCount,
+            'setoresSemChefia' => $this->setoresSemChefia(),
+        ]);
+    }
+
+    /**
+     * Setores em que ninguém cadastra a própria equipe.
+     *
+     * Cadastrar a equipe do setor deixou de ser exclusividade da Unidade
+     * Gestora, mas depende de alguém receber o perfil **Chefe de Setor** — e
+     * nada avisava que isso não tinha sido feito. O resultado é uma porta que
+     * existe e ninguém encontra: o servidor da SCP entra, não vê "Meus
+     * usuários", e não tem como saber que falta um clique nesta tela.
+     *
+     * Só conta setor que já tem gente: designar chefia de setor vazio não é
+     * pendência, é convite a criar conta sem necessidade.
+     */
+    private function setoresSemChefia(): array
+    {
+        $lotados = User::query()
+            ->whereNotNull('setor')
+            ->where('status', true)
+            ->where('approval_status', 'aprovado')
+            ->with('roles.permissions', 'permissions')
+            ->get()
+            ->groupBy('setor');
+
+        return $lotados
+            ->reject(fn ($doSetor) => $doSetor->contains->podeCadastrarNoSetor())
+            // O TI cadastra por Cadastros → Usuários; a porta do setor nem
+            // aparece para quem tem `cadastros` (ver User::podeCadastrarNoSetor).
+            ->reject(fn ($doSetor) => $doSetor->every->can('cadastros'))
+            ->keys()
+            ->map(fn ($setor) => User::LOTACOES[$setor] ?? strtoupper($setor))
+            ->all();
     }
 
     /**

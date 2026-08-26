@@ -24,6 +24,22 @@
                 </a>
             @endif
 
+            {{-- Setor sem chefia designada: a porta de cadastrar a própria equipe
+                 existe, mas ninguém lá dentro a enxerga. Quem fecha essa lacuna
+                 é quem está nesta tela, e nada avisava. --}}
+            @if(! empty($setoresSemChefia))
+                <div class="mb-4 px-4 py-3 bg-gray-50 border border-gray-200 rounded-lg text-sm text-gray-700">
+                    <p class="font-medium text-gray-900 mb-1">Setores sem quem cadastre a própria equipe</p>
+                    <p>
+                        {{ implode(', ', $setoresSemChefia) }} —
+                        ninguém nesses setores tem o perfil <strong>Chefe de Setor</strong>, então a tela
+                        "Meus usuários" não aparece para eles e cada conta precisa ser criada aqui.
+                        Para delegar, edite a pessoa responsável e marque esse perfil; o cadastro que ela
+                        fizer continua vindo para a sua aprovação.
+                    </p>
+                </div>
+            @endif
+
             <div class="bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden">
                 <table class="min-w-full divide-y divide-gray-100">
                     <thead class="bg-gray-50">
