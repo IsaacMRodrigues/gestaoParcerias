@@ -3,6 +3,7 @@
     use App\Models\Chamamento;
     use App\Models\Proposta;
     use App\Models\Instrumento;
+    use App\Models\ManifestacaoInteresse;
     use App\Models\Orgao;
     use App\Models\Osc;
 
@@ -28,6 +29,13 @@
 
     $instrumentosTotal    = Instrumento::count();
     $instrumentosVigentes = Instrumento::where('status', 'vigente')->count();
+
+    // Manifestação de interesse é proposta de OSC sem chamamento aberto: chega
+    // pelo portal e fica esperando o município encaminhar, opinar e decidir.
+    // Sem o card, a única porta era o item de menu — e nada dizia que havia
+    // OSC aguardando resposta. `visiveisPara` mantém o recorte por Secretaria.
+    $manifestacoesFila  = ManifestacaoInteresse::visiveisPara($u)->emTramite()->count();
+    $manifestacoesTotal = ManifestacaoInteresse::visiveisPara($u)->where('status', '!=', 'rascunho')->count();
 @endphp
 
 <x-app-layout>
@@ -121,6 +129,11 @@
                                  color="brand" :href="route('programas.index')" />
                 @endcan
 
+                @can('chamamentos')
+                    <x-stat-card label="Manifestações a decidir" icon="manifestacoes" :value="$manifestacoesFila" :sub="$manifestacoesTotal.' recebidas'"
+                                 color="accent" :href="route('manifestacoes.index')" />
+                @endcan
+
                 @can('propostas')
                     <x-stat-card label="Propostas a analisar" icon="propostas" :value="$propostasAnalise" :sub="$propostasTotal.' no total'"
                                  color="accent" :href="route('propostas.index')" />
@@ -150,6 +163,7 @@
                     @endcan
                     @can('chamamentos')
                         <x-quick-link :href="route('programas.index')" label="Programas & Chamamentos" />
+                        <x-quick-link :href="route('manifestacoes.index')" label="Manifestações de Interesse" />
                     @endcan
                     @can('propostas')
                         <x-quick-link :href="route('propostas.index')" label="Propostas" />

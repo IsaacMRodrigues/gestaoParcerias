@@ -256,6 +256,18 @@ OSC é organização, e organização tem equipe. O vínculo mora em **`users.os
 
 ## O que foi feito
 
+- [2026-08-26] **Manifestações de Interesse no painel** (`dashboard`, `x-stat-card`)
+  - A manifestação chega pelo portal e fica esperando o município encaminhar, ouvir a Secretaria e
+    decidir. A única porta era o item de menu, e nada no painel dizia que havia OSC aguardando
+    resposta — a fila só aparecia para quem lembrasse de ir olhar
+  - Card **"Manifestações a decidir"** com a fila (submetidas, em análise e analisadas — as decididas
+    saem da conta) e o total recebido, mais o atalho na fileira de baixo, como todos os outros
+    módulos têm. Laranja, pela regra da paleta: é trabalho parado esperando alguém
+  - `visiveisPara` mantém o recorte por Secretaria — a UG vê a fila do próprio órgão, a SCP vê tudo
+  - Ícone próprio no `x-stat-card`: mão levantada, que é literalmente o gesto de manifestar interesse
+  - Conferido nos três setores: SCP conta 2 de 3 (a deferida fica de fora), UG vê o card com a fila
+    do próprio órgão, SEPLAN não vê nem card nem atalho por não ter `chamamentos`
+
 - [2026-08-26] **O administrador passa a ver quais setores não têm quem cadastre a equipe** (`usuarios.index`)
   - Cadastrar a própria equipe deixou de ser exclusividade da UG em 24/08, mas depende de alguém
     receber o perfil **Chefe de Setor** — e nada avisava que isso não tinha sido feito. O resultado
@@ -1596,6 +1608,8 @@ Frentes desta rodada, detalhadas nas primeiras entradas de `## O que foi feito`:
 5. **Acabamento**: assinar não joga mais a tela para o topo, atalhos de rolagem na Celebração e nas
    telas da OSC, e o selo de situação parou de se partir ao meio.
 
+16. **Manifestações no painel** (26/08): card com a fila de manifestações a decidir e atalho, para
+   a SCP ver que há OSC esperando resposta sem depender de lembrar do menu.
 15. **Chefia de setor visível** (26/08): a tela de Usuários passa a apontar os setores em que
    ninguém cadastra a própria equipe — a porta existia desde 24/08 e ninguém sabia que faltava
    designar quem a abre.
