@@ -13,7 +13,7 @@ class Peca extends Model
     protected $fillable = [
         'pecaable_type', 'pecaable_id', 'categoria', 'chave', 'rotulo',
         'tipo', 'obrigatorio', 'ordem',
-        'extra', 'setor', 'etapa', 'criado_por',
+        'extra', 'setor', 'etapa', 'criado_por', 'origem_processo_peca_id',
         'conteudo', 'arquivo_path', 'arquivo_nome', 'tamanho', 'mime_type',
         'assinado_por', 'assinado_em', 'codigo_validacao',
         'contra_assinado_por', 'contra_assinado_em', 'codigo_validacao_contra',
@@ -194,6 +194,34 @@ class Peca extends Model
      */
     public const SELECAO_ASSINATURA = [
         'termo_homologacao' => ['setor' => 'pm', 'etapa' => 4],
+    ];
+
+    /**
+     * Peças que o Planejamento já produziu, por chave do checklist => tipo da
+     * peça do processo (ver ProcessoPeca::TIPOS).
+     *
+     * Tudo o que está aqui nasce, é assinado e é publicado dentro do processo
+     * de Planejamento. Pedir de novo na Seleção seria pedir um segundo original
+     * do mesmo documento — com outra assinatura e outro código de validação. A
+     * Seleção passa a apontar para o do Planejamento.
+     *
+     * `anexos` aponta para o edital de propósito: os anexos do chamamento são
+     * os anexos do edital, e é lá que a SCP os envia.
+     */
+    public const ORIGEM_PLANEJAMENTO = [
+        'chamamento_publico' => [
+            'edital'             => 'edital',
+            'anexos'             => 'edital',
+            'comissao_selecao'   => 'portaria_comissao',
+            'parecer_juridico'   => 'parecer_juridico',
+            'pub_extrato_edital' => 'comprovante_publicacao',
+        ],
+        'dispensa_inexigibilidade' => [
+            'justificativa'        => 'justificativa_dispensa',
+            'parecer_tecnico_cnas' => 'parecer_cnas',
+            'parecer_juridico'     => 'parecer_juridico',
+            'pub_extrato'          => 'comprovante_publicacao',
+        ],
     ];
 
     public const CATEGORIA_LABELS = [
@@ -874,8 +902,29 @@ HTML,
             ->get();
     }
 
+    /** Documento do Planejamento que satisfaz este item (ver ORIGEM_PLANEJAMENTO). */
+    public function origem(): BelongsTo
+    {
+        return $this->belongsTo(ProcessoPeca::class, 'origem_processo_peca_id');
+    }
+
+    /**
+     * Este item é satisfeito por um documento do Planejamento?
+     *
+     * Quando sim, não há o que preencher nem o que assinar aqui: o documento
+     * existe, assinado, no processo — a Seleção só o exibe.
+     */
+    public function vemDoPlanejamento(): bool
+    {
+        return $this->origem_processo_peca_id !== null;
+    }
+
     public function preenchido(): bool
     {
+        if ($this->vemDoPlanejamento()) {
+            return true;
+        }
+
         return $this->tipo === 'modelo' ? !empty($this->conteudo) : $this->temArquivo();
     }
 
@@ -893,6 +942,13 @@ HTML,
      */
     public function concluida(): bool
     {
+        // Veio do Planejamento assinado: está pronta, e a assinatura que vale é
+        // a de lá — a coluna assinado_em desta linha continua vazia de propósito,
+        // para não haver duas assinaturas do mesmo documento.
+        if ($this->vemDoPlanejamento()) {
+            return true;
+        }
+
         return $this->tipo === 'modelo' ? $this->assinado() : $this->preenchido();
     }
 
@@ -1102,6 +1158,10 @@ HTML,
 
     public function podePreencher(?User $user): bool
     {
+        if ($this->vemDoPlanejamento()) {
+            return false;
+        }
+
         $dono = $this->donoEmTramite();
 
         // Fora do trâmite (fase do edital, dispensa, anexo avulso sem etapa).
@@ -1224,7 +1284,9 @@ HTML,
      */
     public function podeAssinar(?User $user): bool
     {
-        if ($this->tipo !== 'modelo' || empty($this->conteudo) || $this->assinado()) {
+        if ($this->tipo !== 'modelo' || empty($this->conteudo) || $this->assinado()
+            || $this->vemDoPlanejamento()
+        ) {
             return false;
         }
 
@@ -1256,7 +1318,7 @@ HTML,
     {
         $dono = $this->donoEmTramite();
 
-        if (!$this->emTramite() || $this->assinado()) {
+        if (!$this->emTramite() || $this->assinado() || $this->vemDoPlanejamento()) {
             return null;
         }
 
@@ -1349,7 +1411,76 @@ HTML,
             ) {
                 $peca->update(['conteudo' => $texto]);
             }
+
+            // O modelo semeado não conta como preenchimento: é o texto em
+            // branco que o sistema põe, não algo que alguém escreveu.
+            self::ligarAoPlanejamento($peca, $pecaable, array_filter([$texto, $bruto]));
         }
+    }
+
+    /**
+     * Aponta o item do checklist para o documento que o Planejamento já fez.
+     *
+     * Só quando o item ainda está intocado: se alguém digitou, anexou ou
+     * assinou aqui, esse trabalho manda — apontar para o processo o esconderia
+     * da tela sem aviso. E só quando o documento de lá está pronto de fato
+     * (assinado, ou com anexo, conforme o tipo), para a Seleção não exibir um
+     * espaço vazio como se fosse peça cumprida.
+     */
+    private static function ligarAoPlanejamento(self $peca, Model $pecaable, array $modelos = []): void
+    {
+        if ($peca->origem_processo_peca_id
+            || !$pecaable instanceof Chamamento
+            || !$pecaable->processo_id
+        ) {
+            return;
+        }
+
+        $tipo = self::ORIGEM_PLANEJAMENTO[$peca->categoria][$peca->chave] ?? null;
+
+        if (!$tipo || !self::intocada($peca, $modelos)) {
+            return;
+        }
+
+        $origem = $pecaable->processo?->pecas->firstWhere('tipo', $tipo);
+
+        if (!$origem || !self::origemEstaPronta($peca, $origem)) {
+            return;
+        }
+
+        $peca->update(['origem_processo_peca_id' => $origem->id]);
+    }
+
+    /**
+     * Ninguém mexeu neste item ainda?
+     *
+     * Texto em branco não é o único estado "intocado": as peças de modelo
+     * nascem com o texto-padrão do sistema já dentro. Medir por `conteudo`
+     * vazio deixava justamente o Edital e o Parecer Jurídico de fora da
+     * herança — os dois que mais interessavam — porque o modelo semeado
+     * passava por trabalho de alguém.
+     */
+    private static function intocada(self $peca, array $modelos): bool
+    {
+        if ($peca->arquivo_path || $peca->assinado()) {
+            return false;
+        }
+
+        return empty($peca->conteudo) || in_array($peca->conteudo, $modelos, true);
+    }
+
+    /**
+     * O documento do Planejamento está pronto para valer por este item?
+     *
+     * Quem decide é o tipo do ITEM, não o da origem — e é o que faz o mapa
+     * funcionar sem exceções. O item de modelo herda o texto e exige que ele
+     * esteja assinado; o de arquivo herda os anexos e exige que exista ao menos
+     * um. É assim que "Edital" e "Anexos" apontam para a mesma peça do processo
+     * e ainda assim mostram coisas diferentes: o texto num, os arquivos no outro.
+     */
+    private static function origemEstaPronta(self $peca, ProcessoPeca $origem): bool
+    {
+        return $peca->tipo === 'modelo' ? $origem->assinado() : $origem->temAnexo();
     }
 
     /**

@@ -302,6 +302,9 @@ Route::middleware('auth')->group(function () {
     Route::post('pecas/{peca}/arquivo', [PecaController::class, 'upload'])->name('pecas.upload');
     Route::post('pecas/{peca}/puxar', [PecaController::class, 'puxar'])->name('pecas.puxar');
     Route::get('pecas/{peca}/arquivo', [PecaController::class, 'download'])->name('pecas.download');
+    // Anexo do documento do Planejamento que cumpre a peça — a rota do módulo
+    // de Processos exige `planejamento`, que nem todo condutor da Seleção tem.
+    Route::get('pecas/{peca}/origem/anexos/{anexo}', [PecaController::class, 'baixarAnexoOrigem'])->name('pecas.origem.anexo');
     Route::delete('pecas/{peca}/arquivo', [PecaController::class, 'removerArquivo'])->name('pecas.arquivo.remover');
     // Anexo avulso: só o campo criado à mão é removível (ver PecaController)
     Route::delete('pecas/{peca}', [PecaController::class, 'destruirExtra'])->name('pecas.extra.destruir');

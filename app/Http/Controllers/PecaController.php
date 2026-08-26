@@ -192,6 +192,25 @@ class PecaController extends Controller
         return back()->with('success', '"' . $rotulo . '" removido do checklist.');
     }
 
+    /**
+     * Baixa um anexo do documento do Planejamento que satisfaz esta peça.
+     *
+     * O arquivo já tem rota própria no módulo de Processos, mas ela exige
+     * `planejamento` — e quem conduz a Seleção nem sempre tem essa permissão (o
+     * Prefeito, que assina a homologação, não tem). Aqui a régua é a mesma que
+     * já governa ver a peça: quem enxerga o item do checklist baixa o anexo que
+     * o cumpre.
+     */
+    public function baixarAnexoOrigem(Peca $peca, \App\Models\ProcessoPecaAnexo $anexo): StreamedResponse
+    {
+        abort_unless($peca->podeVer(auth()->user()), 403);
+        abort_unless($peca->vemDoPlanejamento()
+            && $anexo->processo_peca_id === $peca->origem_processo_peca_id, 404);
+        abort_unless(Storage::disk('local')->exists($anexo->arquivo_path), 404, 'Arquivo não encontrado.');
+
+        return Storage::disk('local')->download($anexo->arquivo_path, $anexo->arquivo_nome);
+    }
+
     public function download(Peca $peca): StreamedResponse
     {
         abort_unless($peca->podeVer(auth()->user()), 403);

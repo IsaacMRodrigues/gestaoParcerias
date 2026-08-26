@@ -256,6 +256,35 @@ OSC é organização, e organização tem equipe. O vínculo mora em **`users.os
 
 ## O que foi feito
 
+- [2026-08-26] **A Seleção deixou de pedir de novo o que o Planejamento já fez** (`Peca::ORIGEM_PLANEJAMENTO`)
+  - O Edital nasce, é revisado, assinado pela UG e publicado dentro do processo de Planejamento. Ao
+    chegar na Seleção, o checklist pedia tudo outra vez — o mesmo edital, a mesma portaria da
+    comissão, o mesmo parecer jurídico, o mesmo comprovante de publicação
+  - Redigitar um documento assinado **cria um segundo original**: dois textos, duas assinaturas, dois
+    códigos de validação para o que é uma peça só do processo. A Seleção passa a **guardar a
+    referência**, não uma cópia — coluna `pecas.origem_processo_peca_id`
+  - A linha do checklist diz "Vem do Planejamento — processo nº X", com a assinatura que o documento
+    já tem, e abre o documento do processo em leitura. Não há editor, upload nem botão de assinar:
+    para alterar, é no Planejamento que se mexe
+  - **Quem decide o que a linha mostra é o tipo do item, não o da origem.** Item de modelo herda o
+    texto e exige que ele esteja assinado; item de arquivo herda os anexos e exige ao menos um. É
+    isso que faz "Edital" e "Anexos" apontarem para a mesma peça do processo e cada linha mostrar o
+    que o rótulo promete
+  - **Trabalho manual manda**: se alguém já digitou, anexou ou assinou no item da Seleção, ele não é
+    ligado — apontar para o processo esconderia esse trabalho sem aviso. O modelo semeado pelo
+    sistema não conta como trabalho de alguém (era o que deixava justamente o Edital e o Parecer
+    Jurídico de fora, os dois que mais interessavam)
+  - Vale para as duas rotas: Chamamento Público (edital, anexos, comissão, parecer jurídico,
+    publicação do extrato) e Dispensa/Inexigibilidade (justificativa, parecer CNAS, parecer
+    jurídico, publicação do extrato)
+  - Rota própria para baixar o anexo da origem (`pecas.origem.anexo`): a do módulo de Processos exige
+    `planejamento`, e quem conduz a Seleção nem sempre tem — o Prefeito, que assina a homologação,
+    não tem
+  - Conferido no processo real 0206.0006.2026.01: as 5 peças ligam, nenhuma delas aceita preencher ou
+    assinar, o Edital mostra o texto e o "Anexos" mostra o arquivo, sincronizar de novo não muda nada,
+    o item com texto próprio não é ligado, anexo de outra peça dá 404, e Celebração (15 etapas) e
+    Seleção seguem desenhando a numeração sem buraco
+
 - [2026-08-25] **Selo de papel parou de quebrar ao meio** (`portal/usuarios/index`)
   - "Responsável Legal" não cabia na largura que a coluna recebia e a pílula quebrava em duas linhas,
     com metade do fundo verde em cada — quebrado assim, deixa de parecer selo
@@ -1557,6 +1586,9 @@ Frentes desta rodada, detalhadas nas primeiras entradas de `## O que foi feito`:
 5. **Acabamento**: assinar não joga mais a tela para o topo, atalhos de rolagem na Celebração e nas
    telas da OSC, e o selo de situação parou de se partir ao meio.
 
+14. **Seleção não repete o Planejamento** (26/08): o edital, a portaria da comissão, o parecer
+   jurídico e o comprovante de publicação passam a ser exibidos a partir do processo, com a
+   assinatura que já têm, em vez de serem pedidos de novo.
 13. **Funções da equipe da OSC** (25/08): o responsável legal marca, por pessoa, quais das quatro
    funções o integrante exerce — propostas, documentos, manifestações e Celebração. Ver segue sendo
    de toda a equipe; submeter, recorrer e assinar continuam com quem responde pela entidade.

@@ -202,7 +202,17 @@
                             </p>
 
                             {{-- Linha secundária: só aparece quando há o que informar --}}
-                            @if($peca->assinado())
+                            @if($peca->vemDoPlanejamento())
+                                {{-- A assinatura que vale é a do processo: o documento é
+                                     o mesmo, e aqui ele não é assinado outra vez. --}}
+                                <p class="text-xs text-gray-500 mt-0.5">
+                                    Vem do Planejamento — processo nº {{ $peca->origem->processo->numero }}
+                                    @if($peca->origem->assinado())
+                                        · assinado por {{ $peca->origem->assinante?->name ?? '—' }}
+                                        em {{ $peca->origem->assinado_em->format('d/m/Y H:i') }}
+                                    @endif
+                                </p>
+                            @elseif($peca->assinado())
                                 <p class="text-xs text-gray-400 mt-0.5">
                                     Assinado por {{ $peca->assinante->name }} em {{ $peca->assinado_em->format('d/m/Y H:i') }}
                                 </p>
@@ -229,7 +239,9 @@
                         </div>
 
                         {{-- Arquivo já enviado: chip compacto no lugar do formulário --}}
-                        @if(! $ehModelo && $peca->temArquivo())
+                        @if($peca->vemDoPlanejamento())
+                            {{-- Nada a enviar nem a remover: o arquivo é o do processo. --}}
+                        @elseif(! $ehModelo && $peca->temArquivo())
                             <div class="flex items-center gap-2 shrink-0">
                                 <span class="inline-flex items-center gap-2 bg-gray-50 border border-gray-200 rounded-lg px-2.5 py-1.5 max-w-xs">
                                     <span class="text-[11px] font-bold text-brand-700 uppercase shrink-0">
@@ -265,8 +277,63 @@
 
                     {{-- ===== Bloco de trabalho, recolhido por padrão ===== --}}
 
+                    {{-- VEM DO PLANEJAMENTO: exibe o documento do processo, e só.
+                         Não há editor, upload nem assinatura — redigitar aqui
+                         criaria um segundo original do que é uma peça só. --}}
+                    @if($peca->vemDoPlanejamento())
+                        @php $origem = $peca->origem; @endphp
+                        <details class="mt-2 group">
+                            <summary class="{{ $acao }} text-gray-600 bg-gray-100 hover:bg-gray-200">
+                                <svg class="w-3.5 h-3.5 transition group-open:rotate-90" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.6">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/>
+                                </svg>
+                                Ver documento do processo
+                            </summary>
+
+                            {{-- O item de modelo herda o TEXTO da origem; o de arquivo,
+                                 os anexos dela. É o que permite "Edital" e "Anexos"
+                                 apontarem para a mesma peça do processo e cada linha
+                                 mostrar o que o próprio rótulo promete. --}}
+                            <div class="mt-3 space-y-3">
+                                @if($ehModelo)
+                                    <div class="documento-html border border-gray-200 rounded-lg p-4 bg-white text-gray-800 text-sm">
+                                        {!! $origem->conteudo !!}
+                                    </div>
+
+                                    @if($origem->codigo_validacao)
+                                        <p class="text-xs text-gray-500">
+                                            Código de validação:
+                                            <strong class="font-mono">{{ $origem->codigo_validacao }}</strong>
+                                            · <a href="{{ route('validacao.mostrar', $origem->codigo_validacao) }}" target="_blank"
+                                                 class="text-brand-700 font-medium hover:underline">Validar</a>
+                                        </p>
+                                    @endif
+                                @else
+                                @forelse($origem->anexos as $anexo)
+                                    <div class="flex items-center gap-2">
+                                        <span class="inline-flex items-center gap-2 bg-gray-50 border border-gray-200 rounded-lg px-2.5 py-1.5 max-w-xs">
+                                            <span class="text-[11px] font-bold text-brand-700 uppercase shrink-0">
+                                                {{ strtoupper(pathinfo($anexo->arquivo_nome, PATHINFO_EXTENSION)) }}
+                                            </span>
+                                            <span class="text-xs text-gray-700 truncate">{{ $anexo->arquivo_nome }}</span>
+                                            <span class="text-xs text-gray-400 shrink-0">{{ $anexo->tamanhoLegivel() }}</span>
+                                        </span>
+                                        <a href="{{ route('pecas.origem.anexo', [$peca, $anexo]) }}"
+                                           class="text-xs font-semibold text-brand-700 hover:text-brand-800 transition">Baixar</a>
+                                    </div>
+                                @empty
+                                    <p class="text-xs text-gray-400">O documento do processo não tem anexo.</p>
+                                @endforelse
+                                @endif
+
+                                <p class="text-xs text-gray-400">
+                                    Para alterar este documento, é no processo de Planejamento que se mexe.
+                                </p>
+                            </div>
+                        </details>
+
                     {{-- MODELO: editor rico (brasão + HTML) + assinar --}}
-                    @if($ehModelo)
+                    @elseif($ehModelo)
                         {{-- Recolhido por padrão: com várias peças preenchidas e não
                              assinadas, abrir todas empilhava um editor rico atrás do
                              outro e a lista virava uma parede de documentos.
