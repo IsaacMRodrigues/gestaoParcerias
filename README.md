@@ -256,6 +256,24 @@ OSC é organização, e organização tem equipe. O vínculo mora em **`users.os
 
 ## O que foi feito
 
+- [2026-08-28] **Setor transversal deixou de ser cegado pela própria lotação** (`User::SETORES_TRANSVERSAIS`)
+  - A visibilidade de processos, propostas e manifestações era medida só por `orgao_id`: quem tem
+    Secretaria vê a dela, quem não tem vê tudo. Isso funcionava por omissão — SCP, SEPLAN e
+    Procuradoria enxergavam o Município inteiro **porque estavam sem órgão nenhum**
+  - Ao registrar onde esses setores de fato ficam (a SCP dentro da Secretaria de Planejamento, a
+    Procuradoria dentro do Jurídico), eles parariam de ver Educação, Obras e todas as demais — o
+    oposto do que fazem: a SCP conduz a Seleção e a Celebração de todas as parcerias, a SEPLAN emite
+    o Parecer Financeiro de todas, a Procuradoria o Parecer Jurídico de todas
+  - `podeVerTodosOrgaos()` passa a conhecer os **setores transversais** (scp, seplan, pj, pm, ti).
+    Sede não é recorte de trabalho; só a Unidade Gestora é, de fato, de uma Secretaria
+  - Estrutura acertada junto: `planejamento@` deixou de ser Unidade Gestora e virou a conta da
+    **SEPLAN** (o perfil de Responsável da UG é exclusivo de `ug` e não poderia acompanhar a conta);
+    a **SCP** passou a constar dentro da Secretaria de Planejamento; e nasceu
+    `procurador@saogoncalo.mg.gov.br` como **Procuradoria Jurídica**, sediada no Jurídico —
+    `juridico@` segue Unidade Gestora daquela Secretaria, que é outra coisa
+  - Conferido com dois processos e duas manifestações, de Educação e de Obras: SEPLAN, SCP e
+    Procuradoria veem os dois; cada UG vê só o seu
+
 - [2026-08-28] **A busca do login deixou de adivinhar pelo formato** (`LoginRequest::colunaDeAcesso`)
   - A escolha entre procurar por e-mail ou por nome de usuário vinha de `FILTER_VALIDATE_EMAIL`, o
     formato do que foi digitado. `admin@parcerias` — o login da conta de administração — só não caía

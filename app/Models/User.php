@@ -92,6 +92,20 @@ class User extends Authenticatable
     ];
 
     /**
+     * Setores que atuam para o Município inteiro, não para uma Secretaria.
+     *
+     * A SCP conduz a Seleção e a Celebração de todas as parcerias; a SEPLAN
+     * emite o Parecer Financeiro de todas; a Procuradoria, o Parecer Jurídico
+     * de todas. Eles têm sede — a SCP fica dentro da Secretaria de Planejamento,
+     * a Procuradoria dentro do Jurídico —, mas sede não é recorte de trabalho.
+     *
+     * Existe porque `podeVerTodosOrgaos()` media a visibilidade só por
+     * `orgao_id`: registrar a lotação verdadeira desses setores os cegaria para
+     * todas as outras Secretarias, que é justamente o que eles atendem.
+     */
+    public const SETORES_TRANSVERSAIS = ['scp', 'seplan', 'pj', 'pm', 'ti'];
+
+    /**
      * Setores de lotação do usuário (mais amplo que os setores do trâmite).
      */
     public const LOTACOES = [
@@ -499,12 +513,19 @@ class User extends Authenticatable
 
     /**
      * Vê dados (ex.: propostas) de TODOS os órgãos? — administrador, auditoria
-     * (somente leitura) ou papéis transversais não lotados numa Secretaria
-     * específica (comissões etc.). Quem é lotado numa UG vê só o próprio órgão.
+     * (somente leitura), quem não tem Secretaria, ou quem é de um setor que
+     * atende o Município inteiro.
+     *
+     * Esta última regra faltava: a visibilidade era medida só por `orgao_id`,
+     * então bastava registrar onde a SCP fica sediada (dentro da Secretaria de
+     * Planejamento) para ela deixar de enxergar os processos de Educação, Obras
+     * e de todas as demais — o oposto do que o setor faz. Só a Unidade Gestora
+     * é, de fato, de uma Secretaria.
      */
     public function podeVerTodosOrgaos(): bool
     {
         return is_null($this->orgao_id)
+            || in_array($this->setor, self::SETORES_TRANSVERSAIS, true)
             || $this->somenteLeitura()
             || $this->hasRole('administrador_setorial');
     }
