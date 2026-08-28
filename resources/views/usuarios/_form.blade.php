@@ -82,7 +82,12 @@
     @php $perfisAtuais = old('roles', $user?->roles->pluck('name')->all() ?? []); @endphp
     <div class="mt-1 grid grid-cols-1 sm:grid-cols-2 gap-x-4 gap-y-1.5 border border-gray-200 rounded-md p-3 max-h-72 overflow-y-auto">
         @foreach($roles as $role)
-            @php $excl = \App\Models\User::PERFIS_EXCLUSIVOS[$role->name] ?? null; @endphp
+            @php
+                $excl = \App\Models\User::PERFIS_EXCLUSIVOS[$role->name] ?? null;
+                // Encargo não é lotação: o gestor e as comissões são designados
+                // por portaria e continuam lotados no setor que os designou.
+                $designa = \App\Models\User::setorQueDesigna($role->name);
+            @endphp
             <label class="flex items-start gap-2 text-sm text-gray-700">
                 <input type="checkbox" name="roles[]" value="{{ $role->name }}"
                        class="mt-0.5 rounded border-gray-300 text-brand-600 shadow-sm focus:ring-brand-500"
@@ -91,6 +96,8 @@
                     {{ \App\Models\User::$roleLabels[$role->name] ?? $role->name }}
                     @if($excl)
                         <span class="text-xs text-accent-600">(exclusivo: {{ \App\Models\User::LOTACOES[$excl] ?? $excl }})</span>
+                    @elseif($designa)
+                        <span class="text-xs text-accent-600">(designado por portaria: {{ \App\Models\User::LOTACOES[$designa] ?? $designa }})</span>
                     @endif
                 </span>
             </label>

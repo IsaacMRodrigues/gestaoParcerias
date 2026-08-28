@@ -50,6 +50,20 @@ class UserRequest extends FormRequest
                     }
                 }
 
+                // Encargo designado por portaria (gestor, comissões): quem o
+                // recebe é servidor do setor que publica o ato, e continua
+                // lotado nele — ver User::PERFIS_DE_DESIGNACAO.
+                foreach ((array) $this->input('roles', []) as $role) {
+                    $designa = User::setorQueDesigna($role);
+                    if ($designa && $setor !== $designa) {
+                        $label = User::$roleLabels[$role] ?? $role;
+                        $lot   = User::LOTACOES[$designa] ?? $designa;
+                        $validator->errors()->add('roles',
+                            "O perfil \"{$label}\" é designado por portaria d{$this->artigo($lot)} \"{$lot}\" "
+                            .'e acompanha a lotação dela — selecione esse setor para atribuí-lo.');
+                    }
+                }
+
                 // Chefia serve para cadastrar a equipe do setor, e o usuário
                 // criado herda o setor de quem cadastra: sem lotação, o perfil
                 // seria concedido para uma tela que não abre.
@@ -59,6 +73,14 @@ class UserRequest extends FormRequest
                 }
             },
         ];
+    }
+
+    /** "da Unidade Gestora" x "do Gabinete": só para a frase não sair torta. */
+    private function artigo(string $lotacao): string
+    {
+        return str_starts_with($lotacao, 'Secretaria') || str_starts_with($lotacao, 'Unidade')
+            || str_starts_with($lotacao, 'Comissão') || str_starts_with($lotacao, 'Procuradoria')
+            ? 'a' : 'o';
     }
 
     public function attributes(): array

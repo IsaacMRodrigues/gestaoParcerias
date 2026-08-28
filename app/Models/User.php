@@ -101,9 +101,6 @@ class User extends Authenticatable
         'pj'                 => 'Procuradoria Jurídica (PJ)',
         'pm'                 => 'Gabinete do Prefeito (PM)',
         'ti'                 => 'Tecnologia da Informação (TI)',
-        'comissao_selecao'   => 'Comissão de Seleção',
-        'comissao_avaliacao' => 'Comissão de Avaliação e Monitoramento',
-        'gestor'             => 'Gestoria de Parcerias',
         'osc'                => 'OSC (externo)',
     ];
 
@@ -136,10 +133,32 @@ class User extends Authenticatable
         'responsavel_publicacao'           => 'scp',
         'analista_orcamentario_financeiro' => 'seplan',
         'prefeito_municipal'               => 'pm',
-        'comissao_selecao'                 => 'comissao_selecao',
-        'comissao_monitoramento_avaliacao' => 'comissao_avaliacao',
-        'gestor_parceria'                  => 'gestor',
         'responsavel_legal'                => 'osc',
+    ];
+
+    /**
+     * Encargos designados por portaria — não são lotação.
+     *
+     * Gestor da Parceria e as duas Comissões (Lei nº 13.019/2014, art. 2º, VI,
+     * X e XI) são atribuições que a Unidade Gestora dá a servidores seus, por
+     * ato que ela mesma publica — e que este sistema emite: a portaria do
+     * gestor e a da Comissão de Monitoramento são peças da Celebração
+     * preenchidas pela UG, e a da Comissão de Seleção é peça do Chamamento,
+     * também dela.
+     *
+     * Estavam modelados como perfis exclusivos de "setores" que ninguém ocupa
+     * (nem aqui nem em produção, nunca ocupou). O resultado: a UG publicava a
+     * portaria e não conseguia criar a conta — o perfil não aparecia na lista
+     * dela, e atribuí-lo pelo cadastro exigiria tirar a pessoa da Unidade
+     * Gestora, de onde ela não sai. Quem é designado acumula o encargo sobre o
+     * próprio perfil, como a chefia de setor.
+     */
+    public const PERFIS_DE_DESIGNACAO = [
+        'ug' => [
+            'gestor_parceria',
+            'comissao_selecao',
+            'comissao_monitoramento_avaliacao',
+        ],
     ];
 
     /**
@@ -361,7 +380,24 @@ class User extends Authenticatable
                 $exigido = self::PERFIS_EXCLUSIVOS[$slug] ?? null;
                 return $exigido !== null && $exigido !== $meuSetor;
             })
+            // Encargo por designação: quem concede é quem publica a portaria.
+            ->reject(function ($rotulo, $slug) use ($meuSetor) {
+                $designa = self::setorQueDesigna($slug);
+                return $designa !== null && $designa !== $meuSetor;
+            })
             ->all();
+    }
+
+    /** Setor que designa este encargo, ou null se o perfil não for encargo. */
+    public static function setorQueDesigna(string $perfil): ?string
+    {
+        foreach (self::PERFIS_DE_DESIGNACAO as $setor => $perfis) {
+            if (in_array($perfil, $perfis, true)) {
+                return $setor;
+            }
+        }
+
+        return null;
     }
 
     public function temAcessoInterno(): bool
