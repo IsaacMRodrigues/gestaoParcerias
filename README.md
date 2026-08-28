@@ -256,6 +256,26 @@ OSC é organização, e organização tem equipe. O vínculo mora em **`users.os
 
 ## O que foi feito
 
+- [2026-08-26] **Entrada por nome de usuário, ao lado do e-mail** (`users.login`, `LoginRequest`)
+  - A conta principal de administração precisava de um identificador curto (`admin_parcerias`), que
+    não é endereço de ninguém. Gravar isso na coluna `email` quebraria o que depende dela ser um
+    e-mail de verdade: recuperação de senha, notificações e a própria validação do cadastro
+  - Coluna `users.login` nova, **nula para todo mundo**: quem tem e-mail continua entrando por ele e
+    nada muda para as contas existentes. Formato restrito (minúsculas, números, ponto, hífen,
+    sublinhado) para não haver duas grafias do mesmo acesso, e única no sistema
+  - Um campo só na tela de entrada, agora "E-mail ou usuário": quem digita um endereço é procurado
+    por `email`, o resto por `login`. O `type` do campo virou `text` — com `type="email"` o navegador
+    barrava o nome antes de o formulário sequer ser enviado
+  - **Fusão das duas contas de administrador em `admin_parcerias`.** O script mantém a conta que TEM
+    histórico e apaga a que não tem — `processos.created_by` e as demais colunas de autoria apontam
+    para um id, e trocar de conta apagaria o registro de quem fez o quê. Se as duas tivessem
+    histórico ele pararia, em vez de escolher por conta própria
+  - Conferido: entra por `admin_parcerias` e pelo e-mail antigo, recusa senha errada, recusa a conta
+    apagada; o formato rejeita maiúscula, espaço e acento; e o login duplicado é barrado
+  - **Ressalva registrada**: a senha definida (`123456`) é fraca para uma conta de acesso total num
+    sistema com documentos de OSC, CPFs e dados bancários. Foi pedido assim; vale trocar no primeiro
+    acesso
+
 - [2026-08-26] **Etapa 2 do ciclo virou recolhível na barra lateral** (`layouts/sidebar`)
   - Seleção é a única etapa com três subitens (Chamamentos, Manifestações, Propostas). Para quem
     trabalha em outra fase do ciclo, eram três linhas fixas empurrando o resto do menu para baixo
@@ -1657,6 +1677,8 @@ Frentes desta rodada, detalhadas nas primeiras entradas de `## O que foi feito`:
 5. **Acabamento**: assinar não joga mais a tela para o topo, atalhos de rolagem na Celebração e nas
    telas da OSC, e o selo de situação parou de se partir ao meio.
 
+20. **Login por nome de usuário** (26/08): as duas contas de administrador viraram uma só,
+   `admin_parcerias`, e a tela de entrada passa a aceitar e-mail ou nome de usuário.
 19. **Etapa 2 recolhível** (26/08): a Seleção, única com três subitens, pode ser recolhida na barra
    lateral; a escolha fica no navegador de cada um.
 18. **Proposta é ato da OSC** (26/08): a UG deixou de criar, editar, remover e submeter proposta —

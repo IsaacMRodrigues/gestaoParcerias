@@ -20,6 +20,9 @@ class UserRequest extends FormRequest
         return [
             'name'     => ['required', 'string', 'max:255'],
             'email'    => ['required', 'email', 'max:255', Rule::unique('users', 'email')->ignore($userId)],
+            // Nome de usuário: alternativa ao e-mail na tela de entrada. Sem
+            // espaço nem acento, para não virar duas grafias do mesmo acesso.
+            'login'    => ['nullable', 'string', 'max:50', 'regex:/^[a-z0-9._-]+$/', Rule::unique('users', 'login')->ignore($userId)],
             'cpf'      => ['nullable', 'string', 'max:14', Rule::unique('users', 'cpf')->ignore($userId)],
             'matricula' => ['nullable', 'string', 'max:50', Rule::unique('users', 'matricula')->ignore($userId)],
             'phone'    => ['nullable', 'string', 'max:20'],
@@ -83,11 +86,19 @@ class UserRequest extends FormRequest
             ? 'a' : 'o';
     }
 
+    public function messages(): array
+    {
+        return [
+            'login.regex' => 'O nome de usuário aceita apenas letras minúsculas, números, ponto, hífen e sublinhado.',
+        ];
+    }
+
     public function attributes(): array
     {
         return [
             'name'     => 'nome',
             'email'    => 'e-mail',
+            'login'    => 'nome de usuário',
             'cpf'      => 'CPF',
             'matricula' => 'matrícula',
             'phone'    => 'telefone',

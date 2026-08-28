@@ -147,6 +147,7 @@ class UserController extends Controller
         $user = User::create([
             'name'      => $request->name,
             'email'     => $request->email,
+            'login'     => $request->login ?: null,
             'cpf'       => $request->cpf,
             'matricula' => $request->matricula,
             'phone'     => $request->phone,
@@ -174,6 +175,7 @@ class UserController extends Controller
         $data = [
             'name'      => $request->name,
             'email'     => $request->email,
+            'login'     => $request->login ?: null,
             'cpf'       => $request->cpf,
             'matricula' => $request->matricula,
             'phone'     => $request->phone,

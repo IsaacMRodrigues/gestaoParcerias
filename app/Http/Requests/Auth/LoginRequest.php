@@ -28,7 +28,8 @@ class LoginRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'email' => ['required', 'string', 'email'],
+            // 'string', não 'email': o campo aceita as duas formas de entrar.
+            'login'    => ['required', 'string'],
             'password' => ['required', 'string'],
         ];
     }
@@ -42,11 +43,19 @@ class LoginRequest extends FormRequest
     {
         $this->ensureIsNotRateLimited();
 
-        if (! Auth::attempt($this->only('email', 'password'), $this->boolean('remember'))) {
+        // Um campo só, duas formas de entrar: quem digita um endereço é
+        // procurado por `email`; o resto, pelo nome de usuário. Sem isto, a
+        // conta de administração — que não tem e-mail próprio — não entraria.
+        $credenciais = [
+            $this->colunaDeAcesso() => $this->input('login'),
+            'password'              => $this->input('password'),
+        ];
+
+        if (! Auth::attempt($credenciais, $this->boolean('remember'))) {
             RateLimiter::hit($this->throttleKey());
 
             throw ValidationException::withMessages([
-                'email' => trans('auth.failed'),
+                'login' => trans('auth.failed'),
             ]);
         }
 
@@ -58,7 +67,7 @@ class LoginRequest extends FormRequest
             RateLimiter::hit($this->throttleKey());
 
             throw ValidationException::withMessages([
-                'email' => $mensagem,
+                'login' => $mensagem,
             ]);
         }
 
@@ -81,7 +90,7 @@ class LoginRequest extends FormRequest
         $seconds = RateLimiter::availableIn($this->throttleKey());
 
         throw ValidationException::withMessages([
-            'email' => trans('auth.throttle', [
+            'login' => trans('auth.throttle', [
                 'seconds' => $seconds,
                 'minutes' => ceil($seconds / 60),
             ]),
@@ -93,6 +102,12 @@ class LoginRequest extends FormRequest
      */
     public function throttleKey(): string
     {
-        return Str::transliterate(Str::lower($this->string('email')).'|'.$this->ip());
+        return Str::transliterate(Str::lower($this->string('login')).'|'.$this->ip());
+    }
+
+    /** Por qual coluna procurar quem está tentando entrar. */
+    private function colunaDeAcesso(): string
+    {
+        return filter_var($this->input('login'), FILTER_VALIDATE_EMAIL) ? 'email' : 'login';
     }
 }

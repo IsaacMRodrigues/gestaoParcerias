@@ -9,12 +9,25 @@
     <x-input-error :messages="$errors->get('name')" class="mt-2" />
 </div>
 
-{{-- E-mail --}}
-<div>
-    <x-input-label for="email" value="E-mail *" />
-    <x-text-input id="email" name="email" type="email" class="mt-1 block w-full"
-                  value="{{ old('email', $user?->email) }}" required />
-    <x-input-error :messages="$errors->get('email')" class="mt-2" />
+{{-- E-mail e nome de usuário --}}
+<div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+    <div>
+        <x-input-label for="email" value="E-mail *" />
+        <x-text-input id="email" name="email" type="email" class="mt-1 block w-full"
+                      value="{{ old('email', $user?->email) }}" required />
+        <x-input-error :messages="$errors->get('email')" class="mt-2" />
+    </div>
+    <div>
+        <x-input-label for="login" value="Nome de usuário (opcional)" />
+        <x-text-input id="login" name="login" type="text" class="mt-1 block w-full"
+                      value="{{ old('login', $user?->login) }}" maxlength="50"
+                      placeholder="ex.: admin_parcerias" />
+        <p class="text-xs text-gray-400 mt-1">
+            Segunda forma de entrar, para contas sem endereço próprio. Minúsculas, números, ponto,
+            hífen e sublinhado. Em branco, entra-se só pelo e-mail.
+        </p>
+        <x-input-error :messages="$errors->get('login')" class="mt-2" />
+    </div>
 </div>
 
 {{-- CPF, Matrícula e Telefone --}}

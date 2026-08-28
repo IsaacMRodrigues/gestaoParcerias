@@ -5,13 +5,16 @@
     <form method="POST" action="{{ route('login') }}" class="space-y-5">
         @csrf
 
-        <!-- Email Address -->
+        {{-- Um campo para as duas formas de entrar: o e-mail, como sempre, ou
+             o nome de usuário das contas que não têm endereço próprio. Daí o
+             type="text" — com type="email" o navegador barrava o nome antes de
+             o formulário sequer ser enviado. --}}
         <div>
-            <x-input-label for="email" :value="__('Email')" />
-            <x-text-input id="email" class="block mt-1.5 w-full py-2.5" type="email" name="email"
-                          :value="old('email')" required autofocus autocomplete="username"
+            <x-input-label for="login" value="E-mail ou usuário" />
+            <x-text-input id="login" class="block mt-1.5 w-full py-2.5" type="text" name="login"
+                          :value="old('login')" required autofocus autocomplete="username"
                           placeholder="nome@prefeitura.mg.gov.br" />
-            <x-input-error :messages="$errors->get('email')" class="mt-2" />
+            <x-input-error :messages="$errors->get('login')" class="mt-2" />
         </div>
 
         <!-- Password -->
