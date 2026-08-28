@@ -256,6 +256,16 @@ OSC é organização, e organização tem equipe. O vínculo mora em **`users.os
 
 ## O que foi feito
 
+- [2026-08-28] **A busca do login deixou de adivinhar pelo formato** (`LoginRequest::colunaDeAcesso`)
+  - A escolha entre procurar por e-mail ou por nome de usuário vinha de `FILTER_VALIDATE_EMAIL`, o
+    formato do que foi digitado. `admin@parcerias` — o login da conta de administração — só não caía
+    na coluna errada porque o filtro do PHP recusa domínio sem ponto. Bastaria alguém cadastrar
+    `admin@parcerias.net` para a conta sumir do login, sem explicação
+  - Agora a pergunta é direta: existe usuário com esse `login`? Então é por `login`; senão, por
+    e-mail. Uma consulta a mais por tentativa, e não se erra
+  - A arroba entrou no formato aceito do nome de usuário — `admin@parcerias` não é endereço, é nome
+    de conta
+
 - [2026-08-26] **Entrada por nome de usuário, ao lado do e-mail** (`users.login`, `LoginRequest`)
   - A conta principal de administração precisava de um identificador curto (`admin_parcerias`), que
     não é endereço de ninguém. Gravar isso na coluna `email` quebraria o que depende dela ser um
