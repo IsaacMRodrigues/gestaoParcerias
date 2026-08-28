@@ -256,6 +256,25 @@ OSC é organização, e organização tem equipe. O vínculo mora em **`users.os
 
 ## O que foi feito
 
+- [2026-08-26] **Proposta voltou a ser ato da OSC** (`PropostaController`)
+  - A Unidade Gestora tinha CRUD completo de propostas: criava escolhendo a OSC num dropdown,
+    editava, removia e **submetia no lugar dela**. Na prática, o município podia redigir uma proposta
+    em nome de terceiro, apresentá-la por ele e depois aprová-la — sem que nada registrasse quem de
+    fato propôs
+  - Criar, editar, remover e submeter saíram do módulo interno, **rotas inclusive** (`->only(['index',
+    'show'])`), não só os botões: esconder o botão deixaria a URL funcionando. `create`, `edit`,
+    `_form` e o `PropostaRequest` foram removidos por terem virado código morto
+  - A listagem passa a se apresentar pelo que é — "apresentadas pelas OSCs no portal, aqui elas são
+    analisadas" — e a ação da linha virou **Analisar**. No detalhe, rascunho da OSC agora se explica
+    em vez de oferecer um botão de submeter que não cabe ao município
+  - Fica o que é do município: ler, analisar (parecer, diligência, decisão) e editar o plano de
+    trabalho. **Pendência conhecida**: metas e etapas ainda são montadas pelo município, não pela OSC
+    — na manifestação de interesse é o contrário. Vale unificar
+
+- [2026-08-26] **"Programas e Chamamentos" virou "Chamamentos"** (sidebar, painel, busca)
+  - Um nome mais curto para o que a tela é. Na busca global, "programas" continua valendo como
+    palavra-chave, para quem procurar pelo nome antigo ainda encontrar
+
 - [2026-08-26] **Gestor e Comissões voltaram a ser designáveis pela Unidade Gestora** (`User::PERFIS_DE_DESIGNACAO`)
   - Gestor da Parceria e as duas Comissões (Lei nº 13.019/2014, art. 2º, VI, X e XI) estavam
     modelados como perfis exclusivos de três "setores" — Gestoria de Parcerias, Comissão de Seleção,
@@ -1625,6 +1644,8 @@ Frentes desta rodada, detalhadas nas primeiras entradas de `## O que foi feito`:
 5. **Acabamento**: assinar não joga mais a tela para o topo, atalhos de rolagem na Celebração e nas
    telas da OSC, e o selo de situação parou de se partir ao meio.
 
+18. **Proposta é ato da OSC** (26/08): a UG deixou de criar, editar, remover e submeter proposta —
+   rotas inclusive. A tela interna virou análise.
 17. **Gestor e Comissões designáveis pela UG** (26/08): os três perfis estavam presos a setores
    que ninguém ocupa; viraram encargo por portaria, concedido por quem publica o ato.
 16. **Manifestações no painel** (26/08): card com a fila de manifestações a decidir e atalho, para

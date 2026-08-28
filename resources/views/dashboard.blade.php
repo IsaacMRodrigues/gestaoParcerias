@@ -162,7 +162,7 @@
                         <x-quick-link :href="route('processos.create')" label="Novo Processo" color="accent" />
                     @endcan
                     @can('chamamentos')
-                        <x-quick-link :href="route('programas.index')" label="Programas & Chamamentos" />
+                        <x-quick-link :href="route('programas.index')" label="Chamamentos" />
                         <x-quick-link :href="route('manifestacoes.index')" label="Manifestações de Interesse" />
                     @endcan
                     @can('propostas')

@@ -118,7 +118,7 @@
             @can('chamamentos')
                 <a href="{{ route('programas.index') }}"
                    class="{{ $link }} pl-10 {{ request()->routeIs('programas.*') || request()->routeIs('chamamentos.*') ? $on : '' }}">
-                    Programas e Chamamentos
+                    Chamamentos
                 </a>
             @endcan
             @can('chamamentos')

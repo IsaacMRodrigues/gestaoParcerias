@@ -8,16 +8,11 @@
                 <h2 class="text-2xl font-bold text-gray-900 mt-0.5">{{ $proposta->titulo }}</h2>
             </div>
             <div class="flex items-center gap-3">
+                {{-- Submeter é ato da OSC, no portal, e só do responsável legal:
+                     é o que vincula a entidade ao que foi proposto. Rascunho
+                     aqui significa que ela ainda não apresentou. --}}
                 @if($proposta->status === 'rascunho')
-                    <form action="{{ route('propostas.submeter', $proposta) }}" method="POST"
-                          data-confirm="Confirma a submissão desta proposta?">
-                        @csrf
-                        @method('PATCH')
-                        <button type="submit"
-                                class="btn btn-primary">
-                            Submeter Proposta
-                        </button>
-                    </form>
+                    <span class="text-sm text-gray-500">Rascunho da OSC — ainda não apresentada</span>
                 @endif
                 @if($proposta->temTramiteCelebracao())
                     <a href="{{ route('celebracao.show', $proposta) }}"
@@ -37,10 +32,6 @@
                         Ver Instrumento
                     </a>
                 @endif
-                <a href="{{ route('propostas.edit', $proposta) }}"
-                   class="btn btn-secondary">
-                    Editar
-                </a>
             </div>
         </div>
     </x-slot>

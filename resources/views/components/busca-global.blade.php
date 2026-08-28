@@ -18,7 +18,7 @@
         ['Caixa de Entrada', route('processos.caixa'), 'recebidos pendentes meu setor tramitacao', $u->can('planejamento') && $u->setor],
         ['Novo Processo', route('processos.create'), 'abrir criar cadastrar processo', $u->can('planejamento')],
 
-        ['Programas e Chamamentos', route('programas.index'), 'edital selecao etapa 2', $u->can('chamamentos')],
+        ['Chamamentos', route('programas.index'), 'programas edital selecao etapa 2', $u->can('chamamentos')],
         ['Novo Programa', route('programas.create'), 'criar cadastrar programa', $u->can('chamamentos')],
         ['Propostas', route('propostas.index'), 'planos de trabalho osc etapa 2', $u->can('propostas')],
 

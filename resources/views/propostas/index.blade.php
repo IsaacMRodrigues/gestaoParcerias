@@ -1,11 +1,11 @@
 <x-app-layout>
     <x-slot name="header">
-        <div class="flex items-center justify-between">
+        {{-- Sem botão de criar: a proposta nasce no portal, pela OSC. --}}
+        <div>
             <h2 class="text-2xl font-bold text-gray-900">Propostas</h2>
-            <a href="{{ route('propostas.create') }}"
-               class="btn btn-primary">
-                + Nova Proposta
-            </a>
+            <p class="text-sm text-gray-500 mt-0.5">
+                Apresentadas pelas OSCs no portal. Aqui elas são analisadas.
+            </p>
         </div>
     </x-slot>
 
@@ -52,20 +52,13 @@
                                     </span>
                                 </td>
                                 <td class="px-6 py-4 text-right text-sm font-medium space-x-3 whitespace-nowrap">
-                                    <a href="{{ route('propostas.show', $proposta) }}" class="text-gray-500 hover:text-gray-800">Ver</a>
-                                    <a href="{{ route('propostas.edit', $proposta) }}" class="font-semibold text-brand-700 hover:text-brand-800 transition">Editar</a>
-                                    <form action="{{ route('propostas.destroy', $proposta) }}" method="POST" class="inline"
-                                          data-confirm="Deseja remover esta proposta?">
-                                        @csrf
-                                        @method('DELETE')
-                                        <button type="submit" class="font-medium text-gray-500 hover:text-red-700 transition">Remover</button>
-                                    </form>
+                                    <a href="{{ route('propostas.show', $proposta) }}" class="font-semibold text-brand-700 hover:text-brand-800 transition">Analisar</a>
                                 </td>
                             </tr>
                         @empty
                             <tr>
                                 <td colspan="6" class="px-6 py-12">
-                                    <x-empty-state icone="pasta">Nenhuma proposta cadastrada.</x-empty-state>
+                                    <x-empty-state icone="pasta">Nenhuma proposta apresentada até agora.</x-empty-state>
                                 </td>
                             </tr>
                         @endforelse

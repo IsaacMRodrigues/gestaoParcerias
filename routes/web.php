@@ -228,8 +228,12 @@ Route::middleware(['auth', 'staff', 'readonly'])->group(function () {
 
     // Propostas + Plano de Trabalho
     Route::middleware('permission:propostas')->group(function () {
-        Route::resource('propostas', PropostaController::class);
-        Route::patch('propostas/{proposta}/submeter', [PropostaController::class, 'submeter'])->name('propostas.submeter');
+        // Proposta é ato da OSC: ela cria, edita e submete no portal
+        // (PortalController). Ao município cabe ler, analisar e decidir — daí
+        // aqui só index e show. Antes havia CRUD completo, com a OSC escolhida
+        // num dropdown: dava para o município redigir e submeter uma proposta
+        // em nome de terceiro e depois aprová-la, sem rastro de quem propôs.
+        Route::resource('propostas', PropostaController::class)->only(['index', 'show']);
         Route::resource('propostas.metas', MetaController::class)->except(['show', 'index']);
         Route::resource('propostas.metas.etapas', EtapaController::class)->except(['show', 'index']);
     });
