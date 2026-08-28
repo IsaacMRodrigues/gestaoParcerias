@@ -108,34 +108,67 @@
                     ? route('programas.index')
                     : route('propostas.index');
             @endphp
-            {{-- Seleção nunca é "a página aberta": ela só encaminha ao primeiro
-                 subitem, que é quem recebe o verde sólido. --}}
-            <a href="{{ $urlSelecao }}" class="{{ $link }} {{ $emSelecao ? $naSecao : '' }}">
-                <span class="{{ $etapa }} {{ $emSelecao ? $etapaOn : $etapaOff }}">2</span>
-                Seleção
-                @if($navPropostasNovas > 0)<span class="{{ $badge }}">{{ $navPropostasNovas }}</span>@endif
-            </a>
-            @can('chamamentos')
-                <a href="{{ route('programas.index') }}"
-                   class="{{ $link }} pl-10 {{ request()->routeIs('programas.*') || request()->routeIs('chamamentos.*') ? $on : '' }}">
-                    Chamamentos
-                </a>
-            @endcan
-            @can('chamamentos')
-                {{-- Antessala da Seleção: proposta de OSC sem chamamento aberto --}}
-                <a href="{{ route('manifestacoes.index') }}"
-                   class="{{ $link }} pl-10 {{ request()->routeIs('manifestacoes.*') ? $on : '' }}">
-                    Manifestações de Interesse
-                    @if($navManifestacoes > 0)<span class="{{ $badge }}">{{ $navManifestacoes }}</span>@endif
-                </a>
-            @endcan
-            @can('propostas')
-                <a href="{{ route('propostas.index') }}"
-                   class="{{ $link }} pl-10 {{ request()->routeIs('propostas.*') ? $on : '' }}">
-                    Propostas
+            {{-- Seleção é a única etapa com três subitens: recolhida, encurta a
+                 barra para quem trabalha em outra fase do ciclo.
+
+                 A escolha fica no navegador de cada um (localStorage), mas
+                 estar dentro da seção manda: esconder o item aberto agora seria
+                 tirar da vista onde a pessoa está. Sem localStorage — janela
+                 anônima, site bloqueado — abre, que é o estado de sempre. --}}
+            <div x-data="{
+                    aberto: @js($emSelecao) || (() => {
+                        try { return localStorage.getItem('nav.selecao') !== 'fechado' } catch (e) { return true }
+                    })(),
+                    alternar() {
+                        this.aberto = !this.aberto;
+                        try { localStorage.setItem('nav.selecao', this.aberto ? 'aberto' : 'fechado') } catch (e) {}
+                    }
+                 }" class="relative">
+                {{-- Seleção nunca é "a página aberta": ela só encaminha ao primeiro
+                     subitem, que é quem recebe o verde sólido. O pr-9 reserva o
+                     lugar da seta, que fica por cima (botão dentro de link não
+                     existe em HTML). --}}
+                <a href="{{ $urlSelecao }}" class="{{ $link }} pr-9 {{ $emSelecao ? $naSecao : '' }}">
+                    <span class="{{ $etapa }} {{ $emSelecao ? $etapaOn : $etapaOff }}">2</span>
+                    Seleção
                     @if($navPropostasNovas > 0)<span class="{{ $badge }}">{{ $navPropostasNovas }}</span>@endif
                 </a>
-            @endcan
+                <button type="button" @click="alternar()"
+                        :aria-expanded="aberto ? 'true' : 'false'"
+                        :aria-label="aberto ? 'Recolher a etapa Seleção' : 'Expandir a etapa Seleção'"
+                        class="absolute top-1/2 right-1 -translate-y-1/2 p-1.5 rounded-md text-slate-400
+                               hover:text-white hover:bg-white/10 transition
+                               focus:outline-none focus-visible:ring-2 focus-visible:ring-white/60">
+                    <svg class="w-3.5 h-3.5 transition-transform" :class="aberto ? 'rotate-90' : ''"
+                         fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.6">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/>
+                    </svg>
+                </button>
+
+                <div x-show="aberto" x-cloak>
+                    @can('chamamentos')
+                        <a href="{{ route('programas.index') }}"
+                           class="{{ $link }} pl-10 {{ request()->routeIs('programas.*') || request()->routeIs('chamamentos.*') ? $on : '' }}">
+                            Chamamentos
+                        </a>
+                    @endcan
+                    @can('chamamentos')
+                        {{-- Antessala da Seleção: proposta de OSC sem chamamento aberto --}}
+                        <a href="{{ route('manifestacoes.index') }}"
+                           class="{{ $link }} pl-10 {{ request()->routeIs('manifestacoes.*') ? $on : '' }}">
+                            Manifestações de Interesse
+                            @if($navManifestacoes > 0)<span class="{{ $badge }}">{{ $navManifestacoes }}</span>@endif
+                        </a>
+                    @endcan
+                    @can('propostas')
+                        <a href="{{ route('propostas.index') }}"
+                           class="{{ $link }} pl-10 {{ request()->routeIs('propostas.*') ? $on : '' }}">
+                            Propostas
+                            @if($navPropostasNovas > 0)<span class="{{ $badge }}">{{ $navPropostasNovas }}</span>@endif
+                        </a>
+                    @endcan
+                </div>
+            </div>
         @else
             <span class="{{ $soon }}" title="Seu perfil não tem acesso à Seleção."><span class="{{ $etapa }} border-slate-700 text-slate-600">2</span> Seleção<svg class="ml-auto w-3.5 h-3.5 text-slate-600 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M16.5 10.5V6.75a4.5 4.5 0 10-9 0v3.75m-.75 11.25h10.5a2.25 2.25 0 002.25-2.25v-6.75a2.25 2.25 0 00-2.25-2.25H6.75a2.25 2.25 0 00-2.25 2.25v6.75a2.25 2.25 0 002.25 2.25z"/></svg></span>
         @endcanany

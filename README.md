@@ -256,6 +256,19 @@ OSC é organização, e organização tem equipe. O vínculo mora em **`users.os
 
 ## O que foi feito
 
+- [2026-08-26] **Etapa 2 do ciclo virou recolhível na barra lateral** (`layouts/sidebar`)
+  - Seleção é a única etapa com três subitens (Chamamentos, Manifestações, Propostas). Para quem
+    trabalha em outra fase do ciclo, eram três linhas fixas empurrando o resto do menu para baixo
+  - Seta própria ao lado do rótulo: o texto continua levando ao primeiro subitem, e só a seta
+    recolhe. O botão fica por cima do link, com o `pr-9` reservando o lugar — botão dentro de link
+    não existe em HTML
+  - A escolha fica no navegador de cada um (`localStorage`), mas **estar dentro da seção manda**:
+    esconder o item aberto agora seria tirar da vista onde a pessoa está. Sem `localStorage` — janela
+    anônima, site bloqueado — abre, que é o estado de sempre
+  - Conferido: a expressão Alpine roda como JS puro (abre por padrão, alterna, persiste, e devolve
+    "aberto" quando o `localStorage` lança), e a barra rende certo para UG, SCP e PJ — que continua
+    vendo a etapa cadeada, sem seta
+
 - [2026-08-26] **Proposta voltou a ser ato da OSC** (`PropostaController`)
   - A Unidade Gestora tinha CRUD completo de propostas: criava escolhendo a OSC num dropdown,
     editava, removia e **submetia no lugar dela**. Na prática, o município podia redigir uma proposta
@@ -1644,6 +1657,8 @@ Frentes desta rodada, detalhadas nas primeiras entradas de `## O que foi feito`:
 5. **Acabamento**: assinar não joga mais a tela para o topo, atalhos de rolagem na Celebração e nas
    telas da OSC, e o selo de situação parou de se partir ao meio.
 
+19. **Etapa 2 recolhível** (26/08): a Seleção, única com três subitens, pode ser recolhida na barra
+   lateral; a escolha fica no navegador de cada um.
 18. **Proposta é ato da OSC** (26/08): a UG deixou de criar, editar, remover e submeter proposta —
    rotas inclusive. A tela interna virou análise.
 17. **Gestor e Comissões designáveis pela UG** (26/08): os três perfis estavam presos a setores
