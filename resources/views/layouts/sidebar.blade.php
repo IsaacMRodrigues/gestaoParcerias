@@ -222,12 +222,11 @@
         {{-- Cadastros --}}
         @can('cadastros')
             <p class="{{ $sec }}">Cadastros</p>
-            <a href="{{ route('usuarios.index') }}"
-               class="{{ $link }} {{ request()->routeIs('usuarios.index') || request()->routeIs('usuarios.create') || request()->routeIs('usuarios.edit') ? $on : '' }}">
-                Usuários
-            </a>
-            <a href="{{ route('orgaos.index') }}" class="{{ $link }} {{ request()->routeIs('orgaos.*') ? $on : '' }}">
-                Órgãos / Secretarias
+            {{-- Uma entrada só: a Secretaria e a sua gente moram na mesma tela.
+                 As rotas de usuário acendem aqui porque é de onde se chega a elas. --}}
+            <a href="{{ route('orgaos.index') }}"
+               class="{{ $link }} {{ request()->routeIs('orgaos.*') || request()->routeIs('usuarios.create') || request()->routeIs('usuarios.edit') ? $on : '' }}">
+                Órgãos e usuários
             </a>
             <a href="{{ route('oscs.index') }}" class="{{ $link }} {{ request()->routeIs('oscs.*') ? $on : '' }}">
                 OSCs

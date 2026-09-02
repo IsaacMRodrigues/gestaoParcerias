@@ -23,6 +23,12 @@ class Orgao extends Model
         return ['status' => 'boolean'];
     }
 
+    /** Servidores lotados nesta Secretaria (a equipe da Unidade Gestora). */
+    public function usuarios(): HasMany
+    {
+        return $this->hasMany(User::class)->orderBy('name');
+    }
+
     public function processos(): HasMany
     {
         return $this->hasMany(Processo::class);

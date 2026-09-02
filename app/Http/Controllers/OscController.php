@@ -13,7 +13,12 @@ class OscController extends Controller
 {
     public function index(): View
     {
-        $oscs = Osc::withCount('membros')->orderBy('name')->paginate(15);
+        // As contas da OSC saem da listagem geral de usuários e vêm para cá:
+        // é aqui que se olha a organização, e o acesso dela é parte disso.
+        $oscs = Osc::withCount('membros')
+            ->with(['usuarios.roles'])
+            ->orderBy('name')
+            ->paginate(15);
 
         return view('oscs.index', compact('oscs'));
     }

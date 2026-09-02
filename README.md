@@ -256,6 +256,23 @@ OSC é organização, e organização tem equipe. O vínculo mora em **`users.os
 
 ## O que foi feito
 
+- [2026-08-28] **Cadastros: a Secretaria e a sua gente na mesma tela** (`orgaos.index`, `oscs.index`)
+  - Eram três listagens que ninguém consultava separadas — Usuários, Órgãos/Secretarias e OSCs. Para
+    saber quem responde por uma Secretaria, abria-se Usuários e procurava-se pela coluna de órgão;
+    para saber quem entra em nome de uma OSC, a mesma caça na lista geral
+  - **Órgãos e usuários** virou uma tela só: cada Secretaria traz as contas dela logo abaixo,
+    recuadas. As contas da OSC foram para a tela de **OSCs**, ao lado da organização a que pertencem
+  - Quem atende o Município inteiro não é de Secretaria nenhuma, e sem cuidado a fusão faria a SCP, a
+    Procuradoria e o próprio administrador **desaparecerem da tela** — daí o bloco "Sem Secretaria",
+    no fim, com os setores transversais
+  - Conta ativa **sem perfil** passa a aparecer em laranja: não vê módulo nenhum, é defeito de
+    cadastro e não estado normal. O aviso de "setores sem chefia" veio junto para cá
+  - `usuarios.index` virou redirecionamento (link salvo continua funcionando) e a view saiu; na busca
+    global as duas entradas viraram uma, com as palavras das duas — quem procura "usuários" e quem
+    procura "secretaria" chega ao mesmo lugar
+  - Conferido: as cinco telas rendem, a Secretaria mostra a sua gente, o bloco transversal traz
+    SEPLAN/TI/Gabinete, e as duas contas da OSC aparecem na linha dela
+
 - [2026-08-28] **Setor transversal deixou de ser cegado pela própria lotação** (`User::SETORES_TRANSVERSAIS`)
   - A visibilidade de processos, propostas e manifestações era medida só por `orgao_id`: quem tem
     Secretaria vê a dela, quem não tem vê tudo. Isso funcionava por omissão — SCP, SEPLAN e

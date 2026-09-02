@@ -169,7 +169,7 @@
                         <x-quick-link :href="route('propostas.index')" label="Propostas" />
                     @endcan
                     @can('cadastros')
-                        <x-quick-link :href="route('usuarios.index')" label="Usuários" />
+                        <x-quick-link :href="route('orgaos.index')" label="Órgãos e usuários" />
                     @endcan
                     <x-quick-link :href="route('portal.index')" label="Portal Público" />
                 </div>

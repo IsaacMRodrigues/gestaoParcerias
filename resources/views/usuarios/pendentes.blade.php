@@ -3,7 +3,7 @@
         <div class="flex items-center justify-between">
             <div>
                 <p class="text-sm text-gray-500">
-                    <a href="{{ route('usuarios.index') }}" class="hover:underline">Usuários</a>
+                    <a href="{{ route('orgaos.index') }}" class="hover:underline">Órgãos e usuários</a>
                 </p>
                 <h2 class="text-2xl font-bold text-gray-900 mt-0.5">Cadastros pendentes de aprovação</h2>
             </div>

@@ -28,20 +28,35 @@
                     <tbody class="bg-white divide-y divide-gray-100">
                         @forelse($oscs as $osc)
                             <tr>
-                                <td class="px-6 py-4 text-sm font-medium text-gray-900">{{ $osc->name }}</td>
-                                <td class="px-6 py-4 text-sm text-gray-600">{{ $osc->cnpj }}</td>
-                                <td class="px-6 py-4 text-sm text-gray-600">
+                                <td class="px-6 py-4 text-sm font-medium text-gray-900 align-top">{{ $osc->name }}</td>
+                                <td class="px-6 py-4 text-sm text-gray-600 align-top">{{ $osc->cnpj }}</td>
+                                <td class="px-6 py-4 text-sm text-gray-600 align-top">
                                     {{ \App\Models\Osc::TIPOS[$osc->tipo] ?? '—' }}
                                 </td>
-                                <td class="px-6 py-4 text-sm text-gray-600">{{ $osc->resp_nome ?? '—' }}</td>
-                                <td class="px-6 py-4 text-sm">
+                                {{-- As contas de acesso da OSC ficavam na listagem geral de
+                                     usuários, longe da organização a que pertencem. Quem abre
+                                     esta tela quer saber quem entra em nome de quem. --}}
+                                <td class="px-6 py-4 text-sm text-gray-600 align-top">
+                                    <span class="block">{{ $osc->resp_nome ?? '—' }}</span>
+                                    @forelse($osc->usuarios as $u)
+                                        <span class="block mt-1 text-xs">
+                                            <a href="{{ route('usuarios.edit', $u) }}" class="text-brand-700 hover:underline">{{ $u->email }}</a>
+                                            <span class="text-gray-400">
+                                                — {{ $u->roles->first()?->name === 'responsavel_legal' ? 'responsável legal' : 'membro' }}{{ $u->status ? '' : ', acesso suspenso' }}
+                                            </span>
+                                        </span>
+                                    @empty
+                                        <span class="block mt-1 text-xs text-accent-700">Sem conta de acesso — não entra no portal</span>
+                                    @endforelse
+                                </td>
+                                <td class="px-6 py-4 text-sm align-top">
                                     @if($osc->status)
                                         <span class="px-2.5 py-1 text-xs font-semibold bg-brand-50 text-brand-800 border border-brand-200 rounded-md">Ativa</span>
                                     @else
                                         <span class="px-2.5 py-1 text-xs font-semibold bg-red-50 text-red-800 border border-red-200 rounded-md">Inativa</span>
                                     @endif
                                 </td>
-                                <td class="px-6 py-4 text-right text-sm font-medium space-x-3">
+                                <td class="px-6 py-4 text-right text-sm font-medium space-x-3 align-top">
                                     <a href="{{ route('oscs.edit', $osc) }}" class="font-semibold text-brand-700 hover:text-brand-800 transition">Editar</a>
                                     <form action="{{ route('oscs.destroy', $osc) }}" method="POST" class="inline"
                                           data-confirm="Deseja remover esta OSC?">

@@ -14,7 +14,7 @@
                     @include('usuarios._form', ['user' => $usuario])
 
                     <div class="flex items-center justify-end gap-4 pt-2">
-                        <a href="{{ route('usuarios.index') }}" class="text-sm text-gray-600 hover:text-gray-900">
+                        <a href="{{ route('orgaos.index') }}" class="text-sm text-gray-600 hover:text-gray-900">
                             Cancelar
                         </a>
                         <button type="submit"

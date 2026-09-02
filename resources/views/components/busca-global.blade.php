@@ -25,10 +25,11 @@
         ['Celebração — Instrumentos', route('instrumentos.index'), 'termo fomento colaboracao acordo convenio etapa 3', $u->can('formalizacao')],
         ['Execução', route('execucao.index'), 'repasses despesas prestacao saldo etapa 4', $u->can('execucao')],
 
-        ['Usuários', route('usuarios.index'), 'servidores contas acesso', $u->can('cadastros')],
+        // Uma entrada só, com as palavras das duas telas que se juntaram: quem
+        // procura "usuários" e quem procura "secretaria" chega ao mesmo lugar.
+        ['Órgãos e usuários', route('orgaos.index'), 'usuarios servidores contas acesso secretaria orgao unidade gestora', $u->can('cadastros')],
         ['Novo Usuário', route('usuarios.create'), 'criar cadastrar servidor', $u->can('cadastros')],
         ['Aprovações pendentes', route('usuarios.pendentes'), 'aprovar cadastros novos', $u->can('cadastros')],
-        ['Órgãos / Secretarias', route('orgaos.index'), 'unidade gestora secretaria orgao', $u->can('cadastros')],
         ['OSCs', route('oscs.index'), 'entidades organizacoes sociedade civil', $u->can('cadastros')],
         ['Nova OSC', route('oscs.create'), 'criar cadastrar entidade organizacao', $u->can('cadastros')],
 

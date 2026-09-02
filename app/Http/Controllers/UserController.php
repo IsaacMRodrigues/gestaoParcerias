@@ -11,16 +11,11 @@ use Spatie\Permission\Models\Role;
 
 class UserController extends Controller
 {
-    public function index(): View
+    public function index(): RedirectResponse
     {
-        $users = User::with('roles')->orderBy('name')->paginate(15);
-        $pendentesCount = User::pendentes()->count();
-
-        return view('usuarios.index', [
-            'users'          => $users,
-            'pendentesCount' => $pendentesCount,
-            'setoresSemChefia' => $this->setoresSemChefia(),
-        ]);
+        // A listagem de usuários virou parte de Cadastros → Órgãos: é lá que
+        // cada Secretaria mostra a sua gente. Aqui sobra o formulário.
+        return redirect()->route('orgaos.index');
     }
 
     /**
@@ -35,7 +30,7 @@ class UserController extends Controller
      * Só conta setor que já tem gente: designar chefia de setor vazio não é
      * pendência, é convite a criar conta sem necessidade.
      */
-    private function setoresSemChefia(): array
+    public static function setoresSemChefia(): array
     {
         $lotados = User::query()
             ->whereNotNull('setor')
@@ -159,7 +154,7 @@ class UserController extends Controller
 
         $user->syncRoles($request->roles);
 
-        return redirect()->route('usuarios.index')
+        return redirect()->route('orgaos.index')
             ->with('success', 'Usuário cadastrado com sucesso.');
     }
 
@@ -191,7 +186,7 @@ class UserController extends Controller
         $usuario->update($data);
         $usuario->syncRoles($request->roles);
 
-        return redirect()->route('usuarios.index')
+        return redirect()->route('orgaos.index')
             ->with('success', 'Usuário atualizado com sucesso.');
     }
 
@@ -203,7 +198,7 @@ class UserController extends Controller
 
         $usuario->delete();
 
-        return redirect()->route('usuarios.index')
+        return redirect()->route('orgaos.index')
             ->with('success', 'Usuário removido com sucesso.');
     }
 }
