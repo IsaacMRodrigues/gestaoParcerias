@@ -27,6 +27,22 @@ php artisan migrate
 php artisan db:seed
 ```
 
+O `migrate` já deixa o ambiente utilizável: cria as 26 Secretarias, os perfis de
+acesso e **as 23 contas da Prefeitura** — o administrador, o Prefeito, a SCP, a
+SEPLAN, a Procuradoria e um responsável por Unidade Gestora. Todas com a senha
+provisória `123456`.
+
+| Para entrar como | Login |
+|---|---|
+| Administrador do sistema | `admin_parcerias` |
+| Responsável de uma Secretaria | o e-mail institucional dela (`educacao@saogoncalo.mg.gov.br`, …) |
+| Saúde, Fazenda e Trabalho | `saude`, `fazenda`, `trabalho` (e-mail institucional ainda não informado) |
+| Procuradoria Jurídica | `procurador@saogoncalo.mg.gov.br` |
+| SCP / SEPLAN / Prefeito | `scp@gmail.com`, `seplan@gmail.com`, `prefeito@gmail.com` |
+
+Não há conta de OSC: a organização entra pelo auto-cadastro em `/cadastro/osc`,
+que é o único caminho de entrada dela — percorrê-lo faz parte do teste.
+
 ---
 
 ## Ordem de desenvolvimento planejada

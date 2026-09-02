@@ -4,6 +4,7 @@ use App\Models\User;
 use Database\Seeders\RolesSeeder;
 use Illuminate\Database\Migrations\Migration;
 use Spatie\Permission\Models\Permission;
+use Spatie\Permission\Models\Role;
 use Spatie\Permission\PermissionRegistrar;
 
 /**
@@ -20,6 +21,13 @@ return new class extends Migration
 {
     public function up(): void
     {
+        // Base recém-criada não tem perfil nenhum ainda (os perfis vêm do
+        // RolesSeeder, depois): não há equipe a quem conceder, e procurar por
+        // um papel inexistente derrubava a instalação do zero.
+        if (Role::where('name', 'membro_osc')->doesntExist()) {
+            return;
+        }
+
         foreach (RolesSeeder::FUNCOES_OSC as $funcao) {
             Permission::firstOrCreate(['name' => $funcao, 'guard_name' => 'web']);
         }
@@ -32,6 +40,10 @@ return new class extends Migration
 
     public function down(): void
     {
+        if (Role::where('name', 'membro_osc')->doesntExist()) {
+            return;
+        }
+
         User::role('membro_osc')->get()
             ->each(fn (User $u) => $u->revokePermissionTo(RolesSeeder::FUNCOES_OSC));
     }

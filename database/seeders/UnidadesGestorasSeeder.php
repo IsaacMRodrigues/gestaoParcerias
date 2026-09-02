@@ -31,13 +31,13 @@ class UnidadesGestorasSeeder extends Seeder
         '0217' => 'Desen. Econômico',
         '0218' => 'Controladoria',
         '0219' => 'Juventude',
-        '0220' => 'TI',
         '0221' => 'Ouvidoria',
         '0222' => 'Fundo Mun. Idoso',
         '0223' => 'Gabinete',
         '0224' => 'Gestão de Pessoa',
         '0225' => 'Transporte',
         '0226' => 'Fundo Mun. Pessoa com Def',
+        '0227' => 'Ciência e Tecnologia',
     ];
 
     public function run(): void
