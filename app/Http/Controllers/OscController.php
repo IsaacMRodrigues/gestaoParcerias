@@ -9,6 +9,16 @@ use Illuminate\Support\Facades\Storage;
 use Symfony\Component\HttpFoundation\StreamedResponse;
 use Illuminate\View\View;
 
+/**
+ * Cadastro de OSC visto pela Prefeitura: consulta e correção, não autoria.
+ *
+ * A porta de entrada de uma organização é o auto-cadastro em /cadastro/osc,
+ * onde ela declara os próprios dados e assume a responsabilidade por eles.
+ * Havia aqui um segundo caminho, pelo qual um servidor criava a OSC no lugar
+ * dela — nascia um cadastro sem dono, sem conta de acesso e sem ninguém
+ * respondendo pelo que estava escrito. Editar e remover continuam: erro de
+ * digitação e cadastro duplicado precisam de conserto.
+ */
 class OscController extends Controller
 {
     public function index(): View
@@ -21,22 +31,6 @@ class OscController extends Controller
             ->paginate(15);
 
         return view('oscs.index', compact('oscs'));
-    }
-
-    public function create(): View
-    {
-        return view('oscs.create');
-    }
-
-    public function store(OscRequest $request): RedirectResponse
-    {
-        $osc = Osc::create($request->safe()->except([...array_keys(Osc::ANEXOS), 'membros']));
-
-        $this->salvarAnexos($request, $osc);
-        $this->sincronizarMembros($request, $osc);
-
-        return redirect()->route('oscs.index')
-            ->with('success', 'OSC cadastrada com sucesso.');
     }
 
     public function edit(Osc $osc): View

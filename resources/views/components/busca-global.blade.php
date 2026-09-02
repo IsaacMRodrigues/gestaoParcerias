@@ -31,7 +31,6 @@
         ['Novo Usuário', route('usuarios.create'), 'criar cadastrar servidor', $u->can('cadastros')],
         ['Aprovações pendentes', route('usuarios.pendentes'), 'aprovar cadastros novos', $u->can('cadastros')],
         ['OSCs', route('oscs.index'), 'entidades organizacoes sociedade civil', $u->can('cadastros')],
-        ['Nova OSC', route('oscs.create'), 'criar cadastrar entidade organizacao', $u->can('cadastros')],
 
         ['Meus usuários', route('subusuarios.index'), 'equipe subusuarios da unidade', $u->hasRole('responsavel_unidade_gestora')],
         ['Modelos padrão', route('modelos.index'), 'templates documentos ti', $u->hasRole('administrador_setorial')],

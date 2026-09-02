@@ -174,7 +174,9 @@ Route::middleware(['auth', 'staff', 'readonly'])->group(function () {
 
         Route::resource('usuarios', UserController::class)->except(['show']);
         Route::resource('orgaos', OrgaoController::class)->except(['show']);
-        Route::resource('oscs', OscController::class)->except(['show']);
+        // Sem create/store: quem abre o cadastro de uma OSC é a própria OSC,
+        // em /cadastro/osc. Ver o cabeçalho do OscController.
+        Route::resource('oscs', OscController::class)->only(['index', 'edit', 'update', 'destroy']);
         Route::get('oscs/{osc}/anexo/{campo}', [OscController::class, 'baixarAnexo'])->name('oscs.anexo');
     });
 

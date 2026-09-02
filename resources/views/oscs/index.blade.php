@@ -1,11 +1,10 @@
 <x-app-layout>
     <x-slot name="header">
-        <div class="flex items-center justify-between">
+        <div>
             <h2 class="text-2xl font-bold text-gray-900">OSCs</h2>
-            <a href="{{ route('oscs.create') }}"
-               class="btn btn-primary">
-                + Nova OSC
-            </a>
+            <p class="text-sm text-gray-500 mt-0.5">
+                Organizações que se cadastraram no portal. A Prefeitura consulta e corrige; quem abre o cadastro é a própria OSC.
+            </p>
         </div>
     </x-slot>
 
@@ -69,7 +68,7 @@
                         @empty
                             <tr>
                                 <td colspan="6" class="px-6 py-12">
-                                    <x-empty-state icone="pessoas">Nenhuma OSC cadastrada.</x-empty-state>
+                                    <x-empty-state icone="pessoas">Nenhuma OSC cadastrada ainda — elas aparecem aqui ao se cadastrarem pelo portal.</x-empty-state>
                                 </td>
                             </tr>
                         @endforelse
