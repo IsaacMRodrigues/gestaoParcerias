@@ -274,6 +274,9 @@ OSC é organização, e organização tem equipe. O vínculo mora em **`users.os
     virava rolagem longa para achar uma. O contador na linha ("1 usuário") diz quanto há sem abrir, e
     o cabeçalho tem um "Recolher todos" que abre e fecha tudo de uma vez — cada uma segue podendo ser
     aberta sozinha depois. Secretaria com **zero contas** aparece em laranja
+  - Selos de perfil e rótulos de setor não quebram mais em duas linhas: a pílula partida ao meio
+    deixava de parecer selo. A coluna é que cede (`whitespace-nowrap`), como já se fez na tela das
+    OSCs — "Responsável da Unidade Gestora" não cabia na largura que a tabela dava
   - Conferido: as cinco telas rendem, a Secretaria mostra a sua gente, o bloco transversal traz
     SEPLAN/TI/Gabinete, e as duas contas da OSC aparecem na linha dela
 

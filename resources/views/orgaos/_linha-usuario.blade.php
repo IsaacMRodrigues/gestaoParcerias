@@ -11,14 +11,14 @@
             <span class="ml-1.5 px-1.5 py-0.5 text-[11px] font-mono text-slate-600 bg-slate-100 ring-1 ring-slate-200 rounded">{{ $usuario->login }}</span>
         @endif
         @if($usuario->setor)
-            <span class="ml-1.5 text-[11px] text-gray-400">{{ $usuario->setorLabel() }}</span>
+            <span class="ml-1.5 text-[11px] text-gray-400 whitespace-nowrap">{{ $usuario->setorLabel() }}</span>
         @endif
     </td>
-    <td class="px-6 py-2.5 text-gray-600">{{ $usuario->email }}</td>
-    <td class="px-6 py-2.5">
+    <td class="px-6 py-2.5 text-gray-600 whitespace-nowrap">{{ $usuario->email }}</td>
+    <td class="px-6 py-2.5 whitespace-nowrap">
         @php $perfil = $usuario->roles->first(); @endphp
         @if($perfil)
-            <span class="px-2 py-0.5 text-xs font-medium bg-gray-100 text-gray-700 border border-gray-200 rounded">
+            <span class="inline-block px-2 py-0.5 text-xs font-medium bg-gray-100 text-gray-700 border border-gray-200 rounded whitespace-nowrap">
                 {{ \App\Models\User::$roleLabels[$perfil->name] ?? $perfil->name }}
             </span>
             @if($usuario->roles->count() > 1)
@@ -30,7 +30,7 @@
             <span class="text-xs font-semibold text-accent-700">sem perfil</span>
         @endif
     </td>
-    <td class="px-6 py-2.5">
+    <td class="px-6 py-2.5 whitespace-nowrap">
         @if(! $usuario->isAprovado())
             <span class="px-2 py-0.5 text-xs font-semibold bg-accent-50 text-accent-800 border border-accent-200 rounded">{{ \App\Models\User::APPROVAL[$usuario->approval_status] ?? $usuario->approval_status }}</span>
         @elseif($usuario->status)
