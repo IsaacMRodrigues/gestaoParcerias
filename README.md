@@ -270,6 +270,10 @@ OSC é organização, e organização tem equipe. O vínculo mora em **`users.os
   - `usuarios.index` virou redirecionamento (link salvo continua funcionando) e a view saiu; na busca
     global as duas entradas viraram uma, com as palavras das duas — quem procura "usuários" e quem
     procura "secretaria" chega ao mesmo lugar
+  - **Recolhidas por padrão**: são 27 Secretarias, quase todas com uma conta só, e a lista aberta
+    virava rolagem longa para achar uma. O contador na linha ("1 usuário") diz quanto há sem abrir, e
+    o cabeçalho tem um "Recolher todos" que abre e fecha tudo de uma vez — cada uma segue podendo ser
+    aberta sozinha depois. Secretaria com **zero contas** aparece em laranja
   - Conferido: as cinco telas rendem, a Secretaria mostra a sua gente, o bloco transversal traz
     SEPLAN/TI/Gabinete, e as duas contas da OSC aparecem na linha dela
 

@@ -1,6 +1,10 @@
 {{-- Uma pessoa, na listagem de Cadastros. Recuada (pl-12) para se ler como
      item da Secretaria acima, e não como outra Secretaria. --}}
-<tr class="border-t border-gray-100">
+@php
+    // No bloco "Sem Secretaria" não há o que recolher: a linha é sempre visível.
+    $recolhivel = $recolhivel ?? false;
+@endphp
+<tr class="border-t border-gray-100" @if($recolhivel) x-show="aberto" x-cloak @endif>
     <td class="px-6 py-2.5 pl-12">
         <span class="text-gray-900">{{ $usuario->name }}</span>
         @if($usuario->login)

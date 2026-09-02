@@ -38,11 +38,25 @@
                 </div>
             @endif
 
-            <div class="bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden">
+            {{-- Recolhidas por padrão: são 27 Secretarias, quase todas com uma
+                 conta só, e a lista aberta virava uma rolagem longa para achar
+                 uma. O contador na linha diz quantas contas há sem abrir. --}}
+            <div x-data="{ todos: false }" class="bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden">
                 <table class="min-w-full text-sm">
                     <thead class="bg-gray-50 border-b border-gray-200">
                         <tr>
-                            <th class="px-6 py-3.5 text-left text-[12px] font-bold text-gray-500 uppercase tracking-wider">Órgão / usuário</th>
+                            <th class="px-6 py-3.5 text-left text-[12px] font-bold text-gray-500 uppercase tracking-wider">
+                                <button type="button" @click="todos = !todos"
+                                        class="inline-flex items-center gap-1.5 uppercase tracking-wider text-gray-500
+                                               hover:text-gray-800 transition focus:outline-none focus-visible:ring-2
+                                               focus-visible:ring-brand-500 rounded">
+                                    <svg class="w-3 h-3 transition-transform" :class="todos ? 'rotate-90' : ''"
+                                         fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="3">
+                                        <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/>
+                                    </svg>
+                                    <span x-text="todos ? 'Recolher todos' : 'Órgão / usuário'">Órgão / usuário</span>
+                                </button>
+                            </th>
                             <th class="px-6 py-3.5 text-left text-[12px] font-bold text-gray-500 uppercase tracking-wider">E-mail / sigla</th>
                             <th class="px-6 py-3.5 text-left text-[12px] font-bold text-gray-500 uppercase tracking-wider">Perfil</th>
                             <th class="px-6 py-3.5 text-left text-[12px] font-bold text-gray-500 uppercase tracking-wider">Status</th>
@@ -51,17 +65,31 @@
                     </thead>
 
                     @forelse($orgaos as $orgao)
-                        <tbody class="border-b border-gray-200">
+                        {{-- x-effect: o botão do cabeçalho abre e fecha todas de
+                             uma vez, e cada uma continua podendo ser aberta
+                             sozinha depois. --}}
+                        <tbody class="border-b border-gray-200"
+                               x-data="{ aberto: false }" x-effect="aberto = todos">
                             {{-- Linha do órgão: cinza, para separar as Secretarias
                                  numa lista em que quase tudo é linha de pessoa. --}}
                             <tr class="bg-gray-50/70">
                                 <td class="px-6 py-3">
-                                    <span class="font-mono text-xs text-gray-500 mr-2">{{ $orgao->codigo ?? '—' }}</span>
-                                    <span class="font-semibold text-gray-900">{{ $orgao->name }}</span>
-                                    <span class="ml-2 text-xs text-gray-500">
-                                        {{ $orgao->usuarios_count }}
-                                        {{ $orgao->usuarios_count === 1 ? 'usuário' : 'usuários' }}
-                                    </span>
+                                    <button type="button" @click="aberto = !aberto"
+                                            :aria-expanded="aberto ? 'true' : 'false'"
+                                            class="inline-flex items-center gap-2 text-left group
+                                                   focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-500 rounded">
+                                        <svg class="w-3.5 h-3.5 shrink-0 text-gray-400 transition-transform group-hover:text-gray-700"
+                                             :class="aberto ? 'rotate-90' : ''"
+                                             fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.6">
+                                            <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/>
+                                        </svg>
+                                        <span class="font-mono text-xs text-gray-500">{{ $orgao->codigo ?? '—' }}</span>
+                                        <span class="font-semibold text-gray-900 group-hover:text-brand-800 transition">{{ $orgao->name }}</span>
+                                        <span class="text-xs {{ $orgao->usuarios_count ? 'text-gray-500' : 'text-accent-700 font-semibold' }}">
+                                            {{ $orgao->usuarios_count }}
+                                            {{ $orgao->usuarios_count === 1 ? 'usuário' : 'usuários' }}
+                                        </span>
+                                    </button>
                                 </td>
                                 <td class="px-6 py-3 text-gray-600">
                                     {{ $orgao->email ?? $orgao->sigla ?? '—' }}
@@ -85,9 +113,9 @@
                             </tr>
 
                             @forelse($orgao->usuarios as $usuario)
-                                @include('orgaos._linha-usuario', ['usuario' => $usuario])
+                                @include('orgaos._linha-usuario', ['usuario' => $usuario, 'recolhivel' => true])
                             @empty
-                                <tr>
+                                <tr x-show="aberto" x-cloak>
                                     <td colspan="5" class="px-6 py-3 pl-12 text-xs text-gray-400">
                                         Nenhum usuário nesta Secretaria.
                                         <a href="{{ route('usuarios.create') }}" class="font-semibold text-brand-700 hover:underline">Cadastrar</a>
