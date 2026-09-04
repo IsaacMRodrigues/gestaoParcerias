@@ -272,6 +272,16 @@ OSC é organização, e organização tem equipe. O vínculo mora em **`users.os
 
 ## O que foi feito
 
+- [2026-09-04] **Chamamento com inscrição encerrada não dizia mais "em breve"**
+  - Relatado em teste: um chamamento com inscrições até 28/08/2026, visto em 04/09/2026 (já encerrado),
+    aparecia com o rótulo "Inscrições em breve" — como se ainda não tivesse começado
+  - Causa: `status_efetivo` só distingue "dentro do período" de "fora do período", e as três telas do
+    portal (card da listagem, cabeçalho e rodapé da página de detalhe) tratavam "fora do período" como
+    sinônimo de "ainda não abriu", sem checar se a data-fim já tinha passado
+  - Adicionado `Chamamento::inscricaoEncerrada()` (compara `data_fim_inscricao` com hoje) e as três
+    telas agora mostram "Inscrições encerradas" quando é o caso, mantendo "Inscrições em breve" só para
+    quem realmente ainda não abriu
+
 - [2026-09-04] **Confirmado: a OSC cadastra os próprios usuários** — e um redirecionamento corrigido
   - Testado ponta a ponta: responsável legal cadastra um integrante em *Usuários da OSC*, o registro
     grava papel `membro_osc` + as funções marcadas, e a conta nova entra e vê exatamente o que a

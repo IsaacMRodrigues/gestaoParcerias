@@ -127,6 +127,10 @@
                             <span class="px-4 py-2 text-sm font-medium text-brand-700 bg-brand-50 border border-brand-200 rounded-lg text-center">
                                 Publicado
                             </span>
+                        @elseif($chamamento->inscricaoEncerrada())
+                            <span class="px-4 py-2 text-sm font-medium text-slate-600 bg-slate-50 border border-slate-200 rounded-lg text-center">
+                                Inscrições encerradas
+                            </span>
                         @else
                             <span class="px-4 py-2 text-sm font-medium text-slate-600 bg-slate-50 border border-slate-200 rounded-lg text-center">
                                 Inscrições em breve

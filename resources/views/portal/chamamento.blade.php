@@ -55,6 +55,10 @@
                         <span class="inline-block px-5 py-2.5 text-sm font-semibold text-brand-700 bg-brand-50 border border-brand-200 rounded-lg">
                             Publicado
                         </span>
+                    @elseif($chamamento->status === 'publicado' && $chamamento->inscricaoEncerrada())
+                        <span class="inline-block px-5 py-2.5 text-sm font-semibold text-slate-700 bg-slate-50 border border-slate-200 rounded-lg">
+                            Inscrições encerradas
+                        </span>
                     @elseif($chamamento->status === 'publicado')
                         <span class="inline-block px-5 py-2.5 text-sm font-semibold text-slate-700 bg-slate-50 border border-slate-200 rounded-lg">
                             Inscrições em breve
@@ -253,6 +257,13 @@
                                 </a>
                             </div>
                         @endauth
+                    @elseif($chamamento->inscricaoEncerrada())
+                        <p class="text-sm text-slate-800 font-medium">
+                            O período de inscrição deste chamamento já foi encerrado
+                            @if($chamamento->data_fim_inscricao)
+                                em {{ $chamamento->data_fim_inscricao->format('d/m/Y') }}
+                            @endif.
+                        </p>
                     @else
                         <p class="text-sm text-slate-800 font-medium">
                             Este chamamento foi publicado. As inscrições abrirão em breve.

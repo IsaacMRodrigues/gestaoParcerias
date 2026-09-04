@@ -153,6 +153,15 @@ class Chamamento extends Model
         return in_array($this->tipo, ['dispensa', 'inexigibilidade'], true);
     }
 
+    /**
+     * Publicado, mas fora do período de inscrição por já ter passado do fim —
+     * distingue de "ainda não começou", que usa o mesmo status_efetivo.
+     */
+    public function inscricaoEncerrada(): bool
+    {
+        return $this->data_fim_inscricao !== null && $this->data_fim_inscricao->isPast();
+    }
+
     // ------------------------------------------------------------------
     // Trâmite da Seleção (Fluxo Seleção: UG → SCP → UG → SCP → Prefeito)
     // ------------------------------------------------------------------
