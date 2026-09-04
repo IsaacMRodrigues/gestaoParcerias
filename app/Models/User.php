@@ -385,6 +385,18 @@ class User extends Authenticatable
 
     public function perfisQuePodeConceder(): array
     {
+        // O administrador já concede qualquer perfil pela tela de Cadastros
+        // (usuarios.create, sem filtro nenhum) — restringi-lo aqui não protege
+        // nada, só o obriga a trocar de tela para o que ele já pode fazer.
+        // A régua de exclusividade/designação/vedados é para o chefe de setor
+        // comum, que não tem `cadastros` e não deveria elevar ninguém além do
+        // que a própria Secretaria justifica.
+        if ($this->can('cadastros')) {
+            return collect(self::$roleLabels)
+                ->reject(fn ($rotulo, $slug) => in_array($slug, self::PAPEIS_OSC, true))
+                ->all();
+        }
+
         $meuSetor = $this->setor;
 
         return collect(self::$roleLabels)

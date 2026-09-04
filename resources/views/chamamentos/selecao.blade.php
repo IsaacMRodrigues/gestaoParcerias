@@ -418,7 +418,7 @@
             {{-- Peças, com o progresso no próprio cabeçalho --}}
             <div class="bg-white rounded-xl border border-gray-200 shadow-sm">
                 @include('pecas._cabecalho', [
-                    'titulo' => 'Peças do Processo de Seleção',
+                    'titulo' => 'Documentos da Seleção',
                     'descricao' => 'Documentos do editor saem com brasão e assinatura digital; os demais são arquivos anexados.',
                     'progresso' => $progresso,
                 ])

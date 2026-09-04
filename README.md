@@ -272,6 +272,29 @@ OSC é organização, e organização tem equipe. O vínculo mora em **`users.os
 
 ## O que foi feito
 
+- [2026-09-04] **Quatro ajustes de uso relatados em teste** (rótulos, anexo e perfis)
+  - **"Peças do Processo de Seleção" → "Documentos da Seleção"**: última tela que ainda dizia "Peças"
+    onde o resto do sistema já dizia "Documentos" (o `processos/show` e a Documentação do Aditivo já
+    tinham sido renomeados antes)
+  - **Upload de peça aceita qualquer formato de arquivo** (`PecaController::upload`): a lista fechada
+    de mimes (pdf, doc, docx, xls, xlsx, jpg, jpeg, png) impedia anexar laudos, imagens ou compactados
+    fora dessas extensões — inclusive no espaço de "anexo avulso" da Seleção do Chamamento Público, que
+    é onde o item 6 do checklist (Relatório da Comissão de Seleção) ganha evidências de apoio. Mantido
+    só o limite de 10 MB
+  - **"Novo usuário do setor" mostra todos os perfis para o Administrador**: `perfisQuePodeConceder()`
+    filtrava por lotação e por uma lista de perfis vedados ao chefe comum (proteção correta contra
+    escalada de privilégio) — mas aplicava a mesma régua ao Administrador, que já concede qualquer
+    perfil, sem filtro, pela tela de Cadastros. A régua de segurança agora só vale para quem **não**
+    tem a permissão `cadastros`; para os demais chefes de setor, nada muda
+  - **"Programas e Chamamentos" → "Chamamentos"**: o rótulo interno da permissão `chamamentos`
+    (`RolesSeeder::PERMISSOES`, não exibido em tela hoje) ficou desatualizado depois que o menu
+    passou a dizer só "Chamamentos" — corrigido para não confundir quem ler o seeder depois
+  - **Investigado e não reproduzido**: o relato de que a OSC, ao entrar, não vê onde manifestar
+    interesse nem como cadastrar novos usuários da equipe. Testado com a conta fixture e com um
+    autocadastro novo pelo formulário público — nos dois casos os links **"Manifestar interesse"** e
+    **"Usuários da OSC"** aparecem e as telas abrem normalmente. Requer mais detalhe (conta usada,
+    ambiente) para reproduzir
+
 - [2026-08-28] **Cadastros: a Secretaria e a sua gente na mesma tela** (`orgaos.index`, `oscs.index`)
   - Eram três listagens que ninguém consultava separadas — Usuários, Órgãos/Secretarias e OSCs. Para
     saber quem responde por uma Secretaria, abria-se Usuários e procurava-se pela coluna de órgão;

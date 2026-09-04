@@ -15,7 +15,7 @@ class RolesSeeder extends Seeder
     public const PERMISSOES = [
         'cadastros'         => 'Cadastros (usuários, órgãos, OSCs)',
         'planejamento'      => 'Planejamento (processos, termo de referência, trâmite)',
-        'chamamentos'       => 'Programas e Chamamentos',
+        'chamamentos'       => 'Chamamentos',
         'propostas'         => 'Propostas e Plano de Trabalho',
         'pareceres_tecnico' => 'Parecer Técnico',
         'pareceres_juridico'=> 'Parecer Jurídico',

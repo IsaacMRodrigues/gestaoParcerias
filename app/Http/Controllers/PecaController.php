@@ -109,11 +109,12 @@ class PecaController extends Controller
         abort_if($peca->tipo !== 'arquivo', 422);
         $this->autorizar($peca);
 
+        // Qualquer formato: o que a etapa pede varia (planilha, imagem, .rar de
+        // fotos, laudo em .odt) e nenhuma lista prevê tudo. Só o tamanho limita.
         $request->validate([
-            'arquivo' => ['required', 'file', 'mimes:pdf,doc,docx,xls,xlsx,jpg,jpeg,png', 'max:10240'],
+            'arquivo' => ['required', 'file', 'max:10240'],
         ], [
-            'arquivo.max'   => 'O arquivo não pode ultrapassar 10 MB.',
-            'arquivo.mimes' => 'Formatos aceitos: PDF, Word, Excel, JPG, PNG.',
+            'arquivo.max' => 'O arquivo não pode ultrapassar 10 MB.',
         ]);
 
         // remove arquivo anterior, se houver
