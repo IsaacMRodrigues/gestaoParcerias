@@ -272,6 +272,18 @@ OSC é organização, e organização tem equipe. O vínculo mora em **`users.os
 
 ## O que foi feito
 
+- [2026-09-04] **Confirmado: a OSC cadastra os próprios usuários** — e um redirecionamento corrigido
+  - Testado ponta a ponta: responsável legal cadastra um integrante em *Usuários da OSC*, o registro
+    grava papel `membro_osc` + as funções marcadas, e a conta nova entra e vê exatamente o que a
+    função permite (sem enxergar a administração da equipe, que é só do responsável legal)
+  - **Achado no teste**: o integrante recém-criado, ao entrar, caía primeiro em `/dashboard` (área
+    interna) para só então ser barrado pelo `EnsureIsStaff` e devolvido ao portal com o aviso "Esta
+    área é restrita a servidores" — mensagem pensada para quem tenta entrar onde não devia, estranha
+    para quem acabou de ganhar acesso. Causa: `AuthenticatedSessionController::store()` decidia o
+    destino do login por `hasRole('responsavel_legal')`, o mesmo ponto cego que `EnsureIsStaff` já
+    documentava ter corrigido (papel específico não cobre `membro_osc`). Login agora usa
+    `!temAcessoInterno()`, a mesma régua única — vai direto ao portal, sem o salto
+
 - [2026-09-04] **Quatro ajustes de uso relatados em teste** (rótulos, anexo e perfis)
   - **"Peças do Processo de Seleção" → "Documentos da Seleção"**: última tela que ainda dizia "Peças"
     onde o resto do sistema já dizia "Documentos" (o `processos/show` e a Documentação do Aditivo já

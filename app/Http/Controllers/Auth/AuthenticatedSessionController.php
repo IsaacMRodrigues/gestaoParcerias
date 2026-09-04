@@ -28,7 +28,12 @@ class AuthenticatedSessionController extends Controller
 
         $request->session()->regenerate();
 
-        if (auth()->user()->hasRole('responsavel_legal')) {
+        // Mesma régua de EnsureIsStaff: por papel específico, quebrou no dia em
+        // que a OSC ganhou equipe (membro_osc não caía aqui e entrava direto no
+        // dashboard interno, para ser barrado e devolvido ao portal um passo
+        // depois, com um aviso de "área restrita" que não fazia sentido para
+        // quem acabou de ganhar acesso).
+        if (! auth()->user()->temAcessoInterno()) {
             return redirect()->intended(route('portal.index'));
         }
 
