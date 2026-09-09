@@ -76,16 +76,17 @@ class TramitacaoController extends Controller
             $processo->modalidade = $data['modalidade'];
         }
 
-        $proxEtapa = $processo->etapa + 1;
-        $proxSetor = $processo->etapas()[$proxEtapa]['setor'];
+        $proxEtapa  = $processo->etapa + 1;
+        $proxSetor  = $processo->etapas()[$proxEtapa]['setor'];
+        $setorSaida = $processo->setor_atual;
 
         $processo->tramitacoes()->create([
-            'de_setor'    => $processo->setor_atual,
+            'de_setor'    => $setorSaida,
             'para_setor'  => $proxSetor,
             'enviado_por' => auth()->id(),
             'enviado_em'  => now(),
             'parecer'     => $data['parecer'] ?? null,
-            'status'      => 'enviado',
+            ...$this->chegadaNoProprioSetor($proxSetor, $setorSaida, 'enviado'),
         ]);
 
         $update = [
@@ -100,7 +101,36 @@ class TramitacaoController extends Controller
         $processo->update($update);
 
         return redirect()->route('processos.show', $processo)
-            ->with('success', 'Processo encaminhado para ' . Processo::SETORES[$proxSetor] . '.');
+            ->with('success', $proxSetor === $setorSaida
+                ? 'Etapa concluída. O processo segue no próprio setor, na etapa seguinte.'
+                : 'Processo encaminhado para ' . Processo::SETORES[$proxSetor] . '.');
+    }
+
+    /**
+     * Campos de recebimento de uma movimentação, conforme ela troque ou não de setor.
+     *
+     * Há etapas seguidas do mesmo setor — no Planejamento, a SCP analisa o
+     * Ofício e o Termo de Referência (etapa 2) e logo depois protocola o Pedido
+     * de Parecer à SEPLAN (etapa 3). Como toda movimentação nascia "enviada", a
+     * SCP mandava o processo para si mesma e precisava registrar o recebimento
+     * da própria remessa antes de continuar: um vaivém que não existe na mesa
+     * de ninguém, e um "encaminhado para SCP" que não dizia nada a quem lia o
+     * histórico.
+     *
+     * O processo não muda de mãos: a etapa avança e quem já estava com ele
+     * continua. Só o que atravessa setores é que precisa de aviso de chegada.
+     */
+    private function chegadaNoProprioSetor(string $destino, string $origem, string $status): array
+    {
+        if ($destino !== $origem) {
+            return ['status' => $status];
+        }
+
+        return [
+            'status'       => 'recebido',
+            'recebido_por' => auth()->id(),
+            'recebido_em'  => now(),
+        ];
     }
 
     /**
@@ -117,14 +147,15 @@ class TramitacaoController extends Controller
 
         $etapaAnterior = $processo->etapa - 1;
         $setorAnterior = $processo->etapas()[$etapaAnterior]['setor'];
+        $setorSaida    = $processo->setor_atual;
 
         $processo->tramitacoes()->create([
-            'de_setor'    => $processo->setor_atual,
+            'de_setor'    => $setorSaida,
             'para_setor'  => $setorAnterior,
             'enviado_por' => auth()->id(),
             'enviado_em'  => now(),
             'parecer'     => $data['parecer'],
-            'status'      => 'devolvido',
+            ...$this->chegadaNoProprioSetor($setorAnterior, $setorSaida, 'devolvido'),
         ]);
 
         $processo->update([
@@ -134,7 +165,9 @@ class TramitacaoController extends Controller
         ]);
 
         return redirect()->route('processos.show', $processo)
-            ->with('success', 'Processo devolvido para ' . Processo::SETORES[$setorAnterior] . '.');
+            ->with('success', $setorAnterior === $setorSaida
+                ? 'Processo devolvido à etapa anterior, no próprio setor.'
+                : 'Processo devolvido para ' . Processo::SETORES[$setorAnterior] . '.');
     }
 
     /**

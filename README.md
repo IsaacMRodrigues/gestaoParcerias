@@ -272,6 +272,23 @@ OSC é organização, e organização tem equipe. O vínculo mora em **`users.os
 
 ## O que foi feito
 
+- [2026-09-09] **A SCP deixou de enviar o processo para si mesma** (`TramitacaoController`, `processos/show`)
+  - Relatado em teste: a etapa 2 do Planejamento manda o processo "para a SCP" — que é quem já está
+    com ele. São duas etapas seguidas do mesmo setor (2: analisar o Ofício e o Termo de Referência;
+    3: protocolar o Pedido de Parecer à SEPLAN), e como toda movimentação nascia `enviado`, a SCP
+    precisava **registrar o recebimento da própria remessa** antes de poder continuar
+  - `chegadaNoProprioSetor()`: quando a etapa seguinte é do mesmo setor, o processo não muda de mãos —
+    a movimentação já nasce recebida e o aviso de chegada não aparece. Vale também para a devolução,
+    que tem o mesmo par de etapas em sentido contrário
+  - O histórico dizia "SCP enviou para SCP", descrevendo um vaivém que não houve; agora diz
+    "concluiu a etapa e seguiu no próprio setor" (ou "voltou à etapa anterior, no próprio setor")
+  - Migração destrava o que já estava registrado: movimentação de mesmo setor sem recebimento passa a
+    constar recebida no mesmo instante do envio, por quem a enviou — que é o que de fato aconteceu
+  - Conferido no navegador, autenticado como a SCP: o processo 0210.0001.2026.01 estava travado nesse
+    ponto e voltou a permitir "Encaminhar para SEPLAN" direto
+  - Verificado que a Seleção e a Celebração não têm etapas seguidas do mesmo setor — o caso é só do
+    Planejamento, e o conserto fica no fluxo que o tem
+
 - [2026-09-09] **Barra lateral clara, como o resto do sistema** (`layouts/sidebar`)
   - A coluna era `slate-900` e ocupava 256px de altura inteira em toda tela: uma parede que partia a
     interface em dois ambientes, o menu com uma lógica de cor e o conteúdo com outra

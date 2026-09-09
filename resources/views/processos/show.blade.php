@@ -236,10 +236,19 @@
                                 @if(!$loop->last)<div class="w-px flex-1 bg-gray-200"></div>@endif
                             </div>
                             <div class="flex-1 pb-2">
+                                {{-- Há etapas seguidas do mesmo setor: escrever "SCP enviou
+                                     para SCP" descrevia um vaivém que não aconteceu. O
+                                     processo não mudou de mãos, só de etapa. --}}
                                 <p class="text-sm text-gray-800">
                                     <strong>{{ \App\Models\Processo::SETORES[$t->de_setor] ?? $t->de_setor }}</strong>
-                                    enviou para
-                                    <strong>{{ \App\Models\Processo::SETORES[$t->para_setor] ?? $t->para_setor }}</strong>
+                                    @if($t->de_setor === $t->para_setor)
+                                        {{ $t->status === 'devolvido'
+                                            ? 'voltou à etapa anterior, no próprio setor'
+                                            : 'concluiu a etapa e seguiu no próprio setor' }}
+                                    @else
+                                        enviou para
+                                        <strong>{{ \App\Models\Processo::SETORES[$t->para_setor] ?? $t->para_setor }}</strong>
+                                    @endif
                                 </p>
                                 <p class="text-xs text-gray-400">
                                     {{ $t->enviado_em->format('d/m/Y H:i') }} por {{ $t->remetente->name }}
