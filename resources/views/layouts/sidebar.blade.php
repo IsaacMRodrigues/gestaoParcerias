@@ -14,41 +14,48 @@
     // Planejamento, como era quando só contava processos.
     $navCaixa = \App\Support\CaixaDeEntrada::para(auth()->user())->total();
 
-    // Sidebar em cinza-ardósia escuro, não em verde.
+    // Sidebar clara, como o resto do sistema.
     //
-    // Ela ocupa 256px de altura inteira em toda tela do sistema: pintada com o
-    // verde da marca, virava a maior mancha de cor da interface e puxava tudo
-    // para o mesmo tom — o item ativo (branco sobre verde) mal se distinguia
-    // dos demais. Neutra, a coluna recua para o papel de moldura e o verde
-    // ganha uma função só: marcar onde o usuário está.
-    $sec   = 'px-3 pt-5 pb-1.5 text-[12px] font-semibold uppercase tracking-wider text-slate-500';
-    $link  = 'relative flex items-center gap-2.5 px-3 py-2 rounded-lg text-sm text-slate-300 hover:bg-white/5 hover:text-white transition';
+    // Ela ocupa 256px de altura inteira em toda tela: escura, era uma parede
+    // que partia a interface em dois ambientes — o menu de um lado, o conteúdo
+    // do outro, cada um com a sua lógica de cor. Branca sobre o cinza-claro do
+    // conteúdo, a coluna vira moldura, separada só por um fio, e o verde
+    // mantém a função única de marcar onde o usuário está.
+    $sec   = 'px-3 pt-5 pb-1.5 text-[12px] font-semibold uppercase tracking-wider text-gray-400';
+    $link  = 'relative flex items-center gap-2.5 px-3 py-2 rounded-lg text-sm text-gray-600 hover:bg-gray-100 hover:text-gray-900 transition';
     // Verde sólido = a página aberta agora. Item de seção (o pai de quem está
     // aberto) recebe só um realce discreto: antes os dois ganhavam o mesmo
     // destaque, viravam um bloco verde de duas linhas e não diziam em qual das
     // duas telas o usuário estava.
     $on      = '!text-white bg-brand-600 font-semibold shadow-sm hover:!bg-brand-600';
-    $naSecao = '!text-white bg-white/[0.07] font-medium';
-    $soon  = 'flex items-center gap-2.5 px-3 py-2 rounded-lg text-sm text-slate-600 cursor-default';
+    $naSecao = '!text-brand-800 bg-brand-50 font-medium hover:!bg-brand-50';
+    $soon  = 'flex items-center gap-2.5 px-3 py-2 rounded-lg text-sm text-gray-400 cursor-default';
     $badge = 'ml-auto px-1.5 py-0.5 text-[12px] font-bold bg-accent-500 text-white rounded-full';
     $etapa = 'w-5 h-5 shrink-0 rounded-full border text-[12px] font-bold flex items-center justify-center';
-    $etapaOn  = 'border-white bg-white text-brand-700';
-    $etapaOff = 'border-slate-600 text-slate-400';
+    // O número da etapa se inverte conforme o fundo em que cai: branco vazado
+    // sobre o verde da página aberta, verde sólido sobre o verde claro da
+    // seção. Havia um só, desenhado para fundo escuro — sobre o item aberto
+    // ele viraria um círculo branco em cima de branco.
+    $etapaAtiva = 'border-white bg-white text-brand-700';
+    $etapaSecao = 'border-brand-600 bg-brand-600 text-white';
+    $etapaOff   = 'border-gray-300 text-gray-400';
+    // Etapa que o perfil não alcança, ou que ainda não foi construída.
+    $etapaSem   = 'border-gray-200 text-gray-300';
 @endphp
 
-<aside class="fixed top-1.5 bottom-0 left-0 z-40 w-64 bg-slate-900 flex flex-col
+<aside class="fixed top-1.5 bottom-0 left-0 z-40 w-64 bg-white border-r border-gray-200 flex flex-col
               transform transition-transform duration-200 lg:translate-x-0"
        :class="sidebarOpen ? 'translate-x-0' : '-translate-x-full'">
 
     {{-- Marca: empilhada porque o logotipo já traz o nome do Município e, lado a
          lado com o título, não cabe nos 256px da coluna (o texto era cortado).
          px-6 alinha o logotipo à mesma margem dos ícones do menu abaixo. --}}
-    <div class="px-6 py-5 border-b border-slate-800 shrink-0">
+    <div class="px-6 py-5 border-b border-gray-200 shrink-0">
         <a href="{{ route('landing') }}"
-           class="block rounded-lg focus:outline-none focus-visible:ring-2 focus-visible:ring-white/60">
-            <x-marca variant="branco" class="h-12" />
-            <span class="mt-3 block text-sm font-bold text-white leading-tight">Gestão de Parcerias</span>
-            <span class="block text-[12px] text-slate-500">Sistema público municipal</span>
+           class="block rounded-lg focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-500">
+            <x-marca class="h-12" />
+            <span class="mt-3 block text-sm font-bold text-gray-900 leading-tight">Gestão de Parcerias</span>
+            <span class="block text-[12px] text-gray-500">Sistema público municipal</span>
         </a>
     </div>
 
@@ -89,11 +96,11 @@
             @endphp
             <a href="{{ route('processos.index') }}"
                class="{{ $link }} {{ $ehPlanejamento ? $on : ($emPlanejamento ? $naSecao : '') }}">
-                <span class="{{ $etapa }} {{ $emPlanejamento ? $etapaOn : $etapaOff }}">1</span>
+                <span class="{{ $etapa }} {{ $ehPlanejamento ? $etapaAtiva : ($emPlanejamento ? $etapaSecao : $etapaOff) }}">1</span>
                 Planejamento
             </a>
         @else
-            <span class="{{ $soon }}" title="Seu perfil não tem acesso ao Planejamento."><span class="{{ $etapa }} border-slate-700 text-slate-600">1</span> Planejamento<svg class="ml-auto w-3.5 h-3.5 text-slate-600 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M16.5 10.5V6.75a4.5 4.5 0 10-9 0v3.75m-.75 11.25h10.5a2.25 2.25 0 002.25-2.25v-6.75a2.25 2.25 0 00-2.25-2.25H6.75a2.25 2.25 0 00-2.25 2.25v6.75a2.25 2.25 0 002.25 2.25z"/></svg></span>
+            <span class="{{ $soon }}" title="Seu perfil não tem acesso ao Planejamento."><span class="{{ $etapa }} {{ $etapaSem }}">1</span> Planejamento<svg class="ml-auto w-3.5 h-3.5 text-gray-300 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M16.5 10.5V6.75a4.5 4.5 0 10-9 0v3.75m-.75 11.25h10.5a2.25 2.25 0 002.25-2.25v-6.75a2.25 2.25 0 00-2.25-2.25H6.75a2.25 2.25 0 00-2.25 2.25v6.75a2.25 2.25 0 002.25 2.25z"/></svg></span>
         @endcan
 
         {{-- 2. Seleção --}}
@@ -129,16 +136,16 @@
                      lugar da seta, que fica por cima (botão dentro de link não
                      existe em HTML). --}}
                 <a href="{{ $urlSelecao }}" class="{{ $link }} pr-9 {{ $emSelecao ? $naSecao : '' }}">
-                    <span class="{{ $etapa }} {{ $emSelecao ? $etapaOn : $etapaOff }}">2</span>
+                    <span class="{{ $etapa }} {{ $emSelecao ? $etapaSecao : $etapaOff }}">2</span>
                     Seleção
                     @if($navPropostasNovas > 0)<span class="{{ $badge }}">{{ $navPropostasNovas }}</span>@endif
                 </a>
                 <button type="button" @click="alternar()"
                         :aria-expanded="aberto ? 'true' : 'false'"
                         :aria-label="aberto ? 'Recolher a etapa Seleção' : 'Expandir a etapa Seleção'"
-                        class="absolute top-1/2 right-1 -translate-y-1/2 p-1.5 rounded-md text-slate-400
-                               hover:text-white hover:bg-white/10 transition
-                               focus:outline-none focus-visible:ring-2 focus-visible:ring-white/60">
+                        class="absolute top-1/2 right-1 -translate-y-1/2 p-1.5 rounded-md text-gray-400
+                               hover:text-gray-700 hover:bg-gray-100 transition
+                               focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-500">
                     <svg class="w-3.5 h-3.5 transition-transform" :class="aberto ? 'rotate-90' : ''"
                          fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.6">
                         <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/>
@@ -170,7 +177,7 @@
                 </div>
             </div>
         @else
-            <span class="{{ $soon }}" title="Seu perfil não tem acesso à Seleção."><span class="{{ $etapa }} border-slate-700 text-slate-600">2</span> Seleção<svg class="ml-auto w-3.5 h-3.5 text-slate-600 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M16.5 10.5V6.75a4.5 4.5 0 10-9 0v3.75m-.75 11.25h10.5a2.25 2.25 0 002.25-2.25v-6.75a2.25 2.25 0 00-2.25-2.25H6.75a2.25 2.25 0 00-2.25 2.25v6.75a2.25 2.25 0 002.25 2.25z"/></svg></span>
+            <span class="{{ $soon }}" title="Seu perfil não tem acesso à Seleção."><span class="{{ $etapa }} {{ $etapaSem }}">2</span> Seleção<svg class="ml-auto w-3.5 h-3.5 text-gray-300 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M16.5 10.5V6.75a4.5 4.5 0 10-9 0v3.75m-.75 11.25h10.5a2.25 2.25 0 002.25-2.25v-6.75a2.25 2.25 0 00-2.25-2.25H6.75a2.25 2.25 0 00-2.25 2.25v6.75a2.25 2.25 0 002.25 2.25z"/></svg></span>
         @endcanany
 
         {{-- 3. Celebração --}}
@@ -189,7 +196,7 @@
             @endphp
             <a href="{{ route('celebracao.index') }}"
                class="{{ $link }} {{ $ehCelebracao ? $on : ($emCelebracao ? $naSecao : '') }}">
-                <span class="{{ $etapa }} {{ $emCelebracao ? $etapaOn : $etapaOff }}">3</span>
+                <span class="{{ $etapa }} {{ $ehCelebracao ? $etapaAtiva : ($emCelebracao ? $etapaSecao : $etapaOff) }}">3</span>
                 Celebração
             </a>
             @can('formalizacao')
@@ -199,7 +206,7 @@
                 </a>
             @endcan
         @else
-            <span class="{{ $soon }}" title="Seu setor não participa do trâmite da Celebração."><span class="{{ $etapa }} border-slate-700 text-slate-600">3</span> Celebração<svg class="ml-auto w-3.5 h-3.5 text-slate-600 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M16.5 10.5V6.75a4.5 4.5 0 10-9 0v3.75m-.75 11.25h10.5a2.25 2.25 0 002.25-2.25v-6.75a2.25 2.25 0 00-2.25-2.25H6.75a2.25 2.25 0 00-2.25 2.25v6.75a2.25 2.25 0 002.25 2.25z"/></svg></span>
+            <span class="{{ $soon }}" title="Seu setor não participa do trâmite da Celebração."><span class="{{ $etapa }} {{ $etapaSem }}">3</span> Celebração<svg class="ml-auto w-3.5 h-3.5 text-gray-300 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M16.5 10.5V6.75a4.5 4.5 0 10-9 0v3.75m-.75 11.25h10.5a2.25 2.25 0 002.25-2.25v-6.75a2.25 2.25 0 00-2.25-2.25H6.75a2.25 2.25 0 00-2.25 2.25v6.75a2.25 2.25 0 002.25 2.25z"/></svg></span>
         @endif
 
         {{-- 4. Execução — lista as parcerias e abre a execução de cada uma --}}
@@ -207,17 +214,17 @@
             @php $emExecucao = request()->routeIs('execucao.*') || request()->routeIs('instrumentos.execucao')
                 || request()->routeIs('repasses.*') || request()->routeIs('despesas.*'); @endphp
             <a href="{{ route('execucao.index') }}" class="{{ $link }} {{ $emExecucao ? $on : '' }}">
-                <span class="{{ $etapa }} {{ $emExecucao ? $etapaOn : $etapaOff }}">4</span>
+                <span class="{{ $etapa }} {{ $emExecucao ? $etapaAtiva : $etapaOff }}">4</span>
                 Execução
             </a>
         @else
             <span class="{{ $soon }}" title="Repasses, despesas e saldo: abra pela tela do Instrumento.">
-                <span class="{{ $etapa }} border-slate-700 text-slate-600">4</span> Execução<svg class="ml-auto w-3.5 h-3.5 text-slate-600 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M16.5 10.5V6.75a4.5 4.5 0 10-9 0v3.75m-.75 11.25h10.5a2.25 2.25 0 002.25-2.25v-6.75a2.25 2.25 0 00-2.25-2.25H6.75a2.25 2.25 0 00-2.25 2.25v6.75a2.25 2.25 0 002.25 2.25z"/></svg>
+                <span class="{{ $etapa }} {{ $etapaSem }}">4</span> Execução<svg class="ml-auto w-3.5 h-3.5 text-gray-300 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M16.5 10.5V6.75a4.5 4.5 0 10-9 0v3.75m-.75 11.25h10.5a2.25 2.25 0 002.25-2.25v-6.75a2.25 2.25 0 00-2.25-2.25H6.75a2.25 2.25 0 00-2.25 2.25v6.75a2.25 2.25 0 002.25 2.25z"/></svg>
             </span>
         @endcan
 
-        <span class="{{ $soon }}" title="Em breve — módulo ainda não construído"><span class="{{ $etapa }} border-slate-700 text-slate-600">5</span> Monitoramento<svg class="ml-auto w-3.5 h-3.5 text-slate-600 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 6v6h4.5m4.5 0a9 9 0 11-18 0 9 9 0 0118 0z"/></svg></span>
-        <span class="{{ $soon }}" title="Em breve — módulo ainda não construído"><span class="{{ $etapa }} border-slate-700 text-slate-600">6</span> Prestação de Contas<svg class="ml-auto w-3.5 h-3.5 text-slate-600 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 6v6h4.5m4.5 0a9 9 0 11-18 0 9 9 0 0118 0z"/></svg></span>
+        <span class="{{ $soon }}" title="Em breve — módulo ainda não construído"><span class="{{ $etapa }} {{ $etapaSem }}">5</span> Monitoramento<svg class="ml-auto w-3.5 h-3.5 text-gray-300 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 6v6h4.5m4.5 0a9 9 0 11-18 0 9 9 0 0118 0z"/></svg></span>
+        <span class="{{ $soon }}" title="Em breve — módulo ainda não construído"><span class="{{ $etapa }} {{ $etapaSem }}">6</span> Prestação de Contas<svg class="ml-auto w-3.5 h-3.5 text-gray-300 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 6v6h4.5m4.5 0a9 9 0 11-18 0 9 9 0 0118 0z"/></svg></span>
 
         {{-- Cadastros --}}
         @can('cadastros')
@@ -256,7 +263,7 @@
         @endrole
     </nav>
 
-    <div class="border-t border-slate-800 px-4 py-3 text-[12px] text-slate-600 shrink-0">
+    <div class="border-t border-gray-200 px-4 py-3 text-[12px] text-gray-400 shrink-0">
         PGP · {{ now()->year }}
     </div>
 </aside>

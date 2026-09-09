@@ -272,6 +272,53 @@ OSC é organização, e organização tem equipe. O vínculo mora em **`users.os
 
 ## O que foi feito
 
+- [2026-09-09] **Barra lateral clara, como o resto do sistema** (`layouts/sidebar`)
+  - A coluna era `slate-900` e ocupava 256px de altura inteira em toda tela: uma parede que partia a
+    interface em dois ambientes, o menu com uma lógica de cor e o conteúdo com outra
+  - Branca sobre o cinza-claro do conteúdo, separada só por um fio (`border-r`), a coluna vira
+    moldura. O verde mantém a função única de marcar onde o usuário está
+  - O número da etapa passou a ter **dois estados de fundo**: branco vazado sobre o verde da página
+    aberta, verde sólido sobre o verde claro da seção. Havia um só, desenhado para fundo escuro —
+    sobre o item aberto ele seria um círculo branco em cima de branco
+  - Item de seção deixou de ser `bg-white/[0.07]`, que em fundo claro não aparece, e virou `brand-50`
+    com texto `brand-800`. O logotipo voltou às cores originais (não mais rebatido para branco)
+  - Conferido no navegador, autenticado: painel (item ativo em verde) e uma tela de dentro da Seleção
+    (seção em verde claro + subitem ativo em verde sólido)
+
+- [2026-09-09] **Quem clonar o repositório recebe o sistema com gente dentro**
+  (`2026_08_27_120000_cria_quadro_de_usuarios_da_prefeitura`)
+  - As 23 contas da Prefeitura existiam só no banco de quem as digitou. Clonar dava um sistema vazio:
+    sem gestor de Secretaria, sem Procuradoria, sem quem assina — nenhum processo podia ser percorrido
+    do começo ao fim para testar
+  - Não sobrescreve nada: compara pelo e-mail, e quem já existe fica com a sua senha e os seus
+    perfis. Num banco que já tem gente, só entra o que falta
+  - Testado num banco criado do zero: 23 usuários, 26 Secretarias, 24 perfis, cada gestor na sua
+    lotação e com o perfil certo
+  - Três defeitos que só apareceram nesse teste: (1) a migração das funções da OSC **derrubava a
+    instalação inteira** procurando o perfil `membro_osc` antes de o `RolesSeeder` existir; (2) o
+    quadro de Secretarias ainda criava o órgão "TI", extinto, e não criava Ciência e Tecnologia, que
+    ocupou o lugar dele; (3) o preenchimento do e-mail dos órgãos rodava antes das contas de onde ele
+    é lido — passou para depois
+  - O login do administrador estava `admin@parcerias`; o combinado era `admin_parcerias`. Corrigido
+    no código e no banco local. **Produção segue com o antigo** até que se peça a correção
+
+- [2026-09-09] **Quem cadastra a OSC é a OSC** (`OscController`, `routes/web`)
+  - A tela de OSCs trazia "+ Nova OSC" para o servidor da Prefeitura: um segundo caminho de entrada,
+    paralelo ao auto-cadastro em `/cadastro/osc`. O cadastro que nascia dele não tinha dono — sem
+    conta de acesso, sem ninguém dentro da organização respondendo pelo que estava escrito
+  - Saiu a autoria, não só o botão: `create` e `store` deixaram de existir, o formulário foi apagado
+    e o atalho "Nova OSC" saiu da busca global. Editar e remover continuam, porque erro de digitação
+    e cadastro duplicado precisam de conserto
+
+- [2026-09-09] **Secretarias herdaram o e-mail de quem responde por elas**
+  (`2026_08_27_130000_preenche_email_dos_orgaos`)
+  - Os órgãos foram cadastrados antes das contas e ficaram todos sem e-mail, embora o endereço já
+    existisse: `educacao@` é a caixa da Educação e é com ela que o gestor entra no sistema
+  - 15 Secretarias preenchidas. Ficam de fora o e-mail provisório de Saúde, Fazenda e Trabalho
+    (propagá-lo espalharia um endereço que não existe) e os órgãos sem nenhum usuário
+  - Onde há mais de uma conta e nenhum responsável de UG, o campo segue em branco em vez de escolher
+    no lugar de quem sabe
+
 - [2026-09-04] **Chamamento com inscrição encerrada não dizia mais "em breve"**
   - Relatado em teste: um chamamento com inscrições até 28/08/2026, visto em 04/09/2026 (já encerrado),
     aparecia com o rótulo "Inscrições em breve" — como se ainda não tivesse começado
