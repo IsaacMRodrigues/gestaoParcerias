@@ -59,9 +59,13 @@
                                  deixa de parecer um selo. "Responsável Legal" não
                                  cabe na largura que a coluna recebe, então a coluna
                                  é que cede. --}}
-                            <td class="px-5 py-4 whitespace-nowrap align-top">
+                            {{-- A célula cede, o selo não: com quatro perfis marcados a
+                                 coluna inteira ficava numa linha só e empurrava Funções,
+                                 Acesso e Ação para fora da tela. Cada selo continua
+                                 inteiro; é a coluna que quebra. --}}
+                            <td class="px-5 py-4 align-top max-w-[15rem]">
                                 @if($ehDono)
-                                    <span class="inline-block px-2 py-1 text-xs font-medium bg-brand-100 text-brand-800 rounded-full">
+                                    <span class="inline-block px-2 py-1 text-xs font-medium bg-brand-100 text-brand-800 rounded-full whitespace-nowrap">
                                         Responsável Legal
                                     </span>
                                 @else
@@ -70,7 +74,7 @@
                                     @php $perfisDoUsuario = $usuario->roles->pluck('name')->all(); @endphp
                                     @foreach($perfis as $chave => $perfil)
                                         @if(in_array($chave, $perfisDoUsuario))
-                                            <span class="inline-block px-2 py-1 mb-1 text-xs font-medium bg-slate-100 text-slate-700 rounded-full">
+                                            <span class="inline-block px-2 py-1 mb-1 text-xs font-medium bg-slate-100 text-slate-700 rounded-full whitespace-nowrap">
                                                 {{ $perfil['rotulo'] }}
                                             </span>
                                         @endif
@@ -103,15 +107,17 @@
                                               class="mt-2 space-y-1.5">
                                             @csrf @method('PATCH')
                                             <p class="text-[11px] font-semibold uppercase tracking-wider text-gray-400">Perfil</p>
-                                            @foreach($perfis as $chave => $perfil)
-                                                <label class="flex items-center gap-2 text-xs text-gray-700">
-                                                    <input type="checkbox" name="perfis[]" value="{{ $chave }}"
-                                                           @checked(in_array($chave, $perfisDoUsuario))
-                                                           @disabled($perfil['fixo'] ?? false)
-                                                           class="rounded border-gray-300 text-brand-600 focus:ring-brand-500 disabled:opacity-60">
-                                                    {{ $perfil['rotulo'] }}
-                                                </label>
-                                            @endforeach
+                                            <div class="grid sm:grid-cols-2 gap-x-4 gap-y-1">
+                                                @foreach($perfis as $chave => $perfil)
+                                                    <label class="flex items-start gap-2 text-xs text-gray-700">
+                                                        <input type="checkbox" name="perfis[]" value="{{ $chave }}"
+                                                               @checked(in_array($chave, $perfisDoUsuario))
+                                                               @disabled($perfil['fixo'] ?? false)
+                                                               class="mt-0.5 rounded border-gray-300 text-brand-600 focus:ring-brand-500 disabled:opacity-60">
+                                                        {{ $perfil['rotulo'] }}
+                                                    </label>
+                                                @endforeach
+                                            </div>
                                             <p class="text-[11px] font-semibold uppercase tracking-wider text-gray-400 pt-1.5">Funções</p>
                                             @foreach($funcoes as $chave => $funcao)
                                                 <label class="flex items-center gap-2 text-xs text-gray-700">

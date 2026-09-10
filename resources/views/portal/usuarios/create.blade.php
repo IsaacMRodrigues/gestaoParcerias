@@ -72,7 +72,9 @@
                         <strong>papel de assinatura</strong> nos documentos que ela assinar.
                         Pode marcar mais de um.
                     </p>
-                    <div class="space-y-2">
+                    {{-- Duas colunas: são quinze, e em coluna única o bloco de
+                         perfis ficava mais alto que o resto do formulário. --}}
+                    <div class="grid sm:grid-cols-2 gap-x-4 gap-y-2 border border-gray-200 rounded-lg p-3">
                         @foreach($perfis as $chave => $perfil)
                             <label class="flex items-start gap-2.5 text-sm text-gray-700">
                                 <input type="checkbox" name="perfis[]" value="{{ $chave }}"
@@ -87,6 +89,12 @@
                         @endforeach
                     </div>
                     <x-input-error :messages="$errors->get('perfis')" class="mt-1" />
+                    <p class="text-xs text-gray-500 mt-2">
+                        Alguns destes perfis dizem respeito a etapas que o sistema ainda não tem —
+                        licitação da organização, órgão de controle, monitoramento e prestação de contas.
+                        Marcá-los hoje registra a designação e o papel de assinatura; o acesso vem quando
+                        o módulo existir.
+                    </p>
                 </div>
 
                 {{-- Marcadas por padrão as duas do dia a dia: é o que qualquer

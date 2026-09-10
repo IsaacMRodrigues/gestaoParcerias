@@ -87,6 +87,30 @@ class RolesSeeder extends Seeder
         // O papel é a identidade "sou da equipe desta OSC"; o que cada um faz
         // vem marcado por pessoa, no cadastro, e não pelo papel.
         'membro_osc'                       => [], // equipe da OSC: portal, sem submeter/recorrer
+
+        /*
+         * Perfis do convenente (módulo 1, aba "Membros" do cadastro da OSC).
+         *
+         * Todos sem permissão, e isso não é lacuna: do lado da OSC o perfil
+         * declara o que a pessoa é na organização e sai impresso como papel de
+         * assinatura. Quem abre porta são as funções `osc_*`, marcadas por
+         * pessoa pelo responsável legal. Assim a lista pode espelhar a da tela
+         * de referência sem que marcar uma caixa conceda, por tabela, acesso a
+         * um módulo da Administração.
+         */
+        'cadastrador_proposta'               => [],
+        'cadastrador_prestacao_contas'       => [],
+        'cadastrador_usuario_entidade'       => [],
+        'cadastrador_usuario_orgao_controle' => [],
+        'comissao_licitacao'                 => [],
+        'consultas_basicas_proponente'       => [],
+        'fiscal_convenente'                  => [],
+        'gestor_instrumento_convenente'      => [],
+        'gestor_financeiro_convenente'       => [],
+        'operador_financeiro_convenente'     => [],
+        'ordenador_despesa_convenente'       => [],
+        'orgao_controle_convenente'          => [],
+        'relator_agenda'                     => [],
     ];
 
     public function run(): void

@@ -272,6 +272,32 @@ OSC é organização, e organização tem equipe. O vínculo mora em **`users.os
 
 ## O que foi feito
 
+- [2026-09-10] **Os treze perfis do convenente** (`User::PERFIS_OSC`, `RolesSeeder`, `portal/usuarios/*`)
+  - O `.docx` do módulo 1 tem o mesmo texto do `.txt`, mas traz **três imagens que o `.txt` não tinha**.
+    A tabela de 21 perfis já estava toda no sistema (conferida uma a uma); o que faltava estava na
+    imagem: o painel **"Perfis" da aba Membros**, com a lista do convenente — outra lista, e nenhum
+    dos seus itens existia aqui
+  - Criados os 13: Cadastrador de Proposta, de Prestação de Contas, de Usuário do Ente/Entidade e de
+    Usuário de Órgão de Controle; Comissão de Licitação; Consultas Básicas do Proponente; Fiscal,
+    Gestor de Instrumento, Gestor Financeiro, Operador Financeiro, Ordenador de Despesa e Órgão de
+    Controle do Convenente; Relator da Agenda
+  - **Nenhum concede permissão**, e isso é o desenho, não uma lacuna: do lado da OSC o perfil declara
+    o que a pessoa é e sai impresso como papel de assinatura; quem abre porta são as funções `osc_*`,
+    marcadas por pessoa. Assim a lista espelha a tela de referência sem que marcar uma caixa conceda,
+    por tabela, acesso a um módulo da Administração
+  - Todos entram em `PAPEIS_OSC` — menos `contador`, que existe dos dois lados e cujo lugar é decidido
+    pelo vínculo (`temAcessoInterno`), não pelo nome do papel. Listá-lo ali empurraria o contador do
+    Município para fora das telas dele
+  - A coluna "Papel" da listagem **cede e o selo não**: com quatro perfis marcados ela ficava numa
+    linha só e empurrava Funções, Acesso e Ação para fora da tela
+  - **Corrigido de passagem**: o commit da barra lateral (`c57ab93`) apagou o CSS antigo do
+    `public/build` e não versionou o novo — `public/build` é ignorado e cada arquivo precisa de
+    `git add -f`. O manifesto apontava para um arquivo que não estava no repositório, e quem clonasse
+    ficava sem estilo nenhum
+  - Conferido no navegador: cadastrada uma integrante com Gestor Financeiro + Ordenador de Despesa +
+    Contador, os quatro papéis gravam, ela entra no portal e é barrada no `/dashboard`; o
+    administrador do Município segue interno
+
 - [2026-09-10] **Perfil no cadastro de usuário da OSC** (`OscUsuarioController`, `portal/usuarios/*`)
   - Módulo 1, item 1.2.3 (Membros): "CPF, nome completo, telefone, e-mail, cargo/função, **Perfil (com
     várias opções e podendo marcar mais de 01)**". O campo de perfil não existia — a conta nascia
