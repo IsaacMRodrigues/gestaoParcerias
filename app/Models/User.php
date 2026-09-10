@@ -59,6 +59,32 @@ class User extends Authenticatable
     public const PAPEIS_OSC = ['responsavel_legal', 'membro_osc'];
 
     /**
+     * Perfis que um integrante da OSC pode receber (módulo 1, item 1.2.3:
+     * "Perfil (com várias opções e podendo marcar mais de 01)").
+     *
+     * Perfil não é função. A função (FUNCOES_OSC) diz o que a pessoa pode
+     * FAZER no portal; o perfil diz o que ela É na organização — e é ele que
+     * sai impresso como papel de assinatura no rodapé do que ela assinar.
+     *
+     * A lista é curta de propósito. Os demais perfis do sistema abrem módulos
+     * da Administração, e concedê-los a quem representa uma entidade privada
+     * daria à OSC acesso à mesa de quem a fiscaliza. O Responsável Legal
+     * também fica fora: ele não é integrante da equipe, é o titular do
+     * cadastro da organização (`oscs.user_id`) — ver ehResponsavelLegalOsc().
+     */
+    public const PERFIS_OSC = [
+        'membro_osc' => [
+            'rotulo' => 'Membro da OSC',
+            'ajuda'  => 'Integrante da equipe. Todo cadastro recebe este perfil.',
+            'fixo'   => true,
+        ],
+        'contador' => [
+            'rotulo' => 'Contador',
+            'ajuda'  => 'Elabora as planilhas orçamentárias e presta contas pela organização.',
+        ],
+    ];
+
+    /**
      * O que cada integrante da OSC pode fazer — marcado pelo responsável legal
      * no cadastro da equipe.
      *
@@ -428,6 +454,14 @@ class User extends Authenticatable
 
     public function temAcessoInterno(): bool
     {
+        // O vínculo decide antes do papel: quem responde por uma entidade
+        // privada não é servidor, tenha o perfil que tiver. Sem isto, dar a um
+        // integrante da OSC um perfil que existe dos dois lados — Contador —
+        // o faria atravessar para as telas da Administração.
+        if ($this->osc_id !== null) {
+            return false;
+        }
+
         return $this->roles->contains(fn ($role) => !in_array($role->name, self::PAPEIS_OSC, true));
     }
 

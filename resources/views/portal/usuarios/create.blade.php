@@ -62,6 +62,33 @@
                     </div>
                 </div>
 
+                {{-- Perfil ≠ função. O perfil diz o que a pessoa É na
+                     organização e sai impresso como papel de assinatura; as
+                     funções, logo abaixo, dizem o que ela pode fazer. --}}
+                <div class="pt-2">
+                    <x-input-label value="Perfil" />
+                    <p class="text-xs text-gray-500 mt-0.5 mb-2">
+                        O que a pessoa é na organização. É este nome que aparece como
+                        <strong>papel de assinatura</strong> nos documentos que ela assinar.
+                        Pode marcar mais de um.
+                    </p>
+                    <div class="space-y-2">
+                        @foreach($perfis as $chave => $perfil)
+                            <label class="flex items-start gap-2.5 text-sm text-gray-700">
+                                <input type="checkbox" name="perfis[]" value="{{ $chave }}"
+                                       @checked(($perfil['fixo'] ?? false) || in_array($chave, old('perfis', [])))
+                                       @disabled($perfil['fixo'] ?? false)
+                                       class="mt-0.5 rounded border-gray-300 text-brand-600 focus:ring-brand-500 disabled:opacity-60">
+                                <span>
+                                    {{ $perfil['rotulo'] }}
+                                    <span class="block text-xs text-gray-500">{{ $perfil['ajuda'] }}</span>
+                                </span>
+                            </label>
+                        @endforeach
+                    </div>
+                    <x-input-error :messages="$errors->get('perfis')" class="mt-1" />
+                </div>
+
                 {{-- Marcadas por padrão as duas do dia a dia: é o que qualquer
                      integrante podia fazer antes de as funções existirem, e o
                      cadastro não vira armadilha para quem passar direto. --}}

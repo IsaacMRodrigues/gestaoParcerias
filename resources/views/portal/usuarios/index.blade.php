@@ -65,9 +65,16 @@
                                         Responsável Legal
                                     </span>
                                 @else
-                                    <span class="inline-block px-2 py-1 text-xs font-medium bg-slate-100 text-slate-700 rounded-full">
-                                        Membro
-                                    </span>
+                                    {{-- Era sempre "Membro". Agora mostra os perfis que a
+                                         pessoa tem de fato — é o que assina por ela. --}}
+                                    @php $perfisDoUsuario = $usuario->roles->pluck('name')->all(); @endphp
+                                    @foreach($perfis as $chave => $perfil)
+                                        @if(in_array($chave, $perfisDoUsuario))
+                                            <span class="inline-block px-2 py-1 mb-1 text-xs font-medium bg-slate-100 text-slate-700 rounded-full">
+                                                {{ $perfil['rotulo'] }}
+                                            </span>
+                                        @endif
+                                    @endforeach
                                     @if($usuario->solicitacao_obs)
                                         <p class="text-xs text-gray-500 mt-1 whitespace-normal max-w-[12rem]">{{ $usuario->solicitacao_obs }}</p>
                                     @endif
@@ -95,6 +102,17 @@
                                         <form method="POST" action="{{ route('portal.usuarios.funcoes', $usuario) }}"
                                               class="mt-2 space-y-1.5">
                                             @csrf @method('PATCH')
+                                            <p class="text-[11px] font-semibold uppercase tracking-wider text-gray-400">Perfil</p>
+                                            @foreach($perfis as $chave => $perfil)
+                                                <label class="flex items-center gap-2 text-xs text-gray-700">
+                                                    <input type="checkbox" name="perfis[]" value="{{ $chave }}"
+                                                           @checked(in_array($chave, $perfisDoUsuario))
+                                                           @disabled($perfil['fixo'] ?? false)
+                                                           class="rounded border-gray-300 text-brand-600 focus:ring-brand-500 disabled:opacity-60">
+                                                    {{ $perfil['rotulo'] }}
+                                                </label>
+                                            @endforeach
+                                            <p class="text-[11px] font-semibold uppercase tracking-wider text-gray-400 pt-1.5">Funções</p>
                                             @foreach($funcoes as $chave => $funcao)
                                                 <label class="flex items-center gap-2 text-xs text-gray-700">
                                                     <input type="checkbox" name="funcoes[]" value="{{ $chave }}"
@@ -103,7 +121,7 @@
                                                     {{ $funcao['rotulo'] }}
                                                 </label>
                                             @endforeach
-                                            <button type="submit" class="btn btn-secondary btn-sm mt-1">Salvar funções</button>
+                                            <button type="submit" class="btn btn-secondary btn-sm mt-1">Salvar</button>
                                         </form>
                                     </details>
                                 @endif

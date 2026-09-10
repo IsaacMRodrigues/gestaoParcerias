@@ -272,6 +272,30 @@ OSC é organização, e organização tem equipe. O vínculo mora em **`users.os
 
 ## O que foi feito
 
+- [2026-09-10] **Perfil no cadastro de usuário da OSC** (`OscUsuarioController`, `portal/usuarios/*`)
+  - Módulo 1, item 1.2.3 (Membros): "CPF, nome completo, telefone, e-mail, cargo/função, **Perfil (com
+    várias opções e podendo marcar mais de 01)**". O campo de perfil não existia — a conta nascia
+    sempre `membro_osc`, e nada disso aparecia em tela
+  - **Perfil ≠ função**, e agora são dois blocos separados no formulário: a *função* (`osc_*`) diz o
+    que a pessoa pode **fazer** no portal; o *perfil* diz o que ela **é** na organização e é ele que
+    sai impresso como papel de assinatura no rodapé do que ela assinar
+  - `User::PERFIS_OSC` — **Membro da OSC** (fixo, é a identidade da conta) e **Contador** ("elabora
+    planilhas orçamentárias e presta contas", conforme a lista oficial de perfis do módulo 1)
+  - **Os demais perfis do sistema não são oferecidos**, e é deliberado: todos abrem módulos da
+    Administração. Concedê-los pela tela da OSC deixaria o responsável legal nomear alguém da própria
+    entidade Administrador Setorial. O **Responsável Legal** também fica fora — não é integrante da
+    equipe, é o titular do cadastro (`oscs.user_id`), e oferecê-lo criaria um selo que não confere
+    poder nenhum (submeter, recorrer e assinar seguem presos à titularidade)
+  - **Fronteira reforçada**: `temAcessoInterno()` passou a olhar o vínculo antes do papel — quem tem
+    `osc_id` não é servidor, tenha o perfil que tiver. Sem isso, o Contador (perfil que existe dos
+    dois lados) atravessaria para as telas da Administração
+  - O carimbo de assinatura passa a preferir o perfil **específico**: quem é "Membro da OSC" e
+    "Contador" assina como Contador — o papel genérico acompanha todos e sozinho não diz nada
+  - A listagem da equipe mostra os perfis de cada um (era sempre "Membro") e o mesmo formulário que
+    já trocava as funções passa a trocar o perfil
+  - Conferido no navegador: cadastrada uma contadora pelo formulário do portal, ela nasce com
+    `contador` + `membro_osc`, entra no portal e é **barrada no `/dashboard`**, devolvida ao portal
+
 - [2026-09-09] **A SCP deixou de enviar o processo para si mesma** (`TramitacaoController`, `processos/show`)
   - Relatado em teste: a etapa 2 do Planejamento manda o processo "para a SCP" — que é quem já está
     com ele. São duas etapas seguidas do mesmo setor (2: analisar o Ofício e o Termo de Referência;

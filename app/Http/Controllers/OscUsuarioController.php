@@ -37,6 +37,7 @@ class OscUsuarioController extends Controller
             'osc'      => $osc,
             'usuarios' => $usuarios,
             'funcoes'  => User::FUNCOES_OSC,
+            'perfis'   => User::PERFIS_OSC,
         ]);
     }
 
@@ -47,6 +48,7 @@ class OscUsuarioController extends Controller
         return view('portal.usuarios.create', [
             'osc'     => $osc,
             'funcoes' => User::FUNCOES_OSC,
+            'perfis'  => User::PERFIS_OSC,
         ]);
     }
 
@@ -66,11 +68,16 @@ class OscUsuarioController extends Controller
             // para conceder à conta nova uma permissão da Prefeitura.
             'funcoes'   => ['nullable', 'array'],
             'funcoes.*' => ['string', Rule::in(array_keys(User::FUNCOES_OSC))],
+            // Mesma razão: os perfis do sistema abrem módulos da Administração,
+            // e só os desta lista existem do lado da OSC.
+            'perfis'    => ['nullable', 'array'],
+            'perfis.*'  => ['string', Rule::in(array_keys(User::PERFIS_OSC))],
         ], [
             'name.required'     => 'Informe o nome do integrante.',
             'email.unique'      => 'Já existe uma conta com este e-mail.',
             'password.required' => 'Defina uma senha inicial para o integrante.',
             'funcoes.*.in'      => 'Função fora das que você pode conceder.',
+            'perfis.*.in'       => 'Perfil fora dos que você pode conceder.',
         ]);
 
         $usuario = User::create([
@@ -89,10 +96,13 @@ class OscUsuarioController extends Controller
             'solicitacao_obs' => $request->cargo,
         ]);
 
-        // O papel diz de quem a pessoa é ("equipe desta OSC"); as funções dizem o
-        // que ela faz, e vão na conta, não no papel — cada integrante tem a sua
+        // Três camadas, e cada uma responde a uma pergunta diferente: o papel
+        // 'membro_osc' diz de quem a pessoa é ("equipe desta OSC") e nunca
+        // falta; os demais perfis dizem o que ela é na organização e saem
+        // impressos como papel de assinatura; as funções dizem o que ela pode
+        // fazer, e vão na conta, não no papel — cada integrante tem a sua
         // combinação, e criar um papel por combinação não terminaria nunca.
-        $usuario->assignRole('membro_osc');
+        $usuario->syncRoles($this->perfisMarcados($request));
         $usuario->syncPermissions($request->input('funcoes', []));
 
         return redirect()->route('portal.usuarios.index')->with('success',
@@ -121,13 +131,33 @@ class OscUsuarioController extends Controller
         $request->validate([
             'funcoes'   => ['nullable', 'array'],
             'funcoes.*' => ['string', Rule::in(array_keys(User::FUNCOES_OSC))],
+            'perfis'    => ['nullable', 'array'],
+            'perfis.*'  => ['string', Rule::in(array_keys(User::PERFIS_OSC))],
         ], [
             'funcoes.*.in' => 'Função fora das que você pode conceder.',
+            'perfis.*.in'  => 'Perfil fora dos que você pode conceder.',
         ]);
 
+        $usuario->syncRoles($this->perfisMarcados($request));
         $usuario->syncPermissions($request->input('funcoes', []));
 
-        return back()->with('success', "Funções de {$usuario->name} atualizadas.");
+        return back()->with('success', "Perfil e funções de {$usuario->name} atualizados.");
+    }
+
+    /**
+     * Perfis a gravar: os marcados, sempre com 'membro_osc' junto.
+     *
+     * O papel de equipe não é opcional — é ele que diz que a conta pertence a
+     * esta OSC e não à Administração. Um formulário devolvido sem ele (caixa
+     * desmarcada no navegador, POST forjado) deixaria a pessoa sem papel
+     * nenhum, e uma conta sem papel não é de lado nenhum.
+     */
+    private function perfisMarcados(Request $request): array
+    {
+        return array_values(array_unique([
+            'membro_osc',
+            ...$request->input('perfis', []),
+        ]));
     }
 
     /**

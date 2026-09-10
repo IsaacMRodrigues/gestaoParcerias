@@ -11,7 +11,11 @@
             return null;
         }
 
-        $papel = $u->roles->first()?->name;
+        /* Quem tem mais de um perfil assina pelo mais específico: "Membro da
+           OSC" é a identidade de quem é da equipe e acompanha todos os
+           outros, e sozinho não diz nada sobre quem assinou. */
+        $papel = ($u->roles->first(fn ($r) => $r->name !== 'membro_osc')
+            ?? $u->roles->first())?->name;
         $cargo = $papel ? (\App\Models\User::$roleLabels[$papel] ?? null) : null;
         $cargo = $cargo ?: ($u->setor ? (\App\Models\Processo::SETORES[$u->setor] ?? null) : null);
 
