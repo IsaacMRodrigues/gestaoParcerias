@@ -90,6 +90,14 @@ return new class extends Migration
                 continue;
             }
 
+            // O nome de usuário também é único, e pode já estar com outra
+            // conta: em produção a Saúde foi aberta com outro e-mail e este
+            // mesmo login. Insistir quebraria a migração no meio — e a
+            // Secretaria já tem quem responda por ela, que era o ponto.
+            if ($login && User::where('login', $login)->exists()) {
+                continue;
+            }
+
             $usuario = User::create([
                 'name'            => $nome,
                 'email'           => $email,
