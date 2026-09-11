@@ -272,6 +272,17 @@ OSC é organização, e organização tem equipe. O vínculo mora em **`users.os
 
 ## O que foi feito
 
+- [2026-09-11] **Olho de exibir senha na tela de entrada** (`components/input-senha`, `auth/login`)
+  - Senha se digita às cegas, e no celular ou num teclado desconhecido o erro só aparece depois de a
+    entrada ser recusada — com a conta um passo mais perto do bloqueio a cada tentativa
+  - Componente `<x-input-senha>`: envolve o campo, reserva o lugar do botão (`pr-11`, senão o texto
+    passa por baixo do ícone) e troca o `type` por Alpine. **Começa sempre oculto** — senha à mostra
+    por padrão exporia quem abre a tela diante de outra pessoa, que é o caso comum num balcão
+  - O ícone acompanha a ação: olho aberto quando está oculta (clique para ver), olho cortado quando
+    está à mostra. `tabindex="-1"` para o botão não entrar no caminho do Tab entre senha e "Entrar"
+  - Conferido com clique de verdade em navegador: `password → text → password`
+  - Só a tela de entrada por ora; os demais campos de senha (cadastros, redefinição) seguem sem o olho
+
 - [2026-09-11] **Dos treze perfis do convenente ficaram quatro** (`User::PERFIS_OSC`, `RolesSeeder`)
   - A lista veio inteira da tela de referência, e a maior parte descreve trabalho que esta parceria
     não tem — licitação da organização, órgão de controle próprio, relatoria de agenda, ordenação de

@@ -30,11 +30,7 @@
                 @endif
             </div>
 
-            <x-text-input id="password" class="block mt-1.5 w-full py-2.5"
-                            type="password"
-                            name="password"
-                            required autocomplete="current-password"
-                            placeholder="••••••••" />
+            <x-input-senha id="password" class="mt-1.5" required placeholder="••••••••" />
 
             <x-input-error :messages="$errors->get('password')" class="mt-2" />
         </div>
