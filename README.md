@@ -272,6 +272,20 @@ OSC é organização, e organização tem equipe. O vínculo mora em **`users.os
 
 ## O que foi feito
 
+- [2026-09-11] **O cadastro da equipe da OSC parou de perguntar as funções** (`OscUsuarioController`,
+  `portal/usuarios/*`)
+  - Com o campo Perfil no ar, o formulário pedia duas coisas para a mesma pessoa: quinze perfis e,
+    logo abaixo, quatro caixas de função. E perguntava cedo demais — quem abre a conta ainda não sabe
+    o que a pessoa vai pegar, e a resposta errada era uma conta que só olha
+  - Quem entra **já entra podendo trabalhar**: as quatro funções são concedidas no cadastro. O que
+    vincula juridicamente a organização (submeter, protocolar recurso, contra-assinar o Termo) nunca
+    esteve nessas caixas — é do responsável legal, por titularidade
+  - **Restringir continua possível**, pela listagem da equipe, quando houver motivo. A coluna Funções
+    passa a dizer "Todas as funções" no caso normal e só desenha selos quando alguém está
+    restringido — repetir quatro selos em toda linha enchia a coluna sem dizer nada
+  - Conferido no navegador: conta criada sem marcar função nenhuma nasce com as quatro permissões
+    `osc_*` e o perfil escolhido
+
 - [2026-09-10] **Os treze perfis do convenente** (`User::PERFIS_OSC`, `RolesSeeder`, `portal/usuarios/*`)
   - O `.docx` do módulo 1 tem o mesmo texto do `.txt`, mas traz **três imagens que o `.txt` não tinha**.
     A tabela de 21 perfis já estava toda no sistema (conferida uma a uma); o que faltava estava na

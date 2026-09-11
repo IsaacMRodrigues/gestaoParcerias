@@ -46,9 +46,8 @@ class OscUsuarioController extends Controller
         $osc = $this->oscDoResponsavel();
 
         return view('portal.usuarios.create', [
-            'osc'     => $osc,
-            'funcoes' => User::FUNCOES_OSC,
-            'perfis'  => User::PERFIS_OSC,
+            'osc'    => $osc,
+            'perfis' => User::PERFIS_OSC,
         ]);
     }
 
@@ -65,18 +64,13 @@ class OscUsuarioController extends Controller
             'cargo'    => ['nullable', 'string', 'max:100'],
             'password' => ['required', 'confirmed', Rules\Password::defaults()],
             // A lista permitida vem do servidor: sem isto bastaria forjar o POST
-            // para conceder à conta nova uma permissão da Prefeitura.
-            'funcoes'   => ['nullable', 'array'],
-            'funcoes.*' => ['string', Rule::in(array_keys(User::FUNCOES_OSC))],
-            // Mesma razão: os perfis do sistema abrem módulos da Administração,
-            // e só os desta lista existem do lado da OSC.
+            // para conceder à conta nova um perfil da Administração.
             'perfis'    => ['nullable', 'array'],
             'perfis.*'  => ['string', Rule::in(array_keys(User::PERFIS_OSC))],
         ], [
             'name.required'     => 'Informe o nome do integrante.',
             'email.unique'      => 'Já existe uma conta com este e-mail.',
             'password.required' => 'Defina uma senha inicial para o integrante.',
-            'funcoes.*.in'      => 'Função fora das que você pode conceder.',
             'perfis.*.in'       => 'Perfil fora dos que você pode conceder.',
         ]);
 
@@ -96,14 +90,19 @@ class OscUsuarioController extends Controller
             'solicitacao_obs' => $request->cargo,
         ]);
 
-        // Três camadas, e cada uma responde a uma pergunta diferente: o papel
-        // 'membro_osc' diz de quem a pessoa é ("equipe desta OSC") e nunca
-        // falta; os demais perfis dizem o que ela é na organização e saem
-        // impressos como papel de assinatura; as funções dizem o que ela pode
-        // fazer, e vão na conta, não no papel — cada integrante tem a sua
-        // combinação, e criar um papel por combinação não terminaria nunca.
+        // O papel 'membro_osc' diz de quem a pessoa é ("equipe desta OSC") e
+        // nunca falta; os demais perfis dizem o que ela é na organização e saem
+        // impressos como papel de assinatura.
         $usuario->syncRoles($this->perfisMarcados($request));
-        $usuario->syncPermissions($request->input('funcoes', []));
+
+        // Quem entra já entra podendo trabalhar. O cadastro perguntava, uma a
+        // uma, quais das quatro funções conceder — e perguntava cedo demais:
+        // quem abre a conta ainda não sabe o que a pessoa vai pegar, e a
+        // resposta errada era uma conta que só olha. Restringir continua
+        // possível pela listagem da equipe, quando houver motivo. O que
+        // vincula juridicamente a organização — submeter, recorrer,
+        // contra-assinar — nunca esteve aqui: é do responsável legal.
+        $usuario->syncPermissions(array_keys(User::FUNCOES_OSC));
 
         return redirect()->route('portal.usuarios.index')->with('success',
             "Acesso criado para {$usuario->name}. Já pode entrar com o e-mail e a senha definida.");

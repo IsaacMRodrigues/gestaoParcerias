@@ -90,17 +90,27 @@
                                          não há o que marcar nem por que desmarcar. --}}
                                     <span class="text-xs text-gray-500">Todas as funções</span>
                                 @else
-                                    @php $marcadas = $usuario->permissions->pluck('name')->all(); @endphp
+                                    @php
+                                        $marcadas = $usuario->permissions->pluck('name')->all();
+                                        // Quem entra recebe as quatro: repetir os quatro selos em
+                                        // toda linha enche a coluna sem dizer nada. Os selos passam
+                                        // a valer para o que é exceção — a equipe restringida.
+                                        $todas = count(array_diff(array_keys($funcoes), $marcadas)) === 0;
+                                    @endphp
                                     <details class="group">
                                         <summary class="cursor-pointer select-none marker:content-none
                                                         text-xs text-gray-600 hover:text-gray-900">
-                                            @forelse($marcadas as $chave)
-                                                <span class="inline-block px-2 py-0.5 mb-1 mr-1 bg-slate-100 text-slate-700 rounded">
-                                                    {{ $funcoes[$chave]['rotulo'] ?? $chave }}
-                                                </span>
-                                            @empty
-                                                <span class="italic text-gray-400">Só acompanha</span>
-                                            @endforelse
+                                            @if($todas)
+                                                <span class="text-gray-500">Todas as funções</span>
+                                            @else
+                                                @forelse($marcadas as $chave)
+                                                    <span class="inline-block px-2 py-0.5 mb-1 mr-1 bg-slate-100 text-slate-700 rounded">
+                                                        {{ $funcoes[$chave]['rotulo'] ?? $chave }}
+                                                    </span>
+                                                @empty
+                                                    <span class="italic text-gray-400">Só acompanha</span>
+                                                @endforelse
+                                            @endif
                                             <span class="block mt-0.5 font-semibold text-brand-700 group-open:hidden">Alterar</span>
                                         </summary>
                                         <form method="POST" action="{{ route('portal.usuarios.funcoes', $usuario) }}"
