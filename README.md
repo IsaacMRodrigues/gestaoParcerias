@@ -272,6 +272,19 @@ OSC é organização, e organização tem equipe. O vínculo mora em **`users.os
 
 ## O que foi feito
 
+- [2026-09-11] **Os botões do trâmite pararam de oferecer envio ao próprio setor** (`Processo`,
+  `processos/show`)
+  - O registro da movimentação já tratava as duas etapas seguidas da SCP como continuação, não como
+    remessa ([2026-09-09]), mas os **rótulos dos botões** continuavam montados sobre o nome do setor
+    de destino: na etapa de análise lia-se "✓ Aprovar e liberar para a SCP", com o processo já na SCP
+  - `Processo::segueNoMesmoSetor()` e `voltaNoMesmoSetor()`: quando a etapa vizinha é do mesmo setor,
+    o botão diz "Aprovar e seguir para a próxima etapa" / "Concluir a etapa e seguir", e a devolução
+    diz "Voltar à etapa anterior, no próprio setor"
+  - A etapa de análise ganhou uma linha de apoio: aprovando, o processo continua com o mesmo setor na
+    etapa seguinte — não há encaminhamento a registrar
+  - Conferido no navegador, autenticado como a SCP, no processo 0210.0002.2026.01, que está
+    exatamente nessa etapa
+
 - [2026-09-11] **O cadastro da equipe da OSC parou de perguntar as funções** (`OscUsuarioController`,
   `portal/usuarios/*`)
   - Com o campo Perfil no ar, o formulário pedia duas coisas para a mesma pessoa: quinze perfis e,

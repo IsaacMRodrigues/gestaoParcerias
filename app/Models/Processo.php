@@ -317,6 +317,26 @@ class Processo extends Model
     }
 
     /**
+     * A etapa seguinte é do mesmo setor que está com o processo?
+     *
+     * Acontece no Planejamento: a SCP analisa o Ofício e o Termo de Referência
+     * e, logo depois, protocola o Pedido de Parecer à SEPLAN. O trâmite já
+     * trata isso como continuação, e não como remessa (ver
+     * TramitacaoController::chegadaNoProprioSetor); os botões precisam dizer o
+     * mesmo, senão convidam a SCP a "encaminhar para a SCP".
+     */
+    public function segueNoMesmoSetor(): bool
+    {
+        return $this->proximoSetor() !== null && $this->proximoSetor() === $this->setor_atual;
+    }
+
+    /** A etapa anterior é do mesmo setor — a devolução não muda de mãos. */
+    public function voltaNoMesmoSetor(): bool
+    {
+        return $this->setorAnterior() !== null && $this->setorAnterior() === $this->setor_atual;
+    }
+
+    /**
      * Pode avançar da etapa atual? (os alertas de conformidade são consultivos,
      * não bloqueiam — a UG decide encaminhar; só não avança na última etapa)
      */

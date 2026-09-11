@@ -316,7 +316,15 @@
 
                             @elseif($processo->etapaEhAnalise())
                                 {{-- Etapa de análise (SCP): definir a modalidade e APROVAR, ou REJEITAR --}}
-                                <p class="text-sm text-gray-600">Analise os documentos acima, defina a modalidade da seleção e decida:</p>
+                                <p class="text-sm text-gray-600">
+                                    Analise os documentos acima, defina a modalidade da seleção e decida:
+                                    @if($processo->segueNoMesmoSetor())
+                                        <span class="block text-xs text-gray-500 mt-0.5">
+                                            Aprovando, o processo continua com {{ \App\Models\Processo::SETORES[$processo->setor_atual] ?? $processo->setor_atual }}
+                                            na etapa seguinte — não há encaminhamento a registrar.
+                                        </span>
+                                    @endif
+                                </p>
                                 <form action="{{ route('processos.avancar', $processo) }}" method="POST" class="space-y-4"
                                       data-confirm="Aprovar com a modalidade selecionada e liberar para a próxima etapa?">
                                     @csrf
@@ -339,7 +347,11 @@
                                     </div>
                                     <button type="submit"
                                             class="btn btn-primary">
-                                        ✓ Aprovar e liberar para a {{ strtoupper($processo->proximoSetor()) }}
+                                        @if($processo->segueNoMesmoSetor())
+                                            ✓ Aprovar e seguir para a próxima etapa
+                                        @else
+                                            ✓ Aprovar e liberar para a {{ strtoupper($processo->proximoSetor()) }}
+                                        @endif
                                     </button>
                                 </form>
                                 <form action="{{ route('processos.devolver', $processo) }}" method="POST"
@@ -372,7 +384,11 @@
                                     <button type="submit"
                                             @disabled(!empty($pendencias))
                                             class="btn btn-primary">
-                                        Encaminhar para {{ \App\Models\Processo::SETORES[$processo->proximoSetor()] ?? $processo->proximoSetor() }}
+                                        @if($processo->segueNoMesmoSetor())
+                                            Concluir a etapa e seguir
+                                        @else
+                                            Encaminhar para {{ \App\Models\Processo::SETORES[$processo->proximoSetor()] ?? $processo->proximoSetor() }}
+                                        @endif
                                     </button>
                                 </form>
 
@@ -381,7 +397,9 @@
                                     <form action="{{ route('processos.devolver', $processo) }}" method="POST"
                                           class="pt-3 border-t border-gray-200 space-y-2">
                                         @csrf
-                                        <x-input-label for="motivo" value="Devolver para {{ \App\Models\Processo::SETORES[$processo->setorAnterior()] ?? $processo->setorAnterior() }} (informe o motivo)" />
+                                        <x-input-label for="motivo" :value="$processo->voltaNoMesmoSetor()
+                                            ? 'Voltar à etapa anterior, no próprio setor (informe o motivo)'
+                                            : 'Devolver para ' . (\App\Models\Processo::SETORES[$processo->setorAnterior()] ?? $processo->setorAnterior()) . ' (informe o motivo)'" />
                                         <div class="flex gap-2">
                                             <input id="motivo" name="parecer" type="text"
                                                    class="flex-1 border-gray-300 rounded-md shadow-sm focus:ring-accent-500 focus:border-accent-500 text-sm"
