@@ -272,6 +272,22 @@ OSC é organização, e organização tem equipe. O vínculo mora em **`users.os
 
 ## O que foi feito
 
+- [2026-09-11] **Dos treze perfis do convenente ficaram quatro** (`User::PERFIS_OSC`, `RolesSeeder`)
+  - A lista veio inteira da tela de referência, e a maior parte descreve trabalho que esta parceria
+    não tem — licitação da organização, órgão de controle próprio, relatoria de agenda, ordenação de
+    despesa. Em quinze caixas, os perfis que importam se escondiam entre os que nunca seriam marcados
+  - Ficam **Membro da OSC** (fixo), **Cadastrador de Proposta**, **Cadastrador de Prestação de Contas**
+    e **Cadastrador de Usuário do Ente/Entidade**. O Contador sai da lista da OSC e segue existindo do
+    lado da Administração, que é de onde ele veio
+  - A migração **só apaga o que ninguém tem**: papel atribuído explica assinatura já dada, e some com
+    ela. Conferido antes nos dois ambientes — nenhum usuário com qualquer um dos dez
+  - Os blocos de perfil voltaram a uma coluna só, e o aviso sobre módulos inexistentes ficou restrito
+    ao que sobrou dele: a Prestação de Contas
+  - **Achado no caminho**: `User::where(...)->delete()` não dispara os eventos do modelo, então as
+    contas de teste que apaguei nos dias anteriores deixaram vínculos órfãos em `model_has_roles` —
+    e foi por causa deles que dois papéis resistiram à primeira remoção. Limpos (15 vínculos de papel
+    e 6 de permissão, todos apontando para usuários que não existem mais). Só no banco local
+
 - [2026-09-11] **Os botões do trâmite pararam de oferecer envio ao próprio setor** (`Processo`,
   `processos/show`)
   - O registro da movimentação já tratava as duas etapas seguidas da SCP como continuação, não como

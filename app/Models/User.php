@@ -55,16 +55,6 @@ class User extends Authenticatable
         'cadastrador_proposta'             => 'Cadastrador de Proposta',
         'cadastrador_prestacao_contas'     => 'Cadastrador de Prestação de Contas',
         'cadastrador_usuario_entidade'     => 'Cadastrador de Usuário do Ente/Entidade',
-        'cadastrador_usuario_orgao_controle' => 'Cadastrador de Usuário de Órgão de Controle do Convenente',
-        'comissao_licitacao'               => 'Comissão de Licitação',
-        'consultas_basicas_proponente'     => 'Consultas Básicas do Proponente',
-        'fiscal_convenente'                => 'Fiscal do Convenente',
-        'gestor_instrumento_convenente'    => 'Gestor de Instrumento do Convenente',
-        'gestor_financeiro_convenente'     => 'Gestor Financeiro do Convenente',
-        'operador_financeiro_convenente'   => 'Operador Financeiro do Convenente',
-        'ordenador_despesa_convenente'     => 'Ordenador de Despesa do Convenente',
-        'orgao_controle_convenente'        => 'Órgão de Controle do Convenente',
-        'relator_agenda'                   => 'Relator da Agenda',
     ];
 
     /**
@@ -82,16 +72,6 @@ class User extends Authenticatable
         'cadastrador_proposta',
         'cadastrador_prestacao_contas',
         'cadastrador_usuario_entidade',
-        'cadastrador_usuario_orgao_controle',
-        'comissao_licitacao',
-        'consultas_basicas_proponente',
-        'fiscal_convenente',
-        'gestor_instrumento_convenente',
-        'gestor_financeiro_convenente',
-        'operador_financeiro_convenente',
-        'ordenador_despesa_convenente',
-        'orgao_controle_convenente',
-        'relator_agenda',
     ];
 
     /**
@@ -102,10 +82,12 @@ class User extends Authenticatable
      * FAZER no portal; o perfil diz o que ela É na organização — e é ele que
      * sai impresso como papel de assinatura no rodapé do que ela assinar.
      *
-     * A lista é curta de propósito. Os demais perfis do sistema abrem módulos
-     * da Administração, e concedê-los a quem representa uma entidade privada
-     * daria à OSC acesso à mesa de quem a fiscaliza. O Responsável Legal
-     * também fica fora: ele não é integrante da equipe, é o titular do
+     * A lista é curta de propósito, e foi encurtada de novo: a tela de
+     * referência trazia treze perfis, e destes ficaram os que descrevem
+     * trabalho que existe nesta parceria. Os demais perfis do sistema abrem
+     * módulos da Administração, e concedê-los a quem representa uma entidade
+     * privada daria à OSC acesso à mesa de quem a fiscaliza. O Responsável
+     * Legal também fica fora: ele não é integrante da equipe, é o titular do
      * cadastro da organização (`oscs.user_id`) — ver ehResponsavelLegalOsc().
      */
     public const PERFIS_OSC = [
@@ -125,50 +107,6 @@ class User extends Authenticatable
         'cadastrador_usuario_entidade' => [
             'rotulo' => 'Cadastrador de Usuário do Ente/Entidade',
             'ajuda'  => 'Administra as contas de acesso da própria organização.',
-        ],
-        'cadastrador_usuario_orgao_controle' => [
-            'rotulo' => 'Cadastrador de Usuário de Órgão de Controle',
-            'ajuda'  => 'Abre acesso para quem fiscaliza a organização por fora.',
-        ],
-        'comissao_licitacao' => [
-            'rotulo' => 'Comissão de Licitação',
-            'ajuda'  => 'Conduz as compras e contratações feitas com o recurso da parceria.',
-        ],
-        'consultas_basicas_proponente' => [
-            'rotulo' => 'Consultas Básicas do Proponente',
-            'ajuda'  => 'Só acompanha: vê o andamento e não altera nada.',
-        ],
-        'contador' => [
-            'rotulo' => 'Contador',
-            'ajuda'  => 'Elabora as planilhas orçamentárias e presta contas pela organização.',
-        ],
-        'fiscal_convenente' => [
-            'rotulo' => 'Fiscal do Convenente',
-            'ajuda'  => 'Acompanha a execução do objeto pela organização.',
-        ],
-        'gestor_instrumento_convenente' => [
-            'rotulo' => 'Gestor de Instrumento do Convenente',
-            'ajuda'  => 'Responde pelo termo assinado, do início ao encerramento.',
-        ],
-        'gestor_financeiro_convenente' => [
-            'rotulo' => 'Gestor Financeiro do Convenente',
-            'ajuda'  => 'Responde pela conta específica e pelo uso do repasse.',
-        ],
-        'operador_financeiro_convenente' => [
-            'rotulo' => 'Operador Financeiro do Convenente',
-            'ajuda'  => 'Registra os pagamentos e as despesas da parceria.',
-        ],
-        'ordenador_despesa_convenente' => [
-            'rotulo' => 'Ordenador de Despesa do Convenente',
-            'ajuda'  => 'Autoriza a despesa antes do pagamento.',
-        ],
-        'orgao_controle_convenente' => [
-            'rotulo' => 'Órgão de Controle do Convenente',
-            'ajuda'  => 'Instância de controle interno da própria organização.',
-        ],
-        'relator_agenda' => [
-            'rotulo' => 'Relator da Agenda',
-            'ajuda'  => 'Relata os compromissos e prazos da parceria.',
         ],
     ];
 

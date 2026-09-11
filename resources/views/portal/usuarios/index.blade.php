@@ -117,7 +117,7 @@
                                               class="mt-2 space-y-1.5">
                                             @csrf @method('PATCH')
                                             <p class="text-[11px] font-semibold uppercase tracking-wider text-gray-400">Perfil</p>
-                                            <div class="grid sm:grid-cols-2 gap-x-4 gap-y-1">
+                                            <div class="space-y-1">
                                                 @foreach($perfis as $chave => $perfil)
                                                     <label class="flex items-start gap-2 text-xs text-gray-700">
                                                         <input type="checkbox" name="perfis[]" value="{{ $chave }}"

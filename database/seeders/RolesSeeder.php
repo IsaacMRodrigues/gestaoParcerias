@@ -101,16 +101,6 @@ class RolesSeeder extends Seeder
         'cadastrador_proposta'               => [],
         'cadastrador_prestacao_contas'       => [],
         'cadastrador_usuario_entidade'       => [],
-        'cadastrador_usuario_orgao_controle' => [],
-        'comissao_licitacao'                 => [],
-        'consultas_basicas_proponente'       => [],
-        'fiscal_convenente'                  => [],
-        'gestor_instrumento_convenente'      => [],
-        'gestor_financeiro_convenente'       => [],
-        'operador_financeiro_convenente'     => [],
-        'ordenador_despesa_convenente'       => [],
-        'orgao_controle_convenente'          => [],
-        'relator_agenda'                     => [],
     ];
 
     public function run(): void
