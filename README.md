@@ -272,6 +272,20 @@ OSC é organização, e organização tem equipe. O vínculo mora em **`users.os
 
 ## O que foi feito
 
+- [2026-09-15] **A SCP passou a ter acesso à Execução** (`RolesSeeder`, `layouts/sidebar`)
+  - O item Execução do menu é travado só pela permissão `execucao`, que estava em cinco perfis (Gestor
+    da Parceria, Responsável da UG, Administrador e os dois Auditores). A SCP — que conduz a parceria
+    do edital ao empenho e segue nela na execução — via o cadeado
+  - **Acesso completo, por decisão da gestão**: o Analista Técnico do SCP ganhou `execucao` e, com
+    ela, ver, lançar, editar e apagar repasses e despesas. Não há separação entre consulta e
+    alteração nesse módulo; a alternativa de abrir só para consulta foi apresentada e preterida
+  - Migração roda o `RolesSeeder`, para a mudança chegar a bancos que já existem
+  - **Dica do cadeado corrigida**: dizia "abra pela tela do Instrumento", mas a execução do
+    instrumento está atrás da mesma permissão — mandava a uma porta também trancada. Agora diz
+    "Seu perfil não tem acesso à Execução", como os demais itens travados
+  - Seguem sem acesso: SEPLAN, Procuradoria, Prefeito e o Analista de Prestação de Contas Prévia
+  - Conferido com login real: a SCP abre "Parcerias em Execução"; a SEPLAN recebe 403 e vê a dica nova
+
 - [2026-09-15] **Módulo 3: ajustes do portal, RG no cadastro e as sete declarações da habilitação**
   (`Peca`, `Osc`, `portal/*`, `pecas/_checklist`, `Support/Extenso`)
   - **Leitura das imagens do módulo 3.** As especificações trazem 13 capturas; nove do 3.3 são telas

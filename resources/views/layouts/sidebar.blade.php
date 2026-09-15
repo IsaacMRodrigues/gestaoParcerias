@@ -218,7 +218,10 @@
                 Execução
             </a>
         @else
-            <span class="{{ $soon }}" title="Repasses, despesas e saldo: abra pela tela do Instrumento.">
+            {{-- A dica dizia "abra pela tela do Instrumento", mas a execução do
+                 instrumento está atrás da mesma permissão: mandava o usuário a
+                 uma porta que também estava trancada. --}}
+            <span class="{{ $soon }}" title="Seu perfil não tem acesso à Execução.">
                 <span class="{{ $etapa }} {{ $etapaSem }}">4</span> Execução<svg class="ml-auto w-3.5 h-3.5 text-gray-300 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M16.5 10.5V6.75a4.5 4.5 0 10-9 0v3.75m-.75 11.25h10.5a2.25 2.25 0 002.25-2.25v-6.75a2.25 2.25 0 00-2.25-2.25H6.75a2.25 2.25 0 00-2.25 2.25v6.75a2.25 2.25 0 002.25 2.25z"/></svg>
             </span>
         @endcan

@@ -65,7 +65,10 @@ class RolesSeeder extends Seeder
         'chefe_setor'                      => ['usuarios_setor'],
         // Prefeito: assina o Termo de Adjudicação e Homologação que encerra a Seleção.
         'prefeito_municipal'               => ['chamamentos', 'formalizacao'],
-        'analista_tecnico_scp'             => ['planejamento', 'chamamentos'],
+        // A SCP conduz a parceria do edital ao empenho e segue nela na
+        // execução — emite a OP, analisa as alterações. Sem `execucao`, via o
+        // item com cadeado justamente na fase em que continua trabalhando.
+        'analista_tecnico_scp'             => ['planejamento', 'chamamentos', 'execucao'],
         'responsavel_publicacao'           => ['chamamentos'],
         'analista_orcamentario_financeiro' => ['planejamento'],
         'analista_juridico'                => ['pareceres_juridico', 'planejamento'],
