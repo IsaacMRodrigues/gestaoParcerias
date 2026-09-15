@@ -41,6 +41,8 @@ class OscRegistroController extends Controller
                 'phone'       => $request->osc_phone,
                 'resp_nome'   => $request->resp_nome,
                 'resp_cpf'    => $request->cpf,
+                'resp_rg'       => $request->resp_rg,
+                'resp_rg_orgao' => $request->resp_rg_orgao,
                 'resp_email'  => $request->email,
                 'resp_phone'  => $request->resp_phone,
                 'logradouro'  => $request->logradouro,

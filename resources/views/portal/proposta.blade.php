@@ -4,7 +4,7 @@
         <div class="flex items-start justify-between">
             <div>
                 <p class="text-sm text-brand-600 mb-1">
-                    <a href="{{ route('portal.minhas-propostas') }}" class="hover:underline">← Minhas Propostas</a>
+                    <a href="{{ route('portal.minhas-propostas') }}" class="hover:underline">← Minhas inscrições</a>
                 </p>
                 <h1 class="text-2xl font-bold text-gray-900">{{ $proposta->titulo }}</h1>
                 <p class="text-sm text-gray-500 mt-1">
@@ -124,9 +124,13 @@
                             <input type="file" name="arquivo" required
                                    class="block w-full text-sm text-gray-600 file:mr-3 file:py-1.5 file:px-3 file:rounded file:border-0 file:text-xs file:bg-brand-50 file:text-brand-700 hover:file:bg-brand-100">
                         </div>
+                        {{-- "Anexar", não "Enviar": o botão junta um arquivo à proposta.
+                             Enviar a proposta é outro ato — "Submeter Proposta", no topo
+                             da página —, e a manifestação de interesse já dizia "Anexar"
+                             para a mesma ação. --}}
                         <button type="submit"
                                 class="btn btn-primary">
-                            Enviar
+                            Anexar
                         </button>
                     </form>
                     @error('arquivo') <p class="text-red-600 text-xs mt-2">{{ $message }}</p> @enderror

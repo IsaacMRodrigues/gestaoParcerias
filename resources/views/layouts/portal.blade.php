@@ -121,7 +121,7 @@
         <div class="h-1.5 bg-gradient-to-r from-brand-600 via-brand-500 to-accent-500"></div>
 
         {{-- Barra do portal.
-             Os rótulos longos ("Chamamentos abertos", "Minhas participações")
+             Os rótulos longos ("Chamamentos abertos", "Minhas inscrições")
              quebravam em duas linhas: cinco links não cabiam na largura, e cada
              um terminava com uma altura, desalinhando a barra inteira.
 
@@ -137,7 +137,7 @@
             ];
 
             if (auth()->check() && auth()->user()->ehRepresentanteOsc()) {
-                $navItens[] = ['url' => route('portal.minhas-propostas'), 'rotulo' => 'Minhas participações', 'ativo' => request()->routeIs('portal.minhas*')];
+                $navItens[] = ['url' => route('portal.minhas-propostas'), 'rotulo' => 'Minhas inscrições', 'ativo' => request()->routeIs('portal.minhas*')];
                 $navItens[] = ['url' => route('portal.manifestacoes.index'), 'rotulo' => 'Manifestar interesse', 'ativo' => request()->routeIs('portal.manifestacoes.*')];
             }
 

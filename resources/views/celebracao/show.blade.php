@@ -39,7 +39,7 @@
             @if($ehOsc)
                 <div>
                     <p class="text-sm text-brand-600">
-                        <a href="{{ route('portal.minhas-propostas') }}" class="hover:underline">← Minhas Propostas</a>
+                        <a href="{{ route('portal.minhas-propostas') }}" class="hover:underline">← Minhas inscrições</a>
                     </p>
                     <h1 class="text-2xl font-bold text-gray-900 mt-1">Celebração da Parceria</h1>
                     <p class="text-sm text-gray-500 mt-0.5">{{ $proposta->titulo }}</p>

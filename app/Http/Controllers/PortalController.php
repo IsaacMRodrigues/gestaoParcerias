@@ -115,8 +115,12 @@ class PortalController extends Controller
         $emChamamento = $propostas->filter(fn ($p) => $p->chamamento?->tipo === 'chamamento_publico')->values();
         $emDispensa   = $propostas->reject(fn ($p) => $p->chamamento?->tipo === 'chamamento_publico')->values();
 
+        // A manifestação deferida que já gerou parceria aparece pela proposta
+        // que nasceu dela. Com as duas na mesma lista (ver a view), mostrar
+        // ambas repetiria a mesma iniciativa na tela.
         $manifestacoes = ManifestacaoInteresse::with('orgao')
             ->where('osc_id', $osc->id)
+            ->whereNull('proposta_id')
             ->latest()
             ->get();
 

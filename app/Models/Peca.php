@@ -84,6 +84,16 @@ class Peca extends Model
             ['chave' => 'convocacao_osc',        'rotulo' => 'Convocação da OSC (modelo padrão)',                      'tipo' => 'modelo',  'obrigatorio' => true],
             ['chave' => 'plano_trabalho',        'rotulo' => 'Plano de Trabalho (enviado pela OSC)',                   'tipo' => 'arquivo', 'obrigatorio' => true],
             ['chave' => 'docs_habilitacao',      'rotulo' => 'Documentos de habilitação (enviados pela OSC)',          'tipo' => 'arquivo', 'obrigatorio' => true],
+            // As sete declarações da habilitação (módulo 3.2, itens 7 a 12 e 15).
+            // Vêm preenchidas com o cadastro da OSC e só o responsável legal
+            // assina — ver DECLARACOES_DO_RESPONSAVEL_LEGAL.
+            ['chave' => 'decl_art7',             'rotulo' => 'Declaração — art. 7º, XXXIII, CF/88 (não emprega menor)',                 'tipo' => 'modelo', 'obrigatorio' => true],
+            ['chave' => 'decl_art23',            'rotulo' => 'Declaração — art. 23, XIV, Decreto Municipal 048/2020 (sem contas pendentes)', 'tipo' => 'modelo', 'obrigatorio' => true],
+            ['chave' => 'decl_art33',            'rotulo' => 'Declaração — art. 33, V, "c", Lei 13.019/2014 (condições materiais)',     'tipo' => 'modelo', 'obrigatorio' => true],
+            ['chave' => 'decl_art34',            'rotulo' => 'Declaração — art. 34, VII, Lei 13.019/2014 (sede e tempo de existência)', 'tipo' => 'modelo', 'obrigatorio' => true],
+            ['chave' => 'decl_art39',            'rotulo' => 'Declaração — art. 39, Lei 13.019/2014 (ausência de vedações)',            'tipo' => 'modelo', 'obrigatorio' => true],
+            ['chave' => 'decl_art45',            'rotulo' => 'Declaração — art. 45, Lei 13.019/2014 (vedações de remuneração)',         'tipo' => 'modelo', 'obrigatorio' => true],
+            ['chave' => 'decl_autenticidade',    'rotulo' => 'Declaração de autenticidade dos documentos',                              'tipo' => 'modelo', 'obrigatorio' => true],
             ['chave' => 'aprovacao_plano',       'rotulo' => 'Aprovação do Plano de Trabalho (modelo padrão)',         'tipo' => 'modelo',  'obrigatorio' => true],
             ['chave' => 'pedido_parecer',        'rotulo' => 'Pedido de Parecer Financeiro (modelo padrão)',           'tipo' => 'modelo',  'obrigatorio' => true],
             ['chave' => 'parecer_financeiro',    'rotulo' => 'Parecer Financeiro (modelo padrão)',                     'tipo' => 'modelo',  'obrigatorio' => true],
@@ -241,6 +251,13 @@ class Peca extends Model
         'convocacao_osc'         => 'ug',
         'plano_trabalho'         => 'osc',
         'docs_habilitacao'       => 'osc',
+        'decl_art7'              => 'osc',
+        'decl_art23'             => 'osc',
+        'decl_art33'             => 'osc',
+        'decl_art34'             => 'osc',
+        'decl_art39'             => 'osc',
+        'decl_art45'             => 'osc',
+        'decl_autenticidade'     => 'osc',
         'aprovacao_plano'        => 'ug',
         'pedido_parecer'         => 'scp',
         'parecer_financeiro'     => 'seplan',
@@ -263,6 +280,13 @@ class Peca extends Model
         'convocacao_osc'         => 0,
         'plano_trabalho'         => 1,
         'docs_habilitacao'       => 1,
+        'decl_art7'              => 1,
+        'decl_art23'             => 1,
+        'decl_art33'             => 1,
+        'decl_art34'             => 1,
+        'decl_art39'             => 1,
+        'decl_art45'             => 1,
+        'decl_autenticidade'     => 1,
         'aprovacao_plano'        => 2,
         'pedido_parecer'         => 3,
         'parecer_financeiro'     => 4,
@@ -298,6 +322,21 @@ class Peca extends Model
     ];
 
     /**
+     * Declarações que só o responsável legal da OSC assina.
+     *
+     * Todas abrem com "Eu, [nome], na qualidade de representante legal" ou são
+     * feitas "sob as penas da Lei". A equipe da OSC pode revisar o texto, mas
+     * assinar é afirmar em nome de quem responde pela entidade — deixar um
+     * integrante fazê-lo seria uma pessoa declarando, sob pena de falsidade,
+     * no lugar de outra. É a mesma régua de submeter proposta e contra-assinar
+     * o Termo (ver User::ehResponsavelLegalOsc).
+     */
+    public const DECLARACOES_DO_RESPONSAVEL_LEGAL = [
+        'decl_art7', 'decl_art23', 'decl_art33', 'decl_art34',
+        'decl_art39', 'decl_art45', 'decl_autenticidade',
+    ];
+
+    /**
      * Itens (chave) que podem ser "puxados" do módulo Gestão de Parcerias —
      * ou seja, preenchidos a partir dos documentos que a OSC já enviou na proposta.
      */
@@ -320,6 +359,32 @@ HTML;
      * Texto-modelo HTML das peças "modelo" da Seleção/Documentação
      * (semeado no `sincronizar`). Usa editor rico (TinyMCE) na UI.
      */
+    /*
+     * Declarações da habilitação (módulo 3.2). Diferem dos demais modelos em
+     * duas coisas: são documentos da OSC, e por isso não levam o cabeçalho com
+     * o brasão da Prefeitura; e vêm preenchidas com o cadastro da organização,
+     * em vez de "XXXXX" — o que faltar no cadastro aparece como "XXXXX".
+     *
+     * O texto é o dos modelos entregues pela SCP, palavra por palavra — são
+     * declarações feitas sob as penas da lei, e a redação é de quem as
+     * escreveu. Só mudou o que estava errado de fato:
+     * - art. 39, VI: o modelo citava o "Município de Montes Claros" (fora
+     *   copiado de outro município); aqui é São Gonçalo do Rio Abaixo;
+     * - art. 23: "prestação de contas HÁ nenhum órgão" → "A nenhum órgão";
+     * - art. 34: "ativo há de ___ anos" → "ativo há ___ anos".
+     * E o que era lacuna virou dado: os traços e colchetes dão lugar ao
+     * cadastro, e "NOME / Presidente" dá lugar ao nome do representante legal
+     * — quem declara o faz "na qualidade de representante legal", que nem
+     * sempre é o presidente.
+     */
+    private const DECL_QUALIFICACAO = 'Eu, <strong>{{rep_nome}}</strong>, portador (a) da carteira de identidade n.º {{rep_rg}} expedida pela {{rep_rg_orgao}}, inscrito (a) no CPF sob o n.º {{rep_cpf}}, na qualidade de representante legal da <strong>{{osc_nome}}</strong>, sediada no(a) {{osc_endereco}}, Bairro {{osc_bairro}}, CEP: {{osc_cep}}, inscrita no CNPJ sob o n.º {{osc_cnpj}}';
+
+    private const DECL_PENAS = '<p>A presente declaração é feita sob as penas da Lei, assumindo a declarante toda e qualquer responsabilidade, seja na esfera penal, civil ou administrativa, em caso de sua falsidade.</p>';
+
+    private const DECL_FECHO = '<p>Por ser verdade, firmo a presente declaração.</p>'
+        . '<p style="text-align:right">São Gonçalo do Rio Abaixo, {{data_extenso}}.</p>'
+        . '<p style="text-align:center"><br>{{rep_nome}}<br>Representante legal — {{osc_nome}}</p>';
+
     public const MODELO = [
         'chamamento_publico' => [
             'edital' => self::CABECALHO . <<<'HTML'
@@ -612,6 +677,76 @@ HTML,
         // Celebração: apenas os modelos próprios desta etapa. Os demais são
         // reaproveitados de outras categorias/motores em `modeloTexto()`.
         'celebracao' => [
+            'decl_art7' => '<p style="text-align:center"><strong>DECLARAÇÃO</strong><br>(art. 7º, XXXIII, CF/88)</p>'
+                . '<p>' . self::DECL_QUALIFICACAO . ', declaro que não EMPREGAMOS MENOR DE IDADE, conforme dispõe o art. 7º, XXXIII, CF/88.</p>'
+                . self::DECL_PENAS . self::DECL_FECHO,
+
+            // Correção: "HÁ nenhum órgão" → "A nenhum órgão" (e o acento de ÓRGÃO).
+            'decl_art23' => '<p style="text-align:center"><strong>DECLARAÇÃO</strong><br>(art. 23, XIV, decreto municipal 048/2020)</p>'
+                . '<p>' . self::DECL_QUALIFICACAO . ', declaro que NÃO DEVEMOS PRESTAÇÃO DE CONTAS A NENHUM ÓRGÃO DE QUALQUER ESFERA, OU ENTIDADE.</p>'
+                . self::DECL_PENAS . self::DECL_FECHO,
+
+            // A OSC adota uma das três redações. No sistema não há "versão
+            // final" separada — o texto é editado ali mesmo —, então a
+            // observação diz o que fazer em vez de pedir que seja suprimida.
+            'decl_art33' => <<<'HTML'
+<p style="text-align:center"><strong>DECLARAÇÃO</strong><br>(art. 33, V, c, da Lei nº 13.019 de 2014)</p>
+<p>Declaro, em conformidade com o art. 33, caput, inciso V, alínea “c”, da Lei nº 13.019, de 2014, que a <strong>{{osc_nome}}</strong>:</p>
+<ul><li>dispõe de instalações e outras condições materiais para o desenvolvimento das atividades ou projetos previstos na parceria e o cumprimento das metas estabelecidas.</li></ul>
+<p style="text-align:center">OU</p>
+<ul><li>Irei contratar ou irei adquirir com recursos da parceria as condições materiais para o desenvolvimento das atividades ou projetos previstos na parceria e o cumprimento das metas estabelecidas.</li></ul>
+<p style="text-align:center">OU</p>
+<ul><li>dispõe de instalações e outras condições materiais para o desenvolvimento das atividades ou projetos previstos na parceria e o cumprimento das metas estabelecidas, bem como, ainda, irei contratar ou irei adquirir com recursos da parceria outros bens para tanto.</li></ul>
+<p><em>OBS.: A organização da sociedade civil adotará uma das três redações acima, conforme a sua situação. Apague as duas que não se aplicam e esta observação antes de assinar.</em></p>
+HTML
+                . '<p style="text-align:right">São Gonçalo do Rio Abaixo, {{data_extenso}}.</p>'
+                . '<p style="text-align:center"><br>{{rep_nome}}<br>Representante legal — {{osc_nome}}</p>',
+
+            // Correção: "ativo há de ___ anos" → "ativo há ___ anos".
+            'decl_art34' => <<<'HTML'
+<p style="text-align:center"><strong>DECLARAÇÃO</strong><br>(Art. 34, VII da Lei n° 13.019/2014)</p>
+<p>DECLARO para os devidos fins que, a Organização da Sociedade Civil (OSC), denominada de <strong>{{osc_nome}}</strong>, se encontra sediada à {{osc_logradouro}}, nº {{osc_numero}}, Bairro {{osc_bairro}}, na cidade de {{osc_cidade}}/{{osc_uf}}, conforme comprovante de conta (água, luz ou telefone)/contrato de locação, em anexo, inscrita no CNPJ nº {{osc_cnpj}}, ativo há {{osc_anos}} ({{osc_anos_extenso}}) anos de existência, confirmando a veracidade das informações confirmadas no comprovante de Cadastro Nacional de Pessoas Jurídicas, emitido pela Receita Federal do Brasil.</p>
+HTML
+                . self::DECL_FECHO,
+
+            // Correção: o inciso VI citava o "Município de Montes Claros" — o
+            // modelo fora copiado de outro município.
+            'decl_art39' => <<<'HTML'
+<p style="text-align:center"><strong>DECLARAÇÃO</strong><br>(art. 39 da Lei n° 13.019/2014)</p>
+<p>Declaro, para fins de habilitação, que a <strong>{{osc_nome}}</strong> e seus dirigentes, não incorrem em quaisquer das vedações previstas no art. 39 da Lei Federal nº 13.019, de 2014 e, portanto:</p>
+<p>I – é regularmente constituída (ou, se estrangeira, está autorizada a funcionar no território nacional);</p>
+<p>II – não é omissa no dever de prestar contas de parceria anteriormente celebrada;</p>
+<p>III – não tem como dirigente membro de Poder ou do Ministério Público, ou dirigente de órgão ou entidade da administração pública estadual ou, seus respectivos cônjuges ou companheiros, bem como parentes em linha reta, colateral ou por afinidade, até o segundo grau;</p>
+<p>IV – não teve contas rejeitadas pela administração pública nos últimos cinco anos ou, foram sanadas as irregularidades que motivaram a rejeição e quitados os débitos eventualmente imputados ou, foi reconsiderada ou revista a decisão pela rejeição ou, a apreciação das contas encontra-se pendente de decisão sobre recurso com efeito suspensivo;</p>
+<p>V – não há punição vigente de suspensão de participação em licitação e impedimento de contratar com a administração ou, de declaração de inidoneidade para licitar ou contratar com a administração pública;</p>
+<p>VI – não há punição vigente de suspensão de participação em chamamento público e impedimento de celebrar parceria ou contrato com órgão ou entidade da administração pública do Município de São Gonçalo do Rio Abaixo;</p>
+<p>VII – não há punição vigente de declaração de inidoneidade para participar de chamamento público e de celebrar parcerias ou contratos com órgãos ou entidades de qualquer esfera de governo;</p>
+<p>VIII – não teve contas de parceria julgadas irregulares ou rejeitadas por Tribunal ou Conselho de Contas de qualquer esfera da Federação, em decisão irrecorrível, nos últimos 8 (oito) anos;</p>
+<p>IX – não tem, entre seus dirigentes, pessoa:</p>
+<p>a) cujas contas relativas a parcerias tenham sido julgadas irregulares ou rejeitadas por Tribunal ou Conselho de Contas de qualquer esfera da Federação, em decisão irrecorrível, nos últimos 8 (oito) anos;</p>
+<p>b) julgada responsável por falta grave e inabilitada para o exercício de cargo em comissão ou função de confiança, enquanto durar a inabilitação;</p>
+<p>c) considerada responsável por ato de improbidade, enquanto durarem os prazos estabelecidos nos incisos I, II e III do art. 12 da Lei no 8.429, de 2 de junho de 1992.</p>
+HTML
+                . self::DECL_FECHO,
+
+            'decl_art45' => '<p style="text-align:center"><strong>DECLARAÇÃO</strong><br>(art. 45, da Lei Federal nº. 13.019/2014 e art. 17 e 41ss do Decreto Municipal nº. 048/2020)</p>'
+                . '<p>' . self::DECL_QUALIFICACAO . ', declaro que não serão remunerados, a qualquer título, com os recursos repassados:</p>'
+                . <<<'HTML'
+<p>a) membro de Poder ou do Ministério Público ou dirigente de órgão ou de entidade da Administração Pública Municipal;</p>
+<p>b) servidor ou empregado público, inclusive aquele que exerça cargo em comissão ou função de confiança, de órgão ou entidade da administração pública municipal celebrante, ressalvadas as hipóteses previstas em lei específica e na lei de diretrizes orçamentárias; e</p>
+<p>c) pessoas naturais condenadas pela prática de crimes contra a Administração Pública ou contra o patrimônio público, de crimes eleitorais para os quais a lei comine pena privativa de liberdade, e de crimes de lavagem ou de ocultação de bens, direito e valores.</p>
+<p>d) cônjuge, companheiro ou parente, em linha reta ou colateral, por consanguinidade e ou afinidade, até o terceiro grau, de agente público que exerça, na administração pública municipal, cargo de natureza especial, cargo de provimento em comissão ou função de direção, chefia ou assessoramento.</p>
+HTML
+                . self::DECL_PENAS . self::DECL_FECHO,
+
+            'decl_autenticidade' => <<<'HTML'
+<p style="text-align:center"><strong>DECLARAÇÃO DE AUTENTICIDADE DOS DOCUMENTOS</strong></p>
+<p>DECLARO, sob as penas do art. 299 do Código Penal, serem autênticos e verdadeiros todos os documentos e cópias juntados ao processo nº {{numero_processo}}, observadas as demais determinações previstas na legislação.</p>
+<p>DECLARO, ainda, que são de minha exclusiva responsabilidade a conformidade entre os dados informados e a documentação enviada, bem como a conservação, em papel, dos originais dos documentos digitalizados até que decaia o direito de revisão dos atos praticados no processo, para que, caso solicitado, sejam apresentados para qualquer tipo de conferência.</p>
+HTML
+                . '<p style="text-align:right">São Gonçalo do Rio Abaixo, {{data_extenso}}.</p>'
+                . '<p style="text-align:center"><br>{{rep_nome}}<br>Representante legal — {{osc_nome}}</p>',
+
             'convocacao_osc' => self::CABECALHO . <<<'HTML'
 <p style="text-align:right">São Gonçalo do Rio Abaixo, XX de XXXX de 20XX.</p>
 <p style="text-align:center"><strong>CONVOCAÇÃO PARA APRESENTAÇÃO DE PLANO DE TRABALHO E DOCUMENTOS DE HABILITAÇÃO</strong></p>
@@ -1307,7 +1442,19 @@ HTML,
             return false;
         }
 
-        return $this->selecaoSetorAssinatura() !== 'osc' || $this->oscDona($user, $dono);
+        if ($this->selecaoSetorAssinatura() !== 'osc') {
+            return true;
+        }
+
+        return $this->oscDona($user, $dono)
+            && (!$this->ehDeclaracaoDoResponsavelLegal() || $user->ehResponsavelLegalOsc());
+    }
+
+    /** Declaração que só o responsável legal da OSC pode assinar. */
+    public function ehDeclaracaoDoResponsavelLegal(): bool
+    {
+        return $this->categoria === 'celebracao'
+            && in_array($this->chave, self::DECLARACOES_DO_RESPONSAVEL_LEGAL, true);
     }
 
     /**
@@ -1500,8 +1647,10 @@ HTML,
     private static function tokensDe(Model $pecaable): array
     {
         $osc = $instrumento = $orgao = $processo = null;
+        $cadastro = null;
 
         if ($pecaable instanceof Proposta) {
+            $cadastro    = $pecaable->osc;
             $osc         = $pecaable->osc?->name;
             $instrumento = $pecaable->instrumento?->numero;
             $orgao       = $pecaable->chamamento?->programa?->orgao?->name;
@@ -1528,9 +1677,52 @@ HTML,
             // são preenchidos por quem redige.
             'op_numero'        => null,
             'responsavel_nome' => null,
+            'data_extenso'     => now()->locale('pt_BR')->translatedFormat('j \\d\\e F \\d\\e Y'),
         ];
 
+        // Dados do cadastro da OSC — é deles que as declarações da habilitação
+        // se preenchem. Só a Proposta tem OSC; nos demais donos ficam "XXXXX".
+        $tokens += self::tokensDaOsc($cadastro);
+
         return array_map(fn ($v) => filled($v) ? $v : 'XXXXX', $tokens);
+    }
+
+    /**
+     * Marcadores do cadastro da OSC e do seu representante legal.
+     *
+     * O tempo de existência vem da data de abertura do CNPJ, e sai também por
+     * extenso porque a declaração do art. 34 o pede assim ("ativo há 12 (doze)
+     * anos"). Endereço sai inteiro (logradouro, número e complemento) para as
+     * declarações que trazem a sede numa lacuna só, e por partes para a do art.
+     * 34, que separa o número.
+     */
+    private static function tokensDaOsc(?Osc $osc): array
+    {
+        $anos = $osc?->data_abertura ? (int) $osc->data_abertura->diffInYears(now()) : null;
+
+        $endereco = collect([
+            $osc?->logradouro,
+            filled($osc?->numero) ? 'nº ' . $osc->numero : null,
+            $osc?->complemento,
+        ])->filter(fn ($parte) => filled($parte))->implode(', ');
+
+        return [
+            'osc_nome'          => $osc?->name,
+            'osc_cnpj'          => $osc?->cnpj,
+            'osc_endereco'      => $endereco,
+            'osc_logradouro'    => $osc?->logradouro,
+            'osc_numero'        => $osc?->numero,
+            'osc_bairro'        => $osc?->bairro,
+            'osc_cep'           => $osc?->cep,
+            'osc_cidade'        => $osc?->cidade,
+            'osc_uf'            => $osc?->estado,
+            'osc_anos'          => $anos,
+            'osc_anos_extenso'  => $anos === null ? null : \App\Support\Extenso::inteiro($anos),
+            'rep_nome'          => $osc?->resp_nome,
+            'rep_cpf'           => $osc?->resp_cpf,
+            'rep_rg'            => $osc?->resp_rg,
+            'rep_rg_orgao'      => $osc?->resp_rg_orgao,
+        ];
     }
 
     /**

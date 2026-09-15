@@ -233,6 +233,13 @@
                                     </svg>
                                     {{ $trava }}
                                 </p>
+                            @elseif($peca->ehDeclaracaoDoResponsavelLegal() && $podePreencher && ! $podeAssinar)
+                                {{-- Sem esta linha, o integrante da equipe via a declaração
+                                     aberta para revisão e nenhum botão de assinar — e não
+                                     tinha como saber se era defeito ou regra. --}}
+                                <p class="text-xs text-gray-500 mt-0.5">
+                                    Você pode revisar o texto; quem assina é o responsável legal da OSC.
+                                </p>
                             @elseif($emAndamento)
                                 <p class="text-xs text-accent-700 mt-0.5">Preenchido — falta assinar</p>
                             @endif

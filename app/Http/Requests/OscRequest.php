@@ -38,6 +38,8 @@ class OscRequest extends FormRequest
 
             'resp_nome'        => ['nullable', 'string', 'max:255'],
             'resp_cpf'         => ['nullable', 'string', 'max:14'],
+            'resp_rg'          => ['nullable', 'string', 'max:20'],
+            'resp_rg_orgao'    => ['nullable', 'string', 'max:30'],
             'resp_email'       => ['nullable', 'email', 'max:255'],
             'resp_phone'       => ['nullable', 'string', 'max:20'],
             'resp_cep'         => ['nullable', 'string', 'max:9'],
@@ -75,6 +77,8 @@ class OscRequest extends FormRequest
             'estado'     => 'estado (UF)',
             'resp_nome'  => 'nome do responsável',
             'resp_cpf'   => 'CPF do responsável',
+            'resp_rg'    => 'RG do responsável',
+            'resp_rg_orgao' => 'órgão expedidor do RG',
             'resp_email' => 'e-mail do responsável',
             'resp_phone' => 'telefone do responsável',
         ];

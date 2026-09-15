@@ -136,6 +136,25 @@
                                    class="block w-full border-gray-300 rounded-lg shadow-sm focus:ring-brand-500 focus:border-brand-500 text-sm">
                         </div>
                     </div>
+                    {{-- Vai para as declarações da habilitação, que abrem com
+                         "portador(a) da carteira de identidade nº ___ expedida pela ___". --}}
+                    <div class="grid grid-cols-2 gap-4">
+                        <div>
+                            <label for="resp_rg" class="block text-sm font-medium text-gray-700 mb-1">RG</label>
+                            <input id="resp_rg" name="resp_rg" type="text" maxlength="20"
+                                   value="{{ old('resp_rg') }}" placeholder="MG-00.000.000"
+                                   class="block w-full border-gray-300 rounded-lg shadow-sm focus:ring-brand-500 focus:border-brand-500 text-sm @error('resp_rg') border-red-300 @enderror">
+                            @error('resp_rg') <p class="text-red-600 text-xs mt-1">{{ $message }}</p> @enderror
+                        </div>
+                        <div>
+                            <label for="resp_rg_orgao" class="block text-sm font-medium text-gray-700 mb-1">Órgão expedidor</label>
+                            <input id="resp_rg_orgao" name="resp_rg_orgao" type="text" maxlength="30"
+                                   value="{{ old('resp_rg_orgao') }}" placeholder="SSP/MG"
+                                   class="block w-full border-gray-300 rounded-lg shadow-sm focus:ring-brand-500 focus:border-brand-500 text-sm @error('resp_rg_orgao') border-red-300 @enderror">
+                            @error('resp_rg_orgao') <p class="text-red-600 text-xs mt-1">{{ $message }}</p> @enderror
+                        </div>
+                    </div>
+                    <p class="-mt-2 text-xs text-gray-500">RG e órgão expedidor preenchem automaticamente as declarações da habilitação.</p>
                     <div>
                         <label for="email" class="block text-sm font-medium text-gray-700 mb-1">E-mail (será seu login) *</label>
                         <input id="email" name="email" type="email" required

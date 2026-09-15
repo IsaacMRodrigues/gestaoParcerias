@@ -24,7 +24,7 @@ class Osc extends Model
         'user_id',
         'name', 'tipo', 'cnpj', 'data_abertura', 'cnae_primario', 'cnae_secundario', 'email', 'phone',
         'cep', 'logradouro', 'numero', 'complemento', 'bairro', 'cidade', 'estado',
-        'resp_nome', 'resp_cpf', 'resp_email', 'resp_phone',
+        'resp_nome', 'resp_cpf', 'resp_rg', 'resp_rg_orgao', 'resp_email', 'resp_phone',
         'resp_cep', 'resp_logradouro', 'resp_numero', 'resp_complemento', 'resp_bairro', 'resp_cidade', 'resp_estado',
         'anexo_cartao_cnpj', 'resp_anexo_cpf', 'resp_anexo_comprovante', 'resp_anexo_ata',
         'status',

@@ -272,6 +272,39 @@ OSC é organização, e organização tem equipe. O vínculo mora em **`users.os
 
 ## O que foi feito
 
+- [2026-09-15] **Módulo 3: ajustes do portal, RG no cadastro e as sete declarações da habilitação**
+  (`Peca`, `Osc`, `portal/*`, `pecas/_checklist`, `Support/Extenso`)
+  - **Leitura das imagens do módulo 3.** As especificações trazem 13 capturas; nove do 3.3 são telas
+    *deste* sistema com anotações da cliente. Dali saíram os ajustes abaixo. A anotação sobre
+    "Quero Participar" descrevia o comportamento atual (abre a proposta existente) e não pedia mudança
+  - **Portal:** "Minhas participações" → **"Minhas inscrições"** (barra, título, links de volta e o
+    passo 3 da página inicial). Manifestação de interesse e dispensa/inexigibilidade viraram **uma
+    seção só** — "para a UG é DI e para a OSC é MI". A manifestação deferida que já gerou parceria sai
+    da lista (`proposta_id` preenchido) e aparece pela proposta, senão a mesma iniciativa repetia. O
+    botão dos documentos da proposta passou de **"Enviar" para "Anexar"**, como já era na manifestação
+  - **Cadastro da OSC:** `oscs.resp_rg` e `oscs.resp_rg_orgao`, no auto-cadastro e na edição pela
+    Prefeitura. Nulos — o módulo 1 não lista o RG, e as OSCs antigas não o têm
+  - **Sete declarações** entram no checklist da Celebração, etapa 1, setor OSC, obrigatórias: arts. 7º,
+    23, 33, 34, 39 e 45 e a de autenticidade. Vêm **preenchidas com o cadastro** (novos marcadores em
+    `tokensDaOsc()`: representante, RG, CPF, sede, CNPJ, anos de existência) e sem o brasão da
+    Prefeitura — são documentos da OSC. A do art. 34 calcula "ativo há 12 (doze) anos" pela data de
+    abertura do CNPJ; o extenso é `App\Support\Extenso`, porque a extensão intl existe em produção
+    mas não no ambiente de desenvolvimento
+  - **Texto palavra por palavra dos modelos da SCP**, com só três correções: art. 39, VI citava o
+    **"Município de Montes Claros"** (modelo copiado de outro município) → São Gonçalo do Rio Abaixo;
+    art. 23 "HÁ nenhum órgão" → "A nenhum órgão"; art. 34 "ativo há de" → "ativo há". Lacunas viraram
+    dado, e "NOME / Presidente" virou o nome do representante legal — quem declara o faz nessa
+    qualidade, que nem sempre é a de presidente
+  - **Só o responsável legal assina** (`Peca::DECLARACOES_DO_RESPONSAVEL_LEGAL`). A equipe revisa o
+    texto; assinar seria declarar, sob pena de falsidade, no lugar de outra pessoa. A tela diz isso ao
+    integrante, que antes veria o documento aberto e nenhum botão
+  - Não bloqueiam parcerias em andamento: `pendenciasCelebracao()` só cobra as peças da etapa atual
+  - **Conferido:** as sete saem sem marcador sobrando e com as correções; auto-cadastro real grava
+    RG e órgão; em celebração temporária, o integrante vê as sete com o aviso e **zero** botões de
+    assinar, e o responsável legal vê **sete**. Registros de teste removidos, sem vínculo órfão
+  - **Fica para depois:** a oitava declaração (manutenção da capacidade técnica) pertence às
+    Alterações da Parceria (3.3), tela que ainda não existe
+
 - [2026-09-11] **Olho de exibir senha na tela de entrada** (`components/input-senha`, `auth/login`)
   - Senha se digita às cegas, e no celular ou num teclado desconhecido o erro só aparece depois de a
     entrada ser recusada — com a conta um passo mais perto do bloqueio a cada tentativa

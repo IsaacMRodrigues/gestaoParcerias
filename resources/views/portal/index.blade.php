@@ -177,7 +177,7 @@
                 @foreach([
                     ['1', 'Cadastre sua OSC', 'Crie o cadastro da sua organização com CNPJ e dados do representante legal.'],
                     ['2', 'Envie sua proposta', 'Escolha um chamamento aberto e submeta a proposta com o plano de trabalho.'],
-                    ['3', 'Acompanhe', 'Veja o andamento da análise e os resultados em "Minhas Propostas".'],
+                    ['3', 'Acompanhe', 'Veja o andamento da análise e os resultados em "Minhas inscrições".'],
                 ] as [$n, $titulo, $desc])
                     <div class="bg-white rounded-xl border border-gray-200 p-6">
                         <span class="w-9 h-9 rounded-lg bg-brand-600 text-white font-bold flex items-center justify-center">{{ $n }}</span>

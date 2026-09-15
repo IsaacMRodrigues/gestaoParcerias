@@ -99,6 +99,21 @@
             <x-input-error :messages="$errors->get('resp_cpf')" class="mt-2" />
         </div>
     </div>
+    {{-- Vai para as declarações da habilitação ("carteira de identidade nº ___ expedida pela ___"). --}}
+    <div class="grid grid-cols-2 gap-4 mt-4">
+        <div>
+            <x-input-label for="resp_rg" value="RG" />
+            <x-text-input id="resp_rg" name="resp_rg" type="text" class="mt-1 block w-full"
+                          value="{{ old('resp_rg', $osc?->resp_rg) }}" placeholder="MG-00.000.000" maxlength="20" />
+            <x-input-error :messages="$errors->get('resp_rg')" class="mt-2" />
+        </div>
+        <div>
+            <x-input-label for="resp_rg_orgao" value="Órgão expedidor" />
+            <x-text-input id="resp_rg_orgao" name="resp_rg_orgao" type="text" class="mt-1 block w-full"
+                          value="{{ old('resp_rg_orgao', $osc?->resp_rg_orgao) }}" placeholder="SSP/MG" maxlength="30" />
+            <x-input-error :messages="$errors->get('resp_rg_orgao')" class="mt-2" />
+        </div>
+    </div>
     <div class="grid grid-cols-2 gap-4 mt-4">
         <div>
             <x-input-label for="resp_email" value="E-mail" />
