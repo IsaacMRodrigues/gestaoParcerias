@@ -23,6 +23,7 @@ use App\Http\Controllers\OscUsuarioController;
 use App\Http\Controllers\ManifestacaoAnaliseController;
 use App\Http\Controllers\ManifestacaoController;
 use App\Http\Controllers\PortalController;
+use App\Http\Controllers\PrestacaoContasController;
 use App\Http\Controllers\ProcessoController;
 use App\Http\Controllers\ProcessoPecaController;
 use App\Http\Controllers\ProfileController;
@@ -318,6 +319,19 @@ Route::middleware('auth')->group(function () {
     // Trâmite da Celebração — acessível aos setores internos e à OSC da parceria
     // A listagem é só dos setores que participam do fluxo (checagem no controller);
     // as telas por proposta seguem abertas à OSC da parceria.
+    // Prestação de contas (módulo 3.4) — a OSC monta e envia, a SCP analisa
+    // previamente, a Unidade Gestora decide. A autorização é por setor da vez,
+    // no controller, como na Celebração: a tela serve aos dois lados.
+    Route::get('prestacao-contas', [PrestacaoContasController::class, 'index'])->name('prestacao-contas.index');
+    Route::post('prestacao-contas', [PrestacaoContasController::class, 'store'])->name('prestacao-contas.store');
+    Route::get('prestacao-contas/{pc}', [PrestacaoContasController::class, 'show'])->name('prestacao-contas.show');
+    Route::put('prestacao-contas/{pc}', [PrestacaoContasController::class, 'atualizar'])->name('prestacao-contas.atualizar');
+    Route::post('prestacao-contas/{pc}/bens', [PrestacaoContasController::class, 'adicionarBem'])->name('prestacao-contas.bens.store');
+    Route::delete('prestacao-contas/{pc}/bens/{bem}', [PrestacaoContasController::class, 'removerBem'])->name('prestacao-contas.bens.destroy');
+    Route::post('prestacao-contas/{pc}/avancar', [PrestacaoContasController::class, 'avancar'])->name('prestacao-contas.avancar');
+    Route::post('prestacao-contas/{pc}/devolver', [PrestacaoContasController::class, 'devolver'])->name('prestacao-contas.devolver');
+    Route::post('prestacao-contas/{pc}/concluir', [PrestacaoContasController::class, 'concluir'])->name('prestacao-contas.concluir');
+
     Route::get('celebracao', [CelebracaoController::class, 'index'])->name('celebracao.index');
     Route::get('celebracao/{proposta}', [CelebracaoController::class, 'show'])->name('celebracao.show');
     Route::post('celebracao/{proposta}/anexos', [CelebracaoController::class, 'adicionarAnexo'])->name('celebracao.anexos.store');

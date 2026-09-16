@@ -57,7 +57,7 @@ class RolesSeeder extends Seeder
         'administrador_setorial'           => ['*'],
         'auditor_externo'                  => ['*'], // somente leitura
         'auditor_geral'                    => ['*'], // somente leitura
-        'responsavel_unidade_gestora'      => ['planejamento', 'chamamentos', 'propostas', 'pareceres_decisao', 'formalizacao', 'ordem_pagamento', 'execucao', 'usuarios_setor'],
+        'responsavel_unidade_gestora'      => ['planejamento', 'chamamentos', 'propostas', 'pareceres_decisao', 'formalizacao', 'ordem_pagamento', 'execucao', 'prestacao_contas', 'usuarios_setor'],
         // Chefia de setor: não abre módulo nenhum, só a porta de cadastrar a
         // própria equipe. Acumula-se com o perfil técnico da pessoa (o chefe da
         // PJ é 'analista_juridico' + 'chefe_setor'), para que a chefia não vire
@@ -68,7 +68,9 @@ class RolesSeeder extends Seeder
         // A SCP conduz a parceria do edital ao empenho e segue nela na
         // execução — emite a OP, analisa as alterações. Sem `execucao`, via o
         // item com cadeado justamente na fase em que continua trabalhando.
-        'analista_tecnico_scp'             => ['planejamento', 'chamamentos', 'execucao'],
+        // A prestação de contas passa pela SCP (análise prévia) antes de ir à
+        // Unidade Gestora — módulo 3.4.
+        'analista_tecnico_scp'             => ['planejamento', 'chamamentos', 'execucao', 'prestacao_contas'],
         'responsavel_publicacao'           => ['chamamentos'],
         'analista_orcamentario_financeiro' => ['planejamento'],
         'analista_juridico'                => ['pareceres_juridico', 'planejamento'],
@@ -76,8 +78,8 @@ class RolesSeeder extends Seeder
         'analista_aditivo_apostilamento'   => ['formalizacao'],
         'analista_prestacao_contas_previa' => ['prestacao_contas'],
         'comissao_selecao'                 => ['propostas', 'pareceres_tecnico', 'pareceres_decisao'],
-        'comissao_monitoramento_avaliacao' => ['monitoramento'],
-        'gestor_parceria'                  => ['planejamento', 'monitoramento', 'execucao'],
+        'comissao_monitoramento_avaliacao' => ['monitoramento', 'prestacao_contas'],
+        'gestor_parceria'                  => ['planejamento', 'monitoramento', 'execucao', 'prestacao_contas'],
         'cadastrador'                      => ['chamamentos', 'propostas', 'formalizacao'],
         'contador'                         => ['prestacao_contas'],
         'encaminhador'                     => ['formalizacao'],

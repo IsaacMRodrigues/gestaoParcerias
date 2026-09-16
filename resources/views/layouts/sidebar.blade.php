@@ -227,7 +227,16 @@
         @endcan
 
         <span class="{{ $soon }}" title="Em breve — módulo ainda não construído"><span class="{{ $etapa }} {{ $etapaSem }}">5</span> Monitoramento<svg class="ml-auto w-3.5 h-3.5 text-gray-300 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 6v6h4.5m4.5 0a9 9 0 11-18 0 9 9 0 0118 0z"/></svg></span>
-        <span class="{{ $soon }}" title="Em breve — módulo ainda não construído"><span class="{{ $etapa }} {{ $etapaSem }}">6</span> Prestação de Contas<svg class="ml-auto w-3.5 h-3.5 text-gray-300 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 6v6h4.5m4.5 0a9 9 0 11-18 0 9 9 0 0118 0z"/></svg></span>
+        {{-- 6. Prestação de Contas --}}
+        @can('prestacao_contas')
+            @php $emPrestacao = request()->routeIs('prestacao-contas.*'); @endphp
+            <a href="{{ route('prestacao-contas.index') }}" class="{{ $link }} {{ $emPrestacao ? $on : '' }}">
+                <span class="{{ $etapa }} {{ $emPrestacao ? $etapaAtiva : $etapaOff }}">6</span>
+                Prestação de Contas
+            </a>
+        @else
+            <span class="{{ $soon }}" title="Seu perfil não tem acesso à Prestação de Contas."><span class="{{ $etapa }} {{ $etapaSem }}">6</span> Prestação de Contas<svg class="ml-auto w-3.5 h-3.5 text-gray-300 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M16.5 10.5V6.75a4.5 4.5 0 10-9 0v3.75m-.75 11.25h10.5a2.25 2.25 0 002.25-2.25v-6.75a2.25 2.25 0 00-2.25-2.25H6.75a2.25 2.25 0 00-2.25 2.25v6.75a2.25 2.25 0 002.25 2.25z"/></svg></span>
+        @endcan
 
         {{-- Cadastros --}}
         @can('cadastros')

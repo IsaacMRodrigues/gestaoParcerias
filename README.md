@@ -272,6 +272,35 @@ OSC é organização, e organização tem equipe. O vínculo mora em **`users.os
 
 ## O que foi feito
 
+- [2026-09-16] **Módulo 3.4 — Prestação de Contas** (`PrestacaoContas`, `PrestacaoDocumento`,
+  `PrestacaoContasController`, `prestacao-contas/*`)
+  - O item 6 do ciclo deixou de ser "em breve". Fluxo do módulo 3.4: a **OSC** monta e envia, a
+    **SCP** faz a análise prévia, a **Unidade Gestora** — com o Gestor da Parceria e a Comissão de
+    Monitoramento — decide
+  - **Campos, não documentos.** A cliente pediu que os modelos fossem "para eles preencherem como
+    campo" e que as planilhas "colocassem fórmula". O ofício de encaminhamento, o Relatório de
+    Execução do Objeto e Financeira e o Resumo da Folha **são gerados do que a OSC lança**, com as
+    somas prontas, e é esse texto que vai à assinatura. Cada gravação regera o documento — depois de
+    assinado, nada mais o altera
+  - **O que já existe não se digita de novo**: repasses e despesas do período vêm da Execução; as
+    metas do REO vêm do Plano de Trabalho. O que a OSC preenche é o que só o extrato mostra — saldo
+    anterior, outros créditos, tarifas, devolução — e as glosas
+  - **Contas implementadas** (as fórmulas da planilha ANEXO IV a VII): saldo = anterior + créditos −
+    débitos − ressarcido; total com pessoal (folha + encargos) e demais despesas; por natureza,
+    aprovado − executado − glosado; total dos bens = quantidade × unitário. E o **Resumo da Folha**,
+    que veio **sem nenhuma fórmula**, passa a calcular proventos, descontos, líquido e encargos
+  - Checklist com os 10 itens do módulo 3.4, mais o parecer prévio da SCP e o conclusivo da UG.
+    Cinco tabelas novas; o motor de peças ganhou a categoria `prestacao_contas`
+  - **Permissão**: `prestacao_contas` existia só em quem presta contas por ofício. Quem decide no
+    fluxo — SCP, Responsável da UG, Gestor da Parceria e Comissão de Monitoramento — via cadeado no
+    item que precisa decidir. Corrigido por migração
+  - **Conferido ponta a ponta pelo HTTP**, na parceria do teste de ontem: a OSC abre a parcial, os
+    campos gravam, o saldo calcula (R$ 41.214,50 = 1.000 + 40.000 + 250 − 35,50), o líquido da folha
+    calcula (R$ 8.490,00), o relatório sai com os quatro anexos, a OSC assina e envia, a SCP analisa
+    e a UG encerra. 34 verificações, nenhuma falha
+  - **Fica para depois**: o laudo de obra e o parecer de cada etapa seguem como texto a redigir; a
+    tabela de fotos do REO usa o anexo "documentos que comprovam a execução"
+
 - [2026-09-15] **A SCP passou a ter acesso à Execução** (`RolesSeeder`, `layouts/sidebar`)
   - O item Execução do menu é travado só pela permissão `execucao`, que estava em cinco perfis (Gestor
     da Parceria, Responsável da UG, Administrador e os dois Auditores). A SCP — que conduz a parceria

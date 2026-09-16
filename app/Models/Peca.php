@@ -115,6 +115,24 @@ class Peca extends Model
             ['chave' => 'comprovante_empenho',   'rotulo' => 'Comprovante de empenho global',                          'tipo' => 'arquivo', 'obrigatorio' => true],
         ],
 
+        // 3.4 Prestação de contas — os dez itens do checklist da OSC, mais os
+        // dois documentos de análise da Administração.
+        'prestacao_contas' => [
+            ['chave' => 'oficio_encaminhamento',  'rotulo' => 'Ofício de encaminhamento da prestação de contas (modelo padrão)', 'tipo' => 'modelo',  'obrigatorio' => true],
+            ['chave' => 'relatorio',              'rotulo' => 'Relatório de Execução do Objeto e Financeira (preenchido no Portal)', 'tipo' => 'modelo', 'obrigatorio' => true],
+            ['chave' => 'docs_execucao',          'rotulo' => 'Documentos que comprovam a execução do objeto',                  'tipo' => 'arquivo', 'obrigatorio' => true],
+            ['chave' => 'extrato_conta',          'rotulo' => 'Extrato da conta corrente do período',                           'tipo' => 'arquivo', 'obrigatorio' => true],
+            ['chave' => 'extrato_aplicacao',      'rotulo' => 'Extrato da conta de aplicação/poupança do período',              'tipo' => 'arquivo', 'obrigatorio' => true],
+            ['chave' => 'comprovantes_despesas',  'rotulo' => 'Comprovantes de despesas, em ordem cronológica',                 'tipo' => 'arquivo', 'obrigatorio' => true],
+            ['chave' => 'termo_compromisso',      'rotulo' => 'Termo de compromisso de guarda dos documentos (modelo padrão)',  'tipo' => 'modelo',  'obrigatorio' => true],
+            ['chave' => 'resumo_folha',           'rotulo' => 'Resumo da folha de pagamento (se houver despesa com pessoal)',   'tipo' => 'modelo',  'obrigatorio' => false],
+            ['chave' => 'laudo_obra',             'rotulo' => 'Laudo e relatório fotográfico de obra (se for o caso)',          'tipo' => 'modelo',  'obrigatorio' => false],
+            ['chave' => 'outros_documentos',      'rotulo' => 'Outros documentos',                                             'tipo' => 'arquivo', 'obrigatorio' => false],
+            // Análise da Administração
+            ['chave' => 'parecer_previo',         'rotulo' => 'Parecer prévio da SCP (modelo padrão)',                          'tipo' => 'modelo',  'obrigatorio' => true],
+            ['chave' => 'parecer_conclusivo',     'rotulo' => 'Parecer conclusivo da Unidade Gestora (modelo padrão)',          'tipo' => 'modelo',  'obrigatorio' => true],
+        ],
+
         // 2.3.4 Apostilamento
         'apostilamento' => [
             ['chave' => 'manifestacao_osc',          'rotulo' => 'Manifestação da OSC',                     'tipo' => 'arquivo', 'obrigatorio' => true],
@@ -303,6 +321,40 @@ class Peca extends Model
         'dados_bancarios'        => 11,
         'op_global'              => 12,
         'comprovante_empenho'    => 14,
+    ];
+
+    /**
+     * Prestação de contas: tudo o que a OSC monta fica na etapa 1; a análise
+     * prévia é da SCP e o parecer conclusivo, da Unidade Gestora.
+     */
+    public const PRESTACAO_SETOR = [
+        'oficio_encaminhamento' => 'osc',
+        'relatorio'             => 'osc',
+        'docs_execucao'         => 'osc',
+        'extrato_conta'         => 'osc',
+        'extrato_aplicacao'     => 'osc',
+        'comprovantes_despesas' => 'osc',
+        'termo_compromisso'     => 'osc',
+        'resumo_folha'          => 'osc',
+        'laudo_obra'            => 'osc',
+        'outros_documentos'     => 'osc',
+        'parecer_previo'        => 'scp',
+        'parecer_conclusivo'    => 'ug',
+    ];
+
+    public const PRESTACAO_ETAPA = [
+        'oficio_encaminhamento' => 0,
+        'relatorio'             => 0,
+        'docs_execucao'         => 0,
+        'extrato_conta'         => 0,
+        'extrato_aplicacao'     => 0,
+        'comprovantes_despesas' => 0,
+        'termo_compromisso'     => 0,
+        'resumo_folha'          => 0,
+        'laudo_obra'            => 0,
+        'outros_documentos'     => 0,
+        'parecer_previo'        => 1,
+        'parecer_conclusivo'    => 2,
     ];
 
     /**
@@ -674,6 +726,62 @@ HTML,
 <p style="text-align:center">XXXXXXXXXX<br>Procurador(a) do Município<br>Procuradoria Jurídica</p>
 HTML,
         ],
+        /*
+         * Prestação de contas. O ofício, o relatório e o resumo da folha não
+         * estão aqui: nascem dos campos preenchidos pela OSC, com as somas já
+         * feitas (ver App\Support\PrestacaoDocumento). Aqui ficam os que são
+         * texto de verdade — o compromisso de guarda, o laudo de obra e os
+         * dois pareceres da Administração.
+         */
+        'prestacao_contas' => [
+            'termo_compromisso' => <<<'HTML'
+<p style="text-align:center"><strong>TERMO DE COMPROMISSO</strong><br>(Anexo X — guarda da prestação de contas)</p>
+<p>A OSC <strong>{{osc_nome}}</strong>, estabelecida à {{osc_endereco}}, Bairro {{osc_bairro}}, na cidade de {{osc_cidade}}/{{osc_uf}}, CEP {{osc_cep}}, inscrita no CNPJ sob o nº {{osc_cnpj}}, representada por {{rep_nome}}, na qualidade de representante legal, <strong>compromete-se</strong>, durante o prazo de 10 (dez) anos, contado do dia útil subsequente ao da apresentação desta prestação de contas, a manter em seu arquivo os documentos originais que a compõem, conforme determina o art. 63 do Decreto Municipal nº 048/2020.</p>
+<p>Compromete-se, ainda, a apresentá-los à Administração Pública, aos órgãos de controle interno e externo e ao Ministério Público sempre que solicitado.</p>
+<p style="text-align:right">São Gonçalo do Rio Abaixo, {{data_extenso}}.</p>
+<p style="text-align:center"><br>{{rep_nome}}<br>Representante legal — {{osc_nome}}</p>
+HTML,
+
+            'laudo_obra' => <<<'HTML'
+<p style="text-align:center"><strong>LAUDO DE OBRA</strong><br>(Anexo VIII — Termo de Aceitação Definitiva de Obra)</p>
+<p><strong>OSC PARCEIRA:</strong> {{osc_nome}} — CNPJ {{osc_cnpj}}<br><strong>Termo nº:</strong> {{instrumento}}<br><strong>Processo nº:</strong> {{numero_processo}}</p>
+<p>Declaramos, para os devidos fins, que recebemos na presente data, em perfeitas condições de uso e funcionamento e em conformidade com o termo de parceria acima identificado, a obra XXXXX, executada no Município de São Gonçalo do Rio Abaixo.</p>
+<p><strong>LAUDO TÉCNICO — parecer e descrição:</strong></p>
+<p>XXXXX</p>
+<p style="text-align:right">São Gonçalo do Rio Abaixo, {{data_extenso}}.</p>
+<table style="width:100%;border-collapse:collapse" border="0" cellpadding="8"><tbody><tr>
+<td style="text-align:center">_______________________________<br>{{rep_nome}}<br>Representante legal — {{osc_nome}}<br>CPF {{rep_cpf}}</td>
+<td style="text-align:center">_______________________________<br>Responsável técnico<br>Registro no CREA/CAU nº XXXXX</td>
+</tr></tbody></table>
+HTML,
+
+            'parecer_previo' => self::CABECALHO . <<<'HTML'
+<p style="text-align:center"><strong>PARECER PRÉVIO DE PRESTAÇÃO DE CONTAS</strong></p>
+<p><strong>Processo nº:</strong> {{numero_processo}}<br><strong>OSC:</strong> {{osc_nome}} — CNPJ {{osc_cnpj}}<br><strong>Termo nº:</strong> {{instrumento}}<br><strong>Unidade Gestora:</strong> {{unidade_gestora}}</p>
+<p>O Setor de Convênios e Parcerias procedeu à análise prévia da prestação de contas apresentada, conferindo a documentação do checklist, os extratos bancários, os comprovantes de despesa e a conciliação do período.</p>
+<p><strong>Análise:</strong></p>
+<p>XXXXX</p>
+<p><strong>Conclusão:</strong> a prestação de contas encontra-se XXXXX (em condições de ser aprovada / em condições de ser aprovada com ressalvas / pendente de diligência), seguindo à Unidade Gestora para análise e decisão do Gestor da Parceria e da Comissão de Monitoramento e Avaliação.</p>
+<p style="text-align:right">São Gonçalo do Rio Abaixo, {{data_extenso}}.</p>
+<p style="text-align:center">XXXXX<br>Setor de Convênios e Parcerias (SCP)</p>
+HTML,
+
+            'parecer_conclusivo' => self::CABECALHO . <<<'HTML'
+<p style="text-align:center"><strong>PARECER CONCLUSIVO DE PRESTAÇÃO DE CONTAS</strong></p>
+<p><strong>Processo nº:</strong> {{numero_processo}}<br><strong>OSC:</strong> {{osc_nome}} — CNPJ {{osc_cnpj}}<br><strong>Termo nº:</strong> {{instrumento}}<br><strong>Unidade Gestora:</strong> {{unidade_gestora}}</p>
+<p>O Gestor da Parceria e a Comissão de Monitoramento e Avaliação analisaram a prestação de contas e o parecer prévio do Setor de Convênios e Parcerias, verificando o cumprimento das metas do Plano de Trabalho e a regularidade da aplicação dos recursos.</p>
+<p><strong>Análise:</strong></p>
+<p>XXXXX</p>
+<p><strong>Decisão:</strong> a prestação de contas fica XXXXX (aprovada / aprovada com ressalvas / rejeitada), nos termos do art. 72 da Lei Federal nº 13.019/2014.</p>
+<p style="text-align:right">São Gonçalo do Rio Abaixo, {{data_extenso}}.</p>
+<table style="width:100%;border-collapse:collapse" border="0" cellpadding="8"><tbody><tr>
+<td style="text-align:center">_______________________________<br>Gestor da Parceria</td>
+<td style="text-align:center">_______________________________<br>Comissão de Monitoramento e Avaliação</td>
+<td style="text-align:center">_______________________________<br>{{unidade_gestora}}</td>
+</tr></tbody></table>
+HTML,
+        ],
+
         // Celebração: apenas os modelos próprios desta etapa. Os demais são
         // reaproveitados de outras categorias/motores em `modeloTexto()`.
         'celebracao' => [
@@ -1097,7 +1205,7 @@ HTML,
      * Apostilamento) não há trâmite e as regras antigas valem — quem tem a
      * permissão da tela edita.
      */
-    private function donoEmTramite(): Chamamento|Proposta|null
+    private function donoEmTramite(): Chamamento|Proposta|PrestacaoContas|null
     {
         $alvo = $this->pecaable;
 
@@ -1105,6 +1213,7 @@ HTML,
             $this->categoria === 'chamamento_publico'
                 && $alvo instanceof Chamamento && $alvo->temTramiteSelecao() => $alvo,
             $this->categoria === 'celebracao' && $alvo instanceof Proposta => $alvo,
+            $this->categoria === 'prestacao_contas' && $alvo instanceof PrestacaoContas => $alvo,
             default => null,
         };
     }
@@ -1112,17 +1221,31 @@ HTML,
     /** Mapas de designação conforme a categoria em trâmite. */
     private function mapaSetor(): array
     {
-        return $this->categoria === 'celebracao' ? self::CELEBRACAO_SETOR : self::SELECAO_SETOR;
+        return match ($this->categoria) {
+            'celebracao'       => self::CELEBRACAO_SETOR,
+            'prestacao_contas' => self::PRESTACAO_SETOR,
+            default            => self::SELECAO_SETOR,
+        };
     }
 
     private function mapaEtapa(): array
     {
-        return $this->categoria === 'celebracao' ? self::CELEBRACAO_ETAPA : self::SELECAO_ETAPA;
+        return match ($this->categoria) {
+            'celebracao'       => self::CELEBRACAO_ETAPA,
+            'prestacao_contas' => self::PRESTACAO_ETAPA,
+            default            => self::SELECAO_ETAPA,
+        };
     }
 
     private function mapaAssinatura(): array
     {
-        return $this->categoria === 'celebracao' ? self::CELEBRACAO_ASSINATURA : self::SELECAO_ASSINATURA;
+        // A prestação de contas não tem documento assinado por setor diferente
+        // de quem o preenche — cada peça é assinada por quem a emite.
+        return match ($this->categoria) {
+            'celebracao'       => self::CELEBRACAO_ASSINATURA,
+            'prestacao_contas' => [],
+            default            => self::SELECAO_ASSINATURA,
+        };
     }
 
     /** Setor designado para preencher a peça no trâmite. */
@@ -1284,11 +1407,21 @@ HTML,
     /**
      * Quando a vez é da OSC, ela só atua nas peças da própria parceria.
      */
-    private function oscDona(?User $user, Chamamento|Proposta|null $dono): bool
+    private function oscDona(?User $user, Chamamento|Proposta|PrestacaoContas|null $dono): bool
     {
-        return $user?->ehRepresentanteOsc()
-            && $dono instanceof Proposta
-            && $user->osc->id === $dono->osc_id;
+        if (!$user?->ehRepresentanteOsc()) {
+            return false;
+        }
+
+        // Na prestação de contas a OSC vem pela parceria: instrumento →
+        // proposta → OSC.
+        $oscDoDono = match (true) {
+            $dono instanceof Proposta         => $dono->osc_id,
+            $dono instanceof PrestacaoContas  => $dono->osc()?->id,
+            default                           => null,
+        };
+
+        return $oscDoDono !== null && $user->osc->id === $oscDoDono;
     }
 
     public function podePreencher(?User $user): bool
@@ -1658,6 +1791,13 @@ HTML,
         } elseif ($pecaable instanceof Chamamento) {
             $orgao    = $pecaable->programa?->orgao?->name;
             $processo = $pecaable->processo?->numero;
+        } elseif ($pecaable instanceof PrestacaoContas) {
+            $proposta    = $pecaable->instrumento?->proposta;
+            $cadastro    = $proposta?->osc;
+            $osc         = $cadastro?->name;
+            $instrumento = $pecaable->instrumento?->numero;
+            $orgao       = $proposta?->chamamento?->programa?->orgao?->name;
+            $processo    = $proposta?->chamamento?->processo?->numero;
         } elseif ($pecaable instanceof Aditivo) {
             $proposta    = $pecaable->instrumento?->proposta;
             $osc         = $proposta?->osc?->name;
