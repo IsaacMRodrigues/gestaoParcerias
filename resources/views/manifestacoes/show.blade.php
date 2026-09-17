@@ -192,20 +192,30 @@
                                         </select>
                                     </div>
                                     <div>
-                                        <x-input-label for="programa_id" value="Programa *" />
-                                        <select name="programa_id" id="programa_id" required
+                                        <x-input-label for="programa_id" value="Programa" />
+                                        <select name="programa_id" id="programa_id"
                                                 class="mt-1 block w-full border-gray-300 rounded-md shadow-sm text-sm focus:ring-brand-500 focus:border-brand-500">
-                                            <option value="">Selecione…</option>
+                                            <option value="">
+                                                {{ $programas->isEmpty()
+                                                    ? 'A Secretaria não tem programa cadastrado'
+                                                    : 'Sem programa específico' }}
+                                            </option>
                                             @foreach($programas as $programa)
                                                 <option value="{{ $programa->id }}">{{ $programa->name }}</option>
                                             @endforeach
                                         </select>
+                                        <p class="mt-1 text-xs text-gray-400">
+                                            Opcional. Sem escolha, o chamamento nasce na pasta geral de parcerias da Secretaria.
+                                        </p>
                                         <x-input-error :messages="$errors->get('programa_id')" class="mt-1" />
                                     </div>
                                 </div>
                                 <div>
-                                    <x-input-label for="numero" value="Número do chamamento (opcional)" />
-                                    <x-text-input id="numero" name="numero" type="text" class="mt-1 block w-full sm:w-64" />
+                                    <x-input-label for="numero" value="Número do chamamento *" />
+                                    <x-text-input id="numero" name="numero" type="text" required maxlength="50"
+                                                  placeholder="001/2026" :value="old('numero')"
+                                                  class="mt-1 block w-full sm:w-64" />
+                                    <x-input-error :messages="$errors->get('numero')" class="mt-1" />
                                 </div>
                                 <div>
                                     <x-input-label for="fundamento" value="Fundamento do enquadramento *" />

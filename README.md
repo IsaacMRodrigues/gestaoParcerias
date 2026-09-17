@@ -272,6 +272,24 @@ OSC é organização, e organização tem equipe. O vínculo mora em **`users.os
 
 ## O que foi feito
 
+- [2026-09-17] **Deferir manifestação sem programa aberto** (`ManifestacaoAnaliseController`,
+  `manifestacoes/show`)
+  - A SCP não conseguia deferir: o **Programa** era obrigatório e a Secretaria de Obras não tinha
+    nenhum cadastrado — o único item da lista era "Selecione…". A manifestação não espera programa
+    aberto, então o campo virou **opcional**
+  - Sem escolha, o chamamento nasce numa pasta geral da própria Secretaria — *"Parcerias por
+    manifestação de interesse"* —, criada uma vez e reaproveitada. Não é enfeite: é o **programa que
+    carrega o órgão**, e um chamamento sem ele ficaria sem Secretaria dona, fora do recorte por órgão
+    na UG, na Celebração e na Transparência. Nasce como Termo de Fomento, porque manifestação é
+    iniciativa da OSC (art. 2º, VIII, da Lei 13.019/2014), e pode ser renomeada em Programas
+  - **Número do chamamento passou a ser obrigatório** nesta tela, a pedido: é por ele que a parceria
+    é citada nos atos e na publicidade. O cadastro comum de chamamento segue aceitando em branco
+  - Corrigido de passagem: `numero` era lido sem guarda e derrubava a página com 500 se o campo não
+    viesse no POST
+  - Conferido de verdade na manifestação de Obras, desfazendo no fim: sem programa cria a pasta e o
+    chamamento; com programa escolhido usa o escolhido; programa de outra Secretaria é recusado;
+    número vazio ou ausente é barrado
+
 - [2026-09-16] **Módulo 3.4 — Prestação de Contas** (`PrestacaoContas`, `PrestacaoDocumento`,
   `PrestacaoContasController`, `prestacao-contas/*`)
   - O item 6 do ciclo deixou de ser "em breve". Fluxo do módulo 3.4: a **OSC** monta e envia, a

@@ -26,6 +26,10 @@ use Illuminate\View\View;
  */
 class ManifestacaoAnaliseController extends Controller
 {
+    /** Pasta geral que recebe as parcerias de Secretaria sem programa próprio. */
+    private const PROGRAMA_PADRAO = 'Parcerias por manifestação de interesse';
+
+
     public function index(Request $request): View
     {
         $manifestacoes = ManifestacaoInteresse::with(['osc', 'orgao'])
@@ -111,19 +115,21 @@ class ManifestacaoAnaliseController extends Controller
 
         $data = $request->validate([
             'decisao'     => ['required', Rule::in(array_keys(ManifestacaoInteresse::ENCAMINHAMENTOS))],
-            'programa_id' => ['required', Rule::exists('programas', 'id')->where('orgao_id', $manifestacao->orgao_id)],
-            'numero'      => ['nullable', 'string', 'max:50'],
+            'programa_id' => ['nullable', Rule::exists('programas', 'id')->where('orgao_id', $manifestacao->orgao_id)],
+            'numero'      => ['required', 'string', 'max:50'],
             'fundamento'  => ['required', 'string'],
         ], [
-            'programa_id.required' => 'Escolha o programa em que a parceria será cadastrada.',
-            'programa_id.exists'   => 'O programa precisa ser da mesma Secretaria da manifestação.',
-            'fundamento.required'  => 'Fundamente o enquadramento (arts. 30 e 31 da Lei 13.019/2014).',
+            'programa_id.exists'  => 'O programa precisa ser da mesma Secretaria da manifestação.',
+            'numero.required'     => 'Dê o número do chamamento: é por ele que a parceria é citada nos atos e na publicidade.',
+            'fundamento.required' => 'Fundamente o enquadramento (arts. 30 e 31 da Lei 13.019/2014).',
         ]);
 
-        DB::transaction(function () use ($manifestacao, $data) {
+        $programa = DB::transaction(function () use ($manifestacao, $data) {
+            $programa = $this->programaDoDeferimento($manifestacao, $data['programa_id'] ?? null);
+
             $chamamento = Chamamento::create([
-                'programa_id'     => $data['programa_id'],
-                'numero'          => $data['numero'] ?: null,
+                'programa_id'     => $programa->id,
+                'numero'          => $data['numero'],
                 'titulo'          => $manifestacao->titulo,
                 'objeto'          => $manifestacao->objeto,
                 'tipo'            => $data['decisao'],
@@ -164,11 +170,44 @@ class ManifestacaoAnaliseController extends Controller
                 'chamamento_id'  => $chamamento->id,
                 'proposta_id'    => $proposta->id,
             ]);
+
+            return $programa;
         });
 
         return redirect()->route('manifestacoes.show', $manifestacao)->with('success',
             'Deferida como ' . ManifestacaoInteresse::ENCAMINHAMENTOS[$data['decisao']]
-            . '. O chamamento e a proposta foram criados com o plano de trabalho da OSC.');
+            . '. O chamamento e a proposta foram criados com o plano de trabalho da OSC.'
+            . ($programa->wasRecentlyCreated
+                ? ' Como a Secretaria não tinha programa cadastrado, o chamamento nasceu em "'
+                    . $programa->name . '" — dá para renomeá-lo em Programas.'
+                : ''));
+    }
+
+    /**
+     * O programa em que o chamamento vai nascer.
+     *
+     * A manifestação não espera programa aberto: a OSC propõe quando quer, e a
+     * Secretaria pode não ter nenhum cadastrado. Como é o programa que carrega
+     * o órgão — sem ele o chamamento ficaria sem dono e fora do recorte por
+     * Secretaria —, o sistema abre uma vez a pasta geral daquela Secretaria e
+     * reaproveita nas próximas.
+     */
+    private function programaDoDeferimento(ManifestacaoInteresse $manifestacao, ?string $escolhido): Programa
+    {
+        if ($escolhido) {
+            return Programa::findOrFail($escolhido);
+        }
+
+        return Programa::firstOrCreate(
+            ['orgao_id' => $manifestacao->orgao_id, 'name' => self::PROGRAMA_PADRAO],
+            [
+                // Manifestação é iniciativa da OSC, e a lei chama isso de
+                // fomento (art. 2º, VIII, da Lei 13.019/2014).
+                'tipo'     => 'termo_fomento',
+                'objetivo' => 'Parcerias nascidas de manifestação de interesse da sociedade civil.',
+                'status'   => 'ativo',
+            ],
+        );
     }
 
     public function indeferir(Request $request, ManifestacaoInteresse $manifestacao): RedirectResponse
