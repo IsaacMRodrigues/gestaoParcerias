@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\AditivoController;
+use App\Http\Controllers\AlteracaoController;
 use App\Http\Controllers\BuscaController;
 use App\Http\Controllers\CaixaController;
 use App\Http\Controllers\CelebracaoController;
@@ -19,6 +20,7 @@ use App\Http\Controllers\OscController;
 use App\Http\Controllers\OscRegistroController;
 use App\Http\Controllers\ParecerController;
 use App\Http\Controllers\PecaController;
+use App\Http\Controllers\PlanoTrabalhoController;
 use App\Http\Controllers\OscUsuarioController;
 use App\Http\Controllers\ManifestacaoAnaliseController;
 use App\Http\Controllers\ManifestacaoController;
@@ -76,6 +78,10 @@ Route::middleware(['auth', 'osc'])->group(function () {
     Route::middleware('permission:osc_propostas')->group(function () {
         Route::get('/portal/chamamentos/{chamamento}/participar', [PortalController::class, 'participar'])->name('portal.participar');
         Route::post('/portal/chamamentos/{chamamento}/proposta', [PortalController::class, 'storeProposta'])->name('portal.proposta.store');
+
+        // Plano de Trabalho da proposta (modelo 3.1) — mesmas rotas da
+        // manifestação, declaradas uma vez só em PlanoTrabalhoController::rotas().
+        PlanoTrabalhoController::rotas('proposta', '/portal/propostas/{id}/plano', 'portal.proposta.plano');
     });
 
     // Manifestação de Interesse: propor parceria sem chamamento aberto.
@@ -83,11 +89,8 @@ Route::middleware(['auth', 'osc'])->group(function () {
     Route::middleware('permission:osc_manifestacoes')->group(function () {
         Route::get('/portal/manifestacoes/nova', [ManifestacaoController::class, 'create'])->name('portal.manifestacoes.create');
         Route::post('/portal/manifestacoes', [ManifestacaoController::class, 'store'])->name('portal.manifestacoes.store');
-        Route::put('/portal/manifestacoes/{manifestacao}', [ManifestacaoController::class, 'update'])->name('portal.manifestacoes.update');
-        Route::post('/portal/manifestacoes/{manifestacao}/metas', [ManifestacaoController::class, 'storeMeta'])->name('portal.manifestacoes.metas.store');
-        Route::delete('/portal/manifestacoes/{manifestacao}/metas/{meta}', [ManifestacaoController::class, 'destroyMeta'])->name('portal.manifestacoes.metas.destroy');
-        Route::post('/portal/manifestacoes/{manifestacao}/metas/{meta}/etapas', [ManifestacaoController::class, 'storeEtapa'])->name('portal.manifestacoes.etapas.store');
-        Route::delete('/portal/manifestacoes/{manifestacao}/metas/{meta}/etapas/{etapa}', [ManifestacaoController::class, 'destroyEtapa'])->name('portal.manifestacoes.etapas.destroy');
+
+        PlanoTrabalhoController::rotas('manifestacao', '/portal/manifestacoes/{id}/plano', 'portal.manifestacao.plano');
     });
 
     Route::get('/portal/manifestacoes', [ManifestacaoController::class, 'index'])->name('portal.manifestacoes.index');
@@ -331,6 +334,17 @@ Route::middleware('auth')->group(function () {
     Route::post('prestacao-contas/{pc}/avancar', [PrestacaoContasController::class, 'avancar'])->name('prestacao-contas.avancar');
     Route::post('prestacao-contas/{pc}/devolver', [PrestacaoContasController::class, 'devolver'])->name('prestacao-contas.devolver');
     Route::post('prestacao-contas/{pc}/concluir', [PrestacaoContasController::class, 'concluir'])->name('prestacao-contas.concluir');
+
+    // Alterações da Parceria (módulo 3.3) — a OSC pede, a UG autoriza, a SCP
+    // processa. Mesma régua da prestação de contas: a tela serve aos dois
+    // lados e quem decide o acesso é o setor da vez, no controller.
+    Route::get('alteracoes', [AlteracaoController::class, 'index'])->name('alteracoes.index');
+    Route::post('alteracoes', [AlteracaoController::class, 'store'])->name('alteracoes.store');
+    Route::get('alteracoes/{alteracao}', [AlteracaoController::class, 'show'])->name('alteracoes.show');
+    Route::put('alteracoes/{alteracao}', [AlteracaoController::class, 'atualizar'])->name('alteracoes.atualizar');
+    Route::post('alteracoes/{alteracao}/avancar', [AlteracaoController::class, 'avancar'])->name('alteracoes.avancar');
+    Route::post('alteracoes/{alteracao}/devolver', [AlteracaoController::class, 'devolver'])->name('alteracoes.devolver');
+    Route::post('alteracoes/{alteracao}/decidir', [AlteracaoController::class, 'decidir'])->name('alteracoes.decidir');
 
     Route::get('celebracao', [CelebracaoController::class, 'index'])->name('celebracao.index');
     Route::get('celebracao/{proposta}', [CelebracaoController::class, 'show'])->name('celebracao.show');

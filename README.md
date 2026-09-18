@@ -272,6 +272,50 @@ OSC é organização, e organização tem equipe. O vínculo mora em **`users.os
 
 ## O que foi feito
 
+- [2026-09-18] **Módulo 3 completo: Plano de Trabalho, Alterações da Parceria e o checklist da
+  habilitação item a item** (`TemPlanoDeTrabalho`, `PlanoTrabalhoController`, `Alteracao`,
+  `PlanoDocumento`, `plano/*`, `alteracoes/*`)
+  - **1. A tela que a cliente anotou como inexistente.** O plano era título, objeto, valores, datas e
+    metas; faltavam **plano de aplicação**, **cronograma de desembolso**, quadro de contrapartida,
+    atuação em rede, endereços de execução e quatro colunas da tabela de metas. Pior: no caminho do
+    **chamamento público a OSC não tinha plano nenhum** — a proposta nascia com três campos e nada
+    mais. Não era cosmético: o Parecer Financeiro e o Jurídico afirmam ter analisado o plano de
+    aplicação e o desembolso, e a prestação de contas compara o executado com o *aprovado* por
+    natureza — três coisas que o sistema não guardava
+  - **Uma tela só para os dois caminhos** (`plano/_editor`): a manifestação e a proposta usam o mesmo
+    formulário e o mesmo controller, com o tipo do dono vindo da rota. Era a divergência que já tinha
+    acontecido uma vez. Três tabelas novas repetem o padrão das metas — nascem na manifestação e, no
+    deferimento, a **mesma linha** passa à proposta
+  - **O tipo de despesa do plano é o mesmo da execução** (`Despesa::NATUREZAS`), de propósito: com
+    isso o "aprovado" do Anexo VI da prestação de contas passa a **vir do plano**, em vez de ser
+    digitado à mão pela OSC copiando o próprio plano
+  - Avisos de coerência (aplicação × total, desembolso × solicitado, metas × total) **avisam, não
+    bloqueiam** — quem confere é a análise técnica, e um plano legítimo tem arredondamento
+  - **2. Alterações da Parceria (3.3)** — a aba dentro da Execução, que não existia: a OSC pedia
+    mudança por telefone. Fluxo do fluxograma: **OSC monta e assina → UG autoriza → SCP processa**,
+    com checklist próprio de 12 itens e a **oitava declaração do módulo 3** (manutenção da capacidade
+    técnica), cujo modelo estava na pasta sem uso. Durante o pedido o **Plano de Trabalho reabre**
+    para a OSC, como manda o modelo, e um **retrato do plano** guardado na abertura mostra a quem
+    analisa exatamente o que mudou. Um pedido por parceria de cada vez: dois alterariam o mesmo plano
+    em paralelo e nenhum retrato valeria. Selo **"Alteração em andamento"** em Minhas inscrições
+  - **3. Habilitação item a item (3.2)** — a caixa única "Documentos de habilitação" virou os **nove
+    itens numerados** do modelo (ofício do pedido, experiência prévia, certidões, relação de
+    dirigentes, documentos do presidente, planilha de pessoal, balanço, e os dois de obra), com os
+    "se for o caso" como opcionais. Ninguém via o que faltava. A lista de tipos de anexo passou de 6
+    para 16 — metade dos documentos era classificada como "Outro"
+  - **O Plano de Trabalho virou documento gerado** (`PlanoDocumento`), como diz o item 1: "a partir do
+    preenchido". Sai com identificação, descritivo, endereços, metas com etapas, aplicação, quadro de
+    fontes com percentuais e desembolso, tudo somado, e o responsável legal assina. Enquanto não
+    assinado acompanha o plano; assinado, congela. **A peça antiga continua anexo** — só as novas
+    nascem documento, para não apagar o que já foi entregue
+  - **Corrigido no caminho**: o Laravel entrega os parâmetros de rota **por posição**, e o valor fixo
+    da rota entra por último — o controller recebia o id no lugar do tipo, e o modelo injetado vinha
+    como string. As linhas passaram a ser buscadas dentro do plano do dono, o que também torna a
+    checagem de propriedade estrutural
+  - **158 verificações, nenhuma falha**: 39 no plano, 36 nas alterações, 42 na habilitação e 41 telas
+    abrindo — incluindo os barramentos (OSC alheia, setor errado, plano fechado depois de submetido,
+    aprovar sem o despacho) e a parceria antiga que não pode quebrar
+
 - [2026-09-17] **Deferir manifestação sem programa aberto** (`ManifestacaoAnaliseController`,
   `manifestacoes/show`)
   - A SCP não conseguia deferir: o **Programa** era obrigatório e a Secretaria de Obras não tinha

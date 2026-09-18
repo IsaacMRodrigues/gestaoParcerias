@@ -156,9 +156,45 @@ class PrestacaoContasController extends Controller
             }
         }
 
+        // O "aprovado" de cada bloco vem do plano de aplicação da proposta —
+        // é exatamente o que o Anexo VI compara com o executado. Antes era
+        // digitado à mão, e a OSC tinha de copiar o próprio plano.
+        $aprovado = $this->aprovadoPorBloco($pc);
+
         foreach (array_keys(PrestacaoContas::BLOCOS) as $bloco) {
-            PrestacaoGlosa::firstOrCreate(['prestacao_id' => $pc->id, 'natureza' => $bloco]);
+            PrestacaoGlosa::firstOrCreate(
+                ['prestacao_id' => $pc->id, 'natureza' => $bloco],
+                ['valor_aprovado' => $aprovado[$bloco] ?? 0],
+            );
         }
+    }
+
+    /**
+     * Quanto o plano de aplicação aprovou em cada bloco do Anexo VI.
+     *
+     * Os blocos da prestação agrupam naturezas de despesa (ver
+     * PrestacaoContas::BLOCOS), e o plano lança item a item por natureza —
+     * então a conversão é somar os itens de cada natureza do bloco.
+     */
+    private function aprovadoPorBloco(PrestacaoContas $pc): array
+    {
+        $proposta = $pc->instrumento?->proposta;
+        if (!$proposta) {
+            return [];
+        }
+
+        $porNatureza = $proposta->planoPorNatureza();
+        $porBloco    = [];
+
+        foreach (PrestacaoContas::BLOCOS as $bloco => $def) {
+            $soma = 0.0;
+            foreach ($def['naturezas'] as $natureza) {
+                $soma += $porNatureza[$natureza] ?? 0;
+            }
+            $porBloco[$bloco] = $soma;
+        }
+
+        return $porBloco;
     }
 
     /** Regera os documentos que nascem dos campos — nunca os já assinados. */

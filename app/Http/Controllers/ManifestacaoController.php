@@ -3,7 +3,6 @@
 namespace App\Http\Controllers;
 
 use App\Models\ManifestacaoInteresse;
-use App\Models\Meta;
 use App\Models\Orgao;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -57,80 +56,21 @@ class ManifestacaoController extends Controller
     {
         $this->autorizar($manifestacao);
 
-        $manifestacao->load(['orgao', 'metas.etapas', 'documentos', 'parecerPor', 'decididaPor', 'proposta']);
+        $manifestacao->load(['orgao', 'metas.etapas', 'planoItens', 'desembolsos', 'enderecosExecucao',
+            'documentos', 'parecerPor', 'decididaPor', 'proposta']);
         $orgaos = Orgao::orderBy('name')->get();
 
         return view('portal.manifestacoes.show', compact('manifestacao', 'orgaos'));
     }
 
-    public function update(Request $request, ManifestacaoInteresse $manifestacao): RedirectResponse
-    {
-        $this->autorizarEdicao($manifestacao);
-
-        $manifestacao->update($this->validarDados($request));
-
-        return back()->with('success', 'Dados atualizados.');
-    }
-
-    /** Plano de trabalho: metas e, dentro delas, etapas. */
-    public function storeMeta(Request $request, ManifestacaoInteresse $manifestacao): RedirectResponse
-    {
-        $this->autorizarEdicao($manifestacao);
-
-        $data = $request->validate([
-            'descricao'         => ['required', 'string', 'max:255'],
-            'indicador'         => ['nullable', 'string', 'max:255'],
-            'meta_quantitativa' => ['nullable', 'string', 'max:255'],
-            'data_inicio'       => ['nullable', 'date'],
-            'data_fim'          => ['nullable', 'date', 'after_or_equal:data_inicio'],
-        ]);
-
-        $manifestacao->metas()->create($data + [
-            'numero' => (int) $manifestacao->metas()->max('numero') + 1,
-        ]);
-
-        return back()->with('success', 'Meta adicionada ao plano de trabalho.');
-    }
-
-    public function destroyMeta(ManifestacaoInteresse $manifestacao, Meta $meta): RedirectResponse
-    {
-        $this->autorizarEdicao($manifestacao);
-        abort_unless($meta->manifestacao_id === $manifestacao->id, 404);
-
-        $meta->delete();
-
-        return back()->with('success', 'Meta removida.');
-    }
-
-    public function storeEtapa(Request $request, ManifestacaoInteresse $manifestacao, Meta $meta): RedirectResponse
-    {
-        $this->autorizarEdicao($manifestacao);
-        abort_unless($meta->manifestacao_id === $manifestacao->id, 404);
-
-        $data = $request->validate([
-            'descricao'   => ['required', 'string', 'max:255'],
-            'responsavel' => ['nullable', 'string', 'max:255'],
-            'data_inicio' => ['nullable', 'date'],
-            'data_fim'    => ['nullable', 'date', 'after_or_equal:data_inicio'],
-            'recursos'    => ['nullable', 'string'],
-        ]);
-
-        $meta->etapas()->create($data + [
-            'numero' => (int) $meta->etapas()->max('numero') + 1,
-        ]);
-
-        return back()->with('success', 'Etapa adicionada à meta ' . $meta->numero . '.');
-    }
-
-    public function destroyEtapa(ManifestacaoInteresse $manifestacao, Meta $meta, \App\Models\Etapa $etapa): RedirectResponse
-    {
-        $this->autorizarEdicao($manifestacao);
-        abort_unless($meta->manifestacao_id === $manifestacao->id && $etapa->meta_id === $meta->id, 404);
-
-        $etapa->delete();
-
-        return back()->with('success', 'Etapa removida.');
-    }
+    /*
+     * Dados do plano, metas e etapas saíram daqui.
+     *
+     * A OSC monta o mesmo Plano de Trabalho na manifestação e na proposta, e
+     * duas implementações acabariam divergindo — foi o que aconteceu: a
+     * manifestação tinha metas e a proposta não tinha plano nenhum. Agora é
+     * PlanoTrabalhoController, para os dois caminhos.
+     */
 
     public function storeDocumento(Request $request, ManifestacaoInteresse $manifestacao): RedirectResponse
     {

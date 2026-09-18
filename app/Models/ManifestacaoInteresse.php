@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Models\Concerns\TemPlanoDeTrabalho;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -18,11 +19,19 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 class ManifestacaoInteresse extends Model
 {
     use HasFactory;
+    use TemPlanoDeTrabalho;
 
     protected $table = 'manifestacoes_interesse';
 
+    public function chavePlano(): string
+    {
+        return 'manifestacao_id';
+    }
+
     protected $fillable = [
         'osc_id', 'orgao_id', 'titulo', 'objeto', 'justificativa', 'publico_alvo',
+        'descricao_realidade', 'objetivos', 'valor_outras_fontes', 'vigencia_dias',
+        'atuacao_rede', 'rede_cnpj', 'rede_razao_social', 'rede_municipio', 'rede_data_termo',
         'valor_solicitado', 'valor_proprio', 'data_inicio_prevista', 'data_fim_prevista',
         'status', 'setor_atual', 'submetida_em',
         'parecer_favoravel', 'parecer_ug', 'parecer_por', 'parecer_em',
@@ -35,6 +44,9 @@ class ManifestacaoInteresse extends Model
         return [
             'valor_solicitado'     => 'decimal:2',
             'valor_proprio'        => 'decimal:2',
+            'valor_outras_fontes'  => 'decimal:2',
+            'atuacao_rede'         => 'boolean',
+            'rede_data_termo'      => 'date',
             'data_inicio_prevista' => 'date',
             'data_fim_prevista'    => 'date',
             'submetida_em'         => 'datetime',
@@ -133,11 +145,7 @@ class ManifestacaoInteresse extends Model
      */
     public function pendenciasParaSubmeter(): array
     {
-        $faltam = [];
-
-        if ($this->metas()->count() === 0) {
-            $faltam[] = 'plano de trabalho (ao menos uma meta)';
-        }
+        $faltam = $this->pendenciasDoPlano();
 
         if ($this->documentos()->count() === 0) {
             $faltam[] = 'documentos de habilitação';

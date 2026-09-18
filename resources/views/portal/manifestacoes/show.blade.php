@@ -58,112 +58,13 @@
             </div>
         @endif
 
-        {{-- 1. Dados gerais --}}
-        <div class="bg-white rounded-xl border border-gray-200 shadow-sm p-6">
-            <h2 class="text-base font-semibold text-gray-800 mb-4">Dados da proposta</h2>
-            @if($podeEditar)
-                <form action="{{ route('portal.manifestacoes.update', $manifestacao) }}" method="POST" class="space-y-4">
-                    @csrf @method('PUT')
-                    @include('portal.manifestacoes._campos')
-                    <button type="submit" class="btn btn-secondary btn-sm">Salvar dados</button>
-                </form>
-            @else
-                <dl class="grid sm:grid-cols-2 gap-4 text-sm">
-                    <div><dt class="text-xs uppercase tracking-wide text-gray-500">Objeto</dt>
-                        <dd class="text-gray-800 mt-0.5 whitespace-pre-line">{{ $manifestacao->objeto }}</dd></div>
-                    <div><dt class="text-xs uppercase tracking-wide text-gray-500">Justificativa</dt>
-                        <dd class="text-gray-800 mt-0.5 whitespace-pre-line">{{ $manifestacao->justificativa }}</dd></div>
-                    <div><dt class="text-xs uppercase tracking-wide text-gray-500">Valor solicitado</dt>
-                        <dd class="text-gray-800 mt-0.5">R$ {{ number_format($manifestacao->valor_solicitado, 2, ',', '.') }}</dd></div>
-                    <div><dt class="text-xs uppercase tracking-wide text-gray-500">Vigência prevista</dt>
-                        <dd class="text-gray-800 mt-0.5">
-                            {{ $manifestacao->data_inicio_prevista?->format('d/m/Y') ?? '—' }}
-                            a {{ $manifestacao->data_fim_prevista?->format('d/m/Y') ?? '—' }}
-                        </dd></div>
-                </dl>
-            @endif
-        </div>
-
-        {{-- 2. Plano de trabalho --}}
-        <div class="bg-white rounded-xl border border-gray-200 shadow-sm p-6">
-            <h2 class="text-base font-semibold text-gray-800">Plano de trabalho</h2>
-            <p class="text-xs text-gray-400 mt-0.5 mb-4">Metas e, dentro delas, as etapas de execução.</p>
-
-            <div class="space-y-4">
-                @forelse($manifestacao->metas as $meta)
-                    <div class="border border-gray-200 rounded-lg p-4">
-                        <div class="flex items-start justify-between gap-3">
-                            <div class="min-w-0">
-                                <p class="text-sm font-semibold text-gray-900">Meta {{ $meta->numero }} — {{ $meta->descricao }}</p>
-                                <p class="text-xs text-gray-500 mt-0.5">
-                                    {{ collect([$meta->indicador, $meta->meta_quantitativa])->filter()->implode(' · ') ?: 'Sem indicador informado' }}
-                                </p>
-                            </div>
-                            @if($podeEditar)
-                                <form action="{{ route('portal.manifestacoes.metas.destroy', [$manifestacao, $meta]) }}" method="POST"
-                                      data-confirm="Remover a meta {{ $meta->numero }} e suas etapas?">
-                                    @csrf @method('DELETE')
-                                    <button class="text-xs text-gray-400 hover:text-red-700 transition shrink-0">Remover</button>
-                                </form>
-                            @endif
-                        </div>
-
-                        <ul class="mt-3 space-y-1">
-                            @foreach($meta->etapas as $etapa)
-                                <li class="text-xs text-gray-600 flex items-start justify-between gap-2 border-l-2 border-gray-200 pl-3">
-                                    <span>{{ $etapa->numero }}. {{ $etapa->descricao }}
-                                        @if($etapa->responsavel)<span class="text-gray-400"> · {{ $etapa->responsavel }}</span>@endif
-                                    </span>
-                                    @if($podeEditar)
-                                        <form action="{{ route('portal.manifestacoes.etapas.destroy', [$manifestacao, $meta, $etapa]) }}" method="POST">
-                                            @csrf @method('DELETE')
-                                            <button class="text-gray-400 hover:text-red-700 transition">×</button>
-                                        </form>
-                                    @endif
-                                </li>
-                            @endforeach
-                        </ul>
-
-                        @if($podeEditar)
-                            <form action="{{ route('portal.manifestacoes.etapas.store', [$manifestacao, $meta]) }}" method="POST"
-                                  class="mt-3 flex flex-wrap gap-2">
-                                @csrf
-                                <input type="text" name="descricao" required maxlength="255" placeholder="Nova etapa desta meta"
-                                       class="flex-1 min-w-[14rem] border-gray-300 rounded-md shadow-sm text-sm focus:ring-brand-500 focus:border-brand-500">
-                                <input type="text" name="responsavel" maxlength="255" placeholder="Responsável"
-                                       class="w-40 border-gray-300 rounded-md shadow-sm text-sm focus:ring-brand-500 focus:border-brand-500">
-                                <button class="btn btn-secondary btn-sm">Adicionar etapa</button>
-                            </form>
-                        @endif
-                    </div>
-                @empty
-                    <p class="text-sm text-gray-400">Nenhuma meta cadastrada.</p>
-                @endforelse
-            </div>
-
-            @if($podeEditar)
-                <form action="{{ route('portal.manifestacoes.metas.store', $manifestacao) }}" method="POST"
-                      class="mt-4 pt-4 border-t border-gray-100 grid sm:grid-cols-2 gap-3">
-                    @csrf
-                    <div class="sm:col-span-2">
-                        <x-input-label for="descricao" value="Nova meta *" />
-                        <x-text-input id="descricao" name="descricao" type="text" class="mt-1 block w-full" required />
-                        <x-input-error :messages="$errors->get('descricao')" class="mt-1" />
-                    </div>
-                    <div>
-                        <x-input-label for="indicador" value="Indicador de verificação" />
-                        <x-text-input id="indicador" name="indicador" type="text" class="mt-1 block w-full" />
-                    </div>
-                    <div>
-                        <x-input-label for="meta_quantitativa" value="Meta quantitativa" />
-                        <x-text-input id="meta_quantitativa" name="meta_quantitativa" type="text" class="mt-1 block w-full" />
-                    </div>
-                    <div class="sm:col-span-2">
-                        <button class="btn btn-secondary btn-sm">Adicionar meta</button>
-                    </div>
-                </form>
-            @endif
-        </div>
+        {{-- 1 e 2. Plano de trabalho: dados, endereços, metas, aplicação e desembolso.
+             A mesma tela da proposta — ver resources/views/plano/_editor. --}}
+        @include('plano._editor', [
+            'dono'       => $manifestacao,
+            'rota'       => 'portal.manifestacao.plano',
+            'podeEditar' => $podeEditar,
+        ])
 
         {{-- 3. Documentos --}}
         <div class="bg-white rounded-xl border border-gray-200 shadow-sm p-6">

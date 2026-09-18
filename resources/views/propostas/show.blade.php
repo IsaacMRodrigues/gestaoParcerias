@@ -375,6 +375,16 @@
                 @endforelse
             </div>
 
+            {{-- O resto do Plano de Trabalho: endereços de execução, plano de
+                 aplicação dos recursos, quadro de fontes e desembolso. É o que
+                 o Parecer Financeiro e o Jurídico dizem ter analisado. --}}
+            @include('plano._editor', [
+                'dono'         => $proposta,
+                'rota'         => 'portal.proposta.plano',
+                'podeEditar'   => false,
+                'mostrarMetas' => false,
+            ])
+
         </div>
     </div>
 </x-app-layout>

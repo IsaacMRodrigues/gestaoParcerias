@@ -82,8 +82,25 @@ class Peca extends Model
         // Celebração (Fluxo Etapa de Celebração) — ancorada na proposta aprovada
         'celebracao' => [
             ['chave' => 'convocacao_osc',        'rotulo' => 'Convocação da OSC (modelo padrão)',                      'tipo' => 'modelo',  'obrigatorio' => true],
-            ['chave' => 'plano_trabalho',        'rotulo' => 'Plano de Trabalho (enviado pela OSC)',                   'tipo' => 'arquivo', 'obrigatorio' => true],
-            ['chave' => 'docs_habilitacao',      'rotulo' => 'Documentos de habilitação (enviados pela OSC)',          'tipo' => 'arquivo', 'obrigatorio' => true],
+            // Item 1 do checklist: "a partir do preenchido". O plano não é um
+            // arquivo à parte — é o que a OSC lançou no Portal, impresso para
+            // assinar, de modo que o documento e o dado não possam divergir.
+            ['chave' => 'plano_trabalho',        'rotulo' => 'Plano de Trabalho (preenchido no Portal)',               'tipo' => 'modelo',  'obrigatorio' => true],
+            // Itens 2 a 6, 13, 14, 16 e 17 do checklist do módulo 3.2, um a um:
+            // a caixa única "documentos de habilitação" não deixava ninguém ver
+            // o que estava faltando.
+            ['chave' => 'oficio_pedido',         'rotulo' => 'Ofício do pedido, assinado pelo representante legal',    'tipo' => 'arquivo', 'obrigatorio' => true],
+            ['chave' => 'experiencia_previa',    'rotulo' => 'Comprovantes de experiência prévia (mínimo de um ano)',  'tipo' => 'arquivo', 'obrigatorio' => true],
+            ['chave' => 'certidoes_habilitacao', 'rotulo' => 'Certidões de regularidade fiscal, previdenciária, tributária e de dívida ativa', 'tipo' => 'arquivo', 'obrigatorio' => true],
+            ['chave' => 'relacao_dirigentes',    'rotulo' => 'Relação nominal atualizada dos dirigentes',              'tipo' => 'arquivo', 'obrigatorio' => true],
+            ['chave' => 'docs_presidente',       'rotulo' => 'RG, CPF e comprovante de residência do presidente',      'tipo' => 'arquivo', 'obrigatorio' => true],
+            ['chave' => 'planilha_pessoal',      'rotulo' => 'Planilha de detalhamento de despesas de pessoal (se houver)', 'tipo' => 'arquivo', 'obrigatorio' => false],
+            ['chave' => 'balanco_patrimonial',   'rotulo' => 'Balanço patrimonial do exercício anterior',              'tipo' => 'arquivo', 'obrigatorio' => true],
+            ['chave' => 'relatorio_fotografico', 'rotulo' => 'Relatório fotográfico colorido do local (obra ou reforma)', 'tipo' => 'arquivo', 'obrigatorio' => false],
+            ['chave' => 'planilha_orcamentaria', 'rotulo' => 'Planilha orçamentária de custos, com regime de execução e BDI (obra ou reforma)', 'tipo' => 'arquivo', 'obrigatorio' => false],
+            // Continua existindo para o que não cabe nos itens acima — e para
+            // não perder o que as parcerias antigas já anexaram aqui.
+            ['chave' => 'docs_habilitacao',      'rotulo' => 'Outros documentos de habilitação',                       'tipo' => 'arquivo', 'obrigatorio' => false],
             // As sete declarações da habilitação (módulo 3.2, itens 7 a 12 e 15).
             // Vêm preenchidas com o cadastro da OSC e só o responsável legal
             // assina — ver DECLARACOES_DO_RESPONSAVEL_LEGAL.
@@ -131,6 +148,24 @@ class Peca extends Model
             // Análise da Administração
             ['chave' => 'parecer_previo',         'rotulo' => 'Parecer prévio da SCP (modelo padrão)',                          'tipo' => 'modelo',  'obrigatorio' => true],
             ['chave' => 'parecer_conclusivo',     'rotulo' => 'Parecer conclusivo da Unidade Gestora (modelo padrão)',          'tipo' => 'modelo',  'obrigatorio' => true],
+        ],
+
+        // 3.3 Alteração da Parceria — os dez itens do checklist da OSC. Os
+        // marcados "se for o caso" no modelo entram como não obrigatórios.
+        'alteracao' => [
+            ['chave' => 'proposta_alteracao',  'rotulo' => 'Proposta de alteração (preenchida no Portal)',                        'tipo' => 'modelo',  'obrigatorio' => true],
+            ['chave' => 'oficio_alteracao',    'rotulo' => 'Ofício com justificativa fundamentada, assinado',                     'tipo' => 'arquivo', 'obrigatorio' => true],
+            ['chave' => 'docs_alegacoes',      'rotulo' => 'Documentos que atestam as alegações da justificativa (se for o caso)','tipo' => 'arquivo', 'obrigatorio' => false],
+            ['chave' => 'decl_capacidade',     'rotulo' => 'Declaração de manutenção da capacidade técnica',                      'tipo' => 'modelo',  'obrigatorio' => true],
+            ['chave' => 'extrato_conta',       'rotulo' => 'Extrato da conta corrente, atual',                                    'tipo' => 'arquivo', 'obrigatorio' => true],
+            ['chave' => 'extrato_aplicacao',   'rotulo' => 'Extrato da conta de aplicação/poupança, atual',                       'tipo' => 'arquivo', 'obrigatorio' => true],
+            ['chave' => 'comprovacao_contrapartida', 'rotulo' => 'Comprovação de cumprimento de contrapartida (se for o caso)',   'tipo' => 'arquivo', 'obrigatorio' => false],
+            ['chave' => 'certidoes',           'rotulo' => 'Certidões de regularidade fiscal, previdenciária e tributária',       'tipo' => 'arquivo', 'obrigatorio' => true],
+            ['chave' => 'orcamentos',          'rotulo' => 'Orçamentos (se for o caso)',                                          'tipo' => 'arquivo', 'obrigatorio' => false],
+            ['chave' => 'decl_autenticidade',  'rotulo' => 'Declaração de autenticidade dos documentos apresentados',             'tipo' => 'modelo',  'obrigatorio' => true],
+            // Análise da Administração
+            ['chave' => 'autorizacao_ug',      'rotulo' => 'Autorização da Unidade Gestora (modelo padrão)',                      'tipo' => 'modelo',  'obrigatorio' => true],
+            ['chave' => 'despacho_scp',        'rotulo' => 'Despacho da SCP sobre a alteração (modelo padrão)',                   'tipo' => 'modelo',  'obrigatorio' => true],
         ],
 
         // 2.3.4 Apostilamento
@@ -268,6 +303,15 @@ class Peca extends Model
     public const CELEBRACAO_SETOR = [
         'convocacao_osc'         => 'ug',
         'plano_trabalho'         => 'osc',
+        'oficio_pedido'          => 'osc',
+        'experiencia_previa'     => 'osc',
+        'certidoes_habilitacao'  => 'osc',
+        'relacao_dirigentes'     => 'osc',
+        'docs_presidente'        => 'osc',
+        'planilha_pessoal'       => 'osc',
+        'balanco_patrimonial'    => 'osc',
+        'relatorio_fotografico'  => 'osc',
+        'planilha_orcamentaria'  => 'osc',
         'docs_habilitacao'       => 'osc',
         'decl_art7'              => 'osc',
         'decl_art23'             => 'osc',
@@ -297,6 +341,15 @@ class Peca extends Model
     public const CELEBRACAO_ETAPA = [
         'convocacao_osc'         => 0,
         'plano_trabalho'         => 1,
+        'oficio_pedido'          => 1,
+        'experiencia_previa'     => 1,
+        'certidoes_habilitacao'  => 1,
+        'relacao_dirigentes'     => 1,
+        'docs_presidente'        => 1,
+        'planilha_pessoal'       => 1,
+        'balanco_patrimonial'    => 1,
+        'relatorio_fotografico'  => 1,
+        'planilha_orcamentaria'  => 1,
         'docs_habilitacao'       => 1,
         'decl_art7'              => 1,
         'decl_art23'             => 1,
@@ -358,6 +411,40 @@ class Peca extends Model
     ];
 
     /**
+     * Alteração da parceria: a OSC instrui o pedido inteiro (etapa 0); a UG
+     * autoriza (etapa 1) e a SCP processa (etapa 2).
+     */
+    public const ALTERACAO_SETOR = [
+        'proposta_alteracao'       => 'osc',
+        'oficio_alteracao'         => 'osc',
+        'docs_alegacoes'           => 'osc',
+        'decl_capacidade'          => 'osc',
+        'extrato_conta'            => 'osc',
+        'extrato_aplicacao'        => 'osc',
+        'comprovacao_contrapartida' => 'osc',
+        'certidoes'                => 'osc',
+        'orcamentos'               => 'osc',
+        'decl_autenticidade'       => 'osc',
+        'autorizacao_ug'           => 'ug',
+        'despacho_scp'             => 'scp',
+    ];
+
+    public const ALTERACAO_ETAPA = [
+        'proposta_alteracao'       => 0,
+        'oficio_alteracao'         => 0,
+        'docs_alegacoes'           => 0,
+        'decl_capacidade'          => 0,
+        'extrato_conta'            => 0,
+        'extrato_aplicacao'        => 0,
+        'comprovacao_contrapartida' => 0,
+        'certidoes'                => 0,
+        'orcamentos'               => 0,
+        'decl_autenticidade'       => 0,
+        'autorizacao_ug'           => 1,
+        'despacho_scp'             => 2,
+    ];
+
+    /**
      * A Ordem de Pagamento Global é elaborada pela SCP (etapa 11) e assinada
      * pela Unidade Gestora (etapa 12).
      */
@@ -386,6 +473,12 @@ class Peca extends Model
     public const DECLARACOES_DO_RESPONSAVEL_LEGAL = [
         'decl_art7', 'decl_art23', 'decl_art33', 'decl_art34',
         'decl_art39', 'decl_art45', 'decl_autenticidade',
+        // Alteração da parceria (3.3): a proposta e a declaração de capacidade
+        // técnica são atos de quem responde pela organização.
+        'proposta_alteracao', 'decl_capacidade',
+        // Habilitação (3.2), item 1: "assinada eletronicamente pelo
+        // representante legal".
+        'plano_trabalho',
     ];
 
     /**
@@ -733,6 +826,65 @@ HTML,
          * texto de verdade — o compromisso de guarda, o laudo de obra e os
          * dois pareceres da Administração.
          */
+        // 3.3 Alteração da parceria. A declaração de capacidade técnica é o
+        // oitavo modelo do módulo 3, e o único que faltava: ela só existe aqui.
+        'alteracao' => [
+            'proposta_alteracao' => <<<'HTML'
+<p style="text-align:center"><strong>PROPOSTA DE ALTERAÇÃO DA PARCERIA</strong></p>
+<p><strong>OSC:</strong> {{osc_nome}} — CNPJ {{osc_cnpj}}<br><strong>Termo nº:</strong> {{instrumento}}<br><strong>Processo nº:</strong> {{numero_processo}}<br><strong>Unidade Gestora:</strong> {{unidade_gestora}}</p>
+<p><strong>Alteração pretendida:</strong> {{alteracao_titulo}}</p>
+<p><strong>Descrição das alterações desejadas:</strong></p>
+<p>{{alteracao_descricao}}</p>
+<p><strong>Justificativa:</strong></p>
+<p>{{alteracao_justificativa}}</p>
+<p>O Plano de Trabalho alterado acompanha esta proposta, tramitado no Portal, com o plano de aplicação, o cronograma de execução e o cronograma de desembolso atualizados.</p>
+<p style="text-align:right">São Gonçalo do Rio Abaixo, {{data_extenso}}.</p>
+<p style="text-align:center"><br>{{rep_nome}}<br>Representante legal — {{osc_nome}}</p>
+HTML,
+
+            // Texto do modelo da SCP, com as lacunas viradas dado.
+            'decl_capacidade' => <<<'HTML'
+<p style="text-align:center"><strong>DECLARAÇÃO DE MANUTENÇÃO DA CAPACIDADE TÉCNICA</strong></p>
+<p>A <strong>{{osc_nome}}</strong>, inscrita no CNPJ nº {{osc_cnpj}}, com sede à {{osc_endereco}}, por meio de seu representante legal abaixo assinado, DECLARA, para os devidos fins, que permanece com plenas condições técnicas, materiais, administrativas e operacionais para a execução do objeto pactuado no {{instrumento_tipo}} nº {{instrumento}}.</p>
+<p>Declara, ainda, que dispõe de equipe qualificada, estrutura física adequada, recursos materiais suficientes e capacidade gerencial compatível com as metas e atividades previstas no Plano de Trabalho, comprometendo-se a manter tais condições durante toda a vigência do instrumento celebrado.</p>
+<p>Por ser verdade, firma a presente declaração.</p>
+<p style="text-align:right">São Gonçalo do Rio Abaixo, {{data_extenso}}.</p>
+<p style="text-align:center"><br>{{rep_nome}}<br>CPF {{rep_cpf}}<br>Representante legal — {{osc_nome}}</p>
+HTML,
+
+            'decl_autenticidade' => <<<'HTML'
+<p style="text-align:center"><strong>DECLARAÇÃO DE AUTENTICIDADE DOS DOCUMENTOS</strong></p>
+<p>DECLARO, sob as penas do art. 299 do Código Penal, serem autênticos e verdadeiros todos os documentos e cópias juntados ao pedido de alteração do {{instrumento_tipo}} nº {{instrumento}}, observadas as demais determinações previstas na legislação.</p>
+<p>DECLARO, ainda, que são de minha exclusiva responsabilidade a conformidade entre os dados informados e a documentação enviada, bem como a conservação, em papel, dos originais dos documentos digitalizados até que decaia o direito de revisão dos atos praticados no processo, para que, caso solicitado, sejam apresentados para qualquer tipo de conferência.</p>
+<p style="text-align:right">São Gonçalo do Rio Abaixo, {{data_extenso}}.</p>
+<p style="text-align:center"><br>{{rep_nome}}<br>Representante legal — {{osc_nome}}</p>
+HTML,
+
+            'autorizacao_ug' => self::CABECALHO . <<<'HTML'
+<p style="text-align:center"><strong>AUTORIZAÇÃO DE ALTERAÇÃO DA PARCERIA</strong></p>
+<p><strong>OSC:</strong> {{osc_nome}} — CNPJ {{osc_cnpj}}<br><strong>Termo nº:</strong> {{instrumento}}<br><strong>Processo nº:</strong> {{numero_processo}}</p>
+<p>A <strong>{{unidade_gestora}}</strong>, na qualidade de Unidade Gestora da parceria, analisou o pedido de alteração apresentado pela organização e a documentação que o instrui.</p>
+<p><strong>Alteração pretendida:</strong> {{alteracao_titulo}}</p>
+<p><strong>Análise:</strong></p>
+<p>XXXXX</p>
+<p>Ante o exposto, <strong>AUTORIZA</strong> a alteração pretendida e encaminha o pedido ao Setor de Convênios e Parcerias para processamento.</p>
+<p style="text-align:right">São Gonçalo do Rio Abaixo, {{data_extenso}}.</p>
+<p style="text-align:center"><br>_______________________________<br>Responsável pela Unidade Gestora</p>
+HTML,
+
+            'despacho_scp' => self::CABECALHO . <<<'HTML'
+<p style="text-align:center"><strong>DESPACHO — ALTERAÇÃO DA PARCERIA</strong></p>
+<p><strong>OSC:</strong> {{osc_nome}} — CNPJ {{osc_cnpj}}<br><strong>Termo nº:</strong> {{instrumento}}<br><strong>Processo nº:</strong> {{numero_processo}}</p>
+<p><strong>Alteração pretendida:</strong> {{alteracao_titulo}}</p>
+<p>O Setor de Convênios e Parcerias conferiu a instrução do pedido e a autorização da Unidade Gestora.</p>
+<p><strong>Instrumento de formalização:</strong> XXXXX (termo aditivo ou apostilamento, conforme a natureza da alteração).</p>
+<p><strong>Conclusão:</strong></p>
+<p>XXXXX</p>
+<p style="text-align:right">São Gonçalo do Rio Abaixo, {{data_extenso}}.</p>
+<p style="text-align:center"><br>_______________________________<br>Setor de Convênios e Parcerias</p>
+HTML,
+        ],
+
         'prestacao_contas' => [
             'termo_compromisso' => <<<'HTML'
 <p style="text-align:center"><strong>TERMO DE COMPROMISSO</strong><br>(Anexo X — guarda da prestação de contas)</p>
@@ -1205,7 +1357,7 @@ HTML,
      * Apostilamento) não há trâmite e as regras antigas valem — quem tem a
      * permissão da tela edita.
      */
-    private function donoEmTramite(): Chamamento|Proposta|PrestacaoContas|null
+    private function donoEmTramite(): Chamamento|Proposta|PrestacaoContas|Alteracao|null
     {
         $alvo = $this->pecaable;
 
@@ -1214,6 +1366,7 @@ HTML,
                 && $alvo instanceof Chamamento && $alvo->temTramiteSelecao() => $alvo,
             $this->categoria === 'celebracao' && $alvo instanceof Proposta => $alvo,
             $this->categoria === 'prestacao_contas' && $alvo instanceof PrestacaoContas => $alvo,
+            $this->categoria === 'alteracao' && $alvo instanceof Alteracao => $alvo,
             default => null,
         };
     }
@@ -1224,6 +1377,7 @@ HTML,
         return match ($this->categoria) {
             'celebracao'       => self::CELEBRACAO_SETOR,
             'prestacao_contas' => self::PRESTACAO_SETOR,
+            'alteracao'        => self::ALTERACAO_SETOR,
             default            => self::SELECAO_SETOR,
         };
     }
@@ -1233,6 +1387,7 @@ HTML,
         return match ($this->categoria) {
             'celebracao'       => self::CELEBRACAO_ETAPA,
             'prestacao_contas' => self::PRESTACAO_ETAPA,
+            'alteracao'        => self::ALTERACAO_ETAPA,
             default            => self::SELECAO_ETAPA,
         };
     }
@@ -1243,7 +1398,7 @@ HTML,
         // de quem o preenche — cada peça é assinada por quem a emite.
         return match ($this->categoria) {
             'celebracao'       => self::CELEBRACAO_ASSINATURA,
-            'prestacao_contas' => [],
+            'prestacao_contas', 'alteracao' => [],
             default            => self::SELECAO_ASSINATURA,
         };
     }
@@ -1407,7 +1562,7 @@ HTML,
     /**
      * Quando a vez é da OSC, ela só atua nas peças da própria parceria.
      */
-    private function oscDona(?User $user, Chamamento|Proposta|PrestacaoContas|null $dono): bool
+    private function oscDona(?User $user, Chamamento|Proposta|PrestacaoContas|Alteracao|null $dono): bool
     {
         if (!$user?->ehRepresentanteOsc()) {
             return false;
@@ -1418,6 +1573,7 @@ HTML,
         $oscDoDono = match (true) {
             $dono instanceof Proposta         => $dono->osc_id,
             $dono instanceof PrestacaoContas  => $dono->osc()?->id,
+            $dono instanceof Alteracao        => $dono->osc()?->id,
             default                           => null,
         };
 
@@ -1777,6 +1933,16 @@ HTML,
      * recebe o mesmo "XXXXX" que o resto do modelo usa para o que se digita —
      * apagar o marcador deixaria a frase truncada ("parceria com a , Termo").
      */
+    /**
+     * Os mesmos marcadores usados ao semear, disponíveis a quem regera um
+     * documento fora do momento da criação — a Proposta de Alteração, por
+     * exemplo, que acompanha os campos enquanto não for assinada.
+     */
+    public static function tokensPara(Model $pecaable): array
+    {
+        return self::tokensDe($pecaable);
+    }
+
     private static function tokensDe(Model $pecaable): array
     {
         $osc = $instrumento = $orgao = $processo = null;
@@ -1803,7 +1969,22 @@ HTML,
             $osc         = $proposta?->osc?->name;
             $instrumento = $pecaable->instrumento?->numero;
             $orgao       = $proposta?->chamamento?->programa?->orgao?->name;
+        } elseif ($pecaable instanceof Alteracao) {
+            $proposta      = $pecaable->proposta();
+            $cadastro      = $proposta?->osc;
+            $osc           = $cadastro?->name;
+            $instrumento   = $pecaable->instrumento?->numero;
+            $orgao         = $proposta?->chamamento?->programa?->orgao?->name;
+            $processo      = $proposta?->chamamento?->processo?->numero;
+            $daAlteracao   = [
+                'alteracao_titulo'        => $pecaable->titulo,
+                'alteracao_descricao'     => $pecaable->descricao,
+                'alteracao_justificativa' => $pecaable->justificativa,
+                'instrumento_tipo'        => Instrumento::TIPOS[$pecaable->instrumento?->tipo] ?? 'Termo',
+            ];
         }
+
+        $daAlteracao = $daAlteracao ?? [];
 
         $tokens = [
             'favorecido'      => $osc,
@@ -1823,6 +2004,10 @@ HTML,
         // Dados do cadastro da OSC — é deles que as declarações da habilitação
         // se preenchem. Só a Proposta tem OSC; nos demais donos ficam "XXXXX".
         $tokens += self::tokensDaOsc($cadastro);
+
+        // Campos que só a alteração tem (título, descrição e justificativa do
+        // pedido) — é deles que a Proposta de Alteração se escreve sozinha.
+        $tokens += $daAlteracao;
 
         return array_map(fn ($v) => filled($v) ? $v : 'XXXXX', $tokens);
     }

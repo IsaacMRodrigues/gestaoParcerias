@@ -139,6 +139,7 @@
             if (auth()->check() && auth()->user()->ehRepresentanteOsc()) {
                 $navItens[] = ['url' => route('portal.minhas-propostas'), 'rotulo' => 'Minhas inscrições', 'ativo' => request()->routeIs('portal.minhas*')];
                 $navItens[] = ['url' => route('portal.manifestacoes.index'), 'rotulo' => 'Manifestar interesse', 'ativo' => request()->routeIs('portal.manifestacoes.*')];
+                $navItens[] = ['url' => route('alteracoes.index'), 'rotulo' => 'Alterações', 'ativo' => request()->routeIs('alteracoes.*')];
                 $navItens[] = ['url' => route('prestacao-contas.index'), 'rotulo' => 'Prestação de contas', 'ativo' => request()->routeIs('prestacao-contas.*')];
             }
 

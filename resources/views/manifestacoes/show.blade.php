@@ -78,6 +78,17 @@
                     @endforelse
                 </div>
 
+                {{-- O resto do plano — endereços, aplicação dos recursos e
+                     desembolso —, que é justamente o que a análise examina. --}}
+                <div class="mt-6 pt-6 border-t border-gray-100 -mx-6">
+                    @include('plano._editor', [
+                        'dono'         => $manifestacao,
+                        'rota'         => 'portal.manifestacao.plano',
+                        'podeEditar'   => false,
+                        'mostrarMetas' => false,
+                    ])
+                </div>
+
                 <h3 class="text-base font-semibold text-gray-800 mt-6 pt-6 border-t border-gray-100">Documentos</h3>
                 <ul class="mt-2 divide-y divide-gray-100">
                     @forelse($manifestacao->documentos as $doc)

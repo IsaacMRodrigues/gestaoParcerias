@@ -78,6 +78,7 @@ class CelebracaoController extends Controller
             'Esta proposta ainda não foi aprovada.');
 
         Peca::sincronizar($proposta, 'celebracao');
+        $this->regerarPlanoDeTrabalho($proposta);
 
         if (!$proposta->celebracaoIniciada()) {
             $proposta->update(['celebracao_iniciada_em' => now()]);
@@ -95,6 +96,27 @@ class CelebracaoController extends Controller
         $progresso = Peca::progresso($pecas);
 
         return view('celebracao.show', compact('proposta', 'pecas', 'progresso'));
+    }
+
+    /**
+     * O Plano de Trabalho do checklist nasce do plano preenchido no Portal.
+     *
+     * É o item 1 do módulo 3.2 — "a partir do preenchido". Enquanto ninguém
+     * assinou, o documento acompanha o que a OSC lançou; assinado, congela, e
+     * o que valerá dali em diante é o texto que foi assinado.
+     *
+     * A peça antiga, criada quando este item era anexo, segue como arquivo: só
+     * as novas nascem como documento, para não apagar o que já foi entregue.
+     */
+    private function regerarPlanoDeTrabalho(Proposta $proposta): void
+    {
+        $peca = $proposta->pecas()->where('chave', 'plano_trabalho')->first();
+
+        if (!$peca || $peca->tipo !== 'modelo' || $peca->assinado()) {
+            return;
+        }
+
+        $peca->update(['conteudo' => \App\Support\PlanoDocumento::render($proposta)]);
     }
 
     /**

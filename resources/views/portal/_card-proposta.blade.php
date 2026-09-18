@@ -23,6 +23,15 @@
     </div>
 
     <div class="flex items-center gap-3 shrink-0">
+        @php $emAlteracao = $proposta->instrumento?->alteracoes->first(); @endphp
+        @if($emAlteracao)
+            {{-- Selo do modelo 3.3: a parceria está em alteração, e o pedido
+                 fica a um clique de onde a OSC já está olhando. --}}
+            <a href="{{ route('alteracoes.show', $emAlteracao) }}"
+               class="px-2 py-1 text-xs font-medium bg-accent-100 text-accent-800 rounded-full hover:bg-accent-200 transition">
+                Alteração em andamento
+            </a>
+        @endif
         <span class="px-2 py-1 text-xs font-medium bg-{{ $cor }}-100 text-{{ $cor }}-800 rounded-full">
             {{ \App\Models\Proposta::STATUS[$proposta->status] }}
         </span>

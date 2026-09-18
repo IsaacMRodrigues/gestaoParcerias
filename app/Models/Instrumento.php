@@ -66,6 +66,12 @@ class Instrumento extends Model
         return $this->hasMany(Aditivo::class)->orderBy('numero');
     }
 
+    /** Pedidos de alteração da parceria (módulo 3.3). */
+    public function alteracoes(): HasMany
+    {
+        return $this->hasMany(Alteracao::class)->orderBy('numero');
+    }
+
     public function ordensPagamento(): HasMany
     {
         return $this->hasMany(OrdemPagamento::class)->orderBy('numero');

@@ -1,3 +1,11 @@
+@php
+    /* Montar o plano é função da equipe (osc_propostas); o plano só é da OSC
+       enquanto ela o elabora — ver PlanoTrabalhoController::planoEditavel(). */
+    $podePlanejar = auth()->user()->can('osc_propostas')
+        && \App\Http\Controllers\PlanoTrabalhoController::planoEditavel($proposta);
+    $pendencias   = $proposta->status === 'rascunho' ? $proposta->pendenciasDoPlano() : [];
+@endphp
+
 <x-portal-layout>
     <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-10 space-y-6">
 
@@ -25,14 +33,13 @@
                         <form action="{{ route('portal.proposta.submeter', $proposta) }}" method="POST"
                               data-confirm="Confirma a submissão? Após isso não será possível editar.">
                             @csrf @method('PATCH')
-                            <button type="submit"
-                                    class="btn btn-primary">
+                            <button type="submit" @disabled($pendencias) class="btn btn-primary">
                                 Submeter Proposta
                             </button>
                         </form>
                     @else
                         <span class="inline-block px-3 py-2 text-xs font-medium text-gray-600 bg-gray-100 border border-gray-200 rounded-lg">
-                            Pronta para submissão —
+                            {{ $pendencias ? 'Falta completar o plano —' : 'Pronta para submissão —' }}
                             {{ $proposta->osc->resp_nome ?: 'o responsável legal' }} precisa submeter
                         </span>
                     @endif
@@ -51,42 +58,23 @@
             </div>
         @endif
 
-        {{-- Dados da proposta --}}
-        <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
-            <h2 class="text-base font-semibold text-gray-800 mb-4">Dados da Proposta</h2>
-            <dl class="grid grid-cols-2 gap-x-6 gap-y-3 text-sm">
-                <div>
-                    <dt class="text-gray-500">Valor Solicitado</dt>
-                    <dd class="font-semibold text-gray-900">R$ {{ number_format($proposta->valor_solicitado, 2, ',', '.') }}</dd>
-                </div>
-                <div>
-                    <dt class="text-gray-500">Contrapartida</dt>
-                    <dd class="text-gray-900">R$ {{ number_format($proposta->valor_proprio, 2, ',', '.') }}</dd>
-                </div>
-                @if($proposta->data_inicio_prevista)
-                    <div>
-                        <dt class="text-gray-500">Início Previsto</dt>
-                        <dd class="text-gray-900">{{ $proposta->data_inicio_prevista->format('d/m/Y') }}</dd>
-                    </div>
-                @endif
-                @if($proposta->data_fim_prevista)
-                    <div>
-                        <dt class="text-gray-500">Fim Previsto</dt>
-                        <dd class="text-gray-900">{{ $proposta->data_fim_prevista->format('d/m/Y') }}</dd>
-                    </div>
-                @endif
-                <div class="col-span-2">
-                    <dt class="text-gray-500">Objeto</dt>
-                    <dd class="text-gray-900 mt-0.5">{{ $proposta->objeto }}</dd>
-                </div>
-                @if($proposta->justificativa)
-                    <div class="col-span-2">
-                        <dt class="text-gray-500">Justificativa</dt>
-                        <dd class="text-gray-900 mt-0.5">{{ $proposta->justificativa }}</dd>
-                    </div>
-                @endif
-            </dl>
-        </div>
+        @if($pendencias)
+            <div class="bg-accent-50 border border-accent-200 rounded-lg px-4 py-3">
+                <p class="text-sm font-semibold text-accent-800">Falta para submeter:</p>
+                <ul class="mt-1 text-sm text-accent-700 list-disc list-inside">
+                    @foreach($pendencias as $p)<li>{{ $p }}</li>@endforeach
+                </ul>
+            </div>
+        @endif
+
+        {{-- Plano de trabalho: a mesma tela da manifestação de interesse.
+             Editável enquanto a proposta é rascunho e outra vez na Celebração,
+             quando o município devolve o plano à OSC para elaborá-lo. --}}
+        @include('plano._editor', [
+            'dono'       => $proposta,
+            'rota'       => 'portal.proposta.plano',
+            'podeEditar' => $podePlanejar,
+        ])
 
         {{-- Documentos --}}
         <div class="bg-white rounded-xl shadow-sm border border-gray-200">

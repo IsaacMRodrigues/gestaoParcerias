@@ -7,13 +7,30 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class Documento extends Model
 {
+    /**
+     * Tipos de anexo da organização.
+     *
+     * Acompanham o checklist de habilitação do módulo 3.2: com seis opções, a
+     * OSC classificava metade dos documentos como "Outro" e quem conferia
+     * tinha de abrir arquivo por arquivo para saber o que era o quê.
+     */
     public const TIPOS = [
-        'estatuto'       => 'Estatuto Social',
-        'cnpj'           => 'Cartão CNPJ',
-        'certidao'       => 'Certidão (INSS/FGTS/Débitos)',
-        'plano_trabalho' => 'Plano de Trabalho',
-        'ata'            => 'Ata de Eleição da Diretoria',
-        'outro'          => 'Outro Documento',
+        'estatuto'             => 'Estatuto Social',
+        'cnpj'                 => 'Cartão CNPJ',
+        'certidao'             => 'Certidão de regularidade (INSS/FGTS/Débitos)',
+        'plano_trabalho'       => 'Plano de Trabalho',
+        'ata'                  => 'Ata de Eleição da Diretoria',
+        'oficio_pedido'        => 'Ofício do pedido',
+        'experiencia_previa'   => 'Comprovante de experiência prévia',
+        'relacao_dirigentes'   => 'Relação nominal dos dirigentes',
+        'docs_presidente'      => 'RG, CPF e comprovante de residência do presidente',
+        'balanco'              => 'Balanço patrimonial',
+        'planilha_pessoal'     => 'Planilha de despesas de pessoal',
+        'relatorio_fotografico' => 'Relatório fotográfico',
+        'planilha_orcamentaria' => 'Planilha orçamentária de custos',
+        'extrato'              => 'Extrato bancário',
+        'comprovante_conta'    => 'Comprovante de abertura de conta',
+        'outro'                => 'Outro Documento',
     ];
 
     /**

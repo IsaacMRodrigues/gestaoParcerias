@@ -213,9 +213,15 @@
         @can('execucao')
             @php $emExecucao = request()->routeIs('execucao.*') || request()->routeIs('instrumentos.execucao')
                 || request()->routeIs('repasses.*') || request()->routeIs('despesas.*'); @endphp
-            <a href="{{ route('execucao.index') }}" class="{{ $link }} {{ $emExecucao ? $on : '' }}">
-                <span class="{{ $etapa }} {{ $emExecucao ? $etapaAtiva : $etapaOff }}">4</span>
+            @php $emAlteracoes = request()->routeIs('alteracoes.*'); @endphp
+            <a href="{{ route('execucao.index') }}" class="{{ $link }} {{ $emExecucao ? $on : ($emAlteracoes ? $naSecao : '') }}">
+                <span class="{{ $etapa }} {{ $emExecucao ? $etapaAtiva : ($emAlteracoes ? $etapaSecao : $etapaOff) }}">4</span>
                 Execução
+            </a>
+            {{-- Subitem da Execução, como pede o modelo 3.3: "criar aba/botão
+                 'Alterações da Parceria' dentro da aba/tela 'Execução'". --}}
+            <a href="{{ route('alteracoes.index') }}" class="{{ $link }} pl-10 {{ $emAlteracoes ? $on : '' }}">
+                Alterações da Parceria
             </a>
         @else
             {{-- A dica dizia "abra pela tela do Instrumento", mas a execução do

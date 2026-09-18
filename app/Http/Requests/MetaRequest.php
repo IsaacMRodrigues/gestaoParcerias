@@ -14,12 +14,16 @@ class MetaRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'numero'            => ['required', 'integer', 'min:1'],
-            'descricao'         => ['required', 'string', 'max:255'],
-            'indicador'         => ['nullable', 'string', 'max:255'],
-            'meta_quantitativa' => ['nullable', 'string', 'max:255'],
-            'data_inicio'       => ['nullable', 'date'],
-            'data_fim'          => ['nullable', 'date', 'after_or_equal:data_inicio'],
+            'numero'               => ['required', 'integer', 'min:1'],
+            'descricao'            => ['required', 'string', 'max:255'],
+            'atividades'           => ['nullable', 'string'],
+            'indicador'            => ['nullable', 'string', 'max:255'],
+            'meios_verificacao'    => ['nullable', 'string'],
+            'resultados_esperados' => ['nullable', 'string'],
+            'valor'                => ['nullable', 'numeric', 'min:0'],
+            'meta_quantitativa'    => ['nullable', 'string', 'max:255'],
+            'data_inicio'          => ['nullable', 'date'],
+            'data_fim'             => ['nullable', 'date', 'after_or_equal:data_inicio'],
         ];
     }
 

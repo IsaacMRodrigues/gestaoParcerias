@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use App\Models\Concerns\ImpedeExclusaoComVinculos;
+use App\Models\Concerns\TemPlanoDeTrabalho;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
@@ -11,6 +12,12 @@ use Illuminate\Database\Eloquent\Relations\HasOne;
 class Proposta extends Model
 {
     use ImpedeExclusaoComVinculos;
+    use TemPlanoDeTrabalho;
+
+    public function chavePlano(): string
+    {
+        return 'proposta_id';
+    }
 
     public const STATUS = [
         'rascunho'      => 'Rascunho',
@@ -43,8 +50,10 @@ class Proposta extends Model
 
     protected $fillable = [
         'chamamento_id', 'osc_id', 'titulo', 'objeto', 'justificativa',
-        'valor_solicitado', 'valor_proprio',
-        'data_inicio_prevista', 'data_fim_prevista',
+        'descricao_realidade', 'publico_alvo', 'objetivos',
+        'valor_solicitado', 'valor_proprio', 'valor_outras_fontes',
+        'data_inicio_prevista', 'data_fim_prevista', 'vigencia_dias',
+        'atuacao_rede', 'rede_cnpj', 'rede_razao_social', 'rede_municipio', 'rede_data_termo',
         'status', 'submitted_at',
         'celebracao_etapa', 'celebracao_setor', 'celebracao_iniciada_em', 'celebracao_concluida_em',
     ];
@@ -57,6 +66,9 @@ class Proposta extends Model
             'submitted_at'            => 'datetime',
             'valor_solicitado'        => 'decimal:2',
             'valor_proprio'           => 'decimal:2',
+            'valor_outras_fontes'     => 'decimal:2',
+            'atuacao_rede'            => 'boolean',
+            'rede_data_termo'         => 'date',
             'celebracao_iniciada_em'  => 'datetime',
             'celebracao_concluida_em' => 'datetime',
         ];

@@ -11,9 +11,9 @@ class Meta extends Model
     protected $fillable = [
         // A meta nasce na proposta ou na manifestação de interesse — no
         // deferimento, a mesma linha ganha a proposta criada e segue valendo.
-        'proposta_id', 'manifestacao_id', 'numero', 'descricao',
-        'indicador', 'meta_quantitativa',
-        'data_inicio', 'data_fim',
+        'proposta_id', 'manifestacao_id', 'numero', 'descricao', 'atividades',
+        'indicador', 'meios_verificacao', 'resultados_esperados', 'valor',
+        'meta_quantitativa', 'data_inicio', 'data_fim',
     ];
 
     protected function casts(): array
@@ -21,6 +21,7 @@ class Meta extends Model
         return [
             'data_inicio' => 'date',
             'data_fim'    => 'date',
+            'valor'       => 'decimal:2',
         ];
     }
 

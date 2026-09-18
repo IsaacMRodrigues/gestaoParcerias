@@ -47,7 +47,8 @@ class ManifestacaoAnaliseController extends Controller
     {
         $this->autorizarLeitura($manifestacao);
 
-        $manifestacao->load(['osc', 'orgao', 'metas.etapas', 'documentos', 'parecerPor', 'decididaPor', 'chamamento', 'proposta']);
+        $manifestacao->load(['osc', 'orgao', 'metas.etapas', 'planoItens', 'desembolsos', 'enderecosExecucao',
+            'documentos', 'parecerPor', 'decididaPor', 'chamamento', 'proposta']);
 
         // Só programas da Secretaria a que a manifestação se dirige: o
         // chamamento nasce dentro de um programa, e é ele que define o órgão.
@@ -145,19 +146,30 @@ class ManifestacaoAnaliseController extends Controller
                 'titulo'               => $manifestacao->titulo,
                 'objeto'               => $manifestacao->objeto,
                 'justificativa'        => $manifestacao->justificativa,
+                'descricao_realidade'  => $manifestacao->descricao_realidade,
+                'publico_alvo'         => $manifestacao->publico_alvo,
+                'objetivos'            => $manifestacao->objetivos,
                 'valor_solicitado'     => $manifestacao->valor_solicitado,
                 // A contrapartida é opcional na manifestação e obrigatória na
                 // proposta: sem contrapartida declarada, é zero.
                 'valor_proprio'        => $manifestacao->valor_proprio ?? 0,
+                'valor_outras_fontes'  => $manifestacao->valor_outras_fontes ?? 0,
                 'data_inicio_prevista' => $manifestacao->data_inicio_prevista,
                 'data_fim_prevista'    => $manifestacao->data_fim_prevista,
+                'vigencia_dias'        => $manifestacao->vigencia_dias,
+                'atuacao_rede'         => $manifestacao->atuacao_rede,
+                'rede_cnpj'            => $manifestacao->rede_cnpj,
+                'rede_razao_social'    => $manifestacao->rede_razao_social,
+                'rede_municipio'       => $manifestacao->rede_municipio,
+                'rede_data_termo'      => $manifestacao->rede_data_termo,
                 'status'               => 'submetida',
                 'submitted_at'         => $manifestacao->submetida_em ?? now(),
             ]);
 
             // Plano de trabalho e habilitação passam a ser da proposta — os
-            // mesmos registros, sem recadastro e sem cópia a divergir.
-            $manifestacao->metas()->update(['proposta_id' => $proposta->id]);
+            // mesmos registros, sem recadastro e sem cópia a divergir. O plano
+            // inteiro vai junto: metas, aplicação, desembolso e endereços.
+            $manifestacao->transferirPlanoPara('proposta_id', $proposta->id);
             $manifestacao->documentos()->update(['proposta_id' => $proposta->id]);
 
             $manifestacao->update([

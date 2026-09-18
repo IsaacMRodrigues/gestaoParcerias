@@ -107,8 +107,10 @@ class PortalController extends Controller
         $osc = auth()->user()->oscVinculada();
         abort_unless($osc, 403, 'Sua conta não está vinculada a uma OSC.');
 
+        // `alteracoesEmAndamento` alimenta o selo pedido no modelo 3.3 — a OSC
+        // vê na lista que aquela parceria está em alteração.
         $propostas = $osc->propostas()
-            ->with(['chamamento.programa.orgao', 'instrumento'])
+            ->with(['chamamento.programa.orgao', 'instrumento.alteracoes' => fn ($q) => $q->emAndamento()])
             ->latest()
             ->get();
 
@@ -180,7 +182,9 @@ class PortalController extends Controller
         $osc = auth()->user()->oscVinculada();
         abort_unless($osc && $proposta->osc_id === $osc->id, 403);
 
-        $proposta->load(['chamamento.programa.orgao', 'documentos.uploader', 'pareceres']);
+        $proposta->load(['chamamento.programa.orgao', 'documentos.uploader', 'pareceres',
+            'metas.etapas', 'planoItens', 'desembolsos', 'enderecosExecucao']);
+
         return view('portal.proposta', compact('proposta'));
     }
 
@@ -193,6 +197,13 @@ class PortalController extends Controller
         // monta a proposta; quem a apresenta é quem responde por ela.
         abort_unless(auth()->user()->ehResponsavelLegalOsc(), 403,
             'Somente o responsável legal da OSC pode submeter a proposta.');
+
+        // Sem plano não há proposta: é o plano que a análise técnica examina.
+        // A trava também está aqui, e não só no botão, porque o botão é HTML.
+        if ($pendencias = $proposta->pendenciasDoPlano()) {
+            return back()->withErrors(['plano' => 'Falta completar o plano de trabalho: '
+                . implode('; ', $pendencias) . '.']);
+        }
 
         $proposta->update(['status' => 'submetida', 'submitted_at' => now()]);
 
