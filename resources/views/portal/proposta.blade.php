@@ -76,6 +76,9 @@
             'podeEditar' => $podePlanejar,
         ])
 
+        {{-- O processo inteiro, na medida em que o município o abre (3.3) --}}
+        @include('portal._dossie', ['proposta' => $proposta, 'dossie' => $dossie])
+
         {{-- Documentos --}}
         <div class="bg-white rounded-xl shadow-sm border border-gray-200">
             <div class="flex items-center justify-between px-6 py-4 border-b border-gray-100">

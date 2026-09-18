@@ -183,9 +183,14 @@ class PortalController extends Controller
         abort_unless($osc && $proposta->osc_id === $osc->id, 403);
 
         $proposta->load(['chamamento.programa.orgao', 'documentos.uploader', 'pareceres',
-            'metas.etapas', 'planoItens', 'desembolsos', 'enderecosExecucao']);
+            'metas.etapas', 'planoItens', 'desembolsos', 'enderecosExecucao',
+            // O dossiê reúne as quatro fases: ver Proposta::dossieParaOsc().
+            'chamamento.processo.pecas', 'chamamento.pecas', 'pecas', 'instrumento.pecas']);
 
-        return view('portal.proposta', compact('proposta'));
+        return view('portal.proposta', [
+            'proposta' => $proposta,
+            'dossie'   => $proposta->dossieParaOsc(),
+        ]);
     }
 
     public function submeterProposta(Proposta $proposta): RedirectResponse

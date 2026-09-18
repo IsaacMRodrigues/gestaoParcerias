@@ -10,11 +10,25 @@ class Peca extends Model
 {
     use \App\Models\Concerns\GuardaQuemAssinou;
 
+    /**
+     * A visibilidade à OSC é decidida no nascimento da peça, qualquer que seja
+     * o caminho que a criou — o motor de peças, um anexo avulso ou um seeder.
+     * Deixar isso no sincronizar() esqueceria os outros caminhos.
+     */
+    protected static function booted(): void
+    {
+        static::creating(function (self $peca) {
+            if ($peca->visivel_osc === null) {
+                $peca->visivel_osc = !in_array($peca->chave, self::INTERNAS, true);
+            }
+        });
+    }
+
     protected $table = 'pecas';
 
     protected $fillable = [
         'pecaable_type', 'pecaable_id', 'categoria', 'chave', 'rotulo',
-        'tipo', 'obrigatorio', 'ordem',
+        'tipo', 'obrigatorio', 'ordem', 'visivel_osc',
         'extra', 'setor', 'etapa', 'criado_por', 'origem_processo_peca_id',
         'conteudo', 'arquivo_path', 'arquivo_nome', 'tamanho', 'mime_type',
         'assinado_por', 'assinado_em', 'assinante_nome', 'assinante_cargo', 'codigo_validacao',
@@ -26,6 +40,7 @@ class Peca extends Model
     {
         return [
             'obrigatorio'        => 'boolean',
+            'visivel_osc'        => 'boolean',
             'extra'              => 'boolean',
             'etapa'              => 'integer',
             'assinado_em'        => 'datetime',
@@ -473,6 +488,25 @@ class Peca extends Model
      * no lugar de outra. É a mesma régua de submeter proposta e contra-assinar
      * o Termo (ver User::ehResponsavelLegalOsc).
      */
+    /**
+     * Peças que nascem fechadas à OSC.
+     *
+     * É a instrução interna do município: designações, protocolos entre
+     * setores, empenho e ordem de pagamento. Tudo o mais — o que decide, o que
+     * se publica e o que a própria organização entregou — nasce visível, que é
+     * o que a cliente pediu ao falar em "quase todos os documentos".
+     *
+     * A lista é o padrão, não a regra final: a SCP abre e fecha cada peça na
+     * tela de curadoria do dossiê.
+     */
+    public const INTERNAS = [
+        'comissao_selecao', 'portaria_gestor', 'portaria_comissao_mon',
+        'gestor_parceria', 'comissao_monitoramento',
+        'protocolo_juridico', 'pedido_parecer',
+        'op_global', 'comprovante_empenho',
+        'verificacao_habilitacao', 'certidao_autuacao', 'certidao_autuacao_anexo',
+    ];
+
     public const DECLARACOES_DO_RESPONSAVEL_LEGAL = [
         'decl_art7', 'decl_art23', 'decl_art33', 'decl_art34',
         'decl_art39', 'decl_art45', 'decl_autenticidade',
@@ -1140,6 +1174,29 @@ HTML,
     public function assinado(): bool
     {
         return !is_null($this->assinado_em);
+    }
+
+    /* ---- interface do dossiê da OSC: ver Proposta::dossieParaOsc() ---- */
+
+    public function rotuloDoDossie(): string
+    {
+        return $this->rotulo;
+    }
+
+    public function ehArquivoNoDossie(): bool
+    {
+        return $this->tipo === 'arquivo';
+    }
+
+    /** Identifica o documento na URL e no formulário de curadoria. */
+    public function chaveDoDossie(): string
+    {
+        return 'peca:' . $this->id;
+    }
+
+    public function origemNoDossie(): string
+    {
+        return 'peca';
     }
 
     /** Quem criou o anexo avulso — null nas peças que vêm do template. */

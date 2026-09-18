@@ -10,6 +10,25 @@ class ProcessoPeca extends Model
 {
     use \App\Models\Concerns\GuardaQuemAssinou;
 
+    /**
+     * Peças do Planejamento que nascem fechadas à OSC: o que instrui o
+     * processo por dentro. O edital, os pareceres, a justificativa de dispensa
+     * e os comprovantes de publicação nascem visíveis — ver Peca::INTERNAS.
+     */
+    public const INTERNAS = [
+        'oficio', 'abertura', 'pedido_parecer',
+        'solicitacao_parecer_juridico', 'portaria_comissao',
+    ];
+
+    protected static function booted(): void
+    {
+        static::creating(function (self $peca) {
+            if ($peca->visivel_osc === null) {
+                $peca->visivel_osc = !in_array($peca->tipo, self::INTERNAS, true);
+            }
+        });
+    }
+
     public const TIPOS = [
         'oficio'             => 'Ofício',
         'termo_referencia'   => 'Termo de Referência',
@@ -242,7 +261,7 @@ HTML,
     ];
 
     protected $fillable = [
-        'processo_id', 'tipo', 'conteudo', 'assinado_por', 'assinado_em', 'assinante_nome', 'assinante_cargo', 'codigo_validacao',
+        'processo_id', 'tipo', 'visivel_osc', 'conteudo', 'assinado_por', 'assinado_em', 'assinante_nome', 'assinante_cargo', 'codigo_validacao',
     ];
 
     /**
@@ -277,7 +296,7 @@ HTML,
 
     protected function casts(): array
     {
-        return ['assinado_em' => 'datetime'];
+        return ['assinado_em' => 'datetime', 'visivel_osc' => 'boolean'];
     }
 
     public function processo(): BelongsTo
@@ -298,6 +317,34 @@ HTML,
     public function assinado(): bool
     {
         return !is_null($this->assinado_em);
+    }
+
+    /* ---- interface do dossiê da OSC: ver Proposta::dossieParaOsc() ---- */
+
+    public function rotuloDoDossie(): string
+    {
+        return self::TIPOS[$this->tipo] ?? $this->tipo;
+    }
+
+    /** A peça do Planejamento é sempre texto; os anexos vivem à parte. */
+    public function ehArquivoNoDossie(): bool
+    {
+        return false;
+    }
+
+    public function temArquivo(): bool
+    {
+        return false;
+    }
+
+    public function chaveDoDossie(): string
+    {
+        return 'processo:' . $this->id;
+    }
+
+    public function origemNoDossie(): string
+    {
+        return 'processo';
     }
 
     /** A peça é do tipo ARQUIVO (sem editor/assinatura — só upload)? */

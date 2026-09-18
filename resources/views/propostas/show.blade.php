@@ -32,6 +32,11 @@
                         Ver Instrumento
                     </a>
                 @endif
+                {{-- Curadoria do dossiê (3.3): o que a organização enxerga do
+                     processo. A régua era uma lista cravada no código. --}}
+                <a href="{{ route('dossie.curadoria', $proposta) }}" class="btn btn-outline">
+                    Documentos visíveis à OSC
+                </a>
             </div>
         </div>
     </x-slot>

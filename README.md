@@ -272,6 +272,31 @@ OSC é organização, e organização tem equipe. O vínculo mora em **`users.os
 
 ## O que foi feito
 
+- [2026-09-18] **A OSC passou a ver o processo, e o município escolhe o que ela vê**
+  (`DossieController`, `Proposta::dossieParaOsc`, `pecas.visivel_osc`, `portal/_dossie`)
+  - Último item aberto do módulo 3.3. A cliente pediu que, ao abrir a inscrição, a organização
+    encontrasse "todo o processo: proposta, plano de trabalho, documentos da habilitação, pareceres
+    (orçamentário e jurídico) assinados, termo assinado, publicação", e sugeriu "uma tela em que a
+    SCP selecionava os documentos que aparecem para a OSC"
+  - A régua era **uma lista de três tipos cravada no código** da página do chamamento (edital,
+    justificativa de dispensa e parecer do CNAS). Agora cada documento carrega a sua marca
+    `visivel_osc`, e o bloco **"Documentos do processo"** reúne as quatro fases — Planejamento,
+    Seleção, Celebração e Execução — numa lista só, na tela da inscrição
+  - **Padrão que já serve**: nasce aberto o que decide, o que se publica e o que a própria
+    organização entregou; nasce fechado o que instrui o processo por dentro — designações,
+    protocolos entre setores, ordem de pagamento e empenho (`Peca::INTERNAS`,
+    `ProcessoPeca::INTERNAS`). A decisão é tomada no nascimento da peça, por gatilho no modelo, e
+    não no motor de peças: assim vale para qualquer caminho que crie um documento
+  - **Só circula documento pronto** — assinado ou com arquivo. Minuta na mão da OSC é pior do que
+    documento nenhum, e a marca de visível não muda isso
+  - Tela **"Documentos visíveis à OSC"**, na proposta, lista tudo com caixa de seleção e diz o que
+    ainda não está pronto. O acesso é o mesmo recorte por Secretaria das demais telas
+  - O documento abre no portal com o **mesmo carimbo de assinatura** das telas internas, e com
+    atalho para a validação pública: a OSC confere quem assinou sem depender de ninguém
+  - **22 verificações**: o padrão de visibilidade, o documento em elaboração que não aparece, a OSC
+    alheia e o visitante barrados, o identificador de outra parceria que não entra pela URL desta,
+    a curadoria aplicando exatamente o que foi marcado
+
 - [2026-09-18] **A assinatura passou a guardar quem assinou** (`GuardaQuemAssinou`,
   `User::cargoParaAssinatura`, `processos/_carimbo`, `ValidacaoController`)
   - O carimbo lia o **cadastro de agora**: bastava a pessoa editar o nome no perfil, mudar de setor

@@ -9,6 +9,7 @@ use App\Http\Controllers\ChamamentoController;
 use App\Http\Controllers\SelecaoController;
 use App\Http\Controllers\DiligenciaController;
 use App\Http\Controllers\DocumentoController;
+use App\Http\Controllers\DossieController;
 use App\Http\Controllers\ExecucaoController;
 use App\Http\Controllers\EtapaController;
 use App\Http\Controllers\InstrumentoController;
@@ -73,6 +74,13 @@ Route::middleware(['auth', 'osc'])->group(function () {
      */
     Route::get('/portal/minhas-propostas', [PortalController::class, 'minhasPropostas'])->name('portal.minhas-propostas');
     Route::get('/portal/propostas/{proposta}', [PortalController::class, 'showProposta'])->name('portal.proposta.show');
+
+    // Dossiê da parceria: os documentos das quatro fases que o município
+    // deixou abertos à organização (módulo 3.3). Ver DossieController.
+    Route::get('/portal/propostas/{proposta}/dossie/{origem}/{id}', [DossieController::class, 'mostrar'])
+        ->whereIn('origem', ['peca', 'processo'])->name('portal.dossie.mostrar');
+    Route::get('/portal/propostas/{proposta}/dossie/{origem}/{id}/arquivo', [DossieController::class, 'baixar'])
+        ->whereIn('origem', ['peca', 'processo'])->name('portal.dossie.baixar');
     Route::patch('/portal/propostas/{proposta}/submeter', [PortalController::class, 'submeterProposta'])->name('portal.proposta.submeter');
 
     Route::middleware('permission:osc_propostas')->group(function () {
@@ -345,6 +353,10 @@ Route::middleware('auth')->group(function () {
     Route::post('alteracoes/{alteracao}/avancar', [AlteracaoController::class, 'avancar'])->name('alteracoes.avancar');
     Route::post('alteracoes/{alteracao}/devolver', [AlteracaoController::class, 'devolver'])->name('alteracoes.devolver');
     Route::post('alteracoes/{alteracao}/decidir', [AlteracaoController::class, 'decidir'])->name('alteracoes.decidir');
+
+    // Curadoria do dossiê: quem conduz o processo escolhe o que a OSC vê.
+    Route::get('parcerias/{proposta}/documentos-osc', [DossieController::class, 'curadoria'])->name('dossie.curadoria');
+    Route::put('parcerias/{proposta}/documentos-osc', [DossieController::class, 'salvarCuradoria'])->name('dossie.curadoria.salvar');
 
     Route::get('celebracao', [CelebracaoController::class, 'index'])->name('celebracao.index');
     Route::get('celebracao/{proposta}', [CelebracaoController::class, 'show'])->name('celebracao.show');

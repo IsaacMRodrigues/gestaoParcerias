@@ -166,6 +166,60 @@ class Proposta extends Model
         return (float) $this->valor_solicitado + (float) $this->valor_proprio;
     }
 
+    /**
+     * O processo inteiro, como a OSC o vê (módulo 3.3).
+     *
+     * A cliente pediu que a organização, ao abrir a sua inscrição, encontrasse
+     * "todo o processo" — e não apenas o que ela mesma entregou. São quatro
+     * fases, quatro origens de documento, reunidas aqui numa lista só.
+     *
+     * Entra o que está **pronto** (assinado, ou com arquivo anexado) e marcado
+     * como visível. Minuta não circula: documento pela metade na mão da OSC é
+     * pior do que documento nenhum.
+     *
+     * @return array<string, \Illuminate\Support\Collection>
+     */
+    public function dossieParaOsc(): array
+    {
+        $pronta = fn ($p) => $p->assinado() || (method_exists($p, 'temArquivo') && $p->temArquivo());
+        $abertas = fn ($colecao) => collect($colecao)
+            ->filter(fn ($p) => $p->visivel_osc)
+            ->filter($pronta)
+            ->values();
+
+        $chamamento = $this->chamamento;
+
+        $grupos = [
+            'Planejamento' => $abertas($chamamento?->processo?->pecas ?? []),
+            'Seleção'      => $abertas($chamamento?->pecas ?? []),
+            'Celebração'   => $abertas($this->pecas),
+            'Execução'     => $abertas($this->instrumento?->pecas ?? []),
+        ];
+
+        return array_filter($grupos, fn ($g) => $g->isNotEmpty());
+    }
+
+    /**
+     * Tudo o que pode ser aberto ou fechado à OSC nesta parceria — inclusive o
+     * que ainda não está pronto, porque a SCP decide antes de o documento
+     * existir. É a lista da tela de curadoria.
+     *
+     * @return array<string, \Illuminate\Support\Collection>
+     */
+    public function dossieParaCuradoria(): array
+    {
+        $chamamento = $this->chamamento;
+
+        $grupos = [
+            'Planejamento' => collect($chamamento?->processo?->pecas ?? []),
+            'Seleção'      => collect($chamamento?->pecas ?? []),
+            'Celebração'   => collect($this->pecas),
+            'Execução'     => collect($this->instrumento?->pecas ?? []),
+        ];
+
+        return array_filter($grupos, fn ($g) => $g->isNotEmpty());
+    }
+
     // ------------------------------------------------------------------
     // Trâmite da Celebração (UG → OSC → UG → SCP → SEPLAN → … → SCP)
     // ------------------------------------------------------------------
