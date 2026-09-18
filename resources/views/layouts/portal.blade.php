@@ -143,6 +143,11 @@
                 $navItens[] = ['url' => route('prestacao-contas.index'), 'rotulo' => 'Prestação de contas', 'ativo' => request()->routeIs('prestacao-contas.*')];
             }
 
+            // O suporte é de quem está logado, seja da OSC ou da Prefeitura.
+            if (auth()->check()) {
+                $navItens[] = ['url' => route('suporte.index'), 'rotulo' => 'Suporte', 'ativo' => request()->routeIs('suporte.*')];
+            }
+
             $navLink = fn (bool $ativo) => $ativo
                 ? 'text-brand-700 font-semibold'
                 : 'text-gray-600 hover:text-brand-700';

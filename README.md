@@ -272,6 +272,31 @@ OSC é organização, e organização tem equipe. O vínculo mora em **`users.os
 
 ## O que foi feito
 
+- [2026-09-19] **Painel de suporte** (`Chamado`, `SuporteController`, `suporte/*`, permissão `suporte`)
+  - Canal para dúvidas, problemas e sugestões **sobre o próprio sistema** — até aqui isso corria por
+    telefone e WhatsApp, sem registro e sem fila
+  - **Só para quem está logado**, e é isso que basta de filtro: quem não tem acesso ao sistema não
+    tem o que perguntar sobre ele, e não existe formulário público a ser varrido por robô. Vale para
+    servidor de qualquer setor e para integrante de OSC — a mesma tela, em dois layouts
+  - **Uma caixa só, vista pela TI e pela SCP** (permissão `suporte`, decisão da gestão): a categoria
+    — problema, dúvida ou sugestão — ajuda a triar, mas ninguém precisa reparar que a pergunta caiu
+    na fila errada. Selo no menu com o que ainda está em aberto
+  - O chamado é uma **conversa**, não um formulário: o texto de abertura é a primeira mensagem, e
+    cada resposta entra na mesma linha do tempo, com anexo opcional (uma imagem da tela resolve
+    metade dos chamados). Guarda também a **tela de origem** — descobrir onde a pessoa estava é
+    boa parte do atendimento
+  - **Nota interna** para a equipe combinar entre si: não aparece para quem abriu, nem no HTML dela,
+    nem pelo download do anexo
+  - Automatismos que evitam seletor esquecido: a primeira resposta da equipe move o chamado para
+    "em andamento"; escrever num chamado dado por resolvido o **reabre**, em vez de obrigar a abrir
+    outro e perder o histórico. Encerrar é de quem atende **e de quem abriu** — quem sabe se a
+    dúvida foi sanada é quem a teve
+  - Nome e vínculo de quem escreve ficam **gravados na mensagem**, pela mesma razão do carimbo de
+    assinatura: conta renomeada não reescreve a conversa
+  - **39 verificações**: visitante barrado nas duas pontas, chamado alheio invisível para terceiros
+    (inclusive na lista), a nota interna que não vaza, o anexo que só as duas partes baixam, a
+    reabertura automática e a numeração sequencial por ano
+
 - [2026-09-18] **A OSC passou a ver o processo, e o município escolhe o que ela vê**
   (`DossieController`, `Proposta::dossieParaOsc`, `pecas.visivel_osc`, `portal/_dossie`)
   - Último item aberto do módulo 3.3. A cliente pediu que, ao abrir a inscrição, a organização

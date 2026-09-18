@@ -28,6 +28,7 @@ use App\Http\Controllers\ManifestacaoController;
 use App\Http\Controllers\PortalController;
 use App\Http\Controllers\PrestacaoContasController;
 use App\Http\Controllers\ProcessoController;
+use App\Http\Controllers\SuporteController;
 use App\Http\Controllers\ProcessoPecaController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\ProgramaController;
@@ -126,6 +127,18 @@ Route::middleware(['auth', 'osc'])->group(function () {
         Route::patch('/portal/usuarios/{usuario}/funcoes', [OscUsuarioController::class, 'funcoes'])->name('portal.usuarios.funcoes');
         Route::patch('/portal/usuarios/{usuario}/acesso', [OscUsuarioController::class, 'alternarAcesso'])->name('portal.usuarios.acesso');
     });
+});
+
+// Suporte: qualquer pessoa logada abre chamado — servidor ou OSC. Quem atende
+// é quem tem a permissão `suporte` (a régua está no controller, porque a mesma
+// tela serve aos dois lados).
+Route::middleware('auth')->group(function () {
+    Route::get('/suporte', [SuporteController::class, 'index'])->name('suporte.index');
+    Route::post('/suporte', [SuporteController::class, 'store'])->name('suporte.store');
+    Route::get('/suporte/{chamado}', [SuporteController::class, 'show'])->name('suporte.show');
+    Route::post('/suporte/{chamado}/mensagens', [SuporteController::class, 'responder'])->name('suporte.responder');
+    Route::patch('/suporte/{chamado}/status', [SuporteController::class, 'status'])->name('suporte.status');
+    Route::get('/suporte/{chamado}/anexos/{mensagem}', [SuporteController::class, 'baixarAnexo'])->name('suporte.anexo');
 });
 
 // Recursos: download pela OSC autora ou pela equipe; resposta pela Unidade Gestora

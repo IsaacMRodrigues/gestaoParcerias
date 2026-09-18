@@ -3,6 +3,8 @@
         ? \App\Models\Proposta::visiveisPara(auth()->user())->where('status', 'submetida')->count()
         : 0;
     $navPendentes = auth()->user()->can('cadastros') ? \App\Models\User::pendentes()->count() : 0;
+    // Selo do suporte: só para quem atende, e só do que ainda ocupa alguém.
+    $navChamados = auth()->user()->can('suporte') ? \App\Models\Chamado::emAberto()->count() : 0;
     // Manifestações paradas esperando o setor de quem está vendo o menu.
     $navManifestacoes = auth()->user()->can('chamamentos')
         ? \App\Models\ManifestacaoInteresse::visiveisPara(auth()->user())
@@ -279,6 +281,19 @@
                 Modelos
             </a>
         @endrole
+
+        {{-- Suporte: fora do ciclo da parceria, porque não é etapa de processo
+             — é o canal para falar do próprio sistema. Aberto a todo mundo que
+             está logado; quem atende ganha o selo com a fila. --}}
+        <p class="{{ $sec }}">Ajuda</p>
+        @php $emSuporte = request()->routeIs('suporte.*'); @endphp
+        <a href="{{ route('suporte.index') }}" class="{{ $link }} {{ $emSuporte ? $on : '' }}">
+            <svg class="shrink-0" style="width:18px;height:18px" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.8">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+            </svg>
+            Suporte
+            @if($navChamados > 0)<span class="{{ $badge }}">{{ $navChamados }}</span>@endif
+        </a>
     </nav>
 
     <div class="border-t border-gray-200 px-4 py-3 text-[12px] text-gray-400 shrink-0">
