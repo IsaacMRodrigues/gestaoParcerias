@@ -135,10 +135,11 @@ class SuporteController extends Controller
             'status' => ['required', Rule::in(array_keys(Chamado::STATUS))],
         ]);
 
-        // Quem abriu pode dar o chamado por resolvido — quem sabe se a dúvida
-        // foi sanada é quem a teve. Reabrir também é dele: às vezes a resposta
-        // resolve pela metade, e obrigar a abrir outro chamado perde o histórico.
-        abort_unless($this->atende() || $chamado->user_id === auth()->id(), 403);
+        // Encerrar é de quem atende. Quem abriu acompanha a situação e escreve
+        // de volta se não ficou resolvido — e escrever reabre o chamado (ver
+        // registrarMensagem), o que basta para nada morrer sem resposta.
+        abort_unless($this->atende(), 403,
+            'Quem encerra o chamado é a equipe de suporte.');
 
         $chamado->update([
             'status'        => $dados['status'],

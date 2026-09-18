@@ -152,22 +152,51 @@
             </form>
         </div>
 
-        {{-- Situação: quem atende e quem abriu podem encerrar ou reabrir --}}
+        {{-- Situação do chamado.
+
+             Encerrar é da equipe de suporte. Para quem abriu, este bloco é
+             leitura: ele acompanha em que pé está e, se não ficou resolvido,
+             escreve de volta — o que reabre o chamado sozinho. --}}
         <div class="bg-white rounded-xl border border-gray-200 shadow-sm p-6">
             <h2 class="font-semibold text-gray-900">Situação do chamado</h2>
-            <p class="text-sm text-gray-500 mt-0.5 mb-3">
-                {{ $chamado->resolvido()
-                    ? 'Este chamado está encerrado. Escrever de novo o reabre.'
-                    : 'Marque como resolvido quando o assunto estiver encerrado.' }}
-            </p>
-            <form action="{{ route('suporte.status', $chamado) }}" method="POST" class="flex flex-wrap gap-2">
-                @csrf @method('PATCH')
-                @if($chamado->resolvido())
-                    <button name="status" value="em_andamento" class="btn btn-secondary btn-sm">Reabrir</button>
-                @else
-                    <button name="status" value="resolvido" class="btn btn-primary">Marcar como resolvido</button>
-                @endif
-            </form>
+
+            @if($atende)
+                <p class="text-sm text-gray-500 mt-0.5 mb-3">
+                    {{ $chamado->resolvido()
+                        ? 'Encerrado. Se a pessoa escrever de novo, o chamado reabre sozinho.'
+                        : 'Marque como resolvido quando o assunto estiver encerrado.' }}
+                </p>
+                <form action="{{ route('suporte.status', $chamado) }}" method="POST" class="flex flex-wrap gap-2">
+                    @csrf @method('PATCH')
+                    @if($chamado->resolvido())
+                        <button name="status" value="em_andamento" class="btn btn-secondary btn-sm">Reabrir</button>
+                    @else
+                        <button name="status" value="resolvido" class="btn btn-primary">Marcar como resolvido</button>
+                    @endif
+                </form>
+            @else
+                <div class="mt-3 flex flex-wrap items-center gap-3">
+                    <span class="px-3 py-1 text-sm font-semibold rounded-full
+                                 bg-{{ $cor }}-50 text-{{ $cor }}-800 ring-1 ring-{{ $cor }}-200">
+                        {{ $chamado->statusLabel() }}
+                    </span>
+                    <span class="text-sm text-gray-600">
+                        @switch($chamado->status)
+                            @case('aberto')
+                                Recebido. A equipe de suporte ainda não respondeu.
+                                @break
+                            @case('em_andamento')
+                                A equipe está cuidando do seu chamado.
+                                @break
+                            @case('resolvido')
+                                A equipe deu o assunto por encerrado
+                                @if($chamado->resolvido_em) em {{ $chamado->resolvido_em->format('d/m/Y') }} @endif.
+                                Se não resolveu, escreva acima — o chamado volta para a fila.
+                                @break
+                        @endswitch
+                    </span>
+                </div>
+            @endif
         </div>
     </div>
 </x-dynamic-component>

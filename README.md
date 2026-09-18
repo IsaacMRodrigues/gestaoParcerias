@@ -289,8 +289,10 @@ OSC é organização, e organização tem equipe. O vínculo mora em **`users.os
     nem pelo download do anexo
   - Automatismos que evitam seletor esquecido: a primeira resposta da equipe move o chamado para
     "em andamento"; escrever num chamado dado por resolvido o **reabre**, em vez de obrigar a abrir
-    outro e perder o histórico. Encerrar é de quem atende **e de quem abriu** — quem sabe se a
-    dúvida foi sanada é quem a teve
+    outro e perder o histórico
+  - **Encerrar é só de quem atende.** Para quem abriu, a situação é leitura — um selo e uma frase
+    dizendo em que pé está. Se não ficou resolvido, ele escreve de volta, e o chamado volta à fila
+    sozinho: não há botão a apertar nem chamado que morra sem resposta
   - Nome e vínculo de quem escreve ficam **gravados na mensagem**, pela mesma razão do carimbo de
     assinatura: conta renomeada não reescreve a conversa
   - **39 verificações**: visitante barrado nas duas pontas, chamado alheio invisível para terceiros
