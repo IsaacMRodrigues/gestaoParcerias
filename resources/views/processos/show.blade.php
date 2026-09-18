@@ -1,22 +1,26 @@
 <x-app-layout>
     <x-slot name="header">
-        <div class="flex items-center justify-between">
-            <div>
-                <p class="text-sm text-gray-500">
-                    <a href="{{ route('processos.index') }}" class="hover:underline">Processos</a>
-                </p>
-                <h2 class="text-2xl font-bold text-gray-900 mt-0.5">
-                    Processo {{ $processo->numero }}
-                    <span class="text-sm font-normal text-gray-500 ml-1">— {{ $processo->orgao->name }}</span>
-                </h2>
-            </div>
-            <div class="flex items-center gap-3">
-                @php $color = \App\Models\Processo::STATUS_COLORS[$processo->status] ?? 'gray'; @endphp
-                <span class="px-3 py-1.5 text-sm font-medium bg-{{ $color }}-100 text-{{ $color }}-800 rounded-full">
+        {{-- Selo, órgão e setor numa linha de dados sob o título.
+             Estavam à direita, disputando a faixa com a busca: o espaço não
+             dava, e o selo quebrava no meio — "Em / Trâmite". --}}
+        @php $color = \App\Models\Processo::STATUS_COLORS[$processo->status] ?? 'gray'; @endphp
+        <div class="min-w-0">
+            <p class="text-sm text-gray-500">
+                <a href="{{ route('processos.index') }}" class="hover:underline">Processos</a>
+            </p>
+            <h2 class="text-2xl font-bold text-gray-900 mt-0.5 truncate">Processo {{ $processo->numero }}</h2>
+            <div class="mt-1 flex flex-wrap items-center gap-x-2 gap-y-1 text-sm text-gray-500">
+                <span class="px-2 py-0.5 text-xs font-semibold whitespace-nowrap rounded
+                             bg-{{ $color }}-50 text-{{ $color }}-800 ring-1 ring-{{ $color }}-200">
                     {{ \App\Models\Processo::STATUS[$processo->status] }}
                 </span>
-                <span class="text-sm text-gray-500">
-                    Setor atual: <strong>{{ \App\Models\Processo::SETORES[$processo->setor_atual] ?? $processo->setor_atual }}</strong>
+                {{-- Sem truncar: numa tela estreita é melhor a linha passar para
+                     baixo do que o nome do setor sumir atrás de reticências. --}}
+                <span>{{ $processo->orgao->name }}</span>
+                <span class="text-gray-400">&middot;</span>
+                <span>
+                    Setor atual:
+                    <strong class="text-gray-700">{{ \App\Models\Processo::SETORES[$processo->setor_atual] ?? $processo->setor_atual }}</strong>
                 </span>
             </div>
         </div>
