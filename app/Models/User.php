@@ -507,6 +507,41 @@ class User extends Authenticatable
     }
 
     /**
+     * Como a pessoa se identifica ao assinar: o cargo e a entidade por quem
+     * assina — "Analista Técnico do SCP — Planejamento".
+     *
+     * Para o servidor, a Secretaria; para quem assina pela OSC, a própria OSC:
+     * é ela que se obriga no Termo, e o carimbo sem isso dizia apenas
+     * "Representante Legal", sem dizer de quem.
+     *
+     * Quem tem mais de um perfil assina pelo mais específico: "Membro da OSC"
+     * é a identidade de quem é da equipe, acompanha todos os outros e sozinho
+     * não diz nada sobre quem assinou.
+     *
+     * Este valor é **gravado no momento da assinatura** (ver
+     * pecas.assinante_cargo): promoção, transferência ou troca de perfil não
+     * podem reescrever quem assinou o que, no passado.
+     */
+    public function cargoParaAssinatura(): ?string
+    {
+        $papel = ($this->roles->first(fn ($r) => $r->name !== 'membro_osc')
+            ?? $this->roles->first())?->name;
+
+        $cargo = $papel ? (self::$roleLabels[$papel] ?? null) : null;
+        $cargo = $cargo ?: ($this->setor ? (\App\Models\Processo::SETORES[$this->setor] ?? null) : null);
+
+        $entidade = $this->orgao?->name ?: $this->osc?->name;
+
+        return $entidade ? ($cargo ? $cargo . ' — ' . $entidade : $entidade) : $cargo;
+    }
+
+    /** O par nome/cargo que se congela numa assinatura. */
+    public function identidadeParaAssinatura(): array
+    {
+        return ['nome' => $this->name, 'cargo' => $this->cargoParaAssinatura()];
+    }
+
+    /**
      * É o responsável legal da OSC — quem responde juridicamente por ela.
      *
      * Distinção que passou a existir quando a OSC ganhou equipe: todo mundo da

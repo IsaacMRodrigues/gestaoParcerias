@@ -2,26 +2,15 @@
      Espera: $peca, $qrValidacao e — quando o documento tem assinatura das
      partes (Termo de Parceria) — $qrContra. --}}
 @php
-    /* Cargo de quem assina: o papel no sistema e a entidade por quem assina.
-       Para o servidor, a Secretaria; para quem assina pela OSC, o nome da
-       própria OSC — é ela que se obriga no Termo, e o carimbo sem isso dizia
-       apenas "Representante Legal", sem dizer de quem. */
-    $cargoDe = function ($u) {
-        if (!$u) {
-            return null;
-        }
-
-        /* Quem tem mais de um perfil assina pelo mais específico: "Membro da
-           OSC" é a identidade de quem é da equipe e acompanha todos os
-           outros, e sozinho não diz nada sobre quem assinou. */
-        $papel = ($u->roles->first(fn ($r) => $r->name !== 'membro_osc')
-            ?? $u->roles->first())?->name;
-        $cargo = $papel ? (\App\Models\User::$roleLabels[$papel] ?? null) : null;
-        $cargo = $cargo ?: ($u->setor ? (\App\Models\Processo::SETORES[$u->setor] ?? null) : null);
-
-        $entidade = $u->orgao?->name ?: $u->osc?->name;
-
-        return $entidade ? ($cargo ? $cargo . ' — ' . $entidade : $entidade) : $cargo;
+    /* Nome e cargo vêm do que foi gravado no ato da assinatura, não do
+       cadastro de hoje: editar o perfil, mudar de setor ou ganhar outro papel
+       não pode reescrever quem assinou o quê. A leitura do usuário vivo fica
+       só como recurso para assinatura antiga que não tenha o registro. */
+    $identidade = function (?string $nome, ?string $cargo, $u) {
+        return [
+            'nome'  => $nome ?: $u?->name,
+            'cargo' => $cargo ?: $u?->cargoParaAssinatura(),
+        ];
     };
 
     /* Uma entrada por assinatura. O Termo da Celebração é assinado pelas duas
@@ -32,9 +21,8 @@
     $assinaturas = [];
 
     if ($peca->assinado()) {
-        $assinaturas[] = [
+        $assinaturas[] = $identidade($peca->assinante_nome, $peca->assinante_cargo, $peca->assinante) + [
             'verbo'  => 'assinado eletronicamente',
-            'pessoa' => $peca->assinante,
             'em'     => $peca->assinado_em,
             'codigo' => $peca->codigo_validacao,
             'qr'     => $qrValidacao ?? null,
@@ -42,9 +30,8 @@
     }
 
     if (method_exists($peca, 'contraAssinado') && $peca->contraAssinado()) {
-        $assinaturas[] = [
+        $assinaturas[] = $identidade($peca->contra_assinante_nome, $peca->contra_assinante_cargo, $peca->contraAssinante) + [
             'verbo'  => 'contra-assinado eletronicamente (assinatura das partes)',
-            'pessoa' => $peca->contraAssinante,
             'em'     => $peca->contra_assinado_em,
             'codigo' => $peca->codigo_validacao_contra,
             'qr'     => $qrContra ?? null,
@@ -53,7 +40,6 @@
 @endphp
 
 @foreach($assinaturas as $i => $assinatura)
-    @php $cargo = $cargoDe($assinatura['pessoa']); @endphp
     {{-- A segunda assinatura encosta na primeira, com filete leve: é o mesmo
          carimbo do mesmo documento, não outro bloco. --}}
     <table style="border:none;border-collapse:collapse;width:100%;
@@ -63,7 +49,7 @@
             <td style="border:none;width:48px;vertical-align:top;padding-top:8px;font-size:26px;">🔏</td>
             <td style="border:none;vertical-align:top;padding-top:8px;font-size:11px;color:#1e293b;line-height:1.5;">
                 <p style="margin:0;">Documento {{ $assinatura['verbo'] }} por
-                    <strong>{{ $assinatura['pessoa']?->name }}</strong>@if($cargo), {{ $cargo }}@endif,
+                    <strong>{{ $assinatura['nome'] }}</strong>@if($assinatura['cargo']), {{ $assinatura['cargo'] }}@endif,
                     em <strong>{{ $assinatura['em']->format('d/m/Y') }}</strong>,
                     às <strong>{{ $assinatura['em']->format('H:i') }}</strong>,
                     conforme horário oficial de Brasília, com fundamento na Lei Federal nº 13.019/2014.</p>

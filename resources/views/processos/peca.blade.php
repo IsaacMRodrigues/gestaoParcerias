@@ -21,7 +21,7 @@
                 </div>
             @elseif($peca->assinado())
                 <div class="bg-brand-50 border border-brand-200 text-brand-800 px-4 py-3 rounded-lg text-sm">
-                    Assinado por {{ $peca->assinante->name }} em {{ $peca->assinado_em->format('d/m/Y H:i') }}.
+                    Assinado por {{ $peca->assinanteNome() }} em {{ $peca->assinado_em->format('d/m/Y H:i') }}.
                 </div>
             @elseif($podeAssinar && !$podeEditar)
                 <div class="bg-slate-50 border border-slate-200 text-slate-800 px-4 py-3 rounded-lg text-sm">
@@ -116,7 +116,7 @@
                         <p class="text-sm font-semibold text-gray-800">Assinatura digital</p>
                         @if($peca->assinado())
                             <p class="text-xs text-gray-500">
-                                Assinado por <strong>{{ $peca->assinante->name }}</strong>
+                                Assinado por <strong>{{ $peca->assinanteNome() }}</strong>
                                 em {{ $peca->assinado_em->format('d/m/Y H:i') }}.
                                 Código de validação: <strong>{{ $peca->codigo_validacao }}</strong>
                             </p>

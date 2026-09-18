@@ -8,6 +8,8 @@ use Illuminate\Database\Eloquent\Relations\MorphTo;
 
 class Peca extends Model
 {
+    use \App\Models\Concerns\GuardaQuemAssinou;
+
     protected $table = 'pecas';
 
     protected $fillable = [
@@ -15,8 +17,9 @@ class Peca extends Model
         'tipo', 'obrigatorio', 'ordem',
         'extra', 'setor', 'etapa', 'criado_por', 'origem_processo_peca_id',
         'conteudo', 'arquivo_path', 'arquivo_nome', 'tamanho', 'mime_type',
-        'assinado_por', 'assinado_em', 'codigo_validacao',
-        'contra_assinado_por', 'contra_assinado_em', 'codigo_validacao_contra',
+        'assinado_por', 'assinado_em', 'assinante_nome', 'assinante_cargo', 'codigo_validacao',
+        'contra_assinado_por', 'contra_assinado_em', 'contra_assinante_nome',
+        'contra_assinante_cargo', 'codigo_validacao_contra',
     ];
 
     protected function casts(): array

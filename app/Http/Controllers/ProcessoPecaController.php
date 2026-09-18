@@ -149,9 +149,15 @@ class ProcessoPecaController extends Controller
         abort_unless($peca->podeAssinar($processo, auth()->user()), 403,
             'Você não pode assinar esta peça nesta etapa.');
 
+        // Ver PecaController::assinar(): a identidade de quem assina fica
+        // gravada, para o carimbo não mudar quando a pessoa mudar.
+        $quem = auth()->user()->identidadeParaAssinatura();
+
         $peca->update([
             'assinado_por'     => auth()->id(),
             'assinado_em'      => now(),
+            'assinante_nome'   => $quem['nome'],
+            'assinante_cargo'  => $quem['cargo'],
             'codigo_validacao' => $peca->codigo_validacao ?: ProcessoPeca::gerarCodigoValidacao(),
         ]);
 

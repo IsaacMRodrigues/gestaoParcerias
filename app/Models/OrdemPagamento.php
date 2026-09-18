@@ -8,11 +8,13 @@ use Illuminate\Support\Str;
 
 class OrdemPagamento extends Model
 {
+    use \App\Models\Concerns\GuardaQuemAssinou;
+
     protected $table = 'ordens_pagamento';
 
     protected $fillable = [
         'instrumento_id', 'numero', 'tipo', 'favorecido', 'valor', 'data_emissao',
-        'conteudo', 'assinado_por', 'assinado_em', 'codigo_validacao',
+        'conteudo', 'assinado_por', 'assinado_em', 'assinante_nome', 'assinante_cargo', 'codigo_validacao',
         'dados_bancarios_path', 'dados_bancarios_nome',
     ];
 

@@ -8,6 +8,8 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class ProcessoPeca extends Model
 {
+    use \App\Models\Concerns\GuardaQuemAssinou;
+
     public const TIPOS = [
         'oficio'             => 'Ofício',
         'termo_referencia'   => 'Termo de Referência',
@@ -240,7 +242,7 @@ HTML,
     ];
 
     protected $fillable = [
-        'processo_id', 'tipo', 'conteudo', 'assinado_por', 'assinado_em', 'codigo_validacao',
+        'processo_id', 'tipo', 'conteudo', 'assinado_por', 'assinado_em', 'assinante_nome', 'assinante_cargo', 'codigo_validacao',
     ];
 
     /**

@@ -20,22 +20,17 @@
     {!! $peca->conteudo !!}
 
     @if($peca->assinado())
+        {{-- Nome e cargo de quem assinou, como gravados no ato — ver
+             Concerns\GuardaQuemAssinou. --}}
         @php
-            $assinante = $peca->assinante;
-            $papel = $assinante?->roles->first()?->name;
-            $papelLabel = $papel ? (\App\Models\User::$roleLabels[$papel] ?? null) : null;
-            $setorLabel = $assinante?->setor ? (\App\Models\Processo::SETORES[$assinante->setor] ?? null) : null;
-            $cargo = $papelLabel ?: $setorLabel;
-            $orgaoNome = $assinante?->orgao?->name;
-            if ($orgaoNome) {
-                $cargo = $cargo ? $cargo . ' — ' . $orgaoNome : $orgaoNome;
-            }
+            $nomeAssinante = $peca->assinanteNome();
+            $cargo = $peca->assinanteCargo();
         @endphp
         <table style="border:none;border-collapse:collapse;width:100%;margin-top:28px;border-top:2px solid #1e3a8a;">
             <tr>
                 <td style="border:none;vertical-align:top;padding-top:8px;font-size:11px;color:#1e293b;line-height:1.5;">
                     <p style="margin:0;"><strong>ASSINATURA ELETRÔNICA.</strong> Documento assinado eletronicamente por
-                        <strong>{{ $assinante?->name }}</strong>@if($cargo), {{ $cargo }}@endif,
+                        <strong>{{ $nomeAssinante }}</strong>@if($cargo), {{ $cargo }}@endif,
                         em <strong>{{ $peca->assinado_em->format('d/m/Y') }}</strong>,
                         às <strong>{{ $peca->assinado_em->format('H:i') }}</strong>,
                         conforme horário oficial de Brasília, com fundamento na Lei Federal nº 13.019/2014.</p>

@@ -72,9 +72,15 @@ class PecaController extends Controller
         abort_if(empty($peca->conteudo), 422, 'Preencha o documento antes de assinar.');
         $this->autorizar($peca, 'assinar');
 
+        // Nome e cargo ficam gravados aqui: o carimbo não pode mudar depois
+        // porque a pessoa editou o perfil ou trocou de setor.
+        $quem = auth()->user()->identidadeParaAssinatura();
+
         $peca->update([
             'assinado_por'     => auth()->id(),
             'assinado_em'      => now(),
+            'assinante_nome'   => $quem['nome'],
+            'assinante_cargo'  => $quem['cargo'],
             'codigo_validacao' => $peca->codigo_validacao ?: Peca::gerarCodigoValidacao(),
         ]);
 
@@ -95,9 +101,13 @@ class PecaController extends Controller
             $peca->motivoNaoPodeContraAssinar(auth()->user())
                 ?? 'Você não pode contra-assinar este documento agora.');
 
+        $quem = auth()->user()->identidadeParaAssinatura();
+
         $peca->update([
             'contra_assinado_por'     => auth()->id(),
             'contra_assinado_em'      => now(),
+            'contra_assinante_nome'   => $quem['nome'],
+            'contra_assinante_cargo'  => $quem['cargo'],
             'codigo_validacao_contra' => $peca->codigo_validacao_contra ?: Peca::gerarCodigoValidacao(),
         ]);
 

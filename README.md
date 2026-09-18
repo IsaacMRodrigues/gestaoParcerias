@@ -272,6 +272,24 @@ OSC é organização, e organização tem equipe. O vínculo mora em **`users.os
 
 ## O que foi feito
 
+- [2026-09-18] **A assinatura passou a guardar quem assinou** (`GuardaQuemAssinou`,
+  `User::cargoParaAssinatura`, `processos/_carimbo`, `ValidacaoController`)
+  - O carimbo lia o **cadastro de agora**: bastava a pessoa editar o nome no perfil, mudar de setor
+    ou ganhar outro papel para que **todos os documentos que ela já tinha assinado** passassem a
+    dizer outra coisa. Assinatura eletrônica é ato com data certa — quem assinou, e em que
+    qualidade, não muda depois
+  - Nome e cargo passam a ser **gravados na própria linha, no ato da assinatura**, nas três tabelas
+    que assinam (`pecas`, com a contra-assinatura do Termo, `processo_pecas` e `ordens_pagamento`).
+    A migração **congela as assinaturas já existentes** com o nome e o cargo atuais — a melhor
+    aproximação disponível — e daqui em diante elas não se mexem
+  - A montagem do cargo saiu do Blade para `User::cargoParaAssinatura()`: era ela que precisava
+    rodar **no momento de assinar**, e não na hora de imprimir
+  - Todas as telas que nomeavam o assinante passaram a ler o registro — carimbo, PDF, checklist,
+    tela da peça, ordem de pagamento e a **validação pública**. A leitura do usuário vivo sobrevive
+    só como recurso para linha antiga sem registro
+  - Conferido: assinar grava os dois campos; renomear o usuário e trocá-lo de setor não mudam o
+    carimbo nem a página de validação; as 48 assinaturas que já existiam foram congeladas
+
 - [2026-09-18] **Módulo 3 completo: Plano de Trabalho, Alterações da Parceria e o checklist da
   habilitação item a item** (`TemPlanoDeTrabalho`, `PlanoTrabalhoController`, `Alteracao`,
   `PlanoDocumento`, `plano/*`, `alteracoes/*`)

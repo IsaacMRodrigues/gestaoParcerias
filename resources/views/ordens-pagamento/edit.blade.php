@@ -15,7 +15,7 @@
                 <div class="flex items-center gap-3 p-4 rounded-lg bg-brand-50 border border-brand-200 text-sm text-brand-800">
                     <span class="text-lg">🔏</span>
                     <div>
-                        Assinada eletronicamente por <strong>{{ $op->assinante?->name }}</strong>
+                        Assinada eletronicamente por <strong>{{ $op->assinanteNome() }}</strong>
                         em {{ $op->assinado_em->format('d/m/Y \à\s H:i') }}.
                         Código: <span class="font-mono">{{ $op->codigo_validacao }}</span>.
                     </div>

@@ -208,13 +208,13 @@
                                 <p class="text-xs text-gray-500 mt-0.5">
                                     Vem do Planejamento — processo nº {{ $peca->origem->processo->numero }}
                                     @if($peca->origem->assinado())
-                                        · assinado por {{ $peca->origem->assinante?->name ?? '—' }}
+                                        · assinado por {{ $peca->origem->assinanteNome() ?? '—' }}
                                         em {{ $peca->origem->assinado_em->format('d/m/Y H:i') }}
                                     @endif
                                 </p>
                             @elseif($peca->assinado())
                                 <p class="text-xs text-gray-400 mt-0.5">
-                                    Assinado por {{ $peca->assinante->name }} em {{ $peca->assinado_em->format('d/m/Y H:i') }}
+                                    Assinado por {{ $peca->assinanteNome() }} em {{ $peca->assinado_em->format('d/m/Y H:i') }}
                                 </p>
                                 @if($peca->exigeContraAssinatura())
                                     <p class="text-xs mt-0.5 {{ $peca->contraAssinado() ? 'text-gray-400' : 'text-accent-700' }}">

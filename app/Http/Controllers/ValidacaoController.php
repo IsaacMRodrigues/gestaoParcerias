@@ -43,7 +43,7 @@ class ValidacaoController extends Controller
                 'ref'         => $peca->processo->numero,
                 'extra_label' => 'Unidade Gestora',
                 'extra'       => $peca->processo->orgao->name ?? '—',
-                'assinante'   => $peca->assinante?->name,
+                'assinante'   => $peca->assinante_nome ?: $peca->assinante?->name,
                 'assinado_em' => $peca->assinado_em,
                 'codigo'      => $peca->codigo_validacao,
                 'conteudo'    => $peca->conteudo,
@@ -61,7 +61,7 @@ class ValidacaoController extends Controller
                     'ref'         => $op->instrumento->numero,
                     'extra_label' => 'Favorecido',
                     'extra'       => $op->favorecido ?: ($op->instrumento->proposta->osc->name ?? '—'),
-                    'assinante'   => $op->assinante?->name,
+                    'assinante'   => $op->assinante_nome ?: $op->assinante?->name,
                     'assinado_em' => $op->assinado_em,
                     'codigo'      => $op->codigo_validacao,
                     'conteudo'    => $op->conteudo,
@@ -95,14 +95,15 @@ class ValidacaoController extends Controller
                         'ref'         => $ref,
                         'extra_label' => 'Categoria',
                         'extra'       => Peca::CATEGORIA_LABELS[$selecao->categoria] ?? $selecao->categoria,
-                        'assinante'   => $selecao->assinante?->name,
+                        'assinante'   => $selecao->assinante_nome ?: $selecao->assinante?->name,
                         'assinado_em' => $selecao->assinado_em,
                         'codigo'      => $selecao->codigo_validacao,
                         'conteudo'    => $selecao->conteudo,
                     ];
 
                     if ($selecao->contraAssinado()) {
-                        $doc['contra_assinante']   = $selecao->contraAssinante?->name;
+                        $doc['contra_assinante']   = $selecao->contra_assinante_nome
+                            ?: $selecao->contraAssinante?->name;
                         $doc['contra_osc']         = $selecao->contraAssinante?->osc?->name;
                         $doc['contra_assinado_em'] = $selecao->contra_assinado_em;
                         $doc['contra_codigo']      = $selecao->codigo_validacao_contra;

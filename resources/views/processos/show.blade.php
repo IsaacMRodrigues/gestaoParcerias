@@ -439,7 +439,7 @@
                         $n = $p->anexos()->count();
                         return $n ? $n . ' ' . ($n === 1 ? 'arquivo anexado' : 'arquivos anexados') : 'Nenhum arquivo anexado';
                     }
-                    if ($p->assinado()) return 'Assinado por ' . $p->assinante->name . ' em ' . $p->assinado_em->format('d/m/Y H:i');
+                    if ($p->assinado()) return 'Assinado por ' . $p->assinanteNome() . ' em ' . $p->assinado_em->format('d/m/Y H:i');
                     if (!empty($p->conteudo)) return 'Preenchido — não assinado';
                     return 'Não preenchido';
                 };
