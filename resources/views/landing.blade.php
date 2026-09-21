@@ -210,11 +210,13 @@
             </div>
         </main>
 
-        <footer class="bg-gray-900 text-gray-400 mt-auto">
-            <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8
+        {{-- Rodapé claro, como o resto do sistema: escuro, fechava a página
+             com uma faixa pesada que nenhuma outra tela tinha. --}}
+        <footer class="bg-white border-t border-gray-200 text-gray-500 mt-auto">
+            <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-6
                         flex flex-col sm:flex-row items-center justify-between gap-3 text-xs">
                 <span>Plataforma de Gestão de Parcerias — Sistema público municipal</span>
-                <span class="text-gray-500">PGP · {{ now()->year }}</span>
+                <span class="text-gray-400">PGP · {{ now()->year }}</span>
             </div>
             <div class="h-1.5 bg-gradient-to-r from-brand-600 via-brand-500 to-accent-500"></div>
         </footer>

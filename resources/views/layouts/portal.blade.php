@@ -273,14 +273,15 @@
             {{ $slot }}
         </main>
 
-        <footer class="bg-gray-900 text-gray-400 mt-12">
-            <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8
+        {{-- Claro, como o rodapé da área interna e da página inicial. --}}
+        <footer class="bg-white border-t border-gray-200 text-gray-500 mt-12">
+            <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-6
                         flex flex-col sm:flex-row items-center justify-between gap-3 text-xs">
                 <span>Plataforma de Gestão de Parcerias — Sistema público municipal</span>
                 <span class="flex items-center gap-5">
-                    <a href="{{ route('transparencia') }}" class="hover:text-white transition">Transparência</a>
-                    <a href="{{ route('validacao.index') }}" class="hover:text-white transition">Validar documento</a>
-                    <span class="text-gray-500">PGP · {{ now()->year }}</span>
+                    <a href="{{ route('transparencia') }}" class="hover:text-brand-700 transition">Transparência</a>
+                    <a href="{{ route('validacao.index') }}" class="hover:text-brand-700 transition">Validar documento</a>
+                    <span class="text-gray-400">PGP · {{ now()->year }}</span>
                 </span>
             </div>
             <div class="h-1.5 bg-gradient-to-r from-brand-600 via-brand-500 to-accent-500"></div>
