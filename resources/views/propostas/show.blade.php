@@ -284,12 +284,14 @@
 
             {{-- Plano de Trabalho --}}
             <div class="bg-white rounded-xl border border-gray-200 shadow-sm">
-                <div class="flex items-center justify-between px-6 py-4 border-b border-gray-200">
+                {{-- Só leitura: metas e etapas são o que a OSC se comprometeu
+                     a fazer. Ver rotas de propostas em routes/web.php. --}}
+                <div class="px-6 py-4 border-b border-gray-200">
                     <h3 class="text-base font-semibold text-gray-800">Plano de Trabalho</h3>
-                    <a href="{{ route('propostas.metas.create', $proposta) }}"
-                       class="btn btn-primary btn-sm">
-                        + Nova Meta
-                    </a>
+                    <p class="text-xs text-gray-400 mt-0.5">
+                        Metas e etapas como a organização as propôs. Para mudá-las, devolva o plano
+                        para ajuste — na análise, por diligência; na Celebração, na etapa da OSC.
+                    </p>
                 </div>
 
                 @forelse($proposta->metas as $meta)
@@ -312,19 +314,6 @@
                                     @endif
                                 </div>
                             </div>
-                            <div class="flex items-center gap-3 ml-4 shrink-0">
-                                <a href="{{ route('propostas.metas.etapas.create', [$proposta, $meta]) }}"
-                                   class="text-xs font-semibold text-brand-700 hover:text-brand-800 transition font-medium">+ Etapa</a>
-                                <a href="{{ route('propostas.metas.edit', [$proposta, $meta]) }}"
-                                   class="text-xs text-gray-500 hover:text-gray-800">Editar</a>
-                                <form action="{{ route('propostas.metas.destroy', [$proposta, $meta]) }}"
-                                      method="POST" class="inline"
-                                      data-confirm="Remover esta meta e todas as etapas?">
-                                    @csrf
-                                    @method('DELETE')
-                                    <button type="submit" class="text-xs text-red-500 hover:text-red-700">Remover</button>
-                                </form>
-                            </div>
                         </div>
 
                         {{-- Etapas da Meta --}}
@@ -337,7 +326,6 @@
                                             <th class="text-left pb-2 font-medium">Descrição</th>
                                             <th class="text-left pb-2 font-medium">Responsável</th>
                                             <th class="text-left pb-2 font-medium">Período</th>
-                                            <th class="pb-2"></th>
                                         </tr>
                                     </thead>
                                     <tbody class="divide-y divide-gray-50">
@@ -353,17 +341,6 @@
                                                         —
                                                     @endif
                                                 </td>
-                                                <td class="py-2 text-right space-x-2 whitespace-nowrap">
-                                                    <a href="{{ route('propostas.metas.etapas.edit', [$proposta, $meta, $etapa]) }}"
-                                                       class="text-xs text-gray-400 hover:text-gray-700">Editar</a>
-                                                    <form action="{{ route('propostas.metas.etapas.destroy', [$proposta, $meta, $etapa]) }}"
-                                                          method="POST" class="inline"
-                                                          data-confirm="Remover esta etapa?">
-                                                        @csrf
-                                                        @method('DELETE')
-                                                        <button type="submit" class="text-xs text-red-400 hover:text-red-600">Remover</button>
-                                                    </form>
-                                                </td>
                                             </tr>
                                         @endforeach
                                     </tbody>
@@ -375,7 +352,7 @@
                     </div>
                 @empty
                     <div class="px-6 py-8 text-center text-sm text-gray-400">
-                        Nenhuma meta cadastrada. Adicione a primeira meta do Plano de Trabalho.
+                        A organização ainda não cadastrou metas neste plano de trabalho.
                     </div>
                 @endforelse
             </div>

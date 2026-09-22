@@ -11,9 +11,7 @@ use App\Http\Controllers\DiligenciaController;
 use App\Http\Controllers\DocumentoController;
 use App\Http\Controllers\DossieController;
 use App\Http\Controllers\ExecucaoController;
-use App\Http\Controllers\EtapaController;
 use App\Http\Controllers\InstrumentoController;
-use App\Http\Controllers\MetaController;
 use App\Http\Controllers\ModeloController;
 use App\Http\Controllers\OrdemPagamentoController;
 use App\Http\Controllers\OrgaoController;
@@ -260,9 +258,14 @@ Route::middleware(['auth', 'staff', 'readonly'])->group(function () {
         // aqui só index e show. Antes havia CRUD completo, com a OSC escolhida
         // num dropdown: dava para o município redigir e submeter uma proposta
         // em nome de terceiro e depois aprová-la, sem rastro de quem propôs.
+        //
+        // Metas e etapas seguem a mesma régua, e por isso não há rota delas
+        // aqui: o plano de trabalho é a proposta da OSC, e quem o altera do
+        // lado de cá altera o que a organização se comprometeu a fazer sem
+        // que ela saiba. Quando o plano precisa mudar, o caminho é devolver
+        // para ajuste (diligência, ou a etapa 2 da Celebração) ou, já na
+        // vigência, o pedido de alteração da parceria.
         Route::resource('propostas', PropostaController::class)->only(['index', 'show']);
-        Route::resource('propostas.metas', MetaController::class)->except(['show', 'index']);
-        Route::resource('propostas.metas.etapas', EtapaController::class)->except(['show', 'index']);
     });
 
     // Pareceres (técnico/jurídico/decisão) e diligências — autorização fina por tipo no controller
