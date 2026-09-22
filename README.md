@@ -44,8 +44,9 @@ assinados eletronicamente e validáveis por QR Code.
 | **Notificações por e-mail** (4.7) | ⏳ Não iniciado | o sistema não envia e-mail nenhum |
 | **Integrações** (banco, Diário Oficial, GOV.BR) | ⏳ Última fase | — |
 
-**Em produção** está o commit `c208872` (dossiê da OSC, 18/09/2026). Estão no GitHub e ainda não
-subiram: o painel de suporte, o encerramento de chamado restrito à equipe e o rodapé claro.
+**Em produção** está o commit `5f03212` (22/09/2026), com tudo o que havia no GitHub: painel de
+suporte, rodapé claro, plano de trabalho só-leitura para o município e as três correções da conta
+da OSC. Fora do ar está apenas esta atualização do README.
 
 ---
 
@@ -125,8 +126,8 @@ que a etapa existe e por que não entra.
 ### Menu do portal (OSC logada)
 
 Chamamentos abertos · Transparência · Minhas inscrições · Manifestar interesse · Alterações ·
-Prestação de contas · Suporte — e, no menu da conta, **Usuários da organização** (só o responsável
-legal).
+Prestação de contas · Suporte — e, no menu da conta, **Meus dados e senha** (toda a equipe) e
+**Usuários da organização** (só o responsável legal).
 
 ### Peças que atravessam o sistema
 
@@ -335,11 +336,18 @@ OSC é organização, e organização tem equipe. O vínculo mora em **`users.os
 
 No cadastro do integrante há ainda três perfis de convenente — Cadastrador de Proposta, de
 Prestação de Contas e de Usuário do Ente — que **não abrem porta nenhuma**: declaram o papel da
-pessoa na organização e saem impressos na assinatura. Quem abre porta são as funções `osc_*`.
+pessoa na organização e saem impressos na assinatura. Quem abre porta são as funções `osc_*`, e
+elas são marcadas no próprio cadastro (vêm todas marcadas, desmarcáveis uma a uma) e revisáveis
+depois, no "Alterar" da listagem.
 
 - Tela: **Portal → Usuários** (`portal.usuarios.*`), visível só para o responsável legal.
-- O acesso vale na hora — a Prefeitura não gerencia o quadro de pessoal de entidade privada,
-  e o alcance é contido: o membro só enxerga a OSC a que pertence.
+- **A conta nasce pendente**: quem indica a pessoa é a entidade, quem abre a porta é a Prefeitura.
+  Vai para a mesma fila de **Aprovações pendentes**, decidida pelo TI/Administrador ou pela SCP
+  (permissão `aprovar_contas_osc`, que só enxerga e decide contas de OSC). O login barra pendente.
+- **Cada um troca a própria senha** em **Portal → Meus dados e senha** (`PerfilOscController`):
+  nome, telefone e senha, pedindo a senha atual. O e-mail de acesso não muda por ali. Sem essa
+  tela, a senha inicial definida por quem cadastrou ficava conhecida por outra pessoa para sempre —
+  a tela de perfil do sistema (`/profile`) é do servidor, vive atrás do `staff`.
 - Em vez de excluir, **suspende-se** (`status`): a conta continua respondendo pelo que
   enviou e assinou, mas para de autenticar.
 - Quem decide se alguém é "de dentro" é **`User::temAcessoInterno()`** — os middlewares
@@ -361,6 +369,7 @@ pessoa na organização e saem impressos na assinatura. Quem abre porta são as 
 | `prestacao_contas` | **6 · Prestação de Contas** |
 | `monitoramento` | Leitura de alterações e prestações; o módulo próprio ainda não existe |
 | `usuarios_setor` | **Meus usuários**: cadastrar a equipe do próprio setor (o administrador aprova) |
+| `aprovar_contas_osc` | **Aprovações pendentes**, só as contas de OSC — é como a SCP decide sobre a equipe da organização sem ganhar a mesa de cadastros |
 | `suporte` | **Atender** o suporte: ver e responder os chamados de todos, nota interna, encerrar |
 | `osc_*` | Funções da equipe da OSC, marcadas por pessoa — nunca valem dentro da Administração |
 
@@ -418,7 +427,8 @@ A pasta `tests/` tem só os testes que vêm com o Breeze. As entregas desde o m�
 conferidas por **scripts que exercitam o HTTP de verdade** — com os usuários reais do banco local,
 middlewares e validação inclusos, tudo dentro de uma transação desfeita no fim. Rodam fora do
 repositório; a última rodada somou 235 verificações (plano de trabalho, alterações, habilitação,
-assinatura, dossiê, suporte) mais 41 telas abrindo, sem falha.
+assinatura, dossiê, suporte) mais 41 telas abrindo, sem falha. As entregas de 22/09 somaram outras
+40 (funções no cadastro, plano só-leitura, aprovação de conta e troca de senha no portal).
 
 Dois cuidados que esses scripts ensinaram:
 
@@ -470,6 +480,13 @@ Trazer esses cenários para `tests/Feature` é uma das [Pendências](#pendência
 - **Caixa de Entrada** não inclui alterações da parceria nem chamados de suporte. E
   `app/Support/CaixaDeEntrada.php` está com os comentários apagados por outra pessoa, fora de
   commit, esperando decisão.
+- **Parecer Técnico / Jurídico / Decisão Final** (`ParecerController`, `pareceres/create`) é tela da
+  primeira fase e está fora do fluxo: texto livre, sem documento, sem assinatura e sem validação,
+  enquanto os pareceres de verdade são peças do trâmite; e quem aprova ou reprova a proposta é o
+  julgamento da Seleção. **Zero registros** no banco. É também o único caminho para abrir uma
+  **diligência** — por isso segue de pé até a decisão sobre o pedido de complementação.
+- **Ninguém é avisado de conta esperando aprovação**, nem a pessoa quando é liberada: o sistema não
+  envia e-mail. Vale para a conta de OSC, que agora nasce pendente.
 - `InstrumentoController::store()` cria instrumento **sem exigir a Celebração concluída** e sem
   outra guarda além da permissão da rota.
 - `/programas/{id}` devolve **500**: `ProgramaController@show` aponta para uma view que não existe.
@@ -494,6 +511,40 @@ Trazer esses cenários para `tests/Feature` é uma das [Pendências](#pendência
 Da mais recente para a mais antiga. Cada entrada diz o que mudou, **por quê** e como foi
 conferido — o porquê é o que falta a quem pega o código depois.
 
+- [2026-09-22] **Conta da equipe da OSC: funções, aprovação e senha própria**
+  (`OscUsuarioController`, `PerfilOscController`, `UserController`, permissão `aprovar_contas_osc`)
+  - **Funções no cadastro**: o formulário concedia as quatro `osc_*` sem perguntar, e só dava para
+    restringir depois. Agora vêm marcadas — quem abre a conta raramente sabe de antemão o que a
+    pessoa vai pegar — e quem cadastra desmarca ali mesmo. A lista permitida é conferida no
+    servidor: função forjada no POST é recusada
+  - **A conta nasce pendente**: quem indica a pessoa é a entidade, quem abre a porta do sistema é a
+    Prefeitura, como já era com servidor e equipe de setor. Entra na fila de Aprovações pendentes;
+    o login já barrava pendente. Decide o TI/Administrador **ou a SCP**, que ganhou
+    `aprovar_contas_osc` e enxerga só contas de OSC — nem pelo id alcança um servidor
+  - **Senha própria**: a tela de perfil do sistema vive atrás do `staff` — é do servidor. Quem
+    entrava pelo portal não tinha para onde ir, e a senha inicial, definida por quem cadastrou,
+    ficava conhecida por outra pessoa para sempre. "Meus dados e senha" troca nome, telefone e
+    senha (pedindo a atual); o e-mail de acesso, não
+  - Conferido por script HTTP: 16 verificações, incluindo o 403 quando a SCP tenta aprovar servidor
+    pelo id e o redirecionamento do servidor que tenta abrir a tela da OSC
+
+- [2026-09-22] **Plano de trabalho é só leitura para o município** (`propostas/show`, rotas de
+  `propostas.metas.*` removidas)
+  - Metas e etapas são o que a OSC se comprometeu a fazer; editá-las do lado de cá mudava o
+    compromisso sem que a organização soubesse e sem rastro de quem mudou
+  - Saíram as rotas (não há mais endereço, nem forjando o POST), os botões da tela e os
+    `MetaController`, `EtapaController`, requests e telas que só serviam a elas
+  - O caminho para mudar o plano continua: devolver para ajuste na análise, a etapa da OSC na
+    Celebração, ou o pedido de alteração na vigência
+  - **Custo assumido**: corrigir uma vírgula numa meta agora exige devolver à OSC
+  - Conferido por script HTTP: 17 verificações — UG, Cadastrador e Administrador recebem 404 nas
+    quatro rotas antigas, e a OSC continua criando meta e etapa pelo portal
+  - No editor do plano, o **cronograma de execução subiu** para logo depois dos dados: quem
+    preenche pensa primeiro no que vai fazer, o endereço é detalhe de onde
+
+- [2026-09-22] **Trâmite da Seleção: "Em análise"** (`chamamentos/selecao`)
+  - O selo laranja anunciava "Com Unidade Gestora" — informação de bastidor para quem lê a tela.
+    O setor continua no texto da etapa e no título do selo
 
 - [2026-09-19] **Painel de suporte** (`Chamado`, `SuporteController`, `suporte/*`, permissão `suporte`)
   - Canal para dúvidas, problemas e sugestões **sobre o próprio sistema** — até aqui isso corria por
