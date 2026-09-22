@@ -28,3 +28,6 @@ Thumbs.db
 
 # LibreOffice lock files
 .~lock.*#
+
+# Fotos de teste (522 MB) — material de trabalho local, não vai para o repositório
+/Docs. Desenvolvimento/galeria/
