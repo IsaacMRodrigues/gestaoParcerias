@@ -159,53 +159,8 @@
         @endif
     </div>
 
-    {{-- 2. Endereços de execução --}}
-    <div class="bg-white rounded-xl border border-gray-200 shadow-sm p-6">
-        <h2 class="text-base font-semibold text-gray-800">Endereços de execução</h2>
-        <p class="text-xs text-gray-400 mt-0.5 mb-4">
-            Onde a atividade, a obra, o evento, o serviço ou a entrega do bem acontecem. Pode ser mais de um.
-        </p>
-
-        <ul class="divide-y divide-gray-100">
-            @forelse($dono->enderecosExecucao as $end)
-                <li class="py-2 flex items-start justify-between gap-3">
-                    <span class="min-w-0 text-sm">
-                        <span class="text-gray-900">{{ $end->endereco }}</span>
-                        @if($end->descricao)<span class="block text-xs text-gray-400">{{ $end->descricao }}</span>@endif
-                    </span>
-                    @if($podeEditar)
-                        <form action="{{ route($rota . '.enderecos.destroy', $id + ['endereco' => $end->id]) }}" method="POST">
-                            @csrf @method('DELETE')
-                            <button class="text-xs text-gray-400 hover:text-red-700 transition shrink-0">Remover</button>
-                        </form>
-                    @endif
-                </li>
-            @empty
-                <li class="py-2 text-sm text-gray-400">Nenhum endereço informado.</li>
-            @endforelse
-        </ul>
-
-        @if($podeEditar)
-            <form action="{{ route($rota . '.enderecos.store', $id) }}" method="POST"
-                  class="mt-4 pt-4 border-t border-gray-100 flex flex-wrap items-end gap-3">
-                @csrf
-                <div class="flex-1 min-w-[16rem]">
-                    <x-input-label for="endereco" value="Endereço *" />
-                    <x-text-input id="endereco" name="endereco" type="text" required maxlength="255"
-                                  placeholder="Rua, número, bairro, município" class="mt-1 block w-full" />
-                </div>
-                <div class="min-w-[12rem]">
-                    <x-input-label for="endereco_descricao" value="O que acontece ali" />
-                    <input type="text" name="descricao" id="endereco_descricao" maxlength="255"
-                           class="mt-1 block w-full border-gray-300 rounded-md shadow-sm text-sm focus:ring-brand-500 focus:border-brand-500">
-                </div>
-                <button class="btn btn-secondary btn-sm">Adicionar endereço</button>
-            </form>
-        @endif
-    </div>
-
     @if($mostrarMetas)
-    {{-- 3. Cronograma de execução (metas e etapas) --}}
+    {{-- 2. Cronograma de execução (metas e etapas) --}}
     <div class="bg-white rounded-xl border border-gray-200 shadow-sm p-6">
         <h2 class="text-base font-semibold text-gray-800">Cronograma de execução</h2>
         <p class="text-xs text-gray-400 mt-0.5 mb-4">
@@ -337,6 +292,51 @@
         @endif
     </div>
     @endif
+
+    {{-- 3. Endereços de execução --}}
+    <div class="bg-white rounded-xl border border-gray-200 shadow-sm p-6">
+        <h2 class="text-base font-semibold text-gray-800">Endereços de execução</h2>
+        <p class="text-xs text-gray-400 mt-0.5 mb-4">
+            Onde a atividade, a obra, o evento, o serviço ou a entrega do bem acontecem. Pode ser mais de um.
+        </p>
+
+        <ul class="divide-y divide-gray-100">
+            @forelse($dono->enderecosExecucao as $end)
+                <li class="py-2 flex items-start justify-between gap-3">
+                    <span class="min-w-0 text-sm">
+                        <span class="text-gray-900">{{ $end->endereco }}</span>
+                        @if($end->descricao)<span class="block text-xs text-gray-400">{{ $end->descricao }}</span>@endif
+                    </span>
+                    @if($podeEditar)
+                        <form action="{{ route($rota . '.enderecos.destroy', $id + ['endereco' => $end->id]) }}" method="POST">
+                            @csrf @method('DELETE')
+                            <button class="text-xs text-gray-400 hover:text-red-700 transition shrink-0">Remover</button>
+                        </form>
+                    @endif
+                </li>
+            @empty
+                <li class="py-2 text-sm text-gray-400">Nenhum endereço informado.</li>
+            @endforelse
+        </ul>
+
+        @if($podeEditar)
+            <form action="{{ route($rota . '.enderecos.store', $id) }}" method="POST"
+                  class="mt-4 pt-4 border-t border-gray-100 flex flex-wrap items-end gap-3">
+                @csrf
+                <div class="flex-1 min-w-[16rem]">
+                    <x-input-label for="endereco" value="Endereço *" />
+                    <x-text-input id="endereco" name="endereco" type="text" required maxlength="255"
+                                  placeholder="Rua, número, bairro, município" class="mt-1 block w-full" />
+                </div>
+                <div class="min-w-[12rem]">
+                    <x-input-label for="endereco_descricao" value="O que acontece ali" />
+                    <input type="text" name="descricao" id="endereco_descricao" maxlength="255"
+                           class="mt-1 block w-full border-gray-300 rounded-md shadow-sm text-sm focus:ring-brand-500 focus:border-brand-500">
+                </div>
+                <button class="btn btn-secondary btn-sm">Adicionar endereço</button>
+            </form>
+        @endif
+    </div>
 
     {{-- 4. Plano de aplicação (I — Demonstrativo de recursos) --}}
     <div class="bg-white rounded-xl border border-gray-200 shadow-sm p-6">
