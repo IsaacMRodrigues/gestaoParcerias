@@ -195,6 +195,11 @@
                                         @endif
                                     </div>
 
+                                    <a href="{{ route('portal.perfil.edit') }}"
+                                       class="block px-4 py-2 text-sm hover:bg-gray-50 {{ request()->routeIs('portal.perfil.*') ? 'text-brand-700 font-semibold' : '' }}">
+                                        Meus dados e senha
+                                    </a>
+
                                     {{-- Administrar a equipe é configuração, não navegação diária. --}}
                                     @if(auth()->user()->ehResponsavelLegalOsc())
                                         <a href="{{ route('portal.usuarios.index') }}"

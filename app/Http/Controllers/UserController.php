@@ -51,12 +51,19 @@ class UserController extends Controller
     }
 
     /**
-     * Cadastros aguardando aprovação (auto-cadastro de servidores e subusuários da UG).
+     * Cadastros aguardando aprovação: auto-cadastro de servidor, equipe de
+     * setor e integrante de OSC cadastrado pelo responsável legal.
+     *
+     * Quem chega por `aprovar_contas_osc` e não tem `cadastros` — a SCP — vê
+     * só as contas de OSC. O recorte é aqui e repetido em aprovar/recusar:
+     * esconder na listagem e deixar a rota aberta seria pedir para alguém
+     * aprovar um servidor pelo id.
      */
     public function pendentes(): View
     {
         $pendentes = User::pendentes()
-            ->with(['orgao', 'criadoPor', 'roles'])
+            ->when(! auth()->user()->can('cadastros'), fn ($q) => $q->whereNotNull('osc_id'))
+            ->with(['orgao', 'osc', 'criadoPor', 'roles'])
             ->orderBy('created_at')
             ->paginate(15);
 
@@ -80,6 +87,7 @@ class UserController extends Controller
     public function aprovar(Request $request, User $usuario): RedirectResponse
     {
         abort_unless($usuario->isPendente(), 422, 'Este cadastro não está pendente.');
+        $this->autorizarDecisao($usuario);
 
         // Invariante que a tela antiga garantia ao atribuir os perfis: perfil
         // exclusivo exige o setor correspondente. Continua valendo — só que
@@ -107,11 +115,21 @@ class UserController extends Controller
     }
 
     /**
+     * Quem só tem `aprovar_contas_osc` decide sobre conta de OSC, e nada mais.
+     */
+    private function autorizarDecisao(User $usuario): void
+    {
+        abort_if(! auth()->user()->can('cadastros') && $usuario->osc_id === null, 403,
+            'Este cadastro não é de integrante de OSC.');
+    }
+
+    /**
      * Recusa o cadastro (com motivo) — mantém o registro e bloqueia o login.
      */
     public function recusar(Request $request, User $usuario): RedirectResponse
     {
         abort_unless($usuario->isPendente(), 422, 'Este cadastro não está pendente.');
+        $this->autorizarDecisao($usuario);
 
         $data = $request->validate([
             'rejeitado_motivo' => ['required', 'string', 'max:500'],

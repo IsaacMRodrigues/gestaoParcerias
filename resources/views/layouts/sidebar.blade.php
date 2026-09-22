@@ -2,7 +2,13 @@
     $navPropostasNovas = auth()->user()->can('propostas')
         ? \App\Models\Proposta::visiveisPara(auth()->user())->where('status', 'submetida')->count()
         : 0;
-    $navPendentes = auth()->user()->can('cadastros') ? \App\Models\User::pendentes()->count() : 0;
+    // A SCP aprova só conta de OSC (permissão `aprovar_contas_osc`), então o
+    // selo conta o que ela pode de fato decidir — número que inclui servidor
+    // seria pendência de outra pessoa.
+    $navPendentes = \App\Models\User::pendentes()
+        ->when(! auth()->user()->can('cadastros'), fn ($q) => $q->whereNotNull('osc_id'))
+        ->when(! auth()->user()->canAny(['cadastros', 'aprovar_contas_osc']), fn ($q) => $q->whereRaw('1 = 0'))
+        ->count();
     // Selo do suporte: só para quem atende, e só do que ainda ocupa alguém.
     $navChamados = auth()->user()->can('suporte') ? \App\Models\Chamado::emAberto()->count() : 0;
     // Manifestações paradas esperando o setor de quem está vendo o menu.
@@ -263,6 +269,16 @@
                 @if($navPendentes > 0)<span class="{{ $badge }}">{{ $navPendentes }}</span>@endif
             </a>
         @endcan
+
+        {{-- Sem `cadastros`, mas aprova conta de OSC: a SCP. Uma entrada só,
+             para não abrir a seção inteira de Cadastros a quem não a tem. --}}
+        @if(! auth()->user()->can('cadastros') && auth()->user()->can('aprovar_contas_osc'))
+            <p class="{{ $sec }}">Cadastros</p>
+            <a href="{{ route('usuarios.pendentes') }}" class="{{ $link }} {{ request()->routeIs('usuarios.pendentes') ? $on : '' }}">
+                Contas de OSC a aprovar
+                @if($navPendentes > 0)<span class="{{ $badge }}">{{ $navPendentes }}</span>@endif
+            </a>
+        @endif
 
         {{-- Cadastro da equipe do próprio setor: qualquer chefia, não só a da UG --}}
         @if(auth()->user()->podeCadastrarNoSetor())

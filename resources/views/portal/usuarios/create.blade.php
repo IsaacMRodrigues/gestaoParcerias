@@ -8,9 +8,9 @@
 
         <div class="bg-white rounded-xl border border-gray-200 shadow-sm p-6">
             <p class="text-sm text-gray-500 mb-5">
-                O acesso vale imediatamente — não depende de aprovação da Prefeitura. Defina uma senha
-                inicial e repasse à pessoa; ela passará a atuar em nome de
-                <strong>{{ $osc->name }}</strong>.
+                O cadastro vai para aprovação da Prefeitura e a pessoa entra depois de liberado.
+                Defina uma senha inicial e repasse a ela; a partir da liberação, passa a atuar em
+                nome de <strong>{{ $osc->name }}</strong>.
             </p>
 
             <form action="{{ route('portal.usuarios.store') }}" method="POST" class="space-y-4">
@@ -88,17 +88,44 @@
                     </div>
                     <x-input-error :messages="$errors->get('perfis')" class="mt-1" />
                     <p class="text-xs text-gray-500 mt-2">
-                        A Prestação de Contas é uma etapa que o sistema ainda não tem. Marcar o perfil
-                        hoje registra a designação e o papel de assinatura; o acesso vem quando o
-                        módulo existir.
+                        A prestação de contas é conduzida hoje pela Prefeitura; o portal ainda não
+                        tem a tela para a organização enviá-la. Marcar o perfil registra a designação
+                        e o papel de assinatura.
                     </p>
                 </div>
 
+                {{-- Vêm todas marcadas: quem abre a conta raramente sabe de
+                     antemão o que a pessoa vai pegar, e uma conta sem função
+                     só olha. Depois de um envio com erro, vale o que foi
+                     enviado — inclusive nenhuma. --}}
+                @php($funcoesMarcadas = old('funcoes', $errors->any() ? [] : array_keys($funcoes)))
+                <div class="pt-2">
+                    <x-input-label value="Funções" />
+                    <p class="text-xs text-gray-500 mt-0.5 mb-2">
+                        O que a pessoa pode fazer no portal. Desmarque o que não for com ela; dá para
+                        mudar depois, no "Alterar" da lista da equipe.
+                    </p>
+                    <div class="space-y-2 border border-gray-200 rounded-lg p-3">
+                        @foreach($funcoes as $chave => $funcao)
+                            <label class="flex items-start gap-2.5 text-sm text-gray-700">
+                                <input type="checkbox" name="funcoes[]" value="{{ $chave }}"
+                                       @checked(in_array($chave, $funcoesMarcadas))
+                                       class="mt-0.5 rounded border-gray-300 text-brand-600 focus:ring-brand-500">
+                                <span>
+                                    {{ $funcao['rotulo'] }}
+                                    <span class="block text-xs text-gray-500">{{ $funcao['ajuda'] }}</span>
+                                </span>
+                            </label>
+                        @endforeach
+                    </div>
+                    <x-input-error :messages="$errors->get('funcoes')" class="mt-1" />
+                    <x-input-error :messages="$errors->get('funcoes.*')" class="mt-1" />
+                </div>
+
                 <p class="text-xs text-gray-500 pt-1">
-                    A pessoa entra já podendo trabalhar: montar proposta, anexar documentos,
-                    manifestar interesse e atuar na celebração. <strong>Submeter proposta,
-                    protocolar recurso e assinar o Termo</strong> continuam só com você — são atos
-                    que vinculam juridicamente a organização.
+                    <strong>Submeter proposta, protocolar recurso e assinar o Termo</strong> continuam
+                    só com você, marque o que marcar — são atos que vinculam juridicamente a
+                    organização.
                 </p>
 
                 <div class="flex items-center justify-end gap-3 pt-2">

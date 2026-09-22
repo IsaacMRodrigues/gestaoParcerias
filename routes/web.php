@@ -15,6 +15,7 @@ use App\Http\Controllers\InstrumentoController;
 use App\Http\Controllers\ModeloController;
 use App\Http\Controllers\OrdemPagamentoController;
 use App\Http\Controllers\OrgaoController;
+use App\Http\Controllers\PerfilOscController;
 use App\Http\Controllers\OscController;
 use App\Http\Controllers\OscRegistroController;
 use App\Http\Controllers\ParecerController;
@@ -71,6 +72,12 @@ Route::middleware(['auth', 'osc'])->group(function () {
      * responsável legal marca as funções no cadastro do integrante (ver
      * User::FUNCOES_OSC) e cada grupo abaixo diz qual delas abre o quê.
      */
+    // A conta da própria pessoa: nome, telefone e senha. Vale para toda a
+    // equipe, inclusive quem não se cadastrou sozinho — ver PerfilOscController.
+    Route::get('/portal/perfil', [PerfilOscController::class, 'edit'])->name('portal.perfil.edit');
+    Route::patch('/portal/perfil', [PerfilOscController::class, 'update'])->name('portal.perfil.update');
+    Route::put('/portal/perfil/senha', [PerfilOscController::class, 'senha'])->name('portal.perfil.senha');
+
     Route::get('/portal/minhas-propostas', [PortalController::class, 'minhasPropostas'])->name('portal.minhas-propostas');
     Route::get('/portal/propostas/{proposta}', [PortalController::class, 'showProposta'])->name('portal.proposta.show');
 
@@ -188,13 +195,17 @@ Route::middleware(['auth', 'staff', 'readonly'])->group(function () {
         Route::post('meus-usuarios', [\App\Http\Controllers\SubusuarioController::class, 'store'])->name('subusuarios.store');
     });
 
-    // Cadastros institucionais
-    Route::middleware('permission:cadastros')->group(function () {
-        // Aprovação de cadastros (auto-cadastro de servidores e subusuários da UG)
+    // Aprovação de cadastros: auto-cadastro de servidor, equipe de setor e
+    // integrante de OSC. A SCP entra aqui por `aprovar_contas_osc` e só
+    // enxerga e decide as contas de OSC — o recorte é no UserController.
+    Route::middleware('permission:cadastros|aprovar_contas_osc')->group(function () {
         Route::get('usuarios/pendentes', [UserController::class, 'pendentes'])->name('usuarios.pendentes');
         Route::patch('usuarios/{usuario}/aprovar', [UserController::class, 'aprovar'])->name('usuarios.aprovar');
         Route::patch('usuarios/{usuario}/recusar', [UserController::class, 'recusar'])->name('usuarios.recusar');
+    });
 
+    // Cadastros institucionais
+    Route::middleware('permission:cadastros')->group(function () {
         Route::resource('usuarios', UserController::class)->except(['show']);
         Route::resource('orgaos', OrgaoController::class)->except(['show']);
         // Sem create/store: quem abre o cadastro de uma OSC é a própria OSC,

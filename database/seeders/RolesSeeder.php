@@ -27,6 +27,10 @@ class RolesSeeder extends Seeder
         'execucao'          => 'Execução financeira (repasses, despesas, notas fiscais)',
         'usuarios_setor'    => 'Cadastrar usuários do próprio setor (o administrador aprova)',
         'suporte'           => 'Atender o suporte (ver e responder os chamados de todos)',
+        // Só as contas de OSC. Quem tem `cadastros` já aprova todas, inclusive
+        // estas; esta permissão existe para a SCP decidir sobre a organização
+        // que ela atende sem ganhar a mesa de cadastros da Prefeitura.
+        'aprovar_contas_osc' => 'Aprovar contas de integrantes de OSC',
 
         /*
          * Funções da equipe da OSC.
@@ -71,7 +75,7 @@ class RolesSeeder extends Seeder
         // item com cadeado justamente na fase em que continua trabalhando.
         // A prestação de contas passa pela SCP (análise prévia) antes de ir à
         // Unidade Gestora — módulo 3.4.
-        'analista_tecnico_scp'             => ['planejamento', 'chamamentos', 'execucao', 'prestacao_contas', 'suporte'],
+        'analista_tecnico_scp'             => ['planejamento', 'chamamentos', 'execucao', 'prestacao_contas', 'suporte', 'aprovar_contas_osc'],
         'responsavel_publicacao'           => ['chamamentos'],
         'analista_orcamentario_financeiro' => ['planejamento'],
         'analista_juridico'                => ['pareceres_juridico', 'planejamento'],

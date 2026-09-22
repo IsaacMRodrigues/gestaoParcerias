@@ -143,7 +143,19 @@
                                 @endif
                             </td>
                             <td class="px-5 py-4 align-top whitespace-nowrap">
-                                @if($usuario->status)
+                                @if($usuario->isPendente())
+                                    <span class="inline-flex items-center gap-1.5 text-accent-700">
+                                        <span class="w-1.5 h-1.5 rounded-full bg-accent-500"></span> Aguardando aprovação
+                                    </span>
+                                    <span class="block text-xs text-gray-400 mt-0.5">A Prefeitura libera o acesso.</span>
+                                @elseif($usuario->isRecusado())
+                                    <span class="inline-flex items-center gap-1.5 text-red-700">
+                                        <span class="w-1.5 h-1.5 rounded-full bg-red-500"></span> Recusado
+                                    </span>
+                                    @if($usuario->rejeitado_motivo)
+                                        <span class="block text-xs text-gray-500 mt-0.5 max-w-[16rem] whitespace-normal">{{ $usuario->rejeitado_motivo }}</span>
+                                    @endif
+                                @elseif($usuario->status)
                                     <span class="inline-flex items-center gap-1.5 text-brand-700">
                                         <span class="w-1.5 h-1.5 rounded-full bg-brand-500"></span> Ativo
                                     </span>

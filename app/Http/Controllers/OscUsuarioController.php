@@ -18,9 +18,10 @@ use Illuminate\View\View;
  * e a saída prática era compartilhar a senha do responsável legal: todo mundo
  * atuando sob a mesma identidade, sem rastro de quem fez o quê.
  *
- * Os acessos valem na hora, sem passar pela Prefeitura. O município não
- * gerencia o quadro de pessoal de uma entidade privada, e o alcance é contido
- * por natureza — um membro só enxerga a OSC a que pertence.
+ * Quem indica a pessoa é a entidade; quem abre a porta é a Prefeitura. O
+ * cadastro nasce pendente e vai para a mesma fila das outras contas, decidida
+ * pelo TI/Administrador ou pela SCP. O alcance é contido por natureza — um
+ * membro só enxerga a OSC a que pertence.
  */
 class OscUsuarioController extends Controller
 {
@@ -46,8 +47,9 @@ class OscUsuarioController extends Controller
         $osc = $this->oscDoResponsavel();
 
         return view('portal.usuarios.create', [
-            'osc'    => $osc,
-            'perfis' => User::PERFIS_OSC,
+            'osc'     => $osc,
+            'perfis'  => User::PERFIS_OSC,
+            'funcoes' => User::FUNCOES_OSC,
         ]);
     }
 
@@ -67,11 +69,14 @@ class OscUsuarioController extends Controller
             // para conceder à conta nova um perfil da Administração.
             'perfis'    => ['nullable', 'array'],
             'perfis.*'  => ['string', Rule::in(array_keys(User::PERFIS_OSC))],
+            'funcoes'   => ['nullable', 'array'],
+            'funcoes.*' => ['string', Rule::in(array_keys(User::FUNCOES_OSC))],
         ], [
             'name.required'     => 'Informe o nome do integrante.',
             'email.unique'      => 'Já existe uma conta com este e-mail.',
             'password.required' => 'Defina uma senha inicial para o integrante.',
             'perfis.*.in'       => 'Perfil fora dos que você pode conceder.',
+            'funcoes.*.in'      => 'Função fora das que você pode conceder.',
         ]);
 
         $usuario = User::create([
@@ -82,10 +87,11 @@ class OscUsuarioController extends Controller
             'osc_id'          => $osc->id,
             'password'        => Hash::make($request->password),
             'status'          => true,
-            // Vale na hora: quem responde pela entidade é quem cadastra.
-            'approval_status' => 'aprovado',
-            'approved_at'     => now(),
-            'approved_by'     => $dono->id,
+            // Nasce pendente: quem responde pela entidade indica a pessoa, mas
+            // quem abre a porta do sistema é a Prefeitura (TI/Administrador ou
+            // SCP), como já acontece com servidor e equipe de setor. O login
+            // barra pendente — ver User::podeAutenticar().
+            'approval_status' => 'pendente',
             'created_by'      => $dono->id,
             'solicitacao_obs' => $request->cargo,
         ]);
@@ -95,17 +101,16 @@ class OscUsuarioController extends Controller
         // impressos como papel de assinatura.
         $usuario->syncRoles($this->perfisMarcados($request));
 
-        // Quem entra já entra podendo trabalhar. O cadastro perguntava, uma a
-        // uma, quais das quatro funções conceder — e perguntava cedo demais:
-        // quem abre a conta ainda não sabe o que a pessoa vai pegar, e a
-        // resposta errada era uma conta que só olha. Restringir continua
-        // possível pela listagem da equipe, quando houver motivo. O que
-        // vincula juridicamente a organização — submeter, recorrer,
-        // contra-assinar — nunca esteve aqui: é do responsável legal.
-        $usuario->syncPermissions(array_keys(User::FUNCOES_OSC));
+        // As funções vêm marcadas no formulário — quem abre a conta raramente
+        // sabe de antemão o que a pessoa vai pegar —, mas quem cadastra pode
+        // desmarcar ali mesmo. O que vincula juridicamente a organização —
+        // submeter, recorrer, contra-assinar — nunca esteve aqui: é do
+        // responsável legal.
+        $usuario->syncPermissions($request->input('funcoes', []));
 
         return redirect()->route('portal.usuarios.index')->with('success',
-            "Acesso criado para {$usuario->name}. Já pode entrar com o e-mail e a senha definida.");
+            "Cadastro de {$usuario->name} enviado para aprovação da Prefeitura. "
+            .'Repasse a senha definida: ela vale a partir da liberação.');
     }
 
     /**

@@ -24,8 +24,12 @@
                             <p class="text-base font-semibold text-gray-900">{{ $u->name }}</p>
                             <p class="text-sm text-gray-500">{{ $u->email }}</p>
                             <div class="mt-2 flex flex-wrap gap-x-4 gap-y-1 text-xs text-gray-500">
-                                <span>Setor: <strong class="text-gray-700">{{ \App\Models\User::LOTACOES[$u->setor] ?? '—' }}</strong></span>
-                                <span>Secretaria/UG: <strong class="text-gray-700">{{ $u->orgao->name ?? '—' }}</strong></span>
+                                @if($u->osc_id)
+                                    <span>Organização: <strong class="text-gray-700">{{ $u->osc->name ?? '—' }}</strong></span>
+                                @else
+                                    <span>Setor: <strong class="text-gray-700">{{ \App\Models\User::LOTACOES[$u->setor] ?? '—' }}</strong></span>
+                                    <span>Secretaria/UG: <strong class="text-gray-700">{{ $u->orgao->name ?? '—' }}</strong></span>
+                                @endif
                                 @if($u->matricula)<span>Matrícula: <strong class="text-gray-700">{{ $u->matricula }}</strong></span>@endif
                                 @if($u->cpf)<span>CPF: {{ $u->cpf }}</span>@endif
                                 @if($u->phone)<span>Tel.: {{ $u->phone }}</span>@endif
@@ -33,8 +37,12 @@
                             </div>
                             @if($u->criadoPor)
                                 <p class="mt-1 text-xs text-brand-600">
-                                    Cadastrado por {{ $u->criadoPor->name }} — chefia do setor
-                                    {{ $u->criadoPor->setorLabel() ?: '—' }}.
+                                    @if($u->osc_id)
+                                        Cadastrado por {{ $u->criadoPor->name }} — responsável legal da organização.
+                                    @else
+                                        Cadastrado por {{ $u->criadoPor->name }} — chefia do setor
+                                        {{ $u->criadoPor->setorLabel() ?: '—' }}.
+                                    @endif
                                 </p>
                             @endif
                             @if($u->solicitacao_obs)
