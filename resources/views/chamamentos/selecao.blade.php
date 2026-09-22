@@ -123,8 +123,9 @@
                                 Encerrada em {{ $chamamento->selecao_concluida_em->format('d/m/Y H:i') }}
                             </span>
                         @else
-                            <span class="px-2.5 py-1 text-xs font-medium bg-accent-100 text-accent-800 rounded-full whitespace-nowrap">
-                                Com {{ \App\Models\Chamamento::SETORES_SELECAO[$chamamento->selecao_setor] ?? $chamamento->selecao_setor }}
+                            <span class="px-2.5 py-1 text-xs font-medium bg-accent-100 text-accent-800 rounded-full whitespace-nowrap"
+                                  title="Com {{ \App\Models\Chamamento::SETORES_SELECAO[$chamamento->selecao_setor] ?? $chamamento->selecao_setor }}">
+                                Em análise
                             </span>
                         @endif
                     </div>
