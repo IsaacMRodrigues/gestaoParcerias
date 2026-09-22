@@ -1,157 +1,256 @@
-# Plataforma de Gestão de Parcerias - PGP
+# Plataforma de Gestão de Parcerias — PGP
 
-> **Instrução para IA:** Este README é um documento vivo. Sempre que realizar qualquer trabalho neste projeto, atualize as seções `## O que foi feito` e `## O que está sendo feito` antes de encerrar a conversa. Não omita etapas concluídas — o histórico completo importa para quem continuar o trabalho.
+> **Instrução para IA e para quem continuar o trabalho:** este README é documento vivo. Ao terminar
+> qualquer entrega, registre-a no topo do [Histórico de entregas](#histórico-de-entregas) e atualize
+> [Estado atual](#estado-atual) e [Pendências](#pendências) se algo mudou. Não apague entradas
+> antigas — o histórico completo importa para quem continuar.
+>
+> **O repositório é público.** Nada de senha, IP de servidor, usuário SSH ou conteúdo de `.env`
+> aqui ou em comentário de código.
+
+Sistema web da **Prefeitura de São Gonçalo do Rio Abaixo (MG)** para gerir as parcerias com
+Organizações da Sociedade Civil sob o **MROSC** (Lei 13.019/2014 e Decreto Municipal 048/2020): do
+planejamento interno da Secretaria à prestação de contas da OSC, com os documentos gerados,
+assinados eletronicamente e validáveis por QR Code.
+
+- **Produção:** https://parcerias.pmsgra.net
+- **Repositório:** https://github.com/IsaacMRodrigues/gestaoParcerias
+- **Stack:** Laravel 13 (PHP ≥ 8.3), MySQL, Blade + Tailwind CSS v4 (Vite), Alpine.js
+- **Pacotes:** Laravel Breeze (autenticação), Spatie Laravel Permission (perfis), simple-qrcode
+  (validação), dompdf (PDF)
+- **Tamanho:** 84 migrações · 51 tabelas · 38 models · 39 controllers · 139 views · 153 rotas
+- **Equipe:** 2 desenvolvedores
 
 ---
 
-## Sobre o projeto
+## Estado atual
 
-Plataforma web em **Laravel** para gestão completa de parcerias públicas entre Secretarias Municipais e OSCs (Organizações da Sociedade Civil). Cobre todo o ciclo: planejamento → proposta → análise → formalização → execução → monitoramento → prestação de contas.
+*Atualizado em 22/09/2026.*
 
-**Repositório:** https://github.com/IsaacMRodrigues/gestaoParcerias  
-**Stack:** Laravel 13, MySQL, TailwindCSS, Blade  
-**Pacotes principais:** Laravel Breeze (auth), Spatie Laravel Permission (perfis), simple-qrcode (validação), dompdf (PDF dos documentos)  
-**Equipe:** 2 desenvolvedores
+| Etapa do ciclo | Situação | Onde fica |
+|---|---|---|
+| **1. Planejamento** (módulo 2.1) | ✅ Completo | `ProcessoController`, `Processo`, `ProcessoPeca` |
+| **2. Seleção** (2.2) — chamamento, manifestação de interesse, proposta | ✅ Completo | `SelecaoController`, `ManifestacaoAnaliseController`, `PropostaController` |
+| **Plano de Trabalho** (3.1) — metas, aplicação, desembolso, endereços | ✅ Completo | `PlanoTrabalhoController`, `Concerns\TemPlanoDeTrabalho` |
+| **3. Celebração** (2.2 / 3.2) — habilitação item a item, termo, empenho | ✅ Completo | `CelebracaoController`, motor `Peca` |
+| **Formalização** (2.3) — instrumento, aditivo, apostilamento, OP | ✅ Completo | `InstrumentoController`, `AditivoController`, `OrdemPagamentoController` |
+| **4. Execução** (4.4) — repasses, despesas, notas, saldo | ✅ Completo | `ExecucaoController` |
+| **Alterações da Parceria** (3.3) | ✅ Completo | `AlteracaoController`, `Alteracao` |
+| **Dossiê da OSC** (3.3) — o processo visível à organização | ✅ Completo | `DossieController`, `Proposta::dossieParaOsc()` |
+| **6. Prestação de Contas** (3.4) | ✅ Completo | `PrestacaoContasController`, `Support\PrestacaoDocumento` |
+| **Suporte** — dúvidas, problemas e sugestões | ✅ Completo | `SuporteController`, `Chamado` |
+| **5. Monitoramento e Fiscalização** (4.5) | ⏳ Não iniciado | aparece no menu como "em breve" |
+| **Solicitação de assinatura** (Aprovador de Assinatura) | ⏳ Aguarda definição | ver [Pendências](#pendências) |
+| **Notificações por e-mail** (4.7) | ⏳ Não iniciado | o sistema não envia e-mail nenhum |
+| **Integrações** (banco, Diário Oficial, GOV.BR) | ⏳ Última fase | — |
+
+**Em produção** está o commit `c208872` (dossiê da OSC, 18/09/2026). Estão no GitHub e ainda não
+subiram: o painel de suporte, o encerramento de chamado restrito à equipe e o rodapé claro.
 
 ---
 
-## Setup do projeto (para quem clonar)
+## Setup (para quem clonar)
 
 ```bash
 composer install
 npm install && npm run build
 cp .env.example .env
 php artisan key:generate
-# Configurar DB_DATABASE, DB_USERNAME, DB_PASSWORD no .env
+# preencher DB_DATABASE, DB_USERNAME e DB_PASSWORD no .env
 php artisan migrate
 php artisan db:seed
 ```
 
-O `migrate` já deixa o ambiente utilizável: cria as 26 Secretarias, os perfis de
-acesso e **as 23 contas da Prefeitura** — o administrador, o Prefeito, a SCP, a
-SEPLAN, a Procuradoria e um responsável por Unidade Gestora. Todas com a senha
-provisória `123456`.
+O `migrate` deixa o ambiente utilizável: cria as Secretarias e demais Unidades Gestoras, os perfis e
+o **quadro de contas da Prefeitura** (migração `cria_quadro_de_usuarios_da_prefeitura`) — o
+administrador, o Prefeito, a SCP, a SEPLAN, a Procuradoria e um responsável por Unidade Gestora.
+A senha provisória está nessa migração. **Ela é pública, como todo este repositório: não use essas
+contas fora do ambiente local sem trocar a senha.**
 
 | Para entrar como | Login |
 |---|---|
 | Administrador do sistema | `admin_parcerias` |
 | Responsável de uma Secretaria | o e-mail institucional dela (`educacao@saogoncalo.mg.gov.br`, …) |
-| Saúde, Fazenda e Trabalho | `saude`, `fazenda`, `trabalho` (e-mail institucional ainda não informado) |
+| Saúde, Fazenda e Trabalho | `saude`, `fazenda`, `trabalho` |
 | Procuradoria Jurídica | `procurador@saogoncalo.mg.gov.br` |
 | SCP / SEPLAN / Prefeito | `scp@gmail.com`, `seplan@gmail.com`, `prefeito@gmail.com` |
 
-Não há conta de OSC: a organização entra pelo auto-cadastro em `/cadastro/osc`,
-que é o único caminho de entrada dela — percorrê-lo faz parte do teste.
+A tela de entrada aceita e-mail ou nome de usuário. **Não há conta de OSC pronta:** a organização
+entra pelo auto-cadastro em `/cadastro/osc`, que é o único caminho dela — percorrê-lo faz parte do
+teste.
+
+### Build do CSS e o git
+
+`public/build` está no `.gitignore`, mas os arquivos são **versionados**, porque a produção não roda
+`npm run build`. Cada build que muda classes gera um CSS com hash novo, e o `manifest.json` passa a
+apontar para ele. Depois de todo build, em **comandos separados**:
+
+```bash
+git add -f public/build/assets/app-<novo>.css public/build/manifest.json
+git rm --cached public/build/assets/app-<antigo>.css
+```
+
+Antes do push, o que `git show HEAD:public/build/manifest.json` referencia tem de bater com
+`git ls-files public/build/assets/`. Isso já quebrou o repositório três vezes: `git add -A` ignora o
+CSS novo, e um `git add` que mistura arquivo comum com arquivo de `public/build` falha no aviso de
+pasta ignorada — o commit sai com um manifest apontando para um CSS que não existe.
+
+Outra consequência: o **Tailwind só gera as classes que encontra no código**. Tela nova com classe
+nova e sem build novo aparece sem estilo — em produção também.
 
 ---
 
-## Ordem de desenvolvimento planejada
+## Mapa do sistema
 
-1. [x] Estrutura base Laravel + autenticação + perfis/permissões
-2. [x] Cadastro de usuários (CRUD + atribuição de perfil)
-3. [x] Cadastro institucional (Órgãos/Secretarias e OSCs)
-4. [x] Banco de Programas e Chamamentos Públicos
-5. [x] Propostas + Plano de Trabalho
-6. [x] Workflow de Análise e Aprovação
-7. [x] Formalização (geração de instrumentos + assinatura eletrônica)
-8. [x] Portal público + auto-cadastro de OSC + upload de documentos
-9. [x] Módulo Unidade Gestora — 2.1 Planejamento (Processos, Termo de Referência, trâmite entre setores)
-10. [x] Módulo Unidade Gestora — 2.2 Seleção/Celebração e 2.3 Execução do Concedente (incl. Ordem de Pagamento)
-11. [~] Execução financeira (repasses, despesas, notas fiscais — falta integração bancária)
-12. [ ] Monitoramento e Fiscalização
-13. [ ] Prestação de Contas
-14. [ ] Integrações externas (bancária, Diário Oficial)
+### Menu da área interna
+
+```
+Painel · Caixa de Entrada · Portal Público
+Ciclo da Parceria
+  1  Planejamento
+  2  Seleção ─ Chamamentos · Manifestações de Interesse · Propostas
+  3  Celebração ─ Instrumentos
+  4  Execução ─ Alterações da Parceria
+  5  Monitoramento            (em breve)
+  6  Prestação de Contas
+Cadastros ─ Órgãos e usuários · OSCs · Aprovações pendentes
+Meus usuários                 (chefia de setor)
+Tecnologia da Informação ─ Modelos
+Ajuda ─ Suporte
+```
+
+Item a que o perfil não tem acesso aparece com cadeado e uma dica, em vez de sumir: a pessoa sabe
+que a etapa existe e por que não entra.
+
+### Menu do portal (OSC logada)
+
+Chamamentos abertos · Transparência · Minhas inscrições · Manifestar interesse · Alterações ·
+Prestação de contas · Suporte — e, no menu da conta, **Usuários da organização** (só o responsável
+legal).
+
+### Peças que atravessam o sistema
+
+| Peça | O que faz |
+|---|---|
+| **Motor de peças** (`Peca`) | Checklist documental por categoria — `chamamento_publico`, `dispensa_inexigibilidade`, `celebracao`, `aditivo`, `apostilamento`, `prestacao_contas`, `alteracao`. Cada item tem setor e etapa (`*_SETOR`, `*_ETAPA`); `podePreencher()` e `podeAssinar()` decidem pela vez no trâmite. `sincronizar()` cria os itens e semeia o texto dos modelos |
+| **Modelos** (`Peca::MODELO`, `Support\Modelo`) | Textos com `{{marcadores}}`, preenchidos por `Peca::tokensDe()`: dados da OSC, do representante, do instrumento, datas por extenso (`Support\Extenso`). O que o sistema não sabe fica como `XXXXX` para quem redige |
+| **Documentos gerados** | Não são redigidos: saem dos campos e se regeneram até alguém assinar — `PlanoDocumento` (plano de trabalho), `PrestacaoDocumento` (ofício, relatório, resumo da folha), a Proposta de Alteração |
+| **Assinatura** (`Concerns\GuardaQuemAssinou`) | Grava **nome e cargo no ato**: editar o perfil ou trocar de setor não reescreve o carimbo. Código de validação + QR Code, conferível em `/validar` sem login |
+| **Plano de Trabalho** (`Concerns\TemPlanoDeTrabalho`) | O mesmo plano na manifestação e na proposta; no deferimento a **mesma linha** passa à proposta. O tipo de despesa é `Despesa::NATUREZAS`, o que torna o aprovado comparável ao executado |
+| **Visibilidade à OSC** (`visivel_osc`) | Cada documento carrega a marca; `Peca::INTERNAS` / `ProcessoPeca::INTERNAS` nascem fechados. Só circula documento pronto |
+| **Recorte por órgão** | `visiveisPara()` e `podeVerTodosOrgaos()`: quem é lotado numa Secretaria vê só o que é dela; SCP, SEPLAN, PJ, TI e auditoria veem tudo |
 
 ---
 
-## Fluxograma do sistema
+## Fluxos
 
-### Ciclo da parceria (visão macro)
-
-Do planejamento interno até a prestação de contas. As etapas tracejadas ainda não foram implementadas (fases 11–13).
+### Ciclo da parceria
 
 ```mermaid
 flowchart TD
-    PLAN["1 · Planejamento<br/>Processo + Termo de Referência<br/>(trâmite UG / SCP / SEPLAN)"] --> CH["2 · Chamamento Público<br/>publicado no Portal"]
-    CH --> PROP["3 · Proposta da OSC<br/>+ Plano de Trabalho (metas/etapas)"]
-    PROP --> AN["4 · Análise<br/>Parecer Técnico → Jurídico → Decisão"]
-    AN -->|Diligência| PROP
-    AN -->|Reprovada| FIM(["Encerrado"])
-    AN -->|Aprovada| SEL["5 · Seleção e Celebração<br/>checklist documental (2.2)"]
-    SEL --> FORM["6 · Formalização<br/>Instrumento + Aditivos / Apostilamento (2.3)"]
-    FORM --> VIG["Assinatura + Publicação no DOE<br/>= Instrumento Vigente"]
-    VIG --> EXE["7 · Execução<br/>repasses, despesas, notas fiscais"]
-    EXE --> MON["8 · Monitoramento e Fiscalização"]
-    MON --> PC["9 · Prestação de Contas"]
+    PLAN["1 · Planejamento<br/>ofício, termo de referência, pareceres,<br/>edital ou justificativa de dispensa"] --> SEL
+    MI["Manifestação de Interesse<br/>(a OSC propõe sem chamamento)"] -->|deferida| SEL
+    SEL["2 · Seleção<br/>propostas, comissão, resultado,<br/>homologação pelo Prefeito"] --> CEL
+    CEL["3 · Celebração<br/>plano de trabalho, habilitação, pareceres,<br/>termo assinado pelas partes, empenho"] --> EXE
+    EXE["4 · Execução<br/>repasses, despesas, notas, saldo"] --> PC
+    EXE <--> ALT["Alterações da Parceria"]
+    EXE -.-> MON["5 · Monitoramento"]
+    MON -.-> PC
+    PC["6 · Prestação de Contas<br/>parcial e final"]
 
     classDef futuro fill:#f8fafc,stroke:#94a3b8,stroke-dasharray:4 3,color:#64748b;
-    class EXE,MON,PC futuro
+    class MON futuro
 ```
 
-### Trâmite interno do Planejamento (Módulo UG 2.1)
+### Trâmite do Planejamento (módulo 2.1)
 
-O trâmite **bifurca na análise do SCP (etapa 1)**, quando a modalidade é decidida. As etapas 0–4
-são comuns às duas rotas; a partir da 5 o caminho muda (`Processo::ETAPAS` × `ETAPAS_DISPENSA`,
-resolvidos por `$processo->etapas()`). O SCP pode **devolver** para a UG. Use sempre
-`$processo->etapas()` — nunca a constante estática.
+As etapas 1 a 5 são comuns. Na etapa 2 a SCP analisa, aprova ou devolve à UG e **decide a
+modalidade** — e dali o caminho bifurca: **10 etapas** no chamamento público, **7** na dispensa ou
+inexigibilidade (`Processo::ETAPAS` × `ETAPAS_DISPENSA`, resolvidos por `$processo->etapas()` — use
+sempre o método, nunca a constante).
 
 ```mermaid
 flowchart LR
-    A(["Abertura"]) --> E1["UG<br/>Ofício + Termo de<br/>Referência (assinar)"]
-    E1 --> E2{"SCP analisar<br/>+ definir<br/>modalidade"}
-    E2 -->|rejeita| E1
-    E2 -->|aprova| E3["UG<br/>Solicitar Parecer<br/>Financeiro à SEPLAN"]
-    E3 --> E4["SEPLAN<br/>emitir Parecer<br/>Financeiro"]
-    E4 --> E5["UG<br/>Abertura do<br/>Processo (assinar)"]
-    E5 -->|Chamamento Público| C6["SCP<br/>elaborar Edital"]
-    C6 --> C7["UG<br/>assinar Edital +<br/>Solicitar Parecer<br/>Jurídico (assinar)"]
-    C7 --> C8["PJ<br/>emitir Parecer<br/>Jurídico (assinar)"]
-    C8 --> C9["SCP<br/>publicar no site"]
-    C9 --> Z(["Concluído"])
-    E5 -->|Dispensa/Inexig.| D6["UG<br/>emitir e assinar<br/>Justificativa<br/>(+ Parecer CNAS)"]
-    D6 --> D7["SCP<br/>publicar<br/>Justificativa"]
+    E1["1 · UG<br/>Ofício + Termo de<br/>Referência (assinar)"] --> E2{"2 · SCP<br/>analisar +<br/>definir modalidade"}
+    E2 -->|devolve| E1
+    E2 -->|aprova| E3["3 · SCP<br/>Pedido de Parecer<br/>Financeiro"]
+    E3 --> E4["4 · SEPLAN<br/>Parecer<br/>Financeiro"]
+    E4 --> E5["5 · UG<br/>Abertura do<br/>Processo (assinar)"]
+    E5 -->|Chamamento| C6["6 · SCP<br/>elaborar Edital"]
+    C6 --> C7["7 · UG<br/>assinar Edital +<br/>Portaria da Comissão"]
+    C7 --> C8["8 · SCP<br/>Protocolo à<br/>Procuradoria"]
+    C8 --> C9["9 · PJ<br/>Parecer<br/>Jurídico"]
+    C9 --> C10["10 · SCP<br/>publicar no site"]
+    C10 --> Z(["Concluído"])
+    E5 -->|Dispensa/Inexig.| D6["6 · UG<br/>Justificativa<br/>(+ Parecer CNAS)"]
+    D6 --> D7["7 · SCP<br/>publicar<br/>Justificativa"]
     D7 --> Z
 ```
 
-> O número do processo segue o padrão `UG.Sequencial.Ano.Esfera` (ex.: `0206.0133.2026.01`).
-> **Rota Chamamento Público (9 etapas):** a **Procuradoria Jurídica (`pj`)** entra no trâmite — no
-> mesmo passo em que assina o Edital, a UG preenche e assina a **Solicitação de Parecer Jurídico**
-> (Modelo VI) e encaminha à PJ, que emite o **Parecer Jurídico** e devolve à SCP para publicação.
-> **Rota Dispensa/Inexigibilidade (7 etapas):** no lugar do Edital+Jurídico, a **UG emite e assina a
-> Justificativa** de Dispensa/Inexigibilidade (art. 30–32 da Lei 13.019/2014) — com o **Parecer
-> Técnico CNAS** opcional, só nas parcerias do SUAS — e o SCP publica.
+O número do processo segue `UG.Sequencial.Ano.Esfera` (ex.: `0206.0133.2026.01`). O Parecer
+Técnico CNAS só entra nas parcerias do SUAS.
+
+### Os demais trâmites
+
+Todos seguem a mesma interface (`tramiteEtapaAtual()`, `tramiteEtapas()`, `tramiteEncerrado()`,
+`tramiteSetorLabel()`), que o motor de peças usa para decidir quem age. **A OSC é setor do trâmite**
+na Celebração, nas Alterações e na Prestação — ver `User::setorNoTramite()`, logo abaixo.
+
+| Trâmite | Etapas | Onde |
+|---|---|---|
+| **Seleção** (chamamento público) | UG → SCP → UG → SCP → **Prefeito** (5) | `Chamamento::ETAPAS_SELECAO` |
+| **Manifestação de Interesse** | OSC submete → SCP recebe → Secretaria opina → SCP defere ou indefere | `ManifestacaoInteresse` |
+| **Celebração** | UG → **OSC** → UG → SCP → SEPLAN → UG → SCP → PJ → SCP → **OSC** → SCP → **OSC** → SCP → UG → SCP (15) | `Proposta::ETAPAS_CELEBRACAO` |
+| **Alteração da Parceria** | **OSC** → UG autoriza → SCP processa e decide (3) | `Alteracao::ETAPAS` |
+| **Prestação de Contas** | **OSC** → SCP (análise prévia) → UG com Gestor e Comissão (3) | `PrestacaoContas::ETAPAS` |
+| **Suporte** | quem abre ↔ equipe (TI e SCP) | `Chamado` |
+
+No deferimento, a manifestação **vira** chamamento (tipo dispensa ou inexigibilidade) e proposta,
+levando plano e documentos — as mesmas linhas, sem cópia. Sem programa aberto na Secretaria, o
+chamamento nasce na pasta geral "Parcerias por manifestação de interesse".
 
 ---
 
-## Perfis de usuário (lista oficial — Módulo 1)
+## Perfis e acesso
 
-São 22 perfis. Um usuário pode ter **vários**; os marcados 🔒 são **exclusivos** de um setor
-(só atribuíveis a quem é lotado nele).
+**22 perfis da Prefeitura** e **5 da OSC**. Um usuário pode ter vários; os com setor marcado são
+**exclusivos** (só atribuíveis a quem é lotado nele — `User::PERFIS_EXCLUSIVOS`). A matriz vive em
+`RolesSeeder::MATRIZ`; mudou a matriz, rode `php artisan db:seed --class=RolesSeeder` (a produção
+também precisa).
 
-| Slug | Perfil | 🔒 Setor | Permissões |
+| Slug | Perfil | Setor exclusivo | Permissões |
 |---|---|---|---|
 | `administrador_setorial` | Administrador Setorial | TI | todas |
-| `responsavel_unidade_gestora` | Responsável da Unidade Gestora | UG | planejamento, chamamentos, propostas, decisão, formalização |
-| `analista_tecnico_scp` | Analista Técnico do SCP | SCP | planejamento, chamamentos |
-| `responsavel_publicacao` | Responsável pela Publicação | SCP | chamamentos |
-| `analista_orcamentario_financeiro` | Analista Orçamentário Financeiro | SEPLAN | planejamento |
-| `analista_juridico` | Analista Jurídico | — | parecer jurídico, planejamento (acesso à caixa) |
-| `analista_viabilidade_tecnica` | Analista de Viabilidade Técnica | — | parecer técnico |
-| `analista_aditivo_apostilamento` | Analista de Aditivo e Apostilamento | — | formalização |
-| `analista_prestacao_contas_previa` | Analista de Prestação de Contas Prévia | — | prestação de contas |
-| `comissao_selecao` | Comissão de Seleção | Com. Seleção | propostas, parecer técnico, decisão |
-| `comissao_monitoramento_avaliacao` | Comissão de Monitoramento e Avaliação | Com. Avaliação | monitoramento |
-| `gestor_parceria` | Gestor da Parceria | gestor | planejamento, monitoramento |
-| `cadastrador` | Cadastrador | — | chamamentos, propostas, formalização |
-| `contador` | Contador | — | prestação de contas |
-| `encaminhador` | Encaminhador | — | formalização |
-| `operador_ordem_pagamento` | Operador de Ordem de Pagamento | — | *(futuro: pagamento)* |
-| `aprovador_assinatura_eletronica` | Aprovador de Assinatura Eletrônica | — | *(futuro: assinatura)* |
 | `auditor_externo` | Auditor Externo | — | todas (**somente leitura**) |
 | `auditor_geral` | Auditor Geral | — | todas (**somente leitura**) |
-| `analista` | Analista (em descontinuação) | — | acesso básico |
-| `responsavel_legal` | Responsável Legal | OSC | só portal |
-| `membro_osc` | Membro da OSC | OSC | só portal (prepara; **não submete nem recorre**) |
+| `prefeito_municipal` | Prefeito Municipal | PM | chamamentos, formalizacao |
+| `responsavel_unidade_gestora` | Responsável da Unidade Gestora | UG | planejamento, chamamentos, propostas, pareceres_decisao, formalizacao, ordem_pagamento, execucao, prestacao_contas, usuarios_setor |
+| `chefe_setor` | Chefe de Setor | — | usuarios_setor |
+| `analista_tecnico_scp` | Analista Técnico do SCP | SCP | planejamento, chamamentos, execucao, prestacao_contas, suporte |
+| `responsavel_publicacao` | Responsável pela Publicação | SCP | chamamentos |
+| `analista_orcamentario_financeiro` | Analista Orçamentário Financeiro | SEPLAN | planejamento |
+| `analista_juridico` | Analista Jurídico | — | pareceres_juridico, planejamento |
+| `analista_viabilidade_tecnica` | Analista de Viabilidade Técnica | — | pareceres_tecnico |
+| `analista_aditivo_apostilamento` | Analista de Aditivo e Apostilamento | — | formalizacao |
+| `analista_prestacao_contas_previa` | Analista de Prestação de Contas Prévia | — | prestacao_contas |
+| `comissao_selecao` | Comissão de Seleção | — | propostas, pareceres_tecnico, pareceres_decisao |
+| `comissao_monitoramento_avaliacao` | Comissão de Monitoramento e Avaliação | — | monitoramento, prestacao_contas |
+| `gestor_parceria` | Gestor da Parceria | — | planejamento, monitoramento, execucao, prestacao_contas |
+| `cadastrador` | Cadastrador | — | chamamentos, propostas, formalizacao |
+| `contador` | Contador | — | prestacao_contas |
+| `encaminhador` | Encaminhador | — | formalizacao |
+| `operador_ordem_pagamento` | Operador de Ordem de Pagamento | — | ordem_pagamento |
+| `aprovador_assinatura_eletronica` | Aprovador de Assinatura Eletrônica | — | — *(o fluxo ainda não existe)* |
+| `analista` | Analista (em descontinuação) | — | — |
+
+**OSC:** `responsavel_legal` (exclusivo do setor OSC — faz tudo no portal), `membro_osc` (a
+identidade de quem é da equipe; o que faz vem das funções `osc_*`) e os três perfis de convenente,
+sem permissão — ver [Equipe da OSC](#equipe-da-osc-contas-da-organização).
+
+`chefe_setor` não abre módulo nenhum: só a porta de cadastrar a própria equipe. Acumula-se com o
+perfil técnico da pessoa, para que a chefia não vire atalho para permissões que o setor não tem.
+O **Gestor da Parceria** e as **Comissões** são encargos por portaria: quem os concede é a UG que
+publica o ato, não o setor de lotação.
 
 ### Quem atribui os perfis
 
@@ -184,8 +283,8 @@ dois lugares, nunca na aprovação — na **criação** (responsável do setor) 
 ### A OSC como setor do trâmite (`User::setorNoTramite()`)
 
 Os fluxos designam etapas a setores, e **um deles é a própria OSC** — na Celebração ela elabora
-o Plano de Trabalho, anexa a habilitação, assina o Termo e informa os dados bancários (4 peças e
-3 das 15 etapas). Mas OSC não tem lotação: `users.setor` é **NULL**.
+o Plano de Trabalho, anexa a habilitação, assina o Termo e informa os dados bancários (3 das 15
+etapas). Mas OSC não tem lotação: `users.setor` é **NULL**.
 
 Quem comparava `$user->setor === 'osc'` obtinha sempre falso. Efeito: quando a UG encaminhava a
 Celebração à OSC, o item saía da caixa do município e **não entrava em lugar nenhum** — o trâmite
@@ -215,6 +314,9 @@ ao município cabe **baixar, aprovar ou recusar** — `documentos.analisar` (PAT
 - `Proposta::aceitaDocumentosDaOsc()` — o envio era limitado a `rascunho`, o que fechava a porta
   justamente quando ela precisa estar aberta: reenviar o que foi recusado e anexar a habilitação
   na **Celebração etapa 2**, com a proposta já aprovada. Agora só fecha em `reprovada`/`cancelada`.
+- **Quem aprova ainda está em aberto:** hoje qualquer perfil interno com a permissão `propostas`
+  aprova ou recusa — inclusive o Cadastrador. O fluxograma do módulo 3.2 diz que a habilitação vai
+  "para a SCP", que "analisa a documentação". Ver [Pendências](#pendências).
 
 ### Equipe da OSC (contas da organização)
 
@@ -228,8 +330,12 @@ OSC é organização, e organização tem equipe. O vínculo mora em **`users.os
 
 | Quem | Faz | Não faz |
 |---|---|---|
-| **Responsável legal** (`oscs.user_id`) | tudo do portal + **cadastra e suspende** a equipe | — |
-| **Membro** (`membro_osc`) | prepara proposta, anexa documentos, acompanha | **submeter proposta**, **protocolar recurso**, administrar acessos |
+| **Responsável legal** (`oscs.user_id`) | tudo do portal + **cadastra e suspende** a equipe e marca as funções de cada um | — |
+| **Membro** (`membro_osc`) | acompanha tudo; **age** só nas funções que o responsável marcou para ele: `osc_propostas`, `osc_documentos`, `osc_manifestacoes`, `osc_celebracao` | **submeter**, **recorrer**, **contra-assinar o Termo**, assinar as declarações e o plano de trabalho, administrar acessos |
+
+No cadastro do integrante há ainda três perfis de convenente — Cadastrador de Proposta, de
+Prestação de Contas e de Usuário do Ente — que **não abrem porta nenhuma**: declaram o papel da
+pessoa na organização e saem impressos na assinatura. Quem abre porta são as funções `osc_*`.
 
 - Tela: **Portal → Usuários** (`portal.usuarios.*`), visível só para o responsável legal.
 - O acesso vale na hora — a Prefeitura não gerencia o quadro de pessoal de entidade privada,
@@ -240,37 +346,154 @@ OSC é organização, e organização tem equipe. O vínculo mora em **`users.os
   `staff` e `osc` são espelhos que perguntam a ele. Ao criar outro papel de OSC, some-o a
   **`User::PAPEIS_OSC`** e os dois portões acompanham sozinhos.
 
-### O que cada área de permissão libera (em telas)
+### O que cada permissão libera
 
 | Permissão | Dá acesso a |
 |---|---|
-| `cadastros` | Menu **Cadastros**: Usuários, Órgãos/Secretarias, OSCs |
-| `planejamento` | Menu **Planejamento**: Processos, Termo de Referência, peças e **Caixa de Entrada** (trâmite) |
-| `chamamentos` | Menu **Programas**: Programas, Chamamentos e **Seleção** (checklist 2.2) |
-| `propostas` | Menu **Propostas**: Propostas + Plano de Trabalho (metas/etapas) |
-| `pareceres_tecnico` | Emitir **Parecer Técnico** na análise da proposta |
-| `pareceres_juridico` | Emitir **Parecer Jurídico** na análise da proposta |
-| `pareceres_decisao` | Emitir a **Decisão/Seleção** final da proposta |
-| `formalizacao` | Submenu **Instrumentos**: Instrumentos, Aditivos, Apostilamento e Documentação (2.3) |
-| `ordem_pagamento` | Emitir **Ordens de Pagamento** no instrumento vigente (2.3.1) |
-| `execucao` | **Execução Financeira**: repasses, despesas, notas fiscais e saldo (4.4) |
-| `usuarios_setor` | Menu **Meus usuários**: cadastrar a equipe do próprio setor (o administrador aprova) |
-| `monitoramento` | Monitoramento e Fiscalização *(módulo futuro)* |
-| `prestacao_contas` | Prestação de Contas *(módulo futuro)* |
+| `cadastros` | **Cadastros**: órgãos e usuários, OSCs, aprovação de contas |
+| `planejamento` | **1 · Planejamento**: processos, termo de referência, peças e trâmite |
+| `chamamentos` | **2 · Seleção**: programas, chamamentos, checklist e trâmite da seleção, **manifestações de interesse** |
+| `propostas` | **Propostas**: análise da proposta, plano de trabalho, conferência dos documentos da OSC |
+| `pareceres_tecnico` / `pareceres_juridico` / `pareceres_decisao` | Emitir o parecer correspondente na análise da proposta |
+| `formalizacao` | **Instrumentos**: instrumento, aditivos, apostilamento e sua documentação |
+| `ordem_pagamento` | Emitir **ordens de pagamento** no instrumento vigente |
+| `execucao` | **4 · Execução** (repasses, despesas, notas, saldo) e **Alterações da Parceria** |
+| `prestacao_contas` | **6 · Prestação de Contas** |
+| `monitoramento` | Leitura de alterações e prestações; o módulo próprio ainda não existe |
+| `usuarios_setor` | **Meus usuários**: cadastrar a equipe do próprio setor (o administrador aprova) |
+| `suporte` | **Atender** o suporte: ver e responder os chamados de todos, nota interna, encerrar |
+| `osc_*` | Funções da equipe da OSC, marcadas por pessoa — nunca valem dentro da Administração |
 
-> O menu **Celebração** é a exceção à régua por permissão: quem o abre é quem participa do
-> trâmite (`User::participaDaCelebracao()` — os setores de `Proposta::ETAPAS_CELEBRACAO` mais
-> quem tem `formalizacao`), porque SCP, SEPLAN e PJ conduzem etapas do fluxo sem ter aquela
-> permissão. **Instrumentos** é subitem dele e continua exigindo `formalizacao`.
+Exceções à régua por permissão, todas de propósito:
 
-> As permissões são definidas em `RolesSeeder`, aplicadas por middleware nas rotas + `@can`
-> na navegação (o usuário só vê no menu o que pode acessar). **Auditores** veem tudo mas não
-> gravam (middleware `readonly`). **Responsável Legal** só acessa o portal (middleware `staff`).
-> Setor de lotação do usuário em `User::LOTACOES`; exclusivos em `User::PERFIS_EXCLUSIVOS`.
+- **Celebração** abre para quem participa do trâmite (`User::participaDaCelebracao()`): SCP, SEPLAN
+  e PJ conduzem etapas sem ter `formalizacao`. **Instrumentos**, subitem dela, continua exigindo
+  `formalizacao`.
+- **Suporte** abre para **qualquer pessoa logada** — servidor ou OSC. Abrir chamado não pede
+  permissão; atender pede `suporte`.
+- **Documentos visíveis à OSC** (curadoria do dossiê, na tela da proposta) aceita quem conduz a
+  parceria: `chamamentos`, `propostas`, `formalizacao` ou `execucao`, no recorte da Secretaria.
+
+As permissões são aplicadas por middleware nas rotas e `@can` na navegação. **Auditores** veem tudo
+e não gravam (middleware `readonly`). O portal é barrado ao servidor e a área interna à OSC pelos
+middlewares `osc` e `staff`, que perguntam a `User::temAcessoInterno()`.
 
 ---
 
-## O que foi feito
+## Deploy
+
+A produção é hospedagem compartilhada, **sem git no servidor**: o deploy é por `rsync` a partir do
+clone local. O acesso SSH e o caminho da aplicação estão com o responsável pelo projeto — **não os
+registre aqui**. Só suba quando for pedido.
+
+**Arquivos que existem só no servidor e o `rsync` não pode apagar:** o `.htaccess` da raiz (sem ele
+o site cai e o `.env` fica acessível pela web), os wrappers `./php` e `./composer` (o PHP padrão do
+servidor é mais antigo que o exigido), `storage/` (anexos dos usuários) e o link `public/storage`.
+
+Procedimento:
+
+1. **Backup do banco** e conferência de que o dump está completo (termina com `Dump completed` e tem
+   todas as tabelas). A senha no `.env` do servidor está entre aspas — ler as credenciais pela
+   configuração do Laravel, não pelo arquivo.
+2. **Conferir que ninguém editou no servidor**: o hash dos arquivos que vão ser sobrescritos tem de
+   bater com o do último commit publicado.
+3. **Ensaiar** o envio (`--dry-run --itemize-changes`) e ler a lista. Enviar só o que mudou desde o
+   último deploy (`git diff --name-only <publicado> <novo>`), e depois conferir os hashes no destino.
+4. `./php artisan migrate --force` — e `db:seed --class=RolesSeeder --force` se a matriz de perfis
+   mudou.
+5. **Caches:** `optimize:clear` **antes** de reconstruir (sobrescrever não apaga arquivo que deixou
+   de existir), depois `config:cache`, `route:cache` e `view:cache`. O bytecode do PHP revalida
+   sozinho: `opcache.validate_timestamps` está ligado com revalidação de 2 segundos.
+6. **CSS:** apagar no servidor o arquivo antigo de `public/build/assets/` e conferir que ele responde
+   404 e o novo, 200.
+7. **Teste de fumaça:** `/`, `/login`, `/portal`, `/transparencia`, `/validar` e `/cadastro/osc` em
+   200; `/dashboard` em 302; `/.env` em 403; e **uma rota nova da entrega em 302** — se vier 404, o
+   cache de rotas está velho. Por fim, conferir o `storage/logs/laravel.log`.
+
+---
+
+## Verificação
+
+A pasta `tests/` tem só os testes que vêm com o Breeze. As entregas desde o módulo 3 foram
+conferidas por **scripts que exercitam o HTTP de verdade** — com os usuários reais do banco local,
+middlewares e validação inclusos, tudo dentro de uma transação desfeita no fim. Rodam fora do
+repositório; a última rodada somou 235 verificações (plano de trabalho, alterações, habilitação,
+assinatura, dossiê, suporte) mais 41 telas abrindo, sem falha.
+
+Dois cuidados que esses scripts ensinaram:
+
+- O Laravel entrega os **parâmetros de rota por posição**, e o valor fixo de uma rota
+  (`->defaults()`) entra por último. Controller que recebe tipo e id pela assinatura recebe um no
+  lugar do outro — leia com `$request->route('nome')`.
+- O banco local tem **dados de uso real** (chamados, parcerias de teste). Teste que presume tabela
+  vazia falha; conte a partir do que havia.
+
+Trazer esses cenários para `tests/Feature` é uma das [Pendências](#pendências).
+
+---
+
+## Pendências
+
+*Atualizado em 22/09/2026.*
+
+### Segurança
+
+- **A senha provisória das contas da Prefeitura é pública** — está na migração
+  `cria_quadro_de_usuarios_da_prefeitura`, e este repositório é público. Essas contas foram criadas
+  também em **produção**. É preciso trocar as senhas lá.
+- A assinatura eletrônica não guarda resumo criptográfico do texto assinado: a integridade se apoia
+  no código de validação e no documento deixar de ser editável depois de assinado.
+- Requisitos não-funcionais ainda por fazer: **trilha de auditoria / logs imutáveis**, **MFA**,
+  adequação à **LGPD**.
+
+### Decisões que dependem da gestão ou da cliente
+
+- **Solicitação de assinatura** (perfil Aprovador de Assinatura Eletrônica, pedido no módulo 3.1 como
+  botão "Enviar para assinatura"): falta definir quem solicita e quem aprova em cada tipo de
+  documento. Hoje quem tem a vez assina direto.
+- **Quem aprova os documentos da OSC:** hoje qualquer perfil interno com `propostas`, inclusive o
+  Cadastrador. O fluxograma do 3.2 diz que a habilitação vai à SCP, que analisa; o Plano de Trabalho
+  é aprovado pela UG (etapa 3 da Celebração).
+- **Auto-preenchimento dos `XXXXX`** nos modelos com o que o sistema já sabe — o maior ganho é
+  dotação, ficha e fonte. Aguardando aval.
+- **Limite de anexo de 10 MB**: foto de câmera passa disso (28 de 50 fotos de teste). Aumentar o
+  limite ou reduzir a imagem ao receber — o servidor aceita até 256 MB.
+- O que **Parlamentar** e **Conselho** veem de diferente na tela principal (hoje ambos vão à
+  Transparência).
+- **Modelos de aditivo e apostilamento** ainda sem arquivo da cliente.
+
+### Código
+
+- **5 · Monitoramento e Fiscalização** — aparece no menu como "em breve".
+- **Notificações por e-mail** — o sistema não envia e-mail; chamado de suporte e vez no trâmite só
+  aparecem na tela.
+- **Caixa de Entrada** não inclui alterações da parceria nem chamados de suporte. E
+  `app/Support/CaixaDeEntrada.php` está com os comentários apagados por outra pessoa, fora de
+  commit, esperando decisão.
+- `InstrumentoController::store()` cria instrumento **sem exigir a Celebração concluída** e sem
+  outra guarda além da permissão da rota.
+- `/programas/{id}` devolve **500**: `ProgramaController@show` aponta para uma view que não existe.
+  Nada na interface leva até lá.
+- Na prestação de contas, o **laudo de obra** e os **pareceres** saem com `XXXXX` no corpo.
+- Checklist da dispensa: itens 16 a 18 e a publicação do termo (item 15).
+- Trazer as verificações HTTP para `tests/Feature`.
+
+### Produção (ação, não código)
+
+- Designar **Chefe de Setor** em cada Secretaria, senão o cadastro da própria equipe não tem quem o
+  use fora da UG.
+- Contas a rever: o login do administrador, uma conta de teste de Saúde ativa sem perfil, e a única
+  OSC cadastrada, que está sem RG do representante.
+- Parcerias paradas na **etapa 2 da Celebração** passaram a exigir seis documentos de habilitação
+  que antes cabiam numa caixa só — avisar a cliente antes de cobrar.
+
+---
+
+## Histórico de entregas
+
+Da mais recente para a mais antiga. Cada entrada diz o que mudou, **por quê** e como foi
+conferido — o porquê é o que falta a quem pega o código depois.
+
 
 - [2026-09-19] **Painel de suporte** (`Chamado`, `SuporteController`, `suporte/*`, permissão `suporte`)
   - Canal para dúvidas, problemas e sugestões **sobre o próprio sistema** — até aqui isso corria por
@@ -761,7 +984,8 @@ OSC é organização, e organização tem equipe. O vínculo mora em **`users.os
     histórico ele pararia, em vez de escolher por conta própria
   - Conferido: entra por `admin_parcerias` e pelo e-mail antigo, recusa senha errada, recusa a conta
     apagada; o formato rejeita maiúscula, espaço e acento; e o login duplicado é barrado
-  - **Ressalva registrada**: a senha definida (`123456`) é fraca para uma conta de acesso total num
+  - **Ressalva registrada**: a senha definida (a provisória do quadro — valor retirado deste README
+    em 22/09/2026, por ser o repositório público) é fraca para uma conta de acesso total num
     sistema com documentos de OSC, CPFs e dados bancários. Foi pedido assim; vale trocar no primeiro
     acesso
 
@@ -2144,9 +2368,12 @@ OSC é organização, e organização tem equipe. O vínculo mora em **`users.os
 
 ---
 
-## O que está sendo feito
+### Resumos das entregas de agosto (arquivo)
 
-### 📌 Última entrega — Celebração: acesso, assinatura das partes e leitura do trâmite (21/08/2026)
+Quadro que ficava em "O que está sendo feito" até 21/08/2026. O detalhe de cada item está nas
+entradas acima; fica aqui como estava, para não se perder a leitura de conjunto da época.
+
+#### 📌 Última entrega — Celebração: acesso, assinatura das partes e leitura do trâmite (21/08/2026)
 
 Frentes desta rodada, detalhadas nas primeiras entradas de `## O que foi feito`:
 
@@ -2212,7 +2439,7 @@ e sede da OSC, representante legal, objeto, valor, vigência — continuam como 
 Termo de Parceria e em três documentos da Celebração, enquanto a minuta do Instrumento (view Blade)
 já monta tudo do banco. Vale unificar.
 
-### Entrega anterior — Navegação, permissões, paleta e exclusões seguras (14/08/2026)
+#### Entrega anterior — Navegação, permissões, paleta e exclusões seguras (14/08/2026)
 
 Quatro frentes, detalhadas nas primeiras entradas de `## O que foi feito`:
 
@@ -2236,7 +2463,7 @@ usuário não tinha OSC. Vale conferir se algum documento foi removido indevidam
 **Pendências:** a barra de comandos é da área administrativa; o portal da OSC tem poucas telas e
 ficou de fora. `/busca` responde 302 para a OSC (rota `staff`), como esperado.
 
-### Entrega anterior — Revisão visual de todas as telas (12/08/2026)
+#### Entrega anterior — Revisão visual de todas as telas (12/08/2026)
 
 Passagem de acabamento sobre as 113 views, sem mexer em regra de negócio: identidade visual da
 Prefeitura ocupando espaço de verdade, tipografia 10% maior, densidade revista nas telas mais
@@ -2253,7 +2480,7 @@ link e não era) — todos corrigidos. Detalhes na primeira entrada de `## O que
   invert`). Se o manual de identidade da Prefeitura exigir o cata-vento colorido, a alternativa é
   um bloco de fundo branco no topo da coluna
 
-### Entregas anteriores — `Docs. Desenvolvimento/Modelos novos/` e `Atualizações.txt`
+#### Entregas anteriores — `Docs. Desenvolvimento/Modelos novos/` e `Atualizações.txt`
 
 O trabalho mais recente do projeto foi a implementação **completa** da pasta **`Modelos novos`** e do
 arquivo **`Atualizações.txt`** que o cliente entregou (30/07/2026). Foi executado nesta ordem — as
@@ -2276,7 +2503,7 @@ Pagamento Global e Parcial, além da Tela principal.
 **SCP** (e não direto ao PJ), a devolução do Parecer Jurídico por pendência agora vai para a **SCP**,
 que devolve à UG — o texto do Fluxo CP dizia "envia para UG". Funciona, mas é um desvio da letra.
 
-### Próximos passos
+#### Próximos passos
 
 - Próximos blocos do roadmap, em ordem: **Monitoramento (4.5)** e **Prestação de Contas (4.6)**
   — apoiada nas despesas/saldo da Execução —, e **Notificações/e-mails (4.7)**. São o que falta para
@@ -2296,18 +2523,27 @@ que devolve à UG — o texto do Fluxo CP dizia "envia para UG". Funciona, mas �
 
 ---
 
-## Decisões técnicas registradas
+## Decisões técnicas
 
-- **Framework:** Laravel 13
-- **Permissões:** Spatie Laravel Permission v8
-- **Auth/UI:** Laravel Breeze (Blade) + TailwindCSS
-- **Integrações bancárias:** deixadas para a última fase
-- **Assinatura eletrônica:** solução a definir (GOV.BR, D4Sign, etc.)
+- **Laravel 13** (PHP ≥ 8.3) com **Blade**, **Tailwind CSS v4** via `@tailwindcss/vite` e
+  **Alpine.js** — sem SPA: cada tela é servidor, o que mantém o sistema operável por quem conhece
+  PHP.
+- **Perfis:** Spatie Laravel Permission. A matriz é código (`RolesSeeder::MATRIZ`), não tela: muda
+  por migração/seed, com histórico no git.
+- **Documentos:** HTML guardado no banco (`conteudo`), gerado dos modelos com marcadores, assinado
+  com carimbo, código de validação e QR Code; PDF por dompdf.
+- **Assinatura eletrônica:** própria do sistema, com a identidade de quem assina congelada no ato.
+  Assinatura qualificada (GOV.BR, ICP-Brasil, D4Sign…) segue a definir.
+- **Anexos:** disco local (`storage/app`), 10 MB por arquivo, baixados só por rota autorizada.
+- **Hospedagem:** compartilhada, sem git no servidor; deploy por `rsync` — ver [Deploy](#deploy).
+- **Integrações** (banco, Diário Oficial): última fase.
 
 ---
 
-## Contexto importante
+## Contexto
 
-- Inspirado no Transferegov (federal) e SIGCON-SAÍDA (MG), adaptado para municípios
-- Multi-secretaria e multi-OSC no mesmo ambiente
-- LGPD, MFA e logs imutáveis são requisitos não funcionais obrigatórios
+- Inspirado no Transferegov (federal) e no SIGCON-Saída (MG), adaptado a município.
+- Multi-Secretaria e multi-OSC no mesmo ambiente, com recorte por órgão.
+- A cliente e dona das regras de negócio é a **SCP** (Setor de Convênios e Parcerias). Os modelos de
+  documento e as especificações dos módulos estão em `Docs. Desenvolvimento/`.
+- LGPD, MFA e logs imutáveis são requisitos não-funcionais obrigatórios — ainda pendentes.
