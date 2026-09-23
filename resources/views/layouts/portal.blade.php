@@ -271,6 +271,27 @@
                         </div>
                     </div>
                 @endif
+            {{-- Conta de OSC sem organização (o cadastro da OSC foi removido,
+                 ou o vínculo se perdeu). Sem organização não há em nome de quem
+                 inscrever nem manifestar, e os itens somem do menu — antes
+                 somiam calados, e a pessoa não tinha como saber o porquê. --}}
+            @elseif(auth()->user()->hasAnyRole(\App\Models\User::PAPEIS_OSC))
+                <div class="bg-accent-50 border-b border-accent-200">
+                    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3 flex items-center justify-between gap-4 flex-wrap">
+                        <div class="min-w-0">
+                            <p class="text-sm font-semibold text-accent-900">
+                                Sua conta não está vinculada a nenhuma organização
+                            </p>
+                            <p class="text-xs text-accent-800">
+                                Por isso as inscrições e a manifestação de interesse não aparecem. Peça à
+                                Prefeitura para regularizar o vínculo.
+                            </p>
+                        </div>
+                        <a href="{{ route('suporte.index') }}" class="btn btn-primary btn-sm shrink-0">
+                            Abrir chamado →
+                        </a>
+                    </div>
+                </div>
             @endif
         @endauth
 

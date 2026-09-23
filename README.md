@@ -533,8 +533,9 @@ Trazer os demais cenários para `tests/Feature` é uma das [Pendências](#pendê
 
 - Designar **Chefe de Setor** em cada Secretaria, senão o cadastro da própria equipe não tem quem o
   use fora da UG.
-- Contas a rever: o login do administrador, uma conta de teste de Saúde ativa sem perfil, e a única
-  OSC cadastrada, que está sem RG do representante.
+- Contas a rever: o login do administrador, uma conta de teste de Saúde ativa sem perfil, e a
+  Associação Bem Viver, sem RG do representante. A OSC de teste criada em 23/09 (CNPJ zerado) sai
+  quando os testes em produção acabarem.
 - Parcerias paradas na **etapa 2 da Celebração** passaram a exigir seis documentos de habilitação
   que antes cabiam numa caixa só — avisar a cliente antes de cobrar.
 
@@ -544,6 +545,17 @@ Trazer os demais cenários para `tests/Feature` é uma das [Pendências](#pendê
 
 Da mais recente para a mais antiga. Cada entrada diz o que mudou, **por quê** e como foi
 conferido — o porquê é o que falta a quem pega o código depois.
+
+- [2026-09-23] **Conta de OSC sem organização: aviso no portal e senha sempre acessível**
+  (`layouts/portal`, rotas de `portal.perfil`)
+  - Em produção, a conta de teste da OSC era responsável legal sem organização — o cadastro da OSC
+    dela tinha sumido. O portal escondia "Minhas inscrições" e "Manifestar interesse" sem dizer por
+    quê, e "Meus dados e senha" devolvia à página inicial, porque ficava atrás do middleware `osc`
+  - Agora a conta nessa situação vê uma faixa explicando e o botão para abrir chamado; e a tela de
+    dados e senha só exige login — a conta é da pessoa, não da organização. Servidor que cair nela
+    vai para o perfil interno
+  - Em produção foi criada a OSC **"OSC TESTE (conta de teste — não é organização real)"**, CNPJ e
+    CPF zerados, vinculada a `oscteste@gmail.com`
 
 - [2026-09-23] **Senha esquecida pelo suporte e troca obrigatória** (`PedidoDeSenhaController`,
   `ExigeTrocaDeSenha`, `TrocaDeSenhaController`, `SuporteController::senhaProvisoria`)

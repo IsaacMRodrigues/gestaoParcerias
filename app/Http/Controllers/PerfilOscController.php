@@ -22,14 +22,20 @@ use Illuminate\View\View;
  */
 class PerfilOscController extends Controller
 {
-    public function edit(): View
+    public function edit(): View|RedirectResponse
     {
+        // Servidor tem a tela de perfil dele, na área interna.
+        if (auth()->user()->temAcessoInterno()) {
+            return redirect()->route('profile.edit');
+        }
+
         return view('portal.perfil', ['usuario' => auth()->user()]);
     }
 
     public function update(Request $request): RedirectResponse
     {
         $usuario = $request->user();
+        abort_if($usuario->temAcessoInterno(), 403, 'Use o seu perfil na área interna.');
 
         $data = $request->validate([
             'name'  => ['required', 'string', 'max:255'],
@@ -49,6 +55,8 @@ class PerfilOscController extends Controller
      */
     public function senha(Request $request): RedirectResponse
     {
+        abort_if($request->user()->temAcessoInterno(), 403, 'Use o seu perfil na área interna.');
+
         $data = $request->validate([
             'current_password' => ['required', 'current_password'],
             'password'         => ['required', 'confirmed', Rules\Password::defaults()],

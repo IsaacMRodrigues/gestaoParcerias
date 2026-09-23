@@ -138,4 +138,26 @@ class ContasDeUsuarioTest extends TestCase
 
         $this->assertNull($vazia->fresh());
     }
+
+    // ── A conta é da pessoa, não da organização ──────────────────────────
+
+    public function test_conta_de_osc_sem_organizacao_troca_a_propria_senha_e_ve_o_aviso(): void
+    {
+        $orfa = User::factory()->create(['setor' => 'osc', 'status' => true, 'approval_status' => 'aprovado', 'password' => 'Antiga123']);
+        $orfa->assignRole('responsavel_legal');
+
+        $this->actingAs($orfa)->get('/portal/perfil')->assertOk();
+        $this->actingAs($orfa)->put('/portal/perfil/senha', [
+            'current_password' => 'Antiga123', 'password' => 'NovaSenha9', 'password_confirmation' => 'NovaSenha9',
+        ])->assertSessionHasNoErrors();
+        $this->assertTrue(\Illuminate\Support\Facades\Hash::check('NovaSenha9', $orfa->fresh()->password));
+
+        $this->actingAs($orfa)->get('/portal')->assertSee('Sua conta não está vinculada a nenhuma organização');
+    }
+
+    public function test_servidor_que_abre_o_perfil_do_portal_vai_para_o_seu(): void
+    {
+        $this->actingAs($this->admin)->get('/portal/perfil')->assertRedirect(route('profile.edit'));
+        $this->actingAs($this->admin)->put('/portal/perfil/senha', [])->assertForbidden();
+    }
 }

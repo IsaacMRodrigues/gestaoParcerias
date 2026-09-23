@@ -72,12 +72,6 @@ Route::middleware(['auth', 'osc'])->group(function () {
      * responsável legal marca as funções no cadastro do integrante (ver
      * User::FUNCOES_OSC) e cada grupo abaixo diz qual delas abre o quê.
      */
-    // A conta da própria pessoa: nome, telefone e senha. Vale para toda a
-    // equipe, inclusive quem não se cadastrou sozinho — ver PerfilOscController.
-    Route::get('/portal/perfil', [PerfilOscController::class, 'edit'])->name('portal.perfil.edit');
-    Route::patch('/portal/perfil', [PerfilOscController::class, 'update'])->name('portal.perfil.update');
-    Route::put('/portal/perfil/senha', [PerfilOscController::class, 'senha'])->name('portal.perfil.senha');
-
     Route::get('/portal/minhas-propostas', [PortalController::class, 'minhasPropostas'])->name('portal.minhas-propostas');
     Route::get('/portal/propostas/{proposta}', [PortalController::class, 'showProposta'])->name('portal.proposta.show');
 
@@ -132,6 +126,16 @@ Route::middleware(['auth', 'osc'])->group(function () {
         Route::patch('/portal/usuarios/{usuario}/funcoes', [OscUsuarioController::class, 'funcoes'])->name('portal.usuarios.funcoes');
         Route::patch('/portal/usuarios/{usuario}/acesso', [OscUsuarioController::class, 'alternarAcesso'])->name('portal.usuarios.acesso');
     });
+});
+
+// A conta da própria pessoa no portal: nome, telefone e senha. Fica fora do
+// grupo 'osc' de propósito — a conta é da pessoa, não da organização: quem
+// perdeu o vínculo com a OSC continua podendo trocar a própria senha. O
+// servidor que cair aqui vai para o perfil dele (ver PerfilOscController).
+Route::middleware('auth')->group(function () {
+    Route::get('/portal/perfil', [PerfilOscController::class, 'edit'])->name('portal.perfil.edit');
+    Route::patch('/portal/perfil', [PerfilOscController::class, 'update'])->name('portal.perfil.update');
+    Route::put('/portal/perfil/senha', [PerfilOscController::class, 'senha'])->name('portal.perfil.senha');
 });
 
 // Suporte: qualquer pessoa logada abre chamado — servidor ou OSC. Quem atende
