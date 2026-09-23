@@ -18,7 +18,10 @@ use Spatie\Permission\Traits\HasRoles;
 class User extends Authenticatable
 {
     /** @use HasFactory<UserFactory> */
-    use HasFactory, Notifiable, HasRoles, ImpedeExclusaoComVinculos;
+    use HasFactory, Notifiable, HasRoles;
+    use ImpedeExclusaoComVinculos {
+        motivosParaNaoExcluir as motivosDosVinculos;
+    }
 
     /**
      * Get the attributes that should be cast.
@@ -370,6 +373,59 @@ class User extends Authenticatable
             'tramitacoesEnviadas'    => ['tramitação enviada', 'tramitações enviadas'],
             'tramitacoesRecebidas'   => ['tramitação recebida', 'tramitações recebidas'],
         ];
+    }
+
+    /**
+     * O resto do que a pessoa deixou registrado no processo.
+     *
+     * vinculosBloqueantes() cobria só as colunas que o banco já protegia — as
+     * de chave sem regra de exclusão, onde apagar o usuário dava erro. As
+     * demais estão com `nullOnDelete`: apagar passava, e a contra-assinatura
+     * do Termo, a ordem de pagamento assinada, a tramitação da Celebração, a
+     * decisão da alteração ficavam sem autor, em silêncio. A regra do sistema
+     * é desativar, não excluir; excluir fica para conta que nunca fez nada.
+     *
+     * Contadas pela tabela, e não por relação, porque são muitas e nenhuma
+     * outra parte do sistema navega por elas a partir do usuário.
+     */
+    public const AUTORIA_REGISTRADA = [
+        'pecas.contra_assinado_por'              => ['contra-assinatura', 'contra-assinaturas'],
+        'pecas.criado_por'                       => ['peça criada', 'peças criadas'],
+        'ordens_pagamento.assinado_por'          => ['ordem de pagamento assinada', 'ordens de pagamento assinadas'],
+        'selecao_tramitacoes.enviado_por'        => ['tramitação da Seleção', 'tramitações da Seleção'],
+        'celebracao_tramitacoes.enviado_por'     => ['tramitação da Celebração', 'tramitações da Celebração'],
+        'alteracao_tramitacoes.enviado_por'      => ['tramitação de alteração', 'tramitações de alteração'],
+        'prestacao_tramitacoes.enviado_por'      => ['tramitação de prestação de contas', 'tramitações de prestação de contas'],
+        'alteracoes.criada_por'                  => ['alteração pedida', 'alterações pedidas'],
+        'alteracoes.decidida_por'                => ['alteração decidida', 'alterações decididas'],
+        'manifestacoes_interesse.decidida_por'   => ['manifestação decidida', 'manifestações decididas'],
+        'manifestacoes_interesse.parecer_por'    => ['parecer em manifestação', 'pareceres em manifestação'],
+        'recursos.protocolado_por'               => ['recurso protocolado', 'recursos protocolados'],
+        'recursos.respondido_por'                => ['recurso respondido', 'recursos respondidos'],
+        'documentos.analisado_por'               => ['documento conferido', 'documentos conferidos'],
+        'prestacoes_contas.created_by'           => ['prestação de contas aberta', 'prestações de contas abertas'],
+        'oscs.user_id'                           => ['OSC da qual é responsável legal', 'OSCs das quais é responsável legal'],
+        'chamados.user_id'                       => ['chamado de suporte aberto', 'chamados de suporte abertos'],
+        'chamados.resolvido_por'                 => ['chamado de suporte encerrado', 'chamados de suporte encerrados'],
+        'chamado_mensagens.user_id'              => ['mensagem de suporte', 'mensagens de suporte'],
+        'users.approved_by'                      => ['conta aprovada', 'contas aprovadas'],
+        'users.created_by'                       => ['conta cadastrada', 'contas cadastradas'],
+    ];
+
+    public function motivosParaNaoExcluir(): array
+    {
+        $motivos = $this->motivosDosVinculos();
+
+        foreach (self::AUTORIA_REGISTRADA as $alvo => [$singular, $plural]) {
+            [$tabela, $coluna] = explode('.', $alvo);
+            $quantos = \Illuminate\Support\Facades\DB::table($tabela)->where($coluna, $this->id)->count();
+
+            if ($quantos > 0) {
+                $motivos[] = $quantos.' '.($quantos === 1 ? $singular : $plural);
+            }
+        }
+
+        return $motivos;
     }
 
     protected function fraseDeBloqueio(): string

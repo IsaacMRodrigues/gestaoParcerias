@@ -52,6 +52,23 @@
     </div>
 </div>
 
+{{-- Conta de OSC: lotação, Secretaria e perfis não são daqui. O papel na
+     organização e as funções são do responsável legal, no portal; esta tela
+     listava só os perfis da Prefeitura, exigia marcar um e, ao salvar,
+     trocava o "Membro da OSC" pelo perfil marcado. --}}
+@if($user?->osc_id)
+    <div class="rounded-md border border-gray-200 bg-gray-50 p-4 text-sm text-gray-600">
+        <p>
+            Conta de <strong class="text-gray-800">{{ $user->osc?->name ?? 'organização' }}</strong>.
+            Perfil e funções desta pessoa são definidos pela organização, em
+            <strong>Portal → Usuários da organização</strong>, e não por esta tela.
+        </p>
+        <p class="mt-2">
+            <span class="text-gray-400">Perfis hoje:</span>
+            {{ $user->roles->map(fn ($r) => \App\Models\User::$roleLabels[$r->name] ?? $r->name)->join(', ') ?: '—' }}
+        </p>
+    </div>
+@else
 {{-- Setor de lotação --}}
 <div>
     <x-input-label for="setor" value="Setor de lotação" />
@@ -118,6 +135,7 @@
     </div>
     <x-input-error :messages="$errors->get('roles')" class="mt-2" />
 </div>
+@endif
 
 {{-- Senha --}}
 <div class="grid grid-cols-2 gap-4">

@@ -179,7 +179,9 @@ Route::middleware(['auth', 'staff', 'readonly'])->group(function () {
 
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
-    Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
+    // Sem excluir a própria conta: quem assinou e tramitou continua sendo o
+    // autor do que fez. A conta que deixa de ser usada é desativada pelo
+    // administrador (Cadastros → Usuários), não apagada.
 
     // Catálogo de modelos padrão — apoio do TI (Administrador Setorial)
     Route::middleware('role:administrador_setorial')->group(function () {

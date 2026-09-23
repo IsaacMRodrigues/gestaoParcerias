@@ -15,7 +15,8 @@ class UserRequest extends FormRequest
 
     public function rules(): array
     {
-        $userId = $this->route('usuario')?->id;
+        $userId     = $this->route('usuario')?->id;
+        $contaDeOsc = $this->route('usuario')?->osc_id !== null;
 
         return [
             'name'     => ['required', 'string', 'max:255'],
@@ -29,10 +30,13 @@ class UserRequest extends FormRequest
             'matricula' => ['nullable', 'string', 'max:50', Rule::unique('users', 'matricula')->ignore($userId)],
             'phone'    => ['nullable', 'string', 'max:20'],
             'password' => [$this->isMethod('POST') ? 'required' : 'nullable', 'string', 'min:6', 'confirmed'],
-            'roles'    => ['required', 'array', 'min:1'],
-            'roles.*'  => ['string', 'exists:roles,name'],
-            'setor'    => ['nullable', Rule::in(array_keys(User::LOTACOES))],
-            'orgao_id' => ['nullable', 'exists:orgaos,id'],
+            // Conta de OSC: perfis, lotação e Secretaria ficam de fora — quem
+            // os define é a organização, no portal. `exclude` descarta o que
+            // vier, inclusive num POST forjado.
+            'roles'    => $contaDeOsc ? ['exclude'] : ['required', 'array', 'min:1'],
+            'roles.*'  => $contaDeOsc ? ['exclude'] : ['string', 'exists:roles,name'],
+            'setor'    => $contaDeOsc ? ['exclude'] : ['nullable', Rule::in(array_keys(User::LOTACOES))],
+            'orgao_id' => $contaDeOsc ? ['exclude'] : ['nullable', 'exists:orgaos,id'],
             'status'   => ['boolean'],
         ];
     }

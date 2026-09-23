@@ -192,8 +192,6 @@ class UserController extends Controller
             'cpf'       => $request->cpf,
             'matricula' => $request->matricula,
             'phone'     => $request->phone,
-            'setor'     => $request->setor,
-            'orgao_id'  => $request->orgao_id,
             'status'    => $request->boolean('status', true),
         ];
 
@@ -201,8 +199,19 @@ class UserController extends Controller
             $data['password'] = bcrypt($request->password);
         }
 
+        // Conta de OSC: aqui só identificação, senha e acesso. Perfil e funções
+        // são da organização (portal); lotação e Secretaria não se aplicam.
+        // Ver usuarios/_form e UserRequest.
+        if ($usuario->osc_id === null) {
+            $data['setor']    = $request->setor;
+            $data['orgao_id'] = $request->orgao_id;
+        }
+
         $usuario->update($data);
-        $usuario->syncRoles($request->roles);
+
+        if ($usuario->osc_id === null) {
+            $usuario->syncRoles($request->roles);
+        }
 
         return redirect()->route('orgaos.index')
             ->with('success', 'Usuário atualizado com sucesso.');
