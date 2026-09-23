@@ -44,9 +44,9 @@ assinados eletronicamente e validáveis por QR Code.
 | **Notificações por e-mail** (4.7) | ⏳ Não iniciado | o sistema não envia e-mail nenhum |
 | **Integrações** (banco, Diário Oficial, GOV.BR) | ⏳ Última fase | — |
 
-**Em produção** está o commit `5f03212` (22/09/2026), com tudo o que havia no GitHub: painel de
-suporte, rodapé claro, plano de trabalho só-leitura para o município e as três correções da conta
-da OSC. Fora do ar está apenas esta atualização do README.
+**Em produção** está tudo o que há no GitHub até a entrega de 23/09/2026: parceria alheia barrada
+pelo endereço, contas de OSC protegidas na tela da Prefeitura, exclusão que não apaga autoria e a
+senha esquecida pelo suporte, com troca obrigatória.
 
 ---
 
@@ -379,13 +379,29 @@ Exceções à régua por permissão, todas de propósito:
   e PJ conduzem etapas sem ter `formalizacao`. **Instrumentos**, subitem dela, continua exigindo
   `formalizacao`.
 - **Suporte** abre para **qualquer pessoa logada** — servidor ou OSC. Abrir chamado não pede
-  permissão; atender pede `suporte`.
+  permissão; atender pede `suporte`. A exceção é **"Esqueci minha senha"**, única porta sem login:
+  só abre chamado de Acesso, com limite de 3 pedidos a cada 10 minutos, campo-isca e a mesma
+  resposta exista a conta ou não.
 - **Documentos visíveis à OSC** (curadoria do dossiê, na tela da proposta) aceita quem conduz a
   parceria: `chamamentos`, `propostas`, `formalizacao` ou `execucao`, no recorte da Secretaria.
 
 As permissões são aplicadas por middleware nas rotas e `@can` na navegação. **Auditores** veem tudo
 e não gravam (middleware `readonly`). O portal é barrado ao servidor e a área interna à OSC pelos
 middlewares `osc` e `staff`, que perguntam a `User::temAcessoInterno()`.
+
+Dois middlewares do grupo `web` valem para toda rota, e por isso rota nova já nasce coberta:
+
+- **`ParceriaVisivel`** — se a rota recebe uma parceria ou algo pendurado nela (instrumento,
+  aditivo, ordem de pagamento, despesa, repasse, prestação de contas, alteração, diligência,
+  documento, peça), sobe até a proposta e pergunta a `Proposta::visivelPara()`: a OSC dona, a
+  Secretaria dona ou quem atende o município inteiro. O recorte por Secretaria vivia só nas
+  listagens; a tela de detalhe abria pelo endereço o que a lista escondia.
+- **`ExigeTrocaDeSenha`** — conta com `deve_trocar_senha` só chega à tela de troca. A marca vem de
+  quem definiu a senha por outra pessoa: suporte, administrador, chefia de setor, responsável legal.
+
+**Contas não se excluem pela própria mão**, e o administrador só exclui conta que nunca deixou
+autoria: `User::motivosParaNaoExcluir()` cobre as 29 colunas que apontam para `users`. Quem deixa de
+usar o sistema é desativado.
 
 ---
 
@@ -423,7 +439,14 @@ Procedimento:
 
 ## Verificação
 
-A pasta `tests/` tem só os testes que vêm com o Breeze. As entregas desde o módulo 3 foram
+`tests/Feature` tem **27 testes do sistema**, que rodam com `php artisan test` (sqlite em memória):
+`ParceriaVisivelTest` (quem abre qual parceria, instrumento sem trava), `ContasDeUsuarioTest` (conta
+de OSC na tela da Prefeitura, exclusão de quem deixou autoria) e `SenhaPeloSuporteTest` (pedido sem
+login, senha provisória, troca obrigatória). Cada um foi conferido falhando sem a correção. Dos
+testes que vieram com o Breeze, 5 falham porque esperam regras que o sistema não tem mais (login
+sem aprovação, perfil aberto a todos) — ver [Pendências](#pendências).
+
+Antes disso, as entregas desde o módulo 3 foram
 conferidas por **scripts que exercitam o HTTP de verdade** — com os usuários reais do banco local,
 middlewares e validação inclusos, tudo dentro de uma transação desfeita no fim. Rodam fora do
 repositório; a última rodada somou 235 verificações (plano de trabalho, alterações, habilitação,
@@ -438,19 +461,22 @@ Dois cuidados que esses scripts ensinaram:
 - O banco local tem **dados de uso real** (chamados, parcerias de teste). Teste que presume tabela
   vazia falha; conte a partir do que havia.
 
-Trazer esses cenários para `tests/Feature` é uma das [Pendências](#pendências).
+Trazer os demais cenários para `tests/Feature` é uma das [Pendências](#pendências).
 
 ---
 
 ## Pendências
 
-*Atualizado em 22/09/2026.*
+*Atualizado em 23/09/2026.*
 
 ### Segurança
 
 - **A senha provisória das contas da Prefeitura é pública** — está na migração
-  `cria_quadro_de_usuarios_da_prefeitura`, e este repositório é público. Essas contas foram criadas
-  também em **produção**. É preciso trocar as senhas lá.
+  `cria_quadro_de_usuarios_da_prefeitura`, e este repositório é público. **Mitigado, não resolvido:**
+  a migração `exige_troca_da_senha_provisoria_publica` marcou para troca obrigatória toda conta que
+  ainda a usa. Até cada pessoa entrar e trocar, quem conhece a senha pública consegue entrar antes
+  dela — e escolher a senha. Vale avisar os servidores para entrarem logo; conta que ninguém usa
+  deve ser desativada.
 - A assinatura eletrônica não guarda resumo criptográfico do texto assinado: a integridade se apoia
   no código de validação e no documento deixar de ser editável depois de assinado.
 - Requisitos não-funcionais ainda por fazer: **trilha de auditoria / logs imutáveis**, **MFA**,
@@ -464,8 +490,13 @@ Trazer esses cenários para `tests/Feature` é uma das [Pendências](#pendência
 - **Quem aprova os documentos da OSC:** hoje qualquer perfil interno com `propostas`, inclusive o
   Cadastrador. O fluxograma do 3.2 diz que a habilitação vai à SCP, que analisa; o Plano de Trabalho
   é aprovado pela UG (etapa 3 da Celebração).
-- **Auto-preenchimento dos `XXXXX`** nos modelos com o que o sistema já sabe — o maior ganho é
-  dotação, ficha e fonte. Aguardando aval.
+- **Auto-preenchimento dos `XXXXX`** — levantamento de 23/09: dos 73 documentos dos fluxos, 14 saem
+  completos, 12 não têm texto-modelo e os demais somam 530 lacunas. Cerca de 154 pedem dado que o
+  sistema já tem em marcador pronto (data, Secretaria, OSC, CNPJ, processo) e 127 dado que está no
+  banco sem marcador (valor, objeto, vigência, nº do chamamento e do termo); 146 pedem dado que o
+  sistema não tem (73 são dotação, ficha e fonte; 51, numeração de ofícios e pareceres) e 66 são
+  texto de quem redige. Aguardando: a data do documento é a da criação ou a da assinatura? Onde
+  nascem dotação, ficha e fonte? Numerar os documentos automaticamente?
 - **Limite de anexo de 10 MB**: foto de câmera passa disso (28 de 50 fotos de teste). Aumentar o
   limite ou reduzir a imagem ao receber — o servidor aceita até 256 MB.
 - O que **Parlamentar** e **Conselho** veem de diferente na tela principal (hoje ambos vão à
@@ -487,8 +518,11 @@ Trazer esses cenários para `tests/Feature` é uma das [Pendências](#pendência
   **diligência** — por isso segue de pé até a decisão sobre o pedido de complementação.
 - **Ninguém é avisado de conta esperando aprovação**, nem a pessoa quando é liberada: o sistema não
   envia e-mail. Vale para a conta de OSC, que agora nasce pendente.
-- `InstrumentoController::store()` cria instrumento **sem exigir a Celebração concluída** e sem
-  outra guarda além da permissão da rota.
+- **Formalizar instrumento antes da Celebração concluída** continua possível: o botão aparece com a
+  proposta aprovada. Exigir a Celebração concluída é decisão pendente.
+- `DELETE /instrumentos/{id}` aponta para um método que não existe (500). Nada na tela chama.
+- O selo da **Celebração** ainda diz "Com …" o setor; o da Seleção já diz "Em análise".
+- **5 testes do Breeze** falham por esperarem regras antigas — atualizar para as regras atuais.
 - `/programas/{id}` devolve **500**: `ProgramaController@show` aponta para uma view que não existe.
   Nada na interface leva até lá.
 - Na prestação de contas, o **laudo de obra** e os **pareceres** saem com `XXXXX` no corpo.
@@ -510,6 +544,48 @@ Trazer esses cenários para `tests/Feature` é uma das [Pendências](#pendência
 
 Da mais recente para a mais antiga. Cada entrada diz o que mudou, **por quê** e como foi
 conferido — o porquê é o que falta a quem pega o código depois.
+
+- [2026-09-23] **Senha esquecida pelo suporte e troca obrigatória** (`PedidoDeSenhaController`,
+  `ExigeTrocaDeSenha`, `TrocaDeSenhaController`, `SuporteController::senhaProvisoria`)
+  - O "esqueci minha senha" do Breeze prometia um link por e-mail que nunca chegava: o sistema não
+    envia e-mail (o envio vai para o log). Saiu o fluxo inteiro; o pedido agora abre chamado de
+    **Acesso e senha**, sem login — a única porta do suporte aberta a visitante, com limite de
+    tentativas, campo-isca e a mesma resposta exista a conta ou não
+  - Quem atende (TI ou SCP) gera uma **senha provisória**, mostrada uma única vez e não gravada em
+    lugar nenhum; o chamado guarda só uma nota interna de quem gerou. A SCP não redefine senha de
+    quem administra os cadastros — seria o atalho para entrar como administrador
+  - **Troca obrigatória** no próximo acesso para toda senha definida por outra pessoa: suporte,
+    administrador, chefia de setor, responsável legal da OSC. Fecha o item 9 da homologação
+  - Migração `exige_troca_da_senha_provisoria_publica`: marca quem ainda usa a senha provisória
+    pública do quadro da Prefeitura (lida da migração de origem, sem repeti-la aqui)
+  - Conferido: 12 testes em `SenhaPeloSuporteTest` e o fluxo inteiro com dados reais
+
+- [2026-09-23] **Contas: a tela da Prefeitura não corrompe conta de OSC, e ninguém apaga o autor**
+  (`UserController`, `UserRequest`, `User::motivosParaNaoExcluir`)
+  - Editar integrante de OSC em Cadastros → Usuários exigia marcar um perfil da Prefeitura e, ao
+    salvar, trocava o "Membro da OSC" por ele. Agora a tela serve para nome, e-mail, senha e acesso;
+    perfil, lotação e Secretaria ficam com a organização, e o que vier num envio forjado é descartado
+  - **Excluir a própria conta** saiu (rota, método e formulário do Breeze): quem assinou e tramitou
+    continua autor do que fez
+  - A exclusão pelo administrador conferia 7 das 28 ligações de autoria; as outras 21
+    (contra-assinatura, ordem de pagamento assinada, tramitações, recursos, a OSC de que a pessoa é
+    responsável legal…) viravam `NULL` em silêncio. Agora confere todas — conferido contra o banco
+  - Conferido: 7 testes em `ContasDeUsuarioTest`, 5 deles falhando sem a correção
+
+- [2026-09-23] **Parceria alheia não abre mais pelo endereço** (`ParceriaVisivel`,
+  `Proposta::visivelPara`, `CelebracaoController::show`, `InstrumentoController`)
+  - O recorte por Secretaria vivia só nas listagens: servidor de uma Secretaria abria proposta,
+    instrumento, Celebração e prestação de contas de outra pelo endereço; e a **Celebração não
+    conferia nada** — uma OSC abria a de outra, com nome, CNPJ, valor e Termo à vista. Pior: abrir a
+    página sincronizava peças e marcava o início da Celebração
+  - Um middleware no grupo `web` barra toda rota que receba a parceria ou algo pendurado nela; rota
+    nova já nasce coberta. No `show` da Celebração, a mesma régua do índice: do lado da Prefeitura,
+    só quem participa do trâmite
+  - Criar instrumento: o formulário exigia proposta aprovada e sem instrumento, mas o envio não —
+    um POST direto criava instrumento de proposta em rascunho ou um segundo para a mesma parceria
+  - Conferido: 26 tipos de usuário abrindo todas as telas de parceria antes e depois — os 390
+    resultados que mudaram são todos de servidor abrindo parceria de outra Secretaria; 8 testes em
+    `ParceriaVisivelTest`
 
 - [2026-09-22] **Conta da equipe da OSC: funções, aprovação e senha própria**
   (`OscUsuarioController`, `PerfilOscController`, `UserController`, permissão `aprovar_contas_osc`)
