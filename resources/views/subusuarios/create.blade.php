@@ -20,7 +20,7 @@
                 <p class="text-sm text-gray-500 mb-5">
                     O usuário herda o seu setor{{ auth()->user()->orgao ? ' e a sua Secretaria' : '' }} e fica
                     <strong>pendente</strong> até o administrador do sistema aprovar o acesso — os perfis são os que
-                    você escolher abaixo. Informe uma senha inicial para repassar a ele.
+                    você escolher abaixo. Informe uma senha inicial para repassar a ele — no primeiro acesso, o sistema pede que ele a troque por uma sua.
                 </p>
 
                 <form action="{{ route('subusuarios.store') }}" method="POST" class="space-y-4">

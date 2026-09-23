@@ -13,7 +13,7 @@ use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Spatie\Permission\Traits\HasRoles;
 
-#[Fillable(['name', 'email', 'login', 'cpf', 'matricula', 'phone', 'status', 'setor', 'orgao_id', 'osc_id', 'password', 'approval_status', 'approved_at', 'approved_by', 'created_by', 'solicitacao_obs', 'rejeitado_motivo'])]
+#[Fillable(['name', 'email', 'login', 'cpf', 'matricula', 'phone', 'status', 'setor', 'orgao_id', 'osc_id', 'password', 'deve_trocar_senha', 'approval_status', 'approved_at', 'approved_by', 'created_by', 'solicitacao_obs', 'rejeitado_motivo'])]
 #[Hidden(['password', 'remember_token'])]
 class User extends Authenticatable
 {
@@ -251,6 +251,7 @@ class User extends Authenticatable
             'password'          => 'hashed',
             'status'            => 'boolean',
             'approved_at'       => 'datetime',
+            'deve_trocar_senha' => 'boolean',
         ];
     }
 
@@ -407,6 +408,7 @@ class User extends Authenticatable
         'oscs.user_id'                           => ['OSC da qual é responsável legal', 'OSCs das quais é responsável legal'],
         'chamados.user_id'                       => ['chamado de suporte aberto', 'chamados de suporte abertos'],
         'chamados.resolvido_por'                 => ['chamado de suporte encerrado', 'chamados de suporte encerrados'],
+        'chamados.conta_id'                      => ['pedido de nova senha', 'pedidos de nova senha'],
         'chamado_mensagens.user_id'              => ['mensagem de suporte', 'mensagens de suporte'],
         'users.approved_by'                      => ['conta aprovada', 'contas aprovadas'],
         'users.created_by'                       => ['conta cadastrada', 'contas cadastradas'],

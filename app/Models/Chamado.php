@@ -17,7 +17,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 class Chamado extends Model
 {
     protected $fillable = [
-        'numero', 'user_id', 'autor_nome', 'autor_vinculo',
+        'numero', 'user_id', 'conta_id', 'contato', 'autor_nome', 'autor_vinculo',
         'categoria', 'assunto', 'status', 'origem_url',
         'respondido_em', 'resolvido_em', 'resolvido_por',
     ];
@@ -40,12 +40,16 @@ class Chamado extends Model
         'problema'  => 'Problema no sistema',
         'duvida'    => 'Dúvida de uso',
         'sugestao'  => 'Sugestão',
+        // Pedido de nova senha. Nasce na tela de entrada, sem login — ver
+        // PedidoDeSenhaController —, e quem atende define a senha provisória.
+        'acesso'    => 'Acesso e senha',
     ];
 
     public const CATEGORIAS_COLORS = [
         'problema' => 'red',
         'duvida'   => 'accent',
         'sugestao' => 'brand',
+        'acesso'   => 'accent',
     ];
 
     public const STATUS = [
@@ -66,6 +70,18 @@ class Chamado extends Model
     public function autor(): BelongsTo
     {
         return $this->belongsTo(User::class, 'user_id');
+    }
+
+    /** A conta cuja senha o pedido quer trocar — não é o autor: quem pede não está logado. */
+    public function conta(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'conta_id');
+    }
+
+    /** Pedido de nova senha que a equipe pode atender definindo uma provisória. */
+    public function ehPedidoDeSenha(): bool
+    {
+        return $this->categoria === 'acesso' && $this->conta_id !== null;
     }
 
     public function resolvidoPor(): BelongsTo

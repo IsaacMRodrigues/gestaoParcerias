@@ -9,8 +9,9 @@
         <div class="bg-white rounded-xl border border-gray-200 shadow-sm p-6">
             <p class="text-sm text-gray-500 mb-5">
                 O cadastro vai para aprovação da Prefeitura e a pessoa entra depois de liberado.
-                Defina uma senha inicial e repasse a ela; a partir da liberação, passa a atuar em
-                nome de <strong>{{ $osc->name }}</strong>.
+                Defina uma senha inicial e repasse a ela — no primeiro acesso, o sistema pede que ela
+                troque por uma sua. A partir da liberação, passa a atuar em nome de
+                <strong>{{ $osc->name }}</strong>.
             </p>
 
             <form action="{{ route('portal.usuarios.store') }}" method="POST" class="space-y-4">

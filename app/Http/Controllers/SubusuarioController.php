@@ -86,6 +86,8 @@ class SubusuarioController extends Controller
             'setor'           => $chefe->setor,     // herda o setor de quem cadastra
             'orgao_id'        => $chefe->orgao_id,  // e a Secretaria, quando houver
             'password'        => Hash::make($request->password),
+            // A chefia conhece a senha que definiu: a pessoa troca no primeiro acesso.
+            'deve_trocar_senha' => true,
             'status'          => true,
             'approval_status' => 'pendente',
             'created_by'      => $chefe->id,

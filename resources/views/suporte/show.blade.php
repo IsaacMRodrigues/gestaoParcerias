@@ -85,6 +85,64 @@
             </dl>
         </div>
 
+        {{-- Pedido de nova senha: só para quem atende. A senha aparece uma vez,
+             logo depois de gerada, e não fica gravada em lugar nenhum. --}}
+        @if($atende && $chamado->categoria === 'acesso' && $chamado->user_id === null)
+            <div class="bg-white rounded-xl border border-accent-200 shadow-sm p-5 text-sm space-y-3">
+                <h2 class="text-base font-semibold text-gray-800">Pedido de nova senha</h2>
+
+                @if(session('senha_provisoria'))
+                    <div class="rounded-lg border border-brand-200 bg-brand-50 p-4">
+                        <p class="text-gray-700">Senha provisória de <strong>{{ $chamado->conta?->name }}</strong>:</p>
+                        <p class="mt-1 font-mono text-2xl font-bold tracking-wider text-gray-900 select-all">{{ session('senha_provisoria') }}</p>
+                        <p class="mt-2 text-xs text-gray-600">
+                            Passe à pessoa pelo contato confirmado. Ela <strong>não aparece de novo</strong> — se
+                            perder, gere outra. No primeiro acesso o sistema obriga a troca.
+                        </p>
+                    </div>
+                @endif
+
+                <dl class="grid sm:grid-cols-2 gap-x-6 gap-y-2">
+                    <div>
+                        <dt class="text-gray-500">Conta</dt>
+                        <dd class="text-gray-900">
+                            @if($chamado->conta)
+                                {{ $chamado->conta->name }}
+                                <span class="block text-xs text-gray-500">
+                                    {{ $chamado->conta->email }}
+                                    · {{ $chamado->conta->oscVinculada()?->name ?? ($chamado->conta->setorLabel() ?: 'Prefeitura') }}
+                                    @if(!$chamado->conta->status) · <span class="text-red-600">suspensa</span>@endif
+                                    @if($chamado->conta->isPendente()) · <span class="text-accent-700">aguardando aprovação</span>@endif
+                                </span>
+                            @else
+                                <span class="text-gray-500">—</span>
+                            @endif
+                        </dd>
+                    </div>
+                    <div>
+                        <dt class="text-gray-500">Contato informado</dt>
+                        <dd class="text-gray-900">{{ $chamado->contato ?? '—' }}</dd>
+                    </div>
+                </dl>
+
+                <p class="text-xs text-gray-600 bg-accent-50 rounded-md p-3">
+                    O pedido foi feito sem login: qualquer pessoa pode digitar o e-mail de outra.
+                    <strong>Confirme a identidade</strong> — ligue para o contato do cadastro, não só para o
+                    informado aqui — antes de gerar a senha.
+                </p>
+
+                @if($bloqueioSenha)
+                    <p class="text-sm text-gray-600">{{ $bloqueioSenha }}</p>
+                @elseif(!session('senha_provisoria'))
+                    <form action="{{ route('suporte.senha', $chamado) }}" method="POST"
+                          data-confirm="Gerar uma senha provisória para {{ $chamado->conta->name }}? A senha atual deixa de valer.">
+                        @csrf
+                        <button class="btn btn-primary">Gerar senha provisória</button>
+                    </form>
+                @endif
+            </div>
+        @endif
+
         {{-- A conversa --}}
         <div class="space-y-3">
             @foreach($mensagens as $m)

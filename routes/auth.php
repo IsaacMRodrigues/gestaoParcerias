@@ -4,11 +4,11 @@ use App\Http\Controllers\Auth\AuthenticatedSessionController;
 use App\Http\Controllers\Auth\ConfirmablePasswordController;
 use App\Http\Controllers\Auth\EmailVerificationNotificationController;
 use App\Http\Controllers\Auth\EmailVerificationPromptController;
-use App\Http\Controllers\Auth\NewPasswordController;
 use App\Http\Controllers\Auth\PasswordController;
-use App\Http\Controllers\Auth\PasswordResetLinkController;
 use App\Http\Controllers\Auth\RegisteredUserController;
 use App\Http\Controllers\Auth\VerifyEmailController;
+use App\Http\Controllers\PedidoDeSenhaController;
+use App\Http\Controllers\TrocaDeSenhaController;
 use Illuminate\Support\Facades\Route;
 
 Route::middleware('guest')->group(function () {
@@ -22,17 +22,16 @@ Route::middleware('guest')->group(function () {
 
     Route::post('login', [AuthenticatedSessionController::class, 'store']);
 
-    Route::get('forgot-password', [PasswordResetLinkController::class, 'create'])
+    // Senha esquecida vira chamado de suporte (ver PedidoDeSenhaController).
+    // O fluxo do Breeze — link por e-mail — saiu: o sistema não envia e-mail,
+    // e a tela prometia um link que nunca chegava. O nome `password.request`
+    // fica, porque é por ele que a tela de entrada aponta para cá.
+    Route::get('esqueci-a-senha', [PedidoDeSenhaController::class, 'create'])
         ->name('password.request');
 
-    Route::post('forgot-password', [PasswordResetLinkController::class, 'store'])
-        ->name('password.email');
-
-    Route::get('reset-password/{token}', [NewPasswordController::class, 'create'])
-        ->name('password.reset');
-
-    Route::post('reset-password', [NewPasswordController::class, 'store'])
-        ->name('password.store');
+    Route::post('esqueci-a-senha', [PedidoDeSenhaController::class, 'store'])
+        ->middleware('throttle:3,10')
+        ->name('senha.pedido');
 });
 
 Route::middleware('auth')->group(function () {
@@ -53,6 +52,10 @@ Route::middleware('auth')->group(function () {
     Route::post('confirm-password', [ConfirmablePasswordController::class, 'store']);
 
     Route::put('password', [PasswordController::class, 'update'])->name('password.update');
+
+    // Troca obrigatória de senha definida por outra pessoa — ver ExigeTrocaDeSenha.
+    Route::get('trocar-senha', [TrocaDeSenhaController::class, 'edit'])->name('senha.trocar');
+    Route::put('trocar-senha', [TrocaDeSenhaController::class, 'update'])->name('senha.trocar.salvar');
 
     Route::post('logout', [AuthenticatedSessionController::class, 'destroy'])
         ->name('logout');

@@ -143,6 +143,7 @@ Route::middleware('auth')->group(function () {
     Route::get('/suporte/{chamado}', [SuporteController::class, 'show'])->name('suporte.show');
     Route::post('/suporte/{chamado}/mensagens', [SuporteController::class, 'responder'])->name('suporte.responder');
     Route::patch('/suporte/{chamado}/status', [SuporteController::class, 'status'])->name('suporte.status');
+    Route::post('/suporte/{chamado}/senha-provisoria', [SuporteController::class, 'senhaProvisoria'])->name('suporte.senha');
     Route::get('/suporte/{chamado}/anexos/{mensagem}', [SuporteController::class, 'baixarAnexo'])->name('suporte.anexo');
 });
 

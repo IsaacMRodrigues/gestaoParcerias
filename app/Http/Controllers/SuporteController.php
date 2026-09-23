@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Chamado;
 use App\Models\ChamadoMensagem;
+use App\Models\User;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -98,12 +99,15 @@ class SuporteController extends Controller
     {
         $this->autorizarVer($chamado);
 
-        $chamado->load(['autor', 'resolvidoPor', 'mensagens.autor']);
+        $chamado->load(['autor', 'conta.roles', 'conta.osc', 'resolvidoPor', 'mensagens.autor']);
         $atende = $this->atende();
 
         return view('suporte.show', [
             'chamado'   => $chamado,
             'atende'    => $atende,
+            'bloqueioSenha' => $atende && $chamado->ehPedidoDeSenha()
+                ? $this->motivoParaNaoDefinirSenha($chamado->conta)
+                : null,
             // A nota interna não sai da equipe: nem na tela, nem no HTML.
             'mensagens' => $chamado->mensagens->filter(fn ($m) => $atende || !$m->interna),
         ]);
@@ -148,6 +152,88 @@ class SuporteController extends Controller
         ]);
 
         return back()->with('success', 'Chamado marcado como ' . Chamado::STATUS[$dados['status']] . '.');
+    }
+
+    /**
+     * Define uma senha provisória para a conta do pedido de Acesso.
+     *
+     * A senha é gerada aqui, e não digitada por quem atende: sai aleatória, é
+     * mostrada uma única vez (não fica em lugar nenhum, nem na conversa) e a
+     * conta passa a exigir troca no próximo acesso — quem atende a conhece, e
+     * a pessoa não deve ficar com uma senha que outro sabe.
+     */
+    public function senhaProvisoria(Chamado $chamado): RedirectResponse
+    {
+        abort_unless($this->atende(), 403, 'Quem define a senha é a equipe de suporte.');
+        abort_unless($chamado->ehPedidoDeSenha(), 422, 'Este chamado não é um pedido de nova senha.');
+
+        $conta = $chamado->conta;
+
+        if ($motivo = $this->motivoParaNaoDefinirSenha($conta)) {
+            abort(403, $motivo);
+        }
+
+        $senha = self::gerarSenhaProvisoria();
+
+        DB::transaction(function () use ($chamado, $conta, $senha) {
+            $conta->forceFill([
+                'password'          => $senha,
+                'deve_trocar_senha' => true,
+                // Derruba o "lembrar de mim" de quem estivesse com a conta.
+                'remember_token'    => null,
+            ])->save();
+
+            // O registro do que foi feito, sem a senha: nota interna, porque é
+            // a equipe que precisa saber quem definiu e quando.
+            $this->registrarMensagem($chamado,
+                'Senha provisória definida para ' . $conta->name . ' (' . $conta->email . '). '
+                .'A troca é obrigatória no próximo acesso.', true);
+
+            if ($chamado->status === 'aberto') {
+                $chamado->update(['status' => 'em_andamento', 'respondido_em' => now()]);
+            }
+        });
+
+        return back()->with('senha_provisoria', $senha);
+    }
+
+    /**
+     * Por que esta conta não pode ter a senha definida por quem está atendendo.
+     *
+     * Quem atende sem `cadastros` (a SCP) não mexe na senha de quem tem: sem
+     * isto, definir a senha do administrador seria o atalho para entrar como
+     * ele. E ninguém redefine a própria senha por aqui — para isso há o perfil.
+     */
+    private function motivoParaNaoDefinirSenha(?User $conta): ?string
+    {
+        $eu = auth()->user();
+
+        if (!$conta) {
+            return 'Nenhuma conta com o e-mail ou usuário informado.';
+        }
+
+        if ($conta->id === $eu->id) {
+            return 'Para trocar a sua própria senha, use o seu perfil.';
+        }
+
+        if (($conta->can('cadastros') || $conta->hasRole('administrador_setorial')) && !$eu->can('cadastros')) {
+            return 'Esta conta administra os cadastros do sistema: a senha dela só o TI redefine.';
+        }
+
+        return null;
+    }
+
+    /** Legível ao telefone: sem símbolos e sem os caracteres que se confundem (0/O, 1/l/I). */
+    public static function gerarSenhaProvisoria(): string
+    {
+        $alfabeto = 'abcdefghjkmnpqrstuvwxyzABCDEFGHJKMNPQRSTUVWXYZ23456789';
+        $senha = '';
+
+        for ($i = 0; $i < 10; $i++) {
+            $senha .= $alfabeto[random_int(0, strlen($alfabeto) - 1)];
+        }
+
+        return substr($senha, 0, 5) . '-' . substr($senha, 5);
     }
 
     public function baixarAnexo(Chamado $chamado, ChamadoMensagem $mensagem)

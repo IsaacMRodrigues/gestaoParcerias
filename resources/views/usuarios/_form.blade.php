@@ -140,7 +140,7 @@
 {{-- Senha --}}
 <div class="grid grid-cols-2 gap-4">
     <div>
-        <x-input-label for="password" value="{{ $user ? 'Nova senha (deixe em branco para manter)' : 'Senha *' }}" />
+        <x-input-label for="password" value="{{ $user ? 'Nova senha (deixe em branco para manter; a pessoa troca no próximo acesso)' : 'Senha inicial * (a pessoa troca no primeiro acesso)' }}" />
         <x-text-input id="password" name="password" type="password" class="mt-1 block w-full"
                       autocomplete="new-password" />
         <x-input-error :messages="$errors->get('password')" class="mt-2" />

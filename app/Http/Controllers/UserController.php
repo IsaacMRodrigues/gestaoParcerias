@@ -168,6 +168,8 @@ class UserController extends Controller
             'orgao_id' => $request->orgao_id,
             'status'   => $request->boolean('status', true),
             'password' => bcrypt($request->password),
+            // Quem cadastra conhece a senha: a pessoa troca no primeiro acesso.
+            'deve_trocar_senha' => true,
         ]);
 
         $user->syncRoles($request->roles);
@@ -197,6 +199,9 @@ class UserController extends Controller
 
         if ($request->filled('password')) {
             $data['password'] = bcrypt($request->password);
+            // Senha nova definida pelo administrador é conhecida por ele — a
+            // não ser que seja a dele mesmo.
+            $data['deve_trocar_senha'] = $usuario->id !== auth()->id();
         }
 
         // Conta de OSC: aqui só identificação, senha e acesso. Perfil e funções

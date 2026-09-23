@@ -86,6 +86,9 @@ class OscUsuarioController extends Controller
             'phone'           => $request->phone,
             'osc_id'          => $osc->id,
             'password'        => Hash::make($request->password),
+            // O responsável legal conhece a senha que definiu: a pessoa troca
+            // no primeiro acesso (ver ExigeTrocaDeSenha).
+            'deve_trocar_senha' => true,
             'status'          => true,
             // Nasce pendente: quem responde pela entidade indica a pessoa, mas
             // quem abre a porta do sistema é a Prefeitura (TI/Administrador ou

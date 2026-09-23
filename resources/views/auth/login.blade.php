@@ -25,7 +25,7 @@
                     <a class="text-xs font-medium text-brand-700 hover:text-brand-800 hover:underline rounded
                               focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-500"
                        href="{{ route('password.request') }}">
-                        {{ __('Forgot your password?') }}
+                        Esqueci minha senha
                     </a>
                 @endif
             </div>

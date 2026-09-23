@@ -19,6 +19,8 @@ return Application::configure(basePath: dirname(__DIR__))
             \App\Http\Middleware\NormalizaValoresMonetarios::class,
             // Parceria alheia não abre pelo endereço — ver o próprio middleware.
             \App\Http\Middleware\ParceriaVisivel::class,
+            // Senha definida por outra pessoa se troca antes de tudo.
+            \App\Http\Middleware\ExigeTrocaDeSenha::class,
         ]);
 
         $middleware->alias([
