@@ -126,6 +126,35 @@ class Proposta extends Model
         return $query->whereHas('chamamento.programa', fn ($q) => $q->where('orgao_id', $user->orgao_id));
     }
 
+    /**
+     * Esta parceria pode ser vista por este usuário? A versão de um registro
+     * de scopeVisiveisPara(), mais o lado da OSC.
+     *
+     * Existe porque o recorte vivia só nas listagens: a tela de detalhe abria
+     * pelo endereço o que a lista escondia — servidor de uma Secretaria lendo
+     * parceria de outra, e uma OSC lendo a Celebração de outra. Quem a aplica
+     * é o middleware ParceriaVisivel, para toda rota que receba a parceria ou
+     * algo pendurado nela.
+     */
+    public function visivelPara(User $user): bool
+    {
+        if ($user->ehRepresentanteOsc()) {
+            return $this->osc_id === $user->osc_id;
+        }
+
+        if (!$user->temAcessoInterno()) {
+            return false;
+        }
+
+        if ($user->podeVerTodosOrgaos()) {
+            return true;
+        }
+
+        $orgao = $this->chamamento?->programa?->orgao_id;
+
+        return $orgao !== null && $orgao === $user->orgao_id;
+    }
+
     public function osc(): BelongsTo
     {
         return $this->belongsTo(Osc::class);

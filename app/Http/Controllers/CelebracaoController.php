@@ -74,6 +74,15 @@ class CelebracaoController extends Controller
      */
     public function show(Proposta $proposta): View
     {
+        // De quem é a parceria já foi conferido no middleware ParceriaVisivel
+        // (a OSC dona, ou a Secretaria dela). Aqui, a mesma régua do index: do
+        // lado da Prefeitura, só quem participa do trâmite. Antes o show não
+        // conferia nada — e, como abrir a tela sincroniza peças e marca o
+        // início da Celebração, qualquer um que abrisse gravava no processo.
+        $user = auth()->user();
+        abort_unless($user->ehRepresentanteOsc() || $user->participaDaCelebracao(), 403,
+            'Seu setor não participa do trâmite da Celebração.');
+
         abort_unless($proposta->temTramiteCelebracao(), 404,
             'Esta proposta ainda não foi aprovada.');
 

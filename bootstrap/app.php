@@ -17,6 +17,8 @@ return Application::configure(basePath: dirname(__DIR__))
         // (validação `numeric`, casts decimais) fala em número.
         $middleware->web(append: [
             \App\Http\Middleware\NormalizaValoresMonetarios::class,
+            // Parceria alheia não abre pelo endereço — ver o próprio middleware.
+            \App\Http\Middleware\ParceriaVisivel::class,
         ]);
 
         $middleware->alias([

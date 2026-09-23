@@ -19,9 +19,24 @@ class InstrumentoController extends Controller
         return view('instrumentos.index', compact('instrumentos'));
     }
 
+    /**
+     * A mesma trava para abrir o formulário e para gravar.
+     *
+     * Só o create() conferia: o store() gravava o que chegasse, e um POST direto
+     * criava instrumento para proposta em rascunho ou um segundo instrumento
+     * para a mesma parceria — que é hasOne, e passaria a mostrar só um deles.
+     */
+    private function autorizarFormalizacao(Proposta $proposta): void
+    {
+        abort_unless($proposta->status === 'aprovada', 403,
+            'Só se formaliza instrumento de proposta aprovada.');
+        abort_if($proposta->instrumento()->exists(), 403,
+            'Esta parceria já tem instrumento.');
+    }
+
     public function create(Proposta $proposta): View
     {
-        abort_unless($proposta->status === 'aprovada' && !$proposta->instrumento, 403);
+        $this->autorizarFormalizacao($proposta);
 
         // Pré-popula a partir da proposta aprovada
         return view('instrumentos.create', compact('proposta'));
@@ -29,6 +44,8 @@ class InstrumentoController extends Controller
 
     public function store(InstrumentoRequest $request, Proposta $proposta): RedirectResponse
     {
+        $this->autorizarFormalizacao($proposta);
+
         $instrumento = $proposta->instrumento()->create($request->validated());
 
         return redirect()->route('instrumentos.show', $instrumento)
