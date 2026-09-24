@@ -29,6 +29,7 @@ class DossieController extends Controller
     public function mostrar(Request $request, Proposta $proposta, string $origem, string $id): View
     {
         $this->autorizarOsc($proposta);
+        $this->barrarPlanejamento($origem, $id);
         $peca = $this->documentoAberto($proposta, $origem, $id);
 
         abort_if($peca->ehArquivoNoDossie(), 404, 'Este documento é um arquivo — use o download.');
@@ -39,6 +40,7 @@ class DossieController extends Controller
     public function baixar(Request $request, Proposta $proposta, string $origem, string $id)
     {
         $this->autorizarOsc($proposta);
+        $this->barrarPlanejamento($origem, $id);
         $peca = $this->documentoAberto($proposta, $origem, $id);
 
         abort_unless($peca->ehArquivoNoDossie() && $peca->temArquivo(), 404);
@@ -90,6 +92,20 @@ class DossieController extends Controller
     {
         $osc = auth()->user()->oscVinculada();
         abort_unless($osc && $proposta->osc_id === $osc->id, 403, 'Esta parceria é de outra organização.');
+    }
+
+    /**
+     * Documento do Planejamento é interno (homologação, item 3): 403 explícito,
+     * e não o 404 de "não achei" — quem chega aqui pelo endereço precisa saber
+     * que a porta é fechada, não que o documento sumiu. Vale para a peça do
+     * processo e para a da Seleção que a puxa.
+     */
+    private function barrarPlanejamento(string $origem, string $id): void
+    {
+        $doPlanejamento = $origem === 'processo'
+            || ($origem === 'peca' && Peca::whereKey($id)->whereNotNull('origem_processo_peca_id')->exists());
+
+        abort_if($doPlanejamento, 403, 'Os documentos do Planejamento são internos da Prefeitura.');
     }
 
     private function autorizarMunicipio(Proposta $proposta): void

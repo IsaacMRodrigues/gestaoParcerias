@@ -206,6 +206,12 @@ class Proposta extends Model
      * como visível. Minuta não circula: documento pela metade na mão da OSC é
      * pior do que documento nenhum.
      *
+     * **O Planejamento não entra** (homologação, item 3): Termo de Referência,
+     * Parecer Financeiro, Parecer Jurídico e o resto da instrução são internos
+     * da Prefeitura. Nem pela fase dele, nem pelas peças da Seleção que o puxam
+     * (Peca::vemDoPlanejamento) — a mesma peça, por outra porta. O Edital e a
+     * justificativa de dispensa seguem na página pública do chamamento.
+     *
      * @return array<string, \Illuminate\Support\Collection>
      */
     public function dossieParaOsc(): array
@@ -213,13 +219,13 @@ class Proposta extends Model
         $pronta = fn ($p) => $p->assinado() || (method_exists($p, 'temArquivo') && $p->temArquivo());
         $abertas = fn ($colecao) => collect($colecao)
             ->filter(fn ($p) => $p->visivel_osc)
+            ->reject(fn ($p) => $p instanceof Peca && $p->vemDoPlanejamento())
             ->filter($pronta)
             ->values();
 
         $chamamento = $this->chamamento;
 
         $grupos = [
-            'Planejamento' => $abertas($chamamento?->processo?->pecas ?? []),
             'Seleção'      => $abertas($chamamento?->pecas ?? []),
             'Celebração'   => $abertas($this->pecas),
             'Execução'     => $abertas($this->instrumento?->pecas ?? []),
@@ -239,9 +245,10 @@ class Proposta extends Model
     {
         $chamamento = $this->chamamento;
 
+        // Sem o Planejamento e sem o que o puxa: não há o que decidir sobre o
+        // que é interno por regra (ver dossieParaOsc).
         $grupos = [
-            'Planejamento' => collect($chamamento?->processo?->pecas ?? []),
-            'Seleção'      => collect($chamamento?->pecas ?? []),
+            'Seleção'      => collect($chamamento?->pecas ?? [])->reject(fn ($p) => $p->vemDoPlanejamento())->values(),
             'Celebração'   => collect($this->pecas),
             'Execução'     => collect($this->instrumento?->pecas ?? []),
         ];

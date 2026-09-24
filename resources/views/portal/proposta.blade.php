@@ -76,8 +76,12 @@
             'podeEditar' => $podePlanejar,
         ])
 
-        {{-- O processo inteiro, na medida em que o município o abre (3.3) --}}
-        @include('portal._dossie', ['proposta' => $proposta, 'dossie' => $dossie])
+        {{-- O processo, na medida em que o município o abre (3.3). Sem nada
+             aberto, a aba nem aparece — o Planejamento, que era o que mais a
+             enchia, é interno (homologação, item 3). --}}
+        @if(!empty($dossie))
+            @include('portal._dossie', ['proposta' => $proposta, 'dossie' => $dossie])
+        @endif
 
         {{-- Documentos --}}
         <div class="bg-white rounded-xl shadow-sm border border-gray-200">

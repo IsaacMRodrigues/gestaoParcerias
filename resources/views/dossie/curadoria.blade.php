@@ -25,6 +25,10 @@
                     <strong>desde que já esteja assinado ou anexado</strong> — documento em elaboração
                     nunca é mostrado, ainda que marcado aqui.
                 </p>
+                <p class="mt-2">
+                    Os documentos do <strong>Planejamento</strong> não aparecem nesta lista: são internos da
+                    Prefeitura e nunca são mostrados à organização. O Edital segue na página pública do chamamento.
+                </p>
             </div>
 
             <form action="{{ route('dossie.curadoria.salvar', $proposta) }}" method="POST" class="space-y-6">

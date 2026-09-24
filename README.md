@@ -384,6 +384,8 @@ Exceções à régua por permissão, todas de propósito:
   resposta exista a conta ou não.
 - **Documentos visíveis à OSC** (curadoria do dossiê, na tela da proposta) aceita quem conduz a
   parceria: `chamamentos`, `propostas`, `formalizacao` ou `execucao`, no recorte da Secretaria.
+  **O Planejamento fica fora por regra** — nem entra na curadoria, e o endereço direto responde 403
+  à OSC (homologação, item 3).
 
 As permissões são aplicadas por middleware nas rotas e `@can` na navegação. **Auditores** veem tudo
 e não gravam (middleware `readonly`). O portal é barrado ao servidor e a área interna à OSC pelos
@@ -547,6 +549,19 @@ Trazer os demais cenários para `tests/Feature` é uma das [Pendências](#pendê
 
 Da mais recente para a mais antiga. Cada entrada diz o que mudou, **por quê** e como foi
 conferido — o porquê é o que falta a quem pega o código depois.
+
+- [2026-09-24] **Homologação, item 3 — documentos do Planejamento são internos**
+  (`Proposta::dossieParaOsc`, `DossieController::barrarPlanejamento`, `portal/proposta`, `dossie/curadoria`)
+  - A aba "Documentos do processo" mostrava à OSC o Termo de Referência, os Pareceres Financeiro e
+    Jurídico e o Edital — em produção, exatamente esses quatro, para a única OSC real. Decisão: todo
+    o Planejamento sai da visão da OSC
+  - Também pela porta lateral: as peças da Seleção que **puxam** um documento do Planejamento
+    (`vemDoPlanejamento`: edital, parecer jurídico, extrato, justificativa, parecer CNAS) — estavam
+    marcadas como visíveis e só não apareciam por ainda não contarem como prontas
+  - O endereço direto responde **403**, não 404; a aba some quando não há nada aberto; a curadoria
+    do município deixa de oferecer o Planejamento. O Edital segue na página pública do chamamento
+  - Conferido: 5 testes em `DocumentosInternosTest` (4 falham sem a correção; o quinto confirma
+    que os perfis internos continuam vendo o Planejamento)
 
 - [2026-09-24] **Avisos por e-mail** (`Support\Avisos`, `Mail\Aviso`, `emails/aviso`, agenda em
   `routes/console.php`)
