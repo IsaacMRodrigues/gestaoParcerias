@@ -41,7 +41,7 @@ assinados eletronicamente e validáveis por QR Code.
 | **Suporte** — dúvidas, problemas e sugestões | ✅ Completo | `SuporteController`, `Chamado` |
 | **5. Monitoramento e Fiscalização** (4.5) | ⏳ Não iniciado | aparece no menu como "em breve" |
 | **Solicitação de assinatura** (Aprovador de Assinatura) | ⏳ Aguarda definição | ver [Pendências](#pendências) |
-| **Notificações por e-mail** (4.7) | ⏳ Não iniciado | o sistema não envia e-mail nenhum |
+| **Avisos por e-mail** (4.7) — contas, suporte, vez no trâmite, resultados | ✅ Completo | `Support\Avisos`, `Mail\Aviso` |
 | **Integrações** (banco, Diário Oficial, GOV.BR) | ⏳ Última fase | — |
 
 **Em produção** está tudo o que há no GitHub até a entrega de 23/09/2026: parceria alheia barrada
@@ -431,7 +431,11 @@ Procedimento:
    sozinho: `opcache.validate_timestamps` está ligado com revalidação de 2 segundos.
 6. **CSS:** apagar no servidor o arquivo antigo de `public/build/assets/` e conferir que ele responde
    404 e o novo, 200.
-7. **Teste de fumaça:** `/`, `/login`, `/portal`, `/transparencia`, `/validar` e `/cadastro/osc` em
+7. **E-mail e fila** (configuração única, feita em 24/09): o `.env` do servidor tem `MAIL_*` apontando para
+   o SMTP da Hostinger com a caixa `parcerias@pmsgra.net` — **a senha fica só lá**, entre aspas (ela
+   tem `#`, que sem aspas vira comentário). A fila dos avisos é esvaziada pelo cron da hospedagem,
+   que chama `./php artisan schedule:run` a cada minuto. Conferir com `crontab -l`.
+8. **Teste de fumaça:** `/`, `/login`, `/portal`, `/transparencia`, `/validar` e `/cadastro/osc` em
    200; `/dashboard` em 302; `/.env` em 403; e **uma rota nova da entrega em 302** — se vier 404, o
    cache de rotas está velho. Por fim, conferir o `storage/logs/laravel.log`.
 
@@ -479,6 +483,8 @@ Trazer os demais cenários para `tests/Feature` é uma das [Pendências](#pendê
   deve ser desativada.
 - A assinatura eletrônica não guarda resumo criptográfico do texto assinado: a integridade se apoia
   no código de validação e no documento deixar de ser editável depois de assinado.
+- O **DMARC** do domínio está em `p=none`: só monitora, não impede que alguém envie e-mail se
+  passando por `@pmsgra.net`. SPF e DKIM estão certos; endurecer para `quarantine` é ajuste no DNS.
 - Requisitos não-funcionais ainda por fazer: **trilha de auditoria / logs imutáveis**, **MFA**,
   adequação à **LGPD**.
 
@@ -506,8 +512,6 @@ Trazer os demais cenários para `tests/Feature` é uma das [Pendências](#pendê
 ### Código
 
 - **5 · Monitoramento e Fiscalização** — aparece no menu como "em breve".
-- **Notificações por e-mail** — o sistema não envia e-mail; chamado de suporte e vez no trâmite só
-  aparecem na tela.
 - **Caixa de Entrada** não inclui alterações da parceria nem chamados de suporte. E
   `app/Support/CaixaDeEntrada.php` está com os comentários apagados por outra pessoa, fora de
   commit, esperando decisão.
@@ -516,8 +520,6 @@ Trazer os demais cenários para `tests/Feature` é uma das [Pendências](#pendê
   enquanto os pareceres de verdade são peças do trâmite; e quem aprova ou reprova a proposta é o
   julgamento da Seleção. **Zero registros** no banco. É também o único caminho para abrir uma
   **diligência** — por isso segue de pé até a decisão sobre o pedido de complementação.
-- **Ninguém é avisado de conta esperando aprovação**, nem a pessoa quando é liberada: o sistema não
-  envia e-mail. Vale para a conta de OSC, que agora nasce pendente.
 - **Formalizar instrumento antes da Celebração concluída** continua possível: o botão aparece com a
   proposta aprovada. Exigir a Celebração concluída é decisão pendente.
 - `DELETE /instrumentos/{id}` aponta para um método que não existe (500). Nada na tela chama.
@@ -545,6 +547,25 @@ Trazer os demais cenários para `tests/Feature` é uma das [Pendências](#pendê
 
 Da mais recente para a mais antiga. Cada entrada diz o que mudou, **por quê** e como foi
 conferido — o porquê é o que falta a quem pega o código depois.
+
+- [2026-09-24] **Avisos por e-mail** (`Support\Avisos`, `Mail\Aviso`, `emails/aviso`, agenda em
+  `routes/console.php`)
+  - O sistema não mandava e-mail nenhum: a vez no trâmite, a conta esperando aprovação e a resposta do
+    suporte só existiam na tela. Agora saem da caixa `parcerias@pmsgra.net`
+  - **Contas:** conta pendente → quem aprova (TI/Admin; SCP se for de OSC); aprovada ou recusada → a
+    pessoa. **Suporte:** chamado novo → a equipe; resposta → quem abriu; pedido de senha sem login →
+    também a dona da conta, para saber se não foi ela. **Vez no trâmite:** Planejamento, Seleção,
+    Celebração, Alteração, Prestação de contas, Manifestação e proposta submetida → o setor da vez,
+    ou a OSC (responsável legal e quem tem a função). **Resultados à OSC:** proposta aprovada ou
+    reprovada, manifestação e alteração decididas, prestação concluída, diligência
+  - Disparam dos eventos dos modelos, quando o setor da vez **muda** — por qualquer caminho, sem
+    depender de o controller lembrar. Quem recebe segue a régua da Caixa de Entrada: setor,
+    permissão e parceria visível; e-mail de algo que a pessoa não vê na tela seria pior que nenhum.
+    Quem fez a ação não é avisado dela
+  - Pela **fila**, só depois de gravada a ação (`afterCommit`), com 3 tentativas; o cron da
+    hospedagem a esvazia a cada minuto. Falha de e-mail nunca derruba a ação
+  - Conferido: 8 testes em `AvisosPorEmailTest` (6 falham sem os avisos registrados), um aviso real
+    passando pela fila local, e o login no SMTP de produção com um e-mail de teste à própria caixa
 
 - [2026-09-23] **Conta de OSC sem organização: aviso no portal e senha sempre acessível**
   (`layouts/portal`, rotas de `portal.perfil`)

@@ -22,5 +22,8 @@ class AppServiceProvider extends ServiceProvider
     {
         // Senha: mínimo de 6 caracteres (letras e/ou números), sem exigência de complexidade.
         Password::defaults(fn () => Password::min(6));
+
+        // Avisos por e-mail: disparam dos eventos dos modelos — ver App\Support\Avisos.
+        \App\Support\Avisos::registrar();
     }
 }
