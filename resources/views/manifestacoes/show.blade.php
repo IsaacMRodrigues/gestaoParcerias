@@ -254,7 +254,8 @@
                 </div>
             @else
                 <p class="text-xs text-gray-500">
-                    A manifestação está com <strong>{{ $manifestacao->setor_atual === 'ug' ? $manifestacao->orgao->name : 'o Setor de Convênios e Parcerias' }}</strong>.
+                    A manifestação está com
+                    <strong>{{ $manifestacao->setor_atual === 'ug' ? 'a Unidade Gestora — ' . $manifestacao->orgao->name : 'o Setor de Convênios e Parcerias' }}</strong>.
                 </p>
             @endif
         </div>

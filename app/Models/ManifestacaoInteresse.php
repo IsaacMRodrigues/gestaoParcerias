@@ -59,7 +59,7 @@ class ManifestacaoInteresse extends Model
     public const STATUS = [
         'rascunho'    => 'Rascunho',
         'submetida'   => 'Aguardando o SCP',
-        'em_analise'  => 'Em análise na Secretaria',
+        'em_analise'  => 'Em análise na Unidade Gestora',
         'analisada'   => 'Analisada — decisão do SCP',
         'deferida'    => 'Deferida',
         'indeferida'  => 'Indeferida',

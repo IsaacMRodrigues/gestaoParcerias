@@ -550,6 +550,17 @@ Trazer os demais cenários para `tests/Feature` é uma das [Pendências](#pendê
 Da mais recente para a mais antiga. Cada entrada diz o que mudou, **por quê** e como foi
 conferido — o porquê é o que falta a quem pega o código depois.
 
+- [2026-09-24] **Homologação, item 1 — manifestação vai direto à Unidade Gestora**
+  (`ManifestacaoController::submeter`, `manifestacoes/show`)
+  - A manifestação enviada parava na triagem da SCP, cujo único ato era "encaminhar à Secretaria";
+    a UG não recebia nada até lá, e o detalhe dizia "está com Administração" sem dizer que era a
+    UG. Decisão da gestão: vai direto à UG da Secretaria escolhida
+  - O resto do fluxo não muda: a UG emite o parecer, a SCP decide (e pode indeferir a qualquer
+    momento). O status `submetida` fica só para registros antigos — em produção não havia nenhum
+  - O rodapé do detalhe diz "a Unidade Gestora — <Secretaria>"; o rótulo do status virou "Em
+    análise na Unidade Gestora"; a mensagem de envio e o texto do portal falam da UG
+  - Conferido: 4 testes em `ManifestacaoParaUgTest`, todos falhando sem a correção
+
 - [2026-09-24] **Homologação, item 3 — documentos do Planejamento são internos**
   (`Proposta::dossieParaOsc`, `DossieController::barrarPlanejamento`, `portal/proposta`, `dossie/curadoria`)
   - A aba "Documentos do processo" mostrava à OSC o Termo de Referência, os Pareceres Financeiro e

@@ -4,8 +4,8 @@
             <div>
                 <h1 class="text-2xl font-bold text-gray-900">Manifestações de Interesse</h1>
                 <p class="text-sm text-gray-500 mt-1">
-                    Proponha uma parceria mesmo sem chamamento aberto. O Setor de Convênios e Parcerias
-                    analisa, ouve a Secretaria da área e decide o encaminhamento.
+                    Proponha uma parceria mesmo sem chamamento aberto. A Unidade Gestora da Secretaria
+                    escolhida analisa, e o Setor de Convênios e Parcerias decide o encaminhamento.
                 </p>
             </div>
             @can('osc_manifestacoes')

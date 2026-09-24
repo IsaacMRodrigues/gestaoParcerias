@@ -134,14 +134,21 @@ class ManifestacaoController extends Controller
         abort_unless(empty($pendencias), 422,
             'Complete antes de submeter: ' . implode(', ', $pendencias) . '.');
 
+        // Vai direto à Unidade Gestora da Secretaria escolhida (homologação,
+        // item 1). Antes passava pela SCP, cuja triagem era só o clique de
+        // "encaminhar à Secretaria" — a UG não sabia de nada até lá, e o
+        // detalhe dizia "está com Administração" sem dizer que era a UG. A SCP
+        // segue decidindo depois do parecer da UG, e pode indeferir a qualquer
+        // momento. O status 'submetida' fica só para as antigas.
         $manifestacao->update([
-            'status'       => 'submetida',
-            'setor_atual'  => 'scp',   // a SCP recebe e conduz
+            'status'       => 'em_analise',
+            'setor_atual'  => 'ug',
             'submetida_em' => now(),
         ]);
 
         return redirect()->route('portal.manifestacoes.show', $manifestacao)
-            ->with('success', 'Manifestação submetida. O Setor de Convênios e Parcerias fará a análise.');
+            ->with('success', 'Manifestação enviada à Unidade Gestora — '
+                . $manifestacao->orgao->name . ', que fará a análise.');
     }
 
     private function validarDados(Request $request): array
