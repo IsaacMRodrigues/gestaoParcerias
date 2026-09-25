@@ -550,6 +550,14 @@ Trazer os demais cenários para `tests/Feature` é uma das [Pendências](#pendê
 Da mais recente para a mais antiga. Cada entrada diz o que mudou, **por quê** e como foi
 conferido — o porquê é o que falta a quem pega o código depois.
 
+- [2026-09-25] **Homologação, item 2 — perfis da OSC persistem (teste de integração)**
+  (`PerfisDaOscTest`)
+  - Pelo portal os perfis sempre gravaram; o que os apagava era a tela da Prefeitura
+    (Cadastros → Usuários), corrigida em 23/09. Faltava o teste do aceite: cadastrar com 2 ou mais
+    perfis, reabrir o "Alterar" da lista da equipe e ver todos marcados; alterar pela lista; e
+    passar pela aprovação da Prefeitura sem perder nenhum
+  - Conferido: com o defeito relatado simulado (gravar só "Membro da OSC"), os 4 testes falham
+
 - [2026-09-25] **Homologação, item 8 — "Aguardando o SCP" vira "Aguardando análise"**
   (`ManifestacaoInteresse::STATUS`)
   - Só o rótulo exibido; a chave `submetida` e os registros antigos ficam como estão. Era a única
