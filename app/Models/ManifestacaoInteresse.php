@@ -58,7 +58,10 @@ class ManifestacaoInteresse extends Model
 
     public const STATUS = [
         'rascunho'    => 'Rascunho',
-        'submetida'   => 'Aguardando o SCP',
+        // Só o rótulo mudou (homologação, item 8); a chave fica, e com ela os
+        // registros antigos. Desde o item 1 nenhuma manifestação nova passa por
+        // aqui — o envio já a entrega à Unidade Gestora.
+        'submetida'   => 'Aguardando análise',
         'em_analise'  => 'Em análise na Unidade Gestora',
         'analisada'   => 'Analisada — decisão do SCP',
         'deferida'    => 'Deferida',

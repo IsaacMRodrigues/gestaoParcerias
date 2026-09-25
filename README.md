@@ -550,6 +550,12 @@ Trazer os demais cenários para `tests/Feature` é uma das [Pendências](#pendê
 Da mais recente para a mais antiga. Cada entrada diz o que mudou, **por quê** e como foi
 conferido — o porquê é o que falta a quem pega o código depois.
 
+- [2026-09-25] **Homologação, item 8 — "Aguardando o SCP" vira "Aguardando análise"**
+  (`ManifestacaoInteresse::STATUS`)
+  - Só o rótulo exibido; a chave `submetida` e os registros antigos ficam como estão. Era a única
+    ocorrência do texto no sistema. Desde o item 1, nenhuma manifestação nova passa por esse status
+  - Conferido: `RotuloAguardandoAnaliseTest` e o filtro da lista de manifestações
+
 - [2026-09-24] **Homologação, item 1 — manifestação vai direto à Unidade Gestora**
   (`ManifestacaoController::submeter`, `manifestacoes/show`)
   - A manifestação enviada parava na triagem da SCP, cujo único ato era "encaminhar à Secretaria";
