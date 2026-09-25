@@ -44,9 +44,9 @@ assinados eletronicamente e validáveis por QR Code.
 | **Avisos por e-mail** (4.7) — contas, suporte, vez no trâmite, resultados | ✅ Completo | `Support\Avisos`, `Mail\Aviso` |
 | **Integrações** (banco, Diário Oficial, GOV.BR) | ⏳ Última fase | — |
 
-**Em produção** está tudo o que há no GitHub até a entrega de 23/09/2026: parceria alheia barrada
-pelo endereço, contas de OSC protegidas na tela da Prefeitura, exclusão que não apaga autoria e a
-senha esquecida pelo suporte, com troca obrigatória.
+**Em produção** está tudo o que há no GitHub até 25/09/2026: avisos por e-mail e os itens 1, 2, 3,
+8 e 9 da homologação. **Falta o agendamento no painel da Hostinger** (ver [Deploy](#deploy), passo
+7): sem ele, os avisos entram na fila e esperam — não se perdem, saem quando ele existir.
 
 ---
 
@@ -435,8 +435,10 @@ Procedimento:
    404 e o novo, 200.
 7. **E-mail e fila** (configuração única, feita em 24/09): o `.env` do servidor tem `MAIL_*` apontando para
    o SMTP da Hostinger com a caixa `parcerias@pmsgra.net` — **a senha fica só lá**, entre aspas (ela
-   tem `#`, que sem aspas vira comentário). A fila dos avisos é esvaziada pelo cron da hospedagem,
-   que chama `./php artisan schedule:run` a cada minuto. Conferir com `crontab -l`.
+   tem `#`, que sem aspas vira comentário). A fila dos avisos é esvaziada pelo agendador, que o
+   cron da hospedagem chama a cada minuto: `<php 8.4> <pasta da aplicação>/artisan schedule:run`.
+   **O SSH da Hostinger não tem `crontab`** — o cron se cria no hPanel (Avançado → Cron Jobs).
+   Conferir se a fila anda: `./php artisan tinker` → `DB::table('jobs')->count()` volta a zero.
 8. **Teste de fumaça:** `/`, `/login`, `/portal`, `/transparencia`, `/validar` e `/cadastro/osc` em
    200; `/dashboard` em 302; `/.env` em 403; e **uma rota nova da entrega em 302** — se vier 404, o
    cache de rotas está velho. Por fim, conferir o `storage/logs/laravel.log`.
