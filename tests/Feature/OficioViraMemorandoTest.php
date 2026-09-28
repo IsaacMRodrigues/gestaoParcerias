@@ -67,4 +67,35 @@ class OficioViraMemorandoTest extends TestCase
         $migracao->down();
         $this->assertSame($original, $peca->fresh()->conteudo, 'desfazer devolve o texto original');
     }
+
+    // ── O título do memorando só cita parcerias ─────────────────────────
+
+    public function test_o_titulo_do_memorando_nao_cita_convenios(): void
+    {
+        $this->assertStringContainsString('MEMORANDO PARA SOLICITAÇÃO DE PARCERIAS', ProcessoPeca::MODELO['oficio']);
+        $this->assertStringNotContainsString('CONVÊNIOS', ProcessoPeca::MODELO['oficio']);
+    }
+
+    public function test_a_migracao_troca_o_titulo_gravado_e_desfazer_restaura(): void
+    {
+        $migracao = require database_path('migrations/2026_09_28_120000_titulo_do_memorando_so_parcerias.php');
+        Schema::dropIfExists('backup_titulo_memorando');
+
+        $u = User::factory()->create();
+        $processo = Processo::forceCreate(['numero' => '1', 'orgao_id' => DB::table('orgaos')->insertGetId(['name' => 'X']), 'created_by' => $u->id, 'setor_atual' => 'ug']);
+        $acentuado  = '<p><strong>MEMORANDO PARA SOLICITAÇÃO DE CONVÊNIOS/PARCERIAS</strong></p>';
+        $codificado = '<p><strong>MEMORANDO PARA SOLICITA&Ccedil;&Atilde;O DE CONV&Ecirc;NIOS/PARCERIAS</strong></p><p>Setor de Convênios e Parcerias</p>';
+        $a = ProcessoPeca::forceCreate(['processo_id' => $processo->id, 'tipo' => 'oficio', 'conteudo' => $acentuado]);
+        $b = ProcessoPeca::forceCreate(['processo_id' => $processo->id, 'tipo' => 'abertura', 'conteudo' => $codificado,
+            'assinado_em' => now(), 'assinado_por' => $u->id]);
+
+        $migracao->up();
+        $this->assertSame('<p><strong>MEMORANDO PARA SOLICITAÇÃO DE PARCERIAS</strong></p>', $a->fresh()->conteudo);
+        $this->assertSame('<p><strong>MEMORANDO PARA SOLICITA&Ccedil;&Atilde;O DE PARCERIAS</strong></p><p>Setor de Convênios e Parcerias</p>',
+            $b->fresh()->conteudo, 'a forma codificada também muda, e o nome do Setor de Convênios e Parcerias não');
+
+        $migracao->down();
+        $this->assertSame($acentuado, $a->fresh()->conteudo);
+        $this->assertSame($codificado, $b->fresh()->conteudo);
+    }
 }

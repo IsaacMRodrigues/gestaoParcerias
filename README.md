@@ -558,6 +558,15 @@ Trazer os demais cenários para `tests/Feature` é uma das [Pendências](#pendê
 Da mais recente para a mais antiga. Cada entrada diz o que mudou, **por quê** e como foi
 conferido — o porquê é o que falta a quem pega o código depois.
 
+- [2026-09-28] **Título do memorando só cita parcerias**
+  (`ProcessoPeca::MODELO['oficio']`, migração `titulo_do_memorando_so_parcerias`)
+  - "MEMORANDO PARA SOLICITAÇÃO DE CONVÊNIOS/PARCERIAS" vira "MEMORANDO PARA SOLICITAÇÃO DE
+    PARCERIAS". Era o único lugar do sistema com "Convênios/Parcerias"; o nome do Setor de
+    Convênios e Parcerias não muda
+  - Documentos gravados também, inclusive os assinados (decisão da gestão); em produção eram 10,
+    5 deles assinados. O original fica em `backup_titulo_memorando`, e desfazer restaura
+  - Conferido: dois testes em `OficioViraMemorandoTest`, com a forma acentuada e a codificada
+
 - [2026-09-28] **"Ofício" passa a se chamar "Memorando" em todo o sistema**
   (modelos, rótulos, telas; migração `oficio_passa_a_se_chamar_memorando`)
   - Decisão da gestão: todos, inclusive os documentos que a OSC envia (memorando do pedido, de

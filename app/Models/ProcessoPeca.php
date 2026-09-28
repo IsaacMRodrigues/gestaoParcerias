@@ -136,7 +136,7 @@ HTML;
 <p style="text-align:center">{{responsavel_nome}}<br>Secretaria Municipal de {{unidade_gestora}}</p>
 HTML,
         'oficio' => self::CABECALHO . <<<'HTML'
-<p style="text-align:center"><strong>MEMORANDO PARA SOLICITAÇÃO DE CONVÊNIOS/PARCERIAS</strong></p>
+<p style="text-align:center"><strong>MEMORANDO PARA SOLICITAÇÃO DE PARCERIAS</strong></p>
 <p><br></p>
 <p style="text-align:right">{{cidade}}, {{data}}.</p>
 <p>Memorando nº XXX/XXXX</p>
