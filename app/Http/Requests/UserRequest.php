@@ -48,6 +48,12 @@ class UserRequest extends FormRequest
     {
         return [
             function ($validator) {
+                // Encargos que se fiscalizam não se acumulam — ver
+                // User::ENCARGOS_QUE_NAO_ACUMULAM.
+                if ($conflito = User::conflitoDeEncargos((array) $this->input('roles', []))) {
+                    $validator->errors()->add('roles', $conflito);
+                }
+
                 $setor = $this->input('setor');
                 foreach ((array) $this->input('roles', []) as $role) {
                     $exigido = User::PERFIS_EXCLUSIVOS[$role] ?? null;

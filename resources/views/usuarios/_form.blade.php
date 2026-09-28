@@ -133,6 +133,10 @@
             </label>
         @endforeach
     </div>
+    <p class="text-xs text-gray-500 mt-1">
+        <strong>Gestor da Parceria, Comissão de Seleção, Comissão de Monitoramento e Comissão de Avaliação</strong>
+        não se acumulam: a mesma pessoa só pode ter um desses encargos.
+    </p>
     <x-input-error :messages="$errors->get('roles')" class="mt-2" />
 </div>
 @endif

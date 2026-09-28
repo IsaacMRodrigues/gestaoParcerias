@@ -77,6 +77,12 @@ class SubusuarioController extends Controller
             'perfis.*.in'              => 'Perfil fora do que você pode conceder.',
         ]);
 
+        // Encargos que se fiscalizam não se acumulam — ver User::ENCARGOS_QUE_NAO_ACUMULAM.
+        if ($conflito = User::conflitoDeEncargos((array) $request->input('perfis', []))) {
+            return back()->withInput($request->except('password', 'password_confirmation'))
+                ->withErrors(['perfis' => $conflito]);
+        }
+
         $usuario = User::create([
             'name'            => $request->name,
             'email'           => $request->email,

@@ -89,6 +89,12 @@ class UserController extends Controller
         abort_unless($usuario->isPendente(), 422, 'Este cadastro não está pendente.');
         $this->autorizarDecisao($usuario);
 
+        // Conta que chegou acumulando encargos (cadastrada antes da regra) não
+        // é liberada assim: os perfis se corrigem em Cadastros → Usuários.
+        if ($conflito = User::conflitoDeEncargos($usuario->roles->pluck('name')->all())) {
+            return back()->withErrors(['roles' => $conflito . ' Ajuste os perfis em Cadastros → Usuários antes de aprovar.']);
+        }
+
         // Invariante que a tela antiga garantia ao atribuir os perfis: perfil
         // exclusivo exige o setor correspondente. Continua valendo — só que
         // agora como conferência do que já foi escolhido, não como formulário.

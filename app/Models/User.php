@@ -43,7 +43,8 @@ class User extends Authenticatable
         'cadastrador'                      => 'Cadastrador',
         'chefe_setor'                      => 'Chefe de Setor',
         'contador'                         => 'Contador',
-        'comissao_monitoramento_avaliacao' => 'Comissão de Monitoramento e Avaliação',
+        'comissao_monitoramento'           => 'Comissão de Monitoramento',
+        'comissao_avaliacao'               => 'Comissão de Avaliação',
         'comissao_selecao'                 => 'Comissão de Seleção',
         'encaminhador'                     => 'Encaminhador',
         'gestor_parceria'                  => 'Gestor da Parceria',
@@ -226,9 +227,44 @@ class User extends Authenticatable
         'ug' => [
             'gestor_parceria',
             'comissao_selecao',
-            'comissao_monitoramento_avaliacao',
+            'comissao_monitoramento',
+            'comissao_avaliacao',
         ],
     ];
+
+    /**
+     * Encargos que a mesma pessoa não acumula (decisão da gestão, 28/09/2026).
+     *
+     * Quem seleciona a proposta não gere a parceria, quem gere não a monitora,
+     * quem monitora não avalia as contas — cada encargo fiscaliza o anterior, e
+     * acumular dois é fiscalizar a si mesmo. Os perfis são da pessoa, não da
+     * parceria, então a regra vale por pessoa: um desses, no máximo.
+     *
+     * Conferida no servidor em todo lugar que atribui perfil de servidor — ver
+     * conflitoDeEncargos().
+     */
+    public const ENCARGOS_QUE_NAO_ACUMULAM = [
+        'comissao_selecao',
+        'gestor_parceria',
+        'comissao_monitoramento',
+        'comissao_avaliacao',
+    ];
+
+    /** Mensagem de erro se os perfis acumulam dois encargos; null se não acumulam. */
+    public static function conflitoDeEncargos(array $perfis): ?string
+    {
+        $acumulados = array_values(array_intersect(self::ENCARGOS_QUE_NAO_ACUMULAM, $perfis));
+
+        if (count($acumulados) < 2) {
+            return null;
+        }
+
+        $nomes = array_map(fn ($p) => self::$roleLabels[$p] ?? $p, $acumulados);
+
+        return 'A mesma pessoa não pode acumular ' . implode(' e ', [implode(', ', array_slice($nomes, 0, -1)), end($nomes)])
+            . '. Gestor da Parceria, Comissão de Seleção, Comissão de Monitoramento e Comissão de Avaliação '
+            . 'são encargos que se fiscalizam: escolha um só.';
+    }
 
     /**
      * Perfis com acesso somente de leitura (auditoria).

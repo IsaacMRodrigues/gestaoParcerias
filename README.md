@@ -214,7 +214,7 @@ chamamento nasce na pasta geral "Parcerias por manifestação de interesse".
 
 ## Perfis e acesso
 
-**22 perfis da Prefeitura** e **5 da OSC**. Um usuário pode ter vários; os com setor marcado são
+**23 perfis da Prefeitura** e **5 da OSC**. Um usuário pode ter vários; os com setor marcado são
 **exclusivos** (só atribuíveis a quem é lotado nele — `User::PERFIS_EXCLUSIVOS`). A matriz vive em
 `RolesSeeder::MATRIZ`; mudou a matriz, rode `php artisan db:seed --class=RolesSeeder` (a produção
 também precisa).
@@ -235,7 +235,8 @@ também precisa).
 | `analista_aditivo_apostilamento` | Analista de Aditivo e Apostilamento | — | formalizacao |
 | `analista_prestacao_contas_previa` | Analista de Prestação de Contas Prévia | — | prestacao_contas |
 | `comissao_selecao` | Comissão de Seleção | — | propostas, pareceres_tecnico, pareceres_decisao |
-| `comissao_monitoramento_avaliacao` | Comissão de Monitoramento e Avaliação | — | monitoramento, prestacao_contas |
+| `comissao_monitoramento` | Comissão de Monitoramento | — | monitoramento |
+| `comissao_avaliacao` | Comissão de Avaliação | — | prestacao_contas |
 | `gestor_parceria` | Gestor da Parceria | — | planejamento, monitoramento, execucao, prestacao_contas |
 | `cadastrador` | Cadastrador | — | chamamentos, propostas, formalizacao |
 | `contador` | Contador | — | prestacao_contas |
@@ -250,6 +251,11 @@ sem permissão — ver [Equipe da OSC](#equipe-da-osc-contas-da-organização).
 
 `chefe_setor` não abre módulo nenhum: só a porta de cadastrar a própria equipe. Acumula-se com o
 perfil técnico da pessoa, para que a chefia não vire atalho para permissões que o setor não tem.
+**Encargos que não se acumulam:** Gestor da Parceria, Comissão de Seleção, Comissão de Monitoramento
+e Comissão de Avaliação — a mesma pessoa tem um deles, no máximo (`User::ENCARGOS_QUE_NAO_ACUMULAM`),
+conferido no servidor no cadastro pelo administrador, no cadastro pela chefia e na aprovação. Os perfis
+são da pessoa, não da parceria, então a regra vale por pessoa.
+
 O **Gestor da Parceria** e as **Comissões** são encargos por portaria: quem os concede é a UG que
 publica o ato, não o setor de lotação.
 
@@ -551,6 +557,21 @@ Trazer os demais cenários para `tests/Feature` é uma das [Pendências](#pendê
 
 Da mais recente para a mais antiga. Cada entrada diz o que mudou, **por quê** e como foi
 conferido — o porquê é o que falta a quem pega o código depois.
+
+- [2026-09-28] **Encargos que não se acumulam; Monitoramento e Avaliação separados**
+  (`User::ENCARGOS_QUE_NAO_ACUMULAM`, `UserRequest`, `SubusuarioController`, `UserController::aprovar`,
+  migração `separa_comissao_de_monitoramento_e_de_avaliacao`)
+  - Decisão da gestão: Gestor da Parceria, Comissão de Seleção, Comissão de Monitoramento e Comissão
+    de Avaliação não podem ser a mesma pessoa — cada encargo fiscaliza o outro. Vale por pessoa,
+    porque os perfis são da pessoa e não da parceria
+  - "Comissão de Monitoramento e Avaliação" virou dois perfis: **Monitoramento** (`monitoramento`,
+    acompanha a execução) e **Avaliação** (`prestacao_contas`, avalia as contas). Ninguém tinha o
+    perfil antigo; a migração é reversível
+  - A regra barra o cadastro e a edição pelo administrador, o cadastro pela chefia de setor e a
+    aprovação de conta que chegue acumulando. As duas telas avisam antes de salvar
+  - Em produção, a única conta que acumulava (a de teste "teste 1", com os três) perdeu os três
+    perfis, a pedido da gestão, e ficou sem acesso interno
+  - Conferido: 7 testes em `SegregacaoDeEncargosTest` (5 falham com a regra desligada)
 
 - [2026-09-25] **Homologação, item 2 — perfis da OSC persistem (teste de integração)**
   (`PerfisDaOscTest`)
