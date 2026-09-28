@@ -229,7 +229,7 @@ também precisa).
 | `chefe_setor` | Chefe de Setor | — | usuarios_setor |
 | `analista_tecnico_scp` | Analista Técnico do SCP | SCP | planejamento, chamamentos, execucao, prestacao_contas, suporte |
 | `responsavel_publicacao` | Responsável pela Publicação | SCP | chamamentos |
-| `responsavel_seplan` | Responsável pela SEPLAN | SEPLAN | planejamento — **único que assina o Parecer Financeiro** |
+| `responsavel_seplan` | Responsável pela SEPLAN | SEPLAN | planejamento, usuarios_setor — **único que assina o Parecer Financeiro** |
 | `analista_orcamentario_financeiro` | Analista Orçamentário Financeiro | SEPLAN | planejamento |
 | `analista_juridico` | Analista Jurídico | — | pareceres_juridico, planejamento |
 | `analista_viabilidade_tecnica` | Analista de Viabilidade Técnica | — | pareceres_tecnico |
@@ -249,6 +249,12 @@ também precisa).
 **OSC:** `responsavel_legal` (exclusivo do setor OSC — faz tudo no portal), `membro_osc` (a
 identidade de quem é da equipe; o que faz vem das funções `osc_*`) e os três perfis de convenente,
 sem permissão — ver [Equipe da OSC](#equipe-da-osc-contas-da-organização).
+
+**Quem cadastra a equipe é o responsável do setor** (`User::RESPONSAVEL_DO_SETOR`). Na UG e na SEPLAN o
+responsável tem perfil próprio — Responsável da Unidade Gestora, Responsável pela SEPLAN — e é ele o
+chefe: o perfil Chefe de Setor não vai para outra pessoa desses setores, e nenhum dos dois nomeia outro
+responsável. Nos demais setores, cadastra quem o administrador designar Chefe de Setor. Na OSC, só o
+responsável legal cadastra; o perfil "Cadastrador de Usuário do Ente/Entidade" é papel de assinatura.
 
 `chefe_setor` não abre módulo nenhum: só a porta de cadastrar a própria equipe. Acumula-se com o
 perfil técnico da pessoa, para que a chefia não vire atalho para permissões que o setor não tem.
@@ -559,6 +565,17 @@ Trazer os demais cenários para `tests/Feature` é uma das [Pendências](#pendê
 
 Da mais recente para a mais antiga. Cada entrada diz o que mudou, **por quê** e como foi
 conferido — o porquê é o que falta a quem pega o código depois.
+
+- [2026-09-28] **Só o responsável do setor cadastra a equipe** (`User::RESPONSAVEL_DO_SETOR`,
+  `UserRequest`, `User::PERFIS_VEDADOS_AO_CHEFE`)
+  - Decisão da gestão: na UG, o Chefe de Setor e o Responsável da UG são a mesma pessoa. O perfil
+    Chefe de Setor passa a ser recusado a quem, na UG, não é o responsável. A mesma regra vale na
+    SEPLAN, que também tem responsável próprio: o Responsável pela SEPLAN ganha `usuarios_setor`
+    (cadastra a equipe) e não pode conceder o próprio perfil a ninguém — criaria um segundo
+    assinante do Parecer Financeiro
+  - Em produção a regra já era cumprida: na UG, cadastra só o responsável de cada Secretaria; na SCP,
+    o Chefe de Setor. Na OSC nada muda: cadastra só o responsável legal
+  - Conferido: 3 testes em `ResponsavelDoSetorTest` (os das travas falham com elas desligadas)
 
 - [2026-09-28] **Cadastro da equipe da OSC: perfis Contador e Responsável por Execução; funções
   fora do cadastro** (`User::PERFIS_OSC`, `OscUsuarioController`, `portal/usuarios/create`)

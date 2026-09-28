@@ -54,6 +54,17 @@ class UserRequest extends FormRequest
                     $validator->errors()->add('roles', $conflito);
                 }
 
+                // Onde o setor tem responsável próprio, o chefe é ele: o perfil
+                // Chefe de Setor não vai para mais ninguém dali — ver
+                // User::RESPONSAVEL_DO_SETOR.
+                $perfis      = (array) $this->input('roles', []);
+                $responsavel = User::RESPONSAVEL_DO_SETOR[$this->input('setor')] ?? null;
+                if ($responsavel && in_array('chefe_setor', $perfis, true) && !in_array($responsavel, $perfis, true)) {
+                    $validator->errors()->add('roles', 'Neste setor, o Chefe de Setor é o '
+                        . (User::$roleLabels[$responsavel] ?? $responsavel)
+                        . ': só ele cadastra a equipe, e o perfil Chefe de Setor não vai para outra pessoa.');
+                }
+
                 $setor = $this->input('setor');
                 foreach ((array) $this->input('roles', []) as $role) {
                     $exigido = User::PERFIS_EXCLUSIVOS[$role] ?? null;

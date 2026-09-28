@@ -209,8 +209,20 @@ class User extends Authenticatable
         'auditor_geral',
         'prefeito_municipal',
         'responsavel_unidade_gestora',
+        'responsavel_seplan', // assina o Parecer Financeiro e cadastra a equipe: só o administrador designa
         'chefe_setor',   // chefe não nomeia outro chefe: quem designa chefia é o administrador
         'analista',   // em descontinuação: não se concede mais
+    ];
+
+    /**
+     * Setores que têm um responsável com perfil próprio — e nesses setores o
+     * responsável É o chefe (decisão da gestão, 28/09/2026): quem cadastra a
+     * equipe é ele, e o perfil Chefe de Setor só pode ir para ele. Nos demais
+     * setores, o responsável é quem tem o perfil Chefe de Setor.
+     */
+    public const RESPONSAVEL_DO_SETOR = [
+        'ug'     => 'responsavel_unidade_gestora',
+        'seplan' => 'responsavel_seplan',
     ];
 
     public const PERFIS_EXCLUSIVOS = [

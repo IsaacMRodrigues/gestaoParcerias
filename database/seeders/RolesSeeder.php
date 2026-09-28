@@ -78,8 +78,9 @@ class RolesSeeder extends Seeder
         'analista_tecnico_scp'             => ['planejamento', 'chamamentos', 'execucao', 'prestacao_contas', 'suporte', 'aprovar_contas_osc'],
         'responsavel_publicacao'           => ['chamamentos'],
         // Quem responde pela SEPLAN: o único que assina o Parecer Financeiro
-        // (Peca::ASSINATURA_RESERVADA); elaborar é de qualquer um da SEPLAN.
-        'responsavel_seplan'               => ['planejamento'],
+        // (Peca::ASSINATURA_RESERVADA; elaborar é de qualquer um da SEPLAN) e
+        // quem cadastra a equipe do setor — ver User::RESPONSAVEL_DO_SETOR.
+        'responsavel_seplan'               => ['planejamento', 'usuarios_setor'],
         'analista_orcamentario_financeiro' => ['planejamento'],
         'analista_juridico'                => ['pareceres_juridico', 'planejamento'],
         'analista_viabilidade_tecnica'     => ['pareceres_tecnico'],
