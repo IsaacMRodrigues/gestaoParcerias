@@ -566,6 +566,17 @@ Trazer os demais cenários para `tests/Feature` é uma das [Pendências](#pendê
 Da mais recente para a mais antiga. Cada entrada diz o que mudou, **por quê** e como foi
 conferido — o porquê é o que falta a quem pega o código depois.
 
+- [2026-09-28] **Página pública do chamamento: só o edital e os anexos** (`PortalController::chamamento`,
+  `PortalController::anexoDoEdital`)
+  - Decisão da gestão: a consulta pública mostra **só o edital e os anexos dele**. Os documentos da
+    prorrogação contam como anexos do edital e continuam lá. Na dispensa e na inexigibilidade, que
+    não têm edital, aparece **só a justificativa**. O **Parecer CNAS saiu** da página
+  - Os anexos do edital não tinham como ser baixados sem login. Agora têm o endereço público
+    `/portal/chamamentos/{chamamento}/edital/anexos/{anexo}`. Ele só entrega anexo do **edital
+    assinado** daquele chamamento; anexo de outra peça, de outro chamamento, de edital ainda não
+    assinado ou de dispensa dá 404
+  - Conferido: 5 testes em `ConsultaPublicaDoChamamentoTest` (os da página falham com a lista antiga)
+
 - [2026-09-28] **Nova Proposta da OSC (dispensa ou inexigibilidade)** (`ManifestacaoInteresse::TIPOS`,
   `ManifestacaoController`, `ManifestacaoAnaliseController`, `propostas/index`)
   - Pedido da gestão: um processo novo, parecido com a manifestação de interesse mas não igual. Mesmo
@@ -591,7 +602,7 @@ conferido — o porquê é o que falta a quem pega o código depois.
     dela o julgamento já andou). Pode haver mais de uma prorrogação; cada uma fica registrada com o
     prazo anterior e o novo
   - As OSCs com proposta recebem aviso por e-mail. A página pública do chamamento mostra o novo prazo e
-    os dois documentos, que abrem sem login, como o edital
+    os dois documentos, que abrem sem login, como o edital — contam como anexos dele
   - Conferido: 5 testes em `ChamamentoProrrogacaoTest` (os das travas falham com elas desligadas)
 
 - [2026-09-28] **Só o responsável do setor cadastra a equipe** (`User::RESPONSAVEL_DO_SETOR`,

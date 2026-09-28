@@ -166,6 +166,17 @@
                                     </svg>
                                     {{ \App\Models\ProcessoPeca::TIPOS[$doc->tipo] ?? $doc->tipo }} (ler documento)
                                 </a>
+                                {{-- Anexos do edital: arquivos, baixados direto. --}}
+                                @if($doc->tipo === 'edital' && $doc->anexos->isNotEmpty())
+                                    <ul class="mt-1 ml-6 space-y-1">
+                                        @foreach($doc->anexos as $anexo)
+                                            <li>
+                                                <a href="{{ route('portal.edital.anexo', [$chamamento, $anexo]) }}"
+                                                   class="text-sm text-brand-600 hover:underline">Anexo — {{ $anexo->arquivo_nome }}</a>
+                                            </li>
+                                        @endforeach
+                                    </ul>
+                                @endif
                             </li>
                         @endforeach
                     </ul>

@@ -47,6 +47,9 @@ Route::get('/', fn () => view('landing'))->name('landing');
 // Portal público
 Route::get('/portal', [PortalController::class, 'index'])->name('portal.index');
 Route::get('/portal/chamamentos/{chamamento}', [PortalController::class, 'chamamento'])->name('portal.chamamento');
+// Anexos do edital: públicos, como o edital (só os do edital assinado deste chamamento).
+Route::get('/portal/chamamentos/{chamamento}/edital/anexos/{anexo}', [PortalController::class, 'anexoDoEdital'])
+    ->name('portal.edital.anexo');
 // Documentos da prorrogação do prazo: públicos, como o edital.
 Route::get('/portal/prorrogacoes/{prorrogacao}/{documento}', [\App\Http\Controllers\ChamamentoProrrogacaoController::class, 'arquivo'])
     ->whereIn('documento', ['aviso', 'publicacao'])->name('portal.prorrogacao.arquivo');

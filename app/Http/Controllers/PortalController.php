@@ -63,9 +63,24 @@ class PortalController extends Controller
         return view('portal.transparencia', compact('instrumentos', 'filtros', 'totais', 'exercicios'));
     }
 
+    /**
+     * Anexo do edital, aberto ao público como o próprio edital. Só entrega o
+     * que for anexo do edital assinado do processo deste chamamento — o
+     * endereço não serve para baixar anexo de outra peça.
+     */
+    public function anexoDoEdital(Chamamento $chamamento, \App\Models\ProcessoPecaAnexo $anexo)
+    {
+        $edital = $chamamento->ehDispensa() ? null : $chamamento->processo?->pecas()->where('tipo', 'edital')->first();
+
+        abort_unless($edital && $edital->assinado() && (int) $anexo->processo_peca_id === (int) $edital->id, 404);
+        abort_unless(\Illuminate\Support\Facades\Storage::disk('local')->exists($anexo->arquivo_path), 404, 'Arquivo não encontrado.');
+
+        return \Illuminate\Support\Facades\Storage::disk('local')->download($anexo->arquivo_path, $anexo->arquivo_nome);
+    }
+
     public function chamamento(Chamamento $chamamento): View
     {
-        $chamamento->load(['programa.orgao', 'processo.pecas']);
+        $chamamento->load(['programa.orgao', 'processo.pecas.anexos']);
 
         // Documentos públicos do chamamento: peças de texto assinadas do processo
         // de origem (Edital ou Justificativa de Dispensa) — têm página pública de
@@ -79,7 +94,10 @@ class PortalController extends Controller
             ? $chamamento->propostas()->where('osc_id', $osc->id)->exists()
             : false;
 
-        $publicos = ['edital', 'justificativa_dispensa', 'parecer_cnas'];
+        // Na consulta pública, só o edital e os anexos dele (decisão da gestão,
+        // 28/09/2026); na dispensa e na inexigibilidade, que não têm edital,
+        // a justificativa, que a lei manda publicar. O Parecer CNAS saiu.
+        $publicos = $chamamento->ehDispensa() ? ['justificativa_dispensa'] : ['edital'];
         $documentosPublicos = $chamamento->processo
             ? $chamamento->processo->pecas
                 ->whereIn('tipo', $publicos)
