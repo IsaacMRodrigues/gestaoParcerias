@@ -88,45 +88,13 @@
                         @endforeach
                     </div>
                     <x-input-error :messages="$errors->get('perfis')" class="mt-1" />
-                    <p class="text-xs text-gray-500 mt-2">
-                        A prestação de contas é conduzida hoje pela Prefeitura; o portal ainda não
-                        tem a tela para a organização enviá-la. Marcar o perfil registra a designação
-                        e o papel de assinatura.
-                    </p>
-                </div>
-
-                {{-- Vêm todas marcadas: quem abre a conta raramente sabe de
-                     antemão o que a pessoa vai pegar, e uma conta sem função
-                     só olha. Depois de um envio com erro, vale o que foi
-                     enviado — inclusive nenhuma. --}}
-                @php($funcoesMarcadas = old('funcoes', $errors->any() ? [] : array_keys($funcoes)))
-                <div class="pt-2">
-                    <x-input-label value="Funções" />
-                    <p class="text-xs text-gray-500 mt-0.5 mb-2">
-                        O que a pessoa pode fazer no portal. Desmarque o que não for com ela; dá para
-                        mudar depois, no "Alterar" da lista da equipe.
-                    </p>
-                    <div class="space-y-2 border border-gray-200 rounded-lg p-3">
-                        @foreach($funcoes as $chave => $funcao)
-                            <label class="flex items-start gap-2.5 text-sm text-gray-700">
-                                <input type="checkbox" name="funcoes[]" value="{{ $chave }}"
-                                       @checked(in_array($chave, $funcoesMarcadas))
-                                       class="mt-0.5 rounded border-gray-300 text-brand-600 focus:ring-brand-500">
-                                <span>
-                                    {{ $funcao['rotulo'] }}
-                                    <span class="block text-xs text-gray-500">{{ $funcao['ajuda'] }}</span>
-                                </span>
-                            </label>
-                        @endforeach
-                    </div>
-                    <x-input-error :messages="$errors->get('funcoes')" class="mt-1" />
-                    <x-input-error :messages="$errors->get('funcoes.*')" class="mt-1" />
                 </div>
 
                 <p class="text-xs text-gray-500 pt-1">
-                    <strong>Submeter proposta, protocolar recurso e assinar o Termo</strong> continuam
-                    só com você, marque o que marcar — são atos que vinculam juridicamente a
-                    organização.
+                    A pessoa entra podendo trabalhar em tudo o que a organização faz no portal — dá para
+                    restringir depois, no "Alterar" da lista da equipe. <strong>Submeter proposta,
+                    protocolar recurso e assinar o Termo</strong> continuam só com você: são atos que
+                    vinculam juridicamente a organização.
                 </p>
 
                 <div class="flex items-center justify-end gap-3 pt-2">

@@ -47,9 +47,8 @@ class OscUsuarioController extends Controller
         $osc = $this->oscDoResponsavel();
 
         return view('portal.usuarios.create', [
-            'osc'     => $osc,
-            'perfis'  => User::PERFIS_OSC,
-            'funcoes' => User::FUNCOES_OSC,
+            'osc'    => $osc,
+            'perfis' => User::PERFIS_OSC,
         ]);
     }
 
@@ -69,14 +68,11 @@ class OscUsuarioController extends Controller
             // para conceder à conta nova um perfil da Administração.
             'perfis'    => ['nullable', 'array'],
             'perfis.*'  => ['string', Rule::in(array_keys(User::PERFIS_OSC))],
-            'funcoes'   => ['nullable', 'array'],
-            'funcoes.*' => ['string', Rule::in(array_keys(User::FUNCOES_OSC))],
         ], [
             'name.required'     => 'Informe o nome do integrante.',
             'email.unique'      => 'Já existe uma conta com este e-mail.',
             'password.required' => 'Defina uma senha inicial para o integrante.',
             'perfis.*.in'       => 'Perfil fora dos que você pode conceder.',
-            'funcoes.*.in'      => 'Função fora das que você pode conceder.',
         ]);
 
         $usuario = User::create([
@@ -104,12 +100,12 @@ class OscUsuarioController extends Controller
         // impressos como papel de assinatura.
         $usuario->syncRoles($this->perfisMarcados($request));
 
-        // As funções vêm marcadas no formulário — quem abre a conta raramente
-        // sabe de antemão o que a pessoa vai pegar —, mas quem cadastra pode
-        // desmarcar ali mesmo. O que vincula juridicamente a organização —
-        // submeter, recorrer, contra-assinar — nunca esteve aqui: é do
-        // responsável legal.
-        $usuario->syncPermissions($request->input('funcoes', []));
+        // Quem entra já entra podendo trabalhar: as quatro funções, sempre
+        // (decisão da gestão, 28/09/2026 — o cadastro deixou de perguntá-las).
+        // Restringir continua possível no "Alterar" da lista da equipe. O que
+        // vincula juridicamente a organização — submeter, recorrer,
+        // contra-assinar — nunca esteve nas funções: é do responsável legal.
+        $usuario->syncPermissions(array_keys(User::FUNCOES_OSC));
 
         return redirect()->route('portal.usuarios.index')->with('success',
             "Cadastro de {$usuario->name} enviado para aprovação da Prefeitura. "

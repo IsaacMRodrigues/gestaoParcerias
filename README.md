@@ -341,11 +341,12 @@ OSC é organização, e organização tem equipe. O vínculo mora em **`users.os
 | **Responsável legal** (`oscs.user_id`) | tudo do portal + **cadastra e suspende** a equipe e marca as funções de cada um | — |
 | **Membro** (`membro_osc`) | acompanha tudo; **age** só nas funções que o responsável marcou para ele: `osc_propostas`, `osc_documentos`, `osc_manifestacoes`, `osc_celebracao` | **submeter**, **recorrer**, **contra-assinar o Termo**, assinar as declarações e o plano de trabalho, administrar acessos |
 
-No cadastro do integrante há ainda três perfis de convenente — Cadastrador de Proposta, de
-Prestação de Contas e de Usuário do Ente — que **não abrem porta nenhuma**: declaram o papel da
-pessoa na organização e saem impressos na assinatura. Quem abre porta são as funções `osc_*`, e
-elas são marcadas no próprio cadastro (vêm todas marcadas, desmarcáveis uma a uma) e revisáveis
-depois, no "Alterar" da listagem.
+No cadastro do integrante há ainda cinco perfis — Cadastrador de Proposta, de Prestação de
+Contas e de Usuário do Ente, **Contador** e **Responsável por Execução** — que **não abrem porta
+nenhuma**: declaram o papel da pessoa na organização e saem impressos na assinatura. O Contador da
+OSC (`contador_osc`) é outro perfil que o Contador da Prefeitura, que abre a prestação de contas de
+todas as parcerias. Quem abre porta são as funções `osc_*`: a conta nova recebe **as quatro**, e o
+responsável legal restringe depois, no "Alterar" da listagem.
 
 - Tela: **Portal → Usuários** (`portal.usuarios.*`), visível só para o responsável legal.
 - **A conta nasce pendente**: quem indica a pessoa é a entidade, quem abre a porta é a Prefeitura.
@@ -558,6 +559,17 @@ Trazer os demais cenários para `tests/Feature` é uma das [Pendências](#pendê
 
 Da mais recente para a mais antiga. Cada entrada diz o que mudou, **por quê** e como foi
 conferido — o porquê é o que falta a quem pega o código depois.
+
+- [2026-09-28] **Cadastro da equipe da OSC: perfis Contador e Responsável por Execução; funções
+  fora do cadastro** (`User::PERFIS_OSC`, `OscUsuarioController`, `portal/usuarios/create`)
+  - Pedido da gestão. Os dois perfis novos são papéis de assinatura, sem permissão — chaves próprias
+    (`contador_osc`, `responsavel_execucao_osc`), porque o "Contador" da Prefeitura abre a prestação
+    de contas de todas as parcerias
+  - A seção **Funções** saiu do cadastro: a conta nova recebe as quatro, como antes de 22/09, e o
+    responsável legal restringe no "Alterar". Função mandada num envio forjado é ignorada
+  - Saiu também a frase "o portal ainda não tem a tela para a organização enviar a prestação de
+    contas", escrita em 22/09 e errada: o portal tem essa tela
+  - Conferido: 2 testes novos em `PerfisDaOscTest`
 
 - [2026-09-28] **Parecer Financeiro: qualquer um da SEPLAN elabora, só o responsável assina**
   (`Peca::ASSINATURA_RESERVADA`, perfil `responsavel_seplan`)

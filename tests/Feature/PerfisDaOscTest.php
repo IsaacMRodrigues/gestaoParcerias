@@ -106,4 +106,32 @@ class PerfisDaOscTest extends TestCase
             $novo->getRoleNames()->all(),
         );
     }
+
+    // ── 28/09/2026: Contador e Responsável por Execução; funções fora do cadastro ──
+
+    public function test_contador_e_responsavel_por_execucao_persistem(): void
+    {
+        $novo = $this->cadastrar(['contador_osc', 'responsavel_execucao_osc']);
+
+        $this->assertEqualsCanonicalizing(['membro_osc', 'contador_osc', 'responsavel_execucao_osc'], $this->marcadosAoReabrir($novo));
+        $this->assertFalse($novo->temAcessoInterno(), 'perfil de OSC não abre a área da Prefeitura');
+        $this->assertFalse($novo->can('prestacao_contas'), 'o Contador da OSC não é o Contador da Prefeitura');
+    }
+
+    public function test_o_cadastro_nao_pergunta_funcoes_e_da_as_quatro(): void
+    {
+        $this->actingAs($this->rl)->get('/portal/usuarios/novo')
+            ->assertOk()
+            ->assertSee('Contador')->assertSee('Responsável por Execução')
+            ->assertDontSee('name="funcoes[]"', false);
+
+        // Mesmo mandando "funcoes" num envio forjado, a conta recebe as quatro.
+        $this->actingAs($this->rl)->post('/portal/usuarios', [
+            'name' => 'Integrante', 'email' => 'integrante@example.com',
+            'password' => 'Senha123', 'password_confirmation' => 'Senha123', 'funcoes' => ['osc_documentos'],
+        ])->assertSessionHasNoErrors();
+
+        $this->assertEqualsCanonicalizing(array_keys(User::FUNCOES_OSC),
+            User::where('email', 'integrante@example.com')->sole()->getPermissionNames()->all());
+    }
 }

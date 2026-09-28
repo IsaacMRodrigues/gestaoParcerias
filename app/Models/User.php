@@ -60,6 +60,8 @@ class User extends Authenticatable
         'cadastrador_proposta'             => 'Cadastrador de Proposta',
         'cadastrador_prestacao_contas'     => 'Cadastrador de Prestação de Contas',
         'cadastrador_usuario_entidade'     => 'Cadastrador de Usuário do Ente/Entidade',
+        'contador_osc'                     => 'Contador',
+        'responsavel_execucao_osc'         => 'Responsável por Execução',
     ];
 
     /**
@@ -77,6 +79,8 @@ class User extends Authenticatable
         'cadastrador_proposta',
         'cadastrador_prestacao_contas',
         'cadastrador_usuario_entidade',
+        'contador_osc',
+        'responsavel_execucao_osc',
     ];
 
     /**
@@ -112,6 +116,18 @@ class User extends Authenticatable
         'cadastrador_usuario_entidade' => [
             'rotulo' => 'Cadastrador de Usuário do Ente/Entidade',
             'ajuda'  => 'Administra as contas de acesso da própria organização.',
+        ],
+        // Pedidos da gestão em 28/09/2026. Como os demais, não abrem porta
+        // nenhuma: declaram o papel na organização e saem na assinatura. Chaves
+        // próprias (_osc) de propósito — o "Contador" da Prefeitura abre a
+        // prestação de contas de todas as parcerias, e não pode ser o mesmo perfil.
+        'contador_osc' => [
+            'rotulo' => 'Contador',
+            'ajuda'  => 'Responde pela escrituração e pelas demonstrações contábeis da parceria.',
+        ],
+        'responsavel_execucao_osc' => [
+            'rotulo' => 'Responsável por Execução',
+            'ajuda'  => 'Acompanha a execução do objeto e o cumprimento das metas.',
         ],
     ];
 

@@ -116,6 +116,8 @@ class RolesSeeder extends Seeder
         'cadastrador_proposta'               => [],
         'cadastrador_prestacao_contas'       => [],
         'cadastrador_usuario_entidade'       => [],
+        'contador_osc'                     => [],
+        'responsavel_execucao_osc'         => [],
     ];
 
     public function run(): void
