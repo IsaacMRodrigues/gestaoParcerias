@@ -20,7 +20,7 @@ class Documento extends Model
         'certidao'             => 'Certidão de regularidade (INSS/FGTS/Débitos)',
         'plano_trabalho'       => 'Plano de Trabalho',
         'ata'                  => 'Ata de Eleição da Diretoria',
-        'oficio_pedido'        => 'Ofício do pedido',
+        'oficio_pedido'        => 'Memorando do pedido',
         'experiencia_previa'   => 'Comprovante de experiência prévia',
         'relacao_dirigentes'   => 'Relação nominal dos dirigentes',
         'docs_presidente'      => 'RG, CPF e comprovante de residência do presidente',

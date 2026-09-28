@@ -62,7 +62,7 @@ HTML;
 
     /** Ordem de Pagamento GLOBAL — solicita o empenho global do exercício. */
     public const MODELO_GLOBAL = self::CABECALHO . <<<'HTML'
-<p><strong>Ofício n.:</strong> {{op_numero}}/{{ano}}/SEPLAN/SCP</p>
+<p><strong>Memorando n.:</strong> {{op_numero}}/{{ano}}/SEPLAN/SCP</p>
 <p><strong>A/C do Setor de Contabilidade</strong></p>
 <p>Venho, por meio deste, solicitar a emissão do <strong>empenho global</strong> para pagamentos referentes ao exercício de {{ano}}, no valor total de R$ XXXXX (XXXXXX), referente à parceria com a {{favorecido}}, Termo de XXXX nº. {{instrumento}}, para a seguinte dotação orçamentária:</p>
 <p><strong>Dotação - Ano {{ano}}:</strong> XXXXX &nbsp; <strong>Ficha</strong> XXXX &nbsp; <strong>Fonte</strong> XXXXX</p>
@@ -73,7 +73,7 @@ HTML;
 
     /** Ordem de Pagamento PARCIAL — solicita o subempenho de cada parcela. */
     public const MODELO_PARCIAL = self::CABECALHO . <<<'HTML'
-<p><strong>Ofício n.:</strong> {{op_numero}}/{{ano}}/SEPLAN/SCP</p>
+<p><strong>Memorando n.:</strong> {{op_numero}}/{{ano}}/SEPLAN/SCP</p>
 <p><strong>A/C do Setor de Contabilidade</strong></p>
 <p>Venho por meio deste solicitar a emissão do <strong>subempenho</strong>, para pagamento referente a XXª parcela, no valor de R$ XXXXX (XXXXXXX) a ser pago até o dia XX/XX/XXXX, à {{favorecido}}, agência XXXX, operação XXX, Banco XXXXX na conta:</p>
 <p>- XXXXX: R$ XXXXX (XXXXXX);<br>- XXXXX: R$ XXXX (XXXXXXXX).</p>

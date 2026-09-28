@@ -135,7 +135,7 @@ Prestação de contas · Suporte — e, no menu da conta, **Meus dados e senha**
 |---|---|
 | **Motor de peças** (`Peca`) | Checklist documental por categoria — `chamamento_publico`, `dispensa_inexigibilidade`, `celebracao`, `aditivo`, `apostilamento`, `prestacao_contas`, `alteracao`. Cada item tem setor e etapa (`*_SETOR`, `*_ETAPA`); `podePreencher()` e `podeAssinar()` decidem pela vez no trâmite. `sincronizar()` cria os itens e semeia o texto dos modelos |
 | **Modelos** (`Peca::MODELO`, `Support\Modelo`) | Textos com `{{marcadores}}`, preenchidos por `Peca::tokensDe()`: dados da OSC, do representante, do instrumento, datas por extenso (`Support\Extenso`). O que o sistema não sabe fica como `XXXXX` para quem redige |
-| **Documentos gerados** | Não são redigidos: saem dos campos e se regeneram até alguém assinar — `PlanoDocumento` (plano de trabalho), `PrestacaoDocumento` (ofício, relatório, resumo da folha), a Proposta de Alteração |
+| **Documentos gerados** | Não são redigidos: saem dos campos e se regeneram até alguém assinar — `PlanoDocumento` (plano de trabalho), `PrestacaoDocumento` (memorando, relatório, resumo da folha), a Proposta de Alteração |
 | **Assinatura** (`Concerns\GuardaQuemAssinou`) | Grava **nome e cargo no ato**: editar o perfil ou trocar de setor não reescreve o carimbo. Código de validação + QR Code, conferível em `/validar` sem login |
 | **Plano de Trabalho** (`Concerns\TemPlanoDeTrabalho`) | O mesmo plano na manifestação e na proposta; no deferimento a **mesma linha** passa à proposta. O tipo de despesa é `Despesa::NATUREZAS`, o que torna o aprovado comparável ao executado |
 | **Visibilidade à OSC** (`visivel_osc`) | Cada documento carrega a marca; `Peca::INTERNAS` / `ProcessoPeca::INTERNAS` nascem fechados. Só circula documento pronto |
@@ -149,7 +149,7 @@ Prestação de contas · Suporte — e, no menu da conta, **Meus dados e senha**
 
 ```mermaid
 flowchart TD
-    PLAN["1 · Planejamento<br/>ofício, termo de referência, pareceres,<br/>edital ou justificativa de dispensa"] --> SEL
+    PLAN["1 · Planejamento<br/>memorando, termo de referência, pareceres,<br/>edital ou justificativa de dispensa"] --> SEL
     MI["Manifestação de Interesse<br/>(a OSC propõe sem chamamento)"] -->|deferida| SEL
     SEL["2 · Seleção<br/>propostas, comissão, resultado,<br/>homologação pelo Prefeito"] --> CEL
     CEL["3 · Celebração<br/>plano de trabalho, habilitação, pareceres,<br/>termo assinado pelas partes, empenho"] --> EXE
@@ -172,7 +172,7 @@ sempre o método, nunca a constante).
 
 ```mermaid
 flowchart LR
-    E1["1 · UG<br/>Ofício + Termo de<br/>Referência (assinar)"] --> E2{"2 · SCP<br/>analisar +<br/>definir modalidade"}
+    E1["1 · UG<br/>Memorando + Termo de<br/>Referência (assinar)"] --> E2{"2 · SCP<br/>analisar +<br/>definir modalidade"}
     E2 -->|devolve| E1
     E2 -->|aprova| E3["3 · SCP<br/>Pedido de Parecer<br/>Financeiro"]
     E3 --> E4["4 · SEPLAN<br/>Parecer<br/>Financeiro"]
@@ -510,7 +510,7 @@ Trazer os demais cenários para `tests/Feature` é uma das [Pendências](#pendê
   completos, 12 não têm texto-modelo e os demais somam 530 lacunas. Cerca de 154 pedem dado que o
   sistema já tem em marcador pronto (data, Secretaria, OSC, CNPJ, processo) e 127 dado que está no
   banco sem marcador (valor, objeto, vigência, nº do chamamento e do termo); 146 pedem dado que o
-  sistema não tem (73 são dotação, ficha e fonte; 51, numeração de ofícios e pareceres) e 66 são
+  sistema não tem (73 são dotação, ficha e fonte; 51, numeração de memorandos e pareceres) e 66 são
   texto de quem redige. Aguardando: a data do documento é a da criação ou a da assinatura? Onde
   nascem dotação, ficha e fonte? Numerar os documentos automaticamente?
 - **Limite de anexo de 10 MB**: foto de câmera passa disso (28 de 50 fotos de teste). Aumentar o
@@ -557,6 +557,22 @@ Trazer os demais cenários para `tests/Feature` é uma das [Pendências](#pendê
 
 Da mais recente para a mais antiga. Cada entrada diz o que mudou, **por quê** e como foi
 conferido — o porquê é o que falta a quem pega o código depois.
+
+- [2026-09-28] **"Ofício" passa a se chamar "Memorando" em todo o sistema**
+  (modelos, rótulos, telas; migração `oficio_passa_a_se_chamar_memorando`)
+  - Decisão da gestão: todos, inclusive os documentos que a OSC envia (memorando do pedido, de
+    encaminhamento da prestação, com justificativa da alteração) e o da Ordem de Pagamento
+  - 33 trocas em 10 arquivos. Os identificadores internos (`oficio`, `oficio_pedido`,
+    `oficio_encaminhamento`, `oficio_alteracao`) ficam: não aparecem na tela, e trocá-los exigiria
+    migrar dados sem ganho
+  - **Documentos já gravados também mudaram, inclusive os assinados** — decisão expressa da gestão.
+    A página de validação desses documentos passa a mostrar "Memorando" num texto assinado com
+    "Ofício". O texto original de cada registro alterado fica em `backup_oficio_memorando`, e
+    desfazer a migração o restaura. O editor grava parte dos textos com a letra codificada
+    (`Of&iacute;cio`), e as duas formas são trocadas
+  - As entradas antigas deste histórico mantêm "ofício": registram o que existia na época
+  - Conferido: `OficioViraMemorandoTest` — varre o código atrás de "ofício" escrito (e pega a
+    regressão, com arquivo e linha) e confere a migração trocando e restaurando
 
 - [2026-09-28] **Encargos que não se acumulam; Monitoramento e Avaliação separados**
   (`User::ENCARGOS_QUE_NAO_ACUMULAM`, `UserRequest`, `SubusuarioController`, `UserController::aprovar`,

@@ -30,7 +30,7 @@ class ProcessoPeca extends Model
     }
 
     public const TIPOS = [
-        'oficio'             => 'Ofício',
+        'oficio'             => 'Memorando',
         'termo_referencia'   => 'Termo de Referência',
         'pedido_parecer'     => 'Pedido de Parecer Financeiro',
         'parecer_financeiro' => 'Parecer Financeiro',
@@ -136,10 +136,10 @@ HTML;
 <p style="text-align:center">{{responsavel_nome}}<br>Secretaria Municipal de {{unidade_gestora}}</p>
 HTML,
         'oficio' => self::CABECALHO . <<<'HTML'
-<p style="text-align:center"><strong>OFÍCIO PARA SOLICITAÇÃO DE CONVÊNIOS/PARCERIAS</strong></p>
+<p style="text-align:center"><strong>MEMORANDO PARA SOLICITAÇÃO DE CONVÊNIOS/PARCERIAS</strong></p>
 <p><br></p>
 <p style="text-align:right">{{cidade}}, {{data}}.</p>
-<p>Ofício nº XXX/XXXX</p>
+<p>Memorando nº XXX/XXXX</p>
 <p><br></p>
 <p>Sr(a). XXXXXXXXX<br>Secretaria de Planejamento</p>
 <p><br></p>

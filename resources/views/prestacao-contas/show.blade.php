@@ -1,6 +1,6 @@
 {{-- A tela da prestação de contas.
 
-     O que a OSC vê aqui são campos, e não documentos para redigir: o ofício, o
+     O que a OSC vê aqui são campos, e não documentos para redigir: o memorando, o
      relatório e o resumo da folha são gerados do que ela lança, com as somas
      feitas, e aparecem no checklist prontos para assinar. --}}
 @php
@@ -69,10 +69,10 @@
         </div>
 
         @if($podeEditar)
-            {{-- 1. Ofício --}}
+            {{-- 1. Memorando --}}
             <form action="{{ route('prestacao-contas.atualizar', $pc) }}" method="POST" class="bg-white rounded-xl border border-gray-200 shadow-sm p-6 space-y-4">
                 @csrf @method('PUT') <input type="hidden" name="bloco" value="oficio">
-                <h2 class="font-semibold text-gray-900">Ofício de encaminhamento</h2>
+                <h2 class="font-semibold text-gray-900">Memorando de encaminhamento</h2>
                 <div class="grid sm:grid-cols-4 gap-3">
                     <div><x-input-label for="folhas" value="Nº de folhas" />
                         <x-text-input id="folhas" name="folhas" type="number" min="1" class="mt-1 block w-full" :value="$pc->folhas" /></div>
@@ -85,7 +85,7 @@
                 </div>
                 <div class="sm:w-1/4"><x-input-label for="responsavel_telefone" value="Telefone" />
                     <x-text-input id="responsavel_telefone" name="responsavel_telefone" class="mt-1 block w-full" :value="$pc->responsavel_telefone" /></div>
-                <button class="btn btn-secondary btn-sm">Salvar ofício</button>
+                <button class="btn btn-secondary btn-sm">Salvar memorando</button>
             </form>
 
             {{-- 2. Relatório de Execução do Objeto --}}
@@ -255,7 +255,7 @@
         <div class="bg-white rounded-xl border border-gray-200 shadow-sm">
             @include('pecas._cabecalho', [
                 'titulo'    => 'Documentos da Prestação de Contas',
-                'descricao' => 'O ofício, o relatório e o resumo da folha são gerados dos campos acima, com as somas prontas — basta conferir e assinar.',
+                'descricao' => 'O memorando, o relatório e o resumo da folha são gerados dos campos acima, com as somas prontas — basta conferir e assinar.',
                 'progresso' => $progresso,
             ])
             @include('pecas._checklist', ['pecas' => $pecas])

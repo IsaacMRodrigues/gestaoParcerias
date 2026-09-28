@@ -13,7 +13,7 @@
                     O número do processo será gerado automaticamente no formato
                     <span class="font-mono text-gray-700">UG.Sequencial.Ano.Esfera</span>
                     (ex.: <span class="font-mono text-gray-700">0206.0133.2026.01</span>).
-                    Após criar, você preencherá o Ofício, o Termo de Referência e as demais peças.
+                    Após criar, você preencherá o Memorando, o Termo de Referência e as demais peças.
                 </p>
                 <form action="{{ route('processos.store') }}" method="POST" class="space-y-4">
                     @csrf

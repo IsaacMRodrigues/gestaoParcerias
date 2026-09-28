@@ -58,8 +58,8 @@ class Processo extends Model
      * As etapas 0–4 são idênticas nas duas rotas. Use sempre `$processo->etapas()`.
      */
     public const ETAPAS = [
-        ['setor' => 'ug',     'acao' => 'Preencher Ofício e Termo de Referência e assinar'],
-        ['setor' => 'scp',    'acao' => 'Analisar o Ofício e o Termo de Referência: aprovar ou rejeitar', 'analise' => true],
+        ['setor' => 'ug',     'acao' => 'Preencher Memorando e Termo de Referência e assinar'],
+        ['setor' => 'scp',    'acao' => 'Analisar o Memorando e o Termo de Referência: aprovar ou rejeitar', 'analise' => true],
         ['setor' => 'scp',    'acao' => 'Solicitar o Parecer Financeiro à SEPLAN (Pedido de Parecer)'],
         ['setor' => 'seplan', 'acao' => 'Emitir o Parecer Financeiro e assinar'],
         ['setor' => 'ug',     'acao' => 'Conferir o parecer e fazer a Abertura do Processo (assinar AP)'],
@@ -76,8 +76,8 @@ class Processo extends Model
      * (emitida e assinada pela UG) no lugar do Edital + Parecer Jurídico.
      */
     public const ETAPAS_DISPENSA = [
-        ['setor' => 'ug',     'acao' => 'Preencher Ofício e Termo de Referência e assinar'],
-        ['setor' => 'scp',    'acao' => 'Analisar o Ofício e o Termo de Referência: aprovar ou rejeitar', 'analise' => true],
+        ['setor' => 'ug',     'acao' => 'Preencher Memorando e Termo de Referência e assinar'],
+        ['setor' => 'scp',    'acao' => 'Analisar o Memorando e o Termo de Referência: aprovar ou rejeitar', 'analise' => true],
         ['setor' => 'scp',    'acao' => 'Solicitar o Parecer Financeiro à SEPLAN (Pedido de Parecer)'],
         ['setor' => 'seplan', 'acao' => 'Emitir o Parecer Financeiro e assinar'],
         ['setor' => 'ug',     'acao' => 'Conferir o parecer e fazer a Abertura do Processo (assinar AP)'],
@@ -219,7 +219,7 @@ class Processo extends Model
         $alertas = [];
 
         if (!$this->peca('oficio')?->assinado()) {
-            $alertas[] = ['nivel' => 'erro', 'texto' => 'Ofício não preenchido/assinado.'];
+            $alertas[] = ['nivel' => 'erro', 'texto' => 'Memorando não preenchido/assinado.'];
         }
         if (!$this->peca('termo_referencia')?->assinado()) {
             $alertas[] = ['nivel' => 'erro', 'texto' => 'Termo de Referência não preenchido/assinado.'];
@@ -319,7 +319,7 @@ class Processo extends Model
     /**
      * A etapa seguinte é do mesmo setor que está com o processo?
      *
-     * Acontece no Planejamento: a SCP analisa o Ofício e o Termo de Referência
+     * Acontece no Planejamento: a SCP analisa o Memorando e o Termo de Referência
      * e, logo depois, protocola o Pedido de Parecer à SEPLAN. O trâmite já
      * trata isso como continuação, e não como remessa (ver
      * TramitacaoController::chegadaNoProprioSetor); os botões precisam dizer o
@@ -355,7 +355,7 @@ class Processo extends Model
         $ehDispensa = $this->ehDispensa();
 
         if ($this->etapa === 0) {
-            if (!$this->peca('oficio')?->assinado())             $pend[] = 'Ofício';
+            if (!$this->peca('oficio')?->assinado())             $pend[] = 'Memorando';
             if (!$this->peca('termo_referencia')?->assinado())   $pend[] = 'Termo de Referência';
         } elseif ($this->etapa === 2) {
             if (!$this->peca('pedido_parecer')?->assinado())      $pend[] = 'Pedido de Parecer Financeiro';

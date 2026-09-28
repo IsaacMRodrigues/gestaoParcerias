@@ -17,7 +17,7 @@ use Illuminate\View\View;
 /**
  * Prestação de contas (módulo 3.4).
  *
- * A OSC preenche campos — não redige documentos: o ofício, o relatório e o
+ * A OSC preenche campos — não redige documentos: o memorando, o relatório e o
  * resumo da folha são gerados do que ela lançou, com as somas prontas, e é
  * esse texto que vai à assinatura. Enquanto não houver assinatura, cada
  * gravação regera o documento; depois dela, nada mais o altera.
@@ -221,7 +221,7 @@ class PrestacaoContasController extends Controller
 
     /**
      * Grava um bloco de campos. Cada aba da tela manda o seu, e só o dela — é
-     * o que permite salvar o ofício sem mexer no relatório.
+     * o que permite salvar o memorando sem mexer no relatório.
      */
     public function atualizar(Request $request, PrestacaoContas $pc): RedirectResponse
     {

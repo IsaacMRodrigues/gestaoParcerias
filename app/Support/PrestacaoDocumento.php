@@ -45,7 +45,7 @@ class PrestacaoDocumento
             . '</tbody></table>';
     }
 
-    /** Anexo I — ofício de encaminhamento. */
+    /** Anexo I — memorando de encaminhamento. */
     public static function oficio(PrestacaoContas $pc): string
     {
         $anexos = ['Relatório de Execução do Objeto — REO', 'Documentos que comprovam o REO',
@@ -54,7 +54,7 @@ class PrestacaoDocumento
             'Extratos bancários do período (conta corrente e aplicação)',
             'Comprovantes de despesas, em ordem cronológica', 'Termo de compromisso'];
 
-        return '<p style="text-align:center"><strong>OFÍCIO DE ENCAMINHAMENTO DA PRESTAÇÃO DE CONTAS</strong></p>'
+        return '<p style="text-align:center"><strong>MEMORANDO DE ENCAMINHAMENTO DA PRESTAÇÃO DE CONTAS</strong></p>'
             . self::cabecalho($pc)
             . '<p><br></p><p>Ao(À) Sr(a). Gestor(a) de Convênio/Parceria<br>Prefeitura Municipal de São Gonçalo do Rio Abaixo</p>'
             . '<p>Encaminhamos a V. Sª. a prestação de contas referente ao termo acima identificado, composta de '
@@ -253,7 +253,7 @@ class PrestacaoDocumento
 
     /**
      * Fecho. As planilhas pedem a assinatura do representante legal e a do
-     * profissional de contabilidade; o ofício, só a do representante.
+     * profissional de contabilidade; o memorando, só a do representante.
      */
     private static function assinatura(PrestacaoContas $pc, bool $comContador = false): string
     {

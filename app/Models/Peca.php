@@ -107,7 +107,7 @@ class Peca extends Model
             // Itens 2 a 6, 13, 14, 16 e 17 do checklist do módulo 3.2, um a um:
             // a caixa única "documentos de habilitação" não deixava ninguém ver
             // o que estava faltando.
-            ['chave' => 'oficio_pedido',         'rotulo' => 'Ofício do pedido, assinado pelo representante legal',    'tipo' => 'arquivo', 'obrigatorio' => true],
+            ['chave' => 'oficio_pedido',         'rotulo' => 'Memorando do pedido, assinado pelo representante legal',    'tipo' => 'arquivo', 'obrigatorio' => true],
             ['chave' => 'experiencia_previa',    'rotulo' => 'Comprovantes de experiência prévia (mínimo de um ano)',  'tipo' => 'arquivo', 'obrigatorio' => true],
             ['chave' => 'certidoes_habilitacao', 'rotulo' => 'Certidões de regularidade fiscal, previdenciária, tributária e de dívida ativa', 'tipo' => 'arquivo', 'obrigatorio' => true],
             ['chave' => 'relacao_dirigentes',    'rotulo' => 'Relação nominal atualizada dos dirigentes',              'tipo' => 'arquivo', 'obrigatorio' => true],
@@ -153,7 +153,7 @@ class Peca extends Model
         // 3.4 Prestação de contas — os dez itens do checklist da OSC, mais os
         // dois documentos de análise da Administração.
         'prestacao_contas' => [
-            ['chave' => 'oficio_encaminhamento',  'rotulo' => 'Ofício de encaminhamento da prestação de contas (modelo padrão)', 'tipo' => 'modelo',  'obrigatorio' => true],
+            ['chave' => 'oficio_encaminhamento',  'rotulo' => 'Memorando de encaminhamento da prestação de contas (modelo padrão)', 'tipo' => 'modelo',  'obrigatorio' => true],
             ['chave' => 'relatorio',              'rotulo' => 'Relatório de Execução do Objeto e Financeira (preenchido no Portal)', 'tipo' => 'modelo', 'obrigatorio' => true],
             ['chave' => 'docs_execucao',          'rotulo' => 'Documentos que comprovam a execução do objeto',                  'tipo' => 'arquivo', 'obrigatorio' => true],
             ['chave' => 'extrato_conta',          'rotulo' => 'Extrato da conta corrente do período',                           'tipo' => 'arquivo', 'obrigatorio' => true],
@@ -172,7 +172,7 @@ class Peca extends Model
         // marcados "se for o caso" no modelo entram como não obrigatórios.
         'alteracao' => [
             ['chave' => 'proposta_alteracao',  'rotulo' => 'Proposta de alteração (preenchida no Portal)',                        'tipo' => 'modelo',  'obrigatorio' => true],
-            ['chave' => 'oficio_alteracao',    'rotulo' => 'Ofício com justificativa fundamentada, assinado',                     'tipo' => 'arquivo', 'obrigatorio' => true],
+            ['chave' => 'oficio_alteracao',    'rotulo' => 'Memorando com justificativa fundamentada, assinado',                     'tipo' => 'arquivo', 'obrigatorio' => true],
             ['chave' => 'docs_alegacoes',      'rotulo' => 'Documentos que atestam as alegações da justificativa (se for o caso)','tipo' => 'arquivo', 'obrigatorio' => false],
             ['chave' => 'decl_capacidade',     'rotulo' => 'Declaração de manutenção da capacidade técnica',                      'tipo' => 'modelo',  'obrigatorio' => true],
             ['chave' => 'extrato_conta',       'rotulo' => 'Extrato da conta corrente, atual',                                    'tipo' => 'arquivo', 'obrigatorio' => true],
@@ -857,7 +857,7 @@ HTML,
 HTML,
         ],
         /*
-         * Prestação de contas. O ofício, o relatório e o resumo da folha não
+         * Prestação de contas. O memorando, o relatório e o resumo da folha não
          * estão aqui: nascem dos campos preenchidos pela OSC, com as somas já
          * feitas (ver App\Support\PrestacaoDocumento). Aqui ficam os que são
          * texto de verdade — o compromisso de guarda, o laudo de obra e os
@@ -1153,7 +1153,7 @@ HTML,
             return ProcessoPeca::MODELO[$chave] ?? null;
         }
 
-        // A Ordem de Pagamento Global tem o seu próprio ofício-modelo.
+        // A Ordem de Pagamento Global tem o seu próprio memorando-modelo.
         if ($chave === 'op_global') {
             return OrdemPagamento::MODELO_GLOBAL;
         }
@@ -1983,13 +1983,13 @@ HTML,
      * Dados que o sistema já conhece, para entrar no lugar dos {{marcadores}}
      * dos modelos padrão.
      *
-     * Os modelos emprestados de outros módulos (o ofício da Ordem de Pagamento
+     * Os modelos emprestados de outros módulos (o memorando da Ordem de Pagamento
      * Global, o pedido de parecer e o parecer financeiro) trazem marcadores; a
      * semeadura das peças gravava o texto cru e eles chegavam à tela como
      * "{{favorecido}}", "{{ano}}" — ProcessoPeca e OrdemPagamento já preenchiam
      * os seus, só o motor de peças não.
      *
-     * O que o sistema não tem como saber (o número do ofício, quem assina)
+     * O que o sistema não tem como saber (o número do memorando, quem assina)
      * recebe o mesmo "XXXXX" que o resto do modelo usa para o que se digita —
      * apagar o marcador deixaria a frase truncada ("parceria com a , Termo").
      */
@@ -2054,7 +2054,7 @@ HTML,
             'cidade'          => 'São Gonçalo do Rio Abaixo',
             'data'            => now()->format('d/m/Y'),
             'ano'             => now()->year,
-            // Sem dado no sistema: o número do ofício e o nome de quem assina
+            // Sem dado no sistema: o número do memorando e o nome de quem assina
             // são preenchidos por quem redige.
             'op_numero'        => null,
             'responsavel_nome' => null,

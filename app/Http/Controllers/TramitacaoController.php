@@ -110,7 +110,7 @@ class TramitacaoController extends Controller
      * Campos de recebimento de uma movimentação, conforme ela troque ou não de setor.
      *
      * Há etapas seguidas do mesmo setor — no Planejamento, a SCP analisa o
-     * Ofício e o Termo de Referência (etapa 2) e logo depois protocola o Pedido
+     * Memorando e o Termo de Referência (etapa 2) e logo depois protocola o Pedido
      * de Parecer à SEPLAN (etapa 3). Como toda movimentação nascia "enviada", a
      * SCP mandava o processo para si mesma e precisava registrar o recebimento
      * da própria remessa antes de continuar: um vaivém que não existe na mesa
