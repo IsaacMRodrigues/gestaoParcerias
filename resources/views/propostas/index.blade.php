@@ -13,6 +13,37 @@
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <x-flash-message />
 
+            {{-- Novas Propostas (dispensa ou inexigibilidade, sem chamamento): a SCP
+                 encaminha à UG, que defere ou indefere. Ver ManifestacaoInteresse::TIPOS. --}}
+            @if($novasPropostas->isNotEmpty())
+                <div class="bg-white rounded-xl border border-accent-200 shadow-sm overflow-hidden mb-6">
+                    <div class="px-6 py-3 border-b border-gray-100">
+                        <h3 class="text-sm font-semibold text-gray-800">Novas Propostas em análise</h3>
+                        <p class="text-xs text-gray-500">Sem chamamento: a SCP encaminha à Unidade Gestora, que defere ou indefere.</p>
+                    </div>
+                    <ul class="divide-y divide-gray-100">
+                        @foreach($novasPropostas as $np)
+                            <li>
+                                <a href="{{ route('manifestacoes.show', $np) }}" class="flex items-center justify-between gap-4 px-6 py-3 hover:bg-gray-50">
+                                    <span class="min-w-0">
+                                        <span class="block text-sm font-semibold text-brand-700">{{ $np->titulo }}</span>
+                                        <span class="block text-xs text-gray-500">
+                                            {{ $np->osc?->name }} ·
+                                            {{ \App\Models\ManifestacaoInteresse::FUNDAMENTOS_PEDIDO[$np->fundamento_pedido] ?? '' }} ·
+                                            {{ $np->orgao?->name ?? 'Secretaria a definir' }}
+                                        </span>
+                                    </span>
+                                    <span class="shrink-0 text-xs text-gray-600">
+                                        {{ $np->setor_atual === 'scp' ? 'Com a SCP' : 'Com a Unidade Gestora' }} ·
+                                        R$ {{ number_format($np->valor_solicitado, 2, ',', '.') }}
+                                    </span>
+                                </a>
+                            </li>
+                        @endforeach
+                    </ul>
+                </div>
+            @endif
+
             <div class="bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden">
                 <table class="min-w-full divide-y divide-gray-100">
                     <thead class="bg-gray-50">

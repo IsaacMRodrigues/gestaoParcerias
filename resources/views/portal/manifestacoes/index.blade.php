@@ -2,15 +2,23 @@
     <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-10 space-y-6">
         <div class="flex items-start justify-between gap-4">
             <div>
-                <h1 class="text-2xl font-bold text-gray-900">Manifestações de Interesse</h1>
-                <p class="text-sm text-gray-500 mt-1">
-                    Proponha uma parceria mesmo sem chamamento aberto. A Unidade Gestora da Secretaria
-                    escolhida analisa, e o Setor de Convênios e Parcerias decide o encaminhamento.
-                </p>
+                @if($tipo === 'proposta')
+                    <h1 class="text-2xl font-bold text-gray-900">Novas Propostas</h1>
+                    <p class="text-sm text-gray-500 mt-1">
+                        Proposta de parceria por dispensa ou inexigibilidade de chamamento. O Setor de Convênios
+                        e Parcerias a encaminha à Unidade Gestora adequada, que decide.
+                    </p>
+                @else
+                    <h1 class="text-2xl font-bold text-gray-900">Manifestações de Interesse</h1>
+                    <p class="text-sm text-gray-500 mt-1">
+                        Proponha uma parceria mesmo sem chamamento aberto. A Unidade Gestora da Secretaria
+                        escolhida analisa, e o Setor de Convênios e Parcerias decide o encaminhamento.
+                    </p>
+                @endif
             </div>
             @can('osc_manifestacoes')
-                <a href="{{ route('portal.manifestacoes.create') }}" class="btn btn-primary shrink-0">
-                    + Nova manifestação
+                <a href="{{ $tipo === 'proposta' ? route('portal.novas-propostas.create') : route('portal.manifestacoes.create') }}" class="btn btn-primary shrink-0">
+                    {{ $tipo === 'proposta' ? '+ Nova proposta' : '+ Nova manifestação' }}
                 </a>
             @endcan
         </div>
@@ -25,7 +33,7 @@
                     <span class="min-w-0 flex-1">
                         <span class="block text-sm font-semibold text-gray-900 group-hover:text-brand-800">{{ $m->titulo }}</span>
                         <span class="block text-xs text-gray-500 mt-0.5">
-                            {{ $m->orgao->name }} · R$ {{ number_format($m->valor_solicitado, 2, ',', '.') }}
+                            {{ $m->orgao?->name ?? 'Aguardando encaminhamento da SCP' }} · R$ {{ number_format($m->valor_solicitado, 2, ',', '.') }}
                         </span>
                         @if($m->status === 'indeferida' && $m->decisao_motivo)
                             <span class="block text-xs text-red-700 mt-1">Motivo: {{ $m->decisao_motivo }}</span>
@@ -45,7 +53,7 @@
             @empty
                 <div class="px-6 py-14">
                     <x-empty-state icone="pasta">
-                        Nenhuma manifestação ainda — a primeira começa no botão acima.
+                        {{ $tipo === 'proposta' ? 'Nenhuma proposta ainda' : 'Nenhuma manifestação ainda' }} — a primeira começa no botão acima.
                     </x-empty-state>
                 </div>
             @endforelse

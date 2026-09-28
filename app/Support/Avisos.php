@@ -412,7 +412,9 @@ class Avisos
         self::enviar(
             self::doSetor($m->setor_atual, fn (User $u) => $u->can('chamamentos')
                 && ManifestacaoInteresse::visiveisPara($u)->whereKey($m->id)->exists()),
-            self::avisoDeVez('Manifestação de interesse', $m->titulo, ManifestacaoInteresse::STATUS[$m->status] . '.',
+            self::avisoDeVez($m->tipoLabel(), $m->titulo, $m->ehNovaProposta()
+                    ? ($m->status === 'submetida' ? 'Encaminhar à Unidade Gestora que vai atendê-la.' : 'Deferir ou indeferir a proposta.')
+                    : ManifestacaoInteresse::STATUS[$m->status] . '.',
                 $m->osc?->name, route('manifestacoes.show', $m), false),
         );
     }
@@ -453,9 +455,11 @@ class Avisos
     {
         $deferida = $m->status === 'deferida';
 
+        $nome = $m->ehNovaProposta() ? 'proposta' : 'manifestação de interesse';
+
         self::enviar(self::daOsc($m->osc_id, self::comFuncao('osc_manifestacoes')), new Aviso(
-            assunto: 'Manifestação de interesse ' . ($deferida ? 'deferida' : 'indeferida'),
-            titulo: 'Sua manifestação de interesse foi ' . ($deferida ? 'deferida' : 'indeferida'),
+            assunto: ucfirst($nome) . ' ' . ($deferida ? 'deferida' : 'indeferida'),
+            titulo: 'Sua ' . $nome . ' foi ' . ($deferida ? 'deferida' : 'indeferida'),
             linhas: [$m->titulo],
             url: route('portal.manifestacoes.show', $m),
             botao: 'Ver a manifestação',

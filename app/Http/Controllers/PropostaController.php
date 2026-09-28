@@ -23,7 +23,16 @@ class PropostaController extends Controller
             ->orderBy('created_at', 'desc')
             ->paginate(15);
 
-        return view('propostas.index', compact('propostas'));
+        // Novas Propostas em andamento (28/09/2026): ainda sem chamamento, com a
+        // SCP ou com a UG. Deferidas, viram proposta desta mesma lista.
+        $novasPropostas = \App\Models\ManifestacaoInteresse::with(['osc', 'orgao'])
+            ->doTipo('proposta')
+            ->emTramite()
+            ->visiveisPara(auth()->user())
+            ->latest('submetida_em')
+            ->get();
+
+        return view('propostas.index', compact('propostas', 'novasPropostas'));
     }
 
     public function show(Proposta $proposta): View

@@ -197,14 +197,16 @@ class CaixaDeEntrada
             ->where('setor_atual', $user->setor)
             ->get()
             ->map(fn (ManifestacaoInteresse $m) => [
-                'tramite'   => 'Manifestação',
+                'tramite'   => $m->ehNovaProposta() ? 'Nova Proposta' : 'Manifestação',
                 'titulo'    => $m->titulo,
                 'subtitulo' => collect([
                     $m->osc?->name,
                     $m->orgao?->sigla ?: $m->orgao?->name,
-                    $m->status === 'em_analise'
+                    $m->ehNovaProposta()
+                        ? ($m->status === 'submetida' ? 'Recebida — encaminhar à Unidade Gestora' : 'Deferir ou indeferir')
+                        : ($m->status === 'em_analise'
                         ? 'Manifestação técnica da Secretaria'
-                        : ($m->status === 'analisada' ? 'Decisão do SCP' : 'Recebida — encaminhar à Secretaria'),
+                        : ($m->status === 'analisada' ? 'Decisão do SCP' : 'Recebida — encaminhar à Secretaria')),
                 ])->filter()->implode(' · '),
                 'aguardaRecebimento' => false,
                 'url'   => route('manifestacoes.show', $m),

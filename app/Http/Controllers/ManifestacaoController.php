@@ -24,19 +24,44 @@ class ManifestacaoController extends Controller
 {
     public function index(): View
     {
+        return $this->listar('manifestacao');
+    }
+
+    /**
+     * Nova Proposta (28/09/2026): mesmo conteúdo da manifestação, outro
+     * caminho — ver ManifestacaoInteresse::TIPOS. Listagem, criação e envio
+     * próprios; o resto (dados, plano, documentos) é a mesma tela.
+     */
+    public function indexPropostas(): View
+    {
+        return $this->listar('proposta');
+    }
+
+    private function listar(string $tipo): View
+    {
         $manifestacoes = ManifestacaoInteresse::with('orgao')
             ->where('osc_id', auth()->user()->osc_id)
+            ->doTipo($tipo)
             ->latest()
             ->get();
 
-        return view('portal.manifestacoes.index', compact('manifestacoes'));
+        return view('portal.manifestacoes.index', compact('manifestacoes', 'tipo'));
     }
 
     public function create(): View
     {
         $orgaos = Orgao::orderBy('name')->get();
+        $tipo   = 'manifestacao';
 
-        return view('portal.manifestacoes.create', compact('orgaos'));
+        return view('portal.manifestacoes.create', compact('orgaos', 'tipo'));
+    }
+
+    public function createProposta(): View
+    {
+        $orgaos = collect();
+        $tipo   = 'proposta';
+
+        return view('portal.manifestacoes.create', compact('orgaos', 'tipo'));
     }
 
     public function store(Request $request): RedirectResponse
@@ -44,12 +69,28 @@ class ManifestacaoController extends Controller
         $data = $this->validarDados($request);
 
         $manifestacao = ManifestacaoInteresse::create($data + [
+            'tipo'   => 'manifestacao',
             'osc_id' => auth()->user()->osc_id,
             'status' => 'rascunho',
         ]);
 
         return redirect()->route('portal.manifestacoes.show', $manifestacao)
             ->with('success', 'Manifestação criada. Monte o plano de trabalho e anexe a habilitação para submeter.');
+    }
+
+    /** A Secretaria não se escolhe aqui: quem a define é a SCP, ao encaminhar. */
+    public function storeProposta(Request $request): RedirectResponse
+    {
+        $data = $this->validarDados($request, proposta: true);
+
+        $manifestacao = ManifestacaoInteresse::create($data + [
+            'tipo'   => 'proposta',
+            'osc_id' => auth()->user()->osc_id,
+            'status' => 'rascunho',
+        ]);
+
+        return redirect()->route('portal.manifestacoes.show', $manifestacao)
+            ->with('success', 'Proposta criada. Monte o plano de trabalho e anexe a habilitação para enviar.');
     }
 
     public function show(ManifestacaoInteresse $manifestacao): View
@@ -134,6 +175,15 @@ class ManifestacaoController extends Controller
         abort_unless(empty($pendencias), 422,
             'Complete antes de submeter: ' . implode(', ', $pendencias) . '.');
 
+        // Nova Proposta: vai primeiro à SCP, que escolhe a Unidade Gestora que
+        // a atende (ManifestacaoAnaliseController::encaminhar).
+        if ($manifestacao->ehNovaProposta()) {
+            $manifestacao->update(['status' => 'submetida', 'setor_atual' => 'scp', 'submetida_em' => now()]);
+
+            return redirect()->route('portal.manifestacoes.show', $manifestacao)
+                ->with('success', 'Proposta enviada ao Setor de Convênios e Parcerias, que a encaminhará à Unidade Gestora adequada.');
+        }
+
         // Vai direto à Unidade Gestora da Secretaria escolhida (homologação,
         // item 1). Antes passava pela SCP, cuja triagem era só o clique de
         // "encaminhar à Secretaria" — a UG não sabia de nada até lá, e o
@@ -151,10 +201,14 @@ class ManifestacaoController extends Controller
                 . $manifestacao->orgao->name . ', que fará a análise.');
     }
 
-    private function validarDados(Request $request): array
+    private function validarDados(Request $request, bool $proposta = false): array
     {
         return $request->validate([
-            'orgao_id'             => ['required', 'exists:orgaos,id'],
+            // Na Nova Proposta a Secretaria é da SCP escolher; a OSC informa o fundamento.
+            'orgao_id'             => $proposta ? ['exclude'] : ['required', 'exists:orgaos,id'],
+            'fundamento_pedido'    => $proposta
+                ? ['required', \Illuminate\Validation\Rule::in(array_keys(ManifestacaoInteresse::FUNDAMENTOS_PEDIDO))]
+                : ['exclude'],
             'titulo'               => ['required', 'string', 'max:255'],
             'objeto'               => ['required', 'string'],
             'justificativa'        => ['required', 'string'],
@@ -165,6 +219,7 @@ class ManifestacaoController extends Controller
             'data_fim_prevista'    => ['nullable', 'date', 'after_or_equal:data_inicio_prevista'],
         ], [
             'orgao_id.required'      => 'Escolha a Secretaria a que a proposta se dirige.',
+            'fundamento_pedido.required' => 'Informe o fundamento: dispensa ou inexigibilidade de chamamento.',
             'justificativa.required' => 'A justificativa é o que sustenta o interesse público da parceria.',
         ]);
     }

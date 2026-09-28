@@ -14,7 +14,11 @@
     <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-10 space-y-6">
         <div>
             <p class="text-sm text-brand-600">
-                <a href="{{ route('portal.manifestacoes.index') }}" class="hover:underline">← Manifestações de Interesse</a>
+                @if($manifestacao->ehNovaProposta())
+                    <a href="{{ route('portal.novas-propostas.index') }}" class="hover:underline">← Novas Propostas</a>
+                @else
+                    <a href="{{ route('portal.manifestacoes.index') }}" class="hover:underline">← Manifestações de Interesse</a>
+                @endif
             </p>
             <div class="flex items-start justify-between gap-4 mt-1">
                 <h1 class="text-2xl font-bold text-gray-900">{{ $manifestacao->titulo }}</h1>
@@ -22,7 +26,15 @@
                     {{ $manifestacao->statusLabel() }}
                 </span>
             </div>
-            <p class="text-sm text-gray-500 mt-0.5">{{ $manifestacao->orgao->name }}</p>
+            <p class="text-sm text-gray-500 mt-0.5">
+                @if($manifestacao->ehNovaProposta())
+                    {{ $manifestacao->tipoLabel() }} ·
+                    {{ \App\Models\ManifestacaoInteresse::FUNDAMENTOS_PEDIDO[$manifestacao->fundamento_pedido] ?? '' }} ·
+                    {{ $manifestacao->orgao?->name ?? 'a Secretaria será definida pelo Setor de Convênios e Parcerias' }}
+                @else
+                    {{ $manifestacao->orgao?->name }}
+                @endif
+            </p>
         </div>
 
         <x-flash-message />
@@ -31,7 +43,7 @@
              deixá-la procurar um botão de editar que não vai aparecer. --}}
         @if($rascunho && ! ($podeEditar && $podeAnexar))
             <p class="text-sm text-gray-600 bg-gray-50 border border-gray-200 rounded-lg p-4">
-                Esta manifestação ainda é rascunho.
+                {{ $manifestacao->ehNovaProposta() ? 'Esta proposta' : 'Esta manifestação' }} ainda é rascunho.
                 @unless($podeEditar) Sua conta não tem a função <strong>Manifestações de interesse</strong>. @endunless
                 @unless($podeAnexar) Sua conta não tem a função <strong>Documentos da organização</strong>. @endunless
                 Peça ao responsável legal da OSC em <em>Usuários da Organização</em>.
@@ -127,7 +139,7 @@
 
                 @if(auth()->user()->ehResponsavelLegalOsc())
                     <form action="{{ route('portal.manifestacoes.submeter', $manifestacao) }}" method="POST" class="mt-4"
-                          data-confirm="Submeter a manifestação? Depois disso ela não poderá mais ser editada.">
+                          data-confirm="{{ $manifestacao->ehNovaProposta() ? 'Enviar a proposta ao município? Depois disso ela não poderá mais ser editada.' : 'Submeter a manifestação? Depois disso ela não poderá mais ser editada.' }}">
                         @csrf @method('PATCH')
                         <button type="submit" @disabled($pendencias) class="btn btn-primary">
                             Submeter ao município
@@ -136,7 +148,7 @@
                 @else
                     {{-- Mesma régua da proposta: a equipe monta, o responsável legal apresenta. --}}
                     <p class="mt-4 text-sm text-gray-500">
-                        A equipe monta a manifestação; <strong>submeter é ato do responsável legal</strong> da OSC.
+                        A equipe monta {{ $manifestacao->ehNovaProposta() ? 'a proposta' : 'a manifestação' }}; <strong>enviar é ato do responsável legal</strong> da OSC.
                     </p>
                 @endif
             </div>

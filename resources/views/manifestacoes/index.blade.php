@@ -35,7 +35,10 @@
                         <span class="min-w-0 flex-1">
                             <span class="block text-sm font-semibold text-gray-900 group-hover:text-brand-800">{{ $m->titulo }}</span>
                             <span class="block text-xs text-gray-500 mt-0.5">
-                                {{ $m->osc->name }} · {{ $m->orgao->sigla ?: $m->orgao->name }}
+                                @if($m->ehNovaProposta())
+                                    <span class="px-1.5 py-0.5 text-[10px] font-semibold bg-accent-50 text-accent-800 ring-1 ring-accent-200 rounded">Nova Proposta</span>
+                                @endif
+                                {{ $m->osc->name }} · {{ $m->orgao ? ($m->orgao->sigla ?: $m->orgao->name) : 'Secretaria a definir' }}
                                 · R$ {{ number_format($m->valor_solicitado, 2, ',', '.') }}
                             </span>
                         </span>

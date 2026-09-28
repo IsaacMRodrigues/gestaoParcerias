@@ -2,6 +2,11 @@
     $navPropostasNovas = auth()->user()->can('propostas')
         ? \App\Models\Proposta::visiveisPara(auth()->user())->where('status', 'submetida')->count()
         : 0;
+    // Novas Propostas paradas com a UG de quem vê o menu (28/09/2026).
+    $navPropostasNovas += auth()->user()->can('propostas')
+        ? \App\Models\ManifestacaoInteresse::doTipo('proposta')->emTramite()
+            ->visiveisPara(auth()->user())->where('setor_atual', auth()->user()->setorNoTramite())->count()
+        : 0;
     // A SCP aprova só conta de OSC (permissão `aprovar_contas_osc`), então o
     // selo conta o que ela pode de fato decidir — número que inclui servidor
     // seria pendência de outra pessoa.

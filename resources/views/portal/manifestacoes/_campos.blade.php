@@ -6,6 +6,21 @@
     <x-input-error :messages="$errors->get('titulo')" class="mt-1" />
 </div>
 
+@php $ehProposta = ($tipo ?? $manifestacao?->tipo) === 'proposta'; @endphp
+@if($ehProposta)
+<div>
+    <x-input-label for="fundamento_pedido" value="Fundamento *" />
+    <select name="fundamento_pedido" id="fundamento_pedido" required
+            class="mt-1 block w-full border-gray-300 rounded-md shadow-sm text-sm focus:ring-brand-500 focus:border-brand-500">
+        <option value="">Selecione…</option>
+        @foreach(\App\Models\ManifestacaoInteresse::FUNDAMENTOS_PEDIDO as $chave => $rotulo)
+            <option value="{{ $chave }}" @selected(old('fundamento_pedido', $manifestacao?->fundamento_pedido) === $chave)>{{ $rotulo }}</option>
+        @endforeach
+    </select>
+    <p class="mt-1 text-xs text-gray-400">A Secretaria que vai atender a proposta é escolhida pelo Setor de Convênios e Parcerias.</p>
+    <x-input-error :messages="$errors->get('fundamento_pedido')" class="mt-1" />
+</div>
+@else
 <div>
     <x-input-label for="orgao_id" value="Secretaria a que se dirige *" />
     <select name="orgao_id" id="orgao_id" required
@@ -20,6 +35,7 @@
     <p class="mt-1 text-xs text-gray-400">É a Secretaria da área que dirá se há interesse público na parceria.</p>
     <x-input-error :messages="$errors->get('orgao_id')" class="mt-1" />
 </div>
+@endif
 
 <div>
     <x-input-label for="objeto" value="Objeto *" />

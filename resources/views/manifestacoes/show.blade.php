@@ -7,14 +7,21 @@
     $souScp = $setor === 'scp' && $manifestacao->setor_atual === 'scp';
     $souUg  = $setor === 'ug' && $manifestacao->setor_atual === 'ug'
         && $user->orgao_id === $manifestacao->orgao_id;
+    // Nova Proposta (28/09/2026): a SCP encaminha escolhendo a UG, e a UG decide.
+    $novaProposta = $manifestacao->ehNovaProposta();
 @endphp
 
 <x-app-layout>
     <x-slot name="header">
         <div>
             <p class="text-sm text-gray-500">
-                <a href="{{ route('manifestacoes.index') }}" class="hover:underline">Manifestações de Interesse</a>
-                &rsaquo; Análise
+                @if($novaProposta)
+                    <a href="{{ route('propostas.index') }}" class="hover:underline">Propostas</a>
+                    &rsaquo; Nova Proposta ({{ \App\Models\ManifestacaoInteresse::FUNDAMENTOS_PEDIDO[$manifestacao->fundamento_pedido] ?? '' }})
+                @else
+                    <a href="{{ route('manifestacoes.index') }}" class="hover:underline">Manifestações de Interesse</a>
+                    &rsaquo; Análise
+                @endif
             </p>
             <h2 class="text-2xl font-bold text-gray-900 mt-0.5">{{ $manifestacao->titulo }}</h2>
         </div>
@@ -30,7 +37,7 @@
                     <div><dt class="text-xs font-medium text-gray-500 uppercase tracking-wide">OSC</dt>
                         <dd class="text-gray-800 mt-0.5">{{ $manifestacao->osc->name }}</dd></div>
                     <div><dt class="text-xs font-medium text-gray-500 uppercase tracking-wide">Secretaria</dt>
-                        <dd class="text-gray-800 mt-0.5">{{ $manifestacao->orgao->name }}</dd></div>
+                        <dd class="text-gray-800 mt-0.5">{{ $manifestacao->orgao?->name ?? 'A definir pelo Setor de Convênios e Parcerias' }}</dd></div>
                     <div><dt class="text-xs font-medium text-gray-500 uppercase tracking-wide">Valor solicitado</dt>
                         <dd class="text-gray-800 mt-0.5">R$ {{ number_format($manifestacao->valor_solicitado, 2, ',', '.') }}</dd></div>
                     <div><dt class="text-xs font-medium text-gray-500 uppercase tracking-wide">Situação</dt>
@@ -145,7 +152,29 @@
             {{-- Ações de quem está com a vez --}}
             @elseif($souScp || $souUg)
                 <div class="bg-white rounded-xl border border-gray-200 shadow-sm p-6 space-y-5">
-                    @if($souScp && $manifestacao->status === 'submetida')
+                    @if($souScp && $manifestacao->status === 'submetida' && $novaProposta)
+                        <div>
+                            <h3 class="text-base font-semibold text-gray-800">Encaminhar à Unidade Gestora</h3>
+                            <p class="text-xs text-gray-500 mt-0.5 mb-3">
+                                Escolha a Secretaria cuja Unidade Gestora vai atender a proposta — é ela que defere ou indefere.
+                            </p>
+                            <form action="{{ route('manifestacoes.encaminhar', $manifestacao) }}" method="POST" class="flex flex-wrap items-end gap-3">
+                                @csrf
+                                <div>
+                                    <x-input-label for="orgao_id" value="Secretaria *" />
+                                    <select name="orgao_id" id="orgao_id" required
+                                            class="mt-1 block w-72 border-gray-300 rounded-md shadow-sm text-sm focus:ring-brand-500 focus:border-brand-500">
+                                        <option value="">Selecione…</option>
+                                        @foreach($orgaos as $orgao)
+                                            <option value="{{ $orgao->id }}" @selected(old('orgao_id') == $orgao->id)>{{ $orgao->name }}</option>
+                                        @endforeach
+                                    </select>
+                                    <x-input-error :messages="$errors->get('orgao_id')" class="mt-1" />
+                                </div>
+                                <button class="btn btn-primary">Encaminhar</button>
+                            </form>
+                        </div>
+                    @elseif($souScp && $manifestacao->status === 'submetida')
                         <div>
                             <h3 class="text-base font-semibold text-gray-800">Ouvir a Secretaria</h3>
                             <p class="text-xs text-gray-500 mt-0.5 mb-3">
@@ -159,7 +188,56 @@
                         </div>
                     @endif
 
-                    @if($souUg)
+                    @if($souUg && $novaProposta)
+                        <div>
+                            <h3 class="text-base font-semibold text-gray-800">Deferir a proposta</h3>
+                            <p class="text-xs text-gray-500 mt-0.5 mb-3">
+                                O deferimento cria o chamamento por
+                                {{ \App\Models\ManifestacaoInteresse::ENCAMINHAMENTOS[$manifestacao->fundamento_pedido] ?? $manifestacao->fundamento_pedido }}
+                                e a proposta, com o plano de trabalho e os documentos que a OSC entregou — e ela segue para a Celebração.
+                            </p>
+                            <form action="{{ route('manifestacoes.deferir', $manifestacao) }}" method="POST" class="space-y-3">
+                                @csrf
+                                <div class="grid sm:grid-cols-2 gap-3">
+                                    <div>
+                                        <x-input-label for="numero" value="Número do chamamento *" />
+                                        <x-text-input id="numero" name="numero" type="text" required maxlength="50"
+                                                      placeholder="001/2026" :value="old('numero')" class="mt-1 block w-full" />
+                                        <x-input-error :messages="$errors->get('numero')" class="mt-1" />
+                                    </div>
+                                    <div>
+                                        <x-input-label for="programa_id" value="Programa" />
+                                        <select name="programa_id" id="programa_id"
+                                                class="mt-1 block w-full border-gray-300 rounded-md shadow-sm text-sm focus:ring-brand-500 focus:border-brand-500">
+                                            <option value="">{{ $programas->isEmpty() ? 'A Secretaria não tem programa cadastrado' : 'Sem programa específico' }}</option>
+                                            @foreach($programas as $programa)
+                                                <option value="{{ $programa->id }}">{{ $programa->name }}</option>
+                                            @endforeach
+                                        </select>
+                                        <x-input-error :messages="$errors->get('programa_id')" class="mt-1" />
+                                    </div>
+                                </div>
+                                <div>
+                                    <x-input-label for="fundamento" value="Fundamentação *" />
+                                    <textarea name="fundamento" id="fundamento" rows="3" required
+                                              placeholder="As razões de fato e de direito do deferimento (arts. 30 e 31 da Lei 13.019/2014)"
+                                              class="mt-1 block w-full border-gray-300 rounded-md shadow-sm text-sm focus:ring-brand-500 focus:border-brand-500">{{ old('fundamento') }}</textarea>
+                                    <x-input-error :messages="$errors->get('fundamento')" class="mt-1" />
+                                </div>
+                                <button class="btn btn-primary">Deferir</button>
+                            </form>
+                        </div>
+                        <div class="pt-4 border-t border-gray-100">
+                            <form action="{{ route('manifestacoes.indeferir', $manifestacao) }}" method="POST" class="space-y-2"
+                                  data-confirm="Indeferir esta proposta?">
+                                @csrf
+                                <textarea name="decisao_motivo" rows="2" required placeholder="Motivo do indeferimento (a OSC lerá no portal)"
+                                          class="block w-full border-gray-300 rounded-md shadow-sm text-sm focus:ring-red-500 focus:border-red-500"></textarea>
+                                <x-input-error :messages="$errors->get('decisao_motivo')" class="mt-1" />
+                                <button class="btn btn-danger-outline">Indeferir</button>
+                            </form>
+                        </div>
+                    @elseif($souUg)
                         <div>
                             <h3 class="text-base font-semibold text-gray-800">Manifestação técnica</h3>
                             <form action="{{ route('manifestacoes.parecer', $manifestacao) }}" method="POST" class="mt-3 space-y-3">
@@ -183,7 +261,7 @@
                         </div>
                     @endif
 
-                    @if($souScp && $manifestacao->status === 'analisada')
+                    @if($souScp && $manifestacao->status === 'analisada' && !$novaProposta)
                         <div>
                             <h3 class="text-base font-semibold text-gray-800">Decidir o encaminhamento</h3>
                             <p class="text-xs text-gray-500 mt-0.5 mb-3">
@@ -240,7 +318,7 @@
                         </div>
                     @endif
 
-                    @if($souScp)
+                    @if($souScp && !$novaProposta)
                         <div class="pt-4 border-t border-gray-100">
                             <form action="{{ route('manifestacoes.indeferir', $manifestacao) }}" method="POST" class="space-y-2"
                                   data-confirm="Indeferir esta manifestação?">
@@ -254,8 +332,8 @@
                 </div>
             @else
                 <p class="text-xs text-gray-500">
-                    A manifestação está com
-                    <strong>{{ $manifestacao->setor_atual === 'ug' ? 'a Unidade Gestora — ' . $manifestacao->orgao->name : 'o Setor de Convênios e Parcerias' }}</strong>.
+                    {{ $novaProposta ? 'A proposta' : 'A manifestação' }} está com
+                    <strong>{{ $manifestacao->setor_atual === 'ug' ? 'a Unidade Gestora — ' . $manifestacao->orgao?->name : 'o Setor de Convênios e Parcerias' }}</strong>.
                 </p>
             @endif
         </div>

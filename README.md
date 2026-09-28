@@ -125,7 +125,7 @@ que a etapa existe e por que não entra.
 
 ### Menu do portal (OSC logada)
 
-Chamamentos abertos · Transparência · Minhas inscrições · Manifestar interesse · Alterações ·
+Chamamentos abertos · Transparência · Minhas inscrições · Manifestar interesse · Nova Proposta · Alterações ·
 Prestação de contas · Suporte — e, no menu da conta, **Meus dados e senha** (toda a equipe) e
 **Usuários da organização** (só o responsável legal).
 
@@ -565,6 +565,22 @@ Trazer os demais cenários para `tests/Feature` é uma das [Pendências](#pendê
 
 Da mais recente para a mais antiga. Cada entrada diz o que mudou, **por quê** e como foi
 conferido — o porquê é o que falta a quem pega o código depois.
+
+- [2026-09-28] **Nova Proposta da OSC (dispensa ou inexigibilidade)** (`ManifestacaoInteresse::TIPOS`,
+  `ManifestacaoController`, `ManifestacaoAnaliseController`, `propostas/index`)
+  - Pedido da gestão: um processo novo, parecido com a manifestação de interesse mas não igual. Mesmo
+    conteúdo (dados, plano de trabalho completo, documentos), por isso a mesma tabela, com `tipo`
+  - **Caminho:** a OSC envia informando o fundamento (dispensa ou inexigibilidade) → a **SCP** recebe e
+    escolhe a Unidade Gestora que a atende → a **UG defere ou indefere**. Deferida, nasce o chamamento
+    (dispensa ou inexigibilidade, o que a OSC pediu) e a proposta com o plano e os documentos — o mesmo
+    que o deferimento da manifestação já fazia — e ela segue para a Celebração
+  - **Onde aparece:** item "Nova Proposta" na barra do portal; na tela **Propostas**, seção "Novas
+    Propostas em análise"; na lista de Manifestações com a etiqueta "Nova Proposta" — a SCP, que a
+    recebe primeiro, não tem acesso à tela de Propostas; na caixa de entrada e nos avisos por e-mail
+  - `orgao_id` da manifestação passou a aceitar vazio: na Nova Proposta, a Secretaria só existe depois
+    do encaminhamento
+  - Conferido: 6 testes em `NovaPropostaTest` (4 falham sem o caminho próprio); a manifestação de
+    interesse continua igual
 
 - [2026-09-28] **Prorrogação do prazo de inscrições do chamamento** (`ChamamentoProrrogacaoController`,
   `chamamento_prorrogacoes`)

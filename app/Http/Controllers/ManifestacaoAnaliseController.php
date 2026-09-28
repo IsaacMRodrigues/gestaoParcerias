@@ -34,6 +34,8 @@ class ManifestacaoAnaliseController extends Controller
     {
         $manifestacoes = ManifestacaoInteresse::with(['osc', 'orgao'])
             ->visiveisPara(auth()->user())
+            // A Nova Proposta aparece aqui também (com etiqueta), porque a SCP, que
+            // a recebe primeiro, não tem acesso à tela de Propostas.
             ->where('status', '!=', 'rascunho')   // rascunho é da OSC; o município não vê
             ->when($request->filled('status'), fn ($q) => $q->where('status', $request->status))
             ->latest('submetida_em')
@@ -54,7 +56,10 @@ class ManifestacaoAnaliseController extends Controller
         // chamamento nasce dentro de um programa, e é ele que define o órgão.
         $programas = Programa::where('orgao_id', $manifestacao->orgao_id)->orderBy('name')->get();
 
-        return view('manifestacoes.show', compact('manifestacao', 'programas'));
+        // Nova Proposta: a SCP escolhe a Secretaria que a atende.
+        $orgaos = $manifestacao->ehNovaProposta() ? \App\Models\Orgao::orderBy('name')->get() : collect();
+
+        return view('manifestacoes.show', compact('manifestacao', 'programas', 'orgaos'));
     }
 
     public function downloadDocumento(ManifestacaoInteresse $manifestacao, \App\Models\Documento $documento)
@@ -67,11 +72,23 @@ class ManifestacaoAnaliseController extends Controller
     }
 
     /** SCP → Secretaria: pedido de manifestação técnica. */
-    public function encaminhar(ManifestacaoInteresse $manifestacao): RedirectResponse
+    public function encaminhar(Request $request, ManifestacaoInteresse $manifestacao): RedirectResponse
     {
         $this->autorizarSetor($manifestacao, 'scp');
         abort_unless($manifestacao->status === 'submetida', 422,
             'Só uma manifestação recém-recebida vai à Secretaria.');
+
+        // Nova Proposta: é aqui que a SCP escolhe a Unidade Gestora que a atende.
+        if ($manifestacao->ehNovaProposta()) {
+            $dados = $request->validate(
+                ['orgao_id' => ['required', 'exists:orgaos,id']],
+                ['orgao_id.required' => 'Escolha a Secretaria cuja Unidade Gestora vai atender a proposta.'],
+            );
+            $manifestacao->update(['orgao_id' => $dados['orgao_id'], 'status' => 'em_analise', 'setor_atual' => 'ug']);
+
+            return back()->with('success', 'Proposta encaminhada à Unidade Gestora — '
+                . $manifestacao->fresh()->orgao->name . ', que vai deferir ou indeferir.');
+        }
 
         $manifestacao->update(['status' => 'em_analise', 'setor_atual' => 'ug']);
 
@@ -83,6 +100,8 @@ class ManifestacaoAnaliseController extends Controller
     public function parecer(Request $request, ManifestacaoInteresse $manifestacao): RedirectResponse
     {
         $this->autorizarSetor($manifestacao, 'ug');
+        abort_if($manifestacao->ehNovaProposta(), 422,
+            'Na Nova Proposta a Unidade Gestora não opina: ela defere ou indefere.');
         abort_unless($manifestacao->status === 'em_analise', 422,
             'Esta manifestação não está em análise na Secretaria.');
 
@@ -109,10 +128,14 @@ class ManifestacaoAnaliseController extends Controller
      */
     public function deferir(Request $request, ManifestacaoInteresse $manifestacao): RedirectResponse
     {
-        $this->autorizarSetor($manifestacao, 'scp');
         abort_if($manifestacao->decidida(), 422, 'Esta manifestação já foi decidida.');
-        abort_unless($manifestacao->status === 'analisada', 422,
-            'Ouça a Secretaria antes de decidir — é a manifestação técnica que fundamenta o encaminhamento.');
+        $this->autorizarDecisao($manifestacao);
+
+        // Na Nova Proposta o enquadramento é o que a OSC pediu (dispensa ou
+        // inexigibilidade); na manifestação, a SCP o escolhe.
+        if ($manifestacao->ehNovaProposta()) {
+            $request->merge(['decisao' => $manifestacao->fundamento_pedido]);
+        }
 
         $data = $request->validate([
             'decisao'     => ['required', Rule::in(array_keys(ManifestacaoInteresse::ENCAMINHAMENTOS))],
@@ -224,8 +247,8 @@ class ManifestacaoAnaliseController extends Controller
 
     public function indeferir(Request $request, ManifestacaoInteresse $manifestacao): RedirectResponse
     {
-        $this->autorizarSetor($manifestacao, 'scp');
         abort_if($manifestacao->decidida(), 422, 'Esta manifestação já foi decidida.');
+        $this->autorizarDecisao($manifestacao, indeferir: true);
 
         $data = $request->validate([
             'decisao_motivo' => ['required', 'string'],
@@ -242,6 +265,26 @@ class ManifestacaoAnaliseController extends Controller
         ]);
 
         return back()->with('success', 'Manifestação indeferida. A OSC verá o motivo no portal.');
+    }
+
+    /**
+     * Quem decide: na manifestação, a SCP — deferir depois de ouvir a
+     * Secretaria, indeferir a qualquer momento; na Nova Proposta, a Unidade
+     * Gestora a que a SCP a encaminhou, com ela em análise.
+     */
+    private function autorizarDecisao(ManifestacaoInteresse $manifestacao, bool $indeferir = false): void
+    {
+        if ($manifestacao->ehNovaProposta()) {
+            $this->autorizarSetor($manifestacao, 'ug');
+            abort_unless($manifestacao->status === 'em_analise', 422,
+                'A proposta ainda não foi encaminhada à Unidade Gestora.');
+
+            return;
+        }
+
+        $this->autorizarSetor($manifestacao, 'scp');
+        abort_unless($indeferir || $manifestacao->status === 'analisada', 422,
+            'Ouça a Secretaria antes de decidir — é a manifestação técnica que fundamenta o encaminhamento.');
     }
 
     /** Vê quem tem acesso ao módulo e ao órgão — o mesmo recorte das propostas. */

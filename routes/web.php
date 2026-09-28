@@ -100,11 +100,15 @@ Route::middleware(['auth', 'osc'])->group(function () {
     Route::middleware('permission:osc_manifestacoes')->group(function () {
         Route::get('/portal/manifestacoes/nova', [ManifestacaoController::class, 'create'])->name('portal.manifestacoes.create');
         Route::post('/portal/manifestacoes', [ManifestacaoController::class, 'store'])->name('portal.manifestacoes.store');
+        // Nova Proposta: mesmo conteúdo, outro caminho (ver ManifestacaoInteresse::TIPOS).
+        Route::get('/portal/novas-propostas/nova', [ManifestacaoController::class, 'createProposta'])->name('portal.novas-propostas.create');
+        Route::post('/portal/novas-propostas', [ManifestacaoController::class, 'storeProposta'])->name('portal.novas-propostas.store');
 
         PlanoTrabalhoController::rotas('manifestacao', '/portal/manifestacoes/{id}/plano', 'portal.manifestacao.plano');
     });
 
     Route::get('/portal/manifestacoes', [ManifestacaoController::class, 'index'])->name('portal.manifestacoes.index');
+    Route::get('/portal/novas-propostas', [ManifestacaoController::class, 'indexPropostas'])->name('portal.novas-propostas.index');
     Route::get('/portal/manifestacoes/{manifestacao}', [ManifestacaoController::class, 'show'])->name('portal.manifestacoes.show');
     Route::get('/portal/manifestacoes/{manifestacao}/documentos/{documento}', [ManifestacaoController::class, 'downloadDocumento'])->name('portal.manifestacoes.documentos.download');
     Route::patch('/portal/manifestacoes/{manifestacao}/submeter', [ManifestacaoController::class, 'submeter'])->name('portal.manifestacoes.submeter');

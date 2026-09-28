@@ -29,6 +29,7 @@ class ManifestacaoInteresse extends Model
     }
 
     protected $fillable = [
+        'tipo', 'fundamento_pedido',
         'osc_id', 'orgao_id', 'titulo', 'objeto', 'justificativa', 'publico_alvo',
         'descricao_realidade', 'objetivos', 'valor_outras_fontes', 'vigencia_dias',
         'atuacao_rede', 'rede_cnpj', 'rede_razao_social', 'rede_municipio', 'rede_data_termo',
@@ -82,6 +83,43 @@ class ManifestacaoInteresse extends Model
         'dispensa'        => 'Dispensa de chamamento público',
         'inexigibilidade' => 'Inexigibilidade de chamamento público',
     ];
+
+    /**
+     * Dois processos na mesma tabela (decisão da gestão, 28/09/2026):
+     *
+     * - manifestação de interesse: a OSC escolhe a Secretaria, a UG opina e a
+     *   SCP decide o encaminhamento (chamamento, dispensa ou inexigibilidade);
+     * - Nova Proposta: a OSC informa o fundamento (dispensa ou
+     *   inexigibilidade), a SCP escolhe a UG que a atende e a UG decide.
+     *
+     * O conteúdo é o mesmo — dados, plano de trabalho, documentos —, e por
+     * isso a estrutura também. Muda o caminho: ver ManifestacaoAnaliseController.
+     */
+    public const TIPOS = [
+        'manifestacao' => 'Manifestação de interesse',
+        'proposta'     => 'Nova Proposta',
+    ];
+
+    /** O fundamento que a OSC informa na Nova Proposta (arts. 30 e 31 da Lei 13.019/2014). */
+    public const FUNDAMENTOS_PEDIDO = [
+        'dispensa'        => 'Dispensa de chamamento público (art. 30)',
+        'inexigibilidade' => 'Inexigibilidade de chamamento público (art. 31)',
+    ];
+
+    public function ehNovaProposta(): bool
+    {
+        return $this->tipo === 'proposta';
+    }
+
+    public function tipoLabel(): string
+    {
+        return self::TIPOS[$this->tipo] ?? self::TIPOS['manifestacao'];
+    }
+
+    public function scopeDoTipo($query, string $tipo)
+    {
+        return $query->where('tipo', $tipo);
+    }
 
     public function osc(): BelongsTo
     {
