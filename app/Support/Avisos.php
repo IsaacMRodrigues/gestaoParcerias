@@ -488,6 +488,37 @@ class Avisos
         ));
     }
 
+    /** As OSCs com proposta no chamamento — é a elas que o cancelamento interessa. */
+    private static function oscsDoChamamento(Chamamento $c): Collection
+    {
+        return $c->propostas()->pluck('osc_id')->unique()
+            ->flatMap(fn ($oscId) => self::daOsc($oscId, self::comFuncao('osc_propostas')));
+    }
+
+    public static function chamamentoCancelado(Chamamento $c, string $motivo): void
+    {
+        self::enviar(self::oscsDoChamamento($c), new Aviso(
+            assunto: 'Chamamento cancelado — ' . trim(($c->numero ? $c->numero . ' ' : '') . $c->titulo),
+            titulo: 'A Prefeitura cancelou o chamamento',
+            linhas: [trim(($c->numero ? $c->numero . ' — ' : '') . $c->titulo), 'Motivo: ' . $motivo,
+                'Nada foi excluído: a sua proposta continua registrada. Se o chamamento for reaberto, você recebe outro aviso.'],
+            url: route('portal.chamamento', $c),
+            botao: 'Ver o chamamento',
+        ));
+    }
+
+    public static function chamamentoReaberto(Chamamento $c, string $motivo): void
+    {
+        self::enviar(self::oscsDoChamamento($c), new Aviso(
+            assunto: 'Chamamento reaberto — ' . trim(($c->numero ? $c->numero . ' ' : '') . $c->titulo),
+            titulo: 'A Prefeitura reabriu o chamamento',
+            linhas: [trim(($c->numero ? $c->numero . ' — ' : '') . $c->titulo), 'Motivo: ' . $motivo,
+                'O chamamento volta ao ponto em que estava quando foi cancelado.'],
+            url: route('portal.chamamento', $c),
+            botao: 'Ver o chamamento',
+        ));
+    }
+
     public static function diligencia(Diligencia $d): void
     {
         $proposta = $d->proposta;

@@ -197,6 +197,8 @@ class PortalController extends Controller
     {
         $osc = auth()->user()->oscVinculada();
         abort_unless($osc && $proposta->osc_id === $osc->id && $proposta->status === 'rascunho', 403);
+        abort_if($proposta->chamamento?->cancelado(), 422,
+            'Este chamamento foi cancelado pela Prefeitura; a proposta não pode ser enviada.');
 
         // Submeter é ato que vincula a entidade ao que foi proposto. A equipe
         // monta a proposta; quem a apresenta é quem responde por ela.

@@ -261,6 +261,9 @@ Route::middleware(['auth', 'staff', 'readonly'])->group(function () {
         Route::post('chamamentos/{chamamento}/selecao/avancar', [SelecaoController::class, 'avancar'])->name('chamamentos.selecao.avancar');
         Route::post('chamamentos/{chamamento}/selecao/devolver', [SelecaoController::class, 'devolver'])->name('chamamentos.selecao.devolver');
         Route::post('chamamentos/{chamamento}/selecao/concluir', [SelecaoController::class, 'concluir'])->name('chamamentos.selecao.concluir');
+        // Cancelar sem excluir, e reabrir — só a UG dona (ver o controller).
+        Route::post('chamamentos/{chamamento}/cancelar', [\App\Http\Controllers\ChamamentoCancelamentoController::class, 'cancelar'])->name('chamamentos.cancelar');
+        Route::post('chamamentos/{chamamento}/reabrir', [\App\Http\Controllers\ChamamentoCancelamentoController::class, 'reabrir'])->name('chamamentos.reabrir');
         // Espaço extra de anexo: o número de publicações varia de um chamamento
         // para outro (republicação, errata, segunda edição do Diário).
         Route::post('chamamentos/{chamamento}/selecao/anexos', [SelecaoController::class, 'adicionarAnexo'])->name('chamamentos.selecao.anexos.store');

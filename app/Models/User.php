@@ -445,6 +445,7 @@ class User extends Authenticatable
         'chamados.user_id'                       => ['chamado de suporte aberto', 'chamados de suporte abertos'],
         'chamados.resolvido_por'                 => ['chamado de suporte encerrado', 'chamados de suporte encerrados'],
         'chamados.conta_id'                      => ['pedido de nova senha', 'pedidos de nova senha'],
+        'chamamento_cancelamentos.user_id'       => ['cancelamento ou reabertura de chamamento', 'cancelamentos ou reaberturas de chamamento'],
         'chamado_mensagens.user_id'              => ['mensagem de suporte', 'mensagens de suporte'],
         'users.approved_by'                      => ['conta aprovada', 'contas aprovadas'],
         'users.created_by'                       => ['conta cadastrada', 'contas cadastradas'],

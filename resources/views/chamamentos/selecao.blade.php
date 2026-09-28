@@ -25,6 +25,70 @@
         <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 space-y-6">
             <x-flash-message />
 
+            {{-- Cancelamento (28/09/2026): a UG dona cancela sem excluir e pode
+                 reabrir, sempre com motivo. Ver ChamamentoCancelamentoController. --}}
+            @php
+                $ugDona         = $chamamento->geridoPelaUg(auth()->user());
+                $naoCancela     = $chamamento->motivoParaNaoCancelar();
+                $ultimoCancel   = $chamamento->cancelado() ? $chamamento->ultimoCancelamento() : null;
+                $historicoCancel = $chamamento->cancelamentos()->get();
+            @endphp
+            @if($chamamento->cancelado())
+                <div class="rounded-xl border border-red-200 bg-red-50 p-5 text-sm">
+                    <p class="font-semibold text-red-800">Chamamento cancelado</p>
+                    @if($ultimoCancel)
+                        <p class="text-red-800 mt-1">
+                            Em {{ $ultimoCancel->created_at->format('d/m/Y H:i') }}, por {{ $ultimoCancel->autor_nome ?? '—' }}.
+                            Motivo: {{ $ultimoCancel->motivo }}
+                        </p>
+                    @endif
+                    <p class="text-red-700 mt-1">
+                        Nada foi excluído. Enquanto estiver cancelado, não recebe inscrição nem recurso, a Seleção não anda
+                        e nenhum documento se preenche ou assina. Reabrir devolve o chamamento a
+                        "{{ \App\Models\Chamamento::STATUS[$chamamento->status_antes_cancelar ?: 'publicado'] }}".
+                    </p>
+                    @if($ugDona)
+                        <form action="{{ route('chamamentos.reabrir', $chamamento) }}" method="POST" class="mt-3 space-y-2">
+                            @csrf
+                            <textarea name="motivo" rows="2" required maxlength="2000" placeholder="Motivo da reabertura"
+                                      class="block w-full border-gray-300 rounded-md shadow-sm text-sm focus:ring-brand-500 focus:border-brand-500">{{ old('motivo') }}</textarea>
+                            <x-input-error :messages="$errors->get('motivo')" />
+                            <button class="btn btn-primary btn-sm">Reabrir chamamento</button>
+                        </form>
+                    @endif
+                </div>
+            @elseif($ugDona && !$naoCancela)
+                <details class="rounded-xl border border-gray-200 bg-white p-5 text-sm" @if($errors->has('motivo') || $errors->has('cancelamento')) open @endif>
+                    <summary class="cursor-pointer font-semibold text-gray-700">Cancelar chamamento</summary>
+                    <p class="text-gray-600 mt-2">
+                        Cancela todo o chamamento sem excluir nada: ele sai do portal, fecha inscrições e recursos, e a
+                        Seleção para. As OSCs com proposta recebem aviso com o motivo. Pode ser reaberto depois, por aqui.
+                    </p>
+                    <form action="{{ route('chamamentos.cancelar', $chamamento) }}" method="POST" class="mt-3 space-y-2"
+                          data-confirm="Cancelar este chamamento? As OSCs inscritas serão avisadas.">
+                        @csrf
+                        <textarea name="motivo" rows="2" required maxlength="2000" placeholder="Motivo do cancelamento (as OSCs vão lê-lo)"
+                                  class="block w-full border-gray-300 rounded-md shadow-sm text-sm focus:ring-brand-500 focus:border-brand-500">{{ old('motivo') }}</textarea>
+                        <x-input-error :messages="$errors->get('motivo')" />
+                        <x-input-error :messages="$errors->get('cancelamento')" />
+                        <button class="btn btn-danger-outline btn-sm">Cancelar chamamento</button>
+                    </form>
+                </details>
+            @endif
+            @if($historicoCancel->isNotEmpty())
+                <div class="rounded-xl border border-gray-200 bg-white p-5 text-sm">
+                    <p class="font-semibold text-gray-700 mb-2">Cancelamentos e reaberturas</p>
+                    <ul class="space-y-1 text-gray-600">
+                        @foreach($historicoCancel as $h)
+                            <li>
+                                <strong class="{{ $h->acao === 'cancelado' ? 'text-red-700' : 'text-brand-700' }}">{{ $h->acao === 'cancelado' ? 'Cancelado' : 'Reaberto' }}</strong>
+                                em {{ $h->created_at->format('d/m/Y H:i') }} por {{ $h->autor_nome ?? '—' }} — {{ $h->motivo }}
+                            </li>
+                        @endforeach
+                    </ul>
+                </div>
+            @endif
+
             {{-- Dados do Chamamento --}}
             <div class="bg-white rounded-xl border border-gray-200 shadow-sm p-6">
                 <div class="flex items-start justify-between gap-3 mb-4">

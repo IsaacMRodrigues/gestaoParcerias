@@ -25,6 +25,7 @@ class SelecaoController extends Controller
         abort_unless($chamamento->temTramiteSelecao(), 422,
             'Dispensa/Inexigibilidade não passa por julgamento de propostas.');
         abort_if($chamamento->selecaoConcluida(), 422, 'A Seleção deste chamamento já foi encerrada.');
+        abort_if($chamamento->cancelado(), 422, 'Este chamamento está cancelado: a Seleção só anda depois de reaberto.');
         abort_unless(auth()->user()->setor === $chamamento->selecao_setor, 403,
             'Apenas o setor que está com a Seleção pode movimentá-la.');
     }

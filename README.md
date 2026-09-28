@@ -558,6 +558,22 @@ Trazer os demais cenários para `tests/Feature` é uma das [Pendências](#pendê
 Da mais recente para a mais antiga. Cada entrada diz o que mudou, **por quê** e como foi
 conferido — o porquê é o que falta a quem pega o código depois.
 
+- [2026-09-28] **Cancelar e reabrir chamamento** (`ChamamentoCancelamentoController`,
+  `Chamamento::cancelado`, `chamamento_cancelamentos`)
+  - Botão para a **Unidade Gestora da Secretaria dona**, na tela de Seleção e Celebração. Cancela o
+    chamamento inteiro sem excluir nada, e pode ser reaberto; reabrir devolve o status que ele tinha
+  - **Motivo obrigatório** nos dois atos, com histórico (quem, quando, por quê) e **aviso por e-mail**
+    às OSCs que têm proposta no chamamento. A OSC vê o aviso na página do chamamento e na da proposta
+  - Pode-se cancelar **até a Seleção ser homologada** (ou, na dispensa, até haver proposta aprovada ou
+    em Celebração) — depois disso já há parceria, e desfazê-la é outro ato
+  - Enquanto cancelado: sai do portal, não recebe inscrição, envio de proposta nem recurso, a Seleção
+    não anda, nenhuma peça se preenche ou assina, e sai da caixa de entrada. O Planejamento de origem
+    fica como está
+  - "Cancelado" saiu do campo de status do formulário de edição, que o marcava sem motivo e sem
+    travar nada; chamamento cancelado só sai pelo botão de reabrir
+  - Conferido: 8 testes em `ChamamentoCanceladoTest` (5 falham com a trava desligada) e o ciclo
+    completo com dados reais
+
 - [2026-09-28] **Título do memorando só cita parcerias**
   (`ProcessoPeca::MODELO['oficio']`, migração `titulo_do_memorando_so_parcerias`)
   - "MEMORANDO PARA SOLICITAÇÃO DE CONVÊNIOS/PARCERIAS" vira "MEMORANDO PARA SOLICITAÇÃO DE

@@ -53,7 +53,7 @@ class Chamamento extends Model
         'programa_id', 'processo_id', 'numero', 'titulo', 'objeto', 'tipo',
         'valor_disponivel', 'data_publicacao', 'data_inicio_inscricao',
         'data_fim_inscricao', 'data_resultado', 'requisitos', 'status',
-        'selecao_etapa', 'selecao_setor', 'selecao_concluida_em',
+        'selecao_etapa', 'selecao_setor', 'selecao_concluida_em', 'status_antes_cancelar',
     ];
 
     protected function casts(): array
@@ -183,9 +183,69 @@ class Chamamento extends Model
      */
     public function faseRecursalAberta(): bool
     {
-        return $this->temTramiteSelecao()
+        return !$this->cancelado()
+            && $this->temTramiteSelecao()
             && !$this->selecaoConcluida()
             && (int) $this->selecao_etapa === 2;
+    }
+
+    // ------------------------------------------------------------------
+    // Cancelamento (decisão da gestão, 28/09/2026)
+    // ------------------------------------------------------------------
+
+    /**
+     * Cancelado: não recebe inscrição nem recurso, a Seleção não anda e ninguém
+     * assina peça dele — mas nada é excluído, e a UG pode reabrir. Ver
+     * ChamamentoCancelamentoController.
+     */
+    public function cancelado(): bool
+    {
+        return $this->status === 'cancelado';
+    }
+
+    public function cancelamentos(): \Illuminate\Database\Eloquent\Relations\HasMany
+    {
+        return $this->hasMany(ChamamentoCancelamento::class)->latest('id');
+    }
+
+    /** Quem cancela e reabre: a Unidade Gestora da Secretaria dona do chamamento. */
+    public function geridoPelaUg(?User $user): bool
+    {
+        return $user !== null
+            && $user->setorNoTramite() === 'ug'
+            && $user->can('chamamentos')
+            && $user->orgao_id !== null
+            && $user->orgao_id === $this->programa?->orgao_id;
+    }
+
+    /** O último cancelamento — o que vale enquanto o chamamento estiver cancelado. */
+    public function ultimoCancelamento(): ?ChamamentoCancelamento
+    {
+        return $this->cancelamentos()->where('acao', 'cancelado')->first();
+    }
+
+    /**
+     * Por que não dá para cancelar agora; null se dá.
+     *
+     * Até a Seleção ser homologada. Depois dela já há parceria em Celebração com
+     * a OSC vencedora, e desfazer isso é outro ato. Na dispensa, que não tem
+     * homologação, o marco é o mesmo: proposta aprovada ou Celebração iniciada.
+     */
+    public function motivoParaNaoCancelar(): ?string
+    {
+        if ($this->cancelado()) {
+            return 'Este chamamento já está cancelado.';
+        }
+
+        if ($this->selecaoConcluida()) {
+            return 'A Seleção já foi homologada: há parceria em Celebração, e o chamamento não pode mais ser cancelado.';
+        }
+
+        if ($this->propostas()->where(fn ($q) => $q->where('status', 'aprovada')->orWhereNotNull('celebracao_iniciada_em'))->exists()) {
+            return 'Já há proposta aprovada ou em Celebração neste chamamento, e ele não pode mais ser cancelado.';
+        }
+
+        return null;
     }
 
     /** Recursos protocolados que ainda não têm resposta da UG. */
@@ -252,7 +312,7 @@ class Chamamento extends Model
 
     public function podeAvancarSelecao(): bool
     {
-        return $this->temTramiteSelecao() && !$this->selecaoConcluida() && !$this->ultimaEtapaSelecao();
+        return !$this->cancelado() && $this->temTramiteSelecao() && !$this->selecaoConcluida() && !$this->ultimaEtapaSelecao();
     }
 
     public function setorAnteriorSelecao(): ?string

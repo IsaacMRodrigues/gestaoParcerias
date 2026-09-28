@@ -19,6 +19,12 @@ class PecaController extends Controller
     {
         $user = auth()->user();
 
+        // Chamamento cancelado: nenhuma peça dele se preenche nem se assina.
+        $dono = $peca->pecaable;
+        $chamamento = $dono instanceof \App\Models\Chamamento ? $dono
+            : ($dono instanceof \App\Models\Proposta ? $dono->chamamento : null);
+        abort_if($chamamento?->cancelado(), 422, 'Este chamamento está cancelado: reabra-o para mexer nos documentos.');
+
         $permitido = $acao === 'assinar'
             ? $peca->podeAssinar($user)
             : $peca->podePreencher($user);

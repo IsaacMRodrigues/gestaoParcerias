@@ -8,6 +8,16 @@
 
 <x-portal-layout>
     <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-10 space-y-6">
+        @if($proposta->chamamento?->cancelado())
+            @php $cancel = $proposta->chamamento->ultimoCancelamento(); @endphp
+            <div class="rounded-xl border border-red-200 bg-red-50 p-4 text-sm">
+                <p class="font-semibold text-red-800">Este chamamento foi cancelado pela Prefeitura.</p>
+                @if($cancel)
+                    <p class="text-red-800 mt-1">Em {{ $cancel->created_at->format('d/m/Y') }}. Motivo: {{ $cancel->motivo }}</p>
+                @endif
+                <p class="text-red-700 mt-1">Nada foi excluído: a sua proposta continua registrada, mas não pode ser enviada enquanto isso. Se ele for reaberto, você recebe aviso.</p>
+            </div>
+        @endif
 
         <div class="flex items-start justify-between">
             <div>

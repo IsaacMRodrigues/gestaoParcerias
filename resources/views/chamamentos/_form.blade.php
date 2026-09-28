@@ -43,14 +43,20 @@
     </div>
     <div>
         <x-input-label for="status" value="Status *" />
+        @if($chamamento?->cancelado())
+            {{-- Cancelado não muda por aqui: é o botão "Reabrir chamamento", com motivo. --}}
+            <p class="mt-1 text-sm text-red-700">Cancelado — para reabrir, use o botão na tela de Seleção e Celebração.</p>
+            <input type="hidden" name="status" value="{{ $chamamento->status_antes_cancelar ?: 'publicado' }}">
+        @else
         <select id="status" name="status" required
                 class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-brand-500 focus:border-brand-500 text-sm">
-            @foreach(\App\Models\Chamamento::STATUS as $key => $label)
+            @foreach(array_diff_key(\App\Models\Chamamento::STATUS, ['cancelado' => true]) as $key => $label)
                 <option value="{{ $key }}" {{ old('status', $chamamento?->status ?? 'rascunho') === $key ? 'selected' : '' }}>
                     {{ $label }}
                 </option>
             @endforeach
         </select>
+        @endif
         <x-input-error :messages="$errors->get('status')" class="mt-2" />
     </div>
 </div>

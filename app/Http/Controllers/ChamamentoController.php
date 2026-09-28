@@ -41,7 +41,14 @@ class ChamamentoController extends Controller
 
     public function update(ChamamentoRequest $request, Programa $programa, Chamamento $chamamento): RedirectResponse
     {
-        $chamamento->update($request->validated());
+        $dados = $request->validated();
+
+        // Cancelado só sai pelo botão de reabrir, com motivo — não pela edição.
+        if ($chamamento->cancelado()) {
+            unset($dados['status']);
+        }
+
+        $chamamento->update($dados);
 
         return redirect()->route('programas.chamamentos.index', $programa)
             ->with('success', 'Chamamento atualizado com sucesso.');

@@ -115,6 +115,7 @@ class CaixaDeEntrada
 
         return Chamamento::with('programa.orgao')
             ->where('tipo', 'chamamento_publico')
+            ->where('status', '!=', 'cancelado') // cancelado não anda: não é a vez de ninguém
             ->where('selecao_setor', $user->setor)
             ->whereNull('selecao_concluida_em')
             ->get()
@@ -159,6 +160,7 @@ class CaixaDeEntrada
         return Proposta::with(['osc', 'chamamento.programa.orgao'])
             ->visiveisPara($user)
             ->whereIn('status', ['submetida', 'em_analise'])
+            ->whereHas('chamamento', fn ($q) => $q->where('status', '!=', 'cancelado'))
             ->get()
             ->map(fn (Proposta $p) => [
                 'tramite'   => 'Análise',

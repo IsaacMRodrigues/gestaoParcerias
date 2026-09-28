@@ -26,7 +26,10 @@ class ChamamentoRequest extends FormRequest
             'data_fim_inscricao'    => ['nullable', 'date', 'after_or_equal:data_inicio_inscricao'],
             'data_resultado'        => ['nullable', 'date'],
             'requisitos'            => ['nullable', 'string'],
-            'status'                => ['required', Rule::in(array_keys(Chamamento::STATUS))],
+            // "Cancelado" não se escolhe aqui: é o botão, com motivo e travas
+            // (ChamamentoCancelamentoController). Chamamento já cancelado fica
+            // cancelado — ver ChamamentoController::update.
+            'status'                => ['required', Rule::in(array_keys(array_diff_key(Chamamento::STATUS, ['cancelado' => true])))],
         ];
     }
 
