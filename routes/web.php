@@ -47,6 +47,9 @@ Route::get('/', fn () => view('landing'))->name('landing');
 // Portal público
 Route::get('/portal', [PortalController::class, 'index'])->name('portal.index');
 Route::get('/portal/chamamentos/{chamamento}', [PortalController::class, 'chamamento'])->name('portal.chamamento');
+// Documentos da prorrogação do prazo: públicos, como o edital.
+Route::get('/portal/prorrogacoes/{prorrogacao}/{documento}', [\App\Http\Controllers\ChamamentoProrrogacaoController::class, 'arquivo'])
+    ->whereIn('documento', ['aviso', 'publicacao'])->name('portal.prorrogacao.arquivo');
 Route::get('/transparencia', [PortalController::class, 'transparencia'])->name('transparencia');
 
 // Auto-cadastro de OSC — só para visitante. O store abre uma conta nova e faz
@@ -264,6 +267,8 @@ Route::middleware(['auth', 'staff', 'readonly'])->group(function () {
         // Cancelar sem excluir, e reabrir — só a UG dona (ver o controller).
         Route::post('chamamentos/{chamamento}/cancelar', [\App\Http\Controllers\ChamamentoCancelamentoController::class, 'cancelar'])->name('chamamentos.cancelar');
         Route::post('chamamentos/{chamamento}/reabrir', [\App\Http\Controllers\ChamamentoCancelamentoController::class, 'reabrir'])->name('chamamentos.reabrir');
+        // Prorrogar o prazo de inscrições — só a SCP (ver o controller).
+        Route::post('chamamentos/{chamamento}/prorrogar', [\App\Http\Controllers\ChamamentoProrrogacaoController::class, 'store'])->name('chamamentos.prorrogar');
         // Espaço extra de anexo: o número de publicações varia de um chamamento
         // para outro (republicação, errata, segunda edição do Diário).
         Route::post('chamamentos/{chamamento}/selecao/anexos', [SelecaoController::class, 'adicionarAnexo'])->name('chamamentos.selecao.anexos.store');

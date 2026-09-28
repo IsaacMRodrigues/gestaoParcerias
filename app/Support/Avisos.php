@@ -507,6 +507,22 @@ class Avisos
         ));
     }
 
+    public static function chamamentoProrrogado(Chamamento $c, $anterior): void
+    {
+        self::enviar(self::oscsDoChamamento($c), new Aviso(
+            assunto: 'Inscrições prorrogadas — ' . trim(($c->numero ? $c->numero . ' ' : '') . $c->titulo),
+            titulo: 'O prazo de inscrições do chamamento foi prorrogado',
+            linhas: array_values(array_filter([
+                trim(($c->numero ? $c->numero . ' — ' : '') . $c->titulo),
+                'Novo prazo: até ' . $c->data_fim_inscricao->format('d/m/Y') . '.',
+                $anterior ? 'Prazo anterior: ' . $anterior->format('d/m/Y') . '.' : null,
+                'O aviso de prorrogação e a publicação estão na página do chamamento.',
+            ])),
+            url: route('portal.chamamento', $c),
+            botao: 'Ver o chamamento',
+        ));
+    }
+
     public static function chamamentoReaberto(Chamamento $c, string $motivo): void
     {
         self::enviar(self::oscsDoChamamento($c), new Aviso(

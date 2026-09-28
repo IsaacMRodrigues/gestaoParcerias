@@ -218,6 +218,40 @@ class Chamamento extends Model
             && $user->orgao_id === $this->programa?->orgao_id;
     }
 
+    // ------------------------------------------------------------------
+    // Prorrogação do prazo de inscrições (decisão da gestão, 28/09/2026)
+    // ------------------------------------------------------------------
+
+    public function prorrogacoes(): \Illuminate\Database\Eloquent\Relations\HasMany
+    {
+        return $this->hasMany(ChamamentoProrrogacao::class)->latest('id');
+    }
+
+    /** Quem prorroga: a SCP, que conduz o chamamento para o Município inteiro. */
+    public function prorrogavelPor(?User $user): bool
+    {
+        return $user !== null && $user->setorNoTramite() === 'scp' && $user->can('chamamentos');
+    }
+
+    /**
+     * Por que o prazo não pode ser prorrogado agora; null se pode.
+     *
+     * Só chamamento público publicado, não cancelado, e com a Seleção ainda na
+     * etapa 1: depois dela o julgamento já andou, e reabrir inscrições mudaria
+     * um resultado em curso.
+     */
+    public function motivoParaNaoProrrogar(): ?string
+    {
+        return match (true) {
+            $this->tipo !== 'chamamento_publico' => 'Só chamamento público tem prazo de inscrições.',
+            $this->cancelado()                   => 'Este chamamento está cancelado.',
+            $this->status !== 'publicado'        => 'Só chamamento publicado tem o prazo de inscrições prorrogado.',
+            $this->selecaoConcluida() || (int) $this->selecao_etapa > 0
+                => 'A Seleção já passou da análise das propostas: o prazo de inscrições não pode mais ser prorrogado.',
+            default => null,
+        };
+    }
+
     /** O último cancelamento — o que vale enquanto o chamamento estiver cancelado. */
     public function ultimoCancelamento(): ?ChamamentoCancelamento
     {

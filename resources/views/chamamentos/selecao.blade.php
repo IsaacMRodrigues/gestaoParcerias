@@ -75,6 +75,58 @@
                     </form>
                 </details>
             @endif
+            {{-- Prorrogação do prazo de inscrições (28/09/2026): a SCP, com os
+                 dois anexos. Ver ChamamentoProrrogacaoController. --}}
+            @php
+                $prorrogacoes = $chamamento->prorrogacoes()->get();
+                $podeProrrogar = $chamamento->prorrogavelPor(auth()->user()) && !$chamamento->motivoParaNaoProrrogar();
+            @endphp
+            @if($podeProrrogar)
+                <details class="rounded-xl border border-gray-200 bg-white p-5 text-sm" @if($errors->hasAny(['fim_novo', 'aviso', 'publicacao', 'prorrogacao'])) open @endif>
+                    <summary class="cursor-pointer font-semibold text-gray-700">Prorrogar prazo de inscrições</summary>
+                    <p class="text-gray-600 mt-2">
+                        Prazo atual: <strong>{{ $chamamento->data_fim_inscricao?->format('d/m/Y') ?? '—' }}</strong>.
+                        O novo prazo vale na hora — se as inscrições já tinham acabado, reabrem até a nova data.
+                        As OSCs com proposta recebem aviso, e a página pública mostra os dois documentos.
+                    </p>
+                    <form action="{{ route('chamamentos.prorrogar', $chamamento) }}" method="POST" enctype="multipart/form-data" class="mt-3 space-y-3">
+                        @csrf
+                        <div>
+                            <x-input-label for="fim_novo" value="Novo prazo de inscrições *" />
+                            <x-text-input id="fim_novo" name="fim_novo" type="date" class="mt-1" :value="old('fim_novo')" required />
+                            <x-input-error :messages="$errors->get('fim_novo')" class="mt-1" />
+                        </div>
+                        <div>
+                            <x-input-label for="aviso" value="Aviso de prorrogação *" />
+                            <input id="aviso" name="aviso" type="file" accept=".pdf,.jpg,.jpeg,.png" required class="mt-1 block w-full text-sm">
+                            <x-input-error :messages="$errors->get('aviso')" class="mt-1" />
+                        </div>
+                        <div>
+                            <x-input-label for="publicacao" value="Comprovante de publicação da prorrogação *" />
+                            <input id="publicacao" name="publicacao" type="file" accept=".pdf,.jpg,.jpeg,.png" required class="mt-1 block w-full text-sm">
+                            <x-input-error :messages="$errors->get('publicacao')" class="mt-1" />
+                        </div>
+                        <x-input-error :messages="$errors->get('prorrogacao')" />
+                        <button class="btn btn-primary btn-sm">Prorrogar</button>
+                    </form>
+                </details>
+            @endif
+            @if($prorrogacoes->isNotEmpty())
+                <div class="rounded-xl border border-gray-200 bg-white p-5 text-sm">
+                    <p class="font-semibold text-gray-700 mb-2">Prorrogações do prazo de inscrições</p>
+                    <ul class="space-y-1 text-gray-600">
+                        @foreach($prorrogacoes as $pr)
+                            <li>
+                                Até <strong>{{ $pr->fim_novo->format('d/m/Y') }}</strong>
+                                (antes: {{ $pr->fim_anterior?->format('d/m/Y') ?? '—' }}) — em {{ $pr->created_at->format('d/m/Y') }} por {{ $pr->autor_nome ?? '—' }} ·
+                                <a href="{{ route('portal.prorrogacao.arquivo', [$pr, 'aviso']) }}" class="text-brand-700 hover:underline">aviso</a> ·
+                                <a href="{{ route('portal.prorrogacao.arquivo', [$pr, 'publicacao']) }}" class="text-brand-700 hover:underline">publicação</a>
+                            </li>
+                        @endforeach
+                    </ul>
+                </div>
+            @endif
+
             @if($historicoCancel->isNotEmpty())
                 <div class="rounded-xl border border-gray-200 bg-white p-5 text-sm">
                     <p class="font-semibold text-gray-700 mb-2">Cancelamentos e reaberturas</p>

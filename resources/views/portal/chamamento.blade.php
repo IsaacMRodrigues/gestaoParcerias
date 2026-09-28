@@ -1,5 +1,22 @@
 <x-portal-layout>
     <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
+        @php $prorrogacoes = $chamamento->prorrogacoes()->get(); @endphp
+        @if($prorrogacoes->isNotEmpty() && !$chamamento->cancelado())
+            <div class="rounded-xl border border-brand-200 bg-brand-50 p-4 text-sm mb-4">
+                <p class="font-semibold text-brand-800">
+                    Prazo de inscrições prorrogado até {{ $prorrogacoes->first()->fim_novo->format('d/m/Y') }}.
+                </p>
+                <ul class="mt-1 text-brand-800 space-y-0.5">
+                    @foreach($prorrogacoes as $pr)
+                        <li>
+                            Em {{ $pr->created_at->format('d/m/Y') }}, de {{ $pr->fim_anterior?->format('d/m/Y') ?? '—' }} para {{ $pr->fim_novo->format('d/m/Y') }}:
+                            <a href="{{ route('portal.prorrogacao.arquivo', [$pr, 'aviso']) }}" class="underline">aviso de prorrogação</a> ·
+                            <a href="{{ route('portal.prorrogacao.arquivo', [$pr, 'publicacao']) }}" class="underline">publicação</a>
+                        </li>
+                    @endforeach
+                </ul>
+            </div>
+        @endif
         @if($chamamento?->cancelado())
             @php $cancel = $chamamento->ultimoCancelamento(); @endphp
             <div class="rounded-xl border border-red-200 bg-red-50 p-4 text-sm">

@@ -566,6 +566,18 @@ Trazer os demais cenários para `tests/Feature` é uma das [Pendências](#pendê
 Da mais recente para a mais antiga. Cada entrada diz o que mudou, **por quê** e como foi
 conferido — o porquê é o que falta a quem pega o código depois.
 
+- [2026-09-28] **Prorrogação do prazo de inscrições do chamamento** (`ChamamentoProrrogacaoController`,
+  `chamamento_prorrogacoes`)
+  - Pedido da gestão. Feita pela **SCP**, na tela de Seleção e Celebração, com **dois anexos
+    obrigatórios**: o aviso de prorrogação e o comprovante de publicação. O prazo novo vale na hora —
+    se as inscrições já tinham acabado, reabrem até a nova data
+  - Pode prorrogar chamamento público publicado, não cancelado, com a Seleção ainda na etapa 1 (depois
+    dela o julgamento já andou). Pode haver mais de uma prorrogação; cada uma fica registrada com o
+    prazo anterior e o novo
+  - As OSCs com proposta recebem aviso por e-mail. A página pública do chamamento mostra o novo prazo e
+    os dois documentos, que abrem sem login, como o edital
+  - Conferido: 5 testes em `ChamamentoProrrogacaoTest` (os das travas falham com elas desligadas)
+
 - [2026-09-28] **Só o responsável do setor cadastra a equipe** (`User::RESPONSAVEL_DO_SETOR`,
   `UserRequest`, `User::PERFIS_VEDADOS_AO_CHEFE`)
   - Decisão da gestão: na UG, o Chefe de Setor e o Responsável da UG são a mesma pessoa. O perfil
