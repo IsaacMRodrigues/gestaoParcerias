@@ -233,6 +233,10 @@
                                     </svg>
                                     {{ $trava }}
                                 </p>
+                            @elseif(\App\Models\Peca::perfilQueAssina($peca->chave) && $podePreencher && ! $podeAssinar)
+                                <p class="text-xs text-gray-500 mt-0.5">
+                                    Você pode elaborar o texto; quem assina é o {{ \App\Models\User::$roleLabels[\App\Models\Peca::perfilQueAssina($peca->chave)] }}.
+                                </p>
                             @elseif($peca->ehDeclaracaoDoResponsavelLegal() && $podePreencher && ! $podeAssinar)
                                 {{-- Sem esta linha, o integrante da equipe via a declaração
                                      aberta para revisão e nenhum botão de assinar — e não

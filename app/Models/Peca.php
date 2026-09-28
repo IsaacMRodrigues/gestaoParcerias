@@ -1766,6 +1766,25 @@ HTML,
      * Pode assinar agora? Mesma regra, porém pelo setor/etapa de assinatura —
      * é o que reserva o Termo de Adjudicação e Homologação ao Prefeito.
      */
+    /**
+     * Documentos que só um perfil assina, ainda que o setor inteiro os elabore.
+     *
+     * O Parecer Financeiro é da SEPLAN: qualquer pessoa dela o escreve, mas
+     * quem o assina é o responsável pela Secretaria (decisão da gestão,
+     * 28/09/2026). Vale nos três fluxos em que ele aparece — Planejamento
+     * (ProcessoPeca), Celebração e Aditivo (Peca) —, por isso a chave é a
+     * mesma nas duas famílias de peças.
+     */
+    public const ASSINATURA_RESERVADA = [
+        'parecer_financeiro' => 'responsavel_seplan',
+    ];
+
+    /** O perfil que assina este documento, se a assinatura for reservada. */
+    public static function perfilQueAssina(string $chave): ?string
+    {
+        return self::ASSINATURA_RESERVADA[$chave] ?? null;
+    }
+
     public function podeAssinar(?User $user): bool
     {
         if ($this->tipo !== 'modelo' || empty($this->conteudo) || $this->assinado()
@@ -1789,6 +1808,10 @@ HTML,
             || $dono->tramiteEtapaAtual() !== $this->selecaoEtapaAssinatura()
         ) {
             return false;
+        }
+
+        if ($perfil = self::perfilQueAssina($this->chave)) {
+            return $user->hasRole($perfil);
         }
 
         if ($this->selecaoSetorAssinatura() !== 'osc') {

@@ -110,6 +110,14 @@
                 @endif
             @endif
 
+            {{-- Assinatura reservada (Peca::ASSINATURA_RESERVADA): quem elabora vê
+                 o texto e o salvar, mas não o assinar — e precisa saber por quê. --}}
+            @if($podeEditar && !$podeAssinar && !$peca->assinado() && \App\Models\Peca::perfilQueAssina($peca->tipo))
+                <p class="text-xs text-gray-500">
+                    Você pode elaborar o texto; quem assina é o {{ \App\Models\User::$roleLabels[\App\Models\Peca::perfilQueAssina($peca->tipo)] }}.
+                </p>
+            @endif
+
             @if(!$peca->ehArquivo() && ($podeAssinar || $peca->assinado()))
                 <div class="bg-white rounded-xl border border-gray-200 shadow-sm p-6 flex items-center justify-between">
                     <div>

@@ -497,6 +497,9 @@ HTML,
             && !empty($this->conteudo)
             && $user->setor === $this->setorAssinatura()
             && $processo->setor_atual === $this->setorAssinatura()
-            && $processo->etapa === $this->etapaAssinatura();
+            && $processo->etapa === $this->etapaAssinatura()
+            // Assinatura reservada a um perfil — o Parecer Financeiro é do
+            // Responsável pela SEPLAN. Ver Peca::ASSINATURA_RESERVADA.
+            && (($perfil = Peca::perfilQueAssina($this->tipo)) === null || $user->hasRole($perfil));
     }
 }

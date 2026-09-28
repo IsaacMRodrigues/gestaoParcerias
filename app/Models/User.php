@@ -36,6 +36,7 @@ class User extends Authenticatable
         'analista_viabilidade_tecnica'     => 'Analista de Viabilidade Técnica',
         'analista_juridico'                => 'Analista Jurídico',
         'analista_orcamentario_financeiro' => 'Analista Orçamentário Financeiro',
+        'responsavel_seplan'               => 'Responsável pela SEPLAN',
         'analista_tecnico_scp'             => 'Analista Técnico do SCP',
         'aprovador_assinatura_eletronica'  => 'Aprovador de Assinatura Eletrônica',
         'auditor_externo'                  => 'Auditor Externo',
@@ -202,6 +203,7 @@ class User extends Authenticatable
         'analista_tecnico_scp'             => 'scp',
         'responsavel_publicacao'           => 'scp',
         'analista_orcamentario_financeiro' => 'seplan',
+        'responsavel_seplan'               => 'seplan',
         'prefeito_municipal'               => 'pm',
         'responsavel_legal'                => 'osc',
     ];

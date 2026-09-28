@@ -214,7 +214,7 @@ chamamento nasce na pasta geral "Parcerias por manifestação de interesse".
 
 ## Perfis e acesso
 
-**23 perfis da Prefeitura** e **5 da OSC**. Um usuário pode ter vários; os com setor marcado são
+**24 perfis da Prefeitura** e **5 da OSC**. Um usuário pode ter vários; os com setor marcado são
 **exclusivos** (só atribuíveis a quem é lotado nele — `User::PERFIS_EXCLUSIVOS`). A matriz vive em
 `RolesSeeder::MATRIZ`; mudou a matriz, rode `php artisan db:seed --class=RolesSeeder` (a produção
 também precisa).
@@ -229,6 +229,7 @@ também precisa).
 | `chefe_setor` | Chefe de Setor | — | usuarios_setor |
 | `analista_tecnico_scp` | Analista Técnico do SCP | SCP | planejamento, chamamentos, execucao, prestacao_contas, suporte |
 | `responsavel_publicacao` | Responsável pela Publicação | SCP | chamamentos |
+| `responsavel_seplan` | Responsável pela SEPLAN | SEPLAN | planejamento — **único que assina o Parecer Financeiro** |
 | `analista_orcamentario_financeiro` | Analista Orçamentário Financeiro | SEPLAN | planejamento |
 | `analista_juridico` | Analista Jurídico | — | pareceres_juridico, planejamento |
 | `analista_viabilidade_tecnica` | Analista de Viabilidade Técnica | — | pareceres_tecnico |
@@ -557,6 +558,19 @@ Trazer os demais cenários para `tests/Feature` é uma das [Pendências](#pendê
 
 Da mais recente para a mais antiga. Cada entrada diz o que mudou, **por quê** e como foi
 conferido — o porquê é o que falta a quem pega o código depois.
+
+- [2026-09-28] **Parecer Financeiro: qualquer um da SEPLAN elabora, só o responsável assina**
+  (`Peca::ASSINATURA_RESERVADA`, perfil `responsavel_seplan`)
+  - Decisão da gestão. Antes, qualquer pessoa lotada na SEPLAN assinava. Vale nos três fluxos em
+    que o parecer aparece: Planejamento (`ProcessoPeca`), Celebração e Aditivo (`Peca`)
+  - Perfil novo **Responsável pela SEPLAN**, exclusivo da lotação SEPLAN. Quem elabora vê o aviso
+    "quem assina é o Responsável pela SEPLAN" no lugar do botão
+  - A regra é genérica: outro documento de assinatura reservada entra numa linha da constante
+  - Na gestão, SEPLAN e Secretaria de Planejamento são a mesma coisa: a conta
+    `planejamento@saogoncalo.mg.gov.br` (do responsável, Alisson) passa à SEPLAN com o perfil novo.
+    Em produção ela era a UG do Planejamento, que não tinha parceria nenhuma
+  - Conferido: 4 testes em `ParecerFinanceiroReservadoTest` (os 2 de "a analista não assina" falham
+    com a reserva desligada)
 
 - [2026-09-28] **Cancelar e reabrir chamamento** (`ChamamentoCancelamentoController`,
   `Chamamento::cancelado`, `chamamento_cancelamentos`)
