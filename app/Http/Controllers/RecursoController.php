@@ -32,7 +32,7 @@ class RecursoController extends Controller
             'Somente o responsável legal da OSC pode protocolar recurso.');
 
         abort_unless($chamamento->faseRecursalAberta(), 422,
-            'A fase recursal deste chamamento não está aberta.');
+            'O prazo de recurso deste chamamento não está aberto.');
 
         $proposta = $chamamento->propostas()->where('osc_id', $osc->id)->first();
         abort_unless($proposta, 403,
@@ -75,7 +75,8 @@ class RecursoController extends Controller
     }
 
     /**
-     * A Unidade Gestora responde ao recurso (etapa 2 da Seleção).
+     * A Unidade Gestora responde ao recurso — na etapa seguinte ao prazo de
+     * recurso, quando nenhum outro pode mais chegar.
      */
     public function responder(Request $request, Recurso $recurso): RedirectResponse
     {
@@ -83,8 +84,8 @@ class RecursoController extends Controller
 
         abort_unless(auth()->user()->setor === $chamamento->selecao_setor, 403,
             'Apenas o setor que está com a Seleção pode responder aos recursos.');
-        abort_unless($chamamento->faseRecursalAberta(), 422,
-            'A resposta aos recursos é feita na etapa de análise dos recursos.');
+        abort_unless($chamamento->respostaDeRecursosAberta(), 422,
+            'A resposta aos recursos é feita na etapa seguinte ao prazo de recurso.');
 
         $data = $request->validate([
             'resultado' => ['required', Rule::in(array_keys(Recurso::RESULTADOS))],

@@ -53,7 +53,7 @@ class Chamamento extends Model
         'programa_id', 'processo_id', 'numero', 'titulo', 'objeto', 'tipo',
         'valor_disponivel', 'data_publicacao', 'data_inicio_inscricao',
         'data_fim_inscricao', 'data_resultado', 'requisitos', 'status',
-        'selecao_etapa', 'selecao_setor', 'selecao_concluida_em', 'status_antes_cancelar',
+        'selecao_etapa', 'selecao_setor', 'selecao_concluida_em', 'status_antes_cancelar', 'prazo_recurso_ate',
     ];
 
     protected function casts(): array
@@ -65,6 +65,7 @@ class Chamamento extends Model
             'data_resultado'        => 'date',
             'valor_disponivel'      => 'decimal:2',
             'selecao_concluida_em'  => 'datetime',
+            'prazo_recurso_ate'     => 'date',
         ];
     }
 
@@ -79,14 +80,23 @@ class Chamamento extends Model
     ];
 
     /**
+     * Etapa do prazo de recurso e a de resposta (decisão da gestão, 29/09/2026).
+     * Antes as duas coisas corriam juntas: a OSC podia recorrer enquanto a UG
+     * já redigia o Resultado Definitivo.
+     */
+    public const ETAPA_PRAZO_RECURSO = 2;
+    public const ETAPA_RESPOSTA_RECURSOS = 3;
+
+    /**
      * Etapas do trâmite da Seleção (Fluxo Seleção confirmado pelo cliente).
      * Só se aplica ao Chamamento Público — Dispensa/Inexigibilidade não tem
      * julgamento de propostas nem recurso.
      */
     public const ETAPAS_SELECAO = [
         ['setor' => 'ug',  'acao' => 'Analisar as propostas: emitir o Relatório da Comissão, a Ata e o Resultado Provisório (assinar) e encaminhar à SCP'],
-        ['setor' => 'scp', 'acao' => 'Anexar o comprovante de publicação do Resultado Provisório e devolver à UG'],
-        ['setor' => 'ug',  'acao' => 'Analisar os recursos (se houver) e emitir o Resultado Definitivo (assinar), encaminhando à SCP'],
+        ['setor' => 'scp', 'acao' => 'Anexar o comprovante de publicação do Resultado Provisório, informar o prazo de recurso do edital e devolver à UG'],
+        ['setor' => 'ug',  'acao' => 'Prazo de recurso (opcional para a OSC): as OSCs podem recorrer do Resultado Provisório até a data do edital; findo o prazo, encerrar a etapa'],
+        ['setor' => 'ug',  'acao' => 'Responder os recursos (se houver) e emitir o Resultado Definitivo (assinar), encaminhando à SCP'],
         ['setor' => 'scp', 'acao' => 'Anexar o comprovante de publicação do Resultado Definitivo e emitir o Termo de Adjudicação e Homologação'],
         ['setor' => 'pm',  'acao' => 'Assinar o Termo de Adjudicação e Homologação (encerra a Seleção)'],
     ];
@@ -177,16 +187,35 @@ class Chamamento extends Model
     }
 
     /**
-     * A fase recursal está aberta? Vale a partir da publicação do resultado
-     * provisório (etapa 1 concluída) e até a UG emitir o resultado definitivo
-     * (fim da etapa 2) — é a janela em que a OSC pode protocolar o recurso.
+     * A OSC pode protocolar recurso agora? Só na etapa do prazo de recurso e
+     * até o último dia dele, que vem do edital (a SCP o informa ao publicar o
+     * Resultado Provisório). Recorrer é opcional: sem recurso, a etapa só passa.
      */
     public function faseRecursalAberta(): bool
+    {
+        return $this->naEtapaDaSelecao(self::ETAPA_PRAZO_RECURSO)
+            && $this->prazo_recurso_ate !== null
+            && !$this->prazo_recurso_ate->endOfDay()->isPast();
+    }
+
+    /** O prazo de recurso já acabou (o último dia inteiro já passou)? */
+    public function prazoRecursalEncerrado(): bool
+    {
+        return $this->prazo_recurso_ate !== null && $this->prazo_recurso_ate->endOfDay()->isPast();
+    }
+
+    /** A UG responde os recursos na etapa seguinte ao prazo, antes do Resultado Definitivo. */
+    public function respostaDeRecursosAberta(): bool
+    {
+        return $this->naEtapaDaSelecao(self::ETAPA_RESPOSTA_RECURSOS);
+    }
+
+    private function naEtapaDaSelecao(int $etapa): bool
     {
         return !$this->cancelado()
             && $this->temTramiteSelecao()
             && !$this->selecaoConcluida()
-            && (int) $this->selecao_etapa === 2;
+            && (int) $this->selecao_etapa === $etapa;
     }
 
     // ------------------------------------------------------------------
@@ -385,14 +414,25 @@ class Chamamento extends Model
         $exigidas = [
             0 => ['relatorio_comissao', 'ata_comissao', 'resultado_parcial'],
             1 => ['pub_resultado_parcial'],
-            2 => ['resultado_definitivo'],
-            3 => ['pub_resultado_definitivo', 'termo_homologacao'],
-            4 => ['termo_homologacao'],
+            2 => [],
+            3 => ['resultado_definitivo'],
+            4 => ['pub_resultado_definitivo', 'termo_homologacao'],
+            5 => ['termo_homologacao'],
         ];
 
-        // Etapa 2: todo recurso protocolado precisa de resposta antes do
-        // resultado definitivo (Fluxo Seleção: "analisa os recursos … emite resposta").
-        if ($etapa === 2 && ($semResposta = $this->recursosSemResposta()) > 0) {
+        // Prazo de recurso: a etapa só se encerra depois do último dia dele —
+        // encerrar antes tiraria da OSC um prazo que o edital lhe deu.
+        if ($etapa === self::ETAPA_PRAZO_RECURSO) {
+            if ($this->prazo_recurso_ate === null) {
+                $pend[] = 'Data final do prazo de recurso (a SCP a informa ao publicar o Resultado Provisório)';
+            } elseif (!$this->prazoRecursalEncerrado()) {
+                $pend[] = 'Prazo de recurso aberto até ' . $this->prazo_recurso_ate->format('d/m/Y') . ' — a etapa se encerra depois dele';
+            }
+        }
+
+        // Todo recurso protocolado precisa de resposta antes do resultado
+        // definitivo (Fluxo Seleção: "analisa os recursos … emite resposta").
+        if ($etapa === self::ETAPA_RESPOSTA_RECURSOS && ($semResposta = $this->recursosSemResposta()) > 0) {
             $pend[] = $semResposta === 1
                 ? '1 recurso sem resposta'
                 : "{$semResposta} recursos sem resposta";
@@ -405,9 +445,9 @@ class Chamamento extends Model
             }
 
             // Modelo: precisa estar assinado — exceto o Termo, que a SCP só
-            // emite na etapa 3 (a assinatura é do Prefeito, na etapa 4).
+            // emite na etapa 4 (a assinatura é do Prefeito, na etapa 5).
             if ($peca->tipo === 'modelo') {
-                $soPreencher = $chave === 'termo_homologacao' && $etapa === 3;
+                $soPreencher = $chave === 'termo_homologacao' && $etapa === 4;
                 $ok = $soPreencher ? !empty($peca->conteudo) : $peca->assinado();
                 if (!$ok) {
                     $pend[] = $peca->rotulo . ($soPreencher ? ' (emitir)' : ' (assinar)');

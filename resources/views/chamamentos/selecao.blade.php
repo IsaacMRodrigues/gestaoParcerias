@@ -318,6 +318,11 @@
                                         {{ strtoupper($etapa['setor']) }}
                                     </span>
                                     — {{ $etapa['acao'] }}
+                                    @if($i === \App\Models\Chamamento::ETAPA_PRAZO_RECURSO && $chamamento->prazo_recurso_ate)
+                                        <span class="block text-xs text-gray-500 mt-0.5">
+                                            Prazo do edital: até {{ $chamamento->prazo_recurso_ate->format('d/m/Y') }}
+                                        </span>
+                                    @endif
                                 </span>
                             </li>
                         @endforeach
@@ -378,12 +383,30 @@
                                 @else
                                     <form action="{{ route('chamamentos.selecao.avancar', $chamamento) }}" method="POST" class="space-y-2">
                                         @csrf
+                                        {{-- Ao publicar o Resultado Provisório, a SCP informa o
+                                             prazo de recurso — é o do edital, varia de um para outro. --}}
+                                        @if($etapaAtual + 1 === \App\Models\Chamamento::ETAPA_PRAZO_RECURSO)
+                                            <div>
+                                                <label for="prazo_recurso_ate" class="block text-xs font-medium text-gray-600 mb-1">
+                                                    Último dia do prazo de recurso (conforme o edital)
+                                                </label>
+                                                <input type="date" name="prazo_recurso_ate" id="prazo_recurso_ate" required
+                                                       value="{{ old('prazo_recurso_ate', $chamamento->prazo_recurso_ate?->format('Y-m-d')) }}"
+                                                       min="{{ now()->format('Y-m-d') }}"
+                                                       class="border-gray-300 rounded-md shadow-sm text-sm focus:ring-brand-500 focus:border-brand-500">
+                                                <x-input-error :messages="$errors->get('prazo_recurso_ate')" class="mt-1" />
+                                            </div>
+                                        @endif
                                         <textarea name="parecer" rows="2" placeholder="Observação (opcional)"
                                                   class="block w-full border-gray-300 rounded-md shadow-sm text-sm focus:ring-brand-500 focus:border-brand-500"></textarea>
                                         <button type="submit" @disabled($pendencias)
                                                 class="btn btn-primary">
-                                            Encaminhar para
-                                            {{ \App\Models\Chamamento::SETORES_SELECAO[\App\Models\Chamamento::ETAPAS_SELECAO[$etapaAtual + 1]['setor']] }}
+                                            @if($etapaAtual === \App\Models\Chamamento::ETAPA_PRAZO_RECURSO)
+                                                Encerrar o prazo de recurso
+                                            @else
+                                                Encaminhar para
+                                                {{ \App\Models\Chamamento::SETORES_SELECAO[\App\Models\Chamamento::ETAPAS_SELECAO[$etapaAtual + 1]['setor']] }}
+                                            @endif
                                         </button>
                                     </form>
                                 @endif
@@ -439,14 +462,16 @@
             @endif
 
             {{-- Recursos contra o resultado provisório --}}
-            @if($chamamento->temTramiteSelecao() && ($chamamento->recursos->isNotEmpty() || $chamamento->faseRecursalAberta()))
+            @if($chamamento->temTramiteSelecao() && ($chamamento->recursos->isNotEmpty()
+                || (int) $chamamento->selecao_etapa === \App\Models\Chamamento::ETAPA_PRAZO_RECURSO))
                 <div class="bg-white rounded-xl border border-gray-200 shadow-sm">
                     <div class="px-6 py-4 border-b border-gray-200 flex items-start justify-between gap-3">
                         <div>
                             <h3 class="text-base font-semibold text-gray-800">Recursos</h3>
                             <p class="text-xs text-gray-400 mt-0.5">
-                                Protocolados pelas OSCs contra o resultado provisório. Cada recurso precisa de
-                                resposta antes do resultado definitivo.
+                                Protocolados pelas OSCs contra o resultado provisório
+                                @if($chamamento->prazo_recurso_ate) até {{ $chamamento->prazo_recurso_ate->format('d/m/Y') }}@endif.
+                                Encerrado o prazo, cada recurso precisa de resposta antes do resultado definitivo.
                             </p>
                         </div>
                         @php $semResp = $chamamento->recursos->whereNull('respondido_em')->count(); @endphp
@@ -503,7 +528,7 @@
                                         @endif
                                     </p>
                                 </div>
-                            @elseif($chamamento->faseRecursalAberta() && auth()->user()->setor === $chamamento->selecao_setor)
+                            @elseif($chamamento->respostaDeRecursosAberta() && auth()->user()->setor === $chamamento->selecao_setor)
                                 <form action="{{ route('recursos.responder', $rec) }}" method="POST" class="mt-3 space-y-2">
                                     @csrf
                                     <div class="flex flex-wrap items-center gap-3">
@@ -528,7 +553,11 @@
                         </div>
                     @empty
                         <div class="px-6 py-6 text-sm text-gray-500">
-                            Fase recursal aberta — nenhum recurso protocolado até o momento.
+                            @if($chamamento->faseRecursalAberta())
+                                Prazo de recurso aberto — nenhum recurso protocolado até o momento.
+                            @else
+                                Prazo de recurso encerrado sem recursos.
+                            @endif
                         </div>
                     @endforelse
                 </div>

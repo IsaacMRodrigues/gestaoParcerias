@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Chamamento;
 use App\Models\Peca;
+use App\Support\Avisos;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
@@ -43,9 +44,19 @@ class SelecaoController extends Controller
         abort_unless(empty($pendentes), 422,
             'Conclua antes de encaminhar: ' . implode(', ', $pendentes) . '.');
 
-        $data = $request->validate(['parecer' => ['nullable', 'string']]);
-
         $proxEtapa = (int) $chamamento->selecao_etapa + 1;
+        $abrePrazo = $proxEtapa === Chamamento::ETAPA_PRAZO_RECURSO;
+
+        // Ao publicar o Resultado Provisório, a SCP informa até quando cabe
+        // recurso: o prazo é o do edital, e varia de um para outro.
+        $data = $request->validate([
+            'parecer'           => ['nullable', 'string'],
+            'prazo_recurso_ate' => [$abrePrazo ? 'required' : 'nullable', 'date', 'after_or_equal:today'],
+        ], [
+            'prazo_recurso_ate.required'       => 'Informe o último dia do prazo de recurso previsto no edital.',
+            'prazo_recurso_ate.after_or_equal' => 'O prazo de recurso não pode terminar antes de hoje.',
+        ]);
+
         $proxSetor = Chamamento::ETAPAS_SELECAO[$proxEtapa]['setor'];
 
         $chamamento->selecaoTramitacoes()->create([
@@ -57,11 +68,15 @@ class SelecaoController extends Controller
             'status'      => 'enviado',
         ]);
 
-        $chamamento->update([
+        $chamamento->update(array_merge([
             'selecao_etapa' => $proxEtapa,
             'selecao_setor' => $proxSetor,
             'status'        => 'em_analise',
-        ]);
+        ], $abrePrazo ? ['prazo_recurso_ate' => $data['prazo_recurso_ate']] : []));
+
+        if ($abrePrazo) {
+            Avisos::prazoDeRecursoAberto($chamamento);
+        }
 
         return redirect()->route('chamamentos.selecao', $chamamento)
             ->with('success', 'Seleção encaminhada para ' . Chamamento::SETORES_SELECAO[$proxSetor] . '.');

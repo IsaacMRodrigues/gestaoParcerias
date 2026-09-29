@@ -264,17 +264,18 @@ class Peca extends Model
         'ata_comissao'             => 0,
         'resultado_parcial'        => 0,
         'pub_resultado_parcial'    => 1,
-        'resultado_definitivo'     => 2,
-        'pub_resultado_definitivo' => 3,
-        'termo_homologacao'        => 3,
+        // A etapa 2 é o prazo de recurso das OSCs: não tem documento.
+        'resultado_definitivo'     => 3,
+        'pub_resultado_definitivo' => 4,
+        'termo_homologacao'        => 4,
     ];
 
     /**
      * Quem ASSINA, quando difere de quem preenche: o Termo de Adjudicação e
-     * Homologação é emitido pela SCP (etapa 3) e assinado pelo Prefeito (etapa 4).
+     * Homologação é emitido pela SCP (etapa 4) e assinado pelo Prefeito (etapa 5).
      */
     public const SELECAO_ASSINATURA = [
-        'termo_homologacao' => ['setor' => 'pm', 'etapa' => 4],
+        'termo_homologacao' => ['setor' => 'pm', 'etapa' => 5],
     ];
 
     /**
@@ -1537,9 +1538,9 @@ HTML,
      * Etapa da PRÓXIMA ação pendente desta peça — que nem sempre é a etapa em
      * que ela é preenchida.
      *
-     * O Termo de Adjudicação e Homologação é o caso: a SCP o emite na etapa 4 e
-     * o Prefeito o assina na etapa 5. Agrupado pela etapa de preenchimento, ele
-     * caía no bloco da SCP; com o trâmite já na etapa 5, o Prefeito abria a tela
+     * O Termo de Adjudicação e Homologação é o caso: a SCP o emite na etapa 5 e
+     * o Prefeito o assina na etapa 6. Agrupado pela etapa de preenchimento, ele
+     * caía no bloco da SCP; com o trâmite já na etapa 6, o Prefeito abria a tela
      * e via TODOS os blocos como "etapa vencida", sem nada marcado como dele —
      * justamente a assinatura que ele precisa dar.
      */

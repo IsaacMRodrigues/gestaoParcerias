@@ -188,7 +188,13 @@
             @auth
                 @if($meuRecurso || ($participei && $chamamento->faseRecursalAberta()))
                     <div class="mt-6 border-t border-gray-100 pt-6">
-                        <h2 class="text-sm font-semibold text-gray-700 mb-3">Recurso contra o resultado provisório</h2>
+                        <h2 class="text-sm font-semibold text-gray-700 mb-1">Recurso contra o resultado provisório</h2>
+                        @if($chamamento->prazo_recurso_ate)
+                            <p class="text-xs text-gray-500 mb-3">
+                                Prazo do edital: até {{ $chamamento->prazo_recurso_ate->format('d/m/Y') }}.
+                                @unless($meuRecurso) Recorrer é opcional. @endunless
+                            </p>
+                        @endif
 
                         @if($meuRecurso)
                             <div class="bg-gray-50 border border-gray-200 rounded-lg p-4">
@@ -226,7 +232,7 @@
                             {{-- Membro da OSC vê que há prazo aberto, mas o
                                  protocolo é do responsável legal. --}}
                             <p class="text-sm text-gray-600 bg-gray-50 border border-gray-200 rounded-lg p-4">
-                                A fase recursal está aberta. O recurso precisa ser protocolado pelo
+                                O prazo de recurso está aberto. O recurso precisa ser protocolado pelo
                                 <strong>responsável legal</strong> da organização.
                             </p>
                         @else

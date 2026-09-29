@@ -527,6 +527,20 @@ class Avisos
         ));
     }
 
+    /** Resultado Provisório publicado: as OSCs que concorreram podem recorrer até a data do edital. */
+    public static function prazoDeRecursoAberto(Chamamento $c): void
+    {
+        self::enviar(self::oscsDoChamamento($c), new Aviso(
+            assunto: 'Prazo de recurso aberto — ' . trim(($c->numero ? $c->numero . ' ' : '') . $c->titulo),
+            titulo: 'O Resultado Provisório foi publicado',
+            linhas: [trim(($c->numero ? $c->numero . ' — ' : '') . $c->titulo),
+                'Se a sua organização não concordar com o resultado, pode recorrer até ' . $c->prazo_recurso_ate->format('d/m/Y') . '.',
+                'Recorrer é opcional. O recurso é protocolado pelo responsável legal, na página do chamamento, em PDF.'],
+            url: route('portal.chamamento', $c),
+            botao: 'Ver o chamamento',
+        ));
+    }
+
     public static function chamamentoReaberto(Chamamento $c, string $motivo): void
     {
         self::enviar(self::oscsDoChamamento($c), new Aviso(
