@@ -7,14 +7,10 @@
 </div>
 
 @php $ehProposta = ($tipo ?? $manifestacao?->tipo) === 'proposta'; @endphp
-@if($ehProposta)
-{{-- O fundamento (dispensa ou inexigibilidade) e a Secretaria são decididos
-     pela SCP ao encaminhar — não pela OSC (decisão da gestão, 29/09/2026). --}}
-<p class="text-xs text-gray-500 bg-gray-50 border border-gray-200 rounded-md px-3 py-2">
-    O Setor de Convênios e Parcerias decide o fundamento (dispensa ou inexigibilidade de chamamento)
-    e a Secretaria que vai atender a proposta.
-</p>
-@else
+{{-- Na Nova Proposta o fundamento (dispensa ou inexigibilidade) e a
+     Secretaria são decididos pela SCP ao encaminhar — não pela OSC (decisão
+     da gestão, 29/09/2026). --}}
+@unless($ehProposta)
 <div>
     <x-input-label for="orgao_id" value="Secretaria a que se dirige *" />
     <select name="orgao_id" id="orgao_id" required
@@ -29,7 +25,7 @@
     <p class="mt-1 text-xs text-gray-400">É a Secretaria da área que dirá se há interesse público na parceria.</p>
     <x-input-error :messages="$errors->get('orgao_id')" class="mt-1" />
 </div>
-@endif
+@endunless
 
 <div>
     <x-input-label for="objeto" value="Objeto *" />
