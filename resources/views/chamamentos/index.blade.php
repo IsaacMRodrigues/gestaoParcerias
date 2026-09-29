@@ -8,10 +8,12 @@
                 </p>
                 <h2 class="text-2xl font-bold text-gray-900 mt-0.5">Chamamentos Públicos</h2>
             </div>
-            <a href="{{ route('programas.chamamentos.create', $programa) }}"
-               class="btn btn-primary">
-                + Novo Chamamento
-            </a>
+            @if(\App\Models\Chamamento::cadastroPermitidoA(auth()->user()))
+                <a href="{{ route('programas.chamamentos.create', $programa) }}"
+                   class="btn btn-primary">
+                    + Novo Chamamento
+                </a>
+            @endif
         </div>
     </x-slot>
 
@@ -69,15 +71,17 @@
                                 <td class="px-6 py-4 text-right text-sm font-medium space-x-3 whitespace-nowrap">
                                     <a href="{{ route('chamamentos.selecao', $chamamento) }}"
                                        class="text-gray-600 hover:text-gray-900">Seleção</a>
-                                    <a href="{{ route('programas.chamamentos.edit', [$programa, $chamamento]) }}"
-                                       class="font-semibold text-brand-700 hover:text-brand-800 transition">Editar</a>
-                                    <form action="{{ route('programas.chamamentos.destroy', [$programa, $chamamento]) }}"
-                                          method="POST" class="inline"
-                                          data-confirm="Deseja remover este chamamento?">
-                                        @csrf
-                                        @method('DELETE')
-                                        <button type="submit" class="font-medium text-gray-500 hover:text-red-700 transition">Remover</button>
-                                    </form>
+                                    @if($chamamento->cadastroEditavelPor(auth()->user()))
+                                        <a href="{{ route('programas.chamamentos.edit', [$programa, $chamamento]) }}"
+                                           class="font-semibold text-brand-700 hover:text-brand-800 transition">Editar</a>
+                                        <form action="{{ route('programas.chamamentos.destroy', [$programa, $chamamento]) }}"
+                                              method="POST" class="inline"
+                                              data-confirm="Deseja remover este chamamento?">
+                                            @csrf
+                                            @method('DELETE')
+                                            <button type="submit" class="font-medium text-gray-500 hover:text-red-700 transition">Remover</button>
+                                        </form>
+                                    @endif
                                 </td>
                             </tr>
                         @empty

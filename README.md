@@ -566,6 +566,15 @@ Trazer os demais cenários para `tests/Feature` é uma das [Pendências](#pendê
 Da mais recente para a mais antiga. Cada entrada diz o que mudou, **por quê** e como foi
 conferido — o porquê é o que falta a quem pega o código depois.
 
+- [2026-09-29] **Só a SCP edita o chamamento** (`Chamamento::cadastroPermitidoA`, `ChamamentoController`)
+  - Decisão da gestão. Criar, editar e remover o chamamento (datas de inscrição, número, objeto,
+    situação) passa a ser só da SCP. Até aqui bastava a permissão de chamamentos, que a UG também tem
+  - A UG continua com a Seleção e com o botão de cancelar, que têm rotas próprias. Gerar o chamamento
+    a partir do Planejamento concluído também não mudou: ele nasce dos dados do processo, sem edição
+  - Botões "Novo Chamamento", "Editar", "Remover" e "Editar dados" só aparecem para a SCP. Para a UG,
+    o aviso de período de inscrição em falta diz que a SCP o define
+  - Conferido: 3 testes em `ChamamentoSoScpEditaTest` (2 falham com a trava desligada)
+
 - [2026-09-28] **Página pública do chamamento: só o edital e os anexos** (`PortalController::chamamento`,
   `PortalController::anexoDoEdital`)
   - Decisão da gestão: a consulta pública mostra **só o edital e os anexos dele**. Os documentos da

@@ -206,9 +206,11 @@
                             &larr; Processo de origem {{ $chamamento->processo->numero }}
                         </a>
                     @endif
-                    <a href="{{ route('programas.chamamentos.edit', [$chamamento->programa, $chamamento]) }}" class="text-gray-600 hover:underline">
-                        Editar dados
-                    </a>
+                    @if($chamamento->cadastroEditavelPor(auth()->user()))
+                        <a href="{{ route('programas.chamamentos.edit', [$chamamento->programa, $chamamento]) }}" class="text-gray-600 hover:underline">
+                            Editar dados
+                        </a>
+                    @endif
                     @if($chamamento->tipo === 'chamamento_publico')
                         <a href="{{ route('portal.chamamento', $chamamento) }}" target="_blank" class="text-gray-600 hover:underline">
                             Ver no portal público &rarr;

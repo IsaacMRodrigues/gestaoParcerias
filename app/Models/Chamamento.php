@@ -228,6 +228,22 @@ class Chamamento extends Model
     }
 
     /** Quem prorroga: a SCP, que conduz o chamamento para o Município inteiro. */
+    /**
+     * Quem mexe no cadastro do chamamento — criar, editar, remover: só a SCP
+     * (decisão da gestão, 29/09/2026). A UG segue com a Seleção e com o botão
+     * de cancelar, que têm rotas próprias; o que sai dela é a edição direta de
+     * datas, número, objeto e situação.
+     */
+    public function cadastroEditavelPor(?User $user): bool
+    {
+        return self::cadastroPermitidoA($user);
+    }
+
+    public static function cadastroPermitidoA(?User $user): bool
+    {
+        return $user !== null && $user->setorNoTramite() === 'scp' && $user->can('chamamentos');
+    }
+
     public function prorrogavelPor(?User $user): bool
     {
         return $user !== null && $user->setorNoTramite() === 'scp' && $user->can('chamamentos');

@@ -135,9 +135,13 @@
                         </div>
                         @if($processo->chamamento->tipo === 'chamamento_publico' && ! $processo->chamamento->data_inicio_inscricao)
                             <p class="mt-3 text-sm text-accent-700 bg-accent-50 border border-accent-100 rounded-md px-3 py-2">
-                                ⚠️ Defina o <strong>período de inscrição</strong> no chamamento para abri-lo a propostas das OSCs.
-                                <a href="{{ route('programas.chamamentos.edit', [$processo->chamamento->programa, $processo->chamamento]) }}"
-                                   class="underline font-medium">Definir datas &rarr;</a>
+                                @if($processo->chamamento->cadastroEditavelPor(auth()->user()))
+                                    ⚠️ Defina o <strong>período de inscrição</strong> no chamamento para abri-lo a propostas das OSCs.
+                                    <a href="{{ route('programas.chamamentos.edit', [$processo->chamamento->programa, $processo->chamamento]) }}"
+                                       class="underline font-medium">Definir datas &rarr;</a>
+                                @else
+                                    ⚠️ Falta o <strong>período de inscrição</strong>: a SCP o define no chamamento para abri-lo a propostas das OSCs.
+                                @endif
                             </p>
                         @endif
                     @else

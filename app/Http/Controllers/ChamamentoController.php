@@ -23,11 +23,15 @@ class ChamamentoController extends Controller
 
     public function create(Programa $programa): View
     {
+        $this->somenteScp();
+
         return view('chamamentos.create', compact('programa'));
     }
 
     public function store(ChamamentoRequest $request, Programa $programa): RedirectResponse
     {
+        $this->somenteScp();
+
         $programa->chamamentos()->create($request->validated());
 
         return redirect()->route('programas.chamamentos.index', $programa)
@@ -36,11 +40,15 @@ class ChamamentoController extends Controller
 
     public function edit(Programa $programa, Chamamento $chamamento): View
     {
+        $this->somenteScp();
+
         return view('chamamentos.edit', compact('programa', 'chamamento'));
     }
 
     public function update(ChamamentoRequest $request, Programa $programa, Chamamento $chamamento): RedirectResponse
     {
+        $this->somenteScp();
+
         $dados = $request->validated();
 
         // Cancelado só sai pelo botão de reabrir, com motivo — não pela edição.
@@ -56,6 +64,8 @@ class ChamamentoController extends Controller
 
     public function destroy(Programa $programa, Chamamento $chamamento): RedirectResponse
     {
+        $this->somenteScp();
+
         if ($bloqueio = $this->bloqueioDeExclusao($chamamento)) {
             return $bloqueio;
         }
@@ -64,6 +74,12 @@ class ChamamentoController extends Controller
 
         return redirect()->route('programas.chamamentos.index', $programa)
             ->with('success', 'Chamamento removido com sucesso.');
+    }
+
+    /** O cadastro do chamamento é da SCP (ver Chamamento::cadastroPermitidoA). */
+    private function somenteScp(): void
+    {
+        abort_unless(Chamamento::cadastroPermitidoA(auth()->user()), 403, 'Só a SCP edita o chamamento.');
     }
 
     /**
