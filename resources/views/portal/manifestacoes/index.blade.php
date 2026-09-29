@@ -33,6 +33,7 @@
                     <span class="min-w-0 flex-1">
                         <span class="block text-sm font-semibold text-gray-900 group-hover:text-brand-800">{{ $m->titulo }}</span>
                         <span class="block text-xs text-gray-500 mt-0.5">
+                            @if($m->protocolo)Protocolo nº {{ $m->protocolo }} · @endif
                             {{ $m->orgao?->name ?? 'Aguardando encaminhamento da SCP' }} · R$ {{ number_format($m->valor_solicitado, 2, ',', '.') }}
                         </span>
                         @if($m->status === 'indeferida' && $m->decisao_motivo)

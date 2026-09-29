@@ -28,6 +28,7 @@
                                     <span class="min-w-0">
                                         <span class="block text-sm font-semibold text-brand-700">{{ $np->titulo }}</span>
                                         <span class="block text-xs text-gray-500">
+                                            @if($np->protocolo)Protocolo nº {{ $np->protocolo }} · @endif
                                             {{ $np->osc?->name }} ·
                                             {{ \App\Models\ManifestacaoInteresse::FUNDAMENTOS_PEDIDO[$np->fundamento_pedido] ?? 'Fundamento a definir' }} ·
                                             {{ $np->orgao?->name ?? 'Secretaria a definir' }}

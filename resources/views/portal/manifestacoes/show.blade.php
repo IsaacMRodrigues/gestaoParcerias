@@ -27,6 +27,9 @@
                 </span>
             </div>
             <p class="text-sm text-gray-500 mt-0.5">
+                @if($manifestacao->protocolo)
+                    <strong class="text-gray-700">Protocolo nº {{ $manifestacao->protocolo }}</strong> ·
+                @endif
                 @if($manifestacao->ehNovaProposta())
                     {{ $manifestacao->tipoLabel() }} ·
                     {{ \App\Models\ManifestacaoInteresse::FUNDAMENTOS_PEDIDO[$manifestacao->fundamento_pedido] ?? 'fundamento a definir pela SCP' }} ·

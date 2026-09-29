@@ -7,6 +7,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Support\Facades\DB;
 
 /**
  * Manifestação de Interesse — a OSC propõe sem chamamento aberto.
@@ -29,7 +30,7 @@ class ManifestacaoInteresse extends Model
     }
 
     protected $fillable = [
-        'tipo', 'fundamento_pedido',
+        'tipo', 'protocolo', 'fundamento_pedido',
         'osc_id', 'orgao_id', 'titulo', 'objeto', 'justificativa', 'publico_alvo',
         'descricao_realidade', 'objetivos', 'objetivos_especificos', 'metodologia', 'valor_outras_fontes', 'vigencia_dias',
         'atuacao_rede', 'rede_cnpj', 'rede_razao_social', 'rede_municipio', 'rede_data_termo',
@@ -109,6 +110,35 @@ class ManifestacaoInteresse extends Model
         'dispensa'        => 'Dispensa de chamamento público (art. 30)',
         'inexigibilidade' => 'Inexigibilidade de chamamento público (art. 31)',
     ];
+
+    /**
+     * Próximo número de protocolo: por ano, 2026/0001, um livro só para a
+     * manifestação e a Nova Proposta. Vem do maior número do ano, e não de
+     * uma contagem; a trava de linha evita dois envios simultâneos com o
+     * mesmo número (e o índice único é a última garantia).
+     */
+    public static function proximoProtocolo(): string
+    {
+        $ano = now()->year;
+
+        $ultimo = static::where('protocolo', 'like', $ano . '/%')
+            ->orderByDesc('protocolo')->lockForUpdate()->value('protocolo');
+
+        $sequencial = $ultimo ? ((int) substr($ultimo, 5)) + 1 : 1;
+
+        return $ano . '/' . str_pad((string) $sequencial, 4, '0', STR_PAD_LEFT);
+    }
+
+    /** Envia: protocola (se ainda não tem número) e entrega ao setor. */
+    public function enviar(array $tramite): void
+    {
+        DB::transaction(function () use ($tramite) {
+            $this->update($tramite + [
+                'submetida_em' => now(),
+                'protocolo'    => $this->protocolo ?? self::proximoProtocolo(),
+            ]);
+        });
+    }
 
     public function ehNovaProposta(): bool
     {

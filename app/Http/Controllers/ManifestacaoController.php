@@ -190,10 +190,11 @@ class ManifestacaoController extends Controller
         // Nova Proposta: vai primeiro à SCP, que escolhe a Unidade Gestora que
         // a atende (ManifestacaoAnaliseController::encaminhar).
         if ($manifestacao->ehNovaProposta()) {
-            $manifestacao->update(['status' => 'submetida', 'setor_atual' => 'scp', 'submetida_em' => now()]);
+            $manifestacao->enviar(['status' => 'submetida', 'setor_atual' => 'scp']);
 
             return redirect()->route('portal.manifestacoes.show', $manifestacao)
-                ->with('success', 'Proposta enviada ao Setor de Convênios e Parcerias, que a encaminhará à Unidade Gestora adequada.');
+                ->with('success', 'Proposta enviada — protocolo nº ' . $manifestacao->protocolo
+                    . '. O Setor de Convênios e Parcerias a encaminhará à Unidade Gestora adequada.');
         }
 
         // Vai direto à Unidade Gestora da Secretaria escolhida (homologação,
@@ -202,15 +203,11 @@ class ManifestacaoController extends Controller
         // detalhe dizia "está com Administração" sem dizer que era a UG. A SCP
         // segue decidindo depois do parecer da UG, e pode indeferir a qualquer
         // momento. O status 'submetida' fica só para as antigas.
-        $manifestacao->update([
-            'status'       => 'em_analise',
-            'setor_atual'  => 'ug',
-            'submetida_em' => now(),
-        ]);
+        $manifestacao->enviar(['status' => 'em_analise', 'setor_atual' => 'ug']);
 
         return redirect()->route('portal.manifestacoes.show', $manifestacao)
-            ->with('success', 'Manifestação enviada à Unidade Gestora — '
-                . $manifestacao->orgao->name . ', que fará a análise.');
+            ->with('success', 'Manifestação enviada — protocolo nº ' . $manifestacao->protocolo
+                . '. A Unidade Gestora — ' . $manifestacao->orgao->name . ' — fará a análise.');
     }
 
     /**

@@ -566,6 +566,14 @@ Trazer os demais cenários para `tests/Feature` é uma das [Pendências](#pendê
 Da mais recente para a mais antiga. Cada entrada diz o que mudou, **por quê** e como foi
 conferido — o porquê é o que falta a quem pega o código depois.
 
+- [2026-09-29] **Protocolo da manifestação de interesse e da Nova Proposta** (`ManifestacaoInteresse::proximoProtocolo`)
+  - Pedido da gestão. Ao ser enviada, cada uma recebe um número de protocolo, por ano e no formato dos
+    chamados (2026/0001), num livro só para as duas. O número vem do maior do ano (não de contagem), com
+    trava de linha e índice único; reenvio não troca o número
+  - Aparece na mensagem de envio, no cabeçalho e nas listas do portal, nas telas da SCP/UG (Manifestações e
+    Propostas) e no aviso por e-mail ao setor. As já enviadas ganharam número na ordem de envio (migração)
+  - Conferido: 2 testes em `ProtocoloDaManifestacaoTest` (sequência entre os dois tipos, virada do ano)
+
 - [2026-09-29] **Plano de Trabalho à risca do modelo da cliente** (`Docs. Desenvolvimento/Planodetrabalho.docx`,
   `PlanoDocumento`, `plano/_editor`, migração `plano_de_trabalho_conforme_o_modelo_da_cliente`)
   - Pedido da cliente: seguir o modelo à risca, sem novidades. A tela do plano e o documento impresso

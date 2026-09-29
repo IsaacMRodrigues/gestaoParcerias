@@ -412,7 +412,7 @@ class Avisos
         self::enviar(
             self::doSetor($m->setor_atual, fn (User $u) => $u->can('chamamentos')
                 && ManifestacaoInteresse::visiveisPara($u)->whereKey($m->id)->exists()),
-            self::avisoDeVez($m->tipoLabel(), $m->titulo, $m->ehNovaProposta()
+            self::avisoDeVez($m->tipoLabel(), trim(($m->protocolo ? 'Protocolo nº ' . $m->protocolo . ' — ' : '') . $m->titulo), $m->ehNovaProposta()
                     ? ($m->status === 'submetida' ? 'Encaminhar à Unidade Gestora que vai atendê-la.' : 'Deferir ou indeferir a proposta.')
                     : ManifestacaoInteresse::STATUS[$m->status] . '.',
                 $m->osc?->name, route('manifestacoes.show', $m), false),

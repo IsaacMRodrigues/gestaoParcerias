@@ -24,6 +24,9 @@
                 @endif
             </p>
             <h2 class="text-2xl font-bold text-gray-900 mt-0.5">{{ $manifestacao->titulo }}</h2>
+            @if($manifestacao->protocolo)
+                <p class="text-sm text-gray-500 mt-0.5">Protocolo nº <strong class="text-gray-700">{{ $manifestacao->protocolo }}</strong></p>
+            @endif
         </div>
     </x-slot>
 
