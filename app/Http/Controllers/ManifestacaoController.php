@@ -212,8 +212,9 @@ class ManifestacaoController extends Controller
             'objeto'               => ['required', 'string'],
             'justificativa'        => ['required', 'string'],
             'publico_alvo'         => ['nullable', 'string'],
-            'valor_solicitado'     => ['required', 'numeric', 'min:0'],
-            'valor_proprio'        => ['nullable', 'numeric', 'min:0'],
+            // Na Nova Proposta os valores vão no plano de trabalho, não aqui.
+            'valor_solicitado'     => $proposta ? ['exclude'] : ['required', 'numeric', 'min:0'],
+            'valor_proprio'        => $proposta ? ['exclude'] : ['nullable', 'numeric', 'min:0'],
             'data_inicio_prevista' => ['nullable', 'date'],
             'data_fim_prevista'    => ['nullable', 'date', 'after_or_equal:data_inicio_prevista'],
         ], [

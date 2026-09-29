@@ -61,7 +61,7 @@ class NovaPropostaTest extends TestCase
     {
         $this->actingAs($this->rl)->post('/portal/novas-propostas', [
             'titulo' => 'Oficinas de música',
-            'objeto' => 'x', 'justificativa' => 'x', 'valor_solicitado' => 8000,
+            'objeto' => 'x', 'justificativa' => 'x',
         ])->assertSessionHasNoErrors();
 
         $p = ManifestacaoInteresse::where('titulo', 'Oficinas de música')->sole();
@@ -70,6 +70,11 @@ class NovaPropostaTest extends TestCase
         $p->desembolsos()->create(['ano' => 2026, 'mes' => 10]);
         Documento::forceCreate(['manifestacao_id' => $p->id, 'nome_original' => 'estatuto.pdf', 'path' => 'x.pdf',
             'mime_type' => 'application/pdf', 'tamanho' => 1, 'uploaded_by' => $this->rl->id]);
+
+        // O valor não vem do primeiro formulário: sem lançá-lo no plano de
+        // trabalho, a proposta não sai.
+        $this->actingAs($this->rl)->patch("/portal/manifestacoes/{$p->id}/submeter")->assertStatus(422);
+        $p->forceFill(['valor_solicitado' => 8000])->save();
 
         $this->actingAs($this->rl)->patch("/portal/manifestacoes/{$p->id}/submeter")->assertSessionHas('success');
 
@@ -95,11 +100,12 @@ class NovaPropostaTest extends TestCase
     {
         $this->actingAs($this->rl)->get('/portal/novas-propostas')->assertOk()->assertSee('Nova Proposta');
         $this->actingAs($this->rl)->get('/portal/novas-propostas/nova')->assertOk()
-            ->assertDontSee('name="fundamento_pedido"', false)->assertDontSee('name="orgao_id"', false);
+            ->assertDontSee('name="fundamento_pedido"', false)->assertDontSee('name="orgao_id"', false)
+            ->assertDontSee('name="valor_solicitado"', false)->assertDontSee('name="valor_proprio"', false);
 
         // Mesmo que mande, não grava: quem decide é a SCP.
         $this->actingAs($this->rl)->post('/portal/novas-propostas', [
-            'titulo' => 'Tentativa', 'fundamento_pedido' => 'dispensa', 'objeto' => 'x', 'justificativa' => 'x', 'valor_solicitado' => 1,
+            'titulo' => 'Tentativa', 'fundamento_pedido' => 'dispensa', 'objeto' => 'x', 'justificativa' => 'x',
         ])->assertSessionHasNoErrors();
         $this->assertNull(ManifestacaoInteresse::where('titulo', 'Tentativa')->value('fundamento_pedido'));
     }
