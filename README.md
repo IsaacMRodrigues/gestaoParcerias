@@ -566,6 +566,18 @@ Trazer os demais cenários para `tests/Feature` é uma das [Pendências](#pendê
 Da mais recente para a mais antiga. Cada entrada diz o que mudou, **por quê** e como foi
 conferido — o porquê é o que falta a quem pega o código depois.
 
+- [2026-09-29] **O recurso é julgado pela Comissão de Seleção** (`Recurso::julgavelPor`, `propostas/show`)
+  - Decisão da gestão. Quem julga o recurso contra o resultado provisório (provido, parcialmente provido
+    ou improvido, com a fundamentação que vai à OSC) passa a ser a **Comissão de Seleção** da Secretaria
+    do chamamento — não mais "o setor com a Seleção" (a UG). A UG só emite o Resultado Definitivo depois
+    que todos estiverem julgados (pendência "recurso sem julgamento da Comissão de Seleção")
+  - O recurso aparece na **tela da proposta** da OSC que o protocolou, que a Comissão já usa para os
+    pareceres (ela não tem acesso à tela de Seleção). Durante o prazo de recurso ela vê o recurso, mas só
+    julga na etapa seguinte. Ao abrir essa etapa, os membros da Comissão da Secretaria recebem e-mail
+  - A tela de Seleção da UG mostra os recursos só para leitura, com o link para a proposta
+  - Conferido: 4 testes em `RecursoPelaComissaoTest` (3 falham se a UG puder julgar); `PrazoDeRecursoTest`
+    atualizado
+
 - [2026-09-29] **Protocolo da manifestação de interesse e da Nova Proposta** (`ManifestacaoInteresse::proximoProtocolo`)
   - Pedido da gestão. Ao ser enviada, cada uma recebe um número de protocolo, por ano e no formato dos
     chamados (2026/0001), num livro só para as duas. O número vem do maior do ano (não de contagem), com

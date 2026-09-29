@@ -78,6 +78,10 @@ class SelecaoController extends Controller
             Avisos::prazoDeRecursoAberto($chamamento);
         }
 
+        if ($proxEtapa === Chamamento::ETAPA_RESPOSTA_RECURSOS && $chamamento->recursosSemResposta() > 0) {
+            Avisos::recursosParaAComissao($chamamento);
+        }
+
         return redirect()->route('chamamentos.selecao', $chamamento)
             ->with('success', 'Seleção encaminhada para ' . Chamamento::SETORES_SELECAO[$proxSetor] . '.');
     }

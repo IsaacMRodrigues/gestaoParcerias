@@ -541,6 +541,29 @@ class Avisos
         ));
     }
 
+    /** Findo o prazo, a Comissão de Seleção da Secretaria tem recursos a julgar. */
+    public static function recursosParaAComissao(Chamamento $c): void
+    {
+        $recursos = $c->recursos()->whereNull('respondido_em')->with('osc')->get();
+        $orgao = $c->programa?->orgao_id;
+
+        self::enviar(
+            User::role('comissao_selecao')->where('status', true)
+                ->get()->filter(fn (User $u) => $u->orgao_id === $orgao),
+            new Aviso(
+                assunto: 'Recursos a julgar — ' . trim(($c->numero ? $c->numero . ' ' : '') . $c->titulo),
+                titulo: 'A Comissão de Seleção tem recursos a julgar',
+                linhas: array_merge(
+                    [trim(($c->numero ? $c->numero . ' — ' : '') . $c->titulo), 'O prazo de recurso terminou. Recursos protocolados:'],
+                    $recursos->map(fn ($r) => '• ' . ($r->osc?->name ?? 'OSC'))->all(),
+                    ['Cada recurso está na tela da proposta da OSC que o protocolou.'],
+                ),
+                url: $recursos->first()?->proposta_id ? route('propostas.show', $recursos->first()->proposta_id) : route('propostas.index'),
+                botao: 'Abrir a proposta',
+            ),
+        );
+    }
+
     public static function chamamentoReaberto(Chamamento $c, string $motivo): void
     {
         self::enviar(self::oscsDoChamamento($c), new Aviso(

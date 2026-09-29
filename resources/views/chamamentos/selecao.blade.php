@@ -471,7 +471,7 @@
                             <p class="text-xs text-gray-400 mt-0.5">
                                 Protocolados pelas OSCs contra o resultado provisório
                                 @if($chamamento->prazo_recurso_ate) até {{ $chamamento->prazo_recurso_ate->format('d/m/Y') }}@endif.
-                                Encerrado o prazo, cada recurso precisa de resposta antes do resultado definitivo.
+                                Encerrado o prazo, a Comissão de Seleção julga cada recurso antes do resultado definitivo.
                             </p>
                         </div>
                         @php $semResp = $chamamento->recursos->whereNull('respondido_em')->count(); @endphp
@@ -518,7 +518,7 @@
                             @if($rec->respondido())
                                 <div class="mt-2 border-l-2 border-brand-200 pl-3">
                                     <p class="text-xs font-medium text-gray-500 uppercase tracking-wide">
-                                        Resposta da Unidade Gestora
+                                        Julgamento da Comissão de Seleção
                                     </p>
                                     <p class="text-sm text-gray-700 mt-1 whitespace-pre-line">{{ $rec->resposta }}</p>
                                     <p class="text-xs text-gray-400 mt-1">
@@ -528,27 +528,15 @@
                                         @endif
                                     </p>
                                 </div>
-                            @elseif($chamamento->respostaDeRecursosAberta() && auth()->user()->setor === $chamamento->selecao_setor)
-                                <form action="{{ route('recursos.responder', $rec) }}" method="POST" class="mt-3 space-y-2">
-                                    @csrf
-                                    <div class="flex flex-wrap items-center gap-3">
-                                        <label class="text-xs font-medium text-gray-500">Resultado</label>
-                                        <select name="resultado" required
-                                                class="border-gray-300 rounded-md shadow-sm text-sm focus:ring-brand-500 focus:border-brand-500">
-                                            <option value="">Selecione…</option>
-                                            @foreach(\App\Models\Recurso::RESULTADOS as $k => $lbl)
-                                                <option value="{{ $k }}">{{ $lbl }}</option>
-                                            @endforeach
-                                        </select>
-                                    </div>
-                                    <textarea name="resposta" rows="3" required
-                                              placeholder="Fundamentação da decisão sobre o recurso"
-                                              class="block w-full border-gray-300 rounded-md shadow-sm text-sm focus:ring-brand-500 focus:border-brand-500"></textarea>
-                                    <button type="submit"
-                                            class="btn btn-primary btn-sm">
-                                        Responder recurso
-                                    </button>
-                                </form>
+                            @elseif($chamamento->respostaDeRecursosAberta())
+                                {{-- Quem julga é a Comissão de Seleção, na tela da proposta
+                                     (decisão da gestão, 29/09/2026). --}}
+                                <p class="mt-2 text-xs text-gray-500">
+                                    Aguardando o julgamento da Comissão de Seleção, na tela da proposta.
+                                    @if($rec->proposta_id)
+                                        <a href="{{ route('propostas.show', $rec->proposta_id) }}" class="text-brand-600 hover:underline">Abrir a proposta</a>
+                                    @endif
+                                </p>
                             @endif
                         </div>
                     @empty

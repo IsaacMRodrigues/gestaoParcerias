@@ -224,7 +224,7 @@
                                     </div>
                                 @else
                                     <p class="text-xs text-gray-500 mt-2">
-                                        Aguardando a análise da Unidade Gestora. A resposta aparecerá aqui.
+                                        Aguardando o julgamento da Comissão de Seleção. A resposta aparecerá aqui.
                                     </p>
                                 @endif
                             </div>

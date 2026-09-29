@@ -133,6 +133,73 @@
             </div>
             @endif
 
+            {{-- Recurso contra o resultado provisório: a Comissão de Seleção o julga
+                 aqui, na proposta da OSC que o protocolou (decisão da gestão,
+                 29/09/2026). --}}
+            @foreach($proposta->recursos as $rec)
+                @php $cor = \App\Models\Recurso::RESULTADO_COLORS[$rec->resultado] ?? 'gray'; @endphp
+                <div class="bg-white rounded-xl border border-gray-200 shadow-sm p-6">
+                    <div class="flex items-start justify-between gap-3">
+                        <div>
+                            <h3 class="text-base font-semibold text-gray-800">Recurso contra o resultado provisório</h3>
+                            <p class="text-xs text-gray-400 mt-0.5">
+                                Protocolado pela OSC em {{ $rec->protocolado_em?->format('d/m/Y H:i') }}
+                                @if($rec->temArquivo())
+                                    · <a href="{{ route('recursos.download', $rec) }}" class="text-brand-600 hover:underline">{{ $rec->arquivo_nome }} ({{ $rec->tamanhoFormatado() }})</a>
+                                @endif
+                            </p>
+                        </div>
+                        @if($rec->respondido())
+                            <span class="px-2 py-1 text-xs font-medium bg-{{ $cor }}-100 text-{{ $cor }}-800 rounded-full whitespace-nowrap">{{ $rec->resultadoLabel() }}</span>
+                        @else
+                            <span class="px-2 py-1 text-xs font-medium bg-accent-100 text-accent-800 rounded-full whitespace-nowrap">Aguardando julgamento</span>
+                        @endif
+                    </div>
+
+                    <div class="mt-3 bg-gray-50 rounded-md p-3">
+                        <p class="text-xs font-medium text-gray-500 uppercase tracking-wide">Fundamentação da OSC</p>
+                        <p class="text-sm text-gray-700 mt-1 whitespace-pre-line">{{ $rec->fundamentacao }}</p>
+                    </div>
+
+                    @if($rec->respondido())
+                        <div class="mt-3 border-l-2 border-brand-200 pl-3">
+                            <p class="text-xs font-medium text-gray-500 uppercase tracking-wide">Julgamento da Comissão de Seleção</p>
+                            <p class="text-sm text-gray-700 mt-1 whitespace-pre-line">{{ $rec->resposta }}</p>
+                            <p class="text-xs text-gray-400 mt-1">
+                                {{ $rec->respondente->name ?? '—' }} · {{ $rec->respondido_em->format('d/m/Y H:i') }}
+                                @if($rec->codigo_validacao) · código <strong class="font-mono">{{ $rec->codigo_validacao }}</strong> @endif
+                            </p>
+                        </div>
+                    @elseif($rec->julgavelPor(auth()->user()))
+                        <form action="{{ route('recursos.responder', $rec) }}" method="POST" class="mt-4 space-y-2"
+                              data-confirm="Registrar o julgamento? A resposta vai para a OSC e não pode ser alterada.">
+                            @csrf
+                            <div class="flex flex-wrap items-center gap-3">
+                                <label for="resultado_{{ $rec->id }}" class="text-xs font-medium text-gray-500">Resultado</label>
+                                <select name="resultado" id="resultado_{{ $rec->id }}" required
+                                        class="border-gray-300 rounded-md shadow-sm text-sm focus:ring-brand-500 focus:border-brand-500">
+                                    <option value="">Selecione…</option>
+                                    @foreach(\App\Models\Recurso::RESULTADOS as $k => $lbl)
+                                        <option value="{{ $k }}" @selected(old('resultado') === $k)>{{ $lbl }}</option>
+                                    @endforeach
+                                </select>
+                            </div>
+                            <textarea name="resposta" rows="4" required placeholder="Fundamentação do julgamento"
+                                      class="block w-full border-gray-300 rounded-md shadow-sm text-sm focus:ring-brand-500 focus:border-brand-500">{{ old('resposta') }}</textarea>
+                            <x-input-error :messages="$errors->get('resposta')" class="mt-1" />
+                            <button type="submit" class="btn btn-primary btn-sm">Julgar recurso</button>
+                        </form>
+                    @elseif($rec->chamamento?->faseRecursalAberta())
+                        <p class="mt-3 text-xs text-gray-500">
+                            O prazo de recurso ainda corre (até {{ $rec->chamamento->prazo_recurso_ate->format('d/m/Y') }}).
+                            A Comissão de Seleção julga depois dele.
+                        </p>
+                    @elseif($rec->comissaoPodeVer(auth()->user()) === false && $rec->chamamento?->respostaDeRecursosAberta())
+                        <p class="mt-3 text-xs text-gray-500">Aguardando o julgamento da Comissão de Seleção.</p>
+                    @endif
+                </div>
+            @endforeach
+
             {{-- Dados da Proposta --}}
             <div class="bg-white rounded-xl border border-gray-200 shadow-sm p-6">
                 <h3 class="text-base font-semibold text-gray-800 mb-4">Dados da Proposta</h3>

@@ -61,6 +61,27 @@ class Recurso extends Model
         return $this->belongsTo(User::class, 'respondido_por');
     }
 
+    /**
+     * Quem julga o recurso é a Comissão de Seleção da Secretaria do chamamento
+     * (decisão da gestão, 29/09/2026), na etapa seguinte ao prazo de recurso.
+     * Julgado, não se julga de novo.
+     */
+    public function julgavelPor(?User $user): bool
+    {
+        return $user !== null
+            && !$this->respondido()
+            && $this->chamamento?->respostaDeRecursosAberta()
+            && $this->comissaoPodeVer($user);
+    }
+
+    /** Membro da Comissão de Seleção que enxerga a proposta recorrente. */
+    public function comissaoPodeVer(?User $user): bool
+    {
+        return $user !== null
+            && $user->hasRole('comissao_selecao')
+            && (bool) $this->proposta?->visivelPara($user);
+    }
+
     public function respondido(): bool
     {
         return !is_null($this->respondido_em);

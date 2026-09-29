@@ -12,8 +12,8 @@ use Symfony\Component\HttpFoundation\StreamedResponse;
 
 /**
  * Recursos contra o resultado provisório: a OSC protocola pelo portal (como
- * prevê o modelo do Resultado Provisório) e a Unidade Gestora responde antes de
- * emitir o resultado definitivo.
+ * prevê o modelo do Resultado Provisório) e a Comissão de Seleção os julga
+ * antes de a Unidade Gestora emitir o resultado definitivo.
  */
 class RecursoController extends Controller
 {
@@ -71,21 +71,22 @@ class RecursoController extends Controller
         ]);
 
         return back()->with('success',
-            'Recurso protocolado. A Unidade Gestora analisará e publicará a resposta aqui.');
+            'Recurso protocolado. A Comissão de Seleção o julgará depois do prazo, e a resposta aparecerá aqui.');
     }
 
     /**
-     * A Unidade Gestora responde ao recurso — na etapa seguinte ao prazo de
-     * recurso, quando nenhum outro pode mais chegar.
+     * A Comissão de Seleção julga o recurso (decisão da gestão, 29/09/2026) —
+     * na etapa seguinte ao prazo de recurso, quando nenhum outro pode mais
+     * chegar. A resposta vai à OSC; a UG só emite o Resultado Definitivo
+     * depois que todos estiverem julgados.
      */
     public function responder(Request $request, Recurso $recurso): RedirectResponse
     {
-        $chamamento = $recurso->chamamento;
-
-        abort_unless(auth()->user()->setor === $chamamento->selecao_setor, 403,
-            'Apenas o setor que está com a Seleção pode responder aos recursos.');
-        abort_unless($chamamento->respostaDeRecursosAberta(), 422,
-            'A resposta aos recursos é feita na etapa seguinte ao prazo de recurso.');
+        abort_unless($recurso->comissaoPodeVer(auth()->user()), 403,
+            'O recurso é julgado pela Comissão de Seleção da Secretaria do chamamento.');
+        abort_if($recurso->respondido(), 422, 'Este recurso já foi julgado.');
+        abort_unless($recurso->chamamento->respostaDeRecursosAberta(), 422,
+            'O julgamento dos recursos é feito na etapa seguinte ao prazo de recurso.');
 
         $data = $request->validate([
             'resultado' => ['required', Rule::in(array_keys(Recurso::RESULTADOS))],
@@ -105,7 +106,7 @@ class RecursoController extends Controller
         ]);
 
         return back()->with('success',
-            'Resposta registrada e disponibilizada à OSC (' . $recurso->resultadoLabel() . ').');
+            'Recurso julgado e resposta disponibilizada à OSC (' . $recurso->resultadoLabel() . ').');
     }
 
     /**
@@ -116,7 +117,7 @@ class RecursoController extends Controller
         $user = auth()->user();
         $daOsc = $user->ehRepresentanteOsc() && $user->osc->id === $recurso->osc_id;
 
-        abort_unless($daOsc || $user->can('chamamentos'), 403);
+        abort_unless($daOsc || $user->can('chamamentos') || $recurso->comissaoPodeVer($user), 403);
         abort_unless($recurso->arquivo_path && Storage::disk('local')->exists($recurso->arquivo_path), 404);
 
         return Storage::disk('local')->download($recurso->arquivo_path, $recurso->arquivo_nome);

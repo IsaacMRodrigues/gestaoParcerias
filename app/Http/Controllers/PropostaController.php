@@ -38,7 +38,8 @@ class PropostaController extends Controller
     public function show(Proposta $proposta): View
     {
         $proposta->load(['chamamento.programa', 'osc', 'metas.etapas', 'planoItens', 'desembolsos',
-            'contrapartidas', 'equipe', 'pareceres.diligencias', 'documentos.uploader']);
+            'contrapartidas', 'equipe', 'pareceres.diligencias', 'documentos.uploader',
+            'recursos.chamamento', 'recursos.respondente']);
 
         return view('propostas.show', compact('proposta'));
     }

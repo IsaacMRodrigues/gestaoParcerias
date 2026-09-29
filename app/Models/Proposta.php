@@ -48,6 +48,12 @@ class Proposta extends Model
         'cancelada'     => 'red',
     ];
 
+    /** Recurso da OSC contra o resultado provisório do chamamento (um por OSC). */
+    public function recursos(): \Illuminate\Database\Eloquent\Relations\HasMany
+    {
+        return $this->hasMany(Recurso::class)->latest('id');
+    }
+
     protected $fillable = [
         'chamamento_id', 'osc_id', 'titulo', 'objeto', 'justificativa',
         'descricao_realidade', 'publico_alvo', 'objetivos', 'objetivos_especificos', 'metodologia',

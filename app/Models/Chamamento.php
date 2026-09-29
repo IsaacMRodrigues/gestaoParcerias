@@ -96,7 +96,7 @@ class Chamamento extends Model
         ['setor' => 'ug',  'acao' => 'Analisar as propostas: emitir o Relatório da Comissão, a Ata e o Resultado Provisório (assinar) e encaminhar à SCP'],
         ['setor' => 'scp', 'acao' => 'Anexar o comprovante de publicação do Resultado Provisório, informar o prazo de recurso do edital e devolver à UG'],
         ['setor' => 'ug',  'acao' => 'Prazo de recurso (opcional para a OSC): as OSCs podem recorrer do Resultado Provisório até a data do edital; findo o prazo, encerrar a etapa'],
-        ['setor' => 'ug',  'acao' => 'Responder os recursos (se houver) e emitir o Resultado Definitivo (assinar), encaminhando à SCP'],
+        ['setor' => 'ug',  'acao' => 'A Comissão de Seleção julga os recursos (se houver); a UG emite o Resultado Definitivo (assinar), encaminhando à SCP'],
         ['setor' => 'scp', 'acao' => 'Anexar o comprovante de publicação do Resultado Definitivo e emitir o Termo de Adjudicação e Homologação'],
         ['setor' => 'pm',  'acao' => 'Assinar o Termo de Adjudicação e Homologação (encerra a Seleção)'],
     ];
@@ -433,9 +433,9 @@ class Chamamento extends Model
         // Todo recurso protocolado precisa de resposta antes do resultado
         // definitivo (Fluxo Seleção: "analisa os recursos … emite resposta").
         if ($etapa === self::ETAPA_RESPOSTA_RECURSOS && ($semResposta = $this->recursosSemResposta()) > 0) {
-            $pend[] = $semResposta === 1
-                ? '1 recurso sem resposta'
-                : "{$semResposta} recursos sem resposta";
+            $pend[] = ($semResposta === 1
+                ? '1 recurso sem julgamento'
+                : "{$semResposta} recursos sem julgamento") . ' da Comissão de Seleção';
         }
 
         foreach ($exigidas[$etapa] ?? [] as $chave) {
