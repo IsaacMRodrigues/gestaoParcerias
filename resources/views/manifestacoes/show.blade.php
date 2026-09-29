@@ -17,7 +17,7 @@
             <p class="text-sm text-gray-500">
                 @if($novaProposta)
                     <a href="{{ route('propostas.index') }}" class="hover:underline">Propostas</a>
-                    &rsaquo; Nova Proposta ({{ \App\Models\ManifestacaoInteresse::FUNDAMENTOS_PEDIDO[$manifestacao->fundamento_pedido] ?? '' }})
+                    &rsaquo; Nova Proposta @if($manifestacao->fundamento_pedido)({{ \App\Models\ManifestacaoInteresse::FUNDAMENTOS_PEDIDO[$manifestacao->fundamento_pedido] ?? '' }})@endif
                 @else
                     <a href="{{ route('manifestacoes.index') }}" class="hover:underline">Manifestações de Interesse</a>
                     &rsaquo; Análise
@@ -156,7 +156,7 @@
                         <div>
                             <h3 class="text-base font-semibold text-gray-800">Encaminhar à Unidade Gestora</h3>
                             <p class="text-xs text-gray-500 mt-0.5 mb-3">
-                                Escolha a Secretaria cuja Unidade Gestora vai atender a proposta — é ela que defere ou indefere.
+                                Decida o fundamento e escolha a Secretaria cuja Unidade Gestora vai atender a proposta — é ela que defere ou indefere.
                             </p>
                             <form action="{{ route('manifestacoes.encaminhar', $manifestacao) }}" method="POST" class="flex flex-wrap items-end gap-3">
                                 @csrf
@@ -170,6 +170,17 @@
                                         @endforeach
                                     </select>
                                     <x-input-error :messages="$errors->get('orgao_id')" class="mt-1" />
+                                </div>
+                                <div>
+                                    <x-input-label for="fundamento_pedido" value="Fundamento *" />
+                                    <select name="fundamento_pedido" id="fundamento_pedido" required
+                                            class="mt-1 block w-72 border-gray-300 rounded-md shadow-sm text-sm focus:ring-brand-500 focus:border-brand-500">
+                                        <option value="">Selecione…</option>
+                                        @foreach(\App\Models\ManifestacaoInteresse::FUNDAMENTOS_PEDIDO as $chave => $rotulo)
+                                            <option value="{{ $chave }}" @selected(old('fundamento_pedido', $manifestacao->fundamento_pedido) === $chave)>{{ $rotulo }}</option>
+                                        @endforeach
+                                    </select>
+                                    <x-input-error :messages="$errors->get('fundamento_pedido')" class="mt-1" />
                                 </div>
                                 <button class="btn btn-primary">Encaminhar</button>
                             </form>

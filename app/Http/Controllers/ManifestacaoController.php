@@ -204,11 +204,10 @@ class ManifestacaoController extends Controller
     private function validarDados(Request $request, bool $proposta = false): array
     {
         return $request->validate([
-            // Na Nova Proposta a Secretaria é da SCP escolher; a OSC informa o fundamento.
+            // Na Nova Proposta a SCP escolhe a Secretaria e o fundamento ao
+            // encaminhar; a OSC não informa nenhum dos dois.
             'orgao_id'             => $proposta ? ['exclude'] : ['required', 'exists:orgaos,id'],
-            'fundamento_pedido'    => $proposta
-                ? ['required', \Illuminate\Validation\Rule::in(array_keys(ManifestacaoInteresse::FUNDAMENTOS_PEDIDO))]
-                : ['exclude'],
+            'fundamento_pedido'    => ['exclude'],
             'titulo'               => ['required', 'string', 'max:255'],
             'objeto'               => ['required', 'string'],
             'justificativa'        => ['required', 'string'],
@@ -219,7 +218,6 @@ class ManifestacaoController extends Controller
             'data_fim_prevista'    => ['nullable', 'date', 'after_or_equal:data_inicio_prevista'],
         ], [
             'orgao_id.required'      => 'Escolha a Secretaria a que a proposta se dirige.',
-            'fundamento_pedido.required' => 'Informe o fundamento: dispensa ou inexigibilidade de chamamento.',
             'justificativa.required' => 'A justificativa é o que sustenta o interesse público da parceria.',
         ]);
     }

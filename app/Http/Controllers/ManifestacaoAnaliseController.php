@@ -78,13 +78,17 @@ class ManifestacaoAnaliseController extends Controller
         abort_unless($manifestacao->status === 'submetida', 422,
             'Só uma manifestação recém-recebida vai à Secretaria.');
 
-        // Nova Proposta: é aqui que a SCP escolhe a Unidade Gestora que a atende.
+        // Nova Proposta: é aqui que a SCP decide o fundamento (dispensa ou
+        // inexigibilidade) e escolhe a Unidade Gestora que a atende.
         if ($manifestacao->ehNovaProposta()) {
-            $dados = $request->validate(
-                ['orgao_id' => ['required', 'exists:orgaos,id']],
-                ['orgao_id.required' => 'Escolha a Secretaria cuja Unidade Gestora vai atender a proposta.'],
-            );
-            $manifestacao->update(['orgao_id' => $dados['orgao_id'], 'status' => 'em_analise', 'setor_atual' => 'ug']);
+            $dados = $request->validate([
+                'orgao_id'          => ['required', 'exists:orgaos,id'],
+                'fundamento_pedido' => ['required', Rule::in(array_keys(ManifestacaoInteresse::FUNDAMENTOS_PEDIDO))],
+            ], [
+                'orgao_id.required'          => 'Escolha a Secretaria cuja Unidade Gestora vai atender a proposta.',
+                'fundamento_pedido.required' => 'Decida o fundamento: dispensa ou inexigibilidade de chamamento.',
+            ]);
+            $manifestacao->update($dados + ['status' => 'em_analise', 'setor_atual' => 'ug']);
 
             return back()->with('success', 'Proposta encaminhada à Unidade Gestora — '
                 . $manifestacao->fresh()->orgao->name . ', que vai deferir ou indeferir.');
@@ -131,8 +135,8 @@ class ManifestacaoAnaliseController extends Controller
         abort_if($manifestacao->decidida(), 422, 'Esta manifestação já foi decidida.');
         $this->autorizarDecisao($manifestacao);
 
-        // Na Nova Proposta o enquadramento é o que a OSC pediu (dispensa ou
-        // inexigibilidade); na manifestação, a SCP o escolhe.
+        // Na Nova Proposta o enquadramento é o que a SCP decidiu ao encaminhar
+        // (dispensa ou inexigibilidade); na manifestação, a SCP o escolhe aqui.
         if ($manifestacao->ehNovaProposta()) {
             $request->merge(['decisao' => $manifestacao->fundamento_pedido]);
         }

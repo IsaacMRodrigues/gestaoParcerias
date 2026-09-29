@@ -29,7 +29,7 @@
                                         <span class="block text-sm font-semibold text-brand-700">{{ $np->titulo }}</span>
                                         <span class="block text-xs text-gray-500">
                                             {{ $np->osc?->name }} ·
-                                            {{ \App\Models\ManifestacaoInteresse::FUNDAMENTOS_PEDIDO[$np->fundamento_pedido] ?? '' }} ·
+                                            {{ \App\Models\ManifestacaoInteresse::FUNDAMENTOS_PEDIDO[$np->fundamento_pedido] ?? 'Fundamento a definir' }} ·
                                             {{ $np->orgao?->name ?? 'Secretaria a definir' }}
                                         </span>
                                     </span>

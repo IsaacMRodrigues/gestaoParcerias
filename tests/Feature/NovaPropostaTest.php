@@ -17,8 +17,9 @@ use Tests\TestCase;
 
 /**
  * Nova Proposta da OSC (decisão da gestão, 28/09/2026): o conteúdo da
- * manifestação, outro caminho — a OSC informa dispensa ou inexigibilidade, a
- * SCP encaminha à Unidade Gestora que a atende, e a UG defere ou indefere.
+ * manifestação, outro caminho — a SCP decide o fundamento (dispensa ou
+ * inexigibilidade, desde 29/09/2026) e encaminha à Unidade Gestora que a
+ * atende, e a UG defere ou indefere.
  */
 class NovaPropostaTest extends TestCase
 {
@@ -59,7 +60,7 @@ class NovaPropostaTest extends TestCase
     private function enviada(): ManifestacaoInteresse
     {
         $this->actingAs($this->rl)->post('/portal/novas-propostas', [
-            'titulo' => 'Oficinas de música', 'fundamento_pedido' => 'inexigibilidade',
+            'titulo' => 'Oficinas de música',
             'objeto' => 'x', 'justificativa' => 'x', 'valor_solicitado' => 8000,
         ])->assertSessionHasNoErrors();
 
@@ -78,8 +79,9 @@ class NovaPropostaTest extends TestCase
     private function encaminhada(): ManifestacaoInteresse
     {
         $p = $this->enviada();
-        $this->actingAs($this->scp)->post("/manifestacoes/{$p->id}/encaminhar", ['orgao_id' => $this->educacao->id])
-            ->assertSessionHasNoErrors();
+        $this->actingAs($this->scp)->post("/manifestacoes/{$p->id}/encaminhar", [
+            'orgao_id' => $this->educacao->id, 'fundamento_pedido' => 'inexigibilidade',
+        ])->assertSessionHasNoErrors();
 
         return $p->fresh();
     }
@@ -89,15 +91,33 @@ class NovaPropostaTest extends TestCase
         return CaixaDeEntrada::para($u)->itens->contains(fn ($i) => $i['titulo'] === $titulo && $i['tramite'] === 'Nova Proposta');
     }
 
-    public function test_o_portal_tem_o_item_e_a_osc_informa_o_fundamento_e_nao_a_secretaria(): void
+    public function test_a_osc_nao_informa_o_fundamento_nem_a_secretaria(): void
     {
         $this->actingAs($this->rl)->get('/portal/novas-propostas')->assertOk()->assertSee('Nova Proposta');
-        $this->actingAs($this->rl)->get('/portal/novas-propostas/nova')
-            ->assertOk()->assertSee('name="fundamento_pedido"', false)->assertDontSee('name="orgao_id"', false);
+        $this->actingAs($this->rl)->get('/portal/novas-propostas/nova')->assertOk()
+            ->assertDontSee('name="fundamento_pedido"', false)->assertDontSee('name="orgao_id"', false);
 
+        // Mesmo que mande, não grava: quem decide é a SCP.
         $this->actingAs($this->rl)->post('/portal/novas-propostas', [
-            'titulo' => 'Sem fundamento', 'objeto' => 'x', 'justificativa' => 'x', 'valor_solicitado' => 1,
-        ])->assertSessionHasErrors('fundamento_pedido');
+            'titulo' => 'Tentativa', 'fundamento_pedido' => 'dispensa', 'objeto' => 'x', 'justificativa' => 'x', 'valor_solicitado' => 1,
+        ])->assertSessionHasNoErrors();
+        $this->assertNull(ManifestacaoInteresse::where('titulo', 'Tentativa')->value('fundamento_pedido'));
+    }
+
+    public function test_a_scp_decide_o_fundamento_ao_encaminhar(): void
+    {
+        $p = $this->enviada();
+        $this->assertNull($p->fundamento_pedido);
+
+        $this->actingAs($this->scp)->get("/manifestacoes/{$p->id}")->assertOk()->assertSee('name="fundamento_pedido"', false);
+        $this->actingAs($this->scp)->post("/manifestacoes/{$p->id}/encaminhar", ['orgao_id' => $this->educacao->id])
+            ->assertSessionHasErrors('fundamento_pedido');
+        $this->assertSame('submetida', $p->fresh()->status);
+
+        $this->actingAs($this->scp)->post("/manifestacoes/{$p->id}/encaminhar", [
+            'orgao_id' => $this->educacao->id, 'fundamento_pedido' => 'dispensa',
+        ])->assertSessionHasNoErrors();
+        $this->assertSame('dispensa', $p->fresh()->fundamento_pedido);
     }
 
     public function test_enviada_vai_primeiro_para_a_scp(): void
@@ -140,7 +160,7 @@ class NovaPropostaTest extends TestCase
         $p = $p->fresh();
         $this->assertSame('deferida', $p->status);
         $chamamento = Chamamento::findOrFail($p->chamamento_id);
-        $this->assertSame('inexigibilidade', $chamamento->tipo, 'o enquadramento é o que a OSC pediu');
+        $this->assertSame('inexigibilidade', $chamamento->tipo, 'o enquadramento é o que a SCP decidiu');
         $this->assertSame($this->educacao->id, $chamamento->programa->orgao_id);
         $proposta = Proposta::findOrFail($p->proposta_id);
         $this->assertSame(1, $proposta->metas()->count(), 'o plano de trabalho vai junto');

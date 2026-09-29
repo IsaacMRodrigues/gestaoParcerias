@@ -89,8 +89,8 @@ class ManifestacaoInteresse extends Model
      *
      * - manifestação de interesse: a OSC escolhe a Secretaria, a UG opina e a
      *   SCP decide o encaminhamento (chamamento, dispensa ou inexigibilidade);
-     * - Nova Proposta: a OSC informa o fundamento (dispensa ou
-     *   inexigibilidade), a SCP escolhe a UG que a atende e a UG decide.
+     * - Nova Proposta: a SCP decide o fundamento (dispensa ou
+     *   inexigibilidade) e escolhe a UG que a atende, e a UG decide.
      *
      * O conteúdo é o mesmo — dados, plano de trabalho, documentos —, e por
      * isso a estrutura também. Muda o caminho: ver ManifestacaoAnaliseController.
@@ -100,7 +100,11 @@ class ManifestacaoInteresse extends Model
         'proposta'     => 'Nova Proposta',
     ];
 
-    /** O fundamento que a OSC informa na Nova Proposta (arts. 30 e 31 da Lei 13.019/2014). */
+    /**
+     * O fundamento da Nova Proposta (arts. 30 e 31 da Lei 13.019/2014). A
+     * coluna chama-se `fundamento_pedido` porque de início a OSC o informava;
+     * desde 29/09/2026 é a SCP quem o decide, ao encaminhar à UG.
+     */
     public const FUNDAMENTOS_PEDIDO = [
         'dispensa'        => 'Dispensa de chamamento público (art. 30)',
         'inexigibilidade' => 'Inexigibilidade de chamamento público (art. 31)',

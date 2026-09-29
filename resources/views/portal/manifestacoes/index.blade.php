@@ -6,7 +6,7 @@
                     <h1 class="text-2xl font-bold text-gray-900">Novas Propostas</h1>
                     <p class="text-sm text-gray-500 mt-1">
                         Proposta de parceria por dispensa ou inexigibilidade de chamamento. O Setor de Convênios
-                        e Parcerias a encaminha à Unidade Gestora adequada, que decide.
+                        e Parcerias decide o fundamento e a encaminha à Unidade Gestora adequada, que decide.
                     </p>
                 @else
                     <h1 class="text-2xl font-bold text-gray-900">Manifestações de Interesse</h1>

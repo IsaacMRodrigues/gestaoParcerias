@@ -8,18 +8,12 @@
 
 @php $ehProposta = ($tipo ?? $manifestacao?->tipo) === 'proposta'; @endphp
 @if($ehProposta)
-<div>
-    <x-input-label for="fundamento_pedido" value="Fundamento *" />
-    <select name="fundamento_pedido" id="fundamento_pedido" required
-            class="mt-1 block w-full border-gray-300 rounded-md shadow-sm text-sm focus:ring-brand-500 focus:border-brand-500">
-        <option value="">Selecione…</option>
-        @foreach(\App\Models\ManifestacaoInteresse::FUNDAMENTOS_PEDIDO as $chave => $rotulo)
-            <option value="{{ $chave }}" @selected(old('fundamento_pedido', $manifestacao?->fundamento_pedido) === $chave)>{{ $rotulo }}</option>
-        @endforeach
-    </select>
-    <p class="mt-1 text-xs text-gray-400">A Secretaria que vai atender a proposta é escolhida pelo Setor de Convênios e Parcerias.</p>
-    <x-input-error :messages="$errors->get('fundamento_pedido')" class="mt-1" />
-</div>
+{{-- O fundamento (dispensa ou inexigibilidade) e a Secretaria são decididos
+     pela SCP ao encaminhar — não pela OSC (decisão da gestão, 29/09/2026). --}}
+<p class="text-xs text-gray-500 bg-gray-50 border border-gray-200 rounded-md px-3 py-2">
+    O Setor de Convênios e Parcerias decide o fundamento (dispensa ou inexigibilidade de chamamento)
+    e a Secretaria que vai atender a proposta.
+</p>
 @else
 <div>
     <x-input-label for="orgao_id" value="Secretaria a que se dirige *" />

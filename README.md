@@ -199,7 +199,7 @@ na Celebração, nas Alterações e na Prestação — ver `User::setorNoTramite
 
 | Trâmite | Etapas | Onde |
 |---|---|---|
-| **Seleção** (chamamento público) | UG → SCP → UG → SCP → **Prefeito** (5) | `Chamamento::ETAPAS_SELECAO` |
+| **Seleção** (chamamento público) | UG → SCP → UG (prazo de recurso) → UG → SCP → **Prefeito** (6) | `Chamamento::ETAPAS_SELECAO` |
 | **Manifestação de Interesse** | OSC submete → SCP recebe → Secretaria opina → SCP defere ou indefere | `ManifestacaoInteresse` |
 | **Celebração** | UG → **OSC** → UG → SCP → SEPLAN → UG → SCP → PJ → SCP → **OSC** → SCP → **OSC** → SCP → UG → SCP (15) | `Proposta::ETAPAS_CELEBRACAO` |
 | **Alteração da Parceria** | **OSC** → UG autoriza → SCP processa e decide (3) | `Alteracao::ETAPAS` |
@@ -565,6 +565,28 @@ Trazer os demais cenários para `tests/Feature` é uma das [Pendências](#pendê
 
 Da mais recente para a mais antiga. Cada entrada diz o que mudou, **por quê** e como foi
 conferido — o porquê é o que falta a quem pega o código depois.
+
+- [2026-09-29] **Nova Proposta: o fundamento é decidido pela SCP** (`ManifestacaoAnaliseController::encaminhar`)
+  - Decisão da gestão. A OSC não escolhe mais dispensa ou inexigibilidade: o campo saiu do formulário
+    do portal (e, se vier na requisição, é ignorado). A SCP decide o fundamento no mesmo passo em que
+    escolhe a Unidade Gestora; sem ele, não encaminha. A UG defere com o fundamento que a SCP decidiu
+  - A coluna continua `fundamento_pedido` (nome de quando a OSC o informava). Proposta antiga que já
+    veio com fundamento chega à SCP com ele pré-selecionado
+  - Conferido: `NovaPropostaTest` (7 testes, 1 novo para a decisão da SCP)
+
+- [2026-09-29] **Etapa própria para o prazo de recurso na Seleção** (`Chamamento::ETAPA_PRAZO_RECURSO`,
+  `chamamentos.prazo_recurso_ate`)
+  - Pedido da gestão. A Seleção passa de 5 para 6 etapas: depois da publicação do Resultado Provisório
+    entra o **prazo de recurso**, com a UG. Antes, a OSC podia recorrer na mesma etapa em que a UG já
+    redigia o Resultado Definitivo
+  - O prazo varia de edital para edital: a **SCP informa o último dia** ao encaminhar a publicação do
+    Resultado Provisório (obrigatório). As OSCs com proposta recebem aviso por e-mail
+  - Recorrer é **opcional**: a OSC protocola até o fim do prazo; sem recurso, a etapa só passa. A UG só
+    encerra a etapa depois do último dia, e responde os recursos na etapa seguinte, antes do
+    Resultado Definitivo
+  - Migração: as etapas a partir da antiga 3 andam uma casa (e os anexos avulsos criados nelas). Quem
+    estava na antiga etapa de análise de recursos vai para a de resposta — o prazo dele já tinha corrido
+  - Conferido: 5 testes em `PrazoDeRecursoTest` (o do prazo falha com a data desligada)
 
 - [2026-09-29] **Só a SCP edita o chamamento** (`Chamamento::cadastroPermitidoA`, `ChamamentoController`)
   - Decisão da gestão. Criar, editar e remover o chamamento (datas de inscrição, número, objeto,

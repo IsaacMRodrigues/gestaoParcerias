@@ -29,7 +29,7 @@
             <p class="text-sm text-gray-500 mt-0.5">
                 @if($manifestacao->ehNovaProposta())
                     {{ $manifestacao->tipoLabel() }} ·
-                    {{ \App\Models\ManifestacaoInteresse::FUNDAMENTOS_PEDIDO[$manifestacao->fundamento_pedido] ?? '' }} ·
+                    {{ \App\Models\ManifestacaoInteresse::FUNDAMENTOS_PEDIDO[$manifestacao->fundamento_pedido] ?? 'fundamento a definir pela SCP' }} ·
                     {{ $manifestacao->orgao?->name ?? 'a Secretaria será definida pelo Setor de Convênios e Parcerias' }}
                 @else
                     {{ $manifestacao->orgao?->name }}
