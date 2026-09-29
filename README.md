@@ -566,6 +566,14 @@ Trazer os demais cenários para `tests/Feature` é uma das [Pendências](#pendê
 Da mais recente para a mais antiga. Cada entrada diz o que mudou, **por quê** e como foi
 conferido — o porquê é o que falta a quem pega o código depois.
 
+- [2026-09-29] **Várias vencedoras no mesmo chamamento, todas na Celebração** (`CelebracaoController`)
+  - Pedido da gestão. A adjudicação já aceitava várias vencedoras, e cada uma já ganhava a sua Celebração;
+    faltava a tela deixar isso claro. A lista da **Celebração** agora agrupa as parcerias por chamamento,
+    com o número e o título dele e o total de parcerias vencedoras. Na Celebração de cada uma, a Prefeitura
+    vê as outras vencedoras do mesmo chamamento, com link; a OSC continua vendo só a sua
+  - Conferido: `VariasVencedorasTest` (3 propostas, 2 adjudicadas: as duas aparecem agrupadas, uma aponta
+    para a outra, a reprovada não aparece, a OSC não vê as outras)
+
 - [2026-09-29] **Seleção: etapa 3 "Recurso e resposta ao recurso", Ata do resultado definitivo e Termo
   preenchido pela SCP** (`Chamamento::ETAPAS_SELECAO`, `Peca::PREENCHIMENTO_RESERVADO`, `Peca::aindaEOModelo`)
   - Decisões da gestão, no mesmo dia. **Etapa 3** passa a ser "Recurso e resposta ao recurso": a OSC recorre

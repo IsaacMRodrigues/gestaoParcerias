@@ -12,8 +12,21 @@
         <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 space-y-6">
             <x-flash-message />
 
-            <div class="bg-white rounded-xl border border-gray-200 shadow-sm divide-y divide-gray-100 overflow-hidden">
-                @forelse($propostas as $proposta)
+            @forelse($grupos as $chamamentoId => $doChamamento)
+            @php
+                $ch = $doChamamento->first()->chamamento;
+                $total = (int) ($vencedorasPorChamamento[$chamamentoId] ?? $doChamamento->count());
+            @endphp
+            <div class="bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden">
+                {{-- Um chamamento pode ter várias vencedoras; cada uma tem a sua Celebração. --}}
+                <div class="px-6 py-3 bg-gray-50 border-b border-gray-200 flex items-center justify-between gap-3">
+                    <p class="text-sm font-semibold text-gray-700 min-w-0 truncate">
+                        {{ $ch ? trim(($ch->numero ? 'Chamamento ' . $ch->numero . ' — ' : '') . $ch->titulo) : 'Sem chamamento' }}
+                    </p>
+                    <span class="shrink-0 text-xs text-gray-500">{{ $total }} {{ $total === 1 ? 'parceria vencedora' : 'parcerias vencedoras' }}</span>
+                </div>
+                <div class="divide-y divide-gray-100">
+                @foreach($doChamamento as $proposta)
                     @php
                         $concluida = $proposta->celebracaoConcluida();
                         // "É a sua vez" só faz sentido para quem tem lotação: é o
@@ -70,14 +83,16 @@
                             <span class="block text-sm font-semibold text-brand-700 mt-1.5">Abrir →</span>
                         </span>
                     </a>
-                @empty
-                    <div class="px-6 py-14">
-                        <x-empty-state icone="pasta">
-                            Nenhuma parceria em Celebração — o trâmite começa quando uma proposta é aprovada.
-                        </x-empty-state>
-                    </div>
-                @endforelse
+                @endforeach
+                </div>
             </div>
+            @empty
+                <div class="bg-white rounded-xl border border-gray-200 shadow-sm px-6 py-14">
+                    <x-empty-state icone="pasta">
+                        Nenhuma parceria em Celebração — o trâmite começa quando uma proposta é aprovada.
+                    </x-empty-state>
+                </div>
+            @endforelse
 
             {{ $propostas->links() }}
         </div>

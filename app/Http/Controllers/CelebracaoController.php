@@ -65,7 +65,17 @@ class CelebracaoController extends Controller
             ->orderByDesc('updated_at')
             ->paginate(15);
 
-        return view('celebracao.index', compact('propostas'));
+        // Um chamamento pode ter várias vencedoras, e cada uma tem a sua
+        // Celebração (pedido da gestão, 29/09/2026). A lista as reúne sob o
+        // chamamento, na ordem em que o primeiro dele aparece, com o total de
+        // parcerias que o julgamento gerou.
+        $grupos = $propostas->getCollection()->groupBy('chamamento_id');
+        $vencedorasPorChamamento = Proposta::comTramiteCelebracao()
+            ->whereIn('chamamento_id', $grupos->keys()->filter())
+            ->selectRaw('chamamento_id, count(*) as total')->groupBy('chamamento_id')
+            ->pluck('total', 'chamamento_id');
+
+        return view('celebracao.index', compact('propostas', 'grupos', 'vencedorasPorChamamento'));
     }
 
     /**
@@ -104,7 +114,15 @@ class CelebracaoController extends Controller
         $pecas     = $proposta->pecas;
         $progresso = Peca::progresso($pecas);
 
-        return view('celebracao.show', compact('proposta', 'pecas', 'progresso'));
+        // As outras vencedoras do mesmo chamamento, cada uma na sua Celebração.
+        // Só do lado da Prefeitura: a OSC acompanha a própria parceria.
+        $outrasVencedoras = $user->ehRepresentanteOsc() || !$proposta->chamamento_id
+            ? collect()
+            : Proposta::with('osc')->comTramiteCelebracao()
+                ->where('chamamento_id', $proposta->chamamento_id)->whereKeyNot($proposta->id)
+                ->orderBy('id')->get();
+
+        return view('celebracao.show', compact('proposta', 'pecas', 'progresso', 'outrasVencedoras'));
     }
 
     /**

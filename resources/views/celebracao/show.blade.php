@@ -46,6 +46,27 @@
                 </div>
             @endif
 
+            {{-- Outras vencedoras do mesmo chamamento: cada uma tem a sua Celebração. --}}
+            @if($outrasVencedoras->isNotEmpty())
+                <div class="bg-white rounded-xl border border-gray-200 shadow-sm px-6 py-4">
+                    <p class="text-sm font-semibold text-gray-800">
+                        Este chamamento tem {{ $outrasVencedoras->count() + 1 }} parcerias vencedoras
+                    </p>
+                    <p class="text-xs text-gray-400 mt-0.5">Cada uma tem a sua Celebração, com trâmite e documentos próprios.</p>
+                    <ul class="mt-2 space-y-1 text-sm">
+                        @foreach($outrasVencedoras as $outra)
+                            <li>
+                                <a href="{{ route('celebracao.show', $outra) }}" class="text-brand-600 hover:underline">{{ $outra->titulo }}</a>
+                                <span class="text-gray-500">— {{ $outra->osc?->name }}</span>
+                                @if($outra->celebracaoConcluida())
+                                    <span class="text-xs text-gray-400">· concluída</span>
+                                @endif
+                            </li>
+                        @endforeach
+                    </ul>
+                </div>
+            @endif
+
             {{-- Identificação --}}
             <div class="bg-white rounded-xl border border-gray-200 shadow-sm p-6">
                 <dl class="grid grid-cols-2 sm:grid-cols-4 gap-4 text-sm">
