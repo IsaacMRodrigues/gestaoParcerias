@@ -62,19 +62,10 @@ class Recurso extends Model
     }
 
     /**
-     * Quem julga o recurso é a Comissão de Seleção da Secretaria do chamamento
-     * (decisão da gestão, 29/09/2026), na etapa seguinte ao prazo de recurso.
-     * Julgado, não se julga de novo.
+     * Membro da Comissão de Seleção que enxerga a proposta recorrente — é a
+     * Comissão da Secretaria do chamamento que lê o recurso e, se quiser,
+     * emite a Resposta ao recurso (peça opcional da etapa 3 da Seleção).
      */
-    public function julgavelPor(?User $user): bool
-    {
-        return $user !== null
-            && !$this->respondido()
-            && $this->chamamento?->respostaDeRecursosAberta()
-            && $this->comissaoPodeVer($user);
-    }
-
-    /** Membro da Comissão de Seleção que enxerga a proposta recorrente. */
     public function comissaoPodeVer(?User $user): bool
     {
         return $user !== null

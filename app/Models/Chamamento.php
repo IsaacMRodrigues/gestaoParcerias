@@ -80,12 +80,12 @@ class Chamamento extends Model
     ];
 
     /**
-     * Etapa do prazo de recurso e a de resposta (decisão da gestão, 29/09/2026).
-     * Antes as duas coisas corriam juntas: a OSC podia recorrer enquanto a UG
-     * já redigia o Resultado Definitivo.
+     * Etapa 3 (índice 2), "Recurso e resposta ao recurso" (decisão da gestão,
+     * 29/09/2026): a OSC recorre no prazo do edital, com um arquivo; a
+     * Comissão de Seleção pode emitir a Resposta ao recurso, peça opcional.
+     * Antes o recurso corria junto com a redação do Resultado Definitivo.
      */
     public const ETAPA_PRAZO_RECURSO = 2;
-    public const ETAPA_RESPOSTA_RECURSOS = 3;
 
     /**
      * Etapas do trâmite da Seleção (Fluxo Seleção confirmado pelo cliente).
@@ -95,8 +95,8 @@ class Chamamento extends Model
     public const ETAPAS_SELECAO = [
         ['setor' => 'ug',  'acao' => 'Analisar as propostas: emitir o Relatório da Comissão, a Ata e o Resultado Provisório (assinar) e encaminhar à SCP'],
         ['setor' => 'scp', 'acao' => 'Anexar o comprovante de publicação do Resultado Provisório, informar o prazo de recurso do edital e devolver à UG'],
-        ['setor' => 'ug',  'acao' => 'Prazo de recurso (opcional para a OSC): as OSCs podem recorrer do Resultado Provisório até a data do edital; findo o prazo, encerrar a etapa'],
-        ['setor' => 'ug',  'acao' => 'A Comissão de Seleção julga os recursos (se houver); a UG emite o Resultado Definitivo (assinar), encaminhando à SCP'],
+        ['setor' => 'ug',  'acao' => 'Recurso e resposta ao recurso: as OSCs podem recorrer do Resultado Provisório até a data do edital; a Comissão de Seleção pode emitir a Resposta ao recurso (opcional); findo o prazo, encerrar a etapa'],
+        ['setor' => 'ug',  'acao' => 'Emitir o Resultado Definitivo (assinar) e encaminhar à SCP'],
         ['setor' => 'scp', 'acao' => 'Anexar o comprovante de publicação do Resultado Definitivo e emitir o Termo de Adjudicação e Homologação'],
         ['setor' => 'pm',  'acao' => 'Assinar o Termo de Adjudicação e Homologação (encerra a Seleção)'],
     ];
@@ -202,12 +202,6 @@ class Chamamento extends Model
     public function prazoRecursalEncerrado(): bool
     {
         return $this->prazo_recurso_ate !== null && $this->prazo_recurso_ate->endOfDay()->isPast();
-    }
-
-    /** A UG responde os recursos na etapa seguinte ao prazo, antes do Resultado Definitivo. */
-    public function respostaDeRecursosAberta(): bool
-    {
-        return $this->naEtapaDaSelecao(self::ETAPA_RESPOSTA_RECURSOS);
     }
 
     private function naEtapaDaSelecao(int $etapa): bool
@@ -414,7 +408,7 @@ class Chamamento extends Model
         $exigidas = [
             0 => ['relatorio_comissao', 'ata_comissao', 'resultado_parcial'],
             1 => ['pub_resultado_parcial'],
-            2 => [],
+            2 => [],  // a Resposta ao recurso é opcional
             3 => ['resultado_definitivo'],
             4 => ['pub_resultado_definitivo', 'termo_homologacao'],
             5 => ['termo_homologacao'],
@@ -430,13 +424,6 @@ class Chamamento extends Model
             }
         }
 
-        // Todo recurso protocolado precisa de resposta antes do resultado
-        // definitivo (Fluxo Seleção: "analisa os recursos … emite resposta").
-        if ($etapa === self::ETAPA_RESPOSTA_RECURSOS && ($semResposta = $this->recursosSemResposta()) > 0) {
-            $pend[] = ($semResposta === 1
-                ? '1 recurso sem julgamento'
-                : "{$semResposta} recursos sem julgamento") . ' da Comissão de Seleção';
-        }
 
         foreach ($exigidas[$etapa] ?? [] as $chave) {
             $peca = $this->pecaSelecao($chave);
@@ -444,13 +431,15 @@ class Chamamento extends Model
                 continue;
             }
 
-            // Modelo: precisa estar assinado — exceto o Termo, que a SCP só
-            // emite na etapa 4 (a assinatura é do Prefeito, na etapa 5).
+            // Modelo: precisa estar assinado — exceto o Termo, que a SCP
+            // preenche na etapa 4 e o Prefeito só assina, na 5, sem editar.
+            // Preenchido quer dizer redigido pela SCP: o texto do modelo, como
+            // foi semeado, não vai ao Gabinete (decisão da gestão, 29/09/2026).
             if ($peca->tipo === 'modelo') {
                 $soPreencher = $chave === 'termo_homologacao' && $etapa === 4;
-                $ok = $soPreencher ? !empty($peca->conteudo) : $peca->assinado();
+                $ok = $soPreencher ? !empty($peca->conteudo) && !$peca->aindaEOModelo() : $peca->assinado();
                 if (!$ok) {
-                    $pend[] = $peca->rotulo . ($soPreencher ? ' (emitir)' : ' (assinar)');
+                    $pend[] = $peca->rotulo . ($soPreencher ? ' (preencher antes de enviar ao Gabinete)' : ' (assinar)');
                 }
             } elseif (!$peca->temArquivo()) {
                 $pend[] = $peca->rotulo . ' (anexar arquivo)';

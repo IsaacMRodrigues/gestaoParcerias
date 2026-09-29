@@ -4,16 +4,17 @@ namespace App\Http\Controllers;
 
 use App\Models\Chamamento;
 use App\Models\Recurso;
+use App\Support\Avisos;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
-use Illuminate\Validation\Rule;
 use Symfony\Component\HttpFoundation\StreamedResponse;
 
 /**
- * Recursos contra o resultado provisório: a OSC protocola pelo portal (como
- * prevê o modelo do Resultado Provisório) e a Comissão de Seleção os julga
- * antes de a Unidade Gestora emitir o resultado definitivo.
+ * Recursos contra o resultado provisório: a OSC protocola pelo portal, com um
+ * arquivo (como prevê o modelo do Resultado Provisório), e a Comissão de
+ * Seleção pode respondê-los com a peça "Resposta ao recurso", opcional, na
+ * mesma etapa 3 da Seleção (decisão da gestão, 29/09/2026).
  */
 class RecursoController extends Controller
 {
@@ -57,7 +58,7 @@ class RecursoController extends Controller
         $arquivo = $request->file('arquivo');
         $path = $arquivo->store("recursos/{$chamamento->id}", 'local');
 
-        $chamamento->recursos()->create([
+        $recurso = $chamamento->recursos()->create([
             'osc_id'          => $osc->id,
             'proposta_id'     => $proposta->id,
             'arquivo_path'    => $path,
@@ -68,43 +69,10 @@ class RecursoController extends Controller
             'protocolado_em'  => now(),
         ]);
 
-        return back()->with('success',
-            'Recurso protocolado. A Comissão de Seleção o julgará depois do prazo, e a resposta aparecerá aqui.');
-    }
-
-    /**
-     * A Comissão de Seleção julga o recurso (decisão da gestão, 29/09/2026) —
-     * na etapa seguinte ao prazo de recurso, quando nenhum outro pode mais
-     * chegar. A resposta vai à OSC; a UG só emite o Resultado Definitivo
-     * depois que todos estiverem julgados.
-     */
-    public function responder(Request $request, Recurso $recurso): RedirectResponse
-    {
-        abort_unless($recurso->comissaoPodeVer(auth()->user()), 403,
-            'O recurso é julgado pela Comissão de Seleção da Secretaria do chamamento.');
-        abort_if($recurso->respondido(), 422, 'Este recurso já foi julgado.');
-        abort_unless($recurso->chamamento->respostaDeRecursosAberta(), 422,
-            'O julgamento dos recursos é feito na etapa seguinte ao prazo de recurso.');
-
-        $data = $request->validate([
-            'resultado' => ['required', Rule::in(array_keys(Recurso::RESULTADOS))],
-            'resposta'  => ['required', 'string', 'min:20'],
-        ], [
-            'resultado.required' => 'Informe o resultado do julgamento do recurso.',
-            'resposta.required'  => 'Escreva a resposta ao recurso.',
-            'resposta.min'       => 'Detalhe melhor a resposta ao recurso.',
-        ]);
-
-        $recurso->update([
-            'resultado'        => $data['resultado'],
-            'resposta'         => $data['resposta'],
-            'respondido_por'   => auth()->id(),
-            'respondido_em'    => now(),
-            'codigo_validacao' => $recurso->codigo_validacao ?: Recurso::gerarCodigoValidacao(),
-        ]);
+        Avisos::recursoProtocolado($recurso);
 
         return back()->with('success',
-            'Recurso julgado e resposta disponibilizada à OSC (' . $recurso->resultadoLabel() . ').');
+            'Recurso protocolado. A Comissão de Seleção o analisará; a resposta, se houver, sai nos documentos da Seleção.');
     }
 
     /**

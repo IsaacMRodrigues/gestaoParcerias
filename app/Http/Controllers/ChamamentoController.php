@@ -87,6 +87,11 @@ class ChamamentoController extends Controller
      */
     public function selecao(Chamamento $chamamento): View
     {
+        $user = auth()->user();
+        abort_unless($user->can('chamamentos')
+            || ($user->hasRole('comissao_selecao') && $user->orgao_id !== null && $user->orgao_id === $chamamento->programa?->orgao_id),
+            403);
+
         $categoria = $chamamento->categoriaPecas();
         Peca::sincronizar($chamamento, $categoria);
 

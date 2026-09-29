@@ -164,7 +164,6 @@ Route::middleware('auth')->group(function () {
 // Recursos: download pela OSC autora ou pela equipe; resposta pela Unidade Gestora
 Route::middleware('auth')->group(function () {
     Route::get('recursos/{recurso}/arquivo', [RecursoController::class, 'download'])->name('recursos.download');
-    Route::post('recursos/{recurso}/responder', [RecursoController::class, 'responder'])->name('recursos.responder');
 });
 
 // Documentos (funciona para admin e portal via back())
@@ -266,7 +265,6 @@ Route::middleware(['auth', 'staff', 'readonly'])->group(function () {
         Route::post('manifestacoes/{manifestacao}/deferir', [ManifestacaoAnaliseController::class, 'deferir'])->name('manifestacoes.deferir');
         Route::post('manifestacoes/{manifestacao}/indeferir', [ManifestacaoAnaliseController::class, 'indeferir'])->name('manifestacoes.indeferir');
 
-        Route::get('chamamentos/{chamamento}/selecao', [ChamamentoController::class, 'selecao'])->name('chamamentos.selecao');
         // Trâmite da Seleção: UG → SCP → UG → SCP → Prefeito
         Route::post('chamamentos/{chamamento}/selecao/avancar', [SelecaoController::class, 'avancar'])->name('chamamentos.selecao.avancar');
         Route::post('chamamentos/{chamamento}/selecao/devolver', [SelecaoController::class, 'devolver'])->name('chamamentos.selecao.devolver');
@@ -357,6 +355,12 @@ Route::middleware(['auth', 'staff', 'readonly'])->group(function () {
     });
 
 });
+
+// Tela da Seleção: quem tem a permissão de chamamentos, e também a Comissão de
+// Seleção da Secretaria, que preenche e assina a Resposta ao recurso (etapa 3).
+// Ela só vê: os botões do trâmite seguem na permissão de chamamentos. Ver
+// ChamamentoController::selecao.
+Route::middleware('auth')->get('chamamentos/{chamamento}/selecao', [ChamamentoController::class, 'selecao'])->name('chamamentos.selecao');
 
 // Peças documentais (motor genérico — Seleção 2.2, Celebração e Formalização 2.3).
 // A autorização é feita no PecaController: peças em trâmite são liberadas por

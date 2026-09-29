@@ -541,24 +541,23 @@ class Avisos
         ));
     }
 
-    /** Findo o prazo, a Comissão de Seleção da Secretaria tem recursos a julgar. */
-    public static function recursosParaAComissao(Chamamento $c): void
+    /** Recurso protocolado: a Comissão de Seleção da Secretaria do chamamento fica sabendo. */
+    public static function recursoProtocolado(\App\Models\Recurso $r): void
     {
-        $recursos = $c->recursos()->whereNull('respondido_em')->with('osc')->get();
+        $c = $r->chamamento;
         $orgao = $c->programa?->orgao_id;
 
         self::enviar(
-            User::role('comissao_selecao')->where('status', true)
-                ->get()->filter(fn (User $u) => $u->orgao_id === $orgao),
+            User::role('comissao_selecao')->where('status', true)->where('orgao_id', $orgao)->get(),
             new Aviso(
-                assunto: 'Recursos a julgar — ' . trim(($c->numero ? $c->numero . ' ' : '') . $c->titulo),
-                titulo: 'A Comissão de Seleção tem recursos a julgar',
-                linhas: array_merge(
-                    [trim(($c->numero ? $c->numero . ' — ' : '') . $c->titulo), 'O prazo de recurso terminou. Recursos protocolados:'],
-                    $recursos->map(fn ($r) => '• ' . ($r->osc?->name ?? 'OSC'))->all(),
-                    ['Cada recurso está na tela da proposta da OSC que o protocolou.'],
-                ),
-                url: $recursos->first()?->proposta_id ? route('propostas.show', $recursos->first()->proposta_id) : route('propostas.index'),
+                assunto: 'Recurso protocolado — ' . trim(($c->numero ? $c->numero . ' ' : '') . $c->titulo),
+                titulo: 'Uma OSC recorreu do Resultado Provisório',
+                linhas: [
+                    trim(($c->numero ? $c->numero . ' — ' : '') . $c->titulo),
+                    'Recurso de ' . ($r->osc?->name ?? 'OSC') . ', protocolado em ' . $r->protocolado_em?->format('d/m/Y H:i') . '.',
+                    'O arquivo está na tela da proposta. A Resposta ao recurso, opcional, é o documento da etapa 3 da Seleção.',
+                ],
+                url: $r->proposta_id ? route('propostas.show', $r->proposta_id) : route('propostas.index'),
                 botao: 'Abrir a proposta',
             ),
         );

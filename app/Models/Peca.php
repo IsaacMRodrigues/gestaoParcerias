@@ -65,9 +65,15 @@ class Peca extends Model
             ['chave' => 'ata_comissao',              'rotulo' => 'Ata da Comissão de Seleção (modelo padrão)',       'tipo' => 'modelo', 'obrigatorio' => true],
             ['chave' => 'resultado_parcial',         'rotulo' => 'Resultado provisório (modelo padrão)',    'tipo' => 'modelo',  'obrigatorio' => true],
             ['chave' => 'pub_resultado_parcial',     'rotulo' => 'Publicação do resultado provisório',      'tipo' => 'arquivo', 'obrigatorio' => true],
+            // Etapa 3: o recurso é o arquivo que cada OSC protocola pelo portal
+            // (model Recurso); a resposta é esta peça, da Comissão, opcional.
+            ['chave' => 'resposta_recurso',          'rotulo' => 'Resposta ao recurso (modelo padrão)',     'tipo' => 'modelo',  'obrigatorio' => false],
             // Os recursos não são uma peça única: cada OSC protocola o seu pelo
             // portal e recebe resposta própria (ver o model Recurso).
             ['chave' => 'resultado_definitivo',      'rotulo' => 'Resultado definitivo (modelo padrão)',    'tipo' => 'modelo',  'obrigatorio' => true],
+            // Etapa 4: a ata da sessão do resultado definitivo, anexada pela UG
+            // (pedido da gestão, 29/09/2026).
+            ['chave' => 'ata_resultado_definitivo',  'rotulo' => 'Ata do resultado definitivo',             'tipo' => 'arquivo', 'obrigatorio' => false],
             ['chave' => 'pub_resultado_definitivo',  'rotulo' => 'Publicação do resultado definitivo',      'tipo' => 'arquivo', 'obrigatorio' => true],
             ['chave' => 'termo_homologacao',         'rotulo' => 'Termo de Adjudicação e Homologação (modelo padrão)', 'tipo' => 'modelo', 'obrigatorio' => true],
         ],
@@ -234,7 +240,9 @@ class Peca extends Model
         'ata_comissao'             => 'ug',
         'resultado_parcial'        => 'ug',
         'pub_resultado_parcial'    => 'scp',
+        'resposta_recurso'         => 'ug',   // a Comissão de Seleção, que é da UG
         'resultado_definitivo'     => 'ug',
+        'ata_resultado_definitivo' => 'ug',
         'pub_resultado_definitivo' => 'scp',
         'termo_homologacao'        => 'scp',  // a SCP emite; o Prefeito assina
     ];
@@ -264,8 +272,9 @@ class Peca extends Model
         'ata_comissao'             => 0,
         'resultado_parcial'        => 0,
         'pub_resultado_parcial'    => 1,
-        // A etapa 2 é o prazo de recurso das OSCs: não tem documento.
+        'resposta_recurso'         => 2,  // recurso e resposta ao recurso
         'resultado_definitivo'     => 3,
+        'ata_resultado_definitivo' => 3,
         'pub_resultado_definitivo' => 4,
         'termo_homologacao'        => 4,
     ];
@@ -677,6 +686,14 @@ HTML,
 <p style="text-align:center"><strong>RESOLVE:</strong></p>
 <p><strong>Art. 1º</strong> Tornar público o resultado definitivo de seleção e classificação das Propostas apresentadas pelas organizações da sociedade civil visando a celebração de parcerias em regime de mútua colaboração para a execução relacionados no Edital de Chamamento nº XXXX/XXXX, nos termos da tabela abaixo:</p>
 <table><thead><tr><th>Organização da Sociedade Civil</th><th>CNPJ</th><th>Título do Projeto</th><th>Nota Final</th><th>Classificação</th></tr></thead><tbody><tr><td>XXXXXXXX</td><td>XXXXXXXX</td><td>XXXXXXXX</td><td>XXXX</td><td>XXXX</td></tr></tbody></table>
+<p style="text-align:right">São Gonçalo do Rio Abaixo, XX/XX/XXXX.</p>
+<p style="text-align:center">Membro 1 &nbsp;&nbsp;&nbsp; Membro 2 &nbsp;&nbsp;&nbsp; Membro 3<br>Comissão de Seleção do Chamamento Público XXXX/XXXX<br>Portaria n. XXXX/XXXX</p>
+HTML,
+            'resposta_recurso' => self::CABECALHO . <<<'HTML'
+<p style="text-align:center"><strong>RESPOSTA AO RECURSO ADMINISTRATIVO CONTRA O RESULTADO PROVISÓRIO DO CHAMAMENTO PÚBLICO EDITAL Nº. XXX/XXXX</strong></p>
+<p>A Comissão de Seleção, no uso de suas atribuições legais previstas no Edital de Chamamento Público XXXX/XXXX e na Portaria nº. XXX/XXXX, tendo recebido, no prazo previsto no edital, o(s) recurso(s) interposto(s) pela(s) organização(ões) da sociedade civil abaixo, apresenta a sua resposta:</p>
+<table><thead><tr><th>Organização da Sociedade Civil</th><th>CNPJ</th><th>Síntese do recurso</th><th>Decisão</th></tr></thead><tbody><tr><td>XXXXXXXX</td><td>XXXXXXXX</td><td>XXXXXXXX</td><td>Provido / Parcialmente provido / Improvido</td></tr></tbody></table>
+<p><strong>Fundamentação:</strong> XXXXXXXX</p>
 <p style="text-align:right">São Gonçalo do Rio Abaixo, XX/XX/XXXX.</p>
 <p style="text-align:center">Membro 1 &nbsp;&nbsp;&nbsp; Membro 2 &nbsp;&nbsp;&nbsp; Membro 3<br>Comissão de Seleção do Chamamento Público XXXX/XXXX<br>Portaria n. XXXX/XXXX</p>
 HTML,
@@ -1375,6 +1392,24 @@ HTML,
         return $this->origem_processo_peca_id !== null;
     }
 
+    /**
+     * O texto ainda é o do modelo, do jeito que foi semeado — ninguém o
+     * preencheu. Serve às peças que um setor redige e outro só assina: o Termo
+     * de Adjudicação e Homologação sai da SCP pronto para o Prefeito, que não
+     * o edita (decisão da gestão, 29/09/2026).
+     */
+    public function aindaEOModelo(): bool
+    {
+        if ($this->tipo !== 'modelo' || empty($this->conteudo) || !$this->pecaable) {
+            return false;
+        }
+
+        $bruto = self::modeloTexto($this->categoria, $this->chave);
+
+        return $bruto !== null
+            && trim(\App\Support\Modelo::preencher($bruto, self::tokensDe($this->pecaable))) === trim($this->conteudo);
+    }
+
     public function preenchido(): bool
     {
         if ($this->vemDoPlanejamento()) {
@@ -1665,6 +1700,10 @@ HTML,
             return false;
         }
 
+        if (($perfil = self::PREENCHIMENTO_RESERVADO[$this->chave] ?? null) && !$user->hasRole($perfil)) {
+            return false;
+        }
+
         return $this->selecaoSetor() !== 'osc' || $this->oscDona($user, $dono);
     }
 
@@ -1716,6 +1755,10 @@ HTML,
         // Setor certo, mas a OSC não é a dona desta parceria.
         if ($setorDaPeca === 'osc' && !$this->oscDona($user, $dono)) {
             return 'Este documento pertence a outra OSC.';
+        }
+
+        if (($perfil = self::PREENCHIMENTO_RESERVADO[$this->chave] ?? null) && !$user->hasRole($perfil)) {
+            return 'Este documento é preenchido e assinado pela ' . (User::$roleLabels[$perfil] ?? $perfil) . '.';
         }
 
         // Peça fora do trâmite: não há etapa a explicar.
@@ -1778,6 +1821,16 @@ HTML,
      */
     public const ASSINATURA_RESERVADA = [
         'parecer_financeiro' => 'responsavel_seplan',
+        'resposta_recurso'   => 'comissao_selecao',
+    ];
+
+    /**
+     * Peças que só um perfil preenche, além de assinar. A Resposta ao recurso
+     * é da Comissão de Seleção (decisão da gestão, 29/09/2026): o setor dela é
+     * a UG, mas o resto da UG não responde por ela.
+     */
+    public const PREENCHIMENTO_RESERVADO = [
+        'resposta_recurso' => 'comissao_selecao',
     ];
 
     /** O perfil que assina este documento, se a assinatura for reservada. */

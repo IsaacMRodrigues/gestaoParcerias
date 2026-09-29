@@ -566,6 +566,23 @@ Trazer os demais cenários para `tests/Feature` é uma das [Pendências](#pendê
 Da mais recente para a mais antiga. Cada entrada diz o que mudou, **por quê** e como foi
 conferido — o porquê é o que falta a quem pega o código depois.
 
+- [2026-09-29] **Seleção: etapa 3 "Recurso e resposta ao recurso", Ata do resultado definitivo e Termo
+  preenchido pela SCP** (`Chamamento::ETAPAS_SELECAO`, `Peca::PREENCHIMENTO_RESERVADO`, `Peca::aindaEOModelo`)
+  - Decisões da gestão, no mesmo dia. **Etapa 3** passa a ser "Recurso e resposta ao recurso": a OSC recorre
+    no prazo do edital com um arquivo, e a **Resposta ao recurso** é uma peça nova da etapa, **opcional**
+    (a etapa se encerra sem ela), que só a **Comissão de Seleção** preenche e assina. O formulário "Julgar
+    recurso" da tela da proposta saiu — a peça o substitui; julgamentos antigos continuam à mostra. A
+    etapa 4 fica só com o Resultado Definitivo
+  - A Comissão de Seleção da Secretaria passa a abrir a **tela de Seleção** (antes exigia a permissão de
+    chamamentos), só para a peça: os botões do trâmite e o "anexo extra" seguem com quem tem chamamentos.
+    Ela recebe e-mail quando uma OSC protocola recurso
+  - **Etapa 4:** item novo "Ata do resultado definitivo", arquivo anexado pela UG (não bloqueia o envio)
+  - **Termo de Adjudicação e Homologação:** a SCP precisa preenchê-lo antes de enviá-lo ao Gabinete — o texto
+    do modelo, do jeito que foi semeado, não passa (pendência "preencher antes de enviar ao Gabinete"). O
+    Prefeito só assina: não tem editor, e a SCP também não edita depois de enviado
+  - Conferido: `RecursoPelaComissaoTest` (reescrito: arquivo para a Comissão, peça só dela e opcional, Ata
+    na etapa 4), `TermoDeHomologacaoTest` (2 testes), `PrazoDeRecursoTest` atualizado
+
 - [2026-09-29] **O recurso é o arquivo anexado pela OSC, e aparece para a Comissão de Seleção**
   (`RecursoController::store`, `propostas/show`, `propostas/index`)
   - Decisão da gestão. O formulário de recurso do portal pede só o PDF assinado, com as razões dentro dele;

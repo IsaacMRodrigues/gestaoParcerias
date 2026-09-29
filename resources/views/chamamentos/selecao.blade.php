@@ -224,7 +224,9 @@
                 @php
                     $etapaAtual   = (int) $chamamento->selecao_etapa;
                     $meuSetor     = auth()->user()->setor;
-                    $souDoSetor   = $meuSetor === $chamamento->selecao_setor;
+                    // A Comissão de Seleção abre esta tela para a Resposta ao recurso,
+                    // mas não movimenta o trâmite: isso é de quem tem chamamentos.
+                    $souDoSetor   = $meuSetor === $chamamento->selecao_setor && auth()->user()->can('chamamentos');
                     $concluida    = $chamamento->selecaoConcluida();
                     $pendencias   = $concluida ? [] : $chamamento->pendenciasSelecao();
                 @endphp
@@ -471,7 +473,7 @@
                             <p class="text-xs text-gray-400 mt-0.5">
                                 Protocolados pelas OSCs contra o resultado provisório
                                 @if($chamamento->prazo_recurso_ate) até {{ $chamamento->prazo_recurso_ate->format('d/m/Y') }}@endif.
-                                Encerrado o prazo, a Comissão de Seleção julga cada recurso antes do resultado definitivo.
+                                A Comissão de Seleção pode respondê-los com o documento "Resposta ao recurso" desta etapa (opcional).
                             </p>
                         </div>
                         @php $semResp = $chamamento->recursos->whereNull('respondido_em')->count(); @endphp
@@ -528,15 +530,6 @@
                                         @endif
                                     </p>
                                 </div>
-                            @elseif($chamamento->respostaDeRecursosAberta())
-                                {{-- Quem julga é a Comissão de Seleção, na tela da proposta
-                                     (decisão da gestão, 29/09/2026). --}}
-                                <p class="mt-2 text-xs text-gray-500">
-                                    Aguardando o julgamento da Comissão de Seleção, na tela da proposta.
-                                    @if($rec->proposta_id)
-                                        <a href="{{ route('propostas.show', $rec->proposta_id) }}" class="text-brand-600 hover:underline">Abrir a proposta</a>
-                                    @endif
-                                </p>
                             @endif
                         </div>
                     @empty
@@ -562,7 +555,7 @@
                      publicações um chamamento exige varia de um para outro. --}}
                 @include('pecas._checklist', [
                     'pecas'          => $pecas,
-                    'rotaAnexoExtra' => route('chamamentos.selecao.anexos.store', $chamamento),
+                    'rotaAnexoExtra' => auth()->user()->can('chamamentos') ? route('chamamentos.selecao.anexos.store', $chamamento) : null,
                 ])
             </div>
         </div>

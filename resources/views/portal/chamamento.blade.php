@@ -224,7 +224,7 @@
                                     </div>
                                 @else
                                     <p class="text-xs text-gray-500 mt-2">
-                                        Aguardando o julgamento da Comissão de Seleção. A resposta aparecerá aqui.
+                                        A Comissão de Seleção analisará o recurso. A resposta, se houver, aparecerá nos documentos da sua inscrição.
                                     </p>
                                 @endif
                             </div>
