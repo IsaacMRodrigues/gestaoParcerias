@@ -63,11 +63,12 @@ class NovaPropostaTest extends TestCase
             'titulo' => 'Oficinas de música',
             'objeto' => 'x', 'justificativa' => 'x', 'valor_solicitado' => '8.000,00',
             'itens'       => [['descricao' => 'Instrutor', 'tipo_despesa' => 'servicos_pf', 'quantidade' => 10, 'valor_unitario' => 800]],
-            'desembolsos' => [['ano' => 2026, 'mes' => 10, 'valor' => 8000]],
         ])->assertSessionHasNoErrors();
 
         $p = ManifestacaoInteresse::where('titulo', 'Oficinas de música')->sole();
-        $p->criarMeta(['descricao' => 'Meta 1']);
+        // O desembolso é por meta (item 11 do modelo): vem na tela seguinte.
+        $meta = $p->criarMeta(['descricao' => 'Meta 1']);
+        $p->desembolsos()->create(['meta_id' => $meta->id, 'parcela' => 1, 'valor' => 8000]);
         Documento::forceCreate(['manifestacao_id' => $p->id, 'nome_original' => 'estatuto.pdf', 'path' => 'x.pdf',
             'mime_type' => 'application/pdf', 'tamanho' => 1, 'uploaded_by' => $this->rl->id]);
 
@@ -97,7 +98,7 @@ class NovaPropostaTest extends TestCase
         $this->actingAs($this->rl)->get('/portal/novas-propostas/nova')->assertOk()
             ->assertDontSee('name="fundamento_pedido"', false)->assertDontSee('name="orgao_id"', false)
             ->assertSee('name="valor_solicitado"', false)->assertSee('Plano de aplicação dos recursos')
-            ->assertSee('Cronograma de desembolso');
+            ->assertDontSee('name="valor_proprio"', false)->assertDontSee('Cronograma de desembolso');
 
         // Mesmo que mande, não grava: quem decide é a SCP.
         $this->actingAs($this->rl)->post('/portal/novas-propostas', [
@@ -106,29 +107,22 @@ class NovaPropostaTest extends TestCase
         $this->assertNull(ManifestacaoInteresse::where('titulo', 'Tentativa')->value('fundamento_pedido'));
     }
 
-    public function test_o_primeiro_formulario_grava_valores_plano_de_aplicacao_e_desembolso(): void
+    public function test_o_primeiro_formulario_grava_o_valor_pleiteado_e_a_planilha(): void
     {
         $this->actingAs($this->rl)->post('/portal/novas-propostas', [
             'titulo' => 'Com valores', 'objeto' => 'x', 'justificativa' => 'x',
-            'valor_solicitado' => '10.000,00', 'valor_proprio' => '1.000,00', 'valor_outras_fontes' => '500,00',
+            'valor_solicitado' => '10.000,00',
             'itens' => [
                 ['descricao' => 'Instrutor', 'tipo_despesa' => 'servicos_pf', 'unidade' => 'mês', 'quantidade' => 10, 'valor_unitario' => 1000],
-                ['descricao' => 'Material', 'tipo_despesa' => 'material_consumo', 'quantidade' => 1, 'valor_unitario' => 1500],
-            ],
-            // Duas parcelas no mesmo mês somam, como no editor do plano.
-            'desembolsos' => [
-                ['ano' => 2026, 'mes' => 11, 'valor' => 6000],
-                ['ano' => 2026, 'mes' => 12, 'valor' => 3000],
-                ['ano' => 2026, 'mes' => 12, 'valor' => 1000],
+                ['descricao' => 'Lanche', 'tipo_despesa' => 'auxilio_alimentacao', 'quantidade' => 1, 'valor_unitario' => 1500],
             ],
         ])->assertSessionHasNoErrors();
 
         $p = ManifestacaoInteresse::where('titulo', 'Com valores')->sole();
-        $this->assertSame(['10000.00', '1000.00', '500.00'], [$p->valor_solicitado, $p->valor_proprio, (string) $p->valor_outras_fontes]);
-        $this->assertSame(['Instrutor', 'Material'], $p->planoItens()->orderBy('numero')->pluck('descricao')->all());
+        $this->assertSame('10000.00', $p->valor_solicitado);
+        $this->assertSame(['Instrutor', 'Lanche'], $p->planoItens()->orderBy('numero')->pluck('descricao')->all());
         $this->assertSame(11500.0, $p->fresh()->totalPlanoAplicacao());
-        $this->assertSame(2, $p->desembolsos()->count());
-        $this->assertSame(10000.0, $p->fresh()->totalDesembolso());
+        $this->assertSame(0, $p->desembolsos()->count(), 'o desembolso é por meta, na tela seguinte');
     }
 
     public function test_sem_valor_ou_com_linha_incompleta_nao_cria(): void
@@ -138,9 +132,13 @@ class NovaPropostaTest extends TestCase
         $this->actingAs($this->rl)->post('/portal/novas-propostas', $base)->assertSessionHasErrors('valor_solicitado');
         $this->actingAs($this->rl)->post('/portal/novas-propostas', $base + [
             'valor_solicitado' => 100,
-            'itens'            => [['descricao' => '', 'tipo_despesa' => 'outros', 'quantidade' => 1, 'valor_unitario' => 10]],
-            'desembolsos'      => [['ano' => 2026, 'mes' => 13, 'valor' => 100]],
-        ])->assertSessionHasErrors(['itens.0.descricao', 'desembolsos.0.mes']);
+            'itens'            => [['descricao' => '', 'tipo_despesa' => 'material_consumo', 'quantidade' => 1, 'valor_unitario' => 10]],
+        ])->assertSessionHasErrors(['itens.0.descricao']);
+        // "Outros" era da lista antiga: não se escolhe mais.
+        $this->actingAs($this->rl)->post('/portal/novas-propostas', $base + [
+            'valor_solicitado' => 100,
+            'itens'            => [['descricao' => 'x', 'tipo_despesa' => 'outros', 'quantidade' => 1, 'valor_unitario' => 10]],
+        ])->assertSessionHasErrors(['itens.0.tipo_despesa']);
 
         $this->assertSame(0, ManifestacaoInteresse::where('titulo', 'Incompleta')->count());
     }

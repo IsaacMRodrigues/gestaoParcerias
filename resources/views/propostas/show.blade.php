@@ -166,13 +166,17 @@
                         </dd>
                     </div>
                     <div>
-                        <dt class="text-gray-500">Valor Solicitado</dt>
+                        <dt class="text-gray-500">Valor pleiteado</dt>
                         <dd class="text-gray-900 font-medium">R$ {{ number_format($proposta->valor_solicitado, 2, ',', '.') }}</dd>
                     </div>
-                    <div>
-                        <dt class="text-gray-500">Contrapartida</dt>
-                        <dd class="text-gray-900">R$ {{ number_format($proposta->valor_proprio, 2, ',', '.') }}</dd>
-                    </div>
+                    {{-- Contrapartida em dinheiro saiu do plano (não consta do modelo
+                         da cliente); aparece só em proposta antiga que a declarou. --}}
+                    @if((float) $proposta->valor_proprio > 0)
+                        <div>
+                            <dt class="text-gray-500">Contrapartida</dt>
+                            <dd class="text-gray-900">R$ {{ number_format($proposta->valor_proprio, 2, ',', '.') }}</dd>
+                        </div>
+                    @endif
                     <div>
                         <dt class="text-gray-500">Início Previsto</dt>
                         <dd class="text-gray-900">{{ $proposta->data_inicio_prevista?->format('d/m/Y') ?? '—' }}</dd>

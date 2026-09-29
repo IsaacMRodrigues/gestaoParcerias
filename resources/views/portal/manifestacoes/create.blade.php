@@ -11,8 +11,8 @@
         <h1 class="text-2xl font-bold text-gray-900 mt-1">{{ $tipo === 'proposta' ? 'Nova Proposta' : 'Nova manifestação de interesse' }}</h1>
         <p class="text-sm text-gray-500 mt-1 mb-6">
             @if($tipo === 'proposta')
-                Comece pelos dados gerais, os valores, o plano de aplicação e o cronograma de desembolso. Na tela
-                seguinte você completa o plano de trabalho (metas e endereços) e anexa a habilitação — a proposta
+                Comece pelos dados gerais, o valor pleiteado e o plano de aplicação. Na tela
+                seguinte você completa o plano de trabalho (objetivos, metas, desembolso, equipe) e anexa a habilitação — a proposta
                 só vai ao município quando você enviar.
             @else
                 Comece pelos dados gerais. Na tela seguinte você monta o plano de trabalho e anexa a

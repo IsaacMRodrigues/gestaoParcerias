@@ -55,11 +55,17 @@ class PrestacaoContas extends Model
      * Os quatro blocos do Relatório de Metas Financeiras (Anexo VI) e as
      * naturezas de despesa que caem em cada um.
      */
+    /**
+     * Os quatro blocos do Anexo VI e as naturezas do plano (Despesa::NATUREZAS)
+     * que caem em cada um. Pessoal leva a contratação e os auxílios pagos à
+     * equipe; encargos, os patronais e os tributos; equipamentos, o que é
+     * permanente — inclusive obras e instalações; o resto é manutenção.
+     */
     public const BLOCOS = [
-        'pessoal'      => ['rotulo' => '1. Pessoal',                         'naturezas' => ['recursos_humanos']],
-        'encargos'     => ['rotulo' => '2. Encargos sociais e trabalhistas', 'naturezas' => ['encargos']],
-        'manutencao'   => ['rotulo' => '3. Manutenção e outros',             'naturezas' => ['material_consumo', 'servicos_pf', 'servicos_pj', 'outros']],
-        'equipamentos' => ['rotulo' => '4. Equipamentos e material perm.',   'naturezas' => ['equipamento']],
+        'pessoal'      => ['rotulo' => '1. Pessoal',                         'naturezas' => ['contratacao_tempo_determinado', 'auxilio_alimentacao', 'auxilio_transporte']],
+        'encargos'     => ['rotulo' => '2. Encargos sociais e trabalhistas', 'naturezas' => ['encargos_patronais', 'obrigacoes_tributarias']],
+        'manutencao'   => ['rotulo' => '3. Manutenção e outros',             'naturezas' => ['material_consumo', 'servicos_pf', 'servicos_pj', 'diarias', 'passagens', 'outros']],
+        'equipamentos' => ['rotulo' => '4. Equipamentos e material perm.',   'naturezas' => ['equipamento', 'obras']],
     ];
 
     protected function casts(): array

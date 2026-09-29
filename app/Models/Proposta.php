@@ -50,7 +50,7 @@ class Proposta extends Model
 
     protected $fillable = [
         'chamamento_id', 'osc_id', 'titulo', 'objeto', 'justificativa',
-        'descricao_realidade', 'publico_alvo', 'objetivos',
+        'descricao_realidade', 'publico_alvo', 'objetivos', 'objetivos_especificos', 'metodologia',
         'valor_solicitado', 'valor_proprio', 'valor_outras_fontes',
         'data_inicio_prevista', 'data_fim_prevista', 'vigencia_dias',
         'atuacao_rede', 'rede_cnpj', 'rede_razao_social', 'rede_municipio', 'rede_data_termo',

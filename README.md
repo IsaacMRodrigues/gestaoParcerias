@@ -566,6 +566,30 @@ Trazer os demais cenários para `tests/Feature` é uma das [Pendências](#pendê
 Da mais recente para a mais antiga. Cada entrada diz o que mudou, **por quê** e como foi
 conferido — o porquê é o que falta a quem pega o código depois.
 
+- [2026-09-29] **Plano de Trabalho à risca do modelo da cliente** (`Docs. Desenvolvimento/Planodetrabalho.docx`,
+  `PlanoDocumento`, `plano/_editor`, migração `plano_de_trabalho_conforme_o_modelo_da_cliente`)
+  - Pedido da cliente: seguir o modelo à risca, sem novidades. A tela do plano e o documento impresso
+    passam a ter os **13 itens do modelo**, na ordem e com os títulos dele (o item 1 vem do cadastro da
+    OSC; o documento traz o "Pedido de avaliação" depois do item 2 e a planilha do item 13 como anexo)
+  - **Entrou o que faltava:** objetivos geral e específicos (4), metodologia (5), objetivo específico de
+    cada meta (7), atividades com início, fim e valor estimado (7 e 10), contrapartida não financeira (8),
+    equipe com cargo, formação, carga horária e vínculo CLT/contratado/voluntariado (12)
+  - **Desembolso por meta e parcela** (11), como no modelo (1ª a 12ª parcela por meta), no lugar de ano e
+    mês. As parcelas antigas viraram 1ª, 2ª… na ordem do calendário; a meta só foi preenchida quando o plano
+    tinha uma meta só. Por isso ele saiu do primeiro formulário da Nova Proposta: depende das metas
+  - **Naturezas de despesa:** as 12 do item 9, no plano, na execução e na prestação de contas. Das 7
+    antigas, 4 existem no modelo e mantêm a chave; "Recursos Humanos / Folha" → "Contratação por Tempo
+    Determinado (pessoal)" e "Encargos e Tributos" → "Encargos patronais e trabalhistas" (migração);
+    "Outros" não se escolhe mais e aparece como "Outros (lista antiga)". Nos blocos do Anexo VI da
+    prestação: auxílios vão para Pessoal, tributos para Encargos, obras para Equipamentos, diárias e
+    passagens para Manutenção. O item 9 é "reservado ao ordenador de despesa": o sistema o soma do plano
+    de aplicação, por natureza
+  - **Saiu do plano** (tela, documento e formulários da manifestação e da inscrição em chamamento):
+    endereços de execução, contrapartida em dinheiro, outras fontes e atuação em rede. As colunas e os
+    dados antigos ficam no banco; a contrapartida do instrumento (termo) não mudou
+  - Conferido: 6 testes em `PlanoDeTrabalhoModeloTest` (os 13 itens na ordem, desembolso por meta, as
+    12 naturezas nos blocos da prestação); telas do plano abertas com os dados locais, sem erro
+
 - [2026-09-29] **Nova Proposta: valores, plano de aplicação e desembolso no primeiro formulário**
   (`portal/manifestacoes/_valores-proposta`, `ManifestacaoController::validarValoresDaProposta`)
   - Pedido da gestão, em dois passos no mesmo dia: primeiro saíram os campos soltos de valor; depois

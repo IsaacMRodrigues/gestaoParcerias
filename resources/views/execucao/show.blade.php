@@ -270,7 +270,7 @@
                     <div class="px-6 py-4 border-t border-gray-100 flex flex-wrap gap-x-6 gap-y-1 text-xs text-gray-500">
                         <span class="font-semibold text-gray-600">Por natureza:</span>
                         @foreach($porNatureza as $nat => $total)
-                            <span>{{ \App\Models\Despesa::NATUREZAS[$nat] ?? $nat }}: <strong class="text-gray-800">R$ {{ number_format($total, 2, ',', '.') }}</strong></span>
+                            <span>{{ \App\Models\Despesa::rotuloNatureza($nat) }}: <strong class="text-gray-800">R$ {{ number_format($total, 2, ',', '.') }}</strong></span>
                         @endforeach
                     </div>
                 @endif

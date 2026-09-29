@@ -49,7 +49,7 @@ class ManifestacaoAnaliseController extends Controller
     {
         $this->autorizarLeitura($manifestacao);
 
-        $manifestacao->load(['osc', 'orgao', 'metas.etapas', 'planoItens', 'desembolsos', 'enderecosExecucao',
+        $manifestacao->load(['osc', 'orgao', 'metas.etapas', 'planoItens', 'desembolsos', 'contrapartidas', 'equipe',
             'documentos', 'parecerPor', 'decididaPor', 'chamamento', 'proposta']);
 
         // Só programas da Secretaria a que a manifestação se dirige: o
@@ -176,6 +176,8 @@ class ManifestacaoAnaliseController extends Controller
                 'descricao_realidade'  => $manifestacao->descricao_realidade,
                 'publico_alvo'         => $manifestacao->publico_alvo,
                 'objetivos'            => $manifestacao->objetivos,
+                'objetivos_especificos' => $manifestacao->objetivos_especificos,
+                'metodologia'          => $manifestacao->metodologia,
                 'valor_solicitado'     => $manifestacao->valor_solicitado,
                 // A contrapartida é opcional na manifestação e obrigatória na
                 // proposta: sem contrapartida declarada, é zero.
@@ -195,7 +197,7 @@ class ManifestacaoAnaliseController extends Controller
 
             // Plano de trabalho e habilitação passam a ser da proposta — os
             // mesmos registros, sem recadastro e sem cópia a divergir. O plano
-            // inteiro vai junto: metas, aplicação, desembolso e endereços.
+            // inteiro vai junto: metas, aplicação, desembolso, contrapartida e equipe.
             $manifestacao->transferirPlanoPara('proposta_id', $proposta->id);
             $manifestacao->documentos()->update(['proposta_id' => $proposta->id]);
 

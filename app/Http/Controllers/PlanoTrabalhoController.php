@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Despesa;
 use App\Models\ManifestacaoInteresse;
+use App\Models\PlanoEquipe;
 use App\Models\Proposta;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -46,8 +47,10 @@ class PlanoTrabalhoController extends Controller
         $r('destroyItem',      'delete', '/itens/{item}',                     'itens.destroy');
         $r('storeDesembolso',  'post',   '/desembolsos',                      'desembolsos.store');
         $r('destroyDesembolso', 'delete', '/desembolsos/{desembolso}',        'desembolsos.destroy');
-        $r('storeEndereco',    'post',   '/enderecos',                        'enderecos.store');
-        $r('destroyEndereco',  'delete', '/enderecos/{endereco}',             'enderecos.destroy');
+        $r('storeContrapartida',   'post',   '/contrapartidas',               'contrapartidas.store');
+        $r('destroyContrapartida', 'delete', '/contrapartidas/{contrapartida}', 'contrapartidas.destroy');
+        $r('storeEquipe',          'post',   '/equipe',                       'equipe.store');
+        $r('destroyEquipe',        'delete', '/equipe/{membro}',              'equipe.destroy');
     }
 
     // ----------------------------------------------------------------- dados
@@ -56,38 +59,23 @@ class PlanoTrabalhoController extends Controller
     {
         $dono = $this->donoEditavel($request);
 
+        // Os campos dos itens 2 a 6 do modelo de Plano de Trabalho da cliente.
+        // Contrapartida em dinheiro, outras fontes e atuação em rede não
+        // constam do modelo: saíram da tela, e o que já estava gravado fica.
         $data = $request->validate([
-            'titulo'               => ['required', 'string', 'max:255'],
-            'objeto'               => ['required', 'string'],
-            'descricao_realidade'  => ['nullable', 'string'],
-            'justificativa'        => ['nullable', 'string'],
-            'publico_alvo'         => ['nullable', 'string'],
-            'objetivos'            => ['nullable', 'string'],
-            'valor_solicitado'     => ['required', 'numeric', 'min:0'],
-            'valor_proprio'        => ['nullable', 'numeric', 'min:0'],
-            'valor_outras_fontes'  => ['nullable', 'numeric', 'min:0'],
-            'data_inicio_prevista' => ['nullable', 'date'],
-            'data_fim_prevista'    => ['nullable', 'date', 'after_or_equal:data_inicio_prevista'],
-            'vigencia_dias'        => ['nullable', 'integer', 'min:1', 'max:3650'],
-            'atuacao_rede'         => ['nullable', 'boolean'],
-            'rede_cnpj'            => ['nullable', 'string', 'max:18', 'required_if:atuacao_rede,1'],
-            'rede_razao_social'    => ['nullable', 'string', 'max:255', 'required_if:atuacao_rede,1'],
-            'rede_municipio'       => ['nullable', 'string', 'max:255'],
-            'rede_data_termo'      => ['nullable', 'date'],
-        ], [
-            'rede_cnpj.required_if'         => 'Informe o CNPJ da organização executante em rede.',
-            'rede_razao_social.required_if' => 'Informe a razão social da organização executante em rede.',
+            'titulo'                => ['required', 'string', 'max:255'],
+            'objeto'                => ['required', 'string'],
+            'publico_alvo'          => ['nullable', 'string'],
+            'vigencia_dias'         => ['nullable', 'integer', 'min:1', 'max:3650'],
+            'data_inicio_prevista'  => ['nullable', 'date'],
+            'data_fim_prevista'     => ['nullable', 'date', 'after_or_equal:data_inicio_prevista'],
+            'valor_solicitado'      => ['required', 'numeric', 'min:0'],
+            'descricao_realidade'   => ['nullable', 'string'],
+            'objetivos'             => ['nullable', 'string'],
+            'objetivos_especificos' => ['nullable', 'string'],
+            'metodologia'           => ['nullable', 'string'],
+            'justificativa'         => ['nullable', 'string'],
         ]);
-
-        $data['atuacao_rede']        = (bool) ($data['atuacao_rede'] ?? false);
-        $data['valor_proprio']       = $data['valor_proprio'] ?? 0;
-        $data['valor_outras_fontes'] = $data['valor_outras_fontes'] ?? 0;
-
-        // Rede desmarcada não deixa rastro: os campos seguiriam num plano que
-        // declara não haver rede, e o documento gerado os imprimiria.
-        if (!$data['atuacao_rede']) {
-            $data['rede_cnpj'] = $data['rede_razao_social'] = $data['rede_municipio'] = $data['rede_data_termo'] = null;
-        }
 
         $dono->update($data);
 
@@ -100,16 +88,16 @@ class PlanoTrabalhoController extends Controller
     {
         $dono = $this->donoEditavel($request);
 
+        // Item 7 do modelo: objetivo específico, meta, indicadores
+        // (qualitativos e quantitativos), resultados esperados e meios de
+        // verificação. As atividades são lançadas na própria meta.
         $dono->criarMeta($request->validate([
+            'objetivo_especifico'  => ['nullable', 'string'],
             'descricao'            => ['required', 'string', 'max:255'],
-            'atividades'           => ['nullable', 'string'],
             'indicador'            => ['nullable', 'string', 'max:255'],
-            'meios_verificacao'    => ['nullable', 'string'],
-            'resultados_esperados' => ['nullable', 'string'],
-            'valor'                => ['nullable', 'numeric', 'min:0'],
             'meta_quantitativa'    => ['nullable', 'string', 'max:255'],
-            'data_inicio'          => ['nullable', 'date'],
-            'data_fim'             => ['nullable', 'date', 'after_or_equal:data_inicio'],
+            'resultados_esperados' => ['nullable', 'string'],
+            'meios_verificacao'    => ['nullable', 'string'],
         ]));
 
         return back()->with('success', 'Meta adicionada.');
@@ -129,14 +117,16 @@ class PlanoTrabalhoController extends Controller
         $dono = $this->donoEditavel($request);
         $meta = $dono->metas()->findOrFail($request->route('meta'));
 
+        // Atividade da meta, com o período e o estimado do item 10 do modelo
+        // (cronograma de execução física e financeira).
         $meta->etapas()->create($request->validate([
             'descricao'   => ['required', 'string', 'max:255'],
-            'responsavel' => ['nullable', 'string', 'max:255'],
             'data_inicio' => ['nullable', 'date'],
             'data_fim'    => ['nullable', 'date', 'after_or_equal:data_inicio'],
+            'valor'       => ['nullable', 'numeric', 'min:0'],
         ]) + ['numero' => (int) $meta->etapas()->max('numero') + 1]);
 
-        return back()->with('success', 'Etapa adicionada.');
+        return back()->with('success', 'Atividade adicionada.');
     }
 
     public function destroyEtapa(Request $request): RedirectResponse
@@ -146,7 +136,7 @@ class PlanoTrabalhoController extends Controller
 
         $meta->etapas()->findOrFail($request->route('etapa'))->delete();
 
-        return back()->with('success', 'Etapa removida.');
+        return back()->with('success', 'Atividade removida.');
     }
 
     // ------------------------------------------------- plano de aplicação
@@ -184,20 +174,24 @@ class PlanoTrabalhoController extends Controller
     {
         $dono = $this->donoEditavel($request);
 
+        // Item 11 do modelo: por meta e parcela.
         $dados = $request->validate([
-            'ano'   => ['required', 'integer', 'min:2020', 'max:2100'],
-            'mes'   => ['required', 'integer', 'min:1', 'max:12'],
-            'valor' => ['required', 'numeric', 'min:0.01'],
+            'meta_id' => ['required', Rule::exists('metas', 'id')->where($dono->chavePlano(), $dono->id)],
+            'parcela' => ['required', 'integer', 'min:1', 'max:120'],
+            'valor'   => ['required', 'numeric', 'min:0.01'],
+        ], [
+            'meta_id.required' => 'Escolha a meta da parcela.',
+            'meta_id.exists'   => 'Escolha uma meta deste plano.',
         ]);
 
-        // Duas parcelas no mesmo mês são sempre erro de digitação — o
-        // cronograma tem uma linha por mês, e a planilha do parecer soma por
-        // mês. Somar no lugar de recusar evita perder o que foi digitado.
-        $existente = $dono->desembolsos()->where('ano', $dados['ano'])->where('mes', $dados['mes'])->first();
+        // A mesma parcela da mesma meta duas vezes é erro de digitação — o
+        // cronograma tem uma célula por meta e parcela. Somar no lugar de
+        // recusar evita perder o que foi digitado.
+        $existente = $dono->desembolsos()->where('meta_id', $dados['meta_id'])->where('parcela', $dados['parcela'])->first();
         if ($existente) {
             $existente->update(['valor' => (float) $existente->valor + (float) $dados['valor']]);
 
-            return back()->with('success', 'Já havia parcela neste mês — os valores foram somados.');
+            return back()->with('success', 'Já havia esta parcela nesta meta — os valores foram somados.');
         }
 
         $dono->desembolsos()->create($dados);
@@ -214,27 +208,52 @@ class PlanoTrabalhoController extends Controller
         return back()->with('success', 'Parcela removida.');
     }
 
-    // -------------------------------------------------------- endereços
+    // ----------------------------------- contrapartida não financeira (8)
 
-    public function storeEndereco(Request $request): RedirectResponse
+    public function storeContrapartida(Request $request): RedirectResponse
     {
         $dono = $this->donoEditavel($request);
 
-        $dono->enderecosExecucao()->create($request->validate([
-            'descricao' => ['nullable', 'string', 'max:255'],
-            'endereco'  => ['required', 'string', 'max:255'],
-        ]));
+        $dono->contrapartidas()->create($request->validate([
+            'descricao'  => ['required', 'string', 'max:255'],
+            'quantidade' => ['nullable', 'string', 'max:100'],
+        ]) + ['numero' => $dono->proximoNumero('contrapartidas')]);
 
-        return back()->with('success', 'Endereço de execução incluído.');
+        return back()->with('success', 'Contrapartida incluída.');
     }
 
-    public function destroyEndereco(Request $request): RedirectResponse
+    public function destroyContrapartida(Request $request): RedirectResponse
     {
         $dono = $this->donoEditavel($request);
 
-        $dono->enderecosExecucao()->findOrFail($request->route('endereco'))->delete();
+        $dono->contrapartidas()->findOrFail($request->route('contrapartida'))->delete();
 
-        return back()->with('success', 'Endereço removido.');
+        return back()->with('success', 'Contrapartida removida.');
+    }
+
+    // ------------------------------------------------------- equipe (12)
+
+    public function storeEquipe(Request $request): RedirectResponse
+    {
+        $dono = $this->donoEditavel($request);
+
+        $dono->equipe()->create($request->validate([
+            'cargo_funcao'         => ['required', 'string', 'max:255'],
+            'formacao'             => ['nullable', 'string', 'max:255'],
+            'carga_horaria_mensal' => ['nullable', 'string', 'max:50'],
+            'vinculo'              => ['required', Rule::in(array_keys(PlanoEquipe::VINCULOS))],
+        ]));
+
+        return back()->with('success', 'Integrante da equipe incluído.');
+    }
+
+    public function destroyEquipe(Request $request): RedirectResponse
+    {
+        $dono = $this->donoEditavel($request);
+
+        $dono->equipe()->findOrFail($request->route('membro'))->delete();
+
+        return back()->with('success', 'Integrante removido.');
     }
 
     // --------------------------------------------------------------- apoio

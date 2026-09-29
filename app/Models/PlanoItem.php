@@ -46,6 +46,6 @@ class PlanoItem extends Model
 
     public function tipoLabel(): string
     {
-        return Despesa::NATUREZAS[$this->tipo_despesa] ?? $this->tipo_despesa;
+        return Despesa::rotuloNatureza($this->tipo_despesa);
     }
 }

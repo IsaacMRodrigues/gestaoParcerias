@@ -4,8 +4,10 @@ namespace App\Models\Concerns;
 
 use App\Models\Despesa;
 use App\Models\Meta;
+use App\Models\PlanoContrapartida;
 use App\Models\PlanoDesembolso;
 use App\Models\PlanoEndereco;
+use App\Models\PlanoEquipe;
 use App\Models\PlanoItem;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
@@ -27,10 +29,23 @@ trait TemPlanoDeTrabalho
         return $this->hasMany(PlanoItem::class, $this->chavePlano())->orderBy('numero');
     }
 
+    /** Item 11: por meta e parcela. As parcelas antigas, mensais, vêm na ordem do calendário. */
     public function desembolsos(): HasMany
     {
         return $this->hasMany(PlanoDesembolso::class, $this->chavePlano())
-            ->orderBy('ano')->orderBy('mes');
+            ->orderBy('parcela')->orderBy('ano')->orderBy('mes');
+    }
+
+    /** Item 8: contrapartida não financeira. */
+    public function contrapartidas(): HasMany
+    {
+        return $this->hasMany(PlanoContrapartida::class, $this->chavePlano())->orderBy('numero');
+    }
+
+    /** Item 12: equipe a serviço da parceria. */
+    public function equipe(): HasMany
+    {
+        return $this->hasMany(PlanoEquipe::class, $this->chavePlano())->orderBy('id');
     }
 
     public function enderecosExecucao(): HasMany
@@ -50,9 +65,18 @@ trait TemPlanoDeTrabalho
         return (float) $this->desembolsos->sum('valor');
     }
 
+    /** Total do cronograma de execução físico-financeiro (item 10). */
     public function totalDasMetas(): float
     {
-        return (float) $this->metas->sum('valor');
+        return (float) $this->metas->sum(fn (Meta $m) => $m->valorEstimado());
+    }
+
+    /** Item 9: o valor de cada natureza, das 12 do modelo, somado do plano de aplicação. */
+    public function naturezasDaDespesa(): array
+    {
+        $por = $this->planoPorNatureza();
+
+        return collect(Despesa::NATUREZAS)->mapWithKeys(fn ($rotulo, $chave) => [$chave => (float) ($por[$chave] ?? 0)])->all();
     }
 
     /** O que cada natureza de despesa recebeu no plano — o "aprovado" da prestação. */
@@ -66,33 +90,13 @@ trait TemPlanoDeTrabalho
         return $por;
     }
 
-    /** II — Valor total da proposta: município, contrapartida da OSC e outras fontes. */
-    public function quadroDeFontes(): array
-    {
-        $fontes = [
-            'PMSGRA'            => (float) $this->valor_solicitado,
-            'OSC — Contrapartida' => (float) $this->valor_proprio,
-            'Outras fontes'     => (float) $this->valor_outras_fontes,
-        ];
-        $total = array_sum($fontes);
-
-        $linhas = [];
-        foreach ($fontes as $nome => $valor) {
-            $linhas[] = [
-                'nome'       => $nome,
-                'valor'      => $valor,
-                'percentual' => $total > 0 ? $valor / $total * 100 : 0.0,
-            ];
-        }
-
-        return ['linhas' => $linhas, 'total' => $total];
-    }
-
+    /**
+     * O valor do plano é o valor pleiteado (item 2 do modelo). Contrapartida em
+     * dinheiro e outras fontes não constam do modelo e saíram do plano.
+     */
     public function valorTotalDoPlano(): float
     {
-        return (float) $this->valor_solicitado
-            + (float) $this->valor_proprio
-            + (float) $this->valor_outras_fontes;
+        return (float) $this->valor_solicitado;
     }
 
     /**
@@ -112,7 +116,7 @@ trait TemPlanoDeTrabalho
 
         if ($this->planoItens->isNotEmpty() && abs($aplicacao - $total) > $tol) {
             $avisos[] = sprintf(
-                'O plano de aplicação soma R$ %s, e o valor total da proposta é R$ %s.',
+                'O plano de aplicação soma R$ %s, e o valor pleiteado é R$ %s.',
                 number_format($aplicacao, 2, ',', '.'), number_format($total, 2, ',', '.')
             );
         }
@@ -120,7 +124,7 @@ trait TemPlanoDeTrabalho
         $desembolso = $this->totalDesembolso();
         if ($this->desembolsos->isNotEmpty() && abs($desembolso - (float) $this->valor_solicitado) > $tol) {
             $avisos[] = sprintf(
-                'O cronograma de desembolso soma R$ %s, e o valor solicitado ao município é R$ %s.',
+                'O cronograma de desembolso soma R$ %s, e o valor pleiteado é R$ %s.',
                 number_format($desembolso, 2, ',', '.'),
                 number_format((float) $this->valor_solicitado, 2, ',', '.')
             );
@@ -129,7 +133,7 @@ trait TemPlanoDeTrabalho
         $metas = $this->totalDasMetas();
         if ($metas > 0 && abs($metas - $total) > $tol) {
             $avisos[] = sprintf(
-                'A soma dos valores das metas é R$ %s, e o valor total da proposta é R$ %s.',
+                'O cronograma de execução físico-financeiro soma R$ %s, e o valor pleiteado é R$ %s.',
                 number_format($metas, 2, ',', '.'), number_format($total, 2, ',', '.')
             );
         }
@@ -179,7 +183,7 @@ trait TemPlanoDeTrabalho
     /** Leva o plano inteiro para outro dono — é o que o deferimento faz. */
     public function transferirPlanoPara(string $coluna, int $id): void
     {
-        foreach (['metas', 'planoItens', 'desembolsos', 'enderecosExecucao'] as $relacao) {
+        foreach (['metas', 'planoItens', 'desembolsos', 'enderecosExecucao', 'contrapartidas', 'equipe'] as $relacao) {
             $this->{$relacao}()->update([$coluna => $id]);
         }
     }

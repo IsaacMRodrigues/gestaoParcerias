@@ -48,18 +48,15 @@
               class="mt-1 block w-full border-gray-300 rounded-md shadow-sm text-sm focus:ring-brand-500 focus:border-brand-500">{{ old('publico_alvo', $manifestacao?->publico_alvo) }}</textarea>
 </div>
 
-{{-- Na Nova Proposta os valores têm bloco próprio, com o plano de aplicação e
-     o desembolso: ver _valores-proposta. --}}
+{{-- Na Nova Proposta o valor tem bloco próprio, com o plano de aplicação: ver
+     _valores-proposta. Contrapartida em dinheiro não consta do modelo de Plano
+     de Trabalho da cliente e saiu (29/09/2026). --}}
 @unless($ehProposta)
 <div class="grid grid-cols-2 gap-4">
     <div>
-        <x-input-label for="valor_solicitado" value="Valor solicitado (R$) *" />
+        <x-input-label for="valor_solicitado" value="Valor pleiteado (R$) *" />
         <x-input-dinheiro name="valor_solicitado" :value="$manifestacao?->valor_solicitado" required class="mt-1" />
         <x-input-error :messages="$errors->get('valor_solicitado')" class="mt-1" />
-    </div>
-    <div>
-        <x-input-label for="valor_proprio" value="Contrapartida da OSC (R$)" />
-        <x-input-dinheiro name="valor_proprio" :value="$manifestacao?->valor_proprio" class="mt-1" />
     </div>
 </div>
 @endunless

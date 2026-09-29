@@ -139,7 +139,7 @@ class PrestacaoDocumento
         $linhas = '';
         foreach ($pc->despesas() as $d) {
             $linhas .= '<tr><td>' . self::data($d->data_despesa) . '</td><td>' . e($d->fornecedor ?: '—') . '</td>'
-                . '<td>' . e(Despesa::NATUREZAS[$d->natureza] ?? $d->natureza) . '</td>'
+                . '<td>' . e(Despesa::rotuloNatureza($d->natureza)) . '</td>'
                 . '<td>' . e($d->nota_fiscal_numero ?: '—') . '</td>'
                 . '<td style="text-align:right">' . self::dinheiro($d->valor) . '</td></tr>';
         }

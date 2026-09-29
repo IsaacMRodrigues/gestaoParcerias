@@ -9,7 +9,7 @@ class Etapa extends Model
 {
     protected $fillable = [
         'meta_id', 'numero', 'descricao',
-        'responsavel', 'data_inicio', 'data_fim', 'recursos',
+        'responsavel', 'data_inicio', 'data_fim', 'recursos', 'valor',
     ];
 
     protected function casts(): array
@@ -17,6 +17,7 @@ class Etapa extends Model
         return [
             'data_inicio' => 'date',
             'data_fim'    => 'date',
+            'valor'       => 'decimal:2',
         ];
     }
 

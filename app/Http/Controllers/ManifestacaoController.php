@@ -85,9 +85,9 @@ class ManifestacaoController extends Controller
     public function storeProposta(Request $request): RedirectResponse
     {
         $data = $this->validarDados($request, proposta: true);
-        [$valores, $itens, $parcelas] = $this->validarValoresDaProposta($request);
+        [$valores, $itens] = $this->validarValoresDaProposta($request);
 
-        $manifestacao = DB::transaction(function () use ($data, $valores, $itens, $parcelas) {
+        $manifestacao = DB::transaction(function () use ($data, $valores, $itens) {
             $manifestacao = ManifestacaoInteresse::create($data + $valores + [
                 'tipo'   => 'proposta',
                 'osc_id' => auth()->user()->osc_id,
@@ -96,16 +96,6 @@ class ManifestacaoController extends Controller
 
             foreach (array_values($itens) as $n => $item) {
                 $manifestacao->planoItens()->create($item + ['numero' => $n + 1]);
-            }
-
-            // Uma linha por mês, como no editor do plano: parcelas repetidas
-            // no mesmo mês são somadas, não recusadas.
-            foreach (collect($parcelas)->groupBy(fn ($p) => $p['ano'] . '-' . $p['mes']) as $doMes) {
-                $manifestacao->desembolsos()->create([
-                    'ano'   => $doMes->first()['ano'],
-                    'mes'   => $doMes->first()['mes'],
-                    'valor' => $doMes->sum(fn ($p) => (float) $p['valor']),
-                ]);
             }
 
             return $manifestacao;
@@ -119,7 +109,7 @@ class ManifestacaoController extends Controller
     {
         $this->autorizar($manifestacao);
 
-        $manifestacao->load(['orgao', 'metas.etapas', 'planoItens', 'desembolsos', 'enderecosExecucao',
+        $manifestacao->load(['orgao', 'metas.etapas', 'planoItens', 'desembolsos', 'contrapartidas', 'equipe',
             'documentos', 'parecerPor', 'decididaPor', 'proposta']);
         $orgaos = Orgao::orderBy('name')->get();
 
@@ -224,16 +214,16 @@ class ManifestacaoController extends Controller
     }
 
     /**
-     * Itens 5, 6 e 7 do Plano de Trabalho, que a Nova Proposta já traz no
-     * primeiro formulário (decisão da gestão, 29/09/2026). As tabelas podem
-     * ficar vazias aqui — o envio é que exige o plano completo.
+     * O valor pleiteado (item 2 do modelo de Plano de Trabalho) e a planilha
+     * do plano de aplicação (item 13), que a Nova Proposta já traz no primeiro
+     * formulário (decisão da gestão, 29/09/2026). O cronograma de desembolso,
+     * por meta, fica para a tela seguinte, onde as metas são lançadas. A
+     * planilha pode ficar vazia aqui — o envio é que exige o plano completo.
      */
     private function validarValoresDaProposta(Request $request): array
     {
         $dados = $request->validate([
             'valor_solicitado'              => ['required', 'numeric', 'min:0'],
-            'valor_proprio'                 => ['nullable', 'numeric', 'min:0'],
-            'valor_outras_fontes'           => ['nullable', 'numeric', 'min:0'],
             'itens'                         => ['nullable', 'array', 'max:200'],
             'itens.*.descricao'             => ['required', 'string', 'max:255'],
             'itens.*.tipo_despesa'          => ['required', Rule::in(array_keys(Despesa::NATUREZAS))],
@@ -241,24 +231,13 @@ class ManifestacaoController extends Controller
             'itens.*.quantidade'            => ['required', 'numeric', 'min:0.01'],
             'itens.*.valor_unitario'        => ['required', 'numeric', 'min:0'],
             'itens.*.atividades_vinculadas' => ['nullable', 'string', 'max:255'],
-            'desembolsos'                   => ['nullable', 'array', 'max:120'],
-            'desembolsos.*.ano'             => ['required', 'integer', 'min:2020', 'max:2100'],
-            'desembolsos.*.mes'             => ['required', 'integer', 'min:1', 'max:12'],
-            'desembolsos.*.valor'           => ['required', 'numeric', 'min:0.01'],
         ], [
-            'valor_solicitado.required'     => 'Informe o valor solicitado ao município.',
-            'itens.*.descricao.required'    => 'Descreva cada item do plano de aplicação.',
+            'valor_solicitado.required'       => 'Informe o valor pleiteado.',
+            'itens.*.descricao.required'      => 'Descreva cada item do plano de aplicação.',
             'itens.*.valor_unitario.required' => 'Informe o valor unitário de cada item.',
-            'desembolsos.*.valor.required'  => 'Informe o valor de cada parcela do desembolso.',
         ]);
 
-        $valores = [
-            'valor_solicitado'    => $dados['valor_solicitado'],
-            'valor_proprio'       => $dados['valor_proprio'] ?? 0,
-            'valor_outras_fontes' => $dados['valor_outras_fontes'] ?? 0,
-        ];
-
-        return [$valores, $dados['itens'] ?? [], $dados['desembolsos'] ?? []];
+        return [['valor_solicitado' => $dados['valor_solicitado']], $dados['itens'] ?? []];
     }
 
     private function validarDados(Request $request, bool $proposta = false): array
@@ -272,10 +251,9 @@ class ManifestacaoController extends Controller
             'objeto'               => ['required', 'string'],
             'justificativa'        => ['required', 'string'],
             'publico_alvo'         => ['nullable', 'string'],
-            // Na Nova Proposta os valores têm validação própria, com as tabelas
-            // do plano: ver validarValoresDaProposta.
+            // Na Nova Proposta o valor tem validação própria, com a planilha do
+            // plano de aplicação: ver validarValoresDaProposta.
             'valor_solicitado'     => $proposta ? ['exclude'] : ['required', 'numeric', 'min:0'],
-            'valor_proprio'        => $proposta ? ['exclude'] : ['nullable', 'numeric', 'min:0'],
             'data_inicio_prevista' => ['nullable', 'date'],
             'data_fim_prevista'    => ['nullable', 'date', 'after_or_equal:data_inicio_prevista'],
         ], [

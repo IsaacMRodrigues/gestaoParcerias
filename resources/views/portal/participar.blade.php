@@ -45,18 +45,16 @@
 
                 {{-- Esta tela tinha a máscara escrita à mão, com o script no rodapé;
                      virou o componente do sistema (ver x-input-dinheiro). --}}
+                {{-- Contrapartida em dinheiro não consta do modelo de Plano de
+                     Trabalho da cliente: sai daqui (29/09/2026). --}}
                 <div class="grid grid-cols-2 gap-4">
                     <div>
-                        <label for="valor_solicitado_display" class="block text-sm font-medium text-gray-700 mb-1">Valor Solicitado (R$) *</label>
+                        <label for="valor_solicitado_display" class="block text-sm font-medium text-gray-700 mb-1">Valor pleiteado (R$) *</label>
                         <x-input-dinheiro name="valor_solicitado" :value="$chamamento->valor_disponivel" required />
                         @if($chamamento->valor_disponivel)
                             <p class="text-xs text-gray-400 mt-1">Sugerido do chamamento: R$ {{ number_format($chamamento->valor_disponivel, 2, ',', '.') }}</p>
                         @endif
                         @error('valor_solicitado') <p class="text-red-600 text-xs mt-1">{{ $message }}</p> @enderror
-                    </div>
-                    <div>
-                        <label for="valor_proprio_display" class="block text-sm font-medium text-gray-700 mb-1">Contrapartida da OSC (R$)</label>
-                        <x-input-dinheiro name="valor_proprio" :value="0" />
                     </div>
                 </div>
 

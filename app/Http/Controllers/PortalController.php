@@ -179,7 +179,6 @@ class PortalController extends Controller
             'objeto'               => ['required', 'string'],
             'justificativa'        => ['nullable', 'string'],
             'valor_solicitado'     => ['required', 'numeric', 'min:0'],
-            'valor_proprio'        => ['nullable', 'numeric', 'min:0'],
             'data_inicio_prevista' => ['nullable', 'date'],
             'data_fim_prevista'    => ['nullable', 'date', 'after_or_equal:data_inicio_prevista'],
         ]);
@@ -201,7 +200,7 @@ class PortalController extends Controller
         abort_unless($osc && $proposta->osc_id === $osc->id, 403);
 
         $proposta->load(['chamamento.programa.orgao', 'documentos.uploader', 'pareceres',
-            'metas.etapas', 'planoItens', 'desembolsos', 'enderecosExecucao',
+            'metas.etapas', 'planoItens', 'desembolsos', 'contrapartidas', 'equipe',
             // O dossiê reúne as quatro fases: ver Proposta::dossieParaOsc().
             'chamamento.processo.pecas', 'chamamento.pecas', 'pecas', 'instrumento.pecas']);
 

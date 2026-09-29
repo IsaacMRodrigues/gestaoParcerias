@@ -142,7 +142,7 @@ class AlteracaoController extends Controller
             'tramitacoes.remetente', 'criador', 'decididaPor']);
 
         $proposta = $alteracao->proposta();
-        $proposta?->load(['metas.etapas', 'planoItens', 'desembolsos', 'enderecosExecucao']);
+        $proposta?->load(['metas.etapas', 'planoItens', 'desembolsos', 'contrapartidas', 'equipe']);
 
         return view('alteracoes.show', [
             'alteracao' => $alteracao,
