@@ -1,5 +1,6 @@
 <x-portal-layout>
-    <div class="max-w-2xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
+    {{-- A Nova Proposta traz as tabelas de valores: precisa de mais largura. --}}
+    <div class="{{ $tipo === 'proposta' ? 'max-w-4xl' : 'max-w-2xl' }} mx-auto px-4 sm:px-6 lg:px-8 py-10">
         <p class="text-sm text-brand-600">
             @if($tipo === 'proposta')
                 <a href="{{ route('portal.novas-propostas.index') }}" class="hover:underline">← Novas Propostas</a>
@@ -9,8 +10,14 @@
         </p>
         <h1 class="text-2xl font-bold text-gray-900 mt-1">{{ $tipo === 'proposta' ? 'Nova Proposta' : 'Nova manifestação de interesse' }}</h1>
         <p class="text-sm text-gray-500 mt-1 mb-6">
-            Comece pelos dados gerais. Na tela seguinte você monta o plano de trabalho e anexa a
-            habilitação — {{ $tipo === 'proposta' ? 'a proposta' : 'a manifestação' }} só vai ao município quando você enviar.
+            @if($tipo === 'proposta')
+                Comece pelos dados gerais, os valores, o plano de aplicação e o cronograma de desembolso. Na tela
+                seguinte você completa o plano de trabalho (metas e endereços) e anexa a habilitação — a proposta
+                só vai ao município quando você enviar.
+            @else
+                Comece pelos dados gerais. Na tela seguinte você monta o plano de trabalho e anexa a
+                habilitação — a manifestação só vai ao município quando você enviar.
+            @endif
         </p>
 
         <x-flash-message />
@@ -19,6 +26,9 @@
             <form action="{{ $tipo === 'proposta' ? route('portal.novas-propostas.store') : route('portal.manifestacoes.store') }}" method="POST" class="space-y-4">
                 @csrf
                 @include('portal.manifestacoes._campos', ['manifestacao' => null, 'tipo' => $tipo])
+                @if($tipo === 'proposta')
+                    @include('portal.manifestacoes._valores-proposta')
+                @endif
                 <div class="pt-2">
                     <button type="submit" class="btn btn-primary">{{ $tipo === 'proposta' ? 'Criar proposta' : 'Criar manifestação' }}</button>
                 </div>

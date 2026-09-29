@@ -566,11 +566,16 @@ Trazer os demais cenários para `tests/Feature` é uma das [Pendências](#pendê
 Da mais recente para a mais antiga. Cada entrada diz o que mudou, **por quê** e como foi
 conferido — o porquê é o que falta a quem pega o código depois.
 
-- [2026-09-29] **Nova Proposta: valores só no plano de trabalho** (`portal/manifestacoes/_campos`)
-  - Pedido da gestão. O primeiro formulário da Nova Proposta perdeu "Valor solicitado" e "Contrapartida
-    da OSC": os dois já estão no plano de trabalho, na tela seguinte, junto com as outras fontes. O
-    envio continua exigindo o valor solicitado. A manifestação de interesse não mudou
-  - Conferido: `NovaPropostaTest` (o formulário não traz os campos; sem valor no plano, o envio para)
+- [2026-09-29] **Nova Proposta: valores, plano de aplicação e desembolso no primeiro formulário**
+  (`portal/manifestacoes/_valores-proposta`, `ManifestacaoController::validarValoresDaProposta`)
+  - Pedido da gestão, em dois passos no mesmo dia: primeiro saíram os campos soltos de valor; depois
+    entraram, no lugar, os itens 5, 6 e 7 do Plano de Trabalho — o **plano de aplicação** (tabela de
+    itens, com total por linha e geral), o **valor total e contrapartida** (valor solicitado, obrigatório;
+    contrapartida e outras fontes) e o **cronograma de desembolso** (uma linha por mês; repetidas somam)
+  - Tudo é gravado junto com a proposta, numa transação. As tabelas podem ir vazias: quem exige o plano
+    completo é o envio. Na tela seguinte o mesmo plano segue editável. A manifestação de interesse não mudou
+  - O aviso "a SCP decide o fundamento" também saiu do formulário, a pedido
+  - Conferido: `NovaPropostaTest` (grava valores, itens e parcelas; linha incompleta ou sem valor não cria)
 
 - [2026-09-29] **Nova Proposta: o fundamento é decidido pela SCP** (`ManifestacaoAnaliseController::encaminhar`)
   - Decisão da gestão. A OSC não escolhe mais dispensa ou inexigibilidade: o campo saiu do formulário

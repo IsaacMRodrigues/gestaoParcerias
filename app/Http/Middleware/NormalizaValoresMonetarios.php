@@ -31,6 +31,7 @@ class NormalizaValoresMonetarios
         'valor',
         'valor_solicitado',
         'valor_proprio',
+        'valor_outras_fontes',
         'valor_disponivel',
         'valor_total',
         'valor_repasse',
