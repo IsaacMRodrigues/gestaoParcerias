@@ -18,7 +18,9 @@ class PropostaController extends Controller
 {
     public function index(): View
     {
-        $propostas = Proposta::with(['chamamento.programa', 'osc'])
+        // O recurso da OSC aparece marcado na lista: é por aqui que a Comissão
+        // de Seleção chega à proposta para julgá-lo.
+        $propostas = Proposta::with(['chamamento.programa', 'osc', 'recursos'])
             ->visiveisPara(auth()->user())
             ->orderBy('created_at', 'desc')
             ->paginate(15);

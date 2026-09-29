@@ -240,18 +240,11 @@
                                   enctype="multipart/form-data" class="space-y-3"
                                   data-confirm="Protocolar o recurso? Após o envio não é possível alterá-lo.">
                                 @csrf
-                                <div>
-                                    <label for="fundamentacao" class="block text-xs font-medium text-gray-500 mb-1">
-                                        Fundamentação do recurso
-                                    </label>
-                                    <textarea name="fundamentacao" id="fundamentacao" rows="4" required
-                                              placeholder="Descreva as razões do recurso"
-                                              class="block w-full border-gray-300 rounded-md shadow-sm text-sm focus:ring-brand-500 focus:border-brand-500">{{ old('fundamentacao') }}</textarea>
-                                    <x-input-error :messages="$errors->get('fundamentacao')" class="mt-1" />
-                                </div>
+                                {{-- O recurso é o arquivo que a OSC anexa, com as razões
+                                     dentro dele (decisão da gestão, 29/09/2026). --}}
                                 <div>
                                     <label for="arquivo" class="block text-xs font-medium text-gray-500 mb-1">
-                                        Peça recursal assinada (arquivo único em PDF)
+                                        Recurso assinado, com as razões (arquivo único em PDF)
                                     </label>
                                     <input type="file" name="arquivo" id="arquivo" accept=".pdf" required
                                            class="block w-full text-sm text-gray-600 file:mr-3 file:py-1.5 file:px-3 file:rounded file:border-0 file:text-xs file:bg-brand-50 file:text-brand-700 hover:file:bg-brand-100">

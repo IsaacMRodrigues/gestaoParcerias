@@ -44,15 +44,14 @@ class RecursoController extends Controller
             'Sua OSC já protocolou um recurso neste chamamento.'
         );
 
-        $data = $request->validate([
-            'fundamentacao' => ['required', 'string', 'min:20'],
-            'arquivo'       => ['required', 'file', 'mimes:pdf', 'max:10240'],
+        // O recurso é o arquivo que a OSC anexa, com as razões dentro dele
+        // (decisão da gestão, 29/09/2026). O campo de texto saiu.
+        $request->validate([
+            'arquivo' => ['required', 'file', 'mimes:pdf', 'max:10240'],
         ], [
-            'fundamentacao.required' => 'Descreva a fundamentação do recurso.',
-            'fundamentacao.min'      => 'Detalhe melhor a fundamentação do recurso.',
-            'arquivo.required'       => 'Anexe a peça recursal assinada, em PDF.',
-            'arquivo.mimes'          => 'O recurso deve ser enviado em arquivo único no formato PDF.',
-            'arquivo.max'            => 'O arquivo não pode ultrapassar 10 MB.',
+            'arquivo.required' => 'Anexe o recurso assinado, em PDF.',
+            'arquivo.mimes'    => 'O recurso deve ser enviado em arquivo único no formato PDF.',
+            'arquivo.max'      => 'O arquivo não pode ultrapassar 10 MB.',
         ]);
 
         $arquivo = $request->file('arquivo');
@@ -61,7 +60,6 @@ class RecursoController extends Controller
         $chamamento->recursos()->create([
             'osc_id'          => $osc->id,
             'proposta_id'     => $proposta->id,
-            'fundamentacao'   => $data['fundamentacao'],
             'arquivo_path'    => $path,
             'arquivo_nome'    => $arquivo->getClientOriginalName(),
             'tamanho'         => $arquivo->getSize(),

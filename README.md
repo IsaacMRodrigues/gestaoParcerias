@@ -566,6 +566,16 @@ Trazer os demais cenários para `tests/Feature` é uma das [Pendências](#pendê
 Da mais recente para a mais antiga. Cada entrada diz o que mudou, **por quê** e como foi
 conferido — o porquê é o que falta a quem pega o código depois.
 
+- [2026-09-29] **O recurso é o arquivo anexado pela OSC, e aparece para a Comissão de Seleção**
+  (`RecursoController::store`, `propostas/show`, `propostas/index`)
+  - Decisão da gestão. O formulário de recurso do portal pede só o PDF assinado, com as razões dentro dele;
+    o campo de texto "Fundamentação" saiu. Recursos antigos, que têm texto, continuam mostrando-o
+  - O arquivo aparece para a Comissão de Seleção da Secretaria do chamamento: na tela da proposta, com o
+    botão "Baixar o recurso da OSC (PDF)", e a lista de Propostas marca "recurso a julgar" / "recurso
+    julgado". Comissão de outra Secretaria não vê nem baixa
+  - Conferido: `PrazoDeRecursoTest` (sem arquivo não protocola) e `RecursoPelaComissaoTest` (a Comissão
+    baixa o arquivo e vê a marca; a de outra Secretaria não)
+
 - [2026-09-29] **O recurso é julgado pela Comissão de Seleção** (`Recurso::julgavelPor`, `propostas/show`)
   - Decisão da gestão. Quem julga o recurso contra o resultado provisório (provido, parcialmente provido
     ou improvido, com a fundamentação que vai à OSC) passa a ser a **Comissão de Seleção** da Secretaria

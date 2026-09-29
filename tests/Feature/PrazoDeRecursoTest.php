@@ -71,9 +71,9 @@ class PrazoDeRecursoTest extends TestCase
 
     private function recorrer()
     {
+        // O recurso é só o arquivo que a OSC anexa.
         return $this->actingAs($this->rl)->post("/portal/chamamentos/{$this->chamamento->id}/recurso", [
-            'fundamentacao' => 'A nota do critério 2 desconsiderou a experiência comprovada.',
-            'arquivo'       => UploadedFile::fake()->create('recurso.pdf', 50, 'application/pdf'),
+            'arquivo' => UploadedFile::fake()->create('recurso.pdf', 50, 'application/pdf'),
         ]);
     }
 
@@ -95,8 +95,12 @@ class PrazoDeRecursoTest extends TestCase
     public function test_no_prazo_a_osc_recorre_mas_ninguem_julga_nem_encerra(): void
     {
         $this->abrirPrazo();
+        $this->actingAs($this->rl)->post("/portal/chamamentos/{$this->chamamento->id}/recurso", [])
+            ->assertSessionHasErrors('arquivo');
         $this->recorrer()->assertSessionHas('success');
         $recurso = Recurso::sole();
+        $this->assertSame(['recurso.pdf', null], [$recurso->arquivo_nome, $recurso->fundamentacao]);
+        Storage::disk('local')->assertExists($recurso->arquivo_path);
 
         $this->actingAs($this->comissao)->post("/recursos/{$recurso->id}/responder", ['resultado' => 'improvido', 'resposta' => str_repeat('x', 30)])
             ->assertStatus(422);
@@ -116,7 +120,7 @@ class PrazoDeRecursoTest extends TestCase
         $this->assertFalse($this->chamamento->fresh()->faseRecursalAberta());
         Recurso::query()->delete();
         $this->recorrer()->assertStatus(422);
-        $recurso = Recurso::forceCreate($recurso->only(['chamamento_id', 'osc_id', 'proposta_id', 'fundamentacao', 'protocolado_por', 'protocolado_em']));
+        $recurso = Recurso::forceCreate($recurso->only(['chamamento_id', 'osc_id', 'proposta_id', 'arquivo_path', 'arquivo_nome', 'protocolado_por', 'protocolado_em']));
 
         $this->actingAs($this->ug)->post("/chamamentos/{$this->chamamento->id}/selecao/avancar")->assertSessionHasNoErrors();
         $this->assertSame(Chamamento::ETAPA_RESPOSTA_RECURSOS, (int) $this->chamamento->fresh()->selecao_etapa);
@@ -145,6 +149,7 @@ class PrazoDeRecursoTest extends TestCase
             ->assertSee('Prazo do edital: até ' . now()->addDays(5)->format('d/m/Y'))
             ->assertSee('Encerrar o prazo de recurso');
         $this->actingAs($this->rl)->get("/portal/chamamentos/{$this->chamamento->id}")->assertOk()
-            ->assertSee('Protocolar recurso')->assertSee('Recorrer é opcional.');
+            ->assertSee('Protocolar recurso')->assertSee('Recorrer é opcional.')
+            ->assertSee('name="arquivo"', false)->assertDontSee('name="fundamentacao"', false);
     }
 }

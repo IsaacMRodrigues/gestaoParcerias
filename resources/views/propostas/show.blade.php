@@ -156,10 +156,19 @@
                         @endif
                     </div>
 
-                    <div class="mt-3 bg-gray-50 rounded-md p-3">
-                        <p class="text-xs font-medium text-gray-500 uppercase tracking-wide">Fundamentação da OSC</p>
-                        <p class="text-sm text-gray-700 mt-1 whitespace-pre-line">{{ $rec->fundamentacao }}</p>
-                    </div>
+                    {{-- O recurso é o arquivo da OSC. Texto só nos recursos antigos,
+                         de quando o formulário também o pedia. --}}
+                    @if($rec->temArquivo())
+                        <a href="{{ route('recursos.download', $rec) }}" class="mt-3 inline-flex btn btn-outline btn-sm">
+                            Baixar o recurso da OSC (PDF)
+                        </a>
+                    @endif
+                    @if($rec->fundamentacao)
+                        <div class="mt-3 bg-gray-50 rounded-md p-3">
+                            <p class="text-xs font-medium text-gray-500 uppercase tracking-wide">Fundamentação da OSC</p>
+                            <p class="text-sm text-gray-700 mt-1 whitespace-pre-line">{{ $rec->fundamentacao }}</p>
+                        </div>
+                    @endif
 
                     @if($rec->respondido())
                         <div class="mt-3 border-l-2 border-brand-200 pl-3">

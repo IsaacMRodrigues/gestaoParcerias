@@ -13,6 +13,7 @@ use App\Models\User;
 use Database\Seeders\RolesSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Mail;
+use Illuminate\Support\Facades\Storage;
 use Tests\TestCase;
 
 /**
@@ -34,6 +35,8 @@ class RecursoPelaComissaoTest extends TestCase
         parent::setUp();
         $this->seed(RolesSeeder::class);
         Mail::fake();
+        Storage::fake('local');
+        Storage::disk('local')->put('recursos/1/recurso.pdf', '%PDF');
 
         $orgao = Orgao::forceCreate(['name' => 'Educação']);
         $programa = Programa::forceCreate(['orgao_id' => $orgao->id, 'name' => 'P', 'tipo' => 'termo_fomento']);
@@ -55,7 +58,7 @@ class RecursoPelaComissaoTest extends TestCase
         $this->proposta = Proposta::forceCreate(['chamamento_id' => $this->chamamento->id, 'osc_id' => $osc->id, 'titulo' => 'Oficinas de música',
             'objeto' => 'x', 'status' => 'em_analise', 'valor_solicitado' => 1]);
         $this->recurso = Recurso::forceCreate(['chamamento_id' => $this->chamamento->id, 'osc_id' => $osc->id,
-            'proposta_id' => $this->proposta->id, 'fundamentacao' => 'A nota do critério 2 ignorou a experiência.',
+            'proposta_id' => $this->proposta->id, 'arquivo_path' => 'recursos/1/recurso.pdf', 'arquivo_nome' => 'recurso.pdf',
             'protocolado_em' => now()->subDays(3)]);
     }
 
@@ -78,8 +81,10 @@ class RecursoPelaComissaoTest extends TestCase
         Mail::assertQueued(Aviso::class, fn ($m) => $m->hasTo($this->comissao->email) && str_contains($m->assunto, 'Recursos a julgar'));
         $this->actingAs($this->comissao)->get("/propostas/{$this->proposta->id}")->assertOk()
             ->assertSee('Recurso contra o resultado provisório')
-            ->assertSee('A nota do critério 2 ignorou a experiência.')
+            ->assertSee('Baixar o recurso da OSC (PDF)')
             ->assertSee('Julgar recurso');
+        $this->actingAs($this->comissao)->get("/recursos/{$this->recurso->id}/arquivo")->assertOk()->assertDownload('recurso.pdf');
+        $this->actingAs($this->comissao)->get('/propostas')->assertOk()->assertSee('recurso a julgar');
     }
 
     public function test_a_comissao_julga_e_a_ug_nao(): void
@@ -97,7 +102,7 @@ class RecursoPelaComissaoTest extends TestCase
         $this->actingAs($this->ug)->get("/propostas/{$this->proposta->id}")->assertSee('Julgamento da Comissão de Seleção');
     }
 
-    public function test_comissao_de_outra_secretaria_nao_julga(): void
+    public function test_comissao_de_outra_secretaria_nao_ve_nem_julga(): void
     {
         $this->irParaOJulgamento();
         $outra = User::factory()->create(['setor' => 'ug', 'orgao_id' => Orgao::forceCreate(['name' => 'Saúde'])->id,
@@ -105,6 +110,8 @@ class RecursoPelaComissaoTest extends TestCase
         $outra->assignRole('comissao_selecao');
 
         $this->julgar($outra)->assertForbidden();
+        $this->actingAs($outra)->get("/recursos/{$this->recurso->id}/arquivo")->assertForbidden();
+        $this->actingAs($outra)->get('/propostas')->assertOk()->assertDontSee('recurso a julgar');
     }
 
     public function test_sem_julgamento_a_ug_nao_emite_o_resultado_definitivo(): void

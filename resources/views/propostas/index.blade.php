@@ -68,6 +68,12 @@
                                     @if($proposta->status === 'submetida')
                                         <span class="ml-1.5 px-1.5 py-0.5 text-[11px] font-semibold bg-accent-100 text-accent-700 rounded-full align-middle">nova</span>
                                     @endif
+                                    @if($rec = $proposta->recursos->first())
+                                        <span class="ml-1.5 px-1.5 py-0.5 text-[11px] font-semibold rounded-full align-middle
+                                            {{ $rec->respondido() ? 'bg-gray-100 text-gray-600' : 'bg-accent-100 text-accent-700' }}">
+                                            {{ $rec->respondido() ? 'recurso julgado' : 'recurso a julgar' }}
+                                        </span>
+                                    @endif
                                 </td>
                                 <td class="px-6 py-4 text-sm text-gray-600">{{ $proposta->osc->name }}</td>
                                 <td class="px-6 py-4 text-sm text-gray-600">
