@@ -566,6 +566,12 @@ Trazer os demais cenários para `tests/Feature` é uma das [Pendências](#pendê
 Da mais recente para a mais antiga. Cada entrada diz o que mudou, **por quê** e como foi
 conferido — o porquê é o que falta a quem pega o código depois.
 
+- [2026-09-30] **Declaração do art. 23, XIV, fora da Celebração** (`Peca::TEMPLATES['celebracao']`)
+  - Decisão da gestão: não é mais exigida. Saiu do checklist da Celebração e do modelo de texto. Na
+    migração, as peças ainda não assinadas foram apagadas; as assinadas ficam como histórico, sem ser
+    obrigatórias (havia 1, na base local e na de produção)
+  - Conferido: `DeclaracaoArt23ForaTest`
+
 - [2026-09-30] **Plano de trabalho editável na Celebração, pela OSC e pela UG** (`Proposta::planoAbertoNaCelebracao`,
   `PlanoTrabalhoController::ugPodeEditar`)
   - Decisão da gestão. Na Celebração, o plano fica aberto a edição **em qualquer etapa** (antes, só na etapa

@@ -125,11 +125,13 @@ class Peca extends Model
             // Continua existindo para o que não cabe nos itens acima — e para
             // não perder o que as parcerias antigas já anexaram aqui.
             ['chave' => 'docs_habilitacao',      'rotulo' => 'Outros documentos de habilitação',                       'tipo' => 'arquivo', 'obrigatorio' => false],
-            // As sete declarações da habilitação (módulo 3.2, itens 7 a 12 e 15).
+            // As declarações da habilitação (módulo 3.2, itens 7 a 12 e 15; a do
+            // art. 23 saiu em 30/09/2026).
             // Vêm preenchidas com o cadastro da OSC e só o responsável legal
             // assina — ver DECLARACOES_DO_RESPONSAVEL_LEGAL.
             ['chave' => 'decl_art7',             'rotulo' => 'Declaração — art. 7º, XXXIII, CF/88 (não emprega menor)',                 'tipo' => 'modelo', 'obrigatorio' => true],
-            ['chave' => 'decl_art23',            'rotulo' => 'Declaração — art. 23, XIV, Decreto Municipal 048/2020 (sem contas pendentes)', 'tipo' => 'modelo', 'obrigatorio' => true],
+            // A declaração do art. 23, XIV (sem contas pendentes) saiu em 30/09/2026:
+            // não é mais exigida. As já assinadas ficam como histórico.
             ['chave' => 'decl_art33',            'rotulo' => 'Declaração — art. 33, V, "c", Lei 13.019/2014 (condições materiais)',     'tipo' => 'modelo', 'obrigatorio' => true],
             ['chave' => 'decl_art34',            'rotulo' => 'Declaração — art. 34, VII, Lei 13.019/2014 (sede e tempo de existência)', 'tipo' => 'modelo', 'obrigatorio' => true],
             ['chave' => 'decl_art39',            'rotulo' => 'Declaração — art. 39, Lei 13.019/2014 (ausência de vedações)',            'tipo' => 'modelo', 'obrigatorio' => true],
@@ -342,7 +344,7 @@ class Peca extends Model
         'planilha_orcamentaria'  => 'osc',
         'docs_habilitacao'       => 'osc',
         'decl_art7'              => 'osc',
-        'decl_art23'             => 'osc',
+        'decl_art23'             => 'osc',  // só a peça antiga, já assinada (saiu em 30/09/2026)
         'decl_art33'             => 'osc',
         'decl_art34'             => 'osc',
         'decl_art39'             => 'osc',
@@ -518,7 +520,7 @@ class Peca extends Model
     ];
 
     public const DECLARACOES_DO_RESPONSAVEL_LEGAL = [
-        'decl_art7', 'decl_art23', 'decl_art33', 'decl_art34',
+        'decl_art7', 'decl_art33', 'decl_art34',
         'decl_art39', 'decl_art45', 'decl_autenticidade',
         // Alteração da parceria (3.3): a proposta e a declaração de capacidade
         // técnica são atos de quem responde pela organização.
@@ -994,11 +996,6 @@ HTML,
         'celebracao' => [
             'decl_art7' => '<p style="text-align:center"><strong>DECLARAÇÃO</strong><br>(art. 7º, XXXIII, CF/88)</p>'
                 . '<p>' . self::DECL_QUALIFICACAO . ', declaro que não EMPREGAMOS MENOR DE IDADE, conforme dispõe o art. 7º, XXXIII, CF/88.</p>'
-                . self::DECL_PENAS . self::DECL_FECHO,
-
-            // Correção: "HÁ nenhum órgão" → "A nenhum órgão" (e o acento de ÓRGÃO).
-            'decl_art23' => '<p style="text-align:center"><strong>DECLARAÇÃO</strong><br>(art. 23, XIV, decreto municipal 048/2020)</p>'
-                . '<p>' . self::DECL_QUALIFICACAO . ', declaro que NÃO DEVEMOS PRESTAÇÃO DE CONTAS A NENHUM ÓRGÃO DE QUALQUER ESFERA, OU ENTIDADE.</p>'
                 . self::DECL_PENAS . self::DECL_FECHO,
 
             // A OSC adota uma das três redações. No sistema não há "versão
