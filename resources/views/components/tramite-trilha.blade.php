@@ -1,5 +1,5 @@
 {{-- Trilha de etapas de um trâmite (Seleção, Celebração).
-     $etapas: array de ['setor' => ..., 'acao' => ...]
+     $etapas: array de ['setor' => ..., 'acao' => ...] (e 'setores', na etapa conjunta)
      $atual: índice da etapa corrente | $concluido: trâmite encerrado
      $labels: mapa setor => rótulo --}}
 @props(['etapas', 'atual' => 0, 'concluido' => false, 'labels' => []])
@@ -22,7 +22,8 @@
             </span>
             <span class="{{ $agora ? 'text-gray-900 font-medium' : ($feita ? 'text-gray-500' : 'text-gray-400') }}">
                 <span class="text-xs font-semibold uppercase tracking-wide {{ $agora ? 'text-accent-700' : 'text-gray-400' }}">
-                    {{ $labels[$etapa['setor']] ?? strtoupper($etapa['setor']) }}
+                    {{-- Etapa conjunta: os dois setores, em paralelo. --}}
+                    {{ collect($etapa['setores'] ?? [$etapa['setor']])->map(fn ($s) => $labels[$s] ?? strtoupper($s))->implode(' + ') }}
                 </span>
                 — {{ $etapa['acao'] }}
             </span>

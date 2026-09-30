@@ -201,7 +201,7 @@ na Celebração, nas Alterações e na Prestação — ver `User::setorNoTramite
 |---|---|---|
 | **Seleção** (chamamento público) | UG → SCP → UG (prazo de recurso) → UG → SCP → **Prefeito** (6) | `Chamamento::ETAPAS_SELECAO` |
 | **Manifestação de Interesse** | OSC submete → SCP recebe → Secretaria opina → SCP defere ou indefere | `ManifestacaoInteresse` |
-| **Celebração** | UG → **OSC** → UG → SCP → SEPLAN → UG → SCP → PJ → SCP → **OSC** → SCP → **OSC** → SCP → UG → SCP (15) | `Proposta::ETAPAS_CELEBRACAO` |
+| **Celebração** | UG → **OSC** → UG + SCP (em paralelo) → SCP → SEPLAN → UG → SCP → PJ → SCP → **OSC** → SCP → **OSC** → SCP → UG → SCP (15) | `Proposta::ETAPAS_CELEBRACAO` |
 | **Alteração da Parceria** | **OSC** → UG autoriza → SCP processa e decide (3) | `Alteracao::ETAPAS` |
 | **Prestação de Contas** | **OSC** → SCP (análise prévia) → UG com Gestor e Comissão (3) | `PrestacaoContas::ETAPAS` |
 | **Suporte** | quem abre ↔ equipe (TI e SCP) | `Chamado` |
@@ -565,6 +565,17 @@ Trazer os demais cenários para `tests/Feature` é uma das [Pendências](#pendê
 
 Da mais recente para a mais antiga. Cada entrada diz o que mudou, **por quê** e como foi
 conferido — o porquê é o que falta a quem pega o código depois.
+
+- [2026-09-30] **Celebração: etapa 3 conjunta, UG e SCP ao mesmo tempo** (`Proposta::setoresComAVezNaCelebracao`,
+  `propostas.celebracao_partes_concluidas`)
+  - Decisão da gestão. Quando a OSC encaminha a etapa 2, a etapa 3 vai **à UG e à SCP ao mesmo tempo**: a UG
+    analisa e assina a Aprovação do Plano de Trabalho; a SCP analisa o plano e a habilitação. Cada setor
+    clica em "Concluir a minha parte"; a Celebração só avança quando os dois concluírem. Os dois recebem
+    e-mail e o item na caixa de entrada (que sai da caixa de quem já concluiu). Devolver para a etapa
+    conjunta reabre as duas partes
+  - A etapa, na trilha, aparece como "Unidade Gestora + SCP". O modelo guarda um setor principal (UG) para o
+    que só entende um setor por etapa; a lista de setores da etapa fica em `ETAPAS_CELEBRACAO[2]['setores']`
+  - Conferido: 3 testes em `CelebracaoEtapaConjuntaTest`
 
 - [2026-09-30] **Declaração do art. 23, XIV, fora da Celebração** (`Peca::TEMPLATES['celebracao']`)
   - Decisão da gestão: não é mais exigida. Saiu do checklist da Celebração e do modelo de texto. Na

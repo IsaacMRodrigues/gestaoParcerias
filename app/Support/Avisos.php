@@ -344,10 +344,13 @@ class Avisos
             return;
         }
 
-        self::enviar(
-            self::doSetor($p->celebracao_setor, fn (User $u) => $u->participaDaCelebracao() && $p->visivelPara($u)),
-            self::avisoDeVez('Celebração', $p->titulo, $etapa, $p->osc?->name, $url, false),
-        );
+        // Na etapa conjunta, os dois setores recebem ao mesmo tempo.
+        foreach ($p->setoresComAVezNaCelebracao() as $setor) {
+            self::enviar(
+                self::doSetor($setor, fn (User $u) => $u->participaDaCelebracao() && $p->visivelPara($u)),
+                self::avisoDeVez('Celebração', $p->titulo, $etapa, $p->osc?->name, $url, false),
+            );
+        }
     }
 
     public static function vezDaAlteracao(Alteracao $a): void

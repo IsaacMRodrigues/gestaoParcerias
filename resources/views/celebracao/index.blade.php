@@ -33,7 +33,7 @@
                         // que diferencia acompanhar de ter trabalho parado.
                         $minhaVez = !$concluida
                             && $proposta->celebracaoIniciada()
-                            && $proposta->celebracao_setor === auth()->user()->setorNoTramite();
+                            && $proposta->setorTemAVezNaCelebracao(auth()->user()->setorNoTramite());
                         $etapa = $proposta->etapaCelebracaoInfo();
                     @endphp
                     <a href="{{ route('celebracao.show', $proposta) }}"
@@ -64,7 +64,7 @@
                                     Etapa {{ $proposta->celebracao_etapa + 1 }}/{{ $proposta->totalEtapasCelebracao() }}
                                     — {{ $etapa['acao'] }}
                                     <span class="text-gray-400">
-                                        ({{ \App\Models\Proposta::SETORES_CELEBRACAO[$proposta->celebracao_setor] ?? $proposta->celebracao_setor }})
+                                        ({{ collect($proposta->setoresComAVezNaCelebracao())->map(fn ($s) => \App\Models\Proposta::SETORES_CELEBRACAO[$s] ?? $s)->implode(' e ') }})
                                     </span>
                                 @endif
                             </span>

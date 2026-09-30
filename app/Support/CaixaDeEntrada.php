@@ -252,12 +252,16 @@ class CaixaDeEntrada
      */
     private static function celebracoes(User $user): Collection
     {
+        // Na etapa conjunta da Celebração (UG e SCP em paralelo, 30/09/2026), o
+        // item fica na caixa de cada setor até ele concluir a sua parte.
         return Proposta::with('osc')
             ->visiveisPara($user)
-            ->where('celebracao_setor', $user->setor)
+            ->where(fn ($q) => $q->where('celebracao_setor', $user->setor)
+                ->orWhereIn('celebracao_etapa', Proposta::etapasConjuntasDoSetor($user->setor)))
             ->whereNotNull('celebracao_iniciada_em')
             ->whereNull('celebracao_concluida_em')
             ->get()
+            ->filter(fn (Proposta $p) => $p->setorTemAVezNaCelebracao($user->setor))
             ->map(fn (Proposta $p) => [
                 'tramite'   => 'Celebração',
                 'titulo'    => $p->titulo,

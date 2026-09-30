@@ -61,12 +61,13 @@ class Proposta extends Model
         'data_inicio_prevista', 'data_fim_prevista', 'vigencia_dias',
         'atuacao_rede', 'rede_cnpj', 'rede_razao_social', 'rede_municipio', 'rede_data_termo',
         'status', 'submitted_at',
-        'celebracao_etapa', 'celebracao_setor', 'celebracao_iniciada_em', 'celebracao_concluida_em',
+        'celebracao_etapa', 'celebracao_setor', 'celebracao_partes_concluidas', 'celebracao_iniciada_em', 'celebracao_concluida_em',
     ];
 
     protected function casts(): array
     {
         return [
+            'celebracao_partes_concluidas' => 'array',
             'data_inicio_prevista'    => 'date',
             'data_fim_prevista'       => 'date',
             'submitted_at'            => 'datetime',
@@ -98,7 +99,10 @@ class Proposta extends Model
     public const ETAPAS_CELEBRACAO = [
         ['setor' => 'ug',     'acao' => 'Encaminhar o Termo de Homologação e convocar a OSC a apresentar o Plano de Trabalho e os documentos de habilitação'],
         ['setor' => 'osc',    'acao' => 'Elaborar o Plano de Trabalho e anexar os documentos de habilitação'],
-        ['setor' => 'ug',     'acao' => 'Analisar e emitir/assinar a Aprovação do Plano de Trabalho'],
+        // Etapa conjunta (decisão da gestão, 30/09/2026): o que a OSC entregou vai
+        // à UG e à SCP ao mesmo tempo, e só avança quando as duas concluírem.
+        // 'setor' é o principal, para o que só entende um setor por etapa.
+        ['setor' => 'ug', 'setores' => ['ug', 'scp'], 'acao' => 'Em paralelo — UG: analisar e emitir/assinar a Aprovação do Plano de Trabalho; SCP: analisar o Plano de Trabalho e os documentos de habilitação'],
         ['setor' => 'scp',    'acao' => 'Analisar e solicitar o Parecer Financeiro à SEPLAN'],
         ['setor' => 'seplan', 'acao' => 'Analisar, elaborar e assinar o Parecer Financeiro'],
         ['setor' => 'ug',     'acao' => 'Anexar as portarias do Gestor e da Comissão de Monitoramento e emitir o Parecer Técnico'],
@@ -348,6 +352,49 @@ class Proposta extends Model
         return (int) $this->celebracao_etapa >= $this->totalEtapasCelebracao() - 1;
     }
 
+    /** Os setores de uma etapa da Celebração — dois, na etapa conjunta. */
+    public static function setoresDaEtapaCelebracao(int $etapa): array
+    {
+        $def = self::ETAPAS_CELEBRACAO[$etapa] ?? null;
+
+        return $def ? ($def['setores'] ?? [$def['setor']]) : [];
+    }
+
+    /** As etapas em que o setor atua em conjunto com outro. */
+    public static function etapasConjuntasDoSetor(?string $setor): array
+    {
+        return collect(self::ETAPAS_CELEBRACAO)
+            ->filter(fn ($e) => isset($e['setores']) && in_array($setor, $e['setores'], true))
+            ->keys()->all();
+    }
+
+    public function etapaConjuntaCelebracao(): bool
+    {
+        return count(self::setoresDaEtapaCelebracao((int) $this->celebracao_etapa)) > 1;
+    }
+
+    /** Setores da etapa atual que ainda não concluíram a sua parte. */
+    public function setoresComAVezNaCelebracao(): array
+    {
+        if (!$this->temTramiteCelebracao() || $this->celebracaoConcluida()) {
+            return [];
+        }
+
+        if (!$this->etapaConjuntaCelebracao()) {
+            return array_filter([$this->celebracao_setor]);
+        }
+
+        return array_values(array_diff(
+            self::setoresDaEtapaCelebracao((int) $this->celebracao_etapa),
+            $this->celebracao_partes_concluidas ?? [],
+        ));
+    }
+
+    public function setorTemAVezNaCelebracao(?string $setor): bool
+    {
+        return $setor !== null && in_array($setor, $this->setoresComAVezNaCelebracao(), true);
+    }
+
     public function podeAvancarCelebracao(): bool
     {
         return $this->temTramiteCelebracao()
@@ -374,13 +421,21 @@ class Proposta extends Model
      * A Ordem de Pagamento Global é apenas emitida pela SCP na etapa 11 — a
      * assinatura é da UG, na etapa 12.
      */
-    public function pendenciasCelebracao(): array
+    /**
+     * @param string|null $setor na etapa conjunta, só as pendências da parte
+     *                           deste setor (as peças que ele preenche).
+     */
+    public function pendenciasCelebracao(?string $setor = null): array
     {
         $pend  = [];
         $etapa = (int) $this->celebracao_etapa;
 
         foreach (Peca::CELEBRACAO_ETAPA as $chave => $etapaPeca) {
             if ($etapaPeca !== $etapa) {
+                continue;
+            }
+
+            if ($setor !== null && (Peca::CELEBRACAO_SETOR[$chave] ?? null) !== $setor) {
                 continue;
             }
 

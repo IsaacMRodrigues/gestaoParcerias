@@ -28,9 +28,12 @@ class CelebracaoController extends Controller
         abort_if($proposta->celebracaoConcluida(), 422, 'A Celebração desta parceria já foi concluída.');
 
         $user = auth()->user();
-        // setorNoTramite(): a OSC atua como setor 'osc' e não tem lotação.
-        abort_unless($user->setorNoTramite() === $proposta->celebracao_setor, 403,
-            'Apenas o setor que está com a Celebração pode movimentá-la.');
+        // setorNoTramite(): a OSC atua como setor 'osc' e não tem lotação. Na
+        // etapa conjunta, qualquer dos setores que ainda não concluiu a parte.
+        abort_unless($proposta->setorTemAVezNaCelebracao($user->setorNoTramite()), 403,
+            $proposta->etapaConjuntaCelebracao() && in_array($user->setorNoTramite(), Proposta::setoresDaEtapaCelebracao((int) $proposta->celebracao_etapa), true)
+                ? 'Seu setor já concluiu a parte dele nesta etapa; falta o outro.'
+                : 'Apenas o setor que está com a Celebração pode movimentá-la.');
 
         if ($proposta->celebracao_setor === 'osc') {
             abort_unless($user->ehRepresentanteOsc() && $user->osc->id === $proposta->osc_id, 403,
@@ -185,7 +188,8 @@ class CelebracaoController extends Controller
             'obrigatorio' => false,
             'ordem'       => $ordem,
             'extra'       => true,
-            'setor'       => $proposta->celebracao_setor,
+            // Na etapa conjunta, o anexo é de quem o abriu (UG ou SCP).
+            'setor'       => auth()->user()->setorNoTramite(),
             'etapa'       => $etapa,
             'criado_por'  => auth()->id(),
         ]);
@@ -200,17 +204,42 @@ class CelebracaoController extends Controller
         abort_unless($proposta->podeAvancarCelebracao(), 422,
             'Não é possível encaminhar a partir desta etapa.');
 
-        $pendentes = $proposta->pendenciasCelebracao();
+        $meuSetor  = auth()->user()->setorNoTramite();
+        $conjunta  = $proposta->etapaConjuntaCelebracao();
+        $pendentes = $proposta->pendenciasCelebracao($conjunta ? $meuSetor : null);
         abort_unless(empty($pendentes), 422,
             'Conclua antes de encaminhar: ' . implode(', ', $pendentes) . '.');
 
         $data = $request->validate(['parecer' => ['nullable', 'string']]);
 
+        // Etapa conjunta: cada setor conclui a sua parte; a Celebração só
+        // avança quando o último concluir (decisão da gestão, 30/09/2026).
+        if ($conjunta) {
+            $concluidas = array_values(array_unique(array_merge($proposta->celebracao_partes_concluidas ?? [], [$meuSetor])));
+            $faltam = array_diff(Proposta::setoresDaEtapaCelebracao((int) $proposta->celebracao_etapa), $concluidas);
+
+            if ($faltam) {
+                $proposta->celebracaoTramitacoes()->create([
+                    'de_setor'    => $meuSetor,
+                    'para_setor'  => reset($faltam),
+                    'enviado_por' => auth()->id(),
+                    'enviado_em'  => now(),
+                    'parecer'     => trim('Parte concluída na etapa conjunta. ' . ($data['parecer'] ?? '')),
+                    'status'      => 'enviado',
+                ]);
+                $proposta->update(['celebracao_partes_concluidas' => $concluidas]);
+
+                return redirect()->route('celebracao.show', $proposta)
+                    ->with('success', 'Sua parte foi concluída. A Celebração avança quando '
+                        . implode(' e ', array_map(fn ($s) => Proposta::SETORES_CELEBRACAO[$s] ?? $s, $faltam)) . ' concluir a dela.');
+            }
+        }
+
         $proxEtapa = (int) $proposta->celebracao_etapa + 1;
         $proxSetor = Proposta::ETAPAS_CELEBRACAO[$proxEtapa]['setor'];
 
         $proposta->celebracaoTramitacoes()->create([
-            'de_setor'    => $proposta->celebracao_setor,
+            'de_setor'    => $meuSetor,
             'para_setor'  => $proxSetor,
             'enviado_por' => auth()->id(),
             'enviado_em'  => now(),
@@ -219,12 +248,15 @@ class CelebracaoController extends Controller
         ]);
 
         $proposta->update([
-            'celebracao_etapa' => $proxEtapa,
-            'celebracao_setor' => $proxSetor,
+            'celebracao_etapa'             => $proxEtapa,
+            'celebracao_setor'             => $proxSetor,
+            'celebracao_partes_concluidas' => null,
         ]);
 
+        $para = implode(' e ', array_map(fn ($s) => Proposta::SETORES_CELEBRACAO[$s] ?? $s, Proposta::setoresDaEtapaCelebracao($proxEtapa)));
+
         return redirect()->route('celebracao.show', $proposta)
-            ->with('success', 'Celebração encaminhada para ' . Proposta::SETORES_CELEBRACAO[$proxSetor] . '.');
+            ->with('success', 'Celebração encaminhada para ' . $para . '.');
     }
 
     public function devolver(Request $request, Proposta $proposta): RedirectResponse
@@ -255,7 +287,7 @@ class CelebracaoController extends Controller
         $setorDestino = Proposta::ETAPAS_CELEBRACAO[$destino]['setor'];
 
         $proposta->celebracaoTramitacoes()->create([
-            'de_setor'    => $proposta->celebracao_setor,
+            'de_setor'    => auth()->user()->setorNoTramite(),
             'para_setor'  => $setorDestino,
             'enviado_por' => auth()->id(),
             'enviado_em'  => now(),
@@ -267,9 +299,11 @@ class CelebracaoController extends Controller
             'status'      => 'devolvido',
         ]);
 
+        // Voltar a uma etapa conjunta reabre as duas partes.
         $proposta->update([
-            'celebracao_etapa' => $destino,
-            'celebracao_setor' => $setorDestino,
+            'celebracao_etapa'             => $destino,
+            'celebracao_setor'             => $setorDestino,
+            'celebracao_partes_concluidas' => null,
         ]);
 
         return redirect()->route('celebracao.show', $proposta)

@@ -9,11 +9,16 @@
     // setorNoTramite(): a OSC atua como setor 'osc' e não tem lotação — comparar
     // com users.setor dava sempre falso e escondia dela o botão de encaminhar,
     // deixando a parceria parada sem que ninguém pudesse movimentá-la.
-    $souDoSetor = auth()->user()->setorNoTramite() === $proposta->celebracao_setor
-        && ($proposta->celebracao_setor !== 'osc'
+    // Na etapa conjunta (UG e SCP em paralelo), cada setor tem a vez até
+    // concluir a sua parte.
+    $meuSetor   = auth()->user()->setorNoTramite();
+    $conjunta   = $proposta->etapaConjuntaCelebracao();
+    $souDoSetor = $proposta->setorTemAVezNaCelebracao($meuSetor)
+        && ($meuSetor !== 'osc'
             || auth()->user()->osc?->id === $proposta->osc_id);
-    $pendencias = $concluida ? [] : $proposta->pendenciasCelebracao();
+    $pendencias = $concluida ? [] : $proposta->pendenciasCelebracao($conjunta && $souDoSetor ? $meuSetor : null);
     $setorLabel = fn ($s) => \App\Models\Proposta::SETORES_CELEBRACAO[$s] ?? $s;
+    $comQuem    = collect($proposta->setoresComAVezNaCelebracao())->map($setorLabel)->implode(' e ');
 @endphp
 
 <x-dynamic-component :component="$layout">
@@ -116,7 +121,7 @@
                                 <span class="inline-block px-2.5 py-1 text-xs font-semibold leading-snug bg-brand-50 text-brand-800 border border-brand-200 rounded-md">Concluída</span>
                             @else
                                 <span class="inline-block px-2.5 py-1 text-xs font-semibold leading-snug bg-accent-50 text-accent-800 border border-accent-200 rounded-md">
-                                    Com {{ $setorLabel($proposta->celebracao_setor) }}
+                                    Com {{ $comQuem ?: $setorLabel($proposta->celebracao_setor) }}
                                 </span>
                             @endif
                         </dd>
@@ -182,9 +187,18 @@
                                               class="block w-full border-gray-300 rounded-md shadow-sm text-sm focus:ring-brand-500 focus:border-brand-500"></textarea>
                                     <button type="submit" @disabled($pendencias)
                                             class="btn btn-primary">
-                                        Encaminhar para
-                                        {{ $setorLabel(\App\Models\Proposta::ETAPAS_CELEBRACAO[$etapaAtual + 1]['setor']) }}
+                                        @if($conjunta && count($proposta->setoresComAVezNaCelebracao()) > 1)
+                                            Concluir a minha parte
+                                        @else
+                                            Encaminhar para
+                                            {{ collect(\App\Models\Proposta::setoresDaEtapaCelebracao($etapaAtual + 1))->map($setorLabel)->implode(' e ') }}
+                                        @endif
                                     </button>
+                                    @if($conjunta)
+                                        <p class="text-xs text-gray-500">
+                                            Etapa conjunta: a UG e a SCP concluem cada uma a sua parte; a Celebração avança quando as duas concluírem.
+                                        </p>
+                                    @endif
                                 </form>
                             @endif
 
@@ -222,8 +236,12 @@
                         </div>
                     @else
                         <p class="mt-4 pt-4 border-t border-gray-100 text-xs text-gray-500">
-                            A Celebração está com <strong>{{ $setorLabel($proposta->celebracao_setor) }}</strong>.
-                            Só esse setor pode movimentá-la.
+                            @if($conjunta && in_array($meuSetor, \App\Models\Proposta::setoresDaEtapaCelebracao($etapaAtual), true))
+                                Seu setor já concluiu a parte dele nesta etapa. Falta <strong>{{ $comQuem }}</strong>.
+                            @else
+                                A Celebração está com <strong>{{ $comQuem ?: $setorLabel($proposta->celebracao_setor) }}</strong>.
+                                Só esse setor pode movimentá-la.
+                            @endif
                         </p>
                     @endif
                 @endunless
