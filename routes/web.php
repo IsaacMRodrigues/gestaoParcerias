@@ -297,6 +297,9 @@ Route::middleware(['auth', 'staff', 'readonly'])->group(function () {
         // para ajuste (diligência, ou a etapa 2 da Celebração) ou, já na
         // vigência, o pedido de alteração da parceria.
         Route::resource('propostas', PropostaController::class)->only(['index', 'show']);
+        // O plano de trabalho editado pela UG na Celebração (30/09/2026). As
+        // regras estão em PlanoTrabalhoController::ugPodeEditar.
+        PlanoTrabalhoController::rotas('celebracao', '/propostas/{id}/plano', 'propostas.plano');
     });
 
     // Pareceres (técnico/jurídico/decisão) e diligências — autorização fina por tipo no controller

@@ -67,6 +67,27 @@
                 </div>
             @endif
 
+            {{-- Plano de trabalho aberto: a OSC e a UG editam até o documento dele
+                 ser assinado (decisão da gestão, 30/09/2026). --}}
+            @php
+                $linkPlano = null;
+                if ($proposta->planoAbertoNaCelebracao()) {
+                    if ($ehOsc && auth()->user()->can('osc_propostas')) {
+                        $linkPlano = route('portal.proposta.show', $proposta);
+                    } elseif (\App\Http\Controllers\PlanoTrabalhoController::ugPodeEditar($proposta, auth()->user())) {
+                        $linkPlano = route('propostas.show', $proposta);
+                    }
+                }
+            @endphp
+            @if($linkPlano)
+                <div class="bg-white rounded-xl border border-gray-200 shadow-sm px-6 py-4 flex items-center justify-between gap-4">
+                    <p class="text-sm text-gray-700">
+                        O plano de trabalho pode ser editado até o documento "Plano de Trabalho" desta Celebração ser assinado.
+                    </p>
+                    <a href="{{ $linkPlano }}" class="btn btn-outline btn-sm shrink-0">Editar o plano</a>
+                </div>
+            @endif
+
             {{-- Identificação --}}
             <div class="bg-white rounded-xl border border-gray-200 shadow-sm p-6">
                 <dl class="grid grid-cols-2 sm:grid-cols-4 gap-4 text-sm">

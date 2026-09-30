@@ -303,6 +303,24 @@ class Proposta extends Model
             ->orWhereNotNull('celebracao_iniciada_em'));
     }
 
+    /**
+     * O plano de trabalho está aberto a edição na Celebração? Da aprovação
+     * até o documento "Plano de Trabalho" do checklist ser assinado — em
+     * qualquer etapa, e pela OSC e pela UG (decisão da gestão, 30/09/2026).
+     * Assinado, o texto congela, e mudar o plano passa a ser por Alteração.
+     */
+    public function planoAbertoNaCelebracao(): bool
+    {
+        if (!$this->temTramiteCelebracao() || $this->celebracaoConcluida()) {
+            return false;
+        }
+
+        $documento = $this->pecas()->where('categoria', 'celebracao')->where('chave', 'plano_trabalho')->first();
+
+        // A peça antiga, de quando o plano era anexo, congela com o arquivo.
+        return !$documento || !($documento->assinado() || ($documento->tipo === 'arquivo' && $documento->temArquivo()));
+    }
+
     public function celebracaoIniciada(): bool
     {
         return !is_null($this->celebracao_iniciada_em);

@@ -344,15 +344,33 @@
                 @endforelse
             </div>
 
+            @php
+                // Na Celebração, a UG edita o plano até o documento dele ser
+                // assinado (decisão da gestão, 30/09/2026).
+                $ugEditaPlano = \App\Http\Controllers\PlanoTrabalhoController::ugPodeEditar($proposta, auth()->user());
+            @endphp
+
+            @if($ugEditaPlano)
+                <div class="bg-accent-50 border border-accent-200 rounded-xl px-6 py-3 text-sm text-accent-800">
+                    Celebração em curso: o plano de trabalho pode ser editado pela Unidade Gestora e pela OSC até o
+                    documento "Plano de Trabalho" da Celebração ser assinado.
+                </div>
+                @include('plano._editor', [
+                    'dono'       => $proposta,
+                    'rota'       => 'propostas.plano',
+                    'podeEditar' => true,
+                ])
+            @else
             {{-- Plano de Trabalho --}}
             <div class="bg-white rounded-xl border border-gray-200 shadow-sm">
-                {{-- Só leitura: metas e etapas são o que a OSC se comprometeu
-                     a fazer. Ver rotas de propostas em routes/web.php. --}}
+                {{-- Só leitura fora da Celebração: metas e etapas são o que a OSC
+                     se comprometeu a fazer. Na Celebração, até o plano ser
+                     assinado, a UG usa o editor completo (acima). --}}
                 <div class="px-6 py-4 border-b border-gray-200">
                     <h3 class="text-base font-semibold text-gray-800">Plano de Trabalho</h3>
                     <p class="text-xs text-gray-400 mt-0.5">
-                        Metas e etapas como a organização as propôs. Para mudá-las, devolva o plano
-                        para ajuste — na análise, por diligência; na Celebração, na etapa da OSC.
+                        Metas e atividades como a organização as propôs. Na análise, ajustes vão por
+                        diligência; na Celebração, o plano fica editável até o documento dele ser assinado.
                     </p>
                 </div>
 
@@ -428,6 +446,7 @@
                 'podeEditar'   => false,
                 'mostrarMetas' => false,
             ])
+            @endif
 
         </div>
     </div>

@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Despesa;
 use App\Models\ManifestacaoInteresse;
 use App\Models\PlanoEquipe;
+use App\Models\User;
 use App\Models\Proposta;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -271,6 +272,15 @@ class PlanoTrabalhoController extends Controller
         $tipo = (string) $request->route('tipo');
         $id   = (string) $request->route('id');
 
+        // A UG, na tela interna da proposta, durante a Celebração.
+        if ($tipo === 'celebracao') {
+            $proposta = Proposta::findOrFail($id);
+            abort_unless(self::ugPodeEditar($proposta, auth()->user()), 403,
+                'O plano só se edita na Celebração, pela Unidade Gestora da Secretaria, até o documento "Plano de Trabalho" ser assinado.');
+
+            return $proposta;
+        }
+
         $dono = $tipo === 'proposta'
             ? Proposta::findOrFail($id)
             : ManifestacaoInteresse::findOrFail($id);
@@ -285,13 +295,28 @@ class PlanoTrabalhoController extends Controller
     }
 
     /**
+     * A UG edita o plano na Celebração (decisão da gestão, 30/09/2026): quem
+     * trabalha na formalização, da Secretaria da proposta, enquanto o
+     * documento do plano não foi assinado. A permissão de formalização deixa
+     * de fora a Comissão de Seleção, que também é da UG.
+     */
+    public static function ugPodeEditar(Proposta $proposta, ?User $user): bool
+    {
+        return $user !== null
+            && $user->setorNoTramite() === 'ug'
+            && $user->can('formalizacao')
+            && $proposta->visivelPara($user)
+            && $proposta->planoAbertoNaCelebracao();
+    }
+
+    /**
      * O plano ainda é da OSC?
      *
      * Na manifestação, só no rascunho. Na proposta, enquanto não foi submetida;
-     * outra vez na Celebração, quando o município convoca a OSC a elaborar o
-     * plano definitivo (etapa 2 do fluxo, `celebracao_setor` = osc); e outra
-     * ainda na execução, enquanto houver pedido de alteração em elaboração —
-     * é o próprio plano que a alteração altera (módulo 3.3).
+     * outra vez na Celebração, em qualquer etapa, até o documento "Plano de
+     * Trabalho" ser assinado; e outra ainda na execução, enquanto houver pedido
+     * de alteração em elaboração — é o próprio plano que a alteração altera
+     * (módulo 3.3).
      */
     public static function planoEditavel(Proposta|ManifestacaoInteresse $dono): bool
     {
@@ -303,9 +328,9 @@ class PlanoTrabalhoController extends Controller
             return true;
         }
 
-        if ($dono->temTramiteCelebracao()
-            && !$dono->celebracaoConcluida()
-            && $dono->celebracao_setor === 'osc') {
+        // Na Celebração, em qualquer etapa, até o documento do plano ser
+        // assinado (decisão da gestão, 30/09/2026). Antes só na etapa da OSC.
+        if ($dono->planoAbertoNaCelebracao()) {
             return true;
         }
 

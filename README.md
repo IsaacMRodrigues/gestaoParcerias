@@ -566,6 +566,17 @@ Trazer os demais cenários para `tests/Feature` é uma das [Pendências](#pendê
 Da mais recente para a mais antiga. Cada entrada diz o que mudou, **por quê** e como foi
 conferido — o porquê é o que falta a quem pega o código depois.
 
+- [2026-09-30] **Plano de trabalho editável na Celebração, pela OSC e pela UG** (`Proposta::planoAbertoNaCelebracao`,
+  `PlanoTrabalhoController::ugPodeEditar`)
+  - Decisão da gestão. Na Celebração, o plano fica aberto a edição **em qualquer etapa** (antes, só na etapa
+    da OSC), até o documento "Plano de Trabalho" do checklist ser **assinado** — aí o texto congela e mudar o
+    plano volta a ser por Alteração
+  - Editam: a **OSC**, pelo portal; e a **UG**, na tela interna da proposta, que ganha o editor completo
+    (rotas `propostas.plano.*`). Da UG, só quem tem a permissão de formalização e é da Secretaria da proposta
+    — a Comissão de Seleção, que também é UG, fica de fora. Fora da Celebração a UG continua só lendo o plano
+  - A tela da Celebração mostra "Editar o plano" a quem pode editar
+  - Conferido: 5 testes em `PlanoNaCelebracaoTest` (o da OSC falha com a regra antiga)
+
 - [2026-09-29] **Várias vencedoras no mesmo chamamento, todas na Celebração** (`CelebracaoController`)
   - Pedido da gestão. A adjudicação já aceitava várias vencedoras, e cada uma já ganhava a sua Celebração;
     faltava a tela deixar isso claro. A lista da **Celebração** agora agrupa as parcerias por chamamento,
