@@ -591,6 +591,14 @@ Trazer os demais cenários para `tests/Feature` é uma das [Pendências](#pendê
 Da mais recente para a mais antiga. Cada entrada diz o que mudou, **por quê** e como foi
 conferido — o porquê é o que falta a quem pega o código depois.
 
+- [2026-10-01] **Barra do portal da OSC em grupos** (`layouts/portal`)
+  - Com "Arquivos da OSC", a OSC logada tinha nove links numa linha e a barra passava da largura da tela. Agora:
+    Chamamentos abertos · Minhas inscrições · **Propor parceria ▾** (Manifestar interesse, Nova Proposta) ·
+    **Execução ▾** (Alterações, Prestação de contas) · Arquivos da OSC · Suporte. A Transparência continua na barra
+    para quem não está logado e, para a OSC, no rodapé. A gaveta (menu de celular) passa a valer abaixo de telas
+    grandes (`lg`), com os grupos como títulos
+  - Conferido: `BarraDoPortalTest`
+
 - [2026-10-01] **Arquivos da OSC: documentos anexados uma vez, para todas as parcerias** (`OscArquivoController`,
   `OscArquivo`, `OscArquivoAnalise`, `arquivos-osc/_lista`, comando `osc:avisar-vencimento-certidoes`)
   - Pedido da Raquel (30/09), com o portal do DF (parcerias.df.gov.br/pmis) como modelo: para diminuir a

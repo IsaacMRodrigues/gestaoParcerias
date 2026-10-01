@@ -136,13 +136,23 @@
                 ['url' => route('transparencia'), 'rotulo' => 'Transparência',       'ativo' => request()->routeIs('transparencia')],
             ];
 
+            // A OSC logada tinha nove links numa linha e a barra passava da tela
+            // (01/10/2026). Os de propor e os da execução viraram grupos; a
+            // Transparência, que é consulta pública, fica no rodapé para ela.
             if (auth()->check() && auth()->user()->ehRepresentanteOsc()) {
-                $navItens[] = ['url' => route('portal.minhas-propostas'), 'rotulo' => 'Minhas inscrições', 'ativo' => request()->routeIs('portal.minhas*')];
-                $navItens[] = ['url' => route('portal.arquivos.index'), 'rotulo' => 'Arquivos da OSC', 'ativo' => request()->routeIs('portal.arquivos.*')];
-                $navItens[] = ['url' => route('portal.manifestacoes.index'), 'rotulo' => 'Manifestar interesse', 'ativo' => request()->routeIs('portal.manifestacoes.*') && !(isset($manifestacao) && $manifestacao?->ehNovaProposta())];
-                $navItens[] = ['url' => route('portal.novas-propostas.index'), 'rotulo' => 'Nova Proposta', 'ativo' => request()->routeIs('portal.novas-propostas.*') || (isset($manifestacao) && request()->routeIs('portal.manifestacoes.show') && $manifestacao?->ehNovaProposta())];
-                $navItens[] = ['url' => route('alteracoes.index'), 'rotulo' => 'Alterações', 'ativo' => request()->routeIs('alteracoes.*')];
-                $navItens[] = ['url' => route('prestacao-contas.index'), 'rotulo' => 'Prestação de contas', 'ativo' => request()->routeIs('prestacao-contas.*')];
+                $navItens = [
+                    $navItens[0],
+                    ['url' => route('portal.minhas-propostas'), 'rotulo' => 'Minhas inscrições', 'ativo' => request()->routeIs('portal.minhas*')],
+                    ['rotulo' => 'Propor parceria', 'filhos' => [
+                        ['url' => route('portal.manifestacoes.index'), 'rotulo' => 'Manifestar interesse', 'ativo' => request()->routeIs('portal.manifestacoes.*') && !(isset($manifestacao) && $manifestacao?->ehNovaProposta())],
+                        ['url' => route('portal.novas-propostas.index'), 'rotulo' => 'Nova Proposta', 'ativo' => request()->routeIs('portal.novas-propostas.*') || (isset($manifestacao) && request()->routeIs('portal.manifestacoes.show') && $manifestacao?->ehNovaProposta())],
+                    ]],
+                    ['rotulo' => 'Execução', 'filhos' => [
+                        ['url' => route('alteracoes.index'), 'rotulo' => 'Alterações', 'ativo' => request()->routeIs('alteracoes.*')],
+                        ['url' => route('prestacao-contas.index'), 'rotulo' => 'Prestação de contas', 'ativo' => request()->routeIs('prestacao-contas.*')],
+                    ]],
+                    ['url' => route('portal.arquivos.index'), 'rotulo' => 'Arquivos da OSC', 'ativo' => request()->routeIs('portal.arquivos.*')],
+                ];
             }
 
             // O suporte é de quem está logado, seja da OSC ou da Prefeitura.
@@ -166,11 +176,33 @@
                         </span>
                     </a>
 
-                    <nav class="hidden md:flex items-center gap-6 text-sm whitespace-nowrap">
+                    <nav class="hidden lg:flex items-center gap-6 text-sm whitespace-nowrap">
                         @foreach($navItens as $item)
-                            <a href="{{ $item['url'] }}" class="{{ $navLink($item['ativo']) }} transition">
-                                {{ $item['rotulo'] }}
-                            </a>
+                            @if(isset($item['filhos']))
+                                @php $grupoAtivo = collect($item['filhos'])->contains('ativo', true); @endphp
+                                <div x-data="{ aberto: false }" class="relative" @click.outside="aberto = false" @keydown.escape="aberto = false">
+                                    <button type="button" @click="aberto = !aberto" :aria-expanded="aberto"
+                                            class="flex items-center gap-1 {{ $navLink($grupoAtivo) }} transition">
+                                        {{ $item['rotulo'] }}
+                                        <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20" aria-hidden="true">
+                                            <path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd"/>
+                                        </svg>
+                                    </button>
+                                    <div x-show="aberto" x-transition x-cloak
+                                         class="absolute left-0 mt-2 w-56 bg-white rounded-lg shadow-lg ring-1 ring-black/5 z-50 py-1">
+                                        @foreach($item['filhos'] as $filho)
+                                            <a href="{{ $filho['url'] }}"
+                                               class="block px-4 py-2 text-sm hover:bg-gray-50 {{ $filho['ativo'] ? 'text-brand-700 font-semibold' : 'text-gray-700' }}">
+                                                {{ $filho['rotulo'] }}
+                                            </a>
+                                        @endforeach
+                                    </div>
+                                </div>
+                            @else
+                                <a href="{{ $item['url'] }}" class="{{ $navLink($item['ativo']) }} transition">
+                                    {{ $item['rotulo'] }}
+                                </a>
+                            @endif
                         @endforeach
                     </nav>
 
@@ -227,7 +259,7 @@
                         @endauth
 
                         <button @click="menu = !menu" aria-label="Menu"
-                                class="md:hidden p-2 -mr-2 rounded-md text-gray-500 hover:text-gray-800 hover:bg-gray-100 transition">
+                                class="lg:hidden p-2 -mr-2 rounded-md text-gray-500 hover:text-gray-800 hover:bg-gray-100 transition">
                             <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
                                 <path stroke-linecap="round" stroke-linejoin="round" d="M4 6h16M4 12h16M4 18h16"/>
                             </svg>
@@ -236,12 +268,22 @@
                 </div>
 
                 {{-- Gaveta: os mesmos itens, em coluna, quando não cabem em linha --}}
-                <div x-show="menu" x-cloak x-transition class="md:hidden pb-3 -mt-1 space-y-1">
+                <div x-show="menu" x-cloak x-transition class="lg:hidden pb-3 -mt-1 space-y-1">
                     @foreach($navItens as $item)
-                        <a href="{{ $item['url'] }}"
-                           class="block px-3 py-2 rounded-lg text-sm {{ $item['ativo'] ? 'bg-brand-50 text-brand-800 font-semibold' : 'text-gray-600 hover:bg-gray-50' }}">
-                            {{ $item['rotulo'] }}
-                        </a>
+                        @if(isset($item['filhos']))
+                            <p class="px-3 pt-2 text-xs font-semibold uppercase tracking-wide text-gray-400">{{ $item['rotulo'] }}</p>
+                            @foreach($item['filhos'] as $filho)
+                                <a href="{{ $filho['url'] }}" style="padding-left:1.5rem"
+                                   class="block px-3 py-2 rounded-lg text-sm {{ $filho['ativo'] ? 'bg-brand-50 text-brand-800 font-semibold' : 'text-gray-600 hover:bg-gray-50' }}">
+                                    {{ $filho['rotulo'] }}
+                                </a>
+                            @endforeach
+                        @else
+                            <a href="{{ $item['url'] }}"
+                               class="block px-3 py-2 rounded-lg text-sm {{ $item['ativo'] ? 'bg-brand-50 text-brand-800 font-semibold' : 'text-gray-600 hover:bg-gray-50' }}">
+                                {{ $item['rotulo'] }}
+                            </a>
+                        @endif
                     @endforeach
                 </div>
             </div>
