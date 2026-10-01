@@ -55,7 +55,8 @@ class Devolucao
 
     private static function pronto(Peca|ProcessoPeca $p): bool
     {
-        if ($p->assinado() || ($p instanceof Peca && $p->semAssinatura() && $p->redigida())) {
+        if ($p->assinado() || ($p instanceof Peca && $p->semAssinatura() && $p->redigida())
+            || ($p instanceof Peca && $p->temAssinaturasEmSequencia() && $p->assinaturasPartes->isNotEmpty())) {
             return true;
         }
 

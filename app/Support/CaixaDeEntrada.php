@@ -256,12 +256,15 @@ class CaixaDeEntrada
         // item fica na caixa de cada setor até ele concluir a sua parte.
         return Proposta::with('osc')
             ->visiveisPara($user)
+            // E o Gestor da Parceria, que a SCP escolhe para assinar o Termo
+            // (01/10/2026); nas etapas com perfil, só quem o tem.
             ->where(fn ($q) => $q->where('celebracao_setor', $user->setor)
-                ->orWhereIn('celebracao_etapa', Proposta::etapasConjuntasDoSetor($user->setor)))
+                ->orWhereIn('celebracao_etapa', Proposta::etapasConjuntasDoSetor($user->setor))
+                ->orWhere(fn ($g) => $g->where('celebracao_setor', 'gestor')->where('celebracao_gestor_id', $user->id)))
             ->whereNotNull('celebracao_iniciada_em')
             ->whereNull('celebracao_concluida_em')
             ->get()
-            ->filter(fn (Proposta $p) => $p->setorTemAVezNaCelebracao($user->setor))
+            ->filter(fn (Proposta $p) => $p->usuarioTemAVezNaCelebracao($user))
             ->map(fn (Proposta $p) => [
                 'tramite'   => 'Celebração',
                 'titulo'    => $p->titulo,

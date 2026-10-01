@@ -37,6 +37,12 @@ trait PodeSerDevolvida
         }
 
         $this->forceFill($campos)->save();
+
+        // Assinado em sequência: reabrir recomeça a sequência.
+        if (method_exists($this, 'assinaturasPartes')) {
+            $this->assinaturasPartes()->delete();
+            $this->unsetRelation('assinaturasPartes');
+        }
     }
 
     /** Corrigido: sai a marca de devolvido. */

@@ -36,6 +36,27 @@
                         <dd class="text-gray-900 font-mono text-right">{{ $doc['codigo'] }}</dd>
                     </div>
 
+                    {{-- Assinado em sequência (o Termo, desde 01/10/2026): todas as
+                         partes que já assinaram, e se ainda falta alguma. --}}
+                    @if(!empty($doc['partes']))
+                        <div class="py-2">
+                            <dt class="text-gray-500 mb-1">Assinaturas do documento</dt>
+                            <dd>
+                                <ul class="space-y-1">
+                                    @foreach($doc['partes'] as $parte)
+                                        <li class="flex justify-between gap-4 text-sm">
+                                            <span class="text-gray-900"><strong>{{ $parte['rotulo'] }}:</strong> {{ $parte['nome'] }}</span>
+                                            <span class="text-gray-500 text-right">{{ $parte['em']->format('d/m/Y H:i') }} · <span class="font-mono">{{ $parte['codigo'] }}</span></span>
+                                        </li>
+                                    @endforeach
+                                </ul>
+                                @unless($doc['completo'])
+                                    <p class="mt-1 text-xs text-accent-800">Ainda faltam assinaturas: o documento não está concluído.</p>
+                                @endunless
+                            </dd>
+                        </div>
+                    @endif
+
                     {{-- Assinatura das partes: o Termo de Parceria só está completo
                          com a contra-assinatura da OSC, e quem valida precisa ver
                          quem assinou pelos dois lados. --}}

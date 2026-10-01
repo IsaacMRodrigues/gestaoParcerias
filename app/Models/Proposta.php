@@ -61,7 +61,7 @@ class Proposta extends Model
         'data_inicio_prevista', 'data_fim_prevista', 'vigencia_dias',
         'atuacao_rede', 'rede_cnpj', 'rede_razao_social', 'rede_municipio', 'rede_data_termo',
         'status', 'submitted_at',
-        'celebracao_etapa', 'celebracao_setor', 'celebracao_partes_concluidas', 'celebracao_iniciada_em', 'celebracao_concluida_em',
+        'celebracao_etapa', 'celebracao_setor', 'celebracao_partes_concluidas', 'celebracao_gestor_id', 'celebracao_iniciada_em', 'celebracao_concluida_em',
     ];
 
     protected function casts(): array
@@ -91,6 +91,9 @@ class Proposta extends Model
         'scp'    => 'Setor de Convênios e Parcerias (SCP)',
         'seplan' => 'Secretaria de Planejamento (SEPLAN)',
         'pj'     => 'Procuradoria Jurídica (PJ)',
+        // O Gestor da Parceria é uma pessoa, escolhida pela SCP (01/10/2026).
+        'gestor' => 'Gestor da Parceria',
+        'pm'     => 'Gabinete do Prefeito',
     ];
 
     /**
@@ -108,8 +111,17 @@ class Proposta extends Model
         ['setor' => 'ug',     'acao' => 'Anexar as portarias do Gestor e da Comissão de Monitoramento e emitir o Parecer Técnico'],
         ['setor' => 'scp',    'acao' => 'Conferir o processo, emitir a Minuta do Termo e a Certidão de Autuação e emitir/assinar o Protocolo na Unidade Jurídica'],
         ['setor' => 'pj',     'acao' => 'Analisar e emitir/assinar o Parecer Jurídico'],
-        ['setor' => 'scp',    'acao' => 'Emitir o Parecer da SCP e o Termo, assinando-o pelo Município'],
-        ['setor' => 'osc',    'acao' => 'Assinar o Termo (contra-assinatura da OSC — assinatura das partes)'],
+        // O Termo em sequência (decisão da gestão, 01/10/2026): a SCP emite sem
+        // assinar; assinam a OSC, o Responsável da UG, o Gestor da Parceria e o
+        // Gabinete, e entre uma assinatura e outra o Termo volta à SCP.
+        ['setor' => 'scp',    'acao' => 'Emitir o Parecer da SCP e o Termo (sem assinar o Termo) e encaminhar à OSC'],
+        ['setor' => 'osc',    'acao' => 'Assinar o Termo e devolver à SCP'],
+        ['setor' => 'scp',    'acao' => 'Conferir a assinatura da OSC e encaminhar o Termo à UG'],
+        ['setor' => 'ug',     'perfil' => 'responsavel_unidade_gestora', 'acao' => 'Responsável da UG: assinar o Termo e devolver à SCP'],
+        ['setor' => 'scp',    'acao' => 'Escolher o Gestor da Parceria e encaminhar o Termo a ele'],
+        ['setor' => 'gestor', 'acao' => 'Gestor da Parceria: assinar o Termo e devolver à SCP'],
+        ['setor' => 'scp',    'acao' => 'Encaminhar o Termo ao Gabinete'],
+        ['setor' => 'pm',     'acao' => 'Gabinete: fazer a última assinatura do Termo e devolver à SCP'],
         ['setor' => 'scp',    'acao' => 'Anexar o comprovante de publicação (Diário Oficial e site) e emitir a Autorização de Início de Execução'],
         ['setor' => 'osc',    'acao' => 'Informar os dados bancários da conta específica da parceria'],
         ['setor' => 'scp',    'acao' => 'Elaborar a Ordem de Pagamento Global e encaminhar à UG'],
@@ -395,6 +407,48 @@ class Proposta extends Model
         return $setor !== null && in_array($setor, $this->setoresComAVezNaCelebracao(), true);
     }
 
+    /**
+     * A pessoa tem a vez na Celebração agora? O setor, e mais: na etapa do
+     * Gestor, só o Gestor escolhido pela SCP; nas etapas com perfil (o
+     * Responsável da UG assina o Termo), só quem tem o perfil — e da
+     * Secretaria da parceria (01/10/2026).
+     */
+    public function usuarioTemAVezNaCelebracao(?User $user): bool
+    {
+        if (!$user || !$this->temTramiteCelebracao() || $this->celebracaoConcluida()) {
+            return false;
+        }
+
+        $etapa = self::ETAPAS_CELEBRACAO[(int) $this->celebracao_etapa] ?? null;
+
+        if (($etapa['setor'] ?? null) === 'gestor') {
+            return $this->celebracao_gestor_id !== null && (int) $this->celebracao_gestor_id === (int) $user->id;
+        }
+
+        if (!$this->setorTemAVezNaCelebracao($user->setorNoTramite())) {
+            return false;
+        }
+
+        if ($perfil = $etapa['perfil'] ?? null) {
+            return $user->hasRole($perfil) && $this->visivelPara($user);
+        }
+
+        return true;
+    }
+
+    public function gestorDaCelebracao(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'celebracao_gestor_id');
+    }
+
+    /** Gestores da Parceria que a SCP pode escolher: o perfil, ativos, da Secretaria da parceria. */
+    public function gestoresElegiveis(): \Illuminate\Support\Collection
+    {
+        $orgao = $this->chamamento?->programa?->orgao_id;
+
+        return User::role('gestor_parceria')->where('status', true)->where('orgao_id', $orgao)->orderBy('name')->get();
+    }
+
     public function podeAvancarCelebracao(): bool
     {
         return $this->temTramiteCelebracao()
@@ -453,10 +507,19 @@ class Proposta extends Model
                 continue;
             }
 
+            // O Termo, assinado em sequência: na etapa dele a SCP só o emite.
+            if ($peca->temAssinaturasEmSequencia()) {
+                if (empty($peca->conteudo) || $peca->devolvida()) {
+                    $pend[] = $peca->rotulo . ' (emitir)';
+                }
+
+                continue;
+            }
+
             if ($peca->tipo === 'modelo') {
-                // A OP Global é apenas elaborada pela SCP na etapa 12 — a
-                // assinatura é da UG, na etapa 13.
-                $soPreencher = $chave === 'op_global' && $etapa === 12;
+                // A OP Global é apenas elaborada pela SCP na etapa 18 — a
+                // assinatura é da UG, na etapa 19.
+                $soPreencher = $chave === 'op_global' && $etapa === 18;
                 $ok = $soPreencher ? !empty($peca->conteudo) && !$peca->devolvida() : $peca->assinado();
                 if (!$ok) {
                     $pend[] = $peca->rotulo . ($soPreencher ? ' (emitir)' : ' (assinar)');
@@ -466,13 +529,16 @@ class Proposta extends Model
             }
         }
 
-        // Etapa 9: assinatura das partes — a OSC contra-assina o Termo.
-        if ($etapa === 9 && !$this->pecaCelebracao('termo')?->contraAssinado()) {
-            $pend[] = 'Termo de Parceria (contra-assinatura da OSC)';
+        // Etapas de assinatura do Termo (OSC, UG, Gestor, Gabinete): a da vez.
+        $termo = $this->pecaCelebracao('termo');
+        foreach ($termo?->sequenciaDeAssinaturas() ?? [] as $papel => $regra) {
+            if ($regra['etapa'] === $etapa && !$termo->assinaturaDe($papel)) {
+                $pend[] = $termo->rotulo . ' (assinatura: ' . $regra['rotulo'] . ')';
+            }
         }
 
-        // Etapa 13: a UG assina a OP Global elaborada pela SCP.
-        if ($etapa === 13 && !$this->pecaCelebracao('op_global')?->assinado()) {
+        // Etapa 19: a UG assina a OP Global elaborada pela SCP.
+        if ($etapa === 19 && !$this->pecaCelebracao('op_global')?->assinado()) {
             $pend[] = 'Ordem de Pagamento Global (assinar)';
         }
 

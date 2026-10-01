@@ -25,7 +25,7 @@
                             </a>
                             @if($doc->assinado())
                                 <span class="block text-xs text-gray-400">
-                                    Assinado por {{ $doc->assinanteNome() }} em {{ $doc->assinado_em->format('d/m/Y') }}
+                                    Assinado por {{ $doc->assinanteNome() }} em {{ (method_exists($doc, 'dataDaAssinatura') ? $doc->dataDaAssinatura() : $doc->assinado_em)?->format('d/m/Y') }}
                                 </span>
                             @endif
                         </span>

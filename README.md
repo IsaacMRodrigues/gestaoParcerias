@@ -201,7 +201,7 @@ na Celebração, nas Alterações e na Prestação — ver `User::setorNoTramite
 |---|---|---|
 | **Seleção** (chamamento público) | UG → SCP → UG (prazo de recurso) → UG → SCP → **Prefeito** (6) | `Chamamento::ETAPAS_SELECAO` |
 | **Manifestação de Interesse** | OSC submete → SCP recebe → Secretaria opina → SCP defere ou indefere | `ManifestacaoInteresse` |
-| **Celebração** | UG → **OSC** → UG + SCP (em paralelo) → SCP → SEPLAN → UG → SCP → PJ → SCP → **OSC** → SCP → **OSC** → SCP → UG → SCP (15) | `Proposta::ETAPAS_CELEBRACAO` |
+| **Celebração** | UG → **OSC** → UG + SCP (em paralelo) → SCP → SEPLAN → UG → SCP → PJ → SCP → **OSC** → SCP → **UG** → SCP → **Gestor** → SCP → **Gabinete** → SCP → **OSC** → SCP → UG → SCP (21) | `Proposta::ETAPAS_CELEBRACAO` |
 | **Alteração da Parceria** | **OSC** → UG autoriza → SCP processa e decide (3) | `Alteracao::ETAPAS` |
 | **Prestação de Contas** | **OSC** → SCP (análise prévia) → UG com Gestor e Comissão (3) | `PrestacaoContas::ETAPAS` |
 | **Suporte** | quem abre ↔ equipe (TI e SCP) | `Chamado` |
@@ -565,6 +565,22 @@ Trazer os demais cenários para `tests/Feature` é uma das [Pendências](#pendê
 
 Da mais recente para a mais antiga. Cada entrada diz o que mudou, **por quê** e como foi
 conferido — o porquê é o que falta a quem pega o código depois.
+
+- [2026-10-01] **Termo de Parceria assinado em sequência: OSC, UG, Gestor e Gabinete**
+  (`Peca::ASSINATURAS_EM_SEQUENCIA`, `peca_assinaturas`, `Proposta::usuarioTemAVezNaCelebracao`)
+  - Decisão da gestão. A SCP emite o Termo **sem assinar** (etapa 9). Assinam, nesta ordem: a **OSC** (responsável
+    legal), o **Responsável da UG**, o **Gestor da Parceria** e o **Gabinete**, que faz a última assinatura. Entre
+    uma e outra o Termo volta à SCP, que o encaminha: a Celebração passa de 15 para 21 etapas (as seis novas são
+    as etapas 10 a 16; o que vinha depois andou seis casas, na migração)
+  - O sistema não guardava quem é o Gestor de cada parceria: a SCP agora o **escolhe** ao encaminhar, entre os
+    usuários com o perfil Gestor da Parceria da Secretaria (`propostas.celebracao_gestor_id`). Só ele assina e
+    recebe o aviso e o item na caixa; na etapa da UG, só o Responsável da UG
+  - Mecanismo novo de **várias assinaturas** num documento (`peca_assinaturas`): cada parte tem o seu código de
+    validação e a sua entrada no carimbo, e qualquer dos códigos abre na validação pública o documento com as
+    assinaturas que ele tem até ali. O Termo só conta como assinado com as quatro. Devolver o Termo recomeça a
+    sequência. Termos antigos (SCP pelo Município + contra-assinatura da OSC) continuam valendo como estão
+  - Conferido: 2 testes em `TermoAssinadoEmSequenciaTest` (a sequência inteira, com quem pode e quem não pode
+    assinar em cada etapa, a escolha do Gestor, a caixa de entrada e a validação; ninguém assina fora da vez)
 
 - [2026-10-01] **Celebração, etapa 7: Minuta do Termo e Certidão de Autuação junto com o Protocolo**
   (`Peca::TEMPLATES['celebracao']`)

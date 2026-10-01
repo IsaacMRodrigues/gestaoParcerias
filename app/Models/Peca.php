@@ -408,12 +408,14 @@ class Peca extends Model
         'parecer_juridico'       => 7,
         'parecer_scp'            => 8,
         'termo'                  => 8,
-        'comprovante_publicacao_doe'  => 10,
-        'comprovante_publicacao_site' => 10,
-        'autorizacao_inicio'     => 10,
-        'dados_bancarios'        => 11,
-        'op_global'              => 12,
-        'comprovante_empenho'    => 14,
+        // As etapas 9 a 15 são as assinaturas do Termo (01/10/2026): o que vem
+        // depois andou seis casas.
+        'comprovante_publicacao_doe'  => 16,
+        'comprovante_publicacao_site' => 16,
+        'autorizacao_inicio'     => 16,
+        'dados_bancarios'        => 17,
+        'op_global'              => 18,
+        'comprovante_empenho'    => 20,
     ];
 
     /**
@@ -485,19 +487,37 @@ class Peca extends Model
     ];
 
     /**
-     * A Ordem de Pagamento Global é elaborada pela SCP (etapa 11) e assinada
-     * pela Unidade Gestora (etapa 12).
+     * A Ordem de Pagamento Global é elaborada pela SCP (etapa 19) e assinada
+     * pela Unidade Gestora (etapa 20).
      */
     public const CELEBRACAO_ASSINATURA = [
-        'op_global' => ['setor' => 'ug', 'etapa' => 13],
+        'op_global' => ['setor' => 'ug', 'etapa' => 19],
     ];
 
     /**
-     * Contra-assinatura ("assinatura das partes"): o Termo é assinado pelo
-     * Município (SCP, etapa 8) e contra-assinado pela OSC na etapa 9.
+     * Contra-assinatura ("assinatura das partes"). Era a do Termo, que o
+     * Município assinava e a OSC contra-assinava; desde 01/10/2026 o Termo é
+     * assinado em sequência (ASSINATURAS_EM_SEQUENCIA). A estrutura fica para
+     * os Termos antigos, que continuam mostrando e validando as duas
+     * assinaturas que têm.
      */
-    public const CELEBRACAO_CONTRA_ASSINATURA = [
-        'termo' => ['setor' => 'osc', 'etapa' => 9],
+    public const CELEBRACAO_CONTRA_ASSINATURA = [];
+
+    /**
+     * Documentos assinados por várias partes, em sequência, cada uma na sua
+     * etapa do trâmite (decisão da gestão, 01/10/2026). O Termo de Parceria:
+     * a SCP o emite sem assinar; assinam a OSC, o Responsável da UG, o Gestor
+     * da Parceria e, por último, o Gabinete.
+     */
+    public const ASSINATURAS_EM_SEQUENCIA = [
+        'celebracao' => [
+            'termo' => [
+                'osc'    => ['etapa' => 9,  'rotulo' => 'OSC'],
+                'ug'     => ['etapa' => 11, 'rotulo' => 'Responsável da Unidade Gestora'],
+                'gestor' => ['etapa' => 13, 'rotulo' => 'Gestor da Parceria'],
+                'pm'     => ['etapa' => 15, 'rotulo' => 'Gabinete do Prefeito'],
+            ],
+        ],
     ];
 
     /**
@@ -1204,7 +1224,112 @@ HTML,
 
     public function assinado(): bool
     {
+        // Assinado em sequência: só com todas as partes. O Termo antigo, que o
+        // Município assinava na coluna da peça, continua valendo pela coluna.
+        if (is_null($this->assinado_em) && $this->temAssinaturasEmSequencia()) {
+            return $this->sequenciaCompleta();
+        }
+
         return !is_null($this->assinado_em);
+    }
+
+    // ------------------------------------------------------------------
+    // Assinaturas em sequência (ver ASSINATURAS_EM_SEQUENCIA)
+    // ------------------------------------------------------------------
+
+    public function assinaturasPartes(): \Illuminate\Database\Eloquent\Relations\HasMany
+    {
+        return $this->hasMany(PecaAssinatura::class)->orderBy('ordem');
+    }
+
+    /** ['papel' => ['etapa' => …, 'rotulo' => …]], na ordem; vazio se o documento não é desses. */
+    public function sequenciaDeAssinaturas(): array
+    {
+        return $this->tipo === 'modelo' ? (self::ASSINATURAS_EM_SEQUENCIA[$this->categoria][$this->chave] ?? []) : [];
+    }
+
+    public function temAssinaturasEmSequencia(): bool
+    {
+        return $this->sequenciaDeAssinaturas() !== [];
+    }
+
+    public function assinaturaDe(string $papel): ?PecaAssinatura
+    {
+        return $this->assinaturasPartes->firstWhere('papel', $papel);
+    }
+
+    public function sequenciaCompleta(): bool
+    {
+        foreach (array_keys($this->sequenciaDeAssinaturas()) as $papel) {
+            if (!$this->assinaturaDe($papel)) {
+                return false;
+            }
+        }
+
+        return $this->temAssinaturasEmSequencia();
+    }
+
+    /** O papel que assina na etapa atual do trâmite, se ainda não assinou. */
+    public function papelDaVez(): ?string
+    {
+        $dono = $this->donoEmTramite();
+        if (!$dono || $dono->tramiteEncerrado()) {
+            return null;
+        }
+
+        foreach ($this->sequenciaDeAssinaturas() as $papel => $regra) {
+            if ($regra['etapa'] === $dono->tramiteEtapaAtual() && !$this->assinaturaDe($papel)) {
+                return $papel;
+            }
+        }
+
+        return null;
+    }
+
+    /**
+     * Pode assinar agora, pela parte da vez? Quem tem a vez no trâmite (o
+     * Gestor escolhido, o Responsável da UG…), com o texto pronto e as
+     * assinaturas anteriores dadas. Pela OSC, o responsável legal dela.
+     */
+    public function podeAssinarComoParte(?User $user): bool
+    {
+        $papel = $this->papelDaVez();
+        $dono  = $this->donoEmTramite();
+
+        if (!$user || !$papel || empty($this->conteudo) || !$dono instanceof Proposta
+            || !$dono->usuarioTemAVezNaCelebracao($user)) {
+            return false;
+        }
+
+        foreach ($this->sequenciaDeAssinaturas() as $anterior => $regra) {
+            if ($anterior === $papel) {
+                break;
+            }
+            if (!$this->assinaturaDe($anterior)) {
+                return false;
+            }
+        }
+
+        return $papel !== 'osc' || ($this->oscDona($user, $dono) && $user->ehResponsavelLegalOsc());
+    }
+
+    public function assinarComoParte(User $user): PecaAssinatura
+    {
+        $papel = $this->papelDaVez();
+        $quem  = $user->identidadeParaAssinatura();
+
+        $assinatura = $this->assinaturasPartes()->create([
+            'papel'            => $papel,
+            'ordem'            => array_search($papel, array_keys($this->sequenciaDeAssinaturas()), true) + 1,
+            'assinado_por'     => $user->id,
+            'assinante_nome'   => $quem['nome'],
+            'assinante_cargo'  => $quem['cargo'],
+            'assinado_em'      => now(),
+            'codigo_validacao' => self::gerarCodigoValidacao(),
+        ]);
+        $this->unsetRelation('assinaturasPartes');
+
+        return $assinatura;
     }
 
     /* ---- interface do dossiê da OSC: ver Proposta::dossieParaOsc() ---- */
@@ -1346,7 +1471,8 @@ HTML,
                 \Illuminate\Support\Str::random(4) . '-' .
                 \Illuminate\Support\Str::random(2)
             );
-        } while (static::where('codigo_validacao', $codigo)->exists());
+        } while (static::where('codigo_validacao', $codigo)->exists()
+            || PecaAssinatura::where('codigo_validacao', $codigo)->exists());
 
         return $codigo;
     }
@@ -1884,8 +2010,9 @@ HTML,
 
     public function podeAssinar(?User $user): bool
     {
+        // Assinado em sequência tem o próprio caminho: podeAssinarComoParte().
         if ($this->tipo !== 'modelo' || empty($this->conteudo) || $this->assinado()
-            || $this->vemDoPlanejamento() || $this->semAssinatura()
+            || $this->vemDoPlanejamento() || $this->semAssinatura() || $this->temAssinaturasEmSequencia()
         ) {
             return false;
         }

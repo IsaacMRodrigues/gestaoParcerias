@@ -20,13 +20,27 @@
        carimbo e não têm assinatura das partes. */
     $assinaturas = [];
 
-    if ($peca->assinado()) {
+    if ($peca->assinado_em) {
         $assinaturas[] = $identidade($peca->assinante_nome, $peca->assinante_cargo, $peca->assinante) + [
             'verbo'  => 'assinado eletronicamente',
             'em'     => $peca->assinado_em,
             'codigo' => $peca->codigo_validacao,
             'qr'     => $qrValidacao ?? null,
         ];
+    }
+
+    /* Assinado em sequência (o Termo, desde 01/10/2026): uma entrada por parte,
+       cada uma com o seu código e o seu QR. */
+    if (method_exists($peca, 'temAssinaturasEmSequencia') && $peca->temAssinaturasEmSequencia()) {
+        $rotulos = $peca->sequenciaDeAssinaturas();
+        foreach ($peca->assinaturasPartes as $parte) {
+            $assinaturas[] = $identidade($parte->assinante_nome, $parte->assinante_cargo, $parte->assinante) + [
+                'verbo'  => 'assinado eletronicamente (' . ($rotulos[$parte->papel]['rotulo'] ?? $parte->papel) . ')',
+                'em'     => $parte->assinado_em,
+                'codigo' => $parte->codigo_validacao,
+                'qr'     => \SimpleSoftwareIO\QrCode\Facades\QrCode::size(110)->generate(route('validacao.mostrar', $parte->codigo_validacao)),
+            ];
+        }
     }
 
     if (method_exists($peca, 'contraAssinado') && $peca->contraAssinado()) {

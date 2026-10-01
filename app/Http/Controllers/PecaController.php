@@ -100,6 +100,24 @@ class PecaController extends Controller
     }
 
     /**
+     * Assinatura de uma das partes de documento assinado em sequência — o
+     * Termo de Parceria: OSC, Responsável da UG, Gestor e Gabinete, cada um na
+     * sua etapa (01/10/2026).
+     */
+    public function assinarParte(Peca $peca): RedirectResponse
+    {
+        abort_unless($peca->temAssinaturasEmSequencia(), 422, 'Este documento não é assinado em sequência.');
+        abort_unless($peca->podeAssinarComoParte(auth()->user()), 403,
+            'Não é a sua vez de assinar este documento.');
+
+        $papel = $peca->papelDaVez();
+        $peca->assinarComoParte(auth()->user());
+        $peca->limparDevolucao();
+
+        return $this->voltarParaPeca($peca, $peca->rotulo . ' assinado (' . $peca->sequenciaDeAssinaturas()[$papel]['rotulo'] . ').');
+    }
+
+    /**
      * Contra-assinatura ("assinatura das partes"): a OSC assina o Termo já
      * assinado pelo Município.
      */

@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\OrdemPagamento;
 use App\Models\Peca;
+use App\Models\PecaAssinatura;
 use App\Models\ProcessoPeca;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
@@ -107,6 +108,35 @@ class ValidacaoController extends Controller
                         $doc['contra_osc']         = $selecao->contraAssinante?->osc?->name;
                         $doc['contra_assinado_em'] = $selecao->contra_assinado_em;
                         $doc['contra_codigo']      = $selecao->codigo_validacao_contra;
+                    }
+                } else {
+                    // Assinatura de uma das partes de documento assinado em
+                    // sequência (o Termo, desde 01/10/2026): cada parte tem o
+                    // seu código, e todos levam ao documento com as assinaturas
+                    // que ele tem até aqui.
+                    $parte = PecaAssinatura::with('peca.pecaable', 'peca.assinaturasPartes')->where('codigo_validacao', $codigo)->first();
+
+                    if ($parte) {
+                        $selecao = $parte->peca;
+                        $rotulos = $selecao->sequenciaDeAssinaturas();
+                        $doc = [
+                            'tipo'        => $selecao->rotulo,
+                            'ref_label'   => 'Referência',
+                            'ref'         => $selecao->pecaable?->titulo ?? '—',
+                            'extra_label' => 'Categoria',
+                            'extra'       => Peca::CATEGORIA_LABELS[$selecao->categoria] ?? $selecao->categoria,
+                            'assinante'   => $parte->assinante_nome,
+                            'assinado_em' => $parte->assinado_em,
+                            'codigo'      => $parte->codigo_validacao,
+                            'conteudo'    => $selecao->conteudo,
+                            'partes'      => $selecao->assinaturasPartes->map(fn ($a) => [
+                                'rotulo' => $rotulos[$a->papel]['rotulo'] ?? $a->papel,
+                                'nome'   => $a->assinante_nome,
+                                'em'     => $a->assinado_em,
+                                'codigo' => $a->codigo_validacao,
+                            ])->all(),
+                            'completo'    => $selecao->sequenciaCompleta(),
+                        ];
                     }
                 }
             }

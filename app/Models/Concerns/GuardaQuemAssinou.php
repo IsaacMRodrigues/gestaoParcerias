@@ -18,7 +18,22 @@ trait GuardaQuemAssinou
 {
     public function assinanteNome(): ?string
     {
+        // Assinado em sequência (o Termo, 01/10/2026): todas as partes, na ordem.
+        if ($this->assinado_em === null && method_exists($this, 'temAssinaturasEmSequencia') && $this->temAssinaturasEmSequencia()) {
+            return $this->assinaturasPartes->pluck('assinante_nome')->filter()->implode(', ') ?: null;
+        }
+
         return $this->assinante_nome ?: $this->assinante?->name;
+    }
+
+    /** Quando o documento ficou assinado — no assinado em sequência, a última parte. */
+    public function dataDaAssinatura(): ?\Illuminate\Support\Carbon
+    {
+        if ($this->assinado_em === null && method_exists($this, 'temAssinaturasEmSequencia') && $this->temAssinaturasEmSequencia()) {
+            return $this->assinaturasPartes->max('assinado_em');
+        }
+
+        return $this->assinado_em;
     }
 
     public function assinanteCargo(): ?string

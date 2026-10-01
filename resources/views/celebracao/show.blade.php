@@ -13,12 +13,16 @@
     // concluir a sua parte.
     $meuSetor   = auth()->user()->setorNoTramite();
     $conjunta   = $proposta->etapaConjuntaCelebracao();
-    $souDoSetor = $proposta->setorTemAVezNaCelebracao($meuSetor)
+    $souDoSetor = $proposta->usuarioTemAVezNaCelebracao(auth()->user())
         && ($meuSetor !== 'osc'
             || auth()->user()->osc?->id === $proposta->osc_id);
     $pendencias = $concluida ? [] : $proposta->pendenciasCelebracao($conjunta && $souDoSetor ? $meuSetor : null);
     $setorLabel = fn ($s) => \App\Models\Proposta::SETORES_CELEBRACAO[$s] ?? $s;
-    $comQuem    = collect($proposta->setoresComAVezNaCelebracao())->map($setorLabel)->implode(' e ');
+    $comQuem    = collect($proposta->setoresComAVezNaCelebracao())
+        ->map(fn ($s) => $s === 'gestor' && $proposta->gestorDaCelebracao
+            ? $setorLabel($s) . ' (' . $proposta->gestorDaCelebracao->name . ')'
+            : $setorLabel($s))
+        ->implode(' e ');
 @endphp
 
 <x-dynamic-component :component="$layout">
@@ -185,6 +189,27 @@
                             @else
                                 <form action="{{ route('celebracao.avancar', $proposta) }}" method="POST" class="space-y-2">
                                     @csrf
+                                    {{-- Para o Gestor da Parceria, a SCP escolhe quem assina (01/10/2026). --}}
+                                    @if((\App\Models\Proposta::ETAPAS_CELEBRACAO[$etapaAtual + 1]['setor'] ?? null) === 'gestor')
+                                        @php $gestores = $proposta->gestoresElegiveis(); @endphp
+                                        <div>
+                                            <label for="gestor_id" class="block text-xs font-medium text-gray-600 mb-1">Gestor da Parceria que vai assinar o Termo</label>
+                                            @if($gestores->isEmpty())
+                                                <p class="text-xs text-red-700">
+                                                    Nenhum usuário com o perfil Gestor da Parceria nesta Secretaria. Cadastre o Gestor antes de encaminhar.
+                                                </p>
+                                            @else
+                                                <select name="gestor_id" id="gestor_id" required
+                                                        class="block w-full border-gray-300 rounded-md shadow-sm text-sm focus:ring-brand-500 focus:border-brand-500">
+                                                    <option value="">Selecione…</option>
+                                                    @foreach($gestores as $g)
+                                                        <option value="{{ $g->id }}" @selected((int) old('gestor_id', $proposta->celebracao_gestor_id) === $g->id)>{{ $g->name }}</option>
+                                                    @endforeach
+                                                </select>
+                                            @endif
+                                            <x-input-error :messages="$errors->get('gestor_id')" class="mt-1" />
+                                        </div>
+                                    @endif
                                     <textarea name="parecer" rows="2" placeholder="Observação (opcional)"
                                               class="block w-full border-gray-300 rounded-md shadow-sm text-sm focus:ring-brand-500 focus:border-brand-500"></textarea>
                                     <button type="submit" @disabled($pendencias)

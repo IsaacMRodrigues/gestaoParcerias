@@ -216,7 +216,7 @@
                                 </p>
                             @elseif($peca->assinado())
                                 <p class="text-xs text-gray-400 mt-0.5">
-                                    Assinado por {{ $peca->assinanteNome() }} em {{ $peca->assinado_em->format('d/m/Y H:i') }}
+                                    Assinado por {{ $peca->assinanteNome() }} em {{ $peca->dataDaAssinatura()?->format('d/m/Y H:i') }}
                                 </p>
                                 @if($peca->exigeContraAssinatura())
                                     <p class="text-xs mt-0.5 {{ $peca->contraAssinado() ? 'text-gray-400' : 'text-accent-700' }}">
@@ -358,14 +358,15 @@
                              dentro do documento, e recolhido a tela dizia "aguardando a
                              contra-assinatura da OSC" sem nada visível em que clicar. --}}
                         {{-- E fica aberto o documento em que se acabou de salvar ou assinar. --}}
-                        <details class="mt-2 group" @if($peca->podeContraAssinar(auth()->user()) || (int) session('peca_aberta') === $peca->id) open @endif>
+                        @php $assinaComoParte = $peca->podeAssinarComoParte(auth()->user()); @endphp
+                        <details class="mt-2 group" @if($peca->podeContraAssinar(auth()->user()) || $assinaComoParte || (int) session('peca_aberta') === $peca->id) open @endif>
                             <summary class="{{ $acao }} {{ $peca->assinado()
                                         ? 'text-gray-600 bg-gray-100 hover:bg-gray-200'
                                         : 'text-brand-800 bg-brand-50 hover:bg-brand-100' }}">
                                 <svg class="w-3.5 h-3.5 transition group-open:rotate-90" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.6">
                                     <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/>
                                 </svg>
-                                {{ $peca->assinado() ? 'Ver documento' : ($peca->preenchido() ? 'Editar conteúdo' : 'Preencher conteúdo') }}
+                                {{ $assinaComoParte ? 'Ver e assinar' : ($peca->assinado() || ($peca->temAssinaturasEmSequencia() && ! $podePreencher && $peca->preenchido()) ? 'Ver documento' : ($peca->preenchido() ? 'Editar conteúdo' : 'Preencher conteúdo')) }}
                             </summary>
 
                             <div class="mt-3">
@@ -443,6 +444,38 @@
                                     @endif
                                     <div class="documento-html border border-gray-200 rounded-lg p-4 bg-gray-50 text-gray-700 text-sm">
                                         {!! $peca->conteudo ?: '<p class="text-gray-400">Documento ainda não preenchido.</p>' !!}
+                                    </div>
+                                @endif
+
+                                {{-- Assinado em sequência (o Termo, 01/10/2026): as partes, na
+                                     ordem, e o botão para quem tem a vez. --}}
+                                @if($peca->temAssinaturasEmSequencia() && ! empty($peca->conteudo))
+                                    <div class="mt-3 border border-gray-200 rounded-lg p-3">
+                                        <p class="text-xs font-semibold text-gray-700">Assinaturas, na ordem</p>
+                                        <ol class="mt-1 space-y-1 text-xs text-gray-600">
+                                            @foreach($peca->sequenciaDeAssinaturas() as $papel => $regra)
+                                                @php $parte = $peca->assinaturaDe($papel); @endphp
+                                                <li>
+                                                    {{ $loop->iteration }}. <strong>{{ $regra['rotulo'] }}</strong> —
+                                                    @if($parte)
+                                                        assinado por {{ $parte->assinante_nome }} em {{ $parte->assinado_em->format('d/m/Y H:i') }}
+                                                        · código <span class="font-mono">{{ $parte->codigo_validacao }}</span>
+                                                        · <a href="{{ route('validacao.mostrar', $parte->codigo_validacao) }}" target="_blank" class="text-brand-700 hover:underline">Validar</a>
+                                                    @else
+                                                        <span class="text-gray-400">pendente (etapa {{ $regra['etapa'] + 1 }})</span>
+                                                    @endif
+                                                </li>
+                                            @endforeach
+                                        </ol>
+                                        @if($assinaComoParte)
+                                            <form action="{{ route('pecas.assinar-parte', $peca) }}" method="POST" class="mt-3"
+                                                  data-confirm="Confirma a assinatura deste documento?">
+                                                @csrf @method('PATCH')
+                                                <button type="submit" class="btn btn-primary btn-sm">
+                                                    Assinar como {{ $peca->sequenciaDeAssinaturas()[$peca->papelDaVez()]['rotulo'] }}
+                                                </button>
+                                            </form>
+                                        @endif
                                     </div>
                                 @endif
 

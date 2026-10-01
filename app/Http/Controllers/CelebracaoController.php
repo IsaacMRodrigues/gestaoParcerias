@@ -4,10 +4,12 @@ namespace App\Http\Controllers;
 
 use App\Models\Peca;
 use App\Models\Proposta;
+use App\Models\User;
 use App\Support\Devolucao;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
+use Illuminate\Validation\Rule;
 use Illuminate\View\View;
 
 /**
@@ -31,7 +33,7 @@ class CelebracaoController extends Controller
         $user = auth()->user();
         // setorNoTramite(): a OSC atua como setor 'osc' e não tem lotação. Na
         // etapa conjunta, qualquer dos setores que ainda não concluiu a parte.
-        abort_unless($proposta->setorTemAVezNaCelebracao($user->setorNoTramite()), 403,
+        abort_unless($proposta->usuarioTemAVezNaCelebracao($user), 403,
             $proposta->etapaConjuntaCelebracao() && in_array($user->setorNoTramite(), Proposta::setoresDaEtapaCelebracao((int) $proposta->celebracao_etapa), true)
                 ? 'Seu setor já concluiu a parte dele nesta etapa; falta o outro.'
                 : 'Apenas o setor que está com a Celebração pode movimentá-la.');
@@ -112,6 +114,8 @@ class CelebracaoController extends Controller
             'pecas.assinante.roles', 'pecas.assinante.orgao',
             // O carimbo do Termo nomeia também quem contra-assinou pela OSC.
             'pecas.contraAssinante.roles', 'pecas.contraAssinante.osc',
+            // E as assinaturas em sequência do Termo (01/10/2026).
+            'pecas.assinaturasPartes', 'gestorDaCelebracao',
             'celebracaoTramitacoes.remetente',
         ]);
 
@@ -239,6 +243,16 @@ class CelebracaoController extends Controller
         $proxEtapa = (int) $proposta->celebracao_etapa + 1;
         $proxSetor = Proposta::ETAPAS_CELEBRACAO[$proxEtapa]['setor'];
 
+        // Para o Gestor da Parceria, a SCP escolhe a pessoa (01/10/2026).
+        $gestor = null;
+        if ($proxSetor === 'gestor') {
+            $gestorId = $request->validate(
+                ['gestor_id' => ['required', Rule::in($proposta->gestoresElegiveis()->pluck('id')->all())]],
+                ['gestor_id.required' => 'Escolha o Gestor da Parceria.', 'gestor_id.in' => 'Escolha um Gestor da Parceria da Secretaria.'],
+            )['gestor_id'];
+            $gestor = User::find($gestorId);
+        }
+
         $proposta->celebracaoTramitacoes()->create([
             'de_setor'    => $meuSetor,
             'para_setor'  => $proxSetor,
@@ -248,13 +262,14 @@ class CelebracaoController extends Controller
             'status'      => 'enviado',
         ]);
 
-        $proposta->update([
+        $proposta->update(array_merge([
             'celebracao_etapa'             => $proxEtapa,
             'celebracao_setor'             => $proxSetor,
             'celebracao_partes_concluidas' => null,
-        ]);
+        ], $gestor ? ['celebracao_gestor_id' => $gestor->id] : []));
 
-        $para = implode(' e ', array_map(fn ($s) => Proposta::SETORES_CELEBRACAO[$s] ?? $s, Proposta::setoresDaEtapaCelebracao($proxEtapa)));
+        $para = implode(' e ', array_map(fn ($s) => Proposta::SETORES_CELEBRACAO[$s] ?? $s, Proposta::setoresDaEtapaCelebracao($proxEtapa)))
+            . ($gestor ? ' — ' . $gestor->name : '');
 
         return redirect()->route('celebracao.show', $proposta)
             ->with('success', 'Celebração encaminhada para ' . $para . '.');

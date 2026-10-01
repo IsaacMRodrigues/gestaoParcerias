@@ -33,7 +33,7 @@
                         // que diferencia acompanhar de ter trabalho parado.
                         $minhaVez = !$concluida
                             && $proposta->celebracaoIniciada()
-                            && $proposta->setorTemAVezNaCelebracao(auth()->user()->setorNoTramite());
+                            && $proposta->usuarioTemAVezNaCelebracao(auth()->user());
                         $etapa = $proposta->etapaCelebracaoInfo();
                     @endphp
                     <a href="{{ route('celebracao.show', $proposta) }}"

@@ -344,10 +344,20 @@ class Avisos
             return;
         }
 
-        // Na etapa conjunta, os dois setores recebem ao mesmo tempo.
+        // O Gestor da Parceria é uma pessoa: só ele recebe (01/10/2026).
+        if ($p->celebracao_setor === 'gestor') {
+            self::enviar(array_filter([$p->gestorDaCelebracao]),
+                self::avisoDeVez('Celebração', $p->titulo, $etapa, $p->osc?->name, $url, false));
+
+            return;
+        }
+
+        // Na etapa conjunta, os dois setores recebem ao mesmo tempo; na etapa
+        // com perfil (o Responsável da UG assina o Termo), só quem o tem.
         foreach ($p->setoresComAVezNaCelebracao() as $setor) {
             self::enviar(
-                self::doSetor($setor, fn (User $u) => $u->participaDaCelebracao() && $p->visivelPara($u)),
+                self::doSetor($setor, fn (User $u) => $u->participaDaCelebracao() && $p->visivelPara($u)
+                    && $p->usuarioTemAVezNaCelebracao($u)),
                 self::avisoDeVez('Celebração', $p->titulo, $etapa, $p->osc?->name, $url, false),
             );
         }
