@@ -25,14 +25,15 @@ assinados eletronicamente e validáveis por QR Code.
 
 ## Estado atual
 
-*Atualizado em 22/09/2026.*
+*Atualizado em 01/10/2026.*
 
 | Etapa do ciclo | Situação | Onde fica |
 |---|---|---|
 | **1. Planejamento** (módulo 2.1) | ✅ Completo | `ProcessoController`, `Processo`, `ProcessoPeca` |
-| **2. Seleção** (2.2) — chamamento, manifestação de interesse, proposta | ✅ Completo | `SelecaoController`, `ManifestacaoAnaliseController`, `PropostaController` |
-| **Plano de Trabalho** (3.1) — metas, aplicação, desembolso, endereços | ✅ Completo | `PlanoTrabalhoController`, `Concerns\TemPlanoDeTrabalho` |
-| **3. Celebração** (2.2 / 3.2) — habilitação item a item, termo, empenho | ✅ Completo | `CelebracaoController`, motor `Peca` |
+| **2. Seleção** (2.2) — chamamento, prazo e resposta de recurso, manifestação de interesse, Nova Proposta | ✅ Completo | `SelecaoController`, `ManifestacaoAnaliseController`, `PropostaController` |
+| **Plano de Trabalho** (3.1) — os 13 itens do modelo da cliente | ✅ Completo | `PlanoTrabalhoController`, `Concerns\TemPlanoDeTrabalho`, `Support\PlanoDocumento` |
+| **3. Celebração** (2.2 / 3.2) — 22 etapas: habilitação, etapa conjunta UG + SCP, Termo e OP Global assinados em sequência, empenho | ✅ Completo | `CelebracaoController`, motor `Peca`, `PecaAssinatura` |
+| **Devolução por documento** — em todos os trâmites | ✅ Completo | `Support\Devolucao` |
 | **Formalização** (2.3) — instrumento, aditivo, apostilamento, OP | ✅ Completo | `InstrumentoController`, `AditivoController`, `OrdemPagamentoController` |
 | **4. Execução** (4.4) — repasses, despesas, notas, saldo | ✅ Completo | `ExecucaoController` |
 | **Alterações da Parceria** (3.3) | ✅ Completo | `AlteracaoController`, `Alteracao` |
@@ -44,9 +45,21 @@ assinados eletronicamente e validáveis por QR Code.
 | **Avisos por e-mail** (4.7) — contas, suporte, vez no trâmite, resultados | ✅ Completo | `Support\Avisos`, `Mail\Aviso` |
 | **Integrações** (banco, Diário Oficial, GOV.BR) | ⏳ Última fase | — |
 
-**Em produção** está tudo o que há no GitHub até 25/09/2026: avisos por e-mail e os itens 1, 2, 3,
-8 e 9 da homologação. **Falta o agendamento no painel da Hostinger** (ver [Deploy](#deploy), passo
-7): sem ele, os avisos entram na fila e esperam — não se perdem, saem quando ele existir.
+**Em produção** está o que havia no GitHub até 25/09/2026 (commit `65f5591`): avisos por e-mail e os
+itens 1, 2, 3, 8 e 9 da homologação. **Falta o agendamento no painel da Hostinger** (ver
+[Deploy](#deploy), passo 7): sem ele, os avisos entram na fila e esperam — não se perdem, saem quando
+ele existir.
+
+**No GitHub, ainda não em produção:** tudo o que está no [Histórico](#histórico-de-entregas) de 26/09 a
+01/10/2026. O próximo deploy precisa, além do de sempre:
+
+- rodar as **14 migrações** novas (de `2026_09_28_100000` a `2026_10_01_110000`) e o `RolesSeeder`
+  (perfis novos: Comissão de Monitoramento e de Avaliação separadas, Responsável pela SEPLAN, Contador
+  e Responsável por Execução da OSC);
+- mover a conta `planejamento@saogoncalo.mg.gov.br` para o setor SEPLAN, com o perfil Responsável pela
+  SEPLAN (depois do seeder);
+- antes de a primeira parceria chegar à assinatura do Termo, haver usuário com o perfil **Gestor da
+  Parceria** em cada Secretaria — sem ele, a SCP não tem quem escolher na etapa 13 da Celebração.
 
 ---
 
@@ -461,12 +474,13 @@ Procedimento:
 
 ## Verificação
 
-`tests/Feature` tem **27 testes do sistema**, que rodam com `php artisan test` (sqlite em memória):
-`ParceriaVisivelTest` (quem abre qual parceria, instrumento sem trava), `ContasDeUsuarioTest` (conta
-de OSC na tela da Prefeitura, exclusão de quem deixou autoria) e `SenhaPeloSuporteTest` (pedido sem
-login, senha provisória, troca obrigatória). Cada um foi conferido falhando sem a correção. Dos
-testes que vieram com o Breeze, 5 falham porque esperam regras que o sistema não tem mais (login
-sem aprovação, perfil aberto a todos) — ver [Pendências](#pendências).
+`php artisan test` (sqlite em memória) roda **164 testes** em `tests/Feature`, um arquivo por regra de
+negócio (quem abre qual parceria, contas e senhas, avisos por e-mail, segregação de encargos,
+cancelamento e prorrogação de chamamento, Nova Proposta, prazo e resposta de recurso, plano de
+trabalho do modelo, etapa conjunta, devolução por documento, Termo e OP em sequência…). **159 passam.**
+Os 5 que falham vieram com o Breeze e esperam regras que o sistema não tem mais (login sem aprovação,
+perfil aberto a todos) — ver [Pendências](#pendências). Os testes de regra nova são conferidos falhando
+com a regra desligada antes de entrar.
 
 Antes disso, as entregas desde o módulo 3 foram
 conferidas por **scripts que exercitam o HTTP de verdade** — com os usuários reais do banco local,
@@ -489,7 +503,7 @@ Trazer os demais cenários para `tests/Feature` é uma das [Pendências](#pendê
 
 ## Pendências
 
-*Atualizado em 23/09/2026.*
+*Atualizado em 01/10/2026.*
 
 ### Segurança
 
@@ -526,13 +540,21 @@ Trazer os demais cenários para `tests/Feature` é uma das [Pendências](#pendê
 - O que **Parlamentar** e **Conselho** veem de diferente na tela principal (hoje ambos vão à
   Transparência).
 - **Modelos de aditivo e apostilamento** ainda sem arquivo da cliente.
+- **3 assinaturas da Comissão de Seleção** no Relatório, na Ata e no Resultado Provisório (e, talvez, na
+  Resposta ao recurso): falta definir quem assina — três membros quaisquer da Comissão da Secretaria? — e
+  se os já assinados continuam valendo. O mecanismo de várias assinaturas já existe (o do Termo).
+- **Ata do resultado definitivo** (etapa 4 da Seleção) está opcional: deve ser obrigatória?
+- Validar com a cliente a divisão das **12 naturezas de despesa** nos 4 blocos do Anexo VI da prestação de
+  contas (auxílios em Pessoal, tributos em Encargos, obras em Equipamentos, diárias e passagens em
+  Manutenção).
 
 ### Código
 
 - **5 · Monitoramento e Fiscalização** — aparece no menu como "em breve".
-- **Caixa de Entrada** não inclui alterações da parceria nem chamados de suporte. E
-  `app/Support/CaixaDeEntrada.php` está com os comentários apagados por outra pessoa, fora de
-  commit, esperando decisão.
+- **Caixa de Entrada** não inclui alterações da parceria, chamados de suporte nem os recursos da Seleção
+  para a Comissão (que é avisada por e-mail e os vê na tela da proposta). E `app/Support/CaixaDeEntrada.php`
+  e `app/Http/Middleware/EnsureIsStaff.php` estão com comentários apagados por outra pessoa, fora de
+  commit, esperando decisão — as mudanças deste projeto nesses arquivos entram em commit só nas linhas delas.
 - **Parecer Técnico / Jurídico / Decisão Final** (`ParecerController`, `pareceres/create`) é tela da
   primeira fase e está fora do fluxo: texto livre, sem documento, sem assinatura e sem validação,
   enquanto os pareceres de verdade são peças do trâmite; e quem aprova ou reprova a proposta é o
@@ -558,6 +580,8 @@ Trazer os demais cenários para `tests/Feature` é uma das [Pendências](#pendê
   quando os testes em produção acabarem.
 - Parcerias paradas na **etapa 2 da Celebração** passaram a exigir seis documentos de habilitação
   que antes cabiam numa caixa só — avisar a cliente antes de cobrar.
+- Cadastrar o **Gestor da Parceria** (perfil) em cada Secretaria antes do próximo Termo, e criar o
+  **agendamento** no hPanel (ver acima).
 
 ---
 
