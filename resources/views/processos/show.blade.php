@@ -42,6 +42,7 @@
             {{-- Stepper do fluxo --}}
             <div class="bg-white rounded-xl border border-gray-200 shadow-sm p-6">
                 <h3 class="text-base font-semibold text-gray-800 mb-4">Fluxo do Planejamento</h3>
+                @include('tramite._ultima-devolucao', ['tramitacoes' => $processo->tramitacoes, 'pecas' => $processo->pecas])
                 <ol class="flex flex-wrap gap-y-3">
                     @foreach($processo->etapas() as $i => $et)
                         @php
@@ -365,6 +366,7 @@
                                 <form action="{{ route('processos.devolver', $processo) }}" method="POST"
                                       class="pt-3 border-t border-gray-200 space-y-2">
                                     @csrf
+                                    @include('tramite._devolver-documentos', ['documentos' => $processo->documentosDevolviveis()])
                                     <x-input-label for="motivo" value="Rejeitar e devolver para correção (informe o motivo)" />
                                     <div class="flex gap-2">
                                         <input id="motivo" name="parecer" type="text"
@@ -405,6 +407,7 @@
                                     <form action="{{ route('processos.devolver', $processo) }}" method="POST"
                                           class="pt-3 border-t border-gray-200 space-y-2">
                                         @csrf
+                                        @include('tramite._devolver-documentos', ['documentos' => $processo->documentosDevolviveis()])
                                         <x-input-label for="motivo" :value="$processo->voltaNoMesmoSetor()
                                             ? 'Voltar à etapa anterior, no próprio setor (informe o motivo)'
                                             : 'Devolver para ' . (\App\Models\Processo::SETORES[$processo->setorAnterior()] ?? $processo->setorAnterior()) . ' (informe o motivo)'" />
@@ -468,7 +471,7 @@
                         @foreach($ordem as $i => $tipo)
                             @php $p = $processo->peca($tipo); @endphp
                             @if($p)
-                                <div class="flex items-center justify-between px-6 py-4">
+                                <div id="peca-{{ $p->id }}" class="flex items-center justify-between px-6 py-4">
                                     <div class="flex items-center gap-3">
                                         @if(!empty($p->conteudo))
                                             <input type="checkbox" name="pecas[]" value="{{ $p->id }}"
@@ -485,6 +488,7 @@
                                                 @endif
                                             </p>
                                             <p class="text-xs text-gray-400">{{ $statusPeca($p) }}</p>
+                                            @include('tramite._documento-devolvido', ['peca' => $p])
                                         </div>
                                     </div>
                                     <a href="{{ route('processos.pecas.edit', [$processo, $p]) }}"

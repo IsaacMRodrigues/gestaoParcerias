@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Chamamento;
 use App\Models\Processo;
+use App\Support\Devolucao;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
@@ -145,7 +146,10 @@ class TramitacaoController extends Controller
             'parecer.required' => 'Informe o motivo da devolução.',
         ]);
 
-        $etapaAnterior = $processo->etapa - 1;
+        // Devolução por documento (30/09/2026): só os marcados reabrem, e o
+        // processo volta para a etapa do mais antigo deles.
+        $escolhidas    = Devolucao::escolhidas($request, $processo->documentosDevolviveis());
+        $etapaAnterior = Devolucao::etapaDestino($escolhidas, $processo->etapa - 1);
         $setorAnterior = $processo->etapas()[$etapaAnterior]['setor'];
         $setorSaida    = $processo->setor_atual;
 
@@ -154,7 +158,7 @@ class TramitacaoController extends Controller
             'para_setor'  => $setorAnterior,
             'enviado_por' => auth()->id(),
             'enviado_em'  => now(),
-            'parecer'     => $data['parecer'],
+            'parecer'     => Devolucao::reabrir($escolhidas, $data['parecer'], auth()->user()),
             ...$this->chegadaNoProprioSetor($setorAnterior, $setorSaida, 'devolvido'),
         ]);
 

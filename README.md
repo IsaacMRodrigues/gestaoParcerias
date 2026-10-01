@@ -566,6 +566,22 @@ Trazer os demais cenários para `tests/Feature` é uma das [Pendências](#pendê
 Da mais recente para a mais antiga. Cada entrada diz o que mudou, **por quê** e como foi
 conferido — o porquê é o que falta a quem pega o código depois.
 
+- [2026-10-01] **Devolução por documento, em todos os trâmites** (`App\Support\Devolucao`,
+  `Concerns\PodeSerDevolvida`, `tramite/_devolver-documentos`, `tramite/_ultima-devolucao`)
+  - Decisão da gestão. No Planejamento, na Seleção, na Celebração, na Alteração e na Prestação de contas, o
+    formulário de devolução lista os documentos já feitos em etapas anteriores, e quem devolve **marca os que
+    estão errados**. Só eles reabrem: o texto perde a assinatura (e a contra-assinatura; ganha outro código ao
+    ser assinado de novo); o arquivo fica guardado, mas passa a pedir o envio do corrigido. O trâmite volta para
+    a etapa do documento mais antigo marcado. Os demais continuam assinados. Sem marcar nada, a devolução é a
+    de sempre
+  - **O motivo fica à vista:** aviso vermelho no alto do trâmite ("Devolvido por… em…", o texto e a lista de
+    documentos a corrigir, com link) e caixa vermelha no próprio documento devolvido. A marca sai quando
+    alguém salva o texto, envia o arquivo novo ou assina de novo
+  - Antes, nenhuma devolução reabria documento: o que estava assinado continuava assinado, e quem recebia não
+    tinha como corrigir; o motivo só aparecia no histórico recolhido
+  - Conferido: 5 testes em `DevolucaoPorDocumentoTest` (Celebração, Seleção com arquivo, devolução sem
+    documento, documento de etapa futura recusado, Planejamento); telas dos cinco trâmites abertas sem erro
+
 - [2026-09-30] **Celebração: etapa 3 conjunta, UG e SCP ao mesmo tempo** (`Proposta::setoresComAVezNaCelebracao`,
   `propostas.celebracao_partes_concluidas`)
   - Decisão da gestão. Quando a OSC encaminha a etapa 2, a etapa 3 vai **à UG e à SCP ao mesmo tempo**: a UG

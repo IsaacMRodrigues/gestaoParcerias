@@ -340,6 +340,12 @@ class Chamamento extends Model
         return !is_null($this->selecao_concluida_em);
     }
 
+    /** Documentos que quem devolve pode marcar como errados (ver App\Support\Devolucao). */
+    public function documentosDevolviveis(): \Illuminate\Support\Collection
+    {
+        return \App\Support\Devolucao::candidatas($this->pecas()->get(), (int) $this->selecao_etapa);
+    }
+
     // Interface uniforme de trâmite, usada pelo motor de peças (ver Peca).
     public function tramiteEtapaAtual(): int
     {
@@ -437,12 +443,12 @@ class Chamamento extends Model
             // foi semeado, não vai ao Gabinete (decisão da gestão, 29/09/2026).
             if ($peca->tipo === 'modelo') {
                 $soPreencher = $chave === 'termo_homologacao' && $etapa === 4;
-                $ok = $soPreencher ? !empty($peca->conteudo) && !$peca->aindaEOModelo() : $peca->assinado();
+                $ok = $soPreencher ? !empty($peca->conteudo) && !$peca->aindaEOModelo() && !$peca->devolvida() : $peca->assinado();
                 if (!$ok) {
                     $pend[] = $peca->rotulo . ($soPreencher ? ' (preencher antes de enviar ao Gabinete)' : ' (assinar)');
                 }
-            } elseif (!$peca->temArquivo()) {
-                $pend[] = $peca->rotulo . ' (anexar arquivo)';
+            } elseif (!$peca->temArquivo() || $peca->devolvida()) {
+                $pend[] = $peca->rotulo . ($peca->devolvida() ? ' (devolvido — enviar o arquivo corrigido)' : ' (anexar arquivo)');
             }
         }
 

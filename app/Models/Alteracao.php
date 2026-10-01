@@ -145,8 +145,8 @@ class Alteracao extends Model
 
             if ($peca->tipo === 'modelo' && !$peca->assinado()) {
                 $pend[] = $peca->rotulo . ' (assinar)';
-            } elseif ($peca->tipo === 'arquivo' && !$peca->temArquivo()) {
-                $pend[] = $peca->rotulo . ' (anexar arquivo)';
+            } elseif ($peca->tipo === 'arquivo' && (!$peca->temArquivo() || $peca->devolvida())) {
+                $pend[] = $peca->rotulo . ($peca->devolvida() ? ' (devolvido — enviar o arquivo corrigido)' : ' (anexar arquivo)');
             }
         }
 
@@ -205,6 +205,12 @@ class Alteracao extends Model
     }
 
     // Interface uniforme de trâmite, usada pelo motor de peças (ver Peca).
+    /** Documentos que quem devolve pode marcar como errados (ver App\Support\Devolucao). */
+    public function documentosDevolviveis(): \Illuminate\Support\Collection
+    {
+        return \App\Support\Devolucao::candidatas($this->pecas()->get(), (int) $this->etapa);
+    }
+
     public function tramiteEtapaAtual(): int
     {
         return (int) $this->etapa;

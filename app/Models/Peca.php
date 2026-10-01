@@ -8,6 +8,7 @@ use Illuminate\Database\Eloquent\Relations\MorphTo;
 
 class Peca extends Model
 {
+    use \App\Models\Concerns\PodeSerDevolvida;
     use \App\Models\Concerns\GuardaQuemAssinou;
 
     /**
@@ -45,6 +46,7 @@ class Peca extends Model
             'etapa'              => 'integer',
             'assinado_em'        => 'datetime',
             'contra_assinado_em' => 'datetime',
+            'devolvida_em'       => 'datetime',
         ];
     }
 
@@ -1435,6 +1437,11 @@ HTML,
         // para não haver duas assinaturas do mesmo documento.
         if ($this->vemDoPlanejamento()) {
             return true;
+        }
+
+        // Devolvido para correção não está pronto, mesmo com o arquivo antigo guardado.
+        if ($this->devolvida()) {
+            return false;
         }
 
         return $this->tipo === 'modelo' ? $this->assinado() : $this->preenchido();

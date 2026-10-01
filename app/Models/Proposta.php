@@ -448,12 +448,12 @@ class Proposta extends Model
                 // A OP Global é apenas elaborada pela SCP na etapa 12 — a
                 // assinatura é da UG, na etapa 13.
                 $soPreencher = $chave === 'op_global' && $etapa === 12;
-                $ok = $soPreencher ? !empty($peca->conteudo) : $peca->assinado();
+                $ok = $soPreencher ? !empty($peca->conteudo) && !$peca->devolvida() : $peca->assinado();
                 if (!$ok) {
                     $pend[] = $peca->rotulo . ($soPreencher ? ' (emitir)' : ' (assinar)');
                 }
-            } elseif (!$peca->temArquivo()) {
-                $pend[] = $peca->rotulo . ' (anexar arquivo)';
+            } elseif (!$peca->temArquivo() || $peca->devolvida()) {
+                $pend[] = $peca->rotulo . ($peca->devolvida() ? ' (devolvido — enviar o arquivo corrigido)' : ' (anexar arquivo)');
             }
         }
 
@@ -468,6 +468,12 @@ class Proposta extends Model
         }
 
         return $pend;
+    }
+
+    /** Documentos que quem devolve pode marcar como errados (ver App\Support\Devolucao). */
+    public function documentosDevolviveis(): \Illuminate\Support\Collection
+    {
+        return \App\Support\Devolucao::candidatas($this->pecas()->where('categoria', 'celebracao')->get(), (int) $this->celebracao_etapa);
     }
 
     // Interface uniforme de trâmite, usada pelo motor de peças (ver Peca).

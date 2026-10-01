@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Chamamento;
 use App\Models\Peca;
 use App\Support\Avisos;
+use App\Support\Devolucao;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
@@ -95,7 +96,10 @@ class SelecaoController extends Controller
             'parecer.required' => 'Informe o motivo da devolução.',
         ]);
 
-        $etapaAnterior = (int) $chamamento->selecao_etapa - 1;
+        // Devolução por documento (30/09/2026): só os marcados reabrem, e a
+        // Seleção volta para a etapa do mais antigo deles.
+        $escolhidas    = Devolucao::escolhidas($request, $chamamento->documentosDevolviveis());
+        $etapaAnterior = Devolucao::etapaDestino($escolhidas, (int) $chamamento->selecao_etapa - 1);
         $setorAnterior = Chamamento::ETAPAS_SELECAO[$etapaAnterior]['setor'];
 
         $chamamento->selecaoTramitacoes()->create([
@@ -103,7 +107,7 @@ class SelecaoController extends Controller
             'para_setor'  => $setorAnterior,
             'enviado_por' => auth()->id(),
             'enviado_em'  => now(),
-            'parecer'     => $data['parecer'],
+            'parecer'     => Devolucao::reabrir($escolhidas, $data['parecer'], auth()->user()),
             'status'      => 'devolvido',
         ]);
 

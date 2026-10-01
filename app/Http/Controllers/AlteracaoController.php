@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Alteracao;
 use App\Models\Instrumento;
 use App\Models\Peca;
+use App\Support\Devolucao;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
@@ -212,13 +213,15 @@ class AlteracaoController extends Controller
             'parecer.required' => 'Informe o motivo da devolução — é o que a OSC vai ler para corrigir.',
         ]);
 
-        $anterior = $alteracao->etapa - 1;
-        $destino  = Alteracao::ETAPAS[$anterior]['setor'];
+        // Devolução por documento (30/09/2026): só os marcados reabrem.
+        $escolhidas = Devolucao::escolhidas($request, $alteracao->documentosDevolviveis());
+        $anterior   = Devolucao::etapaDestino($escolhidas, $alteracao->etapa - 1);
+        $destino    = Alteracao::ETAPAS[$anterior]['setor'];
 
         $alteracao->tramitacoes()->create([
             'de_setor' => $alteracao->setor_atual, 'para_setor' => $destino,
             'enviado_por' => auth()->id(), 'enviado_em' => now(),
-            'parecer' => $data['parecer'], 'status' => 'devolvido',
+            'parecer' => Devolucao::reabrir($escolhidas, $data['parecer'], auth()->user()), 'status' => 'devolvido',
         ]);
 
         $alteracao->update([

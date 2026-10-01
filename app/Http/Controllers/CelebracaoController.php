@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Peca;
 use App\Models\Proposta;
+use App\Support\Devolucao;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
@@ -281,10 +282,13 @@ class CelebracaoController extends Controller
             'etapa_destino.min'  => 'Etapa de destino inválida.',
         ]);
 
-        // Sem escolha, devolve para a etapa imediatamente anterior — o
-        // comportamento de sempre.
-        $destino     = $data['etapa_destino'] ?? $atual - 1;
+        // Com documentos marcados, só eles reabrem e o trâmite volta para a
+        // etapa do mais antigo (30/09/2026). Sem marcar, a etapa escolhida —
+        // ou, sem escolha, a imediatamente anterior, como sempre.
+        $escolhidas   = Devolucao::escolhidas($request, $proposta->documentosDevolviveis());
+        $destino      = Devolucao::etapaDestino($escolhidas, $data['etapa_destino'] ?? $atual - 1);
         $setorDestino = Proposta::ETAPAS_CELEBRACAO[$destino]['setor'];
+        $data['parecer'] = Devolucao::reabrir($escolhidas, $data['parecer'], auth()->user());
 
         $proposta->celebracaoTramitacoes()->create([
             'de_setor'    => auth()->user()->setorNoTramite(),

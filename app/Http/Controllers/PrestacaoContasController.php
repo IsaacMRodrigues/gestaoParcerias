@@ -9,6 +9,7 @@ use App\Models\PrestacaoContas;
 use App\Models\PrestacaoGlosa;
 use App\Models\User;
 use App\Support\PrestacaoDocumento;
+use App\Support\Devolucao;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
@@ -354,13 +355,15 @@ class PrestacaoContasController extends Controller
             'parecer.required' => 'Informe o motivo da devolução — é o que a OSC vai ler para corrigir.',
         ]);
 
-        $anterior = $pc->etapa - 1;
-        $destino  = PrestacaoContas::ETAPAS[$anterior]['setor'];
+        // Devolução por documento (30/09/2026): só os marcados reabrem.
+        $escolhidas = Devolucao::escolhidas($request, $pc->documentosDevolviveis());
+        $anterior   = Devolucao::etapaDestino($escolhidas, $pc->etapa - 1);
+        $destino    = PrestacaoContas::ETAPAS[$anterior]['setor'];
 
         $pc->tramitacoes()->create([
             'de_setor' => $pc->setor, 'para_setor' => $destino,
             'enviado_por' => auth()->id(), 'enviado_em' => now(),
-            'parecer' => $data['parecer'], 'status' => 'devolvido',
+            'parecer' => Devolucao::reabrir($escolhidas, $data['parecer'], auth()->user()), 'status' => 'devolvido',
         ]);
         $pc->update(['etapa' => $anterior, 'setor' => $destino]);
 

@@ -349,6 +349,12 @@ class Processo extends Model
      * Peças que precisam estar ASSINADAS antes de encaminhar a etapa atual.
      * Retorna os rótulos pendentes (vazio = pode encaminhar).
      */
+    /** Documentos que quem devolve pode marcar como errados (ver App\Support\Devolucao). */
+    public function documentosDevolviveis(): \Illuminate\Support\Collection
+    {
+        return \App\Support\Devolucao::candidatas($this->pecas()->get(), (int) $this->etapa);
+    }
+
     public function pendenciasParaAvancar(): array
     {
         $pend = [];
@@ -369,11 +375,13 @@ class Processo extends Model
                 // (o Parecer Técnico CNAS é opcional — só nas parcerias do SUAS).
                 if (!$this->peca('justificativa_dispensa')?->assinado()) $pend[] = 'Justificativa de Dispensa/Inexigibilidade';
             } else {
-                if (empty($this->peca('edital')?->conteudo))      $pend[] = 'Edital (elaborar)';
+                $edital = $this->peca('edital');
+                if (empty($edital?->conteudo) || $edital->devolvida()) $pend[] = 'Edital (elaborar' . ($edital?->devolvida() ? ' — devolvido para correção' : '') . ')';
             }
         } elseif ($this->etapa === 6 && !$ehDispensa) {
             if (!$this->peca('edital')?->assinado())              $pend[] = 'Edital (assinatura da UG)';
-            if (!$this->peca('portaria_comissao')?->temAnexo())   $pend[] = 'Portaria da Comissão de Seleção (anexar arquivo)';
+            $portaria = $this->peca('portaria_comissao');
+            if (!$portaria?->temAnexo() || $portaria->devolvida()) $pend[] = 'Portaria da Comissão de Seleção (anexar arquivo' . ($portaria?->devolvida() ? ' corrigido' : '') . ')';
         } elseif ($this->etapa === 7 && !$ehDispensa) {
             if (!$this->peca('solicitacao_parecer_juridico')?->assinado()) $pend[] = 'Solicitação de Parecer Jurídico (Protocolo)';
         } elseif ($this->etapa === 8 && !$ehDispensa) {

@@ -300,6 +300,8 @@
                         @endif
                     @endif
 
+                    @include('tramite._ultima-devolucao', ['tramitacoes' => $chamamento->selecaoTramitacoes, 'pecas' => $pecas])
+
                     {{-- Trilha das etapas --}}
                     <ol class="space-y-2">
                         @foreach(\App\Models\Chamamento::ETAPAS_SELECAO as $i => $etapa)
@@ -417,12 +419,13 @@
                                     <form action="{{ route('chamamentos.selecao.devolver', $chamamento) }}" method="POST"
                                           class="space-y-2 pt-2 border-t border-gray-100">
                                         @csrf
-                                        <textarea name="parecer" rows="2" required placeholder="Motivo da devolução (obrigatório)"
-                                                  class="block w-full border-gray-300 rounded-md shadow-sm text-sm focus:ring-red-500 focus:border-red-500"></textarea>
+                                        @include('tramite._devolver-documentos', ['documentos' => $chamamento->documentosDevolviveis()])
+                                        <textarea name="parecer" rows="2" required placeholder="O que está errado e como corrigir (obrigatório — é o que o outro setor vai ler)"
+                                                  class="block w-full border-gray-300 rounded-md shadow-sm text-sm focus:ring-red-500 focus:border-red-500">{{ old('parecer') }}</textarea>
+                                        <x-input-error :messages="$errors->get('parecer')" class="mt-1" />
                                         <button type="submit"
                                                 class="btn btn-danger-outline">
-                                            Devolver para
-                                            {{ \App\Models\Chamamento::SETORES_SELECAO[$chamamento->setorAnteriorSelecao()] }}
+                                            Devolver
                                         </button>
                                     </form>
                                 @endif

@@ -8,6 +8,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class ProcessoPeca extends Model
 {
+    use \App\Models\Concerns\PodeSerDevolvida;
     use \App\Models\Concerns\GuardaQuemAssinou;
 
     /**
@@ -296,7 +297,7 @@ HTML,
 
     protected function casts(): array
     {
-        return ['assinado_em' => 'datetime', 'visivel_osc' => 'boolean'];
+        return ['assinado_em' => 'datetime', 'visivel_osc' => 'boolean', 'devolvida_em' => 'datetime'];
     }
 
     public function processo(): BelongsTo

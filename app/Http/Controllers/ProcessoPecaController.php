@@ -137,6 +137,7 @@ class ProcessoPecaController extends Controller
             . ' e só pode ser editada na etapa correspondente.');
 
         $peca->update($request->validate(['conteudo' => ['nullable', 'string']]));
+        $peca->limparDevolucao();
 
         return redirect()->route('processos.show', $processo)
             ->with('success', ProcessoPeca::TIPOS[$peca->tipo] . ' salvo.');
@@ -160,6 +161,7 @@ class ProcessoPecaController extends Controller
             'assinante_cargo'  => $quem['cargo'],
             'codigo_validacao' => $peca->codigo_validacao ?: ProcessoPeca::gerarCodigoValidacao(),
         ]);
+        $peca->limparDevolucao();
 
         return redirect()->route('processos.show', $processo)
             ->with('success', ProcessoPeca::TIPOS[$peca->tipo] . ' assinado.');
@@ -190,6 +192,7 @@ class ProcessoPecaController extends Controller
             'mime_type'    => $arquivo->getMimeType(),
             'enviado_por'  => auth()->id(),
         ]);
+        $peca->limparDevolucao();
 
         return redirect()->route('processos.pecas.edit', [$processo, $peca])
             ->with('success', 'Arquivo anexado.');

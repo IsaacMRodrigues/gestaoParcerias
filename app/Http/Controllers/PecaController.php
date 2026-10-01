@@ -69,6 +69,8 @@ class PecaController extends Controller
 
         $peca->update($data);
 
+        $peca->limparDevolucao();
+
         return $this->voltarParaPeca($peca, $peca->rotulo . ' salvo.');
     }
 
@@ -89,6 +91,8 @@ class PecaController extends Controller
             'assinante_cargo'  => $quem['cargo'],
             'codigo_validacao' => $peca->codigo_validacao ?: Peca::gerarCodigoValidacao(),
         ]);
+
+        $peca->limparDevolucao();
 
         return $this->voltarParaPeca($peca, $peca->rotulo . ' assinado.');
     }
@@ -116,6 +120,8 @@ class PecaController extends Controller
             'contra_assinante_cargo'  => $quem['cargo'],
             'codigo_validacao_contra' => $peca->codigo_validacao_contra ?: Peca::gerarCodigoValidacao(),
         ]);
+
+        $peca->limparDevolucao();
 
         return $this->voltarParaPeca($peca, $peca->rotulo . ' contra-assinado pela OSC.');
     }
@@ -147,6 +153,8 @@ class PecaController extends Controller
             'tamanho'      => $arquivo->getSize(),
             'mime_type'    => $arquivo->getMimeType(),
         ]);
+
+        $peca->limparDevolucao();
 
         return $this->voltarParaPeca($peca, $peca->rotulo . ' enviado.');
     }

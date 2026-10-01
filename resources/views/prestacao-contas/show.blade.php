@@ -252,6 +252,8 @@
         @endif
 
         {{-- Checklist --}}
+        @include('tramite._ultima-devolucao', ['tramitacoes' => $pc->tramitacoes, 'pecas' => $pecas])
+
         <div class="bg-white rounded-xl border border-gray-200 shadow-sm">
             @include('pecas._cabecalho', [
                 'titulo'    => 'Documentos da Prestação de Contas',
@@ -303,11 +305,15 @@
                     @endif
 
                     @if($pc->etapa > 0 && $pc->setor !== 'osc')
-                        <form action="{{ route('prestacao-contas.devolver', $pc) }}" method="POST" class="flex gap-2 pt-3 border-t border-gray-200">
+                        <form action="{{ route('prestacao-contas.devolver', $pc) }}" method="POST" class="space-y-2 pt-3 border-t border-gray-200">
                             @csrf
-                            <input name="parecer" required placeholder="Motivo da devolução…"
-                                   class="flex-1 border-gray-300 rounded-lg shadow-sm text-sm focus:ring-red-500 focus:border-red-500">
-                            <button class="btn btn-secondary btn-sm !text-accent-800 !border-accent-300">Devolver</button>
+                            @include('tramite._devolver-documentos', ['documentos' => $pc->documentosDevolviveis()])
+                            <div class="flex gap-2">
+                                <input name="parecer" required placeholder="O que está errado e como corrigir (é o que o outro setor vai ler)…"
+                                       value="{{ old('parecer') }}"
+                                       class="flex-1 border-gray-300 rounded-lg shadow-sm text-sm focus:ring-red-500 focus:border-red-500">
+                                <button class="btn btn-secondary btn-sm !text-accent-800 !border-accent-300">Devolver</button>
+                            </div>
                         </form>
                     @endif
                 </div>

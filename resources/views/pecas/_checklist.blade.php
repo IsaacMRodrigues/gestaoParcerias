@@ -201,6 +201,8 @@
                                 @endif
                             </p>
 
+                            @include('tramite._documento-devolvido', ['peca' => $peca])
+
                             {{-- Linha secundária: só aparece quando há o que informar --}}
                             @if($peca->vemDoPlanejamento())
                                 {{-- A assinatura que vale é a do processo: o documento é

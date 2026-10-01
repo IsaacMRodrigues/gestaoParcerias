@@ -151,6 +151,8 @@
                     @endif
                 </div>
 
+                @include('tramite._ultima-devolucao', ['tramitacoes' => $proposta->celebracaoTramitacoes, 'pecas' => $pecas])
+
                 <x-tramite-trilha
                     :etapas="\App\Models\Proposta::ETAPAS_CELEBRACAO"
                     :atual="$etapaAtual"
@@ -210,9 +212,10 @@
                                 <form action="{{ route('celebracao.devolver', $proposta) }}" method="POST"
                                       class="space-y-2 pt-2 border-t border-gray-100">
                                     @csrf
+                                    @include('tramite._devolver-documentos', ['documentos' => $proposta->documentosDevolviveis()])
                                     <div>
                                         <label for="etapa_destino" class="block text-xs font-medium text-gray-600 mb-1">
-                                            Devolver para a etapa
+                                            Devolver para a etapa <span class="font-normal text-gray-400">(se nenhum documento for marcado acima)</span>
                                         </label>
                                         <select name="etapa_destino" id="etapa_destino"
                                                 class="block w-full border-gray-300 rounded-md shadow-sm text-sm focus:ring-red-500 focus:border-red-500">
@@ -225,7 +228,7 @@
                                         </select>
                                         <x-input-error :messages="$errors->get('etapa_destino')" class="mt-1" />
                                     </div>
-                                    <textarea name="parecer" rows="2" required placeholder="Motivo da devolução (obrigatório)"
+                                    <textarea name="parecer" rows="2" required placeholder="O que está errado e como corrigir (obrigatório — é o que o outro setor vai ler)"
                                               class="block w-full border-gray-300 rounded-md shadow-sm text-sm focus:ring-red-500 focus:border-red-500"></textarea>
                                     <x-input-error :messages="$errors->get('parecer')" class="mt-1" />
                                     <button type="submit" class="btn btn-danger-outline">
