@@ -99,14 +99,29 @@
 
             {{-- Identificação --}}
             <div class="bg-white rounded-xl border border-gray-200 shadow-sm p-6">
-                <dl class="grid grid-cols-2 sm:grid-cols-4 gap-4 text-sm">
+                <dl class="grid grid-cols-2 sm:grid-cols-5 gap-4 text-sm">
                     <div>
                         <dt class="text-xs font-medium text-gray-500 uppercase tracking-wide">OSC</dt>
                         <dd class="text-gray-800 mt-0.5">{{ $proposta->osc->name }}</dd>
                     </div>
+                    {{-- O processo do Planejamento e o número do edital (01/10/2026), no
+                         lugar do "Chamamento". Dispensa e inexigibilidade não têm edital:
+                         o número é o delas. --}}
+                    @php
+                        $ch = $proposta->chamamento;
+                        $rotuloNumero = match ($ch?->tipo) {
+                            'dispensa'        => 'Dispensa nº',
+                            'inexigibilidade' => 'Inexigibilidade nº',
+                            default           => 'Edital nº',
+                        };
+                    @endphp
                     <div>
-                        <dt class="text-xs font-medium text-gray-500 uppercase tracking-wide">Chamamento</dt>
-                        <dd class="text-gray-800 mt-0.5">{{ $proposta->chamamento->numero ?? '—' }}</dd>
+                        <dt class="text-xs font-medium text-gray-500 uppercase tracking-wide">Processo</dt>
+                        <dd class="text-gray-800 mt-0.5">{{ $ch?->processo?->numero ?? '—' }}</dd>
+                    </div>
+                    <div>
+                        <dt class="text-xs font-medium text-gray-500 uppercase tracking-wide">{{ $rotuloNumero }}</dt>
+                        <dd class="text-gray-800 mt-0.5">{{ $ch?->numero ?? '—' }}</dd>
                     </div>
                     <div>
                         <dt class="text-xs font-medium text-gray-500 uppercase tracking-wide">Valor solicitado</dt>

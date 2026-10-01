@@ -566,6 +566,11 @@ Trazer os demais cenários para `tests/Feature` é uma das [Pendências](#pendê
 Da mais recente para a mais antiga. Cada entrada diz o que mudou, **por quê** e como foi
 conferido — o porquê é o que falta a quem pega o código depois.
 
+- [2026-10-01] **Celebração: "Processo" e "Edital nº" no lugar de "Chamamento"** (`celebracao/show`)
+  - Pedido da gestão. A identificação da Celebração mostra o número do **processo** do Planejamento e o **número do
+    edital**; na dispensa e na inexigibilidade, que não têm edital, "Dispensa nº" / "Inexigibilidade nº"
+  - Conferido: `CelebracaoIdentificacaoTest`
+
 - [2026-10-01] **Ordem de Pagamento Global com duas assinaturas: Gestor da Parceria e Responsável da UG**
   (`Peca::ASSINATURAS_EM_SEQUENCIA['celebracao']['op_global']`)
   - Decisão da gestão. A OP Global, elaborada pela SCP, passa a ser assinada pelo **Gestor da Parceria** e depois

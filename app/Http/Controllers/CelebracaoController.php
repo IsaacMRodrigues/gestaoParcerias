@@ -110,7 +110,7 @@ class CelebracaoController extends Controller
         }
 
         $proposta->load([
-            'chamamento.programa.orgao', 'osc',
+            'chamamento.programa.orgao', 'chamamento.processo', 'osc',
             'pecas.assinante.roles', 'pecas.assinante.orgao',
             // O carimbo do Termo nomeia também quem contra-assinou pela OSC.
             'pecas.contraAssinante.roles', 'pecas.contraAssinante.osc',
