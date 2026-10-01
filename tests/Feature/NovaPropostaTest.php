@@ -204,6 +204,30 @@ class NovaPropostaTest extends TestCase
         $proposta = Proposta::findOrFail($p->proposta_id);
         $this->assertSame(1, $proposta->metas()->count(), 'o plano de trabalho vai junto');
         $this->actingAs($this->ugEducacao)->get('/propostas')->assertSee('Oficinas de música');
+
+        // Direto para a Celebração, sem a análise de proposta (01/10/2026).
+        $this->assertSame('aprovada', $proposta->status);
+        $this->assertTrue($proposta->celebracaoIniciada());
+        $this->assertSame([0, 'ug'], [(int) $proposta->celebracao_etapa, $proposta->celebracao_setor]);
+        $this->actingAs($this->ugEducacao)->get('/celebracao')->assertOk()->assertSee('Oficinas de música');
+        // Quem deferiu não recebe o próprio aviso, mas tem o item na caixa; a OSC é avisada.
+        $this->assertTrue(CaixaDeEntrada::para($this->ugEducacao)->itens->contains(fn ($i) => $i['tramite'] === 'Celebração'));
+        Mail::assertQueued(\App\Mail\Aviso::class, fn ($m) => $m->hasTo($this->rl->email));
+    }
+
+    public function test_a_manifestacao_deferida_continua_passando_pela_analise(): void
+    {
+        $m = ManifestacaoInteresse::forceCreate(['tipo' => 'manifestacao', 'osc_id' => $this->rl->osc_id, 'orgao_id' => $this->educacao->id,
+            'titulo' => 'Manifestação', 'objeto' => 'x', 'justificativa' => 'x', 'valor_solicitado' => 100,
+            'status' => 'analisada', 'setor_atual' => 'scp', 'parecer_favoravel' => true, 'parecer_ug' => 'x']);
+
+        $this->actingAs($this->scp)->post("/manifestacoes/{$m->id}/deferir", [
+            'decisao' => 'dispensa', 'numero' => '006/2026', 'fundamento' => 'Art. 30.',
+        ])->assertSessionHasNoErrors();
+
+        $proposta = Proposta::findOrFail($m->fresh()->proposta_id);
+        $this->assertSame('submetida', $proposta->status);
+        $this->assertFalse($proposta->celebracaoIniciada());
     }
 
     public function test_a_ug_indefere_com_motivo(): void

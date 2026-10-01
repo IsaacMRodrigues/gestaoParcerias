@@ -6,6 +6,7 @@ use App\Models\Chamamento;
 use App\Models\ManifestacaoInteresse;
 use App\Models\Programa;
 use App\Models\Proposta;
+use App\Support\Avisos;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -167,6 +168,10 @@ class ManifestacaoAnaliseController extends Controller
 
             // A proposta nasce já submetida: o dossiê foi apresentado e
             // analisado aqui — pedir à OSC que reenvie seria pedir duas vezes.
+            // A Nova Proposta vai além: deferida pela UG, nasce aprovada e já em
+            // Celebração, sem a análise de proposta — a UG decidiu ao deferir
+            // (decisão da gestão, 01/10/2026).
+            $direto = $manifestacao->ehNovaProposta();
             $proposta = Proposta::create([
                 'chamamento_id'        => $chamamento->id,
                 'osc_id'               => $manifestacao->osc_id,
@@ -191,15 +196,26 @@ class ManifestacaoAnaliseController extends Controller
                 'rede_razao_social'    => $manifestacao->rede_razao_social,
                 'rede_municipio'       => $manifestacao->rede_municipio,
                 'rede_data_termo'      => $manifestacao->rede_data_termo,
-                'status'               => 'submetida',
+                'status'               => $direto ? 'aprovada' : 'submetida',
                 'submitted_at'         => $manifestacao->submetida_em ?? now(),
-            ]);
+            ] + ($direto ? [
+                'celebracao_iniciada_em' => now(),
+                'celebracao_etapa'       => 0,
+                'celebracao_setor'       => Proposta::ETAPAS_CELEBRACAO[0]['setor'],
+            ] : []));
 
             // Plano de trabalho e habilitação passam a ser da proposta — os
             // mesmos registros, sem recadastro e sem cópia a divergir. O plano
             // inteiro vai junto: metas, aplicação, desembolso, contrapartida e equipe.
             $manifestacao->transferirPlanoPara('proposta_id', $proposta->id);
             $manifestacao->documentos()->update(['proposta_id' => $proposta->id]);
+
+            // Os avisos que a mudança de status e a vez na Celebração dariam:
+            // aqui a proposta já nasce nesse estado.
+            if ($direto) {
+                Avisos::propostaMudouDeStatus($proposta);
+                Avisos::vezDaCelebracao($proposta);
+            }
 
             $manifestacao->update([
                 'status'         => 'deferida',
@@ -217,7 +233,8 @@ class ManifestacaoAnaliseController extends Controller
 
         return redirect()->route('manifestacoes.show', $manifestacao)->with('success',
             'Deferida como ' . ManifestacaoInteresse::ENCAMINHAMENTOS[$data['decisao']]
-            . '. O chamamento e a proposta foram criados com o plano de trabalho da OSC.'
+            . '. O chamamento e a proposta foram criados com o plano de trabalho da OSC'
+            . ($manifestacao->ehNovaProposta() ? ', e a parceria já está na Celebração.' : '.')
             . ($programa->wasRecentlyCreated
                 ? ' Como a Secretaria não tinha programa cadastrado, o chamamento nasceu em "'
                     . $programa->name . '" — dá para renomeá-lo em Programas.'

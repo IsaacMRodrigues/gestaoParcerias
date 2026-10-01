@@ -566,6 +566,14 @@ Trazer os demais cenários para `tests/Feature` é uma das [Pendências](#pendê
 Da mais recente para a mais antiga. Cada entrada diz o que mudou, **por quê** e como foi
 conferido — o porquê é o que falta a quem pega o código depois.
 
+- [2026-10-01] **Nova Proposta deferida vai direto à Celebração** (`ManifestacaoAnaliseController::deferir`)
+  - Decisão da gestão. Deferida pela UG, a Nova Proposta cria o chamamento (dispensa ou inexigibilidade) e a
+    proposta **já aprovada e com a Celebração iniciada** (etapa 1, com a UG) — sem a análise de proposta com
+    pareceres, porque a UG já decidiu ao deferir. A UG recebe a Celebração na caixa e por e-mail; a OSC é
+    avisada da aprovação. A manifestação de interesse deferida continua como antes (proposta submetida, com
+    análise)
+  - Conferido: `NovaPropostaTest` (deferimento direto à Celebração; manifestação sem mudança)
+
 - [2026-10-01] **Celebração: "Processo" e "Edital nº" no lugar de "Chamamento"** (`celebracao/show`)
   - Pedido da gestão. A identificação da Celebração mostra o número do **processo** do Planejamento e o **número do
     edital**; na dispensa e na inexigibilidade, que não têm edital, "Dispensa nº" / "Inexigibilidade nº"

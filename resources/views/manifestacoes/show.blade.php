@@ -208,7 +208,7 @@
                             <p class="text-xs text-gray-500 mt-0.5 mb-3">
                                 O deferimento cria o chamamento por
                                 {{ \App\Models\ManifestacaoInteresse::ENCAMINHAMENTOS[$manifestacao->fundamento_pedido] ?? $manifestacao->fundamento_pedido }}
-                                e a proposta, com o plano de trabalho e os documentos que a OSC entregou — e ela segue para a Celebração.
+                                e a proposta, já aprovada, com o plano de trabalho e os documentos que a OSC entregou: a parceria vai direto para a Celebração.
                             </p>
                             <form action="{{ route('manifestacoes.deferir', $manifestacao) }}" method="POST" class="space-y-3">
                                 @csrf
