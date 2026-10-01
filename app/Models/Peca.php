@@ -415,7 +415,7 @@ class Peca extends Model
         'autorizacao_inicio'     => 16,
         'dados_bancarios'        => 17,
         'op_global'              => 18,
-        'comprovante_empenho'    => 20,
+        'comprovante_empenho'    => 21,
     ];
 
     /**
@@ -487,12 +487,11 @@ class Peca extends Model
     ];
 
     /**
-     * A Ordem de Pagamento Global é elaborada pela SCP (etapa 19) e assinada
-     * pela Unidade Gestora (etapa 20).
+     * Quem assina, quando difere de quem preenche, na Celebração. Era a OP
+     * Global (SCP elabora, UG assina); desde 01/10/2026 ela é assinada em
+     * sequência — ver ASSINATURAS_EM_SEQUENCIA.
      */
-    public const CELEBRACAO_ASSINATURA = [
-        'op_global' => ['setor' => 'ug', 'etapa' => 19],
-    ];
+    public const CELEBRACAO_ASSINATURA = [];
 
     /**
      * Contra-assinatura ("assinatura das partes"). Era a do Termo, que o
@@ -507,7 +506,8 @@ class Peca extends Model
      * Documentos assinados por várias partes, em sequência, cada uma na sua
      * etapa do trâmite (decisão da gestão, 01/10/2026). O Termo de Parceria:
      * a SCP o emite sem assinar; assinam a OSC, o Responsável da UG, o Gestor
-     * da Parceria e, por último, o Gabinete.
+     * da Parceria e, por último, o Gabinete. E a Ordem de Pagamento Global:
+     * o Gestor da Parceria e o Responsável da UG.
      */
     public const ASSINATURAS_EM_SEQUENCIA = [
         'celebracao' => [
@@ -516,6 +516,12 @@ class Peca extends Model
                 'ug'     => ['etapa' => 11, 'rotulo' => 'Responsável da Unidade Gestora'],
                 'gestor' => ['etapa' => 13, 'rotulo' => 'Gestor da Parceria'],
                 'pm'     => ['etapa' => 15, 'rotulo' => 'Gabinete do Prefeito'],
+            ],
+            // A OP Global: a SCP elabora (etapa 19); assinam o Gestor da
+            // Parceria e o Responsável da UG (01/10/2026).
+            'op_global' => [
+                'gestor' => ['etapa' => 19, 'rotulo' => 'Gestor da Parceria'],
+                'ug'     => ['etapa' => 20, 'rotulo' => 'Responsável da Unidade Gestora'],
             ],
         ],
     ];

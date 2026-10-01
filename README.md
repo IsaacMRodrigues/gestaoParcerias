@@ -201,7 +201,7 @@ na Celebração, nas Alterações e na Prestação — ver `User::setorNoTramite
 |---|---|---|
 | **Seleção** (chamamento público) | UG → SCP → UG (prazo de recurso) → UG → SCP → **Prefeito** (6) | `Chamamento::ETAPAS_SELECAO` |
 | **Manifestação de Interesse** | OSC submete → SCP recebe → Secretaria opina → SCP defere ou indefere | `ManifestacaoInteresse` |
-| **Celebração** | UG → **OSC** → UG + SCP (em paralelo) → SCP → SEPLAN → UG → SCP → PJ → SCP → **OSC** → SCP → **UG** → SCP → **Gestor** → SCP → **Gabinete** → SCP → **OSC** → SCP → UG → SCP (21) | `Proposta::ETAPAS_CELEBRACAO` |
+| **Celebração** | UG → **OSC** → UG + SCP (em paralelo) → SCP → SEPLAN → UG → SCP → PJ → SCP → **OSC** → SCP → **UG** → SCP → **Gestor** → SCP → **Gabinete** → SCP → **OSC** → SCP → **Gestor** → **UG** → SCP (22) | `Proposta::ETAPAS_CELEBRACAO` |
 | **Alteração da Parceria** | **OSC** → UG autoriza → SCP processa e decide (3) | `Alteracao::ETAPAS` |
 | **Prestação de Contas** | **OSC** → SCP (análise prévia) → UG com Gestor e Comissão (3) | `PrestacaoContas::ETAPAS` |
 | **Suporte** | quem abre ↔ equipe (TI e SCP) | `Chamado` |
@@ -565,6 +565,14 @@ Trazer os demais cenários para `tests/Feature` é uma das [Pendências](#pendê
 
 Da mais recente para a mais antiga. Cada entrada diz o que mudou, **por quê** e como foi
 conferido — o porquê é o que falta a quem pega o código depois.
+
+- [2026-10-01] **Ordem de Pagamento Global com duas assinaturas: Gestor da Parceria e Responsável da UG**
+  (`Peca::ASSINATURAS_EM_SEQUENCIA['celebracao']['op_global']`)
+  - Decisão da gestão. A OP Global, elaborada pela SCP, passa a ser assinada pelo **Gestor da Parceria** e depois
+    pelo **Responsável da UG**, cada um na sua etapa (20ª e 21ª); o empenho vai para a 22ª, e a Celebração passa
+    de 21 para 22 etapas (migração). O Gestor é o mesmo escolhido pela SCP para o Termo — ela pode trocá-lo ao
+    encaminhar, e o escolhe se ainda não houver. A OP assinada do jeito antigo (pela UG) continua valendo
+  - Conferido: `OpGlobalDuasAssinaturasTest`
 
 - [2026-10-01] **Termo de Parceria assinado em sequência: OSC, UG, Gestor e Gabinete**
   (`Peca::ASSINATURAS_EM_SEQUENCIA`, `peca_assinaturas`, `Proposta::usuarioTemAVezNaCelebracao`)

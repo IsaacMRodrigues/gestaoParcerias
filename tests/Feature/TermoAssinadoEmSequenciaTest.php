@@ -111,7 +111,7 @@ class TermoAssinadoEmSequenciaTest extends TestCase
 
         // Etapa 13: a SCP escolhe o Gestor.
         $this->actingAs($this->scp)->get("/celebracao/{$this->proposta->id}")->assertOk()
-            ->assertSee('Gestor da Parceria que vai assinar o Termo');
+            ->assertSee('Gestor da Parceria que vai assinar');
         $this->avancar($this->scp)->assertSessionHasErrors('gestor_id');
         $this->avancar($this->scp, ['gestor_id' => $this->gestor->id])->assertSessionHasNoErrors();
         $p = $this->proposta->fresh();

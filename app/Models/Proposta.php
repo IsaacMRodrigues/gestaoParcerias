@@ -124,8 +124,11 @@ class Proposta extends Model
         ['setor' => 'pm',     'acao' => 'Gabinete: fazer a última assinatura do Termo e devolver à SCP'],
         ['setor' => 'scp',    'acao' => 'Anexar o comprovante de publicação (Diário Oficial e site) e emitir a Autorização de Início de Execução'],
         ['setor' => 'osc',    'acao' => 'Informar os dados bancários da conta específica da parceria'],
-        ['setor' => 'scp',    'acao' => 'Elaborar a Ordem de Pagamento Global e encaminhar à UG'],
-        ['setor' => 'ug',     'acao' => 'Assinar a Ordem de Pagamento Global'],
+        // A OP Global com duas assinaturas, nesta ordem (decisão da gestão,
+        // 01/10/2026): o Gestor da Parceria e o Responsável da UG.
+        ['setor' => 'scp',    'acao' => 'Elaborar a Ordem de Pagamento Global e encaminhar ao Gestor da Parceria'],
+        ['setor' => 'gestor', 'acao' => 'Gestor da Parceria: assinar a Ordem de Pagamento Global'],
+        ['setor' => 'ug',     'perfil' => 'responsavel_unidade_gestora', 'acao' => 'Responsável da UG: assinar a Ordem de Pagamento Global'],
         ['setor' => 'scp',    'acao' => 'Anexar o comprovante de empenho global (encerra a Celebração)'],
     ];
 
@@ -507,7 +510,8 @@ class Proposta extends Model
                 continue;
             }
 
-            // O Termo, assinado em sequência: na etapa dele a SCP só o emite.
+            // Assinado em sequência (o Termo, a OP Global): na etapa dele a SCP
+            // só o emite; as assinaturas são cobradas nas etapas de cada parte.
             if ($peca->temAssinaturasEmSequencia()) {
                 if (empty($peca->conteudo) || $peca->devolvida()) {
                     $pend[] = $peca->rotulo . ' (emitir)';
@@ -517,29 +521,23 @@ class Proposta extends Model
             }
 
             if ($peca->tipo === 'modelo') {
-                // A OP Global é apenas elaborada pela SCP na etapa 18 — a
-                // assinatura é da UG, na etapa 19.
-                $soPreencher = $chave === 'op_global' && $etapa === 18;
-                $ok = $soPreencher ? !empty($peca->conteudo) && !$peca->devolvida() : $peca->assinado();
-                if (!$ok) {
-                    $pend[] = $peca->rotulo . ($soPreencher ? ' (emitir)' : ' (assinar)');
+                if (!$peca->assinado()) {
+                    $pend[] = $peca->rotulo . ' (assinar)';
                 }
             } elseif (!$peca->temArquivo() || $peca->devolvida()) {
                 $pend[] = $peca->rotulo . ($peca->devolvida() ? ' (devolvido — enviar o arquivo corrigido)' : ' (anexar arquivo)');
             }
         }
 
-        // Etapas de assinatura do Termo (OSC, UG, Gestor, Gabinete): a da vez.
-        $termo = $this->pecaCelebracao('termo');
-        foreach ($termo?->sequenciaDeAssinaturas() ?? [] as $papel => $regra) {
-            if ($regra['etapa'] === $etapa && !$termo->assinaturaDe($papel)) {
-                $pend[] = $termo->rotulo . ' (assinatura: ' . $regra['rotulo'] . ')';
+        // Etapas de assinatura dos documentos em sequência — o Termo (OSC, UG,
+        // Gestor, Gabinete) e a OP Global (Gestor, UG): a da vez.
+        foreach (array_keys(Peca::ASSINATURAS_EM_SEQUENCIA['celebracao'] ?? []) as $chave) {
+            $doc = $this->pecaCelebracao($chave);
+            foreach ($doc?->sequenciaDeAssinaturas() ?? [] as $papel => $regra) {
+                if ($regra['etapa'] === $etapa && !$doc->assinaturaDe($papel)) {
+                    $pend[] = $doc->rotulo . ' (assinatura: ' . $regra['rotulo'] . ')';
+                }
             }
-        }
-
-        // Etapa 19: a UG assina a OP Global elaborada pela SCP.
-        if ($etapa === 19 && !$this->pecaCelebracao('op_global')?->assinado()) {
-            $pend[] = 'Ordem de Pagamento Global (assinar)';
         }
 
         return $pend;

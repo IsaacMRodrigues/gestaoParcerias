@@ -193,13 +193,16 @@
                                     @if((\App\Models\Proposta::ETAPAS_CELEBRACAO[$etapaAtual + 1]['setor'] ?? null) === 'gestor')
                                         @php $gestores = $proposta->gestoresElegiveis(); @endphp
                                         <div>
-                                            <label for="gestor_id" class="block text-xs font-medium text-gray-600 mb-1">Gestor da Parceria que vai assinar o Termo</label>
+                                            <label for="gestor_id" class="block text-xs font-medium text-gray-600 mb-1">
+                                                Gestor da Parceria que vai assinar
+                                                @if($proposta->celebracao_gestor_id)<span class="font-normal text-gray-400">(o mesmo do Termo, se não trocar)</span>@endif
+                                            </label>
                                             @if($gestores->isEmpty())
                                                 <p class="text-xs text-red-700">
                                                     Nenhum usuário com o perfil Gestor da Parceria nesta Secretaria. Cadastre o Gestor antes de encaminhar.
                                                 </p>
                                             @else
-                                                <select name="gestor_id" id="gestor_id" required
+                                                <select name="gestor_id" id="gestor_id" @required(! $proposta->celebracao_gestor_id)
                                                         class="block w-full border-gray-300 rounded-md shadow-sm text-sm focus:ring-brand-500 focus:border-brand-500">
                                                     <option value="">Selecione…</option>
                                                     @foreach($gestores as $g)

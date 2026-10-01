@@ -243,13 +243,15 @@ class CelebracaoController extends Controller
         $proxEtapa = (int) $proposta->celebracao_etapa + 1;
         $proxSetor = Proposta::ETAPAS_CELEBRACAO[$proxEtapa]['setor'];
 
-        // Para o Gestor da Parceria, a SCP escolhe a pessoa (01/10/2026).
+        // Para o Gestor da Parceria, a SCP escolhe a pessoa (01/10/2026). Já
+        // escolhido para o Termo, vale também para a OP Global — a SCP pode
+        // trocá-lo ao encaminhar.
         $gestor = null;
         if ($proxSetor === 'gestor') {
             $gestorId = $request->validate(
-                ['gestor_id' => ['required', Rule::in($proposta->gestoresElegiveis()->pluck('id')->all())]],
+                ['gestor_id' => [$proposta->celebracao_gestor_id ? 'nullable' : 'required', Rule::in($proposta->gestoresElegiveis()->pluck('id')->all())]],
                 ['gestor_id.required' => 'Escolha o Gestor da Parceria.', 'gestor_id.in' => 'Escolha um Gestor da Parceria da Secretaria.'],
-            )['gestor_id'];
+            )['gestor_id'] ?? $proposta->celebracao_gestor_id;
             $gestor = User::find($gestorId);
         }
 
