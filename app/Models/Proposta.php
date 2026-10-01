@@ -106,7 +106,7 @@ class Proposta extends Model
         ['setor' => 'scp',    'acao' => 'Analisar e solicitar o Parecer Financeiro à SEPLAN'],
         ['setor' => 'seplan', 'acao' => 'Analisar, elaborar e assinar o Parecer Financeiro'],
         ['setor' => 'ug',     'acao' => 'Anexar as portarias do Gestor e da Comissão de Monitoramento e emitir o Parecer Técnico'],
-        ['setor' => 'scp',    'acao' => 'Conferir o processo e emitir/assinar o Protocolo na Unidade Jurídica'],
+        ['setor' => 'scp',    'acao' => 'Conferir o processo, emitir a Minuta do Termo e a Certidão de Autuação e emitir/assinar o Protocolo na Unidade Jurídica'],
         ['setor' => 'pj',     'acao' => 'Analisar e emitir/assinar o Parecer Jurídico'],
         ['setor' => 'scp',    'acao' => 'Emitir o Parecer da SCP e o Termo, assinando-o pelo Município'],
         ['setor' => 'osc',    'acao' => 'Assinar o Termo (contra-assinatura da OSC — assinatura das partes)'],

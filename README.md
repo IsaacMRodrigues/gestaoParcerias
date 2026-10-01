@@ -566,6 +566,15 @@ Trazer os demais cenários para `tests/Feature` é uma das [Pendências](#pendê
 Da mais recente para a mais antiga. Cada entrada diz o que mudou, **por quê** e como foi
 conferido — o porquê é o que falta a quem pega o código depois.
 
+- [2026-10-01] **Celebração, etapa 7: Minuta do Termo e Certidão de Autuação junto com o Protocolo**
+  (`Peca::TEMPLATES['celebracao']`)
+  - Pedido da gestão. A etapa 7 (SCP) ganha dois documentos-modelo, antes do Protocolo na Unidade Jurídica:
+    a **Minuta do Termo**, que nasce com o texto do Termo de Parceria, e a **Certidão de Autuação**, com o
+    texto da rota de Dispensa (que já lista a minuta entre os documentos autuados). Os dois são da SCP,
+    obrigatórios para encaminhar à PJ; a certidão é interna (a OSC não a vê)
+  - Celebrações que já passaram da etapa 7 ganham os dois itens no checklist, sem travar nada
+  - Conferido: `CelebracaoEtapa7Test`
+
 - [2026-10-01] **Salvar ou assinar não fecha o documento** (`PecaController::voltarParaPeca`, `ProcessoPecaController`)
   - Pedido da gestão. Nos checklists (Seleção, Celebração, Alteração, Prestação de contas), o documento em que
     se salvou ou assinou volta **aberto**, no mesmo lugar da página (antes voltava recolhido). No Planejamento,

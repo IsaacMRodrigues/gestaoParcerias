@@ -145,6 +145,10 @@ class Peca extends Model
             ['chave' => 'portaria_gestor',       'rotulo' => 'Portaria do Gestor da Parceria',                         'tipo' => 'arquivo', 'obrigatorio' => true],
             ['chave' => 'portaria_comissao_mon', 'rotulo' => 'Portaria da Comissão de Monitoramento e Avaliação',      'tipo' => 'arquivo', 'obrigatorio' => true],
             ['chave' => 'parecer_tecnico',       'rotulo' => 'Parecer Técnico para celebração (modelo padrão)',        'tipo' => 'modelo',  'obrigatorio' => true],
+            // Etapa 7, com o Protocolo: a minuta do termo e a certidão de autuação,
+            // que seguem com ele à Procuradoria (pedido da gestão, 01/10/2026).
+            ['chave' => 'minuta_termo',          'rotulo' => 'Minuta do Termo (modelo padrão)',                        'tipo' => 'modelo',  'obrigatorio' => true],
+            ['chave' => 'certidao_autuacao',     'rotulo' => 'Certidão de Autuação (modelo padrão)',                   'tipo' => 'modelo',  'obrigatorio' => true],
             ['chave' => 'protocolo_juridico',    'rotulo' => 'Protocolo na Unidade Jurídica (modelo padrão)',          'tipo' => 'modelo',  'obrigatorio' => true],
             ['chave' => 'parecer_juridico',      'rotulo' => 'Parecer Jurídico (modelo padrão)',                       'tipo' => 'modelo',  'obrigatorio' => true],
             ['chave' => 'parecer_scp',           'rotulo' => 'Parecer da SCP — conferência final (modelo padrão)',    'tipo' => 'modelo',  'obrigatorio' => true],
@@ -358,6 +362,8 @@ class Peca extends Model
         'portaria_gestor'        => 'ug',
         'portaria_comissao_mon'  => 'ug',
         'parecer_tecnico'        => 'ug',
+        'minuta_termo'           => 'scp',
+        'certidao_autuacao'      => 'scp',
         'protocolo_juridico'     => 'scp',
         'parecer_juridico'       => 'pj',
         'parecer_scp'            => 'scp',
@@ -396,6 +402,8 @@ class Peca extends Model
         'portaria_gestor'        => 5,
         'portaria_comissao_mon'  => 5,
         'parecer_tecnico'        => 5,
+        'minuta_termo'           => 6,
+        'certidao_autuacao'      => 6,
         'protocolo_juridico'     => 6,
         'parecer_juridico'       => 7,
         'parecer_scp'            => 8,
@@ -1160,9 +1168,15 @@ HTML,
             'parecer_tecnico'    => 'parecer_tecnico_celebracao',
             'protocolo_juridico' => 'protocolo_juridico',
             'parecer_juridico'   => 'parecer_juridico',
+            'certidao_autuacao'  => 'certidao_autuacao',
         ];
         if (isset($daDispensa[$chave])) {
             return self::MODELO['dispensa_inexigibilidade'][$daDispensa[$chave]] ?? null;
+        }
+
+        // A minuta é o rascunho do termo: nasce com o texto do Termo de Parceria.
+        if ($chave === 'minuta_termo') {
+            return self::MODELO['celebracao']['termo'] ?? null;
         }
 
         // Documentos que o trâmite do Processo já modela.
