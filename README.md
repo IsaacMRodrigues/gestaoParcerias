@@ -572,6 +572,9 @@ conferido — o porquê é o que falta a quem pega o código depois.
     a **Minuta do Termo**, que nasce com o texto do Termo de Parceria, e a **Certidão de Autuação**, com o
     texto da rota de Dispensa (que já lista a minuta entre os documentos autuados). Os dois são da SCP,
     obrigatórios para encaminhar à PJ; a certidão é interna (a OSC não a vê)
+  - A **minuta não é assinada** (`Peca::SEM_ASSINATURA`, mesmo dia): é rascunho do termo. Fica pronta quando
+    redigida — o texto do modelo, como veio, não basta (pendência "(preencher)"). Pode ser devolvida como os
+    demais documentos. O Termo de Parceria definitivo continua assinado pelo Município e pela OSC
   - Celebrações que já passaram da etapa 7 ganham os dois itens no checklist, sem travar nada
   - Conferido: `CelebracaoEtapa7Test`
 

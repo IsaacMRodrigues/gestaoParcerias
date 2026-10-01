@@ -1458,6 +1458,10 @@ HTML,
             return false;
         }
 
+        if ($this->semAssinatura()) {
+            return $this->redigida();
+        }
+
         return $this->tipo === 'modelo' ? $this->assinado() : $this->preenchido();
     }
 
@@ -1843,6 +1847,27 @@ HTML,
     ];
 
     /**
+     * Documentos-modelo que só se redigem, sem assinatura. A Minuta do Termo da
+     * Celebração é rascunho do termo que vai à Procuradoria (decisão da gestão,
+     * 01/10/2026): pronta quando redigida — o texto do modelo, como foi
+     * semeado, não basta. O termo definitivo continua assinado pelas partes.
+     */
+    public const SEM_ASSINATURA = [
+        'celebracao' => ['minuta_termo'],
+    ];
+
+    public function semAssinatura(): bool
+    {
+        return $this->tipo === 'modelo' && in_array($this->chave, self::SEM_ASSINATURA[$this->categoria] ?? [], true);
+    }
+
+    /** Redigida: tem texto e ele já não é o do modelo. */
+    public function redigida(): bool
+    {
+        return !empty($this->conteudo) && !$this->aindaEOModelo();
+    }
+
+    /**
      * Peças que só um perfil preenche, além de assinar. A Resposta ao recurso
      * é da Comissão de Seleção (decisão da gestão, 29/09/2026): o setor dela é
      * a UG, mas o resto da UG não responde por ela.
@@ -1860,7 +1885,7 @@ HTML,
     public function podeAssinar(?User $user): bool
     {
         if ($this->tipo !== 'modelo' || empty($this->conteudo) || $this->assinado()
-            || $this->vemDoPlanejamento()
+            || $this->vemDoPlanejamento() || $this->semAssinatura()
         ) {
             return false;
         }

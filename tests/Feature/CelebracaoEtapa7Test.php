@@ -17,7 +17,7 @@ use Tests\TestCase;
 /**
  * Etapa 7 da Celebração: a Minuta do Termo e a Certidão de Autuação, junto
  * com o Protocolo na Unidade Jurídica, todos da SCP (pedido da gestão,
- * 01/10/2026).
+ * 01/10/2026). A minuta só se redige; não é assinada.
  */
 class CelebracaoEtapa7Test extends TestCase
 {
@@ -50,12 +50,23 @@ class CelebracaoEtapa7Test extends TestCase
         $this->assertFalse($pecas['certidao_autuacao']->visivel_osc, 'a certidão é instrução interna');
 
         $pendencias = $proposta->fresh()->pendenciasCelebracao();
-        $this->assertContains('Minuta do Termo (modelo padrão) (assinar)', $pendencias);
+        $this->assertContains('Minuta do Termo (modelo padrão) (preencher)', $pendencias);
         $this->assertContains('Certidão de Autuação (modelo padrão) (assinar)', $pendencias);
 
         $scp = User::factory()->create(['setor' => 'scp', 'status' => true, 'approval_status' => 'aprovado']);
         $scp->assignRole('analista_tecnico_scp');
         $this->assertTrue($pecas['minuta_termo']->podePreencher($scp));
         $this->assertTrue($pecas['certidao_autuacao']->podeAssinar($scp));
+
+        // A minuta não se assina (01/10/2026): pronta quando redigida.
+        $minuta = $pecas['minuta_termo'];
+        $this->assertFalse($minuta->podeAssinar($scp));
+        $this->assertFalse($minuta->concluida(), 'o texto do modelo, como veio, não basta');
+        $this->actingAs($scp)->patch("/pecas/{$minuta->id}/assinar")->assertForbidden();
+
+        $this->actingAs($scp)->put("/pecas/{$minuta->id}", ['conteudo' => '<p>Minuta do termo com a Associação, valor R$ 8.000.</p>'])
+            ->assertSessionHasNoErrors();
+        $this->assertTrue($minuta->fresh()->concluida());
+        $this->assertNotContains('Minuta do Termo (modelo padrão) (preencher)', $proposta->fresh()->pendenciasCelebracao());
     }
 }

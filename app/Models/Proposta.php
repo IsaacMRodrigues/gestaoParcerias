@@ -444,6 +444,15 @@ class Proposta extends Model
                 continue;
             }
 
+            // A Minuta do Termo não se assina: basta estar redigida.
+            if ($peca->semAssinatura()) {
+                if (!$peca->redigida() || $peca->devolvida()) {
+                    $pend[] = $peca->rotulo . ' (preencher)';
+                }
+
+                continue;
+            }
+
             if ($peca->tipo === 'modelo') {
                 // A OP Global é apenas elaborada pela SCP na etapa 12 — a
                 // assinatura é da UG, na etapa 13.

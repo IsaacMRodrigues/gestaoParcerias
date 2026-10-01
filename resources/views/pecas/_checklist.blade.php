@@ -168,7 +168,7 @@
             <div class="flex items-start gap-3">
 
                 {{-- Estado da peça --}}
-                <span class="mt-0.5 shrink-0" title="{{ $peca->concluida() ? ($ehModelo ? 'Assinado' : 'Arquivo enviado') : ($peca->preenchido() ? 'Preenchido, aguardando assinatura' : 'Pendente') }}">
+                <span class="mt-0.5 shrink-0" title="{{ $peca->concluida() ? ($peca->semAssinatura() ? 'Redigido' : ($ehModelo ? 'Assinado' : 'Arquivo enviado')) : ($peca->preenchido() && ! $peca->semAssinatura() ? 'Preenchido, aguardando assinatura' : 'Pendente') }}">
                     @if($peca->concluida())
                         <span class="w-5 h-5 rounded-full bg-brand-600 text-white flex items-center justify-center">
                             <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="3.5">
@@ -245,6 +245,10 @@
                                      tinha como saber se era defeito ou regra. --}}
                                 <p class="text-xs text-gray-500 mt-0.5">
                                     Você pode revisar o texto; quem assina é o responsável legal da OSC.
+                                </p>
+                            @elseif($peca->semAssinatura())
+                                <p class="text-xs text-gray-500 mt-0.5">
+                                    Não é assinado: {{ $peca->redigida() ? 'redigido.' : 'basta redigir o texto (o do modelo não serve como está).' }}
                                 </p>
                             @elseif($emAndamento)
                                 <p class="text-xs text-accent-700 mt-0.5">Preenchido — falta assinar</p>
