@@ -72,6 +72,41 @@ class Osc extends Model
         return $this->user();
     }
 
+    /** Todas as versões da área "Arquivos da OSC" (30/09/2026). */
+    public function arquivos(): HasMany
+    {
+        return $this->hasMany(OscArquivo::class)->orderByDesc('versao');
+    }
+
+    /** A versão atual de cada documento: ['tipo' => OscArquivo]. */
+    public function arquivosAtuais(): \Illuminate\Support\Collection
+    {
+        $todos = $this->relationLoaded('arquivos') ? $this->arquivos : $this->arquivos()->get();
+
+        return $todos->sortByDesc('versao')->unique('tipo')->keyBy('tipo');
+    }
+
+    /**
+     * O que falta na área para ela valer: documento não anexado e certidão
+     * vencida. Vazio = completa.
+     */
+    public function pendenciasDosArquivos(): array
+    {
+        $atuais = $this->arquivosAtuais();
+        $pend = [];
+
+        foreach (OscArquivo::tipos() as $tipo => $rotulo) {
+            $arquivo = $atuais[$tipo] ?? null;
+            if (!$arquivo) {
+                $pend[] = $rotulo . ' (não anexado)';
+            } elseif ($arquivo->vencida()) {
+                $pend[] = $rotulo . ' (vencida em ' . $arquivo->validade->format('d/m/Y') . ')';
+            }
+        }
+
+        return $pend;
+    }
+
     public function membros(): HasMany
     {
         return $this->hasMany(OscMembro::class);

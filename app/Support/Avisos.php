@@ -554,6 +554,22 @@ class Avisos
         ));
     }
 
+    /** Certidão de "Arquivos da OSC" perto de vencer: avisa quem cuida dos documentos da OSC. */
+    public static function certidaoVencendo(\App\Models\OscArquivo $arquivo): void
+    {
+        self::enviar(self::daOsc($arquivo->osc_id, self::comFuncao('osc_documentos')), new Aviso(
+            assunto: 'Certidão vence em ' . $arquivo->validade->format('d/m/Y'),
+            titulo: 'Uma certidão da organização está perto de vencer',
+            linhas: [
+                \App\Models\OscArquivo::rotulo($arquivo->tipo) . ' — válida até ' . $arquivo->validade->format('d/m/Y') . '.',
+                'Vencida, ela passa a impedir o envio de manifestação de interesse e Nova Proposta e a etapa da OSC na Celebração.',
+                'Emita a certidão atualizada e envie a nova versão em "Arquivos da OSC".',
+            ],
+            url: route('portal.arquivos.index'),
+            botao: 'Abrir Arquivos da OSC',
+        ));
+    }
+
     /** Recurso protocolado: a Comissão de Seleção da Secretaria do chamamento fica sabendo. */
     public static function recursoProtocolado(\App\Models\Recurso $r): void
     {

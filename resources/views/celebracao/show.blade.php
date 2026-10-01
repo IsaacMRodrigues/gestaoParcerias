@@ -97,6 +97,29 @@
                 </div>
             @endif
 
+            {{-- Arquivos da OSC (30/09/2026): certidões e declarações saíram do
+                 checklist; a etapa 2 cobra a área completa e em dia. --}}
+            @php $faltamArquivos = $proposta->osc?->pendenciasDosArquivos() ?? []; @endphp
+            <div class="bg-white rounded-xl border border-gray-200 shadow-sm px-6 py-4 flex items-start justify-between gap-4">
+                <div class="text-sm">
+                    <p class="font-semibold text-gray-800">Arquivos da OSC</p>
+                    @if($faltamArquivos)
+                        <p class="text-accent-800 mt-0.5">Falta completar: {{ implode('; ', $faltamArquivos) }}.</p>
+                    @else
+                        <p class="text-gray-500 mt-0.5">Certidões, estatuto, ata de eleição e declarações anexados e em dia.</p>
+                    @endif
+                </div>
+                @php
+                    // Quem analisa (permissão de propostas) vai à tela da proposta; os
+                    // demais setores, à área da OSC, só para ver.
+                    $linkArquivos = $ehOsc ? route('portal.arquivos.index')
+                        : (auth()->user()->can('propostas') ? route('propostas.show', $proposta) . '#arquivos-osc' : route('oscs.arquivos', $proposta->osc_id));
+                @endphp
+                <a href="{{ $linkArquivos }}" class="btn btn-outline btn-sm shrink-0">
+                    {{ $ehOsc ? 'Abrir' : (auth()->user()->can('propostas') ? 'Ver e analisar' : 'Ver') }}
+                </a>
+            </div>
+
             {{-- Identificação --}}
             <div class="bg-white rounded-xl border border-gray-200 shadow-sm p-6">
                 <dl class="grid grid-cols-2 sm:grid-cols-5 gap-4 text-sm">

@@ -65,7 +65,7 @@ class DevolucaoPorDocumentoTest extends TestCase
             'objeto' => 'x', 'status' => 'aprovada', 'valor_solicitado' => 1,
             'celebracao_iniciada_em' => now(), 'celebracao_etapa' => 5, 'celebracao_setor' => 'ug']);
         Peca::sincronizar($proposta, 'celebracao');
-        $proposta->pecas()->whereIn('chave', ['aprovacao_plano', 'decl_art7', 'parecer_financeiro'])->update($this->assinado());
+        $proposta->pecas()->whereIn('chave', ['aprovacao_plano', 'parecer_financeiro'])->update($this->assinado());
 
         $aprovacao = $proposta->pecas()->where('chave', 'aprovacao_plano')->sole();
         $parecer = $proposta->pecas()->where('chave', 'parecer_financeiro')->sole();
@@ -83,7 +83,6 @@ class DevolucaoPorDocumentoTest extends TestCase
         $this->assertTrue($aprovacao->devolvida());
         $this->assertStringContainsString('R$ 8.000', $aprovacao->devolucao_motivo);
         $this->assertTrue($parecer->fresh()->assinado(), 'o que não foi marcado fica como estava');
-        $this->assertTrue($proposta->pecas()->where('chave', 'decl_art7')->sole()->assinado());
 
         $this->actingAs($this->ug)->get("/celebracao/{$proposta->id}")->assertOk()
             ->assertSee('Devolvido por')->assertSee('Documentos a corrigir:')

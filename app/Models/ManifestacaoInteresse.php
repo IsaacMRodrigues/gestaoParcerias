@@ -222,8 +222,14 @@ class ManifestacaoInteresse extends Model
     {
         $faltam = $this->pendenciasDoPlano();
 
+        // Certidões, estatuto, ata e declarações ficam em "Arquivos da OSC",
+        // anexados uma vez (30/09/2026); aqui, os comprovantes de experiência.
+        foreach ($this->osc?->pendenciasDosArquivos() ?? [] as $pendencia) {
+            $faltam[] = 'Arquivos da OSC: ' . $pendencia;
+        }
+
         if ($this->documentos()->count() === 0) {
-            $faltam[] = 'documentos de habilitação';
+            $faltam[] = 'comprovantes de experiência';
         }
 
         if ((float) $this->valor_solicitado <= 0) {

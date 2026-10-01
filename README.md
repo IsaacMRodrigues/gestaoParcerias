@@ -34,6 +34,7 @@ assinados eletronicamente e validáveis por QR Code.
 | **Plano de Trabalho** (3.1) — os 13 itens do modelo da cliente | ✅ Completo | `PlanoTrabalhoController`, `Concerns\TemPlanoDeTrabalho`, `Support\PlanoDocumento` |
 | **3. Celebração** (2.2 / 3.2) — 22 etapas: habilitação, etapa conjunta UG + SCP, Termo e OP Global assinados em sequência, empenho | ✅ Completo | `CelebracaoController`, motor `Peca`, `PecaAssinatura` |
 | **Devolução por documento** — em todos os trâmites | ✅ Completo | `Support\Devolucao` |
+| **Arquivos da OSC** — certidões, estatuto, ata e declarações anexados uma vez | ✅ Completo | `OscArquivoController`, `OscArquivo` |
 | **Formalização** (2.3) — instrumento, aditivo, apostilamento, OP | ✅ Completo | `InstrumentoController`, `AditivoController`, `OrdemPagamentoController` |
 | **4. Execução** (4.4) — repasses, despesas, notas, saldo | ✅ Completo | `ExecucaoController` |
 | **Alterações da Parceria** (3.3) | ✅ Completo | `AlteracaoController`, `Alteracao` |
@@ -53,13 +54,15 @@ ele existir.
 **No GitHub, ainda não em produção:** tudo o que está no [Histórico](#histórico-de-entregas) de 26/09 a
 01/10/2026. O próximo deploy precisa, além do de sempre:
 
-- rodar as **14 migrações** novas (de `2026_09_28_100000` a `2026_10_01_110000`) e o `RolesSeeder`
+- rodar as **15 migrações** novas (de `2026_09_28_100000` a `2026_10_01_120000`) e o `RolesSeeder`
   (perfis novos: Comissão de Monitoramento e de Avaliação separadas, Responsável pela SEPLAN, Contador
   e Responsável por Execução da OSC);
 - mover a conta `planejamento@saogoncalo.mg.gov.br` para o setor SEPLAN, com o perfil Responsável pela
   SEPLAN (depois do seeder);
 - antes de a primeira parceria chegar à assinatura do Termo, haver usuário com o perfil **Gestor da
-  Parceria** em cada Secretaria — sem ele, a SCP não tem quem escolher na etapa 13 da Celebração.
+  Parceria** em cada Secretaria — sem ele, a SCP não tem quem escolher na etapa 13 da Celebração;
+- avisar as OSCs de que, a partir do deploy, a área **Arquivos da OSC** precisa estar completa e em dia para
+  enviar manifestação de interesse ou Nova Proposta (as cadastradas hoje começam com ela vazia).
 
 ---
 
@@ -587,6 +590,26 @@ Trazer os demais cenários para `tests/Feature` é uma das [Pendências](#pendê
 
 Da mais recente para a mais antiga. Cada entrada diz o que mudou, **por quê** e como foi
 conferido — o porquê é o que falta a quem pega o código depois.
+
+- [2026-10-01] **Arquivos da OSC: documentos anexados uma vez, para todas as parcerias** (`OscArquivoController`,
+  `OscArquivo`, `OscArquivoAnalise`, `arquivos-osc/_lista`, comando `osc:avisar-vencimento-certidoes`)
+  - Pedido da Raquel (30/09), com o portal do DF (parcerias.df.gov.br/pmis) como modelo: para diminuir a
+    quantidade de arquivos, a OSC anexa **uma vez** os seus documentos, numa área própria do portal ("Arquivos da
+    OSC", no menu), em três grupos: **certidões negativas** (federal/Dívida Ativa, estadual, trabalhista e FGTS),
+    **documentos institucionais** (estatuto e alterações, ata de eleição da diretoria) e as **seis declarações**
+    (art. 7º, 33, 34, 39, 45 e autenticidade). Na proposta ficam só os comprovantes de experiência
+  - Cada envio é uma **versão**: "Editar" manda a nova, "Histórico" guarda as anteriores. Certidão exige
+    **validade**; vencida aparece em vermelho e volta a ser pendência, e a OSC recebe e-mail
+    `DIAS_AVISO_VENCIMENTO` dias antes (agendado às 7h). Cada declaração tem o **texto para assinar**, já
+    preenchido com o cadastro da OSC
+  - A Prefeitura vê a área de cada OSC (`/oscs/{id}/arquivos`) e **analisa em cada parceria**, na tela da proposta:
+    aprova ou recusa com motivo, sobre a versão que viu — versão nova pede análise nova
+  - Onde passou a valer: o envio de **manifestação de interesse e Nova Proposta** exige a área completa e em dia
+    (e ao menos um comprovante de experiência); a **etapa 2 da Celebração** (OSC) também. Saíram do checklist da
+    Celebração as certidões e as seis declarações (as já entregues ficam como histórico), e da lista de documentos
+    da proposta, o estatuto, a ata e as certidões. A inscrição em chamamento não mudou
+  - Conferido: 9 testes em `ArquivosDaOscTest`; os testes que enviam manifestação ou passam pela etapa da OSC
+    usam `Concerns\PreencheArquivosDaOsc`; telas abertas com os dados locais, sem erro
 
 - [2026-10-01] **Nova Proposta deferida vai direto à Celebração** (`ManifestacaoAnaliseController::deferir`)
   - Decisão da gestão. Deferida pela UG, a Nova Proposta cria o chamamento (dispensa ou inexigibilidade) e a

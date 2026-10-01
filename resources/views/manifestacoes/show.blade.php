@@ -100,6 +100,11 @@
                 </div>
 
                 <h3 class="text-base font-semibold text-gray-800 mt-6 pt-6 border-t border-gray-100">Documentos</h3>
+                {{-- Certidões, estatuto, ata e declarações: na área da OSC (30/09/2026). --}}
+                <p class="text-xs text-gray-500 mt-1">
+                    Certidões, estatuto, ata de eleição e declarações estão em
+                    <a href="{{ route('oscs.arquivos', $manifestacao->osc_id) }}" class="text-brand-700 hover:underline">Arquivos da OSC</a>.
+                </p>
                 <ul class="mt-2 divide-y divide-gray-100">
                     @forelse($manifestacao->documentos as $doc)
                         <li class="py-2 flex items-center justify-between gap-3">

@@ -17,3 +17,9 @@ Artisan::command('inspire', function () {
 Schedule::command('queue:work --stop-when-empty --tries=3 --max-time=50')
     ->everyMinute()
     ->withoutOverlapping();
+
+/*
+ * Certidões de "Arquivos da OSC" perto de vencer (30/09/2026): a OSC é avisada
+ * uma vez, alguns dias antes (OscArquivo::DIAS_AVISO_VENCIMENTO).
+ */
+Schedule::command('osc:avisar-vencimento-certidoes')->dailyAt('07:00');

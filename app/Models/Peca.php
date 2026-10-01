@@ -117,7 +117,10 @@ class Peca extends Model
             // o que estava faltando.
             ['chave' => 'oficio_pedido',         'rotulo' => 'Memorando do pedido, assinado pelo representante legal',    'tipo' => 'arquivo', 'obrigatorio' => true],
             ['chave' => 'experiencia_previa',    'rotulo' => 'Comprovantes de experiência prévia (mínimo de um ano)',  'tipo' => 'arquivo', 'obrigatorio' => true],
-            ['chave' => 'certidoes_habilitacao', 'rotulo' => 'Certidões de regularidade fiscal, previdenciária, tributária e de dívida ativa', 'tipo' => 'arquivo', 'obrigatorio' => true],
+            // Certidões e as seis declarações estão em "Arquivos da OSC" desde
+            // 30/09/2026: anexadas uma vez, valem para todas as parcerias, e a
+            // etapa 2 (da OSC) cobra a área completa e em dia. As peças já
+            // entregues ficam como histórico.
             ['chave' => 'relacao_dirigentes',    'rotulo' => 'Relação nominal atualizada dos dirigentes',              'tipo' => 'arquivo', 'obrigatorio' => true],
             ['chave' => 'docs_presidente',       'rotulo' => 'RG, CPF e comprovante de residência do presidente',      'tipo' => 'arquivo', 'obrigatorio' => true],
             ['chave' => 'planilha_pessoal',      'rotulo' => 'Planilha de detalhamento de despesas de pessoal (se houver)', 'tipo' => 'arquivo', 'obrigatorio' => false],
@@ -127,18 +130,8 @@ class Peca extends Model
             // Continua existindo para o que não cabe nos itens acima — e para
             // não perder o que as parcerias antigas já anexaram aqui.
             ['chave' => 'docs_habilitacao',      'rotulo' => 'Outros documentos de habilitação',                       'tipo' => 'arquivo', 'obrigatorio' => false],
-            // As declarações da habilitação (módulo 3.2, itens 7 a 12 e 15; a do
-            // art. 23 saiu em 30/09/2026).
-            // Vêm preenchidas com o cadastro da OSC e só o responsável legal
-            // assina — ver DECLARACOES_DO_RESPONSAVEL_LEGAL.
-            ['chave' => 'decl_art7',             'rotulo' => 'Declaração — art. 7º, XXXIII, CF/88 (não emprega menor)',                 'tipo' => 'modelo', 'obrigatorio' => true],
-            // A declaração do art. 23, XIV (sem contas pendentes) saiu em 30/09/2026:
-            // não é mais exigida. As já assinadas ficam como histórico.
-            ['chave' => 'decl_art33',            'rotulo' => 'Declaração — art. 33, V, "c", Lei 13.019/2014 (condições materiais)',     'tipo' => 'modelo', 'obrigatorio' => true],
-            ['chave' => 'decl_art34',            'rotulo' => 'Declaração — art. 34, VII, Lei 13.019/2014 (sede e tempo de existência)', 'tipo' => 'modelo', 'obrigatorio' => true],
-            ['chave' => 'decl_art39',            'rotulo' => 'Declaração — art. 39, Lei 13.019/2014 (ausência de vedações)',            'tipo' => 'modelo', 'obrigatorio' => true],
-            ['chave' => 'decl_art45',            'rotulo' => 'Declaração — art. 45, Lei 13.019/2014 (vedações de remuneração)',         'tipo' => 'modelo', 'obrigatorio' => true],
-            ['chave' => 'decl_autenticidade',    'rotulo' => 'Declaração de autenticidade dos documentos',                              'tipo' => 'modelo', 'obrigatorio' => true],
+            // As declarações da habilitação foram para "Arquivos da OSC"
+            // (30/09/2026); a do art. 23, XIV, deixou de ser exigida.
             ['chave' => 'aprovacao_plano',       'rotulo' => 'Aprovação do Plano de Trabalho (modelo padrão)',         'tipo' => 'modelo',  'obrigatorio' => true],
             ['chave' => 'pedido_parecer',        'rotulo' => 'Pedido de Parecer Financeiro (modelo padrão)',           'tipo' => 'modelo',  'obrigatorio' => true],
             ['chave' => 'parecer_financeiro',    'rotulo' => 'Parecer Financeiro (modelo padrão)',                     'tipo' => 'modelo',  'obrigatorio' => true],
@@ -2323,6 +2316,29 @@ HTML,
         $tokens += $daAlteracao;
 
         return array_map(fn ($v) => filled($v) ? $v : 'XXXXX', $tokens);
+    }
+
+    /**
+     * O texto de uma declaração da habilitação preenchido com o cadastro da
+     * OSC, para a área "Arquivos da OSC" (30/09/2026): a OSC o imprime,
+     * assina e anexa uma vez, e ele vale para todas as parcerias.
+     */
+    public static function declaracaoParaOsc(string $chave, Osc $osc): ?string
+    {
+        $bruto = self::MODELO['celebracao'][$chave] ?? null;
+        if ($bruto === null) {
+            return null;
+        }
+
+        $tokens = [
+            'cidade'       => 'São Gonçalo do Rio Abaixo',
+            'data'         => now()->format('d/m/Y'),
+            'ano'          => now()->year,
+            'data_extenso' => now()->locale('pt_BR')->translatedFormat('j \\d\\e F \\d\\e Y'),
+            'favorecido'   => $osc->name,
+        ] + self::tokensDaOsc($osc);
+
+        return \App\Support\Modelo::preencher($bruto, array_map(fn ($v) => filled($v) ? $v : 'XXXXX', $tokens));
     }
 
     /**

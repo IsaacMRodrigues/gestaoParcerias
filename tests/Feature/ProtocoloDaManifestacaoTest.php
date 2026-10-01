@@ -10,6 +10,7 @@ use App\Models\User;
 use Database\Seeders\RolesSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Mail;
+use Tests\Feature\Concerns\PreencheArquivosDaOsc;
 use Tests\TestCase;
 
 /**
@@ -20,6 +21,7 @@ use Tests\TestCase;
 class ProtocoloDaManifestacaoTest extends TestCase
 {
     use RefreshDatabase;
+    use PreencheArquivosDaOsc;
 
     private User $rl;
     private Orgao $orgao;
@@ -35,6 +37,7 @@ class ProtocoloDaManifestacaoTest extends TestCase
         $this->rl = User::factory()->create(['osc_id' => $osc->id, 'setor' => 'osc', 'status' => true, 'approval_status' => 'aprovado']);
         $this->rl->assignRole('responsavel_legal');
         $osc->forceFill(['user_id' => $this->rl->id])->save();
+        $this->preencherArquivosDaOsc($osc);
     }
 
     /** Rascunho completo, pronto para enviar. */

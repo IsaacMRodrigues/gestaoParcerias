@@ -529,6 +529,14 @@ class Proposta extends Model
             }
         }
 
+        // Etapa 2 (da OSC): a área "Arquivos da OSC" completa e em dia — as
+        // certidões e as declarações saíram do checklist para lá (30/09/2026).
+        if ($etapa === 1 && ($setor === null || $setor === 'osc')) {
+            foreach ($this->osc?->pendenciasDosArquivos() ?? [] as $pendencia) {
+                $pend[] = 'Arquivos da OSC: ' . $pendencia;
+            }
+        }
+
         // Etapas de assinatura dos documentos em sequência — o Termo (OSC, UG,
         // Gestor, Gabinete) e a OP Global (Gestor, UG): a da vez.
         foreach (array_keys(Peca::ASSINATURAS_EM_SEQUENCIA['celebracao'] ?? []) as $chave) {

@@ -16,6 +16,7 @@ use App\Http\Controllers\ModeloController;
 use App\Http\Controllers\OrdemPagamentoController;
 use App\Http\Controllers\OrgaoController;
 use App\Http\Controllers\PerfilOscController;
+use App\Http\Controllers\OscArquivoController;
 use App\Http\Controllers\OscController;
 use App\Http\Controllers\OscRegistroController;
 use App\Http\Controllers\ParecerController;
@@ -71,6 +72,12 @@ Route::get('/validar/{codigo}', [\App\Http\Controllers\ValidacaoController::clas
 // Área da OSC logada (portal) — 'osc' barra o usuário interno: servidor analisa
 // e decide sobre a proposta, nunca a apresenta.
 Route::middleware(['auth', 'osc'])->group(function () {
+    // "Arquivos da OSC" (30/09/2026): ver é da equipe; anexar, de quem tem a
+    // função de documentos (conferida no controller).
+    Route::get('/portal/arquivos', [OscArquivoController::class, 'index'])->name('portal.arquivos.index');
+    Route::post('/portal/arquivos/{tipo}', [OscArquivoController::class, 'store'])->name('portal.arquivos.store');
+    Route::get('/portal/arquivos/{tipo}/declaracao', [OscArquivoController::class, 'declaracao'])->name('portal.arquivos.declaracao');
+
     /*
      * Ver é de toda a equipe da OSC; agir é de quem tem a função marcada.
      *
@@ -297,6 +304,9 @@ Route::middleware(['auth', 'staff', 'readonly'])->group(function () {
         // para ajuste (diligência, ou a etapa 2 da Celebração) ou, já na
         // vigência, o pedido de alteração da parceria.
         Route::resource('propostas', PropostaController::class)->only(['index', 'show']);
+        // Análise dos Arquivos da OSC nesta parceria (30/09/2026).
+        Route::post('propostas/{proposta}/arquivos-osc/{arquivo}/analisar', [OscArquivoController::class, 'analisar'])
+            ->name('propostas.arquivos-osc.analisar');
         // O plano de trabalho editado pela UG na Celebração (30/09/2026). As
         // regras estão em PlanoTrabalhoController::ugPodeEditar.
         PlanoTrabalhoController::rotas('celebracao', '/propostas/{id}/plano', 'propostas.plano');
@@ -364,6 +374,13 @@ Route::middleware(['auth', 'staff', 'readonly'])->group(function () {
 // Ela só vê: os botões do trâmite seguem na permissão de chamamentos. Ver
 // ChamamentoController::selecao.
 Route::middleware('auth')->get('chamamentos/{chamamento}/selecao', [ChamamentoController::class, 'selecao'])->name('chamamentos.selecao');
+
+// Arquivos da OSC (30/09/2026): a Prefeitura vê os de cada OSC; o download é da
+// própria OSC e de quem é interno (conferido no controller).
+Route::middleware('auth')->group(function () {
+    Route::get('oscs/{osc}/arquivos', [OscArquivoController::class, 'daOsc'])->name('oscs.arquivos');
+    Route::get('arquivos-osc/{arquivo}', [OscArquivoController::class, 'download'])->name('arquivos-osc.download');
+});
 
 // Peças documentais (motor genérico — Seleção 2.2, Celebração e Formalização 2.3).
 // A autorização é feita no PecaController: peças em trâmite são liberadas por

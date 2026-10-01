@@ -119,7 +119,7 @@
                             <label class="block text-xs font-medium text-gray-600 mb-1">Tipo do Documento</label>
                             <select name="tipo" required
                                     class="block w-full border-gray-300 rounded-lg shadow-sm focus:ring-brand-500 focus:border-brand-500 text-sm">
-                                @foreach(\App\Models\Documento::TIPOS as $key => $label)
+                                @foreach(\App\Models\Documento::tiposParaAnexar() as $key => $label)
                                     <option value="{{ $key }}">{{ $label }}</option>
                                 @endforeach
                             </select>

@@ -83,8 +83,15 @@
 
         {{-- 3. Documentos --}}
         <div class="bg-white rounded-xl border border-gray-200 shadow-sm p-6">
-            <h2 class="text-base font-semibold text-gray-800">Documentos de habilitação</h2>
-            <p class="text-xs text-gray-400 mt-0.5 mb-4">Estatuto, ata de eleição, CNPJ e certidões de regularidade.</p>
+            <h2 class="text-base font-semibold text-gray-800">Comprovantes de experiência e outros documentos</h2>
+            <p class="text-xs text-gray-400 mt-0.5 mb-4">
+                O que depende do objeto desta proposta. Certidões, estatuto, ata de eleição e declarações ficam em
+                <a href="{{ route('portal.arquivos.index') }}" class="text-brand-700 hover:underline">Arquivos da OSC</a>,
+                anexados uma vez para todas as propostas.
+                @if($faltamArquivos = $manifestacao->osc?->pendenciasDosArquivos())
+                    <span class="block mt-1 text-accent-800">Falta completar: {{ implode('; ', $faltamArquivos) }}.</span>
+                @endif
+            </p>
 
             <ul class="divide-y divide-gray-100">
                 @forelse($manifestacao->documentos as $doc)
@@ -115,7 +122,7 @@
                         <x-input-label for="tipo" value="Tipo" />
                         <select name="tipo" id="tipo" required
                                 class="mt-1 border-gray-300 rounded-md shadow-sm text-sm focus:ring-brand-500 focus:border-brand-500">
-                            @foreach(\App\Models\Documento::TIPOS as $k => $rotulo)
+                            @foreach(\App\Models\Documento::tiposParaAnexar() as $k => $rotulo)
                                 <option value="{{ $k }}">{{ $rotulo }}</option>
                             @endforeach
                         </select>

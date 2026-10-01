@@ -13,6 +13,7 @@ use App\Support\CaixaDeEntrada;
 use Database\Seeders\RolesSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Mail;
+use Tests\Feature\Concerns\PreencheArquivosDaOsc;
 use Tests\TestCase;
 
 /**
@@ -24,6 +25,7 @@ use Tests\TestCase;
 class NovaPropostaTest extends TestCase
 {
     use RefreshDatabase;
+    use PreencheArquivosDaOsc;
 
     private Orgao $educacao;
     private User $rl;
@@ -54,6 +56,7 @@ class NovaPropostaTest extends TestCase
         $this->rl = User::factory()->create(['osc_id' => $osc->id, 'setor' => 'osc', 'status' => true, 'approval_status' => 'aprovado']);
         $this->rl->assignRole('responsavel_legal');
         $osc->forceFill(['user_id' => $this->rl->id])->save();
+        $this->preencherArquivosDaOsc($osc);
     }
 
     /** A OSC cria pelo portal, completa o plano e a habilitação, e envia. */

@@ -131,7 +131,8 @@ class ManifestacaoController extends Controller
 
         $request->validate([
             'arquivo' => ['required', 'file', 'mimes:pdf,doc,docx,xls,xlsx,jpg,jpeg,png', 'max:10240'],
-            'tipo'    => ['required', 'string', 'in:' . implode(',', array_keys(\App\Models\Documento::TIPOS))],
+            // Estatuto, ata e certidões estão em "Arquivos da OSC" (30/09/2026).
+            'tipo'    => ['required', 'string', 'in:' . implode(',', array_keys(\App\Models\Documento::tiposParaAnexar()))],
         ], [
             'arquivo.max'   => 'O arquivo não pode ultrapassar 10 MB.',
             'arquivo.mimes' => 'Formatos aceitos: PDF, Word, Excel, JPG, PNG.',

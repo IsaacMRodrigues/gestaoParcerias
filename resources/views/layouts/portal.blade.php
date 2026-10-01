@@ -138,6 +138,7 @@
 
             if (auth()->check() && auth()->user()->ehRepresentanteOsc()) {
                 $navItens[] = ['url' => route('portal.minhas-propostas'), 'rotulo' => 'Minhas inscrições', 'ativo' => request()->routeIs('portal.minhas*')];
+                $navItens[] = ['url' => route('portal.arquivos.index'), 'rotulo' => 'Arquivos da OSC', 'ativo' => request()->routeIs('portal.arquivos.*')];
                 $navItens[] = ['url' => route('portal.manifestacoes.index'), 'rotulo' => 'Manifestar interesse', 'ativo' => request()->routeIs('portal.manifestacoes.*') && !(isset($manifestacao) && $manifestacao?->ehNovaProposta())];
                 $navItens[] = ['url' => route('portal.novas-propostas.index'), 'rotulo' => 'Nova Proposta', 'ativo' => request()->routeIs('portal.novas-propostas.*') || (isset($manifestacao) && request()->routeIs('portal.manifestacoes.show') && $manifestacao?->ehNovaProposta())];
                 $navItens[] = ['url' => route('alteracoes.index'), 'rotulo' => 'Alterações', 'ativo' => request()->routeIs('alteracoes.*')];

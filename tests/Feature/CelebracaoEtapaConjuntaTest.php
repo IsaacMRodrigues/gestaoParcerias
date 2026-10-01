@@ -14,6 +14,7 @@ use App\Support\CaixaDeEntrada;
 use Database\Seeders\RolesSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Mail;
+use Tests\Feature\Concerns\PreencheArquivosDaOsc;
 use Tests\TestCase;
 
 /**
@@ -24,6 +25,7 @@ use Tests\TestCase;
 class CelebracaoEtapaConjuntaTest extends TestCase
 {
     use RefreshDatabase;
+    use PreencheArquivosDaOsc;
 
     private Proposta $proposta;
     private User $rl;
@@ -44,6 +46,7 @@ class CelebracaoEtapaConjuntaTest extends TestCase
         $this->rl = User::factory()->create(['osc_id' => $osc->id, 'setor' => 'osc', 'status' => true, 'approval_status' => 'aprovado']);
         $this->rl->assignRole('responsavel_legal');
         $osc->forceFill(['user_id' => $this->rl->id])->save();
+        $this->preencherArquivosDaOsc($osc);
 
         $this->proposta = Proposta::forceCreate(['chamamento_id' => $chamamento->id, 'osc_id' => $osc->id, 'titulo' => 'Oficinas de música',
             'objeto' => 'x', 'status' => 'aprovada', 'valor_solicitado' => 1,

@@ -34,6 +34,19 @@ class Documento extends Model
     ];
 
     /**
+     * Tipos que passaram para a área "Arquivos da OSC" (30/09/2026): anexados
+     * uma vez, valem para todas as parcerias. Não se pedem mais na proposta;
+     * os já anexados continuam à mostra.
+     */
+    public const NA_AREA_DA_OSC = ['estatuto', 'ata', 'certidao'];
+
+    /** Os tipos que ainda se anexam na proposta ou na manifestação. */
+    public static function tiposParaAnexar(): array
+    {
+        return array_diff_key(self::TIPOS, array_flip(self::NA_AREA_DA_OSC));
+    }
+
+    /**
      * Situação da conferência pelo município. A OSC envia; o município decide.
      */
     public const ANALISE = [
