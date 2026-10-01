@@ -566,6 +566,12 @@ Trazer os demais cenários para `tests/Feature` é uma das [Pendências](#pendê
 Da mais recente para a mais antiga. Cada entrada diz o que mudou, **por quê** e como foi
 conferido — o porquê é o que falta a quem pega o código depois.
 
+- [2026-10-01] **Salvar ou assinar não fecha o documento** (`PecaController::voltarParaPeca`, `ProcessoPecaController`)
+  - Pedido da gestão. Nos checklists (Seleção, Celebração, Alteração, Prestação de contas), o documento em que
+    se salvou ou assinou volta **aberto**, no mesmo lugar da página (antes voltava recolhido). No Planejamento,
+    salvar e assinar ficam na página do documento, com a mensagem de confirmação (antes voltavam ao processo)
+  - Conferido: 2 testes em `DocumentoContinuaAbertoTest`
+
 - [2026-10-01] **Devolução por documento, em todos os trâmites** (`App\Support\Devolucao`,
   `Concerns\PodeSerDevolvida`, `tramite/_devolver-documentos`, `tramite/_ultima-devolucao`)
   - Decisão da gestão. No Planejamento, na Seleção, na Celebração, na Alteração e na Prestação de contas, o

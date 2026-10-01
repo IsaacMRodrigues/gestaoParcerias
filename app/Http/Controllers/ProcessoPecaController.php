@@ -139,7 +139,8 @@ class ProcessoPecaController extends Controller
         $peca->update($request->validate(['conteudo' => ['nullable', 'string']]));
         $peca->limparDevolucao();
 
-        return redirect()->route('processos.show', $processo)
+        // Continua no documento: salvar não deve devolver o usuário ao fluxo (01/10/2026).
+        return redirect()->route('processos.pecas.edit', [$processo, $peca])
             ->with('success', ProcessoPeca::TIPOS[$peca->tipo] . ' salvo.');
     }
 
@@ -163,7 +164,7 @@ class ProcessoPecaController extends Controller
         ]);
         $peca->limparDevolucao();
 
-        return redirect()->route('processos.show', $processo)
+        return redirect()->route('processos.pecas.edit', [$processo, $peca])
             ->with('success', ProcessoPeca::TIPOS[$peca->tipo] . ' assinado.');
     }
 

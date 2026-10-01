@@ -55,7 +55,9 @@ class PecaController extends Controller
      */
     private function voltarParaPeca(Peca $peca, string $mensagem): RedirectResponse
     {
-        return back()->withFragment('peca-' . $peca->id)->with('success', $mensagem);
+        // 'peca_aberta': o documento em que se trabalhava volta aberto — salvar ou
+        // assinar não deve fechá-lo e devolver o usuário à lista (01/10/2026).
+        return back()->withFragment('peca-' . $peca->id)->with('success', $mensagem)->with('peca_aberta', $peca->id);
     }
 
     public function salvar(Request $request, Peca $peca): RedirectResponse

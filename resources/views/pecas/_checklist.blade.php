@@ -353,7 +353,8 @@
                              A exceção é a vez de contra-assinar — o botão da OSC mora
                              dentro do documento, e recolhido a tela dizia "aguardando a
                              contra-assinatura da OSC" sem nada visível em que clicar. --}}
-                        <details class="mt-2 group" @if($peca->podeContraAssinar(auth()->user())) open @endif>
+                        {{-- E fica aberto o documento em que se acabou de salvar ou assinar. --}}
+                        <details class="mt-2 group" @if($peca->podeContraAssinar(auth()->user()) || (int) session('peca_aberta') === $peca->id) open @endif>
                             <summary class="{{ $acao }} {{ $peca->assinado()
                                         ? 'text-gray-600 bg-gray-100 hover:bg-gray-200'
                                         : 'text-brand-800 bg-brand-50 hover:bg-brand-100' }}">
