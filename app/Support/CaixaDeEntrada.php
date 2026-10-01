@@ -9,21 +9,6 @@ use App\Models\Proposta;
 use App\Models\User;
 use Illuminate\Support\Collection;
 
-/**
- * O que está parado esperando o setor do usuário.
- *
- * A caixa de entrada nasceu olhando só para o Planejamento (Processo), e por
- * isso servia apenas aos quatro setores daquele fluxo. Quem atua na Seleção ou
- * na Celebração via sempre "nenhum processo aguardando", mesmo com trabalho
- * parado no próprio nome — o Gabinete do Prefeito, por exemplo, assina a
- * homologação e nunca teve caixa nenhuma, porque não aparece em
- * Processo::SETORES.
- *
- * Cada trâmite guarda o setor da vez numa coluna própria (setor_atual,
- * selecao_setor, celebracao_setor); a análise de proposta não tem coluna
- * nenhuma — é da UG do órgão do chamamento. Esta classe pergunta as quatro
- * fontes e devolve uma lista só, ordenada pelo que espera há mais tempo.
- */
 class CaixaDeEntrada
 {
     private function __construct(
@@ -37,12 +22,6 @@ class CaixaDeEntrada
             return new self(collect());
         }
 
-        // A OSC também tem vez nos trâmites — na Celebração ela elabora o Plano
-        // de Trabalho, assina o Termo e informa os dados bancários. Como não tem
-        // lotação, caía fora desta classe inteira: quando a UG encaminhava, o
-        // item saía da caixa do município e não entrava em lugar nenhum. O
-        // trabalho parecia ter sumido, e a OSC não tinha como saber que era a
-        // sua vez.
         if ($user->ehRepresentanteOsc()) {
             return new self(self::celebracoesDaOsc($user)->sortBy('desde')->values());
         }
@@ -133,24 +112,6 @@ class CaixaDeEntrada
             ]);
     }
 
-    /**
-     * Análise: propostas que a OSC submeteu e ainda esperam a Unidade Gestora.
-     *
-     * Era o único trabalho do sistema que não tinha fila: a proposta chegava
-     * pelo portal, caía na listagem de Propostas e ficava lá, sem que nada
-     * avisasse ninguém — nem a caixa (que só olhava os três trâmites) nem o
-     * painel (cujo card conta apenas 'em_analise'). Quem submetia esperava
-     * análise que ninguém sabia estar pendente.
-     *
-     * Análise de proposta é da UG do órgão que abriu o chamamento — por isso o
-     * filtro por setor, e não a caixa inteira para todo mundo. O recorte por
-     * órgão vem de visiveisPara(), o mesmo da listagem, para a caixa nunca
-     * mostrar o que a tela esconde.
-     *
-     * Fica na fila enquanto houver o que fazer: 'submetida' (ninguém pegou) e
-     * 'em_analise' (alguém pegou e não terminou). Sair da fila é decidir —
-     * aprovar, reprovar ou cancelar.
-     */
     private static function analiseDePropostas(User $user): Collection
     {
         if ($user->setor !== 'ug' || !$user->can('propostas')) {
@@ -178,13 +139,6 @@ class CaixaDeEntrada
             ]);
     }
 
-    /**
-     * Manifestações de interesse paradas no setor.
-     *
-     * A SCP conduz (recebe e decide) e a Secretaria opina: as duas pontas
-     * entram aqui pelo mesmo campo `setor_atual`. Fora do trâmite — deferida,
-     * indeferida ou ainda em rascunho na OSC — não há o que esperar.
-     */
     private static function manifestacoes(User $user): Collection
     {
         if (!$user->can('chamamentos')) {
@@ -214,9 +168,6 @@ class CaixaDeEntrada
             ]);
     }
 
-    /**
-     * Celebração parada com a OSC — a vez dela, nas suas próprias parcerias.
-     */
     private static function celebracoesDaOsc(User $user): Collection
     {
         return Proposta::with('chamamento')
@@ -236,20 +187,6 @@ class CaixaDeEntrada
             ]);
     }
 
-    /**
-     * Celebração: parcerias com o trâmite parado no setor.
-     *
-     * Sem exigir permissão de módulo, ao contrário dos dois blocos acima. Não é
-     * descuido: a rota `celebracao.show` só pede autenticação, e a Celebração
-     * passa por setores que não têm `propostas` nem `formalizacao` — a PJ, por
-     * exemplo, emite o Parecer Jurídico na etapa 8 e só tem `pareceres_juridico`.
-     * Filtrar por permissão aqui reproduziria justamente o defeito que esta
-     * classe veio corrigir: o setor com trabalho parado e caixa vazia.
-     *
-     * Os dois blocos acima mantêm o filtro porque as rotas de destino
-     * (`processos.show` e `chamamentos.selecao`) exigem permissão — sem ele o
-     * item apareceria na caixa e devolveria 403 ao ser clicado.
-     */
     private static function celebracoes(User $user): Collection
     {
         // Na etapa conjunta da Celebração (UG e SCP em paralelo, 30/09/2026), o

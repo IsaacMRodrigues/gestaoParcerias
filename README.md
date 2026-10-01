@@ -552,9 +552,7 @@ Trazer os demais cenários para `tests/Feature` é uma das [Pendências](#pendê
 
 - **5 · Monitoramento e Fiscalização** — aparece no menu como "em breve".
 - **Caixa de Entrada** não inclui alterações da parceria, chamados de suporte nem os recursos da Seleção
-  para a Comissão (que é avisada por e-mail e os vê na tela da proposta). E `app/Support/CaixaDeEntrada.php`
-  e `app/Http/Middleware/EnsureIsStaff.php` estão com comentários apagados por outra pessoa, fora de
-  commit, esperando decisão — as mudanças deste projeto nesses arquivos entram em commit só nas linhas delas.
+  para a Comissão (que é avisada por e-mail e os vê na tela da proposta).
 - **Parecer Técnico / Jurídico / Decisão Final** (`ParecerController`, `pareceres/create`) é tela da
   primeira fase e está fora do fluxo: texto livre, sem documento, sem assinatura e sem validação,
   enquanto os pareceres de verdade são peças do trâmite; e quem aprova ou reprova a proposta é o
