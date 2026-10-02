@@ -31,7 +31,6 @@ use App\Http\Controllers\ProcessoController;
 use App\Http\Controllers\SuporteController;
 use App\Http\Controllers\ProcessoPecaController;
 use App\Http\Controllers\ProfileController;
-use App\Http\Controllers\ProgramaController;
 use App\Http\Controllers\RecursoController;
 use App\Http\Controllers\PropostaController;
 use App\Http\Controllers\TramitacaoController;
@@ -249,10 +248,11 @@ Route::middleware(['auth', 'staff', 'readonly'])->group(function () {
         Route::post('processos/{processo}/publicar-chamamento', [TramitacaoController::class, 'publicar'])->name('processos.publicar-chamamento');
     });
 
-    // Programas, Chamamentos e Seleção (2.2)
+    // Chamamentos e Seleção. O programa é só o agrupamento por Secretaria (Programa::doOrgao);
+    // os endereços antigos de Programas levam à lista de chamamentos.
     Route::middleware('permission:chamamentos')->group(function () {
-        Route::resource('programas', ProgramaController::class);
-        Route::resource('programas.chamamentos', ChamamentoController::class)->except(['show']);
+        Route::resource('chamamentos', ChamamentoController::class)->except(['show']);
+        Route::get('programas/{caminho?}', fn () => redirect()->route('chamamentos.index'))->where('caminho', '.*');
         // Manifestação de Interesse: antessala do chamamento — a SCP conduz, a
         // Secretaria opina, e o deferimento cria a dispensa/inexigibilidade.
         Route::get('manifestacoes', [ManifestacaoAnaliseController::class, 'index'])->name('manifestacoes.index');

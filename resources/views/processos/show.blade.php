@@ -115,9 +115,9 @@
                             <span class="text-sm text-gray-800 font-medium">{{ $processo->chamamento->titulo }}</span>
                         </div>
                         <div class="mt-3 flex flex-wrap gap-3 text-sm">
-                            <a href="{{ route('programas.chamamentos.index', $processo->chamamento->programa) }}"
+                            <a href="{{ route('chamamentos.selecao', $processo->chamamento) }}"
                                class="text-brand-600 hover:underline font-medium">
-                                Ver em Programas &rarr;
+                                Ver o chamamento &rarr;
                             </a>
                             <a href="{{ route('chamamentos.selecao', $processo->chamamento) }}"
                                class="text-gray-600 hover:underline">
@@ -134,7 +134,7 @@
                             <p class="mt-3 text-sm text-accent-700 bg-accent-50 border border-accent-100 rounded-md px-3 py-2">
                                 @if($processo->chamamento->cadastroEditavelPor(auth()->user()))
                                     ⚠️ Defina o <strong>período de inscrição</strong> no chamamento para abri-lo a propostas das OSCs.
-                                    <a href="{{ route('programas.chamamentos.edit', [$processo->chamamento->programa, $processo->chamamento]) }}"
+                                    <a href="{{ route('chamamentos.edit', $processo->chamamento) }}"
                                        class="underline font-medium">Definir datas &rarr;</a>
                                 @else
                                     ⚠️ Falta o <strong>período de inscrição</strong>: a SCP o define no chamamento para abri-lo a propostas das OSCs.

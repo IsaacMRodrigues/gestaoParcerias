@@ -12,8 +12,8 @@
         ['Caixa de Entrada', route('caixa'), 'recebidos pendentes meu setor tramitacao', $u->can('planejamento') && $u->setor],
         ['Novo Processo', route('processos.create'), 'abrir criar cadastrar processo', $u->can('planejamento')],
 
-        ['Chamamentos', route('programas.index'), 'programas edital selecao etapa 2', $u->can('chamamentos')],
-        ['Novo Programa', route('programas.create'), 'criar cadastrar programa', $u->can('chamamentos')],
+        ['Chamamentos', route('chamamentos.index'), 'programas edital selecao etapa 2 abertos', $u->can('chamamentos')],
+        ['Novo Chamamento', route('chamamentos.create'), 'criar cadastrar chamamento edital', \App\Models\Chamamento::cadastroPermitidoA($u)],
         ['Propostas', route('propostas.index'), 'planos de trabalho osc etapa 2', $u->can('propostas')],
 
         ['Celebração — Instrumentos', route('instrumentos.index'), 'termo fomento colaboracao acordo convenio etapa 3', $u->can('formalizacao')],

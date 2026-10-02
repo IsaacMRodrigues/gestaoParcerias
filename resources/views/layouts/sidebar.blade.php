@@ -107,13 +107,13 @@
         {{-- 2. Seleção --}}
         @canany(['chamamentos', 'propostas'])
             @php
-                $emSelecao = request()->routeIs('programas.*') || request()->routeIs('chamamentos.*')
+                $emSelecao = request()->routeIs('chamamentos.*')
                     || request()->routeIs('propostas.*') || request()->routeIs('manifestacoes.*');
                 // Era um <p>: tinha a aparência exata de um link, mas clicar não
                 // fazia nada. Agora leva ao primeiro subitem a que o usuário
                 // tem acesso — o @canany acima garante que existe pelo menos um.
                 $urlSelecao = auth()->user()->can('chamamentos')
-                    ? route('programas.index')
+                    ? route('chamamentos.index')
                     : route('propostas.index');
             @endphp
             {{-- Seleção recolhe; a escolha fica no localStorage, mas dentro da seção ela abre sempre. --}}
@@ -146,8 +146,8 @@
 
                 <div x-show="aberto" x-cloak>
                     @can('chamamentos')
-                        <a href="{{ route('programas.index') }}"
-                           class="{{ $link }} pl-10 {{ request()->routeIs('programas.*') || request()->routeIs('chamamentos.*') ? $on : '' }}">
+                        <a href="{{ route('chamamentos.index') }}"
+                           class="{{ $link }} pl-10 {{ request()->routeIs('chamamentos.*') ? $on : '' }}">
                             Chamamentos
                         </a>
                     @endcan

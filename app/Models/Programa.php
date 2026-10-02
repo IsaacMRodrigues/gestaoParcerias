@@ -37,6 +37,17 @@ class Programa extends Model
         ];
     }
 
+    /** O programa da Secretaria no ano, criado na primeira vez: agrupa os chamamentos dela. */
+    public static function doOrgao(Orgao $orgao, ?int $ano = null): self
+    {
+        $ano ??= now()->year;
+
+        return self::firstOrCreate(
+            ['orgao_id' => $orgao->id, 'sigla' => 'PGP-' . ($orgao->codigo ?: $orgao->id) . '-' . $ano],
+            ['name' => 'Parcerias ' . ($orgao->sigla ?: $orgao->name) . ' ' . $ano, 'tipo' => 'termo_colaboracao', 'status' => 'ativo'],
+        );
+    }
+
     public function orgao(): BelongsTo
     {
         return $this->belongsTo(Orgao::class);

@@ -137,14 +137,13 @@ class ChamamentoCanceladoTest extends TestCase
     public function test_o_formulario_de_edicao_nao_cancela_nem_descancela(): void
     {
         $admin = $this->servidor('administrador_setorial', 'ti', null);
-        $programa = $this->chamamento->programa;
         $dados = ['numero' => '001/2026', 'titulo' => 'Oficinas', 'objeto' => 'x', 'tipo' => 'chamamento_publico'];
 
-        $this->actingAs($admin)->put("/programas/{$programa->id}/chamamentos/{$this->chamamento->id}", $dados + ['status' => 'cancelado'])
+        $this->actingAs($admin)->put("/chamamentos/{$this->chamamento->id}", $dados + ['status' => 'cancelado'])
             ->assertSessionHasErrors('status');
 
         $this->cancelar();
-        $this->actingAs($admin)->put("/programas/{$programa->id}/chamamentos/{$this->chamamento->id}", $dados + ['status' => 'publicado']);
+        $this->actingAs($admin)->put("/chamamentos/{$this->chamamento->id}", $dados + ['status' => 'publicado']);
         $this->assertTrue($this->chamamento->fresh()->cancelado(), 'cancelado só sai pelo botão de reabrir');
     }
 

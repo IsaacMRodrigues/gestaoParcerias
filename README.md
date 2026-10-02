@@ -390,7 +390,7 @@ responsável legal restringe depois, no "Alterar" da listagem.
 |---|---|
 | `cadastros` | **Cadastros**: órgãos e usuários, OSCs, aprovação de contas |
 | `planejamento` | **1 · Planejamento**: processos, termo de referência, peças e trâmite |
-| `chamamentos` | **2 · Seleção**: programas, chamamentos, checklist e trâmite da seleção, **manifestações de interesse** |
+| `chamamentos` | **2 · Seleção**: chamamentos, checklist e trâmite da seleção, **manifestações de interesse** |
 | `propostas` | **Propostas**: análise da proposta, plano de trabalho, conferência dos documentos da OSC |
 | `pareceres_tecnico` / `pareceres_juridico` / `pareceres_decisao` | Emitir o parecer correspondente na análise da proposta |
 | `formalizacao` | **Instrumentos**: instrumento, aditivos, apostilamento e sua documentação |
@@ -563,8 +563,6 @@ Trazer os demais cenários para `tests/Feature` é uma das [Pendências](#pendê
   proposta aprovada. Exigir a Celebração concluída é decisão pendente.
 - `DELETE /instrumentos/{id}` aponta para um método que não existe (500). Nada na tela chama.
 - O selo da **Celebração** ainda diz "Com …" o setor; o da Seleção já diz "Em análise".
-- `/programas/{id}` devolve **500**: `ProgramaController@show` aponta para uma view que não existe.
-  Nada na interface leva até lá.
 - Na prestação de contas, o **laudo de obra** e os **pareceres** saem com `XXXXX` no corpo.
 - Checklist da dispensa: itens 16 a 18 e a publicação do termo (item 15).
 - Trazer as verificações HTTP para `tests/Feature`.
@@ -587,6 +585,19 @@ Trazer os demais cenários para `tests/Feature` é uma das [Pendências](#pendê
 
 Da mais recente para a mais antiga. Cada entrada diz o que mudou, **por quê** e como foi
 conferido — o porquê é o que falta a quem pega o código depois.
+
+- [2026-10-02] **"Chamamentos" vai direto à lista; a tela de Programas saiu** (`ChamamentoController`, `chamamentos/index`)
+  - O menu passava por "Programas Governamentais" para chegar aos chamamentos de cada programa. Agora "Chamamentos"
+    abre uma lista só, de todas as Secretarias, já filtrada nos **abertos** (publicados e em inscrição, a mesma
+    régua do card do painel), com filtros de busca, Secretaria, modalidade e situação (em análise, encerrados,
+    cancelados, rascunhos, todos) e a coluna Secretaria
+  - O programa virou só o agrupamento por Secretaria e ano (`Programa::doOrgao`, o mesmo que o Planejamento já usava
+    ao publicar): o "Novo Chamamento" pede a Secretaria e o chamamento entra no programa dela. Saíram
+    `ProgramaController`, `ProgramaRequest` e as views de programas; as rotas viraram `/chamamentos` e
+    `/chamamentos/{id}/edit`, e qualquer endereço antigo de `/programas` leva à lista (some também o 500 de
+    `/programas/{id}`). Painel, busca global, Seleção e Processo apontam para a lista nova
+  - Conferido: `ListaDeChamamentosTest` (falha com o filtro padrão desligado), `ChamamentoSoScpEditaTest`,
+    `ChamamentoCanceladoTest`; suíte 174/174; telas abertas com os dados locais
 
 - [2026-10-02] **Saem os 5 testes do Breeze que falhavam**
   - Login de qualquer usuário criado, cadastro já logado e `/profile` aberto a todos: o Breeze os testava, mas o

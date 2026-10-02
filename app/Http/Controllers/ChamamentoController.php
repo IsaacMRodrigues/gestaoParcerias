@@ -4,48 +4,82 @@ namespace App\Http\Controllers;
 
 use App\Http\Requests\ChamamentoRequest;
 use App\Models\Chamamento;
+use App\Models\Orgao;
 use App\Models\Peca;
 use App\Models\Programa;
 use Illuminate\Http\RedirectResponse;
+use Illuminate\Http\Request;
 use Illuminate\View\View;
 
 class ChamamentoController extends Controller
 {
-    public function index(Programa $programa): View
-    {
-        $chamamentos = $programa->chamamentos()
-            ->with('processo')
-            ->orderBy('created_at', 'desc')
-            ->paginate(15);
+    /** Situações do filtro; "abertos" (publicados e em inscrição) é o padrão. */
+    public const SITUACOES = [
+        'abertos'      => 'Abertos',
+        'em_analise'   => 'Em análise',
+        'encerrado'    => 'Encerrados',
+        'cancelado'    => 'Cancelados',
+        'rascunho'     => 'Rascunhos',
+        'todos'        => 'Todos',
+    ];
 
-        return view('chamamentos.index', compact('programa', 'chamamentos'));
+    public function index(Request $request): View
+    {
+        $filtros = $request->only(['busca', 'orgao_id', 'tipo']);
+        $filtros['situacao'] = array_key_exists($request->query('situacao'), self::SITUACOES)
+            ? $request->query('situacao')
+            : 'abertos';
+
+        $chamamentos = Chamamento::with(['programa.orgao', 'processo'])
+            ->when($filtros['busca'] ?? null, fn ($q, $busca) => $q->where(fn ($sub) => $sub
+                ->where('numero', 'like', "%{$busca}%")
+                ->orWhere('titulo', 'like', "%{$busca}%")
+                ->orWhere('objeto', 'like', "%{$busca}%")))
+            ->when($filtros['orgao_id'] ?? null, fn ($q, $v) => $q->whereHas('programa', fn ($p) => $p->where('orgao_id', $v)))
+            ->when($filtros['tipo'] ?? null, fn ($q, $v) => $q->where('tipo', $v))
+            ->when($filtros['situacao'] === 'abertos', fn ($q) => $q->whereIn('status', ['publicado', 'em_inscricao']))
+            ->when(! in_array($filtros['situacao'], ['abertos', 'todos'], true), fn ($q) => $q->where('status', $filtros['situacao']))
+            ->orderByDesc('created_at')
+            ->paginate(15)
+            ->withQueryString();
+
+        $orgaos = Orgao::orderBy('name')->get();
+
+        return view('chamamentos.index', compact('chamamentos', 'orgaos', 'filtros'));
     }
 
-    public function create(Programa $programa): View
+    public function create(): View
     {
         $this->somenteScp();
 
-        return view('chamamentos.create', compact('programa'));
+        $orgaos = Orgao::where('status', true)->orderBy('name')->get();
+
+        return view('chamamentos.create', compact('orgaos'));
     }
 
-    public function store(ChamamentoRequest $request, Programa $programa): RedirectResponse
+    public function store(ChamamentoRequest $request): RedirectResponse
     {
         $this->somenteScp();
 
-        $programa->chamamentos()->create($request->validated());
+        $orgao = Orgao::findOrFail($request->validate(
+            ['orgao_id' => ['required', 'exists:orgaos,id']],
+            ['orgao_id.required' => 'Escolha a Secretaria do chamamento.'],
+        )['orgao_id']);
 
-        return redirect()->route('programas.chamamentos.index', $programa)
+        Programa::doOrgao($orgao)->chamamentos()->create($request->validated());
+
+        return redirect()->route('chamamentos.index')
             ->with('success', 'Chamamento cadastrado com sucesso.');
     }
 
-    public function edit(Programa $programa, Chamamento $chamamento): View
+    public function edit(Chamamento $chamamento): View
     {
         $this->somenteScp();
 
-        return view('chamamentos.edit', compact('programa', 'chamamento'));
+        return view('chamamentos.edit', compact('chamamento'));
     }
 
-    public function update(ChamamentoRequest $request, Programa $programa, Chamamento $chamamento): RedirectResponse
+    public function update(ChamamentoRequest $request, Chamamento $chamamento): RedirectResponse
     {
         $this->somenteScp();
 
@@ -58,11 +92,11 @@ class ChamamentoController extends Controller
 
         $chamamento->update($dados);
 
-        return redirect()->route('programas.chamamentos.index', $programa)
+        return redirect()->route('chamamentos.index')
             ->with('success', 'Chamamento atualizado com sucesso.');
     }
 
-    public function destroy(Programa $programa, Chamamento $chamamento): RedirectResponse
+    public function destroy(Chamamento $chamamento): RedirectResponse
     {
         $this->somenteScp();
 
@@ -72,7 +106,7 @@ class ChamamentoController extends Controller
 
         $chamamento->delete();
 
-        return redirect()->route('programas.chamamentos.index', $programa)
+        return redirect()->route('chamamentos.index')
             ->with('success', 'Chamamento removido com sucesso.');
     }
 

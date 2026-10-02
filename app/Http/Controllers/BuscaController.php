@@ -6,7 +6,6 @@ use App\Models\Chamamento;
 use App\Models\Instrumento;
 use App\Models\Osc;
 use App\Models\Processo;
-use App\Models\Programa;
 use App\Models\Proposta;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -70,17 +69,6 @@ class BuscaController extends Controller
                     'titulo'    => trim(($c->numero ? $c->numero.' — ' : '').$c->titulo),
                     'subtitulo' => 'Seleção',
                     'url'       => route('chamamentos.selecao', $c),
-                ]));
-
-            $grupos[] = $this->grupo('Programas', 'programa', Programa::query()
-                ->where(fn ($q) => $q->where('name', 'like', $like)
-                    ->orWhere('sigla', 'like', $like)
-                    ->orWhere('objetivo', 'like', $like))
-                ->latest('id')->limit(self::POR_GRUPO)->get()
-                ->map(fn (Programa $p) => [
-                    'titulo'    => $p->name,
-                    'subtitulo' => collect([$p->sigla, 'Chamamentos do programa'])->filter()->implode(' · '),
-                    'url'       => route('programas.chamamentos.index', $p),
                 ]));
         }
 

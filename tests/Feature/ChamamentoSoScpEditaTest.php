@@ -51,13 +51,13 @@ class ChamamentoSoScpEditaTest extends TestCase
 
     private function base(): string
     {
-        return "/programas/{$this->programa->id}/chamamentos";
+        return '/chamamentos';
     }
 
     public function test_a_ug_nao_cria_nao_edita_nem_remove(): void
     {
         $this->actingAs($this->ug)->get("{$this->base()}/create")->assertForbidden();
-        $this->actingAs($this->ug)->post($this->base(), $this->dados(['numero' => '002/2026']))->assertForbidden();
+        $this->actingAs($this->ug)->post($this->base(), $this->dados(['numero' => '002/2026', 'orgao_id' => $this->programa->orgao_id]))->assertForbidden();
         $this->actingAs($this->ug)->get("{$this->base()}/{$this->chamamento->id}/edit")->assertForbidden();
         $this->actingAs($this->ug)->put("{$this->base()}/{$this->chamamento->id}", $this->dados())->assertForbidden();
         $this->actingAs($this->ug)->delete("{$this->base()}/{$this->chamamento->id}")->assertForbidden();
@@ -70,7 +70,7 @@ class ChamamentoSoScpEditaTest extends TestCase
     {
         $this->actingAs($this->ug)->get($this->base())->assertOk()
             ->assertDontSee('+ Novo Chamamento')
-            ->assertDontSee(route('programas.chamamentos.edit', [$this->programa, $this->chamamento]), false);
+            ->assertDontSee(route('chamamentos.edit', $this->chamamento), false);
 
         $this->actingAs($this->ug)->get("/chamamentos/{$this->chamamento->id}/selecao")->assertOk()
             ->assertDontSee('Editar dados');
@@ -80,7 +80,7 @@ class ChamamentoSoScpEditaTest extends TestCase
     {
         $this->actingAs($this->scp)->get($this->base())->assertOk()
             ->assertSee('+ Novo Chamamento')
-            ->assertSee(route('programas.chamamentos.edit', [$this->programa, $this->chamamento]), false);
+            ->assertSee(route('chamamentos.edit', $this->chamamento), false);
         $this->actingAs($this->scp)->get("{$this->base()}/{$this->chamamento->id}/edit")->assertOk();
 
         $this->actingAs($this->scp)->put("{$this->base()}/{$this->chamamento->id}", $this->dados())

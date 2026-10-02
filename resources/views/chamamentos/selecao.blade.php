@@ -3,10 +3,7 @@
         <div class="flex items-center justify-between">
             <div>
                 <p class="text-sm text-gray-500">
-                    <a href="{{ route('programas.chamamentos.index', $chamamento->programa) }}" class="hover:underline">
-                        {{ $chamamento->programa->sigla ?? $chamamento->programa->name }}
-                    </a>
-                    &rsaquo; Chamamentos
+                    <a href="{{ route('chamamentos.index') }}" class="hover:underline">Chamamentos</a>
                 </p>
                 <h2 class="text-2xl font-bold text-gray-900 mt-0.5">
                     Seleção e Celebração
@@ -207,7 +204,7 @@
                         </a>
                     @endif
                     @if($chamamento->cadastroEditavelPor(auth()->user()))
-                        <a href="{{ route('programas.chamamentos.edit', [$chamamento->programa, $chamamento]) }}" class="text-gray-600 hover:underline">
+                        <a href="{{ route('chamamentos.edit', $chamamento) }}" class="text-gray-600 hover:underline">
                             Editar dados
                         </a>
                     @endif

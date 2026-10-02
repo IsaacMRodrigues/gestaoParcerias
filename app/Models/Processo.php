@@ -345,17 +345,7 @@ class Processo extends Model
         $orgao = $this->orgao;
         $ano = $this->created_at?->year ?? now()->year;
 
-        $programa = Programa::firstOrCreate(
-            [
-                'orgao_id' => $orgao->id,
-                'sigla'    => 'PGP-' . ($orgao->codigo ?: $orgao->id) . '-' . $ano,
-            ],
-            [
-                'name'   => 'Parcerias ' . ($orgao->sigla ?: $orgao->name) . ' ' . $ano,
-                'tipo'   => 'termo_colaboracao',
-                'status' => 'ativo',
-            ]
-        );
+        $programa = Programa::doOrgao($orgao, $ano);
 
         $tipoLabel = self::MODALIDADES[$this->modalidade] ?? $this->modalidade;
         $objeto = $this->extrairObjetoDoTermo() ?: ('Parceria originada do processo ' . $this->numero);

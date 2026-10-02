@@ -110,7 +110,7 @@
 
                 @can('chamamentos')
                     <x-stat-card label="Chamamentos abertos" icon="chamamentos" :value="$chamamentosAbertos" :sub="$chamamentosTotal.' cadastrados'"
-                                 color="brand" :href="route('programas.index')" />
+                                 color="brand" :href="route('chamamentos.index')" />
                 @endcan
 
                 @can('chamamentos')
@@ -146,7 +146,7 @@
                         <x-quick-link :href="route('processos.create')" label="Novo Processo" color="accent" />
                     @endcan
                     @can('chamamentos')
-                        <x-quick-link :href="route('programas.index')" label="Chamamentos" />
+                        <x-quick-link :href="route('chamamentos.index')" label="Chamamentos" />
                         <x-quick-link :href="route('manifestacoes.index')" label="Manifestações de Interesse" />
                     @endcan
                     @can('propostas')

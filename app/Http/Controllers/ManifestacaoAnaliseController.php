@@ -142,7 +142,7 @@ class ManifestacaoAnaliseController extends Controller
             'fundamento.required' => 'Fundamente o enquadramento (arts. 30 e 31 da Lei 13.019/2014).',
         ]);
 
-        $programa = DB::transaction(function () use ($manifestacao, $data) {
+        DB::transaction(function () use ($manifestacao, $data) {
             $programa = $this->programaDoDeferimento($manifestacao, $data['programa_id'] ?? null);
 
             $chamamento = Chamamento::create([
@@ -213,18 +213,12 @@ class ManifestacaoAnaliseController extends Controller
                 'chamamento_id'  => $chamamento->id,
                 'proposta_id'    => $proposta->id,
             ]);
-
-            return $programa;
         });
 
         return redirect()->route('manifestacoes.show', $manifestacao)->with('success',
             'Deferida como ' . ManifestacaoInteresse::ENCAMINHAMENTOS[$data['decisao']]
             . '. O chamamento e a proposta foram criados com o plano de trabalho da OSC'
-            . ($manifestacao->ehNovaProposta() ? ', e a parceria já está na Celebração.' : '.')
-            . ($programa->wasRecentlyCreated
-                ? ' Como a Secretaria não tinha programa cadastrado, o chamamento nasceu em "'
-                    . $programa->name . '" — dá para renomeá-lo em Programas.'
-                : ''));
+            . ($manifestacao->ehNovaProposta() ? ', e a parceria já está na Celebração.' : '.'));
     }
 
     /** O programa do chamamento: a pasta geral da Secretaria, criada uma vez e reaproveitada. */
