@@ -105,6 +105,12 @@ class ArquivosDaOscTest extends TestCase
         $this->actingAs($this->rl)->get('/portal/arquivos/decl_art7/declaracao')->assertOk()
             ->assertSee('Associação Viver')->assertSee('Maria Presidente');
         $this->actingAs($this->rl)->get('/portal/arquivos/estatuto/declaracao')->assertNotFound();
+
+        // Impressa para assinar à mão: toda declaração traz a linha de assinatura.
+        foreach (array_keys(OscArquivo::GRUPOS['declaracoes']['itens']) as $tipo) {
+            $this->actingAs($this->rl)->get("/portal/arquivos/{$tipo}/declaracao")
+                ->assertSee('border-top:1px solid #111', false);
+        }
     }
 
     public function test_area_incompleta_ou_certidao_vencida_impede_o_envio_da_manifestacao(): void

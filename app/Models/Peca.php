@@ -2338,7 +2338,15 @@ HTML,
             'favorecido'   => $osc->name,
         ] + self::tokensDaOsc($osc);
 
-        return \App\Support\Modelo::preencher($bruto, array_map(fn ($v) => filled($v) ? $v : 'XXXXX', $tokens));
+        $html = \App\Support\Modelo::preencher($bruto, array_map(fn ($v) => filled($v) ? $v : 'XXXXX', $tokens));
+
+        // Vai ser impressa e assinada à mão: o bloco do representante ganha a linha de assinatura.
+        return preg_replace(
+            '#<p style="text-align:center"><br>(.*?)</p>#s',
+            '<p style="text-align:center;margin-top:3.5em"><span style="display:inline-block;min-width:20em;border-top:1px solid #111;padding-top:.3em">$1</span></p>',
+            $html,
+            1
+        );
     }
 
     /**

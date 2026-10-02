@@ -591,6 +591,11 @@ Trazer os demais cenários para `tests/Feature` é uma das [Pendências](#pendê
 Da mais recente para a mais antiga. Cada entrada diz o que mudou, **por quê** e como foi
 conferido — o porquê é o que falta a quem pega o código depois.
 
+- [2026-10-02] **Linha de assinatura nas declarações impressas da OSC** (`Peca::declaracaoParaOsc`)
+  - As seis declarações de "Arquivos da OSC" são impressas e assinadas à mão, e saíam sem lugar para a assinatura.
+    O bloco do representante legal ganha a linha acima do nome. Só na versão para imprimir: o texto do modelo não muda
+  - Conferido: `ArquivosDaOscTest`
+
 - [2026-10-02] **Nova Proposta: primeiro formulário sem o campo de valor** (`portal/manifestacoes/_valores-proposta`)
   - A pedido da gestão, sai o "Valor pleiteado" do primeiro formulário, e o título da planilha passa a
     "Plano de aplicação dos recursos (Anexar planilha)", sem o número 13. O valor pleiteado começa como o total da
