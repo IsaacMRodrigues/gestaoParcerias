@@ -591,6 +591,14 @@ Trazer os demais cenários para `tests/Feature` é uma das [Pendências](#pendê
 Da mais recente para a mais antiga. Cada entrada diz o que mudou, **por quê** e como foi
 conferido — o porquê é o que falta a quem pega o código depois.
 
+- [2026-10-02] **Arquivos da OSC no desenho do resto do sistema** (`arquivos-osc/_lista`)
+  - A lista copiava o portal do DF (faixa verde, títulos em caixa alta, selos coloridos, "Histórico • 00") e destoava
+    das outras telas. Agora usa o mesmo desenho da lista de documentos dos trâmites: cabeçalho com contagem e barra
+    de progresso por grupo (`pecas/_cabecalho`, que ganhou rótulos configuráveis), bolinha de situação, versão e
+    validade numa linha só, arquivo atual como chip com "Baixar", e "Enviar arquivo / nova versão", "Histórico" e
+    "Analisar nesta parceria" como os botões recolhíveis do checklist. O histórico só aparece quando há o que mostrar
+  - Conferido: `ArquivosDaOscTest`; portal, cadastro da OSC e proposta renderizados com dados locais
+
 - [2026-10-01] **Barra do portal da OSC em grupos** (`layouts/portal`)
   - Com "Arquivos da OSC", a OSC logada tinha nove links numa linha e a barra passava da largura da tela. Agora:
     Chamamentos abertos · Minhas inscrições · **Propor parceria ▾** (Manifestar interesse, Nova Proposta) ·

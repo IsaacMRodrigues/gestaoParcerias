@@ -73,7 +73,7 @@ class ArquivosDaOscTest extends TestCase
     public function test_a_osc_anexa_uma_vez_e_cada_envio_e_uma_versao(): void
     {
         $this->actingAs($this->rl)->get('/portal/arquivos')->assertOk()
-            ->assertSee('CND — Certidões negativas')->assertSee('Declarações')->assertSee('Arquivo não anexado');
+            ->assertSee('CND — Certidões negativas')->assertSee('Declarações')->assertSee('Não anexado')->assertSee('Enviar arquivo');
 
         $this->enviar('cndt')->assertSessionHasErrors('validade');
         $this->enviar('cndt', ['validade' => now()->subDay()->toDateString()])->assertSessionHasErrors('validade');
@@ -85,7 +85,7 @@ class ArquivosDaOscTest extends TestCase
         $this->assertSame(2, $atual->versao);
         $this->assertSame(2, $this->osc->arquivos()->where('tipo', 'cndt')->count(), 'a versão anterior fica no histórico');
 
-        $this->actingAs($this->rl)->get('/portal/arquivos')->assertSee('Versão atual: 2')->assertSee('Histórico • 02');
+        $this->actingAs($this->rl)->get('/portal/arquivos')->assertSee('Versão 2 · enviada em')->assertSee('Histórico (2 versões)')->assertSee('Enviar nova versão');
         $this->enviar('nao_existe')->assertNotFound();
     }
 

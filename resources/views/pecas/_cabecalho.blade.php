@@ -13,7 +13,7 @@
             <span class="text-lg font-bold {{ $progresso['percent'] === 100 ? 'text-brand-700' : 'text-gray-900' }}">
                 {{ $progresso['ok'] }}<span class="text-gray-400 font-semibold">/{{ $progresso['total'] }}</span>
             </span>
-            <span class="block text-xs text-gray-500">obrigatórias concluídas</span>
+            <span class="block text-xs text-gray-500">{{ $rotuloProgresso ?? 'obrigatórias concluídas' }}</span>
         </div>
     </div>
 
@@ -27,7 +27,7 @@
             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.2">
                 <path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
             </svg>
-            Documentação obrigatória completa.
+            {{ $mensagemCompleta ?? 'Documentação obrigatória completa.' }}
         </p>
     @endif
 </div>
