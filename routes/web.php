@@ -7,7 +7,6 @@ use App\Http\Controllers\CaixaController;
 use App\Http\Controllers\CelebracaoController;
 use App\Http\Controllers\ChamamentoController;
 use App\Http\Controllers\SelecaoController;
-use App\Http\Controllers\DiligenciaController;
 use App\Http\Controllers\DocumentoController;
 use App\Http\Controllers\DossieController;
 use App\Http\Controllers\ExecucaoController;
@@ -19,7 +18,6 @@ use App\Http\Controllers\PerfilOscController;
 use App\Http\Controllers\OscArquivoController;
 use App\Http\Controllers\OscController;
 use App\Http\Controllers\OscRegistroController;
-use App\Http\Controllers\ParecerController;
 use App\Http\Controllers\PecaController;
 use App\Http\Controllers\PlanoTrabalhoController;
 use App\Http\Controllers\OscUsuarioController;
@@ -291,18 +289,6 @@ Route::middleware(['auth', 'staff', 'readonly'])->group(function () {
         // O plano de trabalho editado pela UG na Celebração. As
         // regras estão em PlanoTrabalhoController::ugPodeEditar.
         PlanoTrabalhoController::rotas('celebracao', '/propostas/{id}/plano', 'propostas.plano');
-    });
-
-    // Pareceres (técnico/jurídico/decisão) e diligências — autorização fina por tipo no controller
-    Route::middleware('permission:pareceres_tecnico|pareceres_juridico|pareceres_decisao')->group(function () {
-        Route::get('propostas/{proposta}/pareceres/create/{tipo}', [ParecerController::class, 'create'])
-            ->name('propostas.pareceres.create');
-        Route::post('propostas/{proposta}/pareceres', [ParecerController::class, 'store'])
-            ->name('propostas.pareceres.store');
-        Route::get('propostas/{proposta}/diligencias/{diligencia}', [DiligenciaController::class, 'show'])
-            ->name('propostas.diligencias.show');
-        Route::patch('propostas/{proposta}/diligencias/{diligencia}/responder', [DiligenciaController::class, 'responder'])
-            ->name('propostas.diligencias.responder');
     });
 
     // Formalização (instrumentos e aditivos)

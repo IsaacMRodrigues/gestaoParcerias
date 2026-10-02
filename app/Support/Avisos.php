@@ -7,7 +7,6 @@ use App\Models\Alteracao;
 use App\Models\Chamado;
 use App\Models\ChamadoMensagem;
 use App\Models\Chamamento;
-use App\Models\Diligencia;
 use App\Models\ManifestacaoInteresse;
 use App\Models\PrestacaoContas;
 use App\Models\Processo;
@@ -86,7 +85,6 @@ class Avisos
                 self::prestacaoConcluida($pc);
             }
         });
-        Diligencia::created(fn (Diligencia $d) => self::diligencia($d));
     }
 
     // ════════════════════════════════════════════════════════════ envio
@@ -581,23 +579,6 @@ class Avisos
                 'O chamamento volta ao ponto em que estava quando foi cancelado.'],
             url: route('portal.chamamento', $c),
             botao: 'Ver o chamamento',
-        ));
-    }
-
-    public static function diligencia(Diligencia $d): void
-    {
-        $proposta = $d->proposta;
-
-        self::enviar(self::daOsc($proposta?->osc_id, self::comFuncao('osc_propostas')), new Aviso(
-            assunto: 'Diligência na proposta — ' . ($proposta?->titulo ?? ''),
-            titulo: 'O município pediu uma diligência na sua proposta',
-            linhas: array_values(array_filter([
-                $proposta?->titulo,
-                $d->descricao,
-                $d->prazo ? 'Prazo: ' . \Illuminate\Support\Carbon::parse($d->prazo)->format('d/m/Y') . '.' : null,
-            ])),
-            url: $proposta ? route('portal.proposta.show', $proposta) : null,
-            botao: 'Responder',
         ));
     }
 }

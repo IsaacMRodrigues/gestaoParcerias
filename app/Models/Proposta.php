@@ -172,24 +172,9 @@ class Proposta extends Model
         return $this->hasOne(Instrumento::class);
     }
 
-    public function pareceres(): HasMany
-    {
-        return $this->hasMany(Parecer::class)->orderBy('created_at');
-    }
-
-    public function diligencias(): HasMany
-    {
-        return $this->hasMany(Diligencia::class)->orderBy('created_at');
-    }
-
     public function documentos(): HasMany
     {
         return $this->hasMany(Documento::class)->latest();
-    }
-
-    public function parecer(string $tipo): ?Parecer
-    {
-        return $this->pareceres->firstWhere('tipo', $tipo);
     }
 
     public function valorTotal(): float

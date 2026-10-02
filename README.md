@@ -554,11 +554,9 @@ Trazer os demais cenários para `tests/Feature` é uma das [Pendências](#pendê
 - **5 · Monitoramento e Fiscalização** — aparece no menu como "em breve".
 - **Caixa de Entrada** não inclui alterações da parceria, chamados de suporte nem os recursos da Seleção
   para a Comissão (que é avisada por e-mail e os vê na tela da proposta).
-- **Parecer Técnico / Jurídico / Decisão Final** (`ParecerController`, `pareceres/create`) é tela da
-  primeira fase e está fora do fluxo: texto livre, sem documento, sem assinatura e sem validação,
-  enquanto os pareceres de verdade são peças do trâmite; e quem aprova ou reprova a proposta é o
-  julgamento da Seleção. **Zero registros** no banco. É também o único caminho para abrir uma
-  **diligência** — por isso segue de pé até a decisão sobre o pedido de complementação.
+- As permissões `pareceres_tecnico`, `pareceres_juridico` e `pareceres_decisao` e as tabelas `pareceres` e
+  `diligencias` ficaram sem tela (o parecer avulso saiu em 02/10/2026). Tirá-las mexe nos perfis em produção
+  (o `analista_viabilidade_tecnica` só tem a primeira) — decidir junto com a revisão dos perfis.
 - **Formalizar instrumento antes da Celebração concluída** continua possível: o botão aparece com a
   proposta aprovada. Exigir a Celebração concluída é decisão pendente.
 - `DELETE /instrumentos/{id}` aponta para um método que não existe (500). Nada na tela chama.
@@ -585,6 +583,15 @@ Trazer os demais cenários para `tests/Feature` é uma das [Pendências](#pendê
 
 Da mais recente para a mais antiga. Cada entrada diz o que mudou, **por quê** e como foi
 conferido — o porquê é o que falta a quem pega o código depois.
+
+- [2026-10-02] **Sai o parecer avulso da proposta, e a diligência com ele**
+  - O bloco "Análise da Proposta" (+ Parecer Técnico, + Parecer Jurídico, + Decisão Final) era da primeira fase:
+    texto livre, sem documento nem assinatura, e mudava o status da proposta por fora da Seleção (uma "Decisão
+    Final" aprovava sem julgamento nem adjudicação). Nenhum registro no banco. Saíram `ParecerController`,
+    `DiligenciaController`, `ParecerRequest`, os models `Parecer` e `Diligencia`, as views, as rotas, o bloco na
+    tela interna e no portal e o aviso por e-mail de diligência. Os pareceres que valem são as peças dos trâmites
+  - Ficaram as tabelas e as permissões `pareceres_*`, sem uso (ver Pendências)
+  - Conferido: `ParecerAvulsoForaTest` (falha sem a mudança); suíte 175/175
 
 - [2026-10-02] **"Chamamentos" vai direto à lista; a tela de Programas saiu** (`ChamamentoController`, `chamamentos/index`)
   - O menu passava por "Programas Governamentais" para chegar aos chamamentos de cada programa. Agora "Chamamentos"

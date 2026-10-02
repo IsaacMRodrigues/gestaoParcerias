@@ -5,7 +5,6 @@ namespace App\Http\Middleware;
 use App\Models\Aditivo;
 use App\Models\Alteracao;
 use App\Models\Despesa;
-use App\Models\Diligencia;
 use App\Models\Documento;
 use App\Models\Instrumento;
 use App\Models\OrdemPagamento;
@@ -48,7 +47,6 @@ class ParceriaVisivel
         return match (true) {
             $valor instanceof Proposta    => $valor,
             $valor instanceof Instrumento => $valor->proposta,
-            $valor instanceof Diligencia  => $valor->proposta,
             // Documento de manifestação de interesse não tem proposta: fica com
             // a checagem do ManifestacaoController, como antes.
             $valor instanceof Documento   => $valor->proposta,

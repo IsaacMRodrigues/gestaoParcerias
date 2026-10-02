@@ -189,34 +189,6 @@
             @endforelse
         </div>
 
-        {{-- Pareceres (leitura) --}}
-        @if($proposta->pareceres->isNotEmpty())
-            <div class="bg-white rounded-xl shadow-sm border border-gray-200">
-                <div class="px-6 py-4 border-b border-gray-100">
-                    <h2 class="text-base font-semibold text-gray-800">Análise da Proposta</h2>
-                </div>
-                @foreach($proposta->pareceres as $parecer)
-                    @php $color = \App\Models\Parecer::RESULTADO_COLORS[$parecer->resultado] ?? 'gray'; @endphp
-                    <div class="px-6 py-4 border-b border-gray-50 last:border-0">
-                        <div class="flex items-center justify-between mb-1">
-                            <p class="text-sm font-semibold text-gray-800">
-                                {{ \App\Models\Parecer::TIPOS[$parecer->tipo] }}
-                            </p>
-                            <span class="px-2 py-0.5 text-xs font-medium bg-{{ $color }}-100 text-{{ $color }}-800 rounded-full">
-                                {{ \App\Models\Parecer::RESULTADOS[$parecer->resultado] }}
-                            </span>
-                        </div>
-                        <p class="text-xs text-gray-400">{{ $parecer->data_parecer->format('d/m/Y') }}</p>
-                        @if($parecer->resultado === 'diligencia')
-                            <p class="text-sm text-accent-700 mt-2 bg-accent-50 px-3 py-2 rounded">
-                                O órgão solicitou informações adicionais. Entre em contato com a Secretaria responsável.
-                            </p>
-                        @endif
-                    </div>
-                @endforeach
-            </div>
-        @endif
-
     </div>
 
     {{-- Tela de trabalho da OSC: plano, metas, etapas e documentos numa coluna

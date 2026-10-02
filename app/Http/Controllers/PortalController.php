@@ -178,7 +178,7 @@ class PortalController extends Controller
         $osc = auth()->user()->oscVinculada();
         abort_unless($osc && $proposta->osc_id === $osc->id, 403);
 
-        $proposta->load(['chamamento.programa.orgao', 'documentos.uploader', 'pareceres',
+        $proposta->load(['chamamento.programa.orgao', 'documentos.uploader',
             'metas.etapas', 'planoItens', 'desembolsos', 'contrapartidas', 'equipe',
             // O dossiê reúne as quatro fases: ver Proposta::dossieParaOsc().
             'chamamento.processo.pecas', 'chamamento.pecas', 'pecas', 'instrumento.pecas']);
