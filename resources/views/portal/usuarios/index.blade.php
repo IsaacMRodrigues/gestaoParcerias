@@ -55,14 +55,7 @@
                                 <p class="font-medium text-gray-900">{{ $usuario->name }}</p>
                                 <p class="text-xs text-gray-500">{{ $usuario->email }}</p>
                             </td>
-                            {{-- O selo é uma pílula: quebrado em duas linhas ele
-                                 deixa de parecer um selo. "Responsável Legal" não
-                                 cabe na largura que a coluna recebe, então a coluna
-                                 é que cede. --}}
-                            {{-- A célula cede, o selo não: com quatro perfis marcados a
-                                 coluna inteira ficava numa linha só e empurrava Funções,
-                                 Acesso e Ação para fora da tela. Cada selo continua
-                                 inteiro; é a coluna que quebra. --}}
+                            {{-- Cada selo fica inteiro (whitespace-nowrap); é a coluna que quebra. --}}
                             <td class="px-5 py-4 align-top max-w-[15rem]">
                                 @if($ehDono)
                                     <span class="inline-block px-2 py-1 text-xs font-medium bg-brand-100 text-brand-800 rounded-full whitespace-nowrap">

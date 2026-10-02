@@ -7,10 +7,8 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
 /**
- * Uma versão de um documento da área "Arquivos da OSC" (pedido da gestão,
- * 30/09/2026): anexado uma vez, vale para todas as parcerias da organização.
- * A versão atual de cada tipo é a de número maior; as anteriores são o
- * histórico.
+ * Uma versão de um documento de "Arquivos da OSC": vale para todas as parcerias. A atual é a
+ * de maior número; as anteriores são o histórico.
  */
 class OscArquivo extends Model
 {
@@ -19,11 +17,7 @@ class OscArquivo extends Model
     /** Avisa a OSC por e-mail esta quantidade de dias antes de a certidão vencer. */
     public const DIAS_AVISO_VENCIMENTO = 7;
 
-    /**
-     * Os grupos e os documentos, como no modelo do DF. As certidões têm
-     * validade; as declarações têm texto-modelo, preenchido com o cadastro da
-     * OSC, para imprimir, assinar e anexar.
-     */
+    /** Grupos e documentos. Certidões têm validade; declarações têm texto-modelo para assinar. */
     public const GRUPOS = [
         'certidoes' => [
             'rotulo' => 'CND — Certidões negativas',

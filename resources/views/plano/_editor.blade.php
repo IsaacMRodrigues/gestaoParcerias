@@ -1,18 +1,11 @@
 {{--
-    Plano de Trabalho — à risca do modelo da cliente (Docs. Desenvolvimento/
-    Planodetrabalho.docx): mesma ordem, mesmos números e mesmos nomes de itens.
-    O item 1 (Identificação) vem do cadastro da organização; o 9 é reservado
-    ao ordenador de despesa e sai somado do plano de aplicação (item 13).
-
-    Serve a manifestação de interesse e a proposta de chamamento público: é o
-    mesmo plano, e uma tela só evita que os dois caminhos divirjam. Quem chama
-    passa o dono e o prefixo das rotas; $podeEditar decide entre editar e ler.
+    Plano de Trabalho no modelo da cliente: mesma ordem, números e nomes de itens. O item 1 vem
+    do cadastro; o 9 sai somado do plano de aplicação (item 13). Serve à manifestação e à proposta.
 
     @param $dono         Proposta|ManifestacaoInteresse
     @param $rota         prefixo nomeado, ex.: 'portal.proposta.plano'
     @param $podeEditar   bool
-    @param $mostrarMetas bool — falso nas telas do município, que já têm o
-                         próprio bloco de metas, com edição na negociação
+    @param $mostrarMetas bool — falso nas telas do município, que têm o próprio bloco de metas
 --}}
 @php
     $mostrarMetas = $mostrarMetas ?? true;

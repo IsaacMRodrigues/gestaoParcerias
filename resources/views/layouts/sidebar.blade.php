@@ -2,7 +2,7 @@
     $navPropostasNovas = auth()->user()->can('propostas')
         ? \App\Models\Proposta::visiveisPara(auth()->user())->where('status', 'submetida')->count()
         : 0;
-    // Novas Propostas paradas com a UG de quem vê o menu (28/09/2026).
+    // Novas Propostas paradas com a UG de quem vê o menu.
     $navPropostasNovas += auth()->user()->can('propostas')
         ? \App\Models\ManifestacaoInteresse::doTipo('proposta')->emTramite()
             ->visiveisPara(auth()->user())->where('setor_atual', auth()->user()->setorNoTramite())->count()
@@ -27,28 +27,16 @@
     // Planejamento, como era quando só contava processos.
     $navCaixa = \App\Support\CaixaDeEntrada::para(auth()->user())->total();
 
-    // Sidebar clara, como o resto do sistema.
-    //
-    // Ela ocupa 256px de altura inteira em toda tela: escura, era uma parede
-    // que partia a interface em dois ambientes — o menu de um lado, o conteúdo
-    // do outro, cada um com a sua lógica de cor. Branca sobre o cinza-claro do
-    // conteúdo, a coluna vira moldura, separada só por um fio, e o verde
-    // mantém a função única de marcar onde o usuário está.
+    // Sidebar clara; o verde marca só onde o usuário está.
     $sec   = 'px-3 pt-5 pb-1.5 text-[12px] font-semibold uppercase tracking-wider text-gray-400';
     $link  = 'relative flex items-center gap-2.5 px-3 py-2 rounded-lg text-sm text-gray-600 hover:bg-gray-100 hover:text-gray-900 transition';
-    // Verde sólido = a página aberta agora. Item de seção (o pai de quem está
-    // aberto) recebe só um realce discreto: antes os dois ganhavam o mesmo
-    // destaque, viravam um bloco verde de duas linhas e não diziam em qual das
-    // duas telas o usuário estava.
+    // Verde sólido = a página aberta; a seção que a contém recebe só um realce.
     $on      = '!text-white bg-brand-600 font-semibold shadow-sm hover:!bg-brand-600';
     $naSecao = '!text-brand-800 bg-brand-50 font-medium hover:!bg-brand-50';
     $soon  = 'flex items-center gap-2.5 px-3 py-2 rounded-lg text-sm text-gray-400 cursor-default';
     $badge = 'ml-auto px-1.5 py-0.5 text-[12px] font-bold bg-accent-500 text-white rounded-full';
     $etapa = 'w-5 h-5 shrink-0 rounded-full border text-[12px] font-bold flex items-center justify-center';
-    // O número da etapa se inverte conforme o fundo em que cai: branco vazado
-    // sobre o verde da página aberta, verde sólido sobre o verde claro da
-    // seção. Havia um só, desenhado para fundo escuro — sobre o item aberto
-    // ele viraria um círculo branco em cima de branco.
+    // O número da etapa se inverte conforme o fundo (página aberta ou seção).
     $etapaAtiva = 'border-white bg-white text-brand-700';
     $etapaSecao = 'border-brand-600 bg-brand-600 text-white';
     $etapaOff   = 'border-gray-300 text-gray-400';
@@ -128,13 +116,7 @@
                     ? route('programas.index')
                     : route('propostas.index');
             @endphp
-            {{-- Seleção é a única etapa com três subitens: recolhida, encurta a
-                 barra para quem trabalha em outra fase do ciclo.
-
-                 A escolha fica no navegador de cada um (localStorage), mas
-                 estar dentro da seção manda: esconder o item aberto agora seria
-                 tirar da vista onde a pessoa está. Sem localStorage — janela
-                 anônima, site bloqueado — abre, que é o estado de sempre. --}}
+            {{-- Seleção recolhe; a escolha fica no localStorage, mas dentro da seção ela abre sempre. --}}
             <div x-data="{
                     aberto: @js($emSelecao) || (() => {
                         try { return localStorage.getItem('nav.selecao') !== 'fechado' } catch (e) { return true }
@@ -144,10 +126,7 @@
                         try { localStorage.setItem('nav.selecao', this.aberto ? 'aberto' : 'fechado') } catch (e) {}
                     }
                  }" class="relative">
-                {{-- Seleção nunca é "a página aberta": ela só encaminha ao primeiro
-                     subitem, que é quem recebe o verde sólido. O pr-9 reserva o
-                     lugar da seta, que fica por cima (botão dentro de link não
-                     existe em HTML). --}}
+                {{-- Seleção só encaminha ao primeiro subitem; o pr-9 reserva o lugar da seta. --}}
                 <a href="{{ $urlSelecao }}" class="{{ $link }} pr-9 {{ $emSelecao ? $naSecao : '' }}">
                     <span class="{{ $etapa }} {{ $emSelecao ? $etapaSecao : $etapaOff }}">2</span>
                     Seleção
@@ -194,11 +173,7 @@
         @endcanany
 
         {{-- 3. Celebração --}}
-        {{-- Quem abre o trâmite não é só quem tem `formalizacao`: SCP, SEPLAN e
-             PJ conduzem etapas do fluxo e, gateados por aquela permissão, viam
-             cadeado aqui com parceria parada esperando o seu setor na caixa de
-             entrada. O item leva ao trâmite; a lista de Instrumentos, que é o
-             que de fato exige `formalizacao`, virou subitem. --}}
+        {{-- Quem participa da Celebração vê o trâmite; a lista de Instrumentos (formalizacao) é subitem. --}}
         @if(auth()->user()->participaDaCelebracao())
             @php
                 // instrumentos.execucao é rota do trâmite 4: sem excluí-la, os

@@ -1,12 +1,4 @@
-{{-- Atalhos de rolagem: topo e fim da página.
-
-     A tela da Celebração é longa — trilha de 15 etapas, histórico e um
-     checklist de 18 documentos. Depois de descer até o último item, voltar ao
-     trâmite (onde ficam os botões de encaminhar e devolver) era rolagem cega.
-
-     Cada seta some quando não teria efeito: no topo da página não há "subir",
-     no fim não há "descer". Fica fora do fluxo do texto (aria-hidden não: são
-     botões de verdade, com rótulo, para quem navega por teclado ou leitor). --}}
+{{-- Atalhos de rolagem para o topo e o fim da página; cada seta some quando não teria efeito. --}}
 <div x-data="{
         noTopo: true,
         noFim: false,

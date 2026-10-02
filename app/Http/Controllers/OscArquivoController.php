@@ -15,10 +15,8 @@ use Illuminate\View\View;
 use Symfony\Component\HttpFoundation\StreamedResponse;
 
 /**
- * "Arquivos da OSC" (pedido da gestão, 30/09/2026, com o portal do DF como
- * modelo): a OSC anexa uma vez as certidões, o estatuto, a ata de eleição e
- * as declarações; cada envio é uma versão nova. A Prefeitura os vê na área da
- * OSC e os analisa em cada parceria.
+ * "Arquivos da OSC": certidões, estatuto, ata e declarações, anexados uma vez (cada envio é uma
+ * versão). A Prefeitura os vê na área da OSC e os analisa em cada parceria.
  */
 class OscArquivoController extends Controller
 {

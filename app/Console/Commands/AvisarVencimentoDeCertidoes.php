@@ -6,10 +6,7 @@ use App\Models\OscArquivo;
 use App\Support\Avisos;
 use Illuminate\Console\Command;
 
-/**
- * Avisa a OSC das certidões de "Arquivos da OSC" que vencem em breve
- * (30/09/2026). Só a versão atual de cada documento, e uma vez por versão.
- */
+/** Avisa a OSC das certidões que vencem em breve: só a versão atual, uma vez por versão. */
 class AvisarVencimentoDeCertidoes extends Command
 {
     protected $signature = 'osc:avisar-vencimento-certidoes';

@@ -2,11 +2,7 @@
 
 namespace App\Support;
 
-/**
- * Preenchimento automático ("puxar") dos modelos padrão: substitui os
- * marcadores {{token}} pelos dados já conhecidos no sistema na hora de preencher.
- * O que não tiver dado disponível permanece como está (ex.: "XXXX" para digitar).
- */
+/** Substitui os marcadores {{token}} dos modelos pelos dados conhecidos; o resto fica como está. */
 class Modelo
 {
     public static function preencher(?string $html, array $tokens): ?string

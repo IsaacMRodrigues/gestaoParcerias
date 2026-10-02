@@ -7,7 +7,7 @@
     $souScp = $setor === 'scp' && $manifestacao->setor_atual === 'scp';
     $souUg  = $setor === 'ug' && $manifestacao->setor_atual === 'ug'
         && $user->orgao_id === $manifestacao->orgao_id;
-    // Nova Proposta (28/09/2026): a SCP encaminha escolhendo a UG, e a UG decide.
+    // Nova Proposta: a SCP encaminha escolhendo a UG, e a UG decide.
     $novaProposta = $manifestacao->ehNovaProposta();
 @endphp
 
@@ -100,7 +100,7 @@
                 </div>
 
                 <h3 class="text-base font-semibold text-gray-800 mt-6 pt-6 border-t border-gray-100">Documentos</h3>
-                {{-- Certidões, estatuto, ata e declarações: na área da OSC (30/09/2026). --}}
+                {{-- Certidões, estatuto, ata e declarações: na área da OSC. --}}
                 <p class="text-xs text-gray-500 mt-1">
                     Certidões, estatuto, ata de eleição e declarações estão em
                     <a href="{{ route('oscs.arquivos', $manifestacao->osc_id) }}" class="text-brand-700 hover:underline">Arquivos da OSC</a>.

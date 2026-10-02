@@ -18,22 +18,8 @@ use Illuminate\Http\Request;
 use Symfony\Component\HttpFoundation\Response;
 
 /**
- * Barra quem abre, pelo endereço, uma parceria que não é sua.
- *
- * O recorte por Secretaria vivia só nas listagens (Proposta::visiveisPara):
- * a lista escondia, mas /propostas/19, /instrumentos/4, /prestacao-contas/1
- * e /celebracao/19 abriam para servidor de outra Secretaria — e a Celebração,
- * que não conferia nada, abria até para outra OSC. Cada controller fazia a
- * sua checagem, ou não fazia.
- *
- * Aqui a porta é única. Registrado no grupo `web`, olha os registros que a
- * rota recebe, sobe de cada um até a parceria (proposta) e pergunta a
- * Proposta::visivelPara(). Rota nova que receba instrumento, aditivo, ordem
- * de pagamento etc. já nasce protegida. Rota sem nada disso passa direto.
- *
- * Roda depois do SubstituteBindings (que também é do grupo `web`), então os
- * parâmetros já chegam como models. Sem usuário, deixa passar: quem barra o
- * visitante é o `auth` da própria rota.
+ * Barra quem abre pelo endereço uma parceria que não vê: sobe de cada model da rota até a
+ * proposta e pergunta a Proposta::visivelPara(). Sem usuário, deixa passar (o auth barra).
  */
 class ParceriaVisivel
 {

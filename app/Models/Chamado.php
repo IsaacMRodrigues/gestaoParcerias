@@ -7,13 +7,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
-/**
- * Um chamado de suporte.
- *
- * Quem abre é qualquer pessoa logada — servidor de qualquer setor ou integrante
- * de uma OSC. Quem atende é quem tem a permissão `suporte`: hoje a TI e a SCP,
- * na mesma caixa.
- */
+/** Chamado de suporte: abre quem está logado; atende quem tem a permissão suporte. */
 class Chamado extends Model
 {
     protected $fillable = [
@@ -30,12 +24,7 @@ class Chamado extends Model
         ];
     }
 
-    /**
-     * As três naturezas de chamado.
-     *
-     * Não é burocracia: um problema tem urgência que uma sugestão não tem, e
-     * quem atende precisa ver isso antes de abrir.
-     */
+    /** As naturezas de chamado (a urgência de um problema não é a de uma sugestão). */
     public const CATEGORIAS = [
         'problema'  => 'Problema no sistema',
         'duvida'    => 'Dúvida de uso',
@@ -123,12 +112,7 @@ class Chamado extends Model
         return $query->whereIn('status', ['aberto', 'em_andamento']);
     }
 
-    /**
-     * Numeração por ano, como a dos processos: 2026/0001.
-     *
-     * Vem do maior número do próprio ano, e não de uma contagem — chamado
-     * apagado deixaria a contagem repetir um número já usado.
-     */
+    /** Numeração por ano (2026/0001), pelo maior número do ano, não por contagem. */
     public static function proximoNumero(): string
     {
         $ano = now()->year;
@@ -142,10 +126,7 @@ class Chamado extends Model
         return $ano . '/' . str_pad((string) $sequencial, 4, '0', STR_PAD_LEFT);
     }
 
-    /**
-     * De onde a pessoa fala: a Secretaria, no caso do servidor; a organização,
-     * no caso da OSC. Ajuda quem atende a entender a pergunta antes de lê-la.
-     */
+    /** De onde a pessoa fala: a Secretaria (servidor) ou a organização (OSC). */
     public static function vinculoDe(User $user): ?string
     {
         if ($user->ehRepresentanteOsc()) {

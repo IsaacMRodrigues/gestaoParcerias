@@ -9,10 +9,7 @@ use App\Models\ProcessoPeca;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
 
-/**
- * Validação pública da autenticidade de documentos assinados.
- * Acessível sem login (igual aos portais de validação de documentos).
- */
+/** Validação pública, sem login, da autenticidade de documentos assinados. */
 class ValidacaoController extends Controller
 {
     public function index(): View
@@ -68,11 +65,7 @@ class ValidacaoController extends Controller
                     'conteudo'    => $op->conteudo,
                 ];
             } else {
-                // Documento com assinatura das partes (o Termo de Parceria) tem
-                // dois códigos: o do Município e o da contra-assinatura da OSC.
-                // O carimbo imprime ambos, então ambos precisam validar — pelo
-                // código da OSC a busca não encontrava nada e o portal dizia
-                // "documento não encontrado" para um documento autêntico.
+                // Termos antigos têm também o código da contra-assinatura da OSC, que o carimbo imprime.
                 $selecao = Peca::with(['assinante', 'contraAssinante', 'pecaable'])
                     ->where('tipo', 'modelo')
                     ->whereNotNull('assinado_em')
@@ -110,10 +103,7 @@ class ValidacaoController extends Controller
                         $doc['contra_codigo']      = $selecao->codigo_validacao_contra;
                     }
                 } else {
-                    // Assinatura de uma das partes de documento assinado em
-                    // sequência (o Termo, desde 01/10/2026): cada parte tem o
-                    // seu código, e todos levam ao documento com as assinaturas
-                    // que ele tem até aqui.
+                    // Assinatura de uma das partes de documento assinado em sequência: cada parte tem o seu código.
                     $parte = PecaAssinatura::with('peca.pecaable', 'peca.assinaturasPartes')->where('codigo_validacao', $codigo)->first();
 
                     if ($parte) {

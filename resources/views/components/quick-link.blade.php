@@ -5,10 +5,7 @@
 ])
 
 @php
-    // Atalhos são todos a mesma coisa — um caminho curto para outra tela —, então
-    // ficam neutros e só ganham o verde da marca ao passar o mouse. Antes a
-    // fileira inteira já vinha verde e virava um bloco só; pintá-los de cores
-    // diferentes seria o erro oposto, inventando distinção onde não há.
+    // Atalhos neutros; o verde da marca só ao passar o mouse.
     $cores = [
         'slate'  => ['bg-slate-100 text-slate-600', 'group-hover:bg-brand-600',  'hover:border-brand-400 hover:text-brand-800'],
         'brand'  => ['bg-brand-50 text-brand-700',  'group-hover:bg-brand-600',  'hover:border-brand-400 hover:text-brand-800'],

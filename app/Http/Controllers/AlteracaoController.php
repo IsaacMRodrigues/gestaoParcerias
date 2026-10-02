@@ -11,15 +11,8 @@ use Illuminate\Http\Request;
 use Illuminate\View\View;
 
 /**
- * Alterações da Parceria (módulo 3.3).
- *
- * A OSC pede a mudança durante a execução; a Unidade Gestora autoriza; a SCP
- * processa. Enquanto o pedido está com a OSC, ela edita o próprio Plano de
- * Trabalho — é o que o modelo manda —, e o retrato guardado na abertura mostra
- * a quem analisa o que mudou.
- *
- * A Proposta de Alteração não é redigida: nasce dos campos preenchidos e é
- * regerada a cada gravação, até alguém assiná-la.
+ * Alterações da Parceria: a OSC pede, a UG autoriza, a SCP processa. A Proposta de Alteração
+ * nasce dos campos e é regerada até ser assinada.
  */
 class AlteracaoController extends Controller
 {
@@ -213,7 +206,7 @@ class AlteracaoController extends Controller
             'parecer.required' => 'Informe o motivo da devolução — é o que a OSC vai ler para corrigir.',
         ]);
 
-        // Devolução por documento (30/09/2026): só os marcados reabrem.
+        // Devolução por documento: só os marcados reabrem.
         $escolhidas = Devolucao::escolhidas($request, $alteracao->documentosDevolviveis());
         $anterior   = Devolucao::etapaDestino($escolhidas, $alteracao->etapa - 1);
         $destino    = Alteracao::ETAPAS[$anterior]['setor'];
@@ -265,12 +258,7 @@ class AlteracaoController extends Controller
             : 'Alteração indeferida. A OSC verá o motivo no portal.');
     }
 
-    /**
-     * A Proposta de Alteração nasce dos campos — nunca depois de assinada.
-     *
-     * Mesma regra da prestação de contas: enquanto ninguém assinou, o documento
-     * acompanha o que está preenchido; assinado, ele congela.
-     */
+    /** Regera a Proposta de Alteração a partir dos campos; assinada, congela. */
     private function regerarProposta(Alteracao $alteracao): void
     {
         $peca = $alteracao->pecas()->where('chave', 'proposta_alteracao')->first();

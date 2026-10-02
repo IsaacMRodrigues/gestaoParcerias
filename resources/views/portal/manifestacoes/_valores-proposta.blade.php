@@ -1,11 +1,5 @@
-{{--
-    Nova Proposta, primeiro formulário: a planilha do plano de aplicação. O
-    valor pleiteado não se digita aqui: começa como o total da planilha e segue
-    editável no plano de trabalho, na tela seguinte.
-
-    As linhas vêm de old() quando a validação devolve o formulário, para a OSC
-    não perder o que digitou.
---}}
+{{-- Nova Proposta, primeiro formulário: a planilha do plano de aplicação. O valor pleiteado
+     começa como o total dela. As linhas vêm de old() quando a validação devolve o formulário. --}}
 @php
     $itensIniciais = collect(old('itens', []))->values()->map(fn ($i) => [
         'descricao'             => $i['descricao'] ?? '',

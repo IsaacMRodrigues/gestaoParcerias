@@ -6,15 +6,7 @@ use Closure;
 use Illuminate\Http\Request;
 use Symfony\Component\HttpFoundation\Response;
 
-/**
- * Espelho do EnsureIsStaff: protege o que só a OSC faz — participar de
- * chamamento, submeter e acompanhar proposta, protocolar recurso.
- *
- * Servidor é usuário interno dos setores: analisa, tramita e decide sobre as
- * propostas, nunca as apresenta. Deixar essa regra só nos controllers (que
- * checavam ->osc por conta própria, cada um de um jeito) era frágil — bastava
- * uma rota nova esquecer a checagem. Aqui a porta é única.
- */
+/** Espelho do EnsureIsStaff: só a OSC participa de chamamento, submete proposta e recorre. */
 class EnsureIsOsc
 {
     public function handle(Request $request, Closure $next): Response

@@ -1,7 +1,4 @@
-{{-- Devolução por documento (decisão da gestão, 30/09/2026): quem devolve marca
-     o que está errado. Só os marcados reabrem — o texto perde a assinatura, o
-     arquivo pede um novo envio —, e o trâmite volta para a etapa do mais antigo
-     deles. Os demais documentos ficam como estão.
+{{-- Devolução por documento: só os marcados reabrem e o trâmite volta à etapa do mais antigo.
      Espera: $documentos (Devolucao::candidatas). --}}
 @if($documentos->isNotEmpty())
     <fieldset class="border border-red-200 rounded-md p-3">

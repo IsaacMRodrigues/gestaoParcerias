@@ -25,7 +25,7 @@
         <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 space-y-6">
             <x-flash-message />
 
-            {{-- Cancelamento (28/09/2026): a UG dona cancela sem excluir e pode
+            {{-- Cancelamento: a UG dona cancela sem excluir e pode
                  reabrir, sempre com motivo. Ver ChamamentoCancelamentoController. --}}
             @php
                 $ugDona         = $chamamento->geridoPelaUg(auth()->user());
@@ -75,7 +75,7 @@
                     </form>
                 </details>
             @endif
-            {{-- Prorrogação do prazo de inscrições (28/09/2026): a SCP, com os
+            {{-- Prorrogação do prazo de inscrições: a SCP, com os
                  dois anexos. Ver ChamamentoProrrogacaoController. --}}
             @php
                 $prorrogacoes = $chamamento->prorrogacoes()->get();
@@ -353,11 +353,7 @@
                                           data-confirm="Encerrar a Seleção? O chamamento será homologado e as propostas não escolhidas serão reprovadas.">
                                         @csrf
 
-                                        {{-- Adjudicar: o Termo que encerra a Seleção é de
-                                             ADJUDICAÇÃO e homologação. Sem dizer quem venceu,
-                                             o chamamento era encerrado e nenhuma proposta ficava
-                                             'aprovada' — e a Celebração, que exige isso, nunca
-                                             abria. --}}
+                                        {{-- Adjudicar: dizer quem venceu, para as propostas seguirem à Celebração. --}}
                                         @if($emJulgamento->isNotEmpty())
                                             <div class="mb-3 border border-gray-200 rounded-lg p-3">
                                                 <p class="text-sm font-semibold text-gray-900">Proposta(s) vencedora(s)</p>

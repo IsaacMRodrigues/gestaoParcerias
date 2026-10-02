@@ -21,10 +21,7 @@ class UserRequest extends FormRequest
         return [
             'name'     => ['required', 'string', 'max:255'],
             'email'    => ['required', 'email', 'max:255', Rule::unique('users', 'email')->ignore($userId)],
-            // Nome de usuário: alternativa ao e-mail na tela de entrada. Sem
-            // espaço, maiúscula nem acento, para não virar duas grafias do
-            // mesmo acesso. A arroba entra porque "admin@parcerias" é a forma
-            // que a Prefeitura usa — não é endereço, é nome de conta.
+            // Nome de usuário, alternativa ao e-mail: sem espaço, maiúscula nem acento (a arroba é permitida).
             'login'    => ['nullable', 'string', 'max:50', 'regex:/^[a-z0-9._@-]+$/', Rule::unique('users', 'login')->ignore($userId)],
             'cpf'      => ['nullable', 'string', 'max:14', Rule::unique('users', 'cpf')->ignore($userId)],
             'matricula' => ['nullable', 'string', 'max:50', Rule::unique('users', 'matricula')->ignore($userId)],

@@ -6,14 +6,7 @@ use Closure;
 use Illuminate\Http\Request;
 use Symfony\Component\HttpFoundation\Response;
 
-/**
- * Senha definida por outra pessoa se troca antes de qualquer outra coisa.
- *
- * A marca `users.deve_trocar_senha` vem de quem definiu a senha por alguém:
- * o suporte (senha provisória), o administrador, a chefia do setor e o
- * responsável legal da OSC ao cadastrar a equipe. Enquanto ela estiver
- * acesa, toda tela leva à troca — só a própria troca e o sair passam.
- */
+/** Com users.deve_trocar_senha acesa (senha definida por outra pessoa), toda tela leva à troca. */
 class ExigeTrocaDeSenha
 {
     public function handle(Request $request, Closure $next): Response

@@ -591,6 +591,16 @@ Trazer os demais cenários para `tests/Feature` é uma das [Pendências](#pendê
 Da mais recente para a mais antiga. Cada entrada diz o que mudou, **por quê** e como foi
 conferido — o porquê é o que falta a quem pega o código depois.
 
+- [2026-10-02] **Limpeza do código**
+  - Código sem uso removido: a contra-assinatura do Termo (rota, ação, regras e telas; fica só a exibição das
+    contra-assinaturas já feitas), as constantes vazias da Celebração, oito métodos e constantes sem chamada,
+    a view `processos/caixa`, a `welcome` e sete componentes do Breeze, imports e linhas em branco sobrando
+  - Comentários enxutos em 127 arquivos (−1.870 linhas): cada um diz em 1–3 linhas o que o código faz hoje. A
+    história ("antes era assim…") e as datas de decisão saíram — estão neste histórico e no git. Comentários
+    que tinham ficado soltos, longe do código que descreviam, voltaram para o lugar
+  - Conferido: um verificador comparou cada arquivo com a versão anterior sem comentários nem espaços (só
+    comentários mudaram); `view:cache` compila todas as views; suíte 170/175, as mesmas 5 falhas do Breeze
+
 - [2026-10-02] **Linha de assinatura nas declarações impressas da OSC** (`Peca::declaracaoParaOsc`)
   - As seis declarações de "Arquivos da OSC" são impressas e assinadas à mão, e saíam sem lugar para a assinatura.
     O bloco do representante legal ganha a linha acima do nome. Só na versão para imprimir: o texto do modelo não muda

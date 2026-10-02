@@ -10,15 +10,7 @@ use Illuminate\View\View;
 
 class OrgaoController extends Controller
 {
-    /**
-     * Secretarias e as pessoas de cada uma, na mesma tela.
-     *
-     * Eram duas listagens que ninguém consultava separadas: para saber quem
-     * responde por uma Secretaria, abria-se Usuários e procurava-se pela coluna
-     * de órgão. Agora a Secretaria traz a sua gente junto — e quem não é de
-     * Secretaria nenhuma (os setores transversais) aparece num bloco à parte,
-     * em vez de sumir da tela.
-     */
+    /** Secretarias e as pessoas de cada uma; os setores transversais num bloco à parte. */
     public function index(): View
     {
         $orgaos = Orgao::with(['usuarios.roles'])

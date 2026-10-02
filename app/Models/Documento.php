@@ -7,13 +7,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class Documento extends Model
 {
-    /**
-     * Tipos de anexo da organização.
-     *
-     * Acompanham o checklist de habilitação do módulo 3.2: com seis opções, a
-     * OSC classificava metade dos documentos como "Outro" e quem conferia
-     * tinha de abrir arquivo por arquivo para saber o que era o quê.
-     */
+    /** Tipos de anexo da organização, conforme o checklist de habilitação. */
     public const TIPOS = [
         'estatuto'             => 'Estatuto Social',
         'cnpj'                 => 'Cartão CNPJ',
@@ -33,11 +27,7 @@ class Documento extends Model
         'outro'                => 'Outro Documento',
     ];
 
-    /**
-     * Tipos que passaram para a área "Arquivos da OSC" (30/09/2026): anexados
-     * uma vez, valem para todas as parcerias. Não se pedem mais na proposta;
-     * os já anexados continuam à mostra.
-     */
+    /** Tipos que ficam em "Arquivos da OSC": não se pedem mais na proposta (os já anexados seguem). */
     public const NA_AREA_DA_OSC = ['estatuto', 'ata', 'certidao'];
 
     /** Os tipos que ainda se anexam na proposta ou na manifestação. */
@@ -110,13 +100,7 @@ class Documento extends Model
         return !$this->aprovado() && !$this->recusado();
     }
 
-    /**
-     * A OSC pode retirar o documento?
-     *
-     * Só enquanto ninguém decidiu, ou quando foi recusado — aí retirar é parte
-     * de corrigir. Documento aprovado virou peça da instrução do processo: sai
-     * do alcance de quem o enviou.
-     */
+    /** A OSC pode retirar o documento? Enquanto ninguém decidiu, ou se foi recusado. */
     public function podeSerRemovido(): bool
     {
         return !$this->aprovado();

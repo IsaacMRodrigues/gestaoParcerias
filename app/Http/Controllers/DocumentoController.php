@@ -23,7 +23,7 @@ class DocumentoController extends Controller
 
         $request->validate([
             'arquivo' => ['required', 'file', 'mimes:pdf,doc,docx,xls,xlsx,jpg,jpeg,png', 'max:10240'],
-            // Estatuto, ata e certidões estão em "Arquivos da OSC" (30/09/2026).
+            // Estatuto, ata e certidões estão em "Arquivos da OSC".
             'tipo'    => ['required', Rule::in(array_keys(Documento::tiposParaAnexar()))],
         ], [
             'arquivo.max'   => 'O arquivo não pode ultrapassar 10 MB.',
@@ -72,13 +72,7 @@ class DocumentoController extends Controller
         return back()->with('success', 'Documento removido.');
     }
 
-    /**
-     * Conferência do município: aprovar ou recusar o documento da OSC.
-     *
-     * Antes só existia "Remover" para os dois lados — servidor apagava o
-     * documento da OSC, sem registro de quem apagou nem por quê, e a OSC não
-     * tinha como saber o que precisava refazer.
-     */
+    /** Conferência do município: aprovar ou recusar o documento da OSC. */
     public function analisar(Request $request, Proposta $proposta, Documento $documento): RedirectResponse
     {
         $this->autorizarEscrita($proposta);
@@ -122,15 +116,7 @@ class DocumentoController extends Controller
             .'Peça ao responsável legal da OSC para marcá-la em Usuários da Organização.');
     }
 
-    /**
-     * Quem pode ver os documentos desta proposta.
-     *
-     * A versão anterior só sabia negar para a OSC dona de outra proposta: quem
-     * não tinha OSC — ou seja, todo usuário interno — passava sem nenhuma
-     * checagem, e qualquer servidor autenticado baixava e apagava documentos de
-     * qualquer proposta do município. Agora cada lado é verificado pelo que de
-     * fato o autoriza, e ninguém entra por omissão.
-     */
+    /** Quem pode ver os documentos desta proposta: cada lado pelo que de fato o autoriza. */
     private function autorizarLeitura(Proposta $proposta): void
     {
         $user = auth()->user();

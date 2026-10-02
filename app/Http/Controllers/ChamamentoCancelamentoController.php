@@ -9,16 +9,8 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
 /**
- * Cancelar e reabrir o chamamento (decisão da gestão, 28/09/2026).
- *
- * Cancelar não exclui nada: o chamamento sai do portal, fecha inscrições e
- * recursos, a Seleção para e ninguém assina peça dele (ver Chamamento::
- * cancelado() e as travas que a consultam). Reabrir devolve o status que ele
- * tinha. Os dois atos pedem motivo, ficam no histórico e avisam as OSCs que
- * têm proposta no chamamento.
- *
- * Quem age é a Unidade Gestora da Secretaria dona do chamamento. Pode-se
- * cancelar até a Seleção ser homologada — ver motivoParaNaoCancelar().
+ * Cancelar e reabrir o chamamento, pela UG dona, com motivo e aviso às OSCs. Cancelar não exclui
+ * nada; vale até a homologação (ver Chamamento::motivoParaNaoCancelar).
  */
 class ChamamentoCancelamentoController extends Controller
 {

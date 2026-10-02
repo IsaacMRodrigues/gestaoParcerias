@@ -38,11 +38,8 @@ use App\Http\Controllers\TramitacaoController;
 use App\Http\Controllers\UserController;
 use Illuminate\Support\Facades\Route;
 
-// Tela principal: escolha do perfil de acesso (Prefeitura, OSC, Cidadão,
-// Parlamentar e Conselho). É o "início do site" — o logotipo aponta para cá em
-// todas as telas, inclusive para quem já está logado, por isso a raiz sempre
-// renderiza a landing. O destino de quem acabou de entrar continua sendo
-// definido no AuthenticatedSessionController, não aqui.
+// Tela inicial (escolha do perfil de acesso), também para quem já está logado: o logotipo
+// aponta para cá. O destino pós-login fica no AuthenticatedSessionController.
 Route::get('/', fn () => view('landing'))->name('landing');
 
 // Portal público
@@ -72,18 +69,14 @@ Route::get('/validar/{codigo}', [\App\Http\Controllers\ValidacaoController::clas
 // Área da OSC logada (portal) — 'osc' barra o usuário interno: servidor analisa
 // e decide sobre a proposta, nunca a apresenta.
 Route::middleware(['auth', 'osc'])->group(function () {
-    // "Arquivos da OSC" (30/09/2026): ver é da equipe; anexar, de quem tem a
+    // "Arquivos da OSC": ver é da equipe; anexar, de quem tem a
     // função de documentos (conferida no controller).
     Route::get('/portal/arquivos', [OscArquivoController::class, 'index'])->name('portal.arquivos.index');
     Route::post('/portal/arquivos/{tipo}', [OscArquivoController::class, 'store'])->name('portal.arquivos.store');
     Route::get('/portal/arquivos/{tipo}/declaracao', [OscArquivoController::class, 'declaracao'])->name('portal.arquivos.declaracao');
 
     /*
-     * Ver é de toda a equipe da OSC; agir é de quem tem a função marcada.
-     *
-     * A régua está aqui, na rota, e não espalhada nos controllers: o
-     * responsável legal marca as funções no cadastro do integrante (ver
-     * User::FUNCOES_OSC) e cada grupo abaixo diz qual delas abre o quê.
+     * Ver é de toda a equipe da OSC; agir, de quem tem a função marcada (User::FUNCOES_OSC).
      */
     Route::get('/portal/minhas-propostas', [PortalController::class, 'minhasPropostas'])->name('portal.minhas-propostas');
     Route::get('/portal/propostas/{proposta}', [PortalController::class, 'showProposta'])->name('portal.proposta.show');
@@ -145,10 +138,8 @@ Route::middleware(['auth', 'osc'])->group(function () {
     });
 });
 
-// A conta da própria pessoa no portal: nome, telefone e senha. Fica fora do
-// grupo 'osc' de propósito — a conta é da pessoa, não da organização: quem
-// perdeu o vínculo com a OSC continua podendo trocar a própria senha. O
-// servidor que cair aqui vai para o perfil dele (ver PerfilOscController).
+// A conta da própria pessoa no portal: fora do grupo 'osc', porque é da pessoa, não da
+// organização. O servidor vai para o perfil dele (ver PerfilOscController).
 Route::middleware('auth')->group(function () {
     Route::get('/portal/perfil', [PerfilOscController::class, 'edit'])->name('portal.perfil.edit');
     Route::patch('/portal/perfil', [PerfilOscController::class, 'update'])->name('portal.perfil.update');
@@ -291,23 +282,13 @@ Route::middleware(['auth', 'staff', 'readonly'])->group(function () {
 
     // Propostas + Plano de Trabalho
     Route::middleware('permission:propostas')->group(function () {
-        // Proposta é ato da OSC: ela cria, edita e submete no portal
-        // (PortalController). Ao município cabe ler, analisar e decidir — daí
-        // aqui só index e show. Antes havia CRUD completo, com a OSC escolhida
-        // num dropdown: dava para o município redigir e submeter uma proposta
-        // em nome de terceiro e depois aprová-la, sem rastro de quem propôs.
-        //
-        // Metas e etapas seguem a mesma régua, e por isso não há rota delas
-        // aqui: o plano de trabalho é a proposta da OSC, e quem o altera do
-        // lado de cá altera o que a organização se comprometeu a fazer sem
-        // que ela saiba. Quando o plano precisa mudar, o caminho é devolver
-        // para ajuste (diligência, ou a etapa 2 da Celebração) ou, já na
-        // vigência, o pedido de alteração da parceria.
+        // Proposta e plano de trabalho são da OSC (no portal): aqui só ler, analisar e decidir.
+        // Para mudar o plano, devolve-se para ajuste ou, na vigência, pede-se alteração.
         Route::resource('propostas', PropostaController::class)->only(['index', 'show']);
-        // Análise dos Arquivos da OSC nesta parceria (30/09/2026).
+        // Análise dos Arquivos da OSC nesta parceria.
         Route::post('propostas/{proposta}/arquivos-osc/{arquivo}/analisar', [OscArquivoController::class, 'analisar'])
             ->name('propostas.arquivos-osc.analisar');
-        // O plano de trabalho editado pela UG na Celebração (30/09/2026). As
+        // O plano de trabalho editado pela UG na Celebração. As
         // regras estão em PlanoTrabalhoController::ugPodeEditar.
         PlanoTrabalhoController::rotas('celebracao', '/propostas/{id}/plano', 'propostas.plano');
     });
@@ -369,23 +350,19 @@ Route::middleware(['auth', 'staff', 'readonly'])->group(function () {
 
 });
 
-// Tela da Seleção: quem tem a permissão de chamamentos, e também a Comissão de
-// Seleção da Secretaria, que preenche e assina a Resposta ao recurso (etapa 3).
-// Ela só vê: os botões do trâmite seguem na permissão de chamamentos. Ver
-// ChamamentoController::selecao.
+// Tela da Seleção: quem tem chamamentos e a Comissão de Seleção da Secretaria (só vê; os
+// botões seguem na permissão). Ver ChamamentoController::selecao.
 Route::middleware('auth')->get('chamamentos/{chamamento}/selecao', [ChamamentoController::class, 'selecao'])->name('chamamentos.selecao');
 
-// Arquivos da OSC (30/09/2026): a Prefeitura vê os de cada OSC; o download é da
+// Arquivos da OSC: a Prefeitura vê os de cada OSC; o download é da
 // própria OSC e de quem é interno (conferido no controller).
 Route::middleware('auth')->group(function () {
     Route::get('oscs/{osc}/arquivos', [OscArquivoController::class, 'daOsc'])->name('oscs.arquivos');
     Route::get('arquivos-osc/{arquivo}', [OscArquivoController::class, 'download'])->name('arquivos-osc.download');
 });
 
-// Peças documentais (motor genérico — Seleção 2.2, Celebração e Formalização 2.3).
-// A autorização é feita no PecaController: peças em trâmite são liberadas por
-// setor + etapa (o que inclui a vez da OSC na Celebração); fora de trâmite,
-// continua exigindo a permissão de chamamentos/formalização.
+// Peças documentais. A autorização é no PecaController: em trâmite, por setor + etapa;
+// fora dele, pela permissão de chamamentos/formalização.
 Route::middleware('auth')->group(function () {
     Route::put('pecas/{peca}', [PecaController::class, 'salvar'])->name('pecas.salvar');
     Route::patch('pecas/{peca}/assinar', [PecaController::class, 'assinar'])->name('pecas.assinar');
@@ -400,12 +377,8 @@ Route::middleware('auth')->group(function () {
     // Anexo avulso: só o campo criado à mão é removível (ver PecaController)
     Route::delete('pecas/{peca}', [PecaController::class, 'destruirExtra'])->name('pecas.extra.destruir');
 
-    // Trâmite da Celebração — acessível aos setores internos e à OSC da parceria
-    // A listagem é só dos setores que participam do fluxo (checagem no controller);
-    // as telas por proposta seguem abertas à OSC da parceria.
-    // Prestação de contas (módulo 3.4) — a OSC monta e envia, a SCP analisa
-    // previamente, a Unidade Gestora decide. A autorização é por setor da vez,
-    // no controller, como na Celebração: a tela serve aos dois lados.
+    // Prestação de contas: a OSC monta e envia, a SCP analisa, a UG decide. Autorização por
+    // setor da vez, no controller.
     Route::get('prestacao-contas', [PrestacaoContasController::class, 'index'])->name('prestacao-contas.index');
     Route::post('prestacao-contas', [PrestacaoContasController::class, 'store'])->name('prestacao-contas.store');
     Route::get('prestacao-contas/{pc}', [PrestacaoContasController::class, 'show'])->name('prestacao-contas.show');

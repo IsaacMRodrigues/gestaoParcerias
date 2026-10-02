@@ -6,11 +6,8 @@
 
     $etapaAtual = (int) $proposta->celebracao_etapa;
     $concluida  = $proposta->celebracaoConcluida();
-    // setorNoTramite(): a OSC atua como setor 'osc' e não tem lotação — comparar
-    // com users.setor dava sempre falso e escondia dela o botão de encaminhar,
-    // deixando a parceria parada sem que ninguém pudesse movimentá-la.
-    // Na etapa conjunta (UG e SCP em paralelo), cada setor tem a vez até
-    // concluir a sua parte.
+    // setorNoTramite(): a OSC atua como 'osc' (não tem lotação). Na etapa conjunta, cada setor
+    // tem a vez até concluir a sua parte.
     $meuSetor   = auth()->user()->setorNoTramite();
     $conjunta   = $proposta->etapaConjuntaCelebracao();
     $souDoSetor = $proposta->usuarioTemAVezNaCelebracao(auth()->user())
@@ -76,8 +73,7 @@
                 </div>
             @endif
 
-            {{-- Plano de trabalho aberto: a OSC e a UG editam até o documento dele
-                 ser assinado (decisão da gestão, 30/09/2026). --}}
+            {{-- Plano de trabalho aberto: a OSC e a UG editam até o documento dele ser assinado. --}}
             @php
                 $linkPlano = null;
                 if ($proposta->planoAbertoNaCelebracao()) {
@@ -97,7 +93,7 @@
                 </div>
             @endif
 
-            {{-- Arquivos da OSC (30/09/2026): certidões e declarações saíram do
+            {{-- Arquivos da OSC: certidões e declarações saíram do
                  checklist; a etapa 2 cobra a área completa e em dia. --}}
             @php $faltamArquivos = $proposta->osc?->pendenciasDosArquivos() ?? []; @endphp
             <div class="bg-white rounded-xl border border-gray-200 shadow-sm px-6 py-4 flex items-start justify-between gap-4">
@@ -127,7 +123,7 @@
                         <dt class="text-xs font-medium text-gray-500 uppercase tracking-wide">OSC</dt>
                         <dd class="text-gray-800 mt-0.5">{{ $proposta->osc->name }}</dd>
                     </div>
-                    {{-- O processo do Planejamento e o número do edital (01/10/2026), no
+                    {{-- O processo do Planejamento e o número do edital, no
                          lugar do "Chamamento". Dispensa e inexigibilidade não têm edital:
                          o número é o delas. --}}
                     @php
@@ -155,10 +151,7 @@
                     <div>
                         <dt class="text-xs font-medium text-gray-500 uppercase tracking-wide">Situação</dt>
                         <dd class="mt-0.5">
-                            {{-- inline-block: como <span> inline, o rótulo longo ("Com Setor de
-                                 Convênios e Parcerias (SCP)") quebrava em duas linhas e a moldura
-                                 se partia junto — duas meias caixas, cada uma com metade da borda.
-                                 Em bloco, o texto quebra dentro de uma caixa só. --}}
+                            {{-- inline-block: o rótulo longo quebra dentro de uma caixa só. --}}
                             @if($concluida)
                                 <span class="inline-block px-2.5 py-1 text-xs font-semibold leading-snug bg-brand-50 text-brand-800 border border-brand-200 rounded-md">Concluída</span>
                             @else
@@ -227,7 +220,7 @@
                             @else
                                 <form action="{{ route('celebracao.avancar', $proposta) }}" method="POST" class="space-y-2">
                                     @csrf
-                                    {{-- Para o Gestor da Parceria, a SCP escolhe quem assina (01/10/2026). --}}
+                                    {{-- Para o Gestor da Parceria, a SCP escolhe quem assina. --}}
                                     @if((\App\Models\Proposta::ETAPAS_CELEBRACAO[$etapaAtual + 1]['setor'] ?? null) === 'gestor')
                                         @php $gestores = $proposta->gestoresElegiveis(); @endphp
                                         <div>
@@ -271,10 +264,7 @@
                             @endif
 
                             @if($etapaAtual > 0 && !$ehOsc)
-                                {{-- Devolução dirigida: o erro nem sempre está na etapa
-                                     anterior. Se o documento da etapa 6 saiu errado e o
-                                     trâmite já vai na 9, voltar de uma em uma faria três
-                                     setores reprocessarem o que estava certo. --}}
+                                {{-- Devolução dirigida: o erro nem sempre está na etapa anterior. --}}
                                 <form action="{{ route('celebracao.devolver', $proposta) }}" method="POST"
                                       class="space-y-2 pt-2 border-t border-gray-100">
                                     @csrf

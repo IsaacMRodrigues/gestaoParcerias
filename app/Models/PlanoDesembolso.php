@@ -5,13 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
-/**
- * Uma parcela do cronograma de desembolso — item 11 do modelo de Plano de
- * Trabalho: por meta e por parcela (1ª, 2ª, 3ª…), com o valor.
- *
- * Ano e mês são do esquema anterior, em que o cronograma era mensal; ficam só
- * nas parcelas antigas.
- */
+/** Parcela do cronograma de desembolso (item 11): por meta e parcela. Ano e mês só nas antigas. */
 class PlanoDesembolso extends Model
 {
     protected $table = 'plano_desembolsos';

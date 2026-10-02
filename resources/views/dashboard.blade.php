@@ -12,10 +12,7 @@
     $processosTotal   = Processo::count();
     $processosTramite = Processo::where('status', 'em_tramite')->count();
 
-    // Antes contava só Processo::where('setor_atual', ...), então a faixa servia
-    // apenas aos quatro setores do Planejamento e mentia para todos os demais:
-    // quem tinha trabalho parado na Seleção ou na Celebração lia "nenhum
-    // processo aguardando". Agora vem dos três trâmites.
+    // Pendências dos três trâmites, pela Caixa de Entrada.
     $minhaCaixa = $u->setor ? \App\Support\CaixaDeEntrada::para($u) : null;
 
     $chamamentosTotal   = Chamamento::count();
@@ -30,10 +27,7 @@
     $instrumentosTotal    = Instrumento::count();
     $instrumentosVigentes = Instrumento::where('status', 'vigente')->count();
 
-    // Manifestação de interesse é proposta de OSC sem chamamento aberto: chega
-    // pelo portal e fica esperando o município encaminhar, opinar e decidir.
-    // Sem o card, a única porta era o item de menu — e nada dizia que havia
-    // OSC aguardando resposta. `visiveisPara` mantém o recorte por Secretaria.
+    // Manifestações esperando o município, no recorte por Secretaria.
     $manifestacoesFila  = ManifestacaoInteresse::visiveisPara($u)->emTramite()->count();
     $manifestacoesTotal = ManifestacaoInteresse::visiveisPara($u)->where('status', '!=', 'rascunho')->count();
 @endphp
@@ -59,13 +53,7 @@
     <div class="py-8">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-6">
 
-            {{-- Caixa de entrada do setor.
-                 A cor conta o estado, em vez de gritar sempre igual: laranja
-                 (pendência que espera por você) só quando há processo parado;
-                 sem fila, a faixa recua para um aviso branco e discreto. Antes
-                 era o mesmo bloco verde-vivo dizendo "0 processos aguardando" —
-                 destaque máximo para a ausência de trabalho, e mais uma mancha
-                 verde ao lado de uma sidebar já verde. --}}
+            {{-- Caixa do setor: laranja só quando há pendência; sem fila, um aviso discreto. --}}
             @if(!is_null($minhaCaixa))
                 @if($minhaCaixa->total() > 0)
                     <a href="{{ route('caixa') }}"
@@ -114,11 +102,7 @@
 
             {{-- Cards de métricas --}}
             <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-                {{-- A cor diz o estado da métrica, não o módulo — é o que a paleta
-                     da Prefeitura (verde, laranja, cinzas) permite dizer, e é a
-                     informação mais útil: laranja é trabalho parado esperando
-                     alguém, verde é o que está rodando, cinza é cadastro que só
-                     se consulta. A fileira separa "preciso agir" de "está bem". --}}
+                {{-- A cor diz o estado da métrica: laranja espera alguém, verde roda, cinza é consulta. --}}
                 @can('planejamento')
                     <x-stat-card label="Processos em trâmite" icon="processos" :value="$processosTramite" :sub="$processosTotal.' no total'"
                                  color="accent" :href="route('processos.index')" />

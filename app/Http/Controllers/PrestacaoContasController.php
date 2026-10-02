@@ -15,15 +15,8 @@ use Illuminate\Validation\Rule;
 use Illuminate\View\View;
 
 /**
- * Prestação de contas (módulo 3.4).
- *
- * A OSC preenche campos — não redige documentos: o memorando, o relatório e o
- * resumo da folha são gerados do que ela lançou, com as somas prontas, e é
- * esse texto que vai à assinatura. Enquanto não houver assinatura, cada
- * gravação regera o documento; depois dela, nada mais o altera.
- *
- * Quem faz o quê: a OSC monta e envia, a SCP analisa previamente, e a Unidade
- * Gestora — com o Gestor da Parceria e a Comissão de Monitoramento — decide.
+ * Prestação de contas: a OSC preenche campos e os documentos são gerados deles até a
+ * assinatura. A OSC monta e envia, a SCP analisa e a UG decide.
  */
 class PrestacaoContasController extends Controller
 {
@@ -138,11 +131,7 @@ class PrestacaoContasController extends Controller
         ]);
     }
 
-    /**
-     * Primeira abertura: traz as metas do Plano de Trabalho e cria a linha de
-     * cada bloco financeiro. Sem isso a OSC começaria com tabelas vazias e
-     * teria de redigitar o que já foi aprovado.
-     */
+    /** Primeira abertura: traz as metas do plano e cria a linha de cada bloco financeiro. */
     private function semear(PrestacaoContas $pc): void
     {
         if ($pc->metas()->doesntExist()) {
@@ -169,13 +158,7 @@ class PrestacaoContasController extends Controller
         }
     }
 
-    /**
-     * Quanto o plano de aplicação aprovou em cada bloco do Anexo VI.
-     *
-     * Os blocos da prestação agrupam naturezas de despesa (ver
-     * PrestacaoContas::BLOCOS), e o plano lança item a item por natureza —
-     * então a conversão é somar os itens de cada natureza do bloco.
-     */
+    /** Quanto o plano de aplicação aprovou em cada bloco do Anexo VI (soma por natureza). */
     private function aprovadoPorBloco(PrestacaoContas $pc): array
     {
         $proposta = $pc->instrumento?->proposta;
@@ -219,10 +202,7 @@ class PrestacaoContasController extends Controller
         }
     }
 
-    /**
-     * Grava um bloco de campos. Cada aba da tela manda o seu, e só o dela — é
-     * o que permite salvar o memorando sem mexer no relatório.
-     */
+    /** Grava os campos de uma aba (cada aba manda só os seus). */
     public function atualizar(Request $request, PrestacaoContas $pc): RedirectResponse
     {
         $this->autorizarSetor($pc);
@@ -354,7 +334,7 @@ class PrestacaoContasController extends Controller
             'parecer.required' => 'Informe o motivo da devolução — é o que a OSC vai ler para corrigir.',
         ]);
 
-        // Devolução por documento (30/09/2026): só os marcados reabrem.
+        // Devolução por documento: só os marcados reabrem.
         $escolhidas = Devolucao::escolhidas($request, $pc->documentosDevolviveis());
         $anterior   = Devolucao::etapaDestino($escolhidas, $pc->etapa - 1);
         $destino    = PrestacaoContas::ETAPAS[$anterior]['setor'];

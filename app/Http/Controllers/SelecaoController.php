@@ -11,17 +11,10 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Str;
 use Illuminate\Validation\Rule;
 
-/**
- * Trâmite da Seleção (Fluxo Seleção do cliente):
- * UG (relatório + ata + resultado provisório) → SCP (publica o provisório)
- * → UG (recursos + resultado definitivo) → SCP (publica o definitivo e emite
- * o Termo de Adjudicação e Homologação) → Prefeito (assina) → encerra.
- */
+/** Trâmite da Seleção do Chamamento Público (etapas em Chamamento::ETAPAS_SELECAO). */
 class SelecaoController extends Controller
 {
-    /**
-     * Só o setor que está com a Seleção pode movimentá-la.
-     */
+    /** Só o setor que está com a Seleção pode movimentá-la. */
     private function autorizarSetor(Chamamento $chamamento): void
     {
         abort_unless($chamamento->temTramiteSelecao(), 422,
@@ -32,9 +25,7 @@ class SelecaoController extends Controller
             'Apenas o setor que está com a Seleção pode movimentá-la.');
     }
 
-    /**
-     * Encaminha a Seleção para o próximo setor do fluxo.
-     */
+    /** Encaminha a Seleção para o próximo setor do fluxo. */
     public function avancar(Request $request, Chamamento $chamamento): RedirectResponse
     {
         $this->autorizarSetor($chamamento);
@@ -83,9 +74,7 @@ class SelecaoController extends Controller
             ->with('success', 'Seleção encaminhada para ' . Chamamento::SETORES_SELECAO[$proxSetor] . '.');
     }
 
-    /**
-     * Devolve para a etapa anterior (pendência a corrigir).
-     */
+    /** Devolve para uma etapa anterior (pendência a corrigir). */
     public function devolver(Request $request, Chamamento $chamamento): RedirectResponse
     {
         $this->autorizarSetor($chamamento);
@@ -95,7 +84,7 @@ class SelecaoController extends Controller
             'parecer.required' => 'Informe o motivo da devolução.',
         ]);
 
-        // Devolução por documento (30/09/2026): só os marcados reabrem, e a
+        // Devolução por documento: só os marcados reabrem, e a
         // Seleção volta para a etapa do mais antigo deles.
         $escolhidas    = Devolucao::escolhidas($request, $chamamento->documentosDevolviveis());
         $etapaAnterior = Devolucao::etapaDestino($escolhidas, (int) $chamamento->selecao_etapa - 1);
@@ -120,17 +109,8 @@ class SelecaoController extends Controller
     }
 
     /**
-     * Abre mais um espaço de anexo no checklist.
-     *
-     * Quantas publicações um chamamento exige não é regra fixa: republicação,
-     * errata, uma segunda edição do Diário Oficial. O template prevê o comum;
-     * este botão cobre o resto, sem inventar campos que a maioria não usa.
-     *
-     * Dois lugares possíveis, e a diferença importa. Na etapa corrente do
-     * trâmite, o anexo é da vez de quem o cria — mesma régua de avançar e
-     * devolver. Nos documentos gerais (a fase do edital, e a Dispensa inteira,
-     * que não passa por julgamento), não há etapa: grava-se o setor de quem
-     * abriu o espaço, e só ele preenche.
+     * Abre mais um espaço de anexo (republicação, errata…). Na etapa corrente, é da vez de quem
+     * o cria; nos documentos gerais, grava-se o setor de quem abriu, e só ele preenche.
      */
     public function adicionarAnexo(Request $request, Chamamento $chamamento): RedirectResponse
     {
@@ -149,10 +129,7 @@ class SelecaoController extends Controller
 
         $etapa = $naEtapa ? (int) $chamamento->selecao_etapa : null;
 
-        // Fora da etapa o anexo segue a regra dos vizinhos: no chamamento
-        // público as peças prévias têm dono (é segregação de função — quem pede
-        // o parecer não o emite), na Dispensa nunca tiveram. Dar dono ali
-        // travaria justamente quem a pessoa abriu o espaço para atender.
+        // Fora da etapa, segue os vizinhos: no chamamento as peças prévias têm dono; na Dispensa, não.
         $setor = match (true) {
             $naEtapa => $chamamento->selecao_setor,
             $chamamento->categoriaPecas() === 'chamamento_publico' => auth()->user()->setorNoTramite(),
@@ -183,16 +160,7 @@ class SelecaoController extends Controller
             ->with('success', 'Espaço de anexo criado. Envie o arquivo abaixo.');
     }
 
-    /**
-     * Encerra a Seleção na última etapa (Prefeito, após assinar a homologação)
-     * e devolve o chamamento à Unidade Gestora para a Celebração.
-     */
-    /**
-     * Propostas ainda sem decisão neste chamamento.
-     *
-     * Quem já foi aprovada ou reprovada saiu do julgamento; rascunho nunca
-     * chegou a ser apresentado.
-     */
+    /** Propostas ainda sem decisão neste chamamento (nem aprovadas, reprovadas ou rascunho). */
     private function propostasEmJulgamento(Chamamento $chamamento)
     {
         return $chamamento->propostas()
@@ -202,18 +170,8 @@ class SelecaoController extends Controller
     }
 
     /**
-     * Adjudicar: declarar quem venceu.
-     *
-     * O Termo que encerra a Seleção é de *Adjudicação* e Homologação —
-     * adjudicar é justamente atribuir o objeto ao vencedor. Até aqui esse ato
-     * não existia no sistema: a Seleção era encerrada, a mensagem prometia "segue
-     * para a Celebração" e nenhuma proposta mudava de status. Como a Celebração
-     * exige proposta 'aprovada', o fluxo morria num vão — o chamamento ficava
-     * encerrado e a parceria não tinha por onde continuar.
-     *
-     * As não escolhidas são reprovadas no mesmo ato: o resultado do julgamento
-     * é um só, e deixá-las 'submetida' significaria mantê-las na fila de
-     * análise para sempre.
+     * Adjudica: as vencedoras são aprovadas e seguem para a Celebração; as demais são reprovadas
+     * no mesmo ato, porque o resultado do julgamento é um só.
      */
     private function adjudicarPropostas(Chamamento $chamamento, array $vencedoras): void
     {
@@ -224,10 +182,7 @@ class SelecaoController extends Controller
         }
     }
 
-    /**
-     * Regras da declaração de vencedoras, comuns ao encerramento e à
-     * declaração posterior (chamamentos encerrados antes deste ato existir).
-     */
+    /** Regras da declaração de vencedoras, comuns ao encerramento e à declaração posterior. */
     private function validarVencedoras(Request $request, Chamamento $chamamento): array
     {
         $candidatas = $this->propostasEmJulgamento($chamamento);
@@ -237,9 +192,7 @@ class SelecaoController extends Controller
         }
 
         $data = $request->validate([
-            // Ao menos uma: reprovar todas não pode ser efeito silencioso de um
-            // clique em "Encerrar". Chamamento fracassado se resolve reprovando
-            // as propostas uma a uma antes, na tela de cada uma.
+            // Ao menos uma: chamamento fracassado se resolve reprovando as propostas uma a uma.
             'vencedoras'   => ['required', 'array', 'min:1'],
             'vencedoras.*' => ['integer', Rule::in($candidatas->pluck('id')->all())],
         ], [
@@ -250,10 +203,7 @@ class SelecaoController extends Controller
         return $data['vencedoras'];
     }
 
-    /**
-     * Declara as vencedoras de um chamamento cuja Seleção já foi encerrada —
-     * o caso dos que foram homologados antes de a adjudicação existir.
-     */
+    /** Declara as vencedoras de um chamamento já encerrado (homologado antes de a adjudicação existir). */
     public function adjudicar(Request $request, Chamamento $chamamento): RedirectResponse
     {
         abort_unless($chamamento->temTramiteSelecao(), 422,
@@ -273,6 +223,7 @@ class SelecaoController extends Controller
             : count($vencedoras).' propostas adjudicadas. A Celebração já pode ser iniciada.');
     }
 
+    /** Encerra a Seleção na última etapa e devolve o chamamento à UG para a Celebração. */
     public function concluir(Request $request, Chamamento $chamamento): RedirectResponse
     {
         $this->autorizarSetor($chamamento);

@@ -7,10 +7,7 @@ use Illuminate\Database\Seeder;
 
 class UnidadesGestorasSeeder extends Seeder
 {
-    /**
-     * Quadro padrão de Unidades Gestoras do município (código => nome).
-     * O código entra na composição do número do processo (UG.Seq.Ano.Esfera).
-     */
+    /** Unidades Gestoras do município (código => nome); o código entra no número do processo. */
     public const UNIDADES = [
         '0201' => 'Governo',
         '0202' => 'Jurídico',

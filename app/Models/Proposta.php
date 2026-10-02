@@ -30,13 +30,8 @@ class Proposta extends Model
     ];
 
     /**
-     * Ver Processo::STATUS_COLORS para a regra (cinza inerte, laranja em
-     * andamento, verde positivo, vermelho negativo).
-     *
-     * Submetida, em análise e em negociação dividem o laranja: são três
-     * momentos do mesmo estado — a proposta está com a Administração e espera
-     * alguém agir. A paleta da Prefeitura tem duas matizes, então quem separa
-     * esses três é o rótulo do selo, não a cor.
+     * Ver Processo::STATUS_COLORS. Submetida, em análise e em negociação dividem o laranja
+     * (a proposta espera a Administração); quem os separa é o rótulo.
      */
     public const STATUS_COLORS = [
         'rascunho'      => 'gray',
@@ -81,29 +76,23 @@ class Proposta extends Model
         ];
     }
 
-    /**
-     * Setores que atuam na Celebração — inclui a própria OSC, que envia o plano
-     * de trabalho, os documentos de habilitação e os dados bancários.
-     */
+    /** Setores que atuam na Celebração, incluindo a própria OSC. */
     public const SETORES_CELEBRACAO = [
         'ug'     => 'Unidade Gestora',
         'osc'    => 'Organização da Sociedade Civil',
         'scp'    => 'Setor de Convênios e Parcerias (SCP)',
         'seplan' => 'Secretaria de Planejamento (SEPLAN)',
         'pj'     => 'Procuradoria Jurídica (PJ)',
-        // O Gestor da Parceria é uma pessoa, escolhida pela SCP (01/10/2026).
+        // O Gestor da Parceria é uma pessoa, escolhida pela SCP.
         'gestor' => 'Gestor da Parceria',
         'pm'     => 'Gabinete do Prefeito',
     ];
 
-    /**
-     * Etapas da Celebração (Fluxo Etapa de Celebração confirmado pelo cliente).
-     */
+    /** Etapas da Celebração. */
     public const ETAPAS_CELEBRACAO = [
         ['setor' => 'ug',     'acao' => 'Encaminhar o Termo de Homologação e convocar a OSC a apresentar o Plano de Trabalho e os documentos de habilitação'],
         ['setor' => 'osc',    'acao' => 'Elaborar o Plano de Trabalho e anexar os documentos de habilitação'],
-        // Etapa conjunta (decisão da gestão, 30/09/2026): o que a OSC entregou vai
-        // à UG e à SCP ao mesmo tempo, e só avança quando as duas concluírem.
+        // Etapa conjunta: vai à UG e à SCP ao mesmo tempo e só avança quando as duas concluírem.
         // 'setor' é o principal, para o que só entende um setor por etapa.
         ['setor' => 'ug', 'setores' => ['ug', 'scp'], 'acao' => 'Em paralelo — UG: analisar e emitir/assinar a Aprovação do Plano de Trabalho; SCP: analisar o Plano de Trabalho e os documentos de habilitação'],
         ['setor' => 'scp',    'acao' => 'Analisar e solicitar o Parecer Financeiro à SEPLAN'],
@@ -111,9 +100,8 @@ class Proposta extends Model
         ['setor' => 'ug',     'acao' => 'Anexar as portarias do Gestor e da Comissão de Monitoramento e emitir o Parecer Técnico'],
         ['setor' => 'scp',    'acao' => 'Conferir o processo, emitir a Minuta do Termo e a Certidão de Autuação e emitir/assinar o Protocolo na Unidade Jurídica'],
         ['setor' => 'pj',     'acao' => 'Analisar e emitir/assinar o Parecer Jurídico'],
-        // O Termo em sequência (decisão da gestão, 01/10/2026): a SCP emite sem
-        // assinar; assinam a OSC, o Responsável da UG, o Gestor da Parceria e o
-        // Gabinete, e entre uma assinatura e outra o Termo volta à SCP.
+        // O Termo é assinado em sequência (ver Peca::ASSINATURAS_EM_SEQUENCIA); entre uma
+        // assinatura e outra, volta à SCP.
         ['setor' => 'scp',    'acao' => 'Emitir o Parecer da SCP e o Termo (sem assinar o Termo) e encaminhar à OSC'],
         ['setor' => 'osc',    'acao' => 'Assinar o Termo e devolver à SCP'],
         ['setor' => 'scp',    'acao' => 'Conferir a assinatura da OSC e encaminhar o Termo à UG'],
@@ -124,8 +112,7 @@ class Proposta extends Model
         ['setor' => 'pm',     'acao' => 'Gabinete: fazer a última assinatura do Termo e devolver à SCP'],
         ['setor' => 'scp',    'acao' => 'Anexar o comprovante de publicação (Diário Oficial e site) e emitir a Autorização de Início de Execução'],
         ['setor' => 'osc',    'acao' => 'Informar os dados bancários da conta específica da parceria'],
-        // A OP Global com duas assinaturas, nesta ordem (decisão da gestão,
-        // 01/10/2026): o Gestor da Parceria e o Responsável da UG.
+        // A OP Global com duas assinaturas, nesta ordem: o Gestor da Parceria e o Responsável da UG.
         ['setor' => 'scp',    'acao' => 'Elaborar a Ordem de Pagamento Global e encaminhar ao Gestor da Parceria'],
         ['setor' => 'gestor', 'acao' => 'Gestor da Parceria: assinar a Ordem de Pagamento Global'],
         ['setor' => 'ug',     'perfil' => 'responsavel_unidade_gestora', 'acao' => 'Responsável da UG: assinar a Ordem de Pagamento Global'],
@@ -137,11 +124,7 @@ class Proposta extends Model
         return $this->belongsTo(Chamamento::class);
     }
 
-    /**
-     * Restringe às propostas visíveis ao usuário: quem é lotado numa Secretaria
-     * (órgão) vê só as propostas dos chamamentos do seu órgão; admin/auditoria e
-     * papéis transversais veem todas.
-     */
+    /** Propostas visíveis ao usuário: a UG vê as do seu órgão; admin, auditoria e transversais, todas. */
     public function scopeVisiveisPara($query, User $user)
     {
         if ($user->podeVerTodosOrgaos()) {
@@ -152,14 +135,8 @@ class Proposta extends Model
     }
 
     /**
-     * Esta parceria pode ser vista por este usuário? A versão de um registro
-     * de scopeVisiveisPara(), mais o lado da OSC.
-     *
-     * Existe porque o recorte vivia só nas listagens: a tela de detalhe abria
-     * pelo endereço o que a lista escondia — servidor de uma Secretaria lendo
-     * parceria de outra, e uma OSC lendo a Celebração de outra. Quem a aplica
-     * é o middleware ParceriaVisivel, para toda rota que receba a parceria ou
-     * algo pendurado nela.
+     * Esta parceria é visível ao usuário? A versão de scopeVisiveisPara() para um registro,
+     * mais o lado da OSC. Aplicada pelo middleware ParceriaVisivel.
      */
     public function visivelPara(User $user): bool
     {
@@ -221,21 +198,8 @@ class Proposta extends Model
     }
 
     /**
-     * O processo inteiro, como a OSC o vê (módulo 3.3).
-     *
-     * A cliente pediu que a organização, ao abrir a sua inscrição, encontrasse
-     * "todo o processo" — e não apenas o que ela mesma entregou. São quatro
-     * fases, quatro origens de documento, reunidas aqui numa lista só.
-     *
-     * Entra o que está **pronto** (assinado, ou com arquivo anexado) e marcado
-     * como visível. Minuta não circula: documento pela metade na mão da OSC é
-     * pior do que documento nenhum.
-     *
-     * **O Planejamento não entra** (homologação, item 3): Termo de Referência,
-     * Parecer Financeiro, Parecer Jurídico e o resto da instrução são internos
-     * da Prefeitura. Nem pela fase dele, nem pelas peças da Seleção que o puxam
-     * (Peca::vemDoPlanejamento) — a mesma peça, por outra porta. O Edital e a
-     * justificativa de dispensa seguem na página pública do chamamento.
+     * O processo inteiro como a OSC o vê: o que está pronto e marcado como visível, das
+     * fases a partir da Seleção. O Planejamento é interno e não entra.
      *
      * @return array<string, \Illuminate\Support\Collection>
      */
@@ -260,9 +224,8 @@ class Proposta extends Model
     }
 
     /**
-     * Tudo o que pode ser aberto ou fechado à OSC nesta parceria — inclusive o
-     * que ainda não está pronto, porque a SCP decide antes de o documento
-     * existir. É a lista da tela de curadoria.
+     * Tudo o que pode ser aberto ou fechado à OSC nesta parceria, pronto ou não
+     * (a lista da tela de curadoria).
      *
      * @return array<string, \Illuminate\Support\Collection>
      */
@@ -296,14 +259,7 @@ class Proposta extends Model
         return $this->hasMany(CelebracaoTramitacao::class)->latest('id');
     }
 
-    /**
-     * A OSC ainda pode apresentar documentos nesta proposta?
-     *
-     * Era limitado a 'rascunho', o que fechava a porta justamente quando ela
-     * mais precisa estar aberta: para reenviar o que o município recusou e para
-     * anexar a habilitação na Celebração (etapa 2 do fluxo), quando a proposta
-     * já está aprovada. Só encerra quando o caminho acabou.
-     */
+    /** A OSC ainda pode apresentar documentos? Até o caminho acabar (inclusive na Celebração). */
     public function aceitaDocumentosDaOsc(): bool
     {
         return !in_array($this->status, ['reprovada', 'cancelada'], true);
@@ -323,10 +279,8 @@ class Proposta extends Model
     }
 
     /**
-     * O plano de trabalho está aberto a edição na Celebração? Da aprovação
-     * até o documento "Plano de Trabalho" do checklist ser assinado — em
-     * qualquer etapa, e pela OSC e pela UG (decisão da gestão, 30/09/2026).
-     * Assinado, o texto congela, e mudar o plano passa a ser por Alteração.
+     * Plano de trabalho aberto à edição na Celebração (OSC e UG), até o documento do plano
+     * ser assinado. Depois, só por Alteração.
      */
     public function planoAbertoNaCelebracao(): bool
     {
@@ -411,10 +365,8 @@ class Proposta extends Model
     }
 
     /**
-     * A pessoa tem a vez na Celebração agora? O setor, e mais: na etapa do
-     * Gestor, só o Gestor escolhido pela SCP; nas etapas com perfil (o
-     * Responsável da UG assina o Termo), só quem tem o perfil — e da
-     * Secretaria da parceria (01/10/2026).
+     * A pessoa tem a vez na Celebração agora? O setor e, quando a etapa pede, o Gestor escolhido
+     * ou o perfil exigido (da Secretaria da parceria).
      */
     public function usuarioTemAVezNaCelebracao(?User $user): bool
     {
@@ -467,13 +419,9 @@ class Proposta extends Model
     }
 
     /**
-     * Peças que precisam estar prontas antes de encaminhar a etapa atual.
-     * A Ordem de Pagamento Global é apenas emitida pela SCP na etapa 11 — a
-     * assinatura é da UG, na etapa 12.
-     */
-    /**
-     * @param string|null $setor na etapa conjunta, só as pendências da parte
-     *                           deste setor (as peças que ele preenche).
+     * Pendências para encaminhar a etapa atual da Celebração.
+     *
+     * @param string|null $setor na etapa conjunta, só as da parte deste setor.
      */
     public function pendenciasCelebracao(?string $setor = null): array
     {
@@ -523,7 +471,7 @@ class Proposta extends Model
         }
 
         // Etapa 2 (da OSC): a área "Arquivos da OSC" completa e em dia — as
-        // certidões e as declarações saíram do checklist para lá (30/09/2026).
+        // certidões e as declarações saíram do checklist para lá.
         if ($etapa === 1 && ($setor === null || $setor === 'osc')) {
             foreach ($this->osc?->pendenciasDosArquivos() ?? [] as $pendencia) {
                 $pend[] = 'Arquivos da OSC: ' . $pendencia;
@@ -569,9 +517,7 @@ class Proposta extends Model
 
     public function tramiteSetorLabel(?string $setor): string
     {
-        // Setores de fora deste trâmite (a PJ, por exemplo, que atua nas peças
-        // da fase do edital) não estão no mapa: cai na lotação, senão a tela
-        // escreveria a sigla crua — "o setor pj".
+        // Setor de fora deste trâmite (a PJ, por exemplo): cai na lotação.
         return self::SETORES_CELEBRACAO[$setor]
             ?? (User::LOTACOES[$setor] ?? strtoupper((string) $setor));
     }

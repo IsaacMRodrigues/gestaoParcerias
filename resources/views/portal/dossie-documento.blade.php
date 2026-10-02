@@ -1,7 +1,4 @@
-{{-- Um documento do processo, aberto pela OSC.
-
-     Mesmo carimbo de assinatura das telas internas: é o mesmo documento, e a
-     organização precisa poder conferir quem assinou e validar o código. --}}
+{{-- Um documento do processo, aberto pela OSC, com o mesmo carimbo das telas internas. --}}
 <x-portal-layout>
     <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-10 space-y-6">
         <div>

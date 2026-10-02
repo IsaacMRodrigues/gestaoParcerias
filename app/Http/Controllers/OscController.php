@@ -9,16 +9,7 @@ use Illuminate\Support\Facades\Storage;
 use Symfony\Component\HttpFoundation\StreamedResponse;
 use Illuminate\View\View;
 
-/**
- * Cadastro de OSC visto pela Prefeitura: consulta e correção, não autoria.
- *
- * A porta de entrada de uma organização é o auto-cadastro em /cadastro/osc,
- * onde ela declara os próprios dados e assume a responsabilidade por eles.
- * Havia aqui um segundo caminho, pelo qual um servidor criava a OSC no lugar
- * dela — nascia um cadastro sem dono, sem conta de acesso e sem ninguém
- * respondendo pelo que estava escrito. Editar e remover continuam: erro de
- * digitação e cadastro duplicado precisam de conserto.
- */
+/** Cadastro de OSC visto pela Prefeitura: consultar, corrigir e remover (a OSC se cadastra sozinha). */
 class OscController extends Controller
 {
     public function index(): View

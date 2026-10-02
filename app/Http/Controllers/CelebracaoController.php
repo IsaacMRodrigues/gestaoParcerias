@@ -12,18 +12,10 @@ use Illuminate\Support\Str;
 use Illuminate\Validation\Rule;
 use Illuminate\View\View;
 
-/**
- * Trâmite da Celebração (Fluxo Etapa de Celebração), ancorado na proposta
- * aprovada: UG convoca → OSC (plano + habilitação) → UG (aprova) → SCP →
- * SEPLAN → UG → SCP → PJ → SCP (termo + publicação) → SCP (autorização) →
- * OSC (dados bancários) → SCP (OP global) → UG (assina) → SCP (empenho).
- */
+/** Trâmite da Celebração, ancorado na proposta aprovada (etapas em Proposta::ETAPAS_CELEBRACAO). */
 class CelebracaoController extends Controller
 {
-    /**
-     * Só o setor que está com a Celebração pode movimentá-la. Quando a vez é da
-     * OSC, exige-se ainda que seja a OSC desta proposta.
-     */
+    /** Só quem tem a vez na Celebração pode movimentá-la (pela OSC, a OSC desta proposta). */
     private function autorizarSetor(Proposta $proposta): void
     {
         abort_unless($proposta->temTramiteCelebracao(), 422,
@@ -49,14 +41,7 @@ class CelebracaoController extends Controller
         }
     }
 
-    /**
-     * Listagem do trâmite — a porta de entrada da Celebração no menu.
-     *
-     * Existe porque o item "Celebração" do menu apontava para a lista de
-     * Instrumentos, protegida por `formalizacao`: SCP, SEPLAN e PJ conduzem
-     * etapas do fluxo e mesmo assim viam cadeado. Aqui a régua é participar do
-     * trâmite; o recorte por órgão continua sendo o de sempre (visiveisPara).
-     */
+    /** Lista do trâmite: quem participa da Celebração, no recorte por órgão de sempre. */
     public function index(): View
     {
         $user = auth()->user();
@@ -71,10 +56,8 @@ class CelebracaoController extends Controller
             ->orderByDesc('updated_at')
             ->paginate(15);
 
-        // Um chamamento pode ter várias vencedoras, e cada uma tem a sua
-        // Celebração (pedido da gestão, 29/09/2026). A lista as reúne sob o
-        // chamamento, na ordem em que o primeiro dele aparece, com o total de
-        // parcerias que o julgamento gerou.
+        // Um chamamento pode ter várias vencedoras, cada uma com a sua Celebração: a lista as reúne
+        // sob o chamamento.
         $grupos = $propostas->getCollection()->groupBy('chamamento_id');
         $vencedorasPorChamamento = Proposta::comTramiteCelebracao()
             ->whereIn('chamamento_id', $grupos->keys()->filter())
@@ -84,17 +67,11 @@ class CelebracaoController extends Controller
         return view('celebracao.index', compact('propostas', 'grupos', 'vencedorasPorChamamento'));
     }
 
-    /**
-     * Tela da Celebração. No primeiro acesso cria (idempotente) o checklist e
-     * marca o início do trâmite.
-     */
+    /** Tela da Celebração. No primeiro acesso cria (idempotente) o checklist e marca o início. */
     public function show(Proposta $proposta): View
     {
-        // De quem é a parceria já foi conferido no middleware ParceriaVisivel
-        // (a OSC dona, ou a Secretaria dela). Aqui, a mesma régua do index: do
-        // lado da Prefeitura, só quem participa do trâmite. Antes o show não
-        // conferia nada — e, como abrir a tela sincroniza peças e marca o
-        // início da Celebração, qualquer um que abrisse gravava no processo.
+        // A visibilidade já foi conferida em ParceriaVisivel; aqui, do lado da Prefeitura, só quem
+        // participa do trâmite (abrir a tela grava: sincroniza peças e marca o início).
         $user = auth()->user();
         abort_unless($user->ehRepresentanteOsc() || $user->participaDaCelebracao(), 403,
             'Seu setor não participa do trâmite da Celebração.');
@@ -114,7 +91,7 @@ class CelebracaoController extends Controller
             'pecas.assinante.roles', 'pecas.assinante.orgao',
             // O carimbo do Termo nomeia também quem contra-assinou pela OSC.
             'pecas.contraAssinante.roles', 'pecas.contraAssinante.osc',
-            // E as assinaturas em sequência do Termo (01/10/2026).
+            // E as assinaturas em sequência do Termo.
             'pecas.assinaturasPartes', 'gestorDaCelebracao',
             'celebracaoTramitacoes.remetente',
         ]);
@@ -134,14 +111,8 @@ class CelebracaoController extends Controller
     }
 
     /**
-     * O Plano de Trabalho do checklist nasce do plano preenchido no Portal.
-     *
-     * É o item 1 do módulo 3.2 — "a partir do preenchido". Enquanto ninguém
-     * assinou, o documento acompanha o que a OSC lançou; assinado, congela, e
-     * o que valerá dali em diante é o texto que foi assinado.
-     *
-     * A peça antiga, criada quando este item era anexo, segue como arquivo: só
-     * as novas nascem como documento, para não apagar o que já foi entregue.
+     * O Plano de Trabalho do checklist acompanha o plano lançado no Portal até ser assinado;
+     * a peça antiga, de quando era anexo, segue como arquivo.
      */
     private function regerarPlanoDeTrabalho(Proposta $proposta): void
     {
@@ -154,18 +125,7 @@ class CelebracaoController extends Controller
         $peca->update(['conteudo' => \App\Support\PlanoDocumento::render($proposta)]);
     }
 
-    /**
-     * Anexo avulso na etapa corrente.
-     *
-     * O checklist é fechado — vem do template — e a etapa da publicação é o
-     * caso claro do que faltava: são dois veículos previstos (Diário Oficial e
-     * site), mas às vezes a publicação sai em mais de uma edição, ou a
-     * Procuradoria pede um documento a mais. Sem espaço no checklist, isso
-     * ficava fora do sistema.
-     *
-     * O anexo nasce opcional de propósito: complementa a instrução, não pode
-     * travar o encaminhamento como as peças obrigatórias do fluxo.
-     */
+    /** Anexo avulso na etapa corrente; nasce opcional, para não travar o encaminhamento. */
     public function adicionarAnexo(Request $request, Proposta $proposta): RedirectResponse
     {
         $this->autorizarSetor($proposta);
@@ -218,7 +178,7 @@ class CelebracaoController extends Controller
         $data = $request->validate(['parecer' => ['nullable', 'string']]);
 
         // Etapa conjunta: cada setor conclui a sua parte; a Celebração só
-        // avança quando o último concluir (decisão da gestão, 30/09/2026).
+        // avança quando o último concluir.
         if ($conjunta) {
             $concluidas = array_values(array_unique(array_merge($proposta->celebracao_partes_concluidas ?? [], [$meuSetor])));
             $faltam = array_diff(Proposta::setoresDaEtapaCelebracao((int) $proposta->celebracao_etapa), $concluidas);
@@ -243,9 +203,7 @@ class CelebracaoController extends Controller
         $proxEtapa = (int) $proposta->celebracao_etapa + 1;
         $proxSetor = Proposta::ETAPAS_CELEBRACAO[$proxEtapa]['setor'];
 
-        // Para o Gestor da Parceria, a SCP escolhe a pessoa (01/10/2026). Já
-        // escolhido para o Termo, vale também para a OP Global — a SCP pode
-        // trocá-lo ao encaminhar.
+        // O Gestor da Parceria é escolhido pela SCP; escolhido para o Termo, vale também para a OP Global.
         $gestor = null;
         if ($proxSetor === 'gestor') {
             $gestorId = $request->validate(
@@ -289,9 +247,7 @@ class CelebracaoController extends Controller
 
         $data = $request->validate([
             'parecer' => ['required', 'string'],
-            // Devolução dirigida: o erro nem sempre está na etapa anterior. Se o
-            // documento da etapa 6 saiu errado e o trâmite já vai na 9, voltar de
-            // uma em uma obrigaria três setores a reprocessar o que estava certo.
+            // Devolução dirigida: o erro nem sempre está na etapa anterior.
             'etapa_destino' => ['nullable', 'integer', 'min:0', 'lt:' . $atual],
         ], [
             'parecer.required'   => 'Informe o motivo da devolução.',
@@ -299,9 +255,8 @@ class CelebracaoController extends Controller
             'etapa_destino.min'  => 'Etapa de destino inválida.',
         ]);
 
-        // Com documentos marcados, só eles reabrem e o trâmite volta para a
-        // etapa do mais antigo (30/09/2026). Sem marcar, a etapa escolhida —
-        // ou, sem escolha, a imediatamente anterior, como sempre.
+        // Com documentos marcados, só eles reabrem e o trâmite volta à etapa do mais antigo. Sem marcar,
+        // a etapa escolhida (ou a anterior).
         $escolhidas   = Devolucao::escolhidas($request, $proposta->documentosDevolviveis());
         $destino      = Devolucao::etapaDestino($escolhidas, $data['etapa_destino'] ?? $atual - 1);
         $setorDestino = Proposta::ETAPAS_CELEBRACAO[$destino]['setor'];
@@ -332,9 +287,7 @@ class CelebracaoController extends Controller
                 . Proposta::SETORES_CELEBRACAO[$setorDestino] . '.');
     }
 
-    /**
-     * Conclui a Celebração na última etapa (SCP, após anexar o empenho global).
-     */
+    /** Conclui a Celebração na última etapa (SCP, após anexar o empenho). */
     public function concluir(Proposta $proposta): RedirectResponse
     {
         $this->autorizarSetor($proposta);

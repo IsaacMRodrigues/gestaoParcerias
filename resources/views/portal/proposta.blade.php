@@ -35,10 +35,7 @@
                     {{ \App\Models\Proposta::STATUS[$proposta->status] }}
                 </span>
                 @if($proposta->status === 'rascunho')
-                    {{-- A equipe monta a proposta; apresentá-la é ato do
-                         responsável legal. Em vez de esconder o botão e deixar
-                         o membro sem saber o que falta, a tela diz de quem é a
-                         vez — mesmo princípio do checklist dos trâmites. --}}
+                    {{-- Apresentar é do responsável legal; para a equipe, a tela diz de quem é a vez. --}}
                     @if(auth()->user()->ehResponsavelLegalOsc())
                         <form action="{{ route('portal.proposta.submeter', $proposta) }}" method="POST"
                               data-confirm="Confirma a submissão? Após isso não será possível editar.">
@@ -129,10 +126,7 @@
                             <input type="file" name="arquivo" required
                                    class="block w-full text-sm text-gray-600 file:mr-3 file:py-1.5 file:px-3 file:rounded file:border-0 file:text-xs file:bg-brand-50 file:text-brand-700 hover:file:bg-brand-100">
                         </div>
-                        {{-- "Anexar", não "Enviar": o botão junta um arquivo à proposta.
-                             Enviar a proposta é outro ato — "Submeter Proposta", no topo
-                             da página —, e a manifestação de interesse já dizia "Anexar"
-                             para a mesma ação. --}}
+                        {{-- "Anexar": junta um arquivo à proposta (submeter é o botão do topo). --}}
                         <button type="submit"
                                 class="btn btn-primary">
                             Anexar

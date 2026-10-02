@@ -5,10 +5,7 @@
     <form method="POST" action="{{ route('login') }}" class="space-y-5">
         @csrf
 
-        {{-- Um campo para as duas formas de entrar: o e-mail, como sempre, ou
-             o nome de usuário das contas que não têm endereço próprio. Daí o
-             type="text" — com type="email" o navegador barrava o nome antes de
-             o formulário sequer ser enviado. --}}
+        {{-- Um campo para e-mail ou nome de usuário, por isso type="text". --}}
         <div>
             <x-input-label for="login" value="E-mail ou usuário" />
             <x-text-input id="login" class="block mt-1.5 w-full py-2.5" type="text" name="login"

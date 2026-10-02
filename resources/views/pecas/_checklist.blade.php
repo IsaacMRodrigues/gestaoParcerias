@@ -1,36 +1,16 @@
-{{-- Espera: $pecas (Collection de App\Models\Peca)
-
-     A lista é longa (10+ peças), então cada linha mostra só o essencial:
-     estado, nome e uma ação. Formulários de upload/edição ficam recolhidos —
-     abertos de uma vez, viravam uma parede de campos repetidos.
-
-     Os badges de tipo ("modelo padrão" / "arquivo") saíram: a própria ação
-     ("Preencher conteúdo" x "Enviar arquivo") já diz qual é. E como quase toda
-     peça é obrigatória, marcamos só a exceção ("opcional"). --}}
+{{-- Espera: $pecas (Collection de App\Models\Peca). Uma linha por peça (estado, nome e uma
+     ação), com os formulários recolhidos. Só a exceção leva marca ("opcional"). --}}
 @php
-    /* Agrupamento por etapa do trâmite.
-     *
-     * A lista saía na ordem do template, misturando etapas: um documento da
-     * etapa 4 aparecia entre dois da etapa 1, todos com a mesma aparência. Quem
-     * abria a tela não tinha como saber o que preencher agora e o que é de
-     * depois — a informação existia (cada peça sabe a sua etapa), mas a tela não
-     * usava para nada.
-     *
-     * Agora cada etapa é um bloco, na ordem do fluxo, e o bloco diz em que pé
-     * está: concluída, agora, ou depois. Os documentos fora do trâmite
-     * (Dispensa, Aditivo, Apostilamento — onde selecaoSetor() é null) vão para
-     * um bloco próprio no topo e a tela degrada para a lista simples de antes
-     * quando NENHUMA peça é governada por trâmite. */
+    /* Agrupa por etapa do trâmite, na ordem do fluxo, dizendo se cada bloco está concluído,
+     * é o de agora ou vem depois. Peças fora de trâmite ficam num bloco no topo; sem nenhuma
+     * peça em trâmite, a lista é simples. */
     $governadas = $pecas->filter->emTramite();
     $agrupar    = $governadas->isNotEmpty();
     $etapaAtual = $governadas->first()?->etapaAtualDoTramite();
     $encerrado  = (bool) $governadas->first()?->tramiteJaEncerrado();
 
     $SEM_ETAPA = 'livre';
-    // Etapas do fluxo, para desenhar TODAS — inclusive as que não têm documento
-    // próprio. Sem isto a numeração pulava: a etapa 13 (SCP elabora a Ordem de
-    // Pagamento) some da lista quando a peça migra para a etapa 14 (UG assina),
-    // e a tela ia de 12 para 14 como se o fluxo tivesse buraco.
+    // Todas as etapas do fluxo, até as sem documento próprio, para a numeração não pular.
     $etapasTramite = $agrupar ? $governadas->first()->etapasDoTramite() : [];
 
     $grupos = $agrupar
@@ -109,20 +89,12 @@
     @endif
 
     @php
-        /* Espaço extra de anexo, onde a tela dona ofereceu a rota.
-         *
-         * Vale nos dois tipos de bloco, e por motivos diferentes: na etapa
-         * corrente, porque é ali que se está trabalhando; nos documentos
-         * gerais, porque é onde moram as peças sem etapa — a fase do edital e
-         * a Dispensa inteira, que não passa por julgamento. Em ambos, $minhaVez
-         * já responde se a pessoa pode agir no bloco. */
+        /* Espaço extra de anexo, onde a tela dona ofereceu a rota: na etapa corrente ou nos
+         * documentos gerais, para quem tem a vez. */
         $podeAnexarExtra = ($rotaAnexoExtra ?? null) && $minhaVez && ($grupoAgora || $semEtapa);
     @endphp
 
-    {{-- Etapa que não tem documento próprio: em vez de sumir da lista (e abrir
-         buraco na numeração), aparece dizendo o que se faz nela. É o caso da
-         assinatura das partes e da assinatura da Ordem de Pagamento, cujos
-         documentos ficam no bloco de quem os emitiu. --}}
+    {{-- Etapa sem documento próprio: aparece dizendo o que se faz nela. --}}
     @if($pecasDoGrupo->isEmpty() && $acaoDaEtapa)
         <p class="px-6 py-3 text-xs text-gray-400 {{ $grupoFuturo ? 'opacity-60' : '' }}">
             {{ $acaoDaEtapa }}.
@@ -140,9 +112,7 @@
             $podeAssinar   = $peca->podeAssinar(auth()->user());
             $trava         = $peca->motivoTrava(auth()->user());
 
-            // Agrupado, a trava "Disponível na etapa 2 (SCP)" repete palavra por
-            // palavra o cabeçalho logo acima. Fica só nas travas que acrescentam
-            // algo — as da etapa corrente, que dizem de quem é a vez.
+            // Agrupado, a trava repete o cabeçalho; fica só na etapa corrente, que diz de quem é a vez.
             if ($agrupar && !$semEtapa && $nEtapa !== $etapaAtual) {
                 $trava = null;
             }
@@ -157,11 +127,8 @@
                      cursor-pointer select-none transition marker:content-none';
         @endphp
 
-        {{-- Âncora da linha: salvar/assinar/enviar redirecionam para
-             #peca-{id}, senão a página voltava ao topo a cada ação e o usuário
-             tinha de reencontrar, numa lista de 18 itens, onde estava.
-             scroll-margin-top desconta o cabeçalho fixo (inline: classe nova
-             obrigaria a recompilar o CSS só por causa de uma margem). --}}
+        {{-- Âncora: salvar/assinar/enviar voltam para #peca-{id}. scroll-margin-top desconta o
+             cabeçalho fixo. --}}
         <div id="peca-{{ $peca->id }}" style="scroll-margin-top:7rem" class="px-6 py-3.5">
             <div class="flex items-start gap-3">
 
@@ -235,9 +202,7 @@
                                     Você pode elaborar o texto; quem assina é o {{ \App\Models\User::$roleLabels[\App\Models\Peca::perfilQueAssina($peca->chave)] }}.
                                 </p>
                             @elseif($peca->ehDeclaracaoDoResponsavelLegal() && $podePreencher && ! $podeAssinar)
-                                {{-- Sem esta linha, o integrante da equipe via a declaração
-                                     aberta para revisão e nenhum botão de assinar — e não
-                                     tinha como saber se era defeito ou regra. --}}
+                                {{-- Diz ao integrante da equipe por que não há botão de assinar. --}}
                                 <p class="text-xs text-gray-500 mt-0.5">
                                     Você pode revisar o texto; quem assina é o responsável legal da OSC.
                                 </p>
@@ -289,9 +254,7 @@
 
                     {{-- ===== Bloco de trabalho, recolhido por padrão ===== --}}
 
-                    {{-- VEM DO PLANEJAMENTO: exibe o documento do processo, e só.
-                         Não há editor, upload nem assinatura — redigitar aqui
-                         criaria um segundo original do que é uma peça só. --}}
+                    {{-- Vem do Planejamento: só exibe o documento do processo, sem editor, upload nem assinatura. --}}
                     @if($peca->vemDoPlanejamento())
                         @php $origem = $peca->origem; @endphp
                         <details class="mt-2 group">
@@ -302,10 +265,7 @@
                                 Ver documento do processo
                             </summary>
 
-                            {{-- O item de modelo herda o TEXTO da origem; o de arquivo,
-                                 os anexos dela. É o que permite "Edital" e "Anexos"
-                                 apontarem para a mesma peça do processo e cada linha
-                                 mostrar o que o próprio rótulo promete. --}}
+                            {{-- Item de modelo herda o texto da origem; item de arquivo, os anexos dela. --}}
                             <div class="mt-3 space-y-3">
                                 @if($ehModelo)
                                     <div class="documento-html border border-gray-200 rounded-lg p-4 bg-white text-gray-800 text-sm">
@@ -417,7 +377,7 @@
                                     </div>
                                 @endif
 
-                                {{-- Assinado em sequência (o Termo, 01/10/2026): as partes, na
+                                {{-- Assinado em sequência (o Termo): as partes, na
                                      ordem, e o botão para quem tem a vez. --}}
                                 @if($peca->temAssinaturasEmSequencia() && ! empty($peca->conteudo))
                                     <div class="mt-3 border border-gray-200 rounded-lg p-3">
@@ -514,16 +474,9 @@
                             </div>
                         </details>
 
-                    {{-- ARQUIVO sem envio liberado.
-                         Precisa existir: as peças de modelo SEMPRE mostram um botão
-                         (que abre em leitura quando bloqueado), e as de arquivo não
-                         mostravam nada — a linha virava um beco sem saída, e quem
-                         precisava enviar o documento achava que a interface estava
-                         quebrada, sem nada em que clicar. --}}
+                    {{-- Arquivo sem envio liberado: ainda assim a linha oferece algo em que clicar. --}}
                     @elseif(! $ehModelo && ! $podePreencher)
-                        {{-- Só quando o usuário não pode agir: com envio liberado e
-                             arquivo presente, o cabeçalho da linha já traz o chip com
-                             Baixar e Remover, e repetir aqui seria ruído. --}}
+                        {{-- Só quando não pode agir: com envio liberado, o chip do cabeçalho já traz Baixar e Remover. --}}
                         <details class="mt-2 group">
                             <summary class="{{ $acao }} text-gray-600 bg-gray-100 hover:bg-gray-200">
                                 <svg class="w-3.5 h-3.5 transition group-open:rotate-90" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.6">
@@ -567,9 +520,7 @@
                 </summary>
                 <form action="{{ $rotaAnexoExtra }}" method="POST" class="mt-3 flex flex-wrap items-start gap-2">
                     @csrf
-                    {{-- Em qual bloco o anexo nasce: o servidor precisa saber, e
-                         não dá para deduzir — o mesmo usuário pode estar com a
-                         vez na etapa e ainda assim querer um documento geral. --}}
+                    {{-- Em qual bloco o anexo nasce (a pessoa pode ter a vez na etapa e querer um documento geral). --}}
                     <input type="hidden" name="escopo" value="{{ $semEtapa ? 'geral' : 'etapa' }}">
                     <div class="flex-1 min-w-[16rem]">
                         <input type="text" name="rotulo" maxlength="120" required

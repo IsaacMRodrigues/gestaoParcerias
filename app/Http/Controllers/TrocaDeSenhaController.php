@@ -8,12 +8,7 @@ use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\Rules;
 use Illuminate\View\View;
 
-/**
- * A troca de senha obrigatória do primeiro acesso — ver ExigeTrocaDeSenha.
- *
- * Não pede a senha atual: a pessoa acabou de entrar com ela. Pede, sim, que a
- * nova seja outra — repetir a provisória manteria a senha que alguém conhece.
- */
+/** Troca de senha obrigatória (ver ExigeTrocaDeSenha): sem pedir a atual, mas a nova tem de ser outra. */
 class TrocaDeSenhaController extends Controller
 {
     public function edit(Request $request): View|RedirectResponse

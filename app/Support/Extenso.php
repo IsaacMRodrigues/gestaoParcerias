@@ -3,16 +3,8 @@
 namespace App\Support;
 
 /**
- * Número inteiro por extenso, em português.
- *
- * Existe para as declarações que pedem a quantidade escrita duas vezes, como
- * "ativo há 12 (doze) anos". O PHP faz isso com a extensão intl, mas ela não
- * está no ambiente de desenvolvimento — e um modelo que funciona em produção e
- * quebra na máquina de quem o mantém é um modelo que ninguém consegue testar.
- *
- * Cobre de 0 a 999.999, que sobra para anos de existência, quantidades e
- * contagens de folhas. Valores em reais ficam para outra hora: pedem
- * centavos, "de reais" e as regras de milhão.
+ * Número inteiro por extenso, de 0 a 999.999 ("ativo há 12 (doze) anos"), sem depender da
+ * extensão intl.
  */
 class Extenso
 {

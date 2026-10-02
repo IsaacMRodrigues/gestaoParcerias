@@ -10,12 +10,8 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Support\Facades\DB;
 
 /**
- * Manifestação de Interesse — a OSC propõe sem chamamento aberto.
- *
- * Caminho: a OSC monta o dossiê (plano de trabalho e habilitação) e submete;
- * a SCP recebe e ouve a Secretaria da área, que diz se há interesse público e
- * orçamento; a SCP decide o encaminhamento — dispensa ou inexigibilidade — e o
- * deferimento gera o chamamento e a proposta que seguem pelo fluxo de sempre.
+ * Manifestação de Interesse e Nova Proposta: a OSC propõe sem chamamento aberto. O
+ * deferimento gera o chamamento e a proposta, que seguem pelo fluxo de sempre.
  */
 class ManifestacaoInteresse extends Model
 {
@@ -86,37 +82,23 @@ class ManifestacaoInteresse extends Model
     ];
 
     /**
-     * Dois processos na mesma tabela (decisão da gestão, 28/09/2026):
-     *
-     * - manifestação de interesse: a OSC escolhe a Secretaria, a UG opina e a
-     *   SCP decide o encaminhamento (chamamento, dispensa ou inexigibilidade);
-     * - Nova Proposta: a SCP decide o fundamento (dispensa ou
-     *   inexigibilidade) e escolhe a UG que a atende, e a UG decide.
-     *
-     * O conteúdo é o mesmo — dados, plano de trabalho, documentos —, e por
-     * isso a estrutura também. Muda o caminho: ver ManifestacaoAnaliseController.
+     * Dois processos na mesma tabela, com o mesmo conteúdo e caminhos diferentes:
+     * - manifestação: a OSC escolhe a Secretaria, a UG opina e a SCP decide;
+     * - Nova Proposta: a SCP decide o fundamento e a UG, e a UG decide.
+     * Ver ManifestacaoAnaliseController.
      */
     public const TIPOS = [
         'manifestacao' => 'Manifestação de interesse',
         'proposta'     => 'Nova Proposta',
     ];
 
-    /**
-     * O fundamento da Nova Proposta (arts. 30 e 31 da Lei 13.019/2014). A
-     * coluna chama-se `fundamento_pedido` porque de início a OSC o informava;
-     * desde 29/09/2026 é a SCP quem o decide, ao encaminhar à UG.
-     */
+    /** Fundamento da Nova Proposta (arts. 30 e 31 da Lei 13.019/2014), decidido pela SCP. */
     public const FUNDAMENTOS_PEDIDO = [
         'dispensa'        => 'Dispensa de chamamento público (art. 30)',
         'inexigibilidade' => 'Inexigibilidade de chamamento público (art. 31)',
     ];
 
-    /**
-     * Próximo número de protocolo: por ano, 2026/0001, um livro só para a
-     * manifestação e a Nova Proposta. Vem do maior número do ano, e não de
-     * uma contagem; a trava de linha evita dois envios simultâneos com o
-     * mesmo número (e o índice único é a última garantia).
-     */
+    /** Próximo protocolo (2026/0001), por ano, um livro só; trava de linha contra envios simultâneos. */
     public static function proximoProtocolo(): string
     {
         $ano = now()->year;
@@ -211,19 +193,13 @@ class ManifestacaoInteresse extends Model
         return in_array($this->status, ['deferida', 'indeferida'], true);
     }
 
-    /**
-     * O que falta para a OSC poder submeter. Vazio = pode.
-     *
-     * Dossiê completo é a regra combinada: sem plano de trabalho e sem
-     * habilitação, a Secretaria não tem como dizer se há interesse, e a SCP
-     * decidiria no escuro.
-     */
+    /** O que falta para a OSC submeter (vazio = pode): dossiê completo. */
     public function pendenciasParaSubmeter(): array
     {
         $faltam = $this->pendenciasDoPlano();
 
         // Certidões, estatuto, ata e declarações ficam em "Arquivos da OSC",
-        // anexados uma vez (30/09/2026); aqui, os comprovantes de experiência.
+        // anexados uma vez; aqui, os comprovantes de experiência.
         foreach ($this->osc?->pendenciasDosArquivos() ?? [] as $pendencia) {
             $faltam[] = 'Arquivos da OSC: ' . $pendencia;
         }

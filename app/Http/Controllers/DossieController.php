@@ -11,16 +11,8 @@ use Illuminate\Support\Facades\Storage;
 use Illuminate\View\View;
 
 /**
- * O dossiê da parceria como a OSC o vê (módulo 3.3).
- *
- * Duas pontas do mesmo assunto: a organização abre, na sua inscrição, os
- * documentos das quatro fases; e quem conduz o processo decide, numa tela, o
- * que fica aberto. Antes a régua era uma lista de três tipos cravada no
- * código da página do chamamento.
- *
- * O acesso da OSC não depende de adivinhar identificadores: o documento tem
- * de pertencer à cadeia daquela parceria, estar marcado como visível e estar
- * pronto — assinado ou com arquivo. Minuta não circula.
+ * O dossiê da parceria: a OSC abre os documentos marcados como visíveis e prontos; quem
+ * conduz o processo decide o que fica aberto (curadoria).
  */
 class DossieController extends Controller
 {
@@ -94,12 +86,7 @@ class DossieController extends Controller
         abort_unless($osc && $proposta->osc_id === $osc->id, 403, 'Esta parceria é de outra organização.');
     }
 
-    /**
-     * Documento do Planejamento é interno (homologação, item 3): 403 explícito,
-     * e não o 404 de "não achei" — quem chega aqui pelo endereço precisa saber
-     * que a porta é fechada, não que o documento sumiu. Vale para a peça do
-     * processo e para a da Seleção que a puxa.
-     */
+    /** Documento do Planejamento é interno: 403 explícito, não 404. */
     private function barrarPlanejamento(string $origem, string $id): void
     {
         $doPlanejamento = $origem === 'processo'
@@ -130,13 +117,7 @@ class DossieController extends Controller
         );
     }
 
-    /**
-     * O documento pedido, confirmado como desta parceria, aberto e pronto.
-     *
-     * A checagem é feita sobre a lista montada para esta proposta — e não por
-     * uma busca pelo id —, então um identificador de outra parceria não tem
-     * como passar.
-     */
+    /** O documento pedido, buscado na lista desta parceria: aberto e pronto. */
     private function documentoAberto(Proposta $proposta, string $origem, string $id): Peca|ProcessoPeca
     {
         $procurado = $origem . ':' . $id;

@@ -8,10 +8,8 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 class Despesa extends Model
 {
     /**
-     * Naturezas de despesa (controle por natureza — 4.4): as 12 do item 9 do
-     * modelo de Plano de Trabalho da cliente, na ordem e com o texto dele. É a
-     * mesma lista no plano de aplicação, na execução e na prestação de contas,
-     * para que o aprovado e o gasto sejam comparáveis.
+     * As 12 naturezas de despesa do modelo de Plano de Trabalho, as mesmas no plano, na execução e
+     * na prestação de contas.
      */
     public const NATUREZAS = [
         'auxilio_alimentacao'           => 'Auxílio-Alimentação',
@@ -28,10 +26,7 @@ class Despesa extends Model
         'passagens'                     => 'Passagens e Despesas com Locomoção',
     ];
 
-    /**
-     * Da lista anterior, só "Outros" ficou sem equivalente no modelo: não se
-     * escolhe mais, mas o registro antigo segue com o seu rótulo.
-     */
+    /** Da lista anterior: não se escolhe mais, mas o registro antigo mantém o rótulo. */
     public const NATUREZAS_ANTIGAS = [
         'outros' => 'Outros (lista antiga)',
     ];

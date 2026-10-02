@@ -1,10 +1,6 @@
 @php
-    // Dois blocos. No chamamento público a OSC concorre com outras; fora dele
-    // a iniciativa é dela — manifesta interesse, e o Município decide se a
-    // parceria segue por dispensa ou inexigibilidade. Eram três blocos, mas
-    // manifestação e dispensa/inexigibilidade são o mesmo caminho visto de
-    // lados diferentes ("para a UG é DI e para a OSC é MI"), e separá-los
-    // obrigava a OSC a procurar em dois lugares a mesma iniciativa.
+    // Dois blocos: chamamento público (a OSC concorre) e a iniciativa da OSC (manifestação,
+    // dispensa ou inexigibilidade).
     $corProposta = fn ($p) => \App\Models\Proposta::STATUS_COLORS[$p->status] ?? 'gray';
 @endphp
 

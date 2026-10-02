@@ -5,12 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
-/**
- * Item do plano de aplicação dos recursos (I — Demonstrativo de Recursos).
- *
- * É o que o Parecer Financeiro confere e o que a prestação de contas usa como
- * "aprovado" de cada natureza de despesa.
- */
+/** Item do plano de aplicação: o "aprovado" de cada natureza na prestação de contas. */
 class PlanoItem extends Model
 {
     protected $table = 'plano_itens';

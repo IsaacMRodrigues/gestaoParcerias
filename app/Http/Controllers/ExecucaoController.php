@@ -14,10 +14,7 @@ use Symfony\Component\HttpFoundation\StreamedResponse;
 
 class ExecucaoController extends Controller
 {
-    /**
-     * Lista as parcerias em execução — é por aqui que se escolhe de qual
-     * instrumento se quer ver repasses, despesas e saldo.
-     */
+    /** Parcerias em execução, para escolher de qual instrumento ver repasses, despesas e saldo. */
     public function index(Request $request): View
     {
         $filtros = $request->only(['busca', 'status']);
@@ -136,11 +133,7 @@ class ExecucaoController extends Controller
         return back()->with('success', 'Despesa registrada.');
     }
 
-    /**
-     * Corrige uma despesa já lançada. A nota fiscal pode ser **anexada depois**
-     * (caso comum: a despesa é registrada antes de a nota chegar), substituída
-     * ou removida.
-     */
+    /** Corrige uma despesa lançada; a nota fiscal pode ser anexada depois, trocada ou removida. */
     public function updateDespesa(Request $request, Despesa $despesa): RedirectResponse
     {
         $data = $request->validate([

@@ -23,11 +23,6 @@ class User extends Authenticatable
         motivosParaNaoExcluir as motivosDosVinculos;
     }
 
-    /**
-     * Get the attributes that should be cast.
-     *
-     * @return array<string, string>
-     */
     public static array $roleLabels = [
         'administrador_setorial'           => 'Administrador Setorial',
         'analista'                         => 'Analista (em descontinuação)',
@@ -65,13 +60,8 @@ class User extends Authenticatable
     ];
 
     /**
-     * Papéis que NÃO são da Administração: gente da OSC, que só acessa o
-     * portal. Quem tiver qualquer papel fora desta lista é usuário interno.
-     *
-     * 'contador' fica de fora de propósito, embora seja oferecido à OSC: ele
-     * existe dos dois lados — a Prefeitura também tem contador —, e listá-lo
-     * aqui empurraria o contador do Município para fora das telas dele. Quem
-     * separa os dois é o vínculo (ver temAcessoInterno).
+     * Papéis da OSC, que só acessa o portal. 'contador' fica fora: existe dos dois lados,
+     * e quem separa é o vínculo (ver temAcessoInterno).
      */
     public const PAPEIS_OSC = [
         'responsavel_legal',
@@ -84,20 +74,9 @@ class User extends Authenticatable
     ];
 
     /**
-     * Perfis que um integrante da OSC pode receber (módulo 1, item 1.2.3:
-     * "Perfil (com várias opções e podendo marcar mais de 01)").
-     *
-     * Perfil não é função. A função (FUNCOES_OSC) diz o que a pessoa pode
-     * FAZER no portal; o perfil diz o que ela É na organização — e é ele que
-     * sai impresso como papel de assinatura no rodapé do que ela assinar.
-     *
-     * A lista é curta de propósito, e foi encurtada de novo: a tela de
-     * referência trazia treze perfis, e destes ficaram os que descrevem
-     * trabalho que existe nesta parceria. Os demais perfis do sistema abrem
-     * módulos da Administração, e concedê-los a quem representa uma entidade
-     * privada daria à OSC acesso à mesa de quem a fiscaliza. O Responsável
-     * Legal também fica fora: ele não é integrante da equipe, é o titular do
-     * cadastro da organização (`oscs.user_id`) — ver ehResponsavelLegalOsc().
+     * Perfis que um integrante da OSC pode receber: dizem o que a pessoa é na organização e
+     * saem na assinatura (o que ela pode fazer está em FUNCOES_OSC). Nenhum abre telas da
+     * Administração; o Responsável Legal é o titular do cadastro (ver ehResponsavelLegalOsc).
      */
     public const PERFIS_OSC = [
         'membro_osc' => [
@@ -117,10 +96,7 @@ class User extends Authenticatable
             'rotulo' => 'Cadastrador de Usuário do Ente/Entidade',
             'ajuda'  => 'Administra as contas de acesso da própria organização.',
         ],
-        // Pedidos da gestão em 28/09/2026. Como os demais, não abrem porta
-        // nenhuma: declaram o papel na organização e saem na assinatura. Chaves
-        // próprias (_osc) de propósito — o "Contador" da Prefeitura abre a
-        // prestação de contas de todas as parcerias, e não pode ser o mesmo perfil.
+        // Chaves próprias (_osc): o Contador da Prefeitura abre as prestações de todas as parcerias.
         'contador_osc' => [
             'rotulo' => 'Contador',
             'ajuda'  => 'Responde pela escrituração e pelas demonstrações contábeis da parceria.',
@@ -132,18 +108,8 @@ class User extends Authenticatable
     ];
 
     /**
-     * O que cada integrante da OSC pode fazer — marcado pelo responsável legal
-     * no cadastro da equipe.
-     *
-     * Até aqui a equipe era um bloco só: quem entrava podia tudo o que a OSC
-     * pode. Uma entidade não trabalha assim — quem escreve o projeto não é
-     * quem cuida das certidões, e os dados bancários da Celebração não são
-     * assunto de todo mundo. As chaves são permissões Spatie (prefixo `osc_`),
-     * concedidas por pessoa e não pelo papel.
-     *
-     * O que NÃO está aqui é deliberado: submeter proposta, protocolar recurso
-     * e contra-assinar o Termo vinculam juridicamente a entidade e seguem com
-     * o responsável legal — não são delegáveis por caixa marcada.
+     * O que cada integrante da OSC pode fazer (permissões Spatie osc_*, por pessoa).
+     * Submeter proposta e protocolar recurso ficam com o responsável legal: não se delegam.
      */
     public const FUNCOES_OSC = [
         'osc_propostas' => [
@@ -165,16 +131,8 @@ class User extends Authenticatable
     ];
 
     /**
-     * Setores que atuam para o Município inteiro, não para uma Secretaria.
-     *
-     * A SCP conduz a Seleção e a Celebração de todas as parcerias; a SEPLAN
-     * emite o Parecer Financeiro de todas; a Procuradoria, o Parecer Jurídico
-     * de todas. Eles têm sede — a SCP fica dentro da Secretaria de Planejamento,
-     * a Procuradoria dentro do Jurídico —, mas sede não é recorte de trabalho.
-     *
-     * Existe porque `podeVerTodosOrgaos()` media a visibilidade só por
-     * `orgao_id`: registrar a lotação verdadeira desses setores os cegaria para
-     * todas as outras Secretarias, que é justamente o que eles atendem.
+     * Setores que atendem o Município inteiro, não uma Secretaria: veem todos os órgãos
+     * (ver podeVerTodosOrgaos), qualquer que seja a sede.
      */
     public const SETORES_TRANSVERSAIS = ['scp', 'seplan', 'pj', 'pm', 'ti'];
 
@@ -192,16 +150,8 @@ class User extends Authenticatable
     ];
 
     /**
-     * Perfis exclusivos de um setor: só podem ser atribuídos a quem é lotado nele.
-     */
-    /**
-     * Perfis que o chefe de setor NÃO concede — só o administrador do sistema.
-     *
-     * São os que ultrapassam a própria Secretaria: acesso total (TI), leitura
-     * de todos os órgãos (auditorias), o Gabinete, e o próprio posto de chefia
-     * (senão um responsável de UG nomearia outro). Sem essa lista, delegar a
-     * atribuição de perfis viraria escalada de privilégio: quem cadastra
-     * poderia conceder a si mesmo, por interposta conta, mais do que tem.
+     * Perfis que o chefe de setor não concede, só o administrador: os que ultrapassam a
+     * Secretaria e o próprio posto de chefia (evita escalada de privilégio).
      */
     public const PERFIS_VEDADOS_AO_CHEFE = [
         'administrador_setorial',
@@ -214,17 +164,13 @@ class User extends Authenticatable
         'analista',   // em descontinuação: não se concede mais
     ];
 
-    /**
-     * Setores que têm um responsável com perfil próprio — e nesses setores o
-     * responsável É o chefe (decisão da gestão, 28/09/2026): quem cadastra a
-     * equipe é ele, e o perfil Chefe de Setor só pode ir para ele. Nos demais
-     * setores, o responsável é quem tem o perfil Chefe de Setor.
-     */
+    /** Setores com responsável de perfil próprio: nesses, o responsável é o chefe e cadastra a equipe. */
     public const RESPONSAVEL_DO_SETOR = [
         'ug'     => 'responsavel_unidade_gestora',
         'seplan' => 'responsavel_seplan',
     ];
 
+    /** Perfis exclusivos de um setor: só para quem é lotado nele. */
     public const PERFIS_EXCLUSIVOS = [
         'administrador_setorial'           => 'ti',
         'responsavel_unidade_gestora'      => 'ug',
@@ -237,21 +183,8 @@ class User extends Authenticatable
     ];
 
     /**
-     * Encargos designados por portaria — não são lotação.
-     *
-     * Gestor da Parceria e as duas Comissões (Lei nº 13.019/2014, art. 2º, VI,
-     * X e XI) são atribuições que a Unidade Gestora dá a servidores seus, por
-     * ato que ela mesma publica — e que este sistema emite: a portaria do
-     * gestor e a da Comissão de Monitoramento são peças da Celebração
-     * preenchidas pela UG, e a da Comissão de Seleção é peça do Chamamento,
-     * também dela.
-     *
-     * Estavam modelados como perfis exclusivos de "setores" que ninguém ocupa
-     * (nem aqui nem em produção, nunca ocupou). O resultado: a UG publicava a
-     * portaria e não conseguia criar a conta — o perfil não aparecia na lista
-     * dela, e atribuí-lo pelo cadastro exigiria tirar a pessoa da Unidade
-     * Gestora, de onde ela não sai. Quem é designado acumula o encargo sobre o
-     * próprio perfil, como a chefia de setor.
+     * Encargos designados por portaria (Gestor da Parceria e as Comissões), não lotação:
+     * a UG os concede a servidores seus, que acumulam o encargo sobre o próprio perfil.
      */
     public const PERFIS_DE_DESIGNACAO = [
         'ug' => [
@@ -263,15 +196,8 @@ class User extends Authenticatable
     ];
 
     /**
-     * Encargos que a mesma pessoa não acumula (decisão da gestão, 28/09/2026).
-     *
-     * Quem seleciona a proposta não gere a parceria, quem gere não a monitora,
-     * quem monitora não avalia as contas — cada encargo fiscaliza o anterior, e
-     * acumular dois é fiscalizar a si mesmo. Os perfis são da pessoa, não da
-     * parceria, então a regra vale por pessoa: um desses, no máximo.
-     *
-     * Conferida no servidor em todo lugar que atribui perfil de servidor — ver
-     * conflitoDeEncargos().
+     * Encargos que a mesma pessoa não acumula, porque cada um fiscaliza o anterior: um, no máximo.
+     * Conferido onde se atribui perfil de servidor (conflitoDeEncargos).
      */
     public const ENCARGOS_QUE_NAO_ACUMULAM = [
         'comissao_selecao',
@@ -296,14 +222,10 @@ class User extends Authenticatable
             . 'são encargos que se fiscalizam: escolha um só.';
     }
 
-    /**
-     * Perfis com acesso somente de leitura (auditoria).
-     */
+    /** Perfis com acesso somente de leitura (auditoria). */
     public const PERFIS_SOMENTE_LEITURA = ['auditor_externo', 'auditor_geral'];
 
-    /**
-     * Situação da aprovação do cadastro.
-     */
+    /** Situação da aprovação do cadastro. */
     public const APPROVAL = [
         'pendente' => 'Pendente de aprovação',
         'aprovado' => 'Aprovado',
@@ -369,24 +291,14 @@ class User extends Authenticatable
         return $this->hasMany(User::class, 'created_by');
     }
 
-    /**
-     * A OSC de que este usuário faz parte.
-     *
-     * Era um hasOne sobre oscs.user_id, o que limitava cada OSC a uma única
-     * conta. Agora o vínculo mora em users.osc_id e a organização pode ter
-     * equipe; oscs.user_id ficou reservado ao responsável legal.
-     */
+    /** A OSC de que o usuário faz parte (users.osc_id); oscs.user_id é o responsável legal. */
     public function osc(): BelongsTo
     {
         return $this->belongsTo(Osc::class);
     }
 
     // ------------------------------------------------------------------
-    // Rastros do usuário no sistema.
-    //
-    // Todas estas colunas têm FK sem CASCADE: são o registro de quem fez o
-    // quê, e o banco impede que sumam junto com a conta. Existem aqui para o
-    // motivoParaNaoExcluir() poder contá-las antes de tentar o delete.
+    // Rastros do usuário (FKs sem CASCADE), contados antes de excluir a conta.
     // ------------------------------------------------------------------
 
     public function processosCriados(): \Illuminate\Database\Eloquent\Relations\HasMany
@@ -438,17 +350,8 @@ class User extends Authenticatable
     }
 
     /**
-     * O resto do que a pessoa deixou registrado no processo.
-     *
-     * vinculosBloqueantes() cobria só as colunas que o banco já protegia — as
-     * de chave sem regra de exclusão, onde apagar o usuário dava erro. As
-     * demais estão com `nullOnDelete`: apagar passava, e a contra-assinatura
-     * do Termo, a ordem de pagamento assinada, a tramitação da Celebração, a
-     * decisão da alteração ficavam sem autor, em silêncio. A regra do sistema
-     * é desativar, não excluir; excluir fica para conta que nunca fez nada.
-     *
-     * Contadas pela tabela, e não por relação, porque são muitas e nenhuma
-     * outra parte do sistema navega por elas a partir do usuário.
+     * Demais colunas que registram autoria (com nullOnDelete), contadas por tabela: só se exclui
+     * conta que nunca fez nada. A regra é desativar, não excluir.
      */
     public const AUTORIA_REGISTRADA = [
         'pecas.contra_assinado_por'              => ['contra-assinatura', 'contra-assinaturas'],
@@ -524,33 +427,8 @@ class User extends Authenticatable
     }
 
     /**
-     * Usuário interno do sistema (equipe da Administração) — qualquer papel que
-     * não seja exclusivamente o `responsavel_legal` das OSCs, que só acessa o
-     * portal público. Usado para manter o menu administrativo no topo mesmo
-     * quando o interno navega pelo portal.
-     */
-    /**
-     * Perfis que este usuário pode conceder ao cadastrar alguém.
-     *
-     * Deriva das regras em vez de repetir uma lista: tira os papéis de OSC, os
-     * vedados ao chefe e os que são exclusivos de OUTRO setor — o subusuário
-     * herda a lotação de quem o cadastra, então conceder um perfil de outro
-     * setor seria atribuir algo que o cadastrado não poderia exercer.
-     *
-     * @return array<string,string> slug => rótulo
-     */
-    /**
-     * Cadastra a equipe do próprio setor?
-     *
-     * A porta existia só para o chefe da Unidade Gestora; SCP, SEPLAN, PJ e
-     * Gabinete dependiam do administrador criar cada conta. Agora vale para
-     * qualquer setor, por meio da permissão `usuarios_setor` — que o perfil
-     * `chefe_setor` concede e a chefia da UG já traz.
-     *
-     * Exige lotação: o usuário criado herda o setor de quem cadastra, então sem
-     * setor não há o que herdar (é o caso das auditorias, transversais).
-     * Quem tem `cadastros` não usa esta porta — cria e aprova direto em
-     * Cadastros → Usuários, e ver as duas na tela só confundiria.
+     * Cadastra a equipe do próprio setor? Pela permissão usuarios_setor e com lotação (o novo
+     * usuário herda o setor). Quem tem cadastros usa a tela de Cadastros.
      */
     public function podeCadastrarNoSetor(): bool
     {
@@ -560,14 +438,14 @@ class User extends Authenticatable
             && !$this->somenteLeitura();
     }
 
+    /**
+     * Perfis que este usuário pode conceder: tira os da OSC, os vedados ao chefe e os de outro setor.
+     *
+     * @return array<string,string> slug => rótulo
+     */
     public function perfisQuePodeConceder(): array
     {
-        // O administrador já concede qualquer perfil pela tela de Cadastros
-        // (usuarios.create, sem filtro nenhum) — restringi-lo aqui não protege
-        // nada, só o obriga a trocar de tela para o que ele já pode fazer.
-        // A régua de exclusividade/designação/vedados é para o chefe de setor
-        // comum, que não tem `cadastros` e não deveria elevar ninguém além do
-        // que a própria Secretaria justifica.
+        // O administrador já concede qualquer perfil em Cadastros; a régua abaixo é para o chefe de setor.
         if ($this->can('cadastros')) {
             return collect(self::$roleLabels)
                 ->reject(fn ($rotulo, $slug) => in_array($slug, self::PAPEIS_OSC, true))
@@ -603,12 +481,10 @@ class User extends Authenticatable
         return null;
     }
 
+    /** Usuário interno (Administração)? O vínculo com OSC decide antes do papel. */
     public function temAcessoInterno(): bool
     {
-        // O vínculo decide antes do papel: quem responde por uma entidade
-        // privada não é servidor, tenha o perfil que tiver. Sem isto, dar a um
-        // integrante da OSC um perfil que existe dos dois lados — Contador —
-        // o faria atravessar para as telas da Administração.
+        // Quem é de uma OSC não é servidor, tenha o perfil que tiver (o Contador existe dos dois lados).
         if ($this->osc_id !== null) {
             return false;
         }
@@ -617,14 +493,8 @@ class User extends Authenticatable
     }
 
     /**
-     * Atua como OSC? Definição única de quem pode participar de chamamentos,
-     * submeter propostas e mexer nos documentos da própria proposta.
-     *
-     * Exige as duas coisas: o papel de responsável legal E o vínculo com a OSC.
-     * Só o vínculo não basta — servidor é usuário interno dos setores, não
-     * representa entidade, e um registro em oscs.user_id apontando para a conta
-     * de um servidor (por engano ou má-fé) não pode virar permissão. Por isso
-     * as telas e os controllers perguntam por este método, nunca por ->osc.
+     * Atua como OSC? Exige o papel de responsável legal e o vínculo com a OSC.
+     * As telas perguntam por aqui, nunca por ->osc.
      */
     public function ehRepresentanteOsc(): bool
     {
@@ -632,20 +502,8 @@ class User extends Authenticatable
     }
 
     /**
-     * Como a pessoa se identifica ao assinar: o cargo e a entidade por quem
-     * assina — "Analista Técnico do SCP — Planejamento".
-     *
-     * Para o servidor, a Secretaria; para quem assina pela OSC, a própria OSC:
-     * é ela que se obriga no Termo, e o carimbo sem isso dizia apenas
-     * "Representante Legal", sem dizer de quem.
-     *
-     * Quem tem mais de um perfil assina pelo mais específico: "Membro da OSC"
-     * é a identidade de quem é da equipe, acompanha todos os outros e sozinho
-     * não diz nada sobre quem assinou.
-     *
-     * Este valor é **gravado no momento da assinatura** (ver
-     * pecas.assinante_cargo): promoção, transferência ou troca de perfil não
-     * podem reescrever quem assinou o que, no passado.
+     * Cargo e entidade de quem assina ("Analista Técnico do SCP — Planejamento"; pela OSC, a própria
+     * OSC), pelo perfil mais específico. Gravado na assinatura (pecas.assinante_cargo).
      */
     public function cargoParaAssinatura(): ?string
     {
@@ -666,65 +524,25 @@ class User extends Authenticatable
         return ['nome' => $this->name, 'cargo' => $this->cargoParaAssinatura()];
     }
 
-    /**
-     * É o responsável legal da OSC — quem responde juridicamente por ela.
-     *
-     * Distinção que passou a existir quando a OSC ganhou equipe: todo mundo da
-     * organização prepara a proposta, mas submeter, recorrer e administrar os
-     * acessos são atos que vinculam a entidade, e ficam com uma pessoa só.
-     * A fonte da verdade é oscs.user_id, não o papel: papel se atribui por
-     * engano, a titularidade do cadastro não.
-     */
+    /** Responsável legal da OSC: o titular do cadastro (oscs.user_id), não o papel. */
     public function ehResponsavelLegalOsc(): bool
     {
         return $this->ehRepresentanteOsc() && $this->osc?->user_id === $this->id;
     }
 
-    /**
-     * Integrante da OSC a quem esta função NÃO foi marcada.
-     *
-     * A pergunta é feita em telas que servem aos dois lados (documentos da
-     * proposta, peças do trâmite), onde o servidor tem as próprias permissões e
-     * não pode ser medido por esta régua — daí a checagem vir junto.
-     */
+    /** Integrante da OSC sem esta função marcada (servidores não são medidos por esta régua). */
     public function oscSemFuncao(string $funcao): bool
     {
         return $this->ehRepresentanteOsc() && ! $this->can($funcao);
     }
 
-    /**
-     * O "setor" deste usuário para efeito de trâmite.
-     *
-     * Os fluxos designam etapas a setores, e um desses setores é a própria OSC
-     * (na Celebração ela elabora o Plano de Trabalho, anexa a habilitação,
-     * assina o Termo e informa os dados bancários). Só que OSC não tem lotação:
-     * users.setor é NULL para ela. Quem comparava `$user->setor === 'osc'`
-     * obtinha sempre falso, e o trâmite entrava num beco — a parceria chegava à
-     * OSC e não podia ser movimentada por ninguém, nem por ela.
-     *
-     * Daí este acessor: um lugar só para dizer que, no trâmite, quem representa
-     * a OSC atua como setor 'osc'.
-     */
+    /** Setor no trâmite: quem representa a OSC atua como 'osc' (a OSC não tem lotação). */
     public function setorNoTramite(): ?string
     {
         return $this->ehRepresentanteOsc() ? 'osc' : $this->setor;
     }
 
-    /**
-     * Toma parte no trâmite da Celebração?
-     *
-     * A permissão `formalizacao` responde por quem lavra o instrumento, mas a
-     * Celebração passa por setores que não a têm: a SCP conduz sete das quinze
-     * etapas (protocolo na PJ, termo, publicação, ordem de pagamento, empenho),
-     * a SEPLAN emite o Parecer Financeiro, a PJ o Parecer Jurídico. Gateando o
-     * menu só por `formalizacao`, esses setores viam a Celebração cadeado —
-     * enquanto a caixa de entrada lhes entregava, no mesmo instante, parceria
-     * parada esperando a sua etapa.
-     *
-     * Quem participa é, então, quem aparece no fluxo: os setores de
-     * ETAPAS_CELEBRACAO. A OSC fica de fora porque não navega pelo menu
-     * interno — chega à sua etapa pelo portal e pela caixa.
-     */
+    /** Toma parte na Celebração? Os setores de ETAPAS_CELEBRACAO (a OSC chega pelo portal). */
     public function participaDaCelebracao(): bool
     {
         if (!$this->temAcessoInterno()) {
@@ -744,15 +562,8 @@ class User extends Authenticatable
     }
 
     /**
-     * Vê dados (ex.: propostas) de TODOS os órgãos? — administrador, auditoria
-     * (somente leitura), quem não tem Secretaria, ou quem é de um setor que
-     * atende o Município inteiro.
-     *
-     * Esta última regra faltava: a visibilidade era medida só por `orgao_id`,
-     * então bastava registrar onde a SCP fica sediada (dentro da Secretaria de
-     * Planejamento) para ela deixar de enxergar os processos de Educação, Obras
-     * e de todas as demais — o oposto do que o setor faz. Só a Unidade Gestora
-     * é, de fato, de uma Secretaria.
+     * Vê todos os órgãos? Administrador, auditoria, quem não tem Secretaria ou é de setor
+     * transversal. Só a Unidade Gestora é de fato de uma Secretaria.
      */
     public function podeVerTodosOrgaos(): bool
     {

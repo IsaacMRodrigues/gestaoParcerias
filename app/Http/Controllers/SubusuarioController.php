@@ -11,16 +11,8 @@ use Illuminate\Validation\Rules;
 use Illuminate\View\View;
 
 /**
- * Cadastro da equipe do setor pela própria chefia.
- *
- * Nasceu só para a Unidade Gestora; SCP, SEPLAN, PJ e Gabinete dependiam do
- * administrador criar cada conta — quem conhece a equipe não era quem
- * cadastrava. Agora vale para qualquer setor, por meio da permissão
- * `usuarios_setor` (perfil `chefe_setor`), e o administrador segue sendo quem
- * libera: o usuário nasce PENDENTE e não autentica antes da aprovação.
- *
- * Cada chefia cadastra apenas o próprio setor — o usuário criado herda setor e
- * órgão de quem o cadastrou, sem campo no formulário para escolher outro.
+ * Cadastro da equipe do setor pela chefia (permissão usuarios_setor). O usuário herda setor e
+ * órgão de quem cadastra e nasce pendente, até o administrador aprovar.
  */
 class SubusuarioController extends Controller
 {
@@ -100,10 +92,7 @@ class SubusuarioController extends Controller
             'solicitacao_obs' => $request->solicitacao_obs,
         ]);
 
-        // Os perfis já ficam no usuário, mas ele segue 'pendente' e não
-        // autentica (podeAutenticar exige aprovado + ativo). Assim a tela de
-        // aprovação mostra a escolha de quem cadastrou, em vez de o
-        // administrador ter de adivinhar a função da pessoa.
+        // Os perfis ficam no usuário, que segue pendente: a aprovação mostra a escolha de quem cadastrou.
         $usuario->syncRoles($request->perfis);
 
         return redirect()->route('subusuarios.index')->with('success',

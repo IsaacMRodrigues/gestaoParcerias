@@ -22,10 +22,8 @@ Route::middleware('guest')->group(function () {
 
     Route::post('login', [AuthenticatedSessionController::class, 'store']);
 
-    // Senha esquecida vira chamado de suporte (ver PedidoDeSenhaController).
-    // O fluxo do Breeze — link por e-mail — saiu: o sistema não envia e-mail,
-    // e a tela prometia um link que nunca chegava. O nome `password.request`
-    // fica, porque é por ele que a tela de entrada aponta para cá.
+    // Senha esquecida vira chamado de suporte (ver PedidoDeSenhaController); o nome
+    // password.request fica, porque a tela de entrada aponta para ele.
     Route::get('esqueci-a-senha', [PedidoDeSenhaController::class, 'create'])
         ->name('password.request');
 

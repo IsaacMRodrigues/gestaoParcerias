@@ -52,10 +52,7 @@
     </div>
 </div>
 
-{{-- Conta de OSC: lotação, Secretaria e perfis não são daqui. O papel na
-     organização e as funções são do responsável legal, no portal; esta tela
-     listava só os perfis da Prefeitura, exigia marcar um e, ao salvar,
-     trocava o "Membro da OSC" pelo perfil marcado. --}}
+{{-- Conta de OSC: lotação, Secretaria e perfis são definidos pelo responsável legal, no portal. --}}
 @if($user?->osc_id)
     <div class="rounded-md border border-gray-200 bg-gray-50 p-4 text-sm text-gray-600">
         <p>

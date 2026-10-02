@@ -51,11 +51,7 @@
                         @endphp
                         <li class="flex items-center">
                             <div class="flex flex-col items-center text-center w-24">
-                                {{-- Etapa vencida fica em verde suave (é histórico); a etapa
-                                     ATUAL é a única em cor forte, no laranja de pendência.
-                                     Antes vencida era 'green-500' e atual 'brand-600' — dois
-                                     verdes quase idênticos, e a fileira não dizia onde o
-                                     processo estava, que é a única coisa que se quer saber. --}}
+                                {{-- Etapa vencida em verde suave; só a atual em cor forte (laranja de pendência). --}}
                                 <div class="w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold
                                     {{ $feita ? 'bg-brand-100 text-brand-700 ring-1 ring-brand-200'
                                               : ($atualEtapa ? 'bg-accent-500 text-white ring-4 ring-accent-100'
@@ -225,12 +221,7 @@
                 </ul>
             </div>
 
-            {{-- Trâmite — vem ANTES dos documentos de propósito.
-                 É aqui que fica a ação que destrava a tela: enquanto o
-                 recebimento não é registrado, as peças abaixo ficam todas em
-                 modo leitura. No fim da página, o usuário percorria os dez
-                 documentos sem conseguir mexer em nenhum e só descobria o
-                 motivo depois de rolar tudo. --}}
+            {{-- Trâmite antes dos documentos: é aqui que se registra o recebimento que libera as peças. --}}
             <div class="bg-white rounded-xl border border-gray-200 shadow-sm">
                 <div class="px-6 py-4 border-b border-gray-200 flex items-center justify-between">
                     <h3 class="text-base font-semibold text-gray-800">Trâmite entre Setores</h3>

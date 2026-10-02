@@ -13,15 +13,8 @@ use Illuminate\Validation\Rule;
 use Illuminate\View\View;
 
 /**
- * Manifestação de Interesse pelo lado da OSC (portal).
- *
- * É a porta para propor uma parceria quando não há chamamento aberto: a OSC
- * monta o dossiê completo — dados, plano de trabalho e habilitação — e submete
- * à SCP, que ouve a Secretaria e decide o encaminhamento.
- *
- * Montar é da equipe; submeter é do responsável legal — a mesma régua da
- * proposta e do recurso, porque submeter vincula a entidade ao que foi
- * proposto.
+ * Manifestação de Interesse e Nova Proposta pelo lado da OSC (portal). Montar é da equipe;
+ * submeter, do responsável legal.
  */
 class ManifestacaoController extends Controller
 {
@@ -30,11 +23,7 @@ class ManifestacaoController extends Controller
         return $this->listar('manifestacao');
     }
 
-    /**
-     * Nova Proposta (28/09/2026): mesmo conteúdo da manifestação, outro
-     * caminho — ver ManifestacaoInteresse::TIPOS. Listagem, criação e envio
-     * próprios; o resto (dados, plano, documentos) é a mesma tela.
-     */
+    /** Nova Proposta: o mesmo conteúdo da manifestação, outro caminho (ver ManifestacaoInteresse::TIPOS). */
     public function indexPropostas(): View
     {
         return $this->listar('proposta');
@@ -116,22 +105,13 @@ class ManifestacaoController extends Controller
         return view('portal.manifestacoes.show', compact('manifestacao', 'orgaos'));
     }
 
-    /*
-     * Dados do plano, metas e etapas saíram daqui.
-     *
-     * A OSC monta o mesmo Plano de Trabalho na manifestação e na proposta, e
-     * duas implementações acabariam divergindo — foi o que aconteceu: a
-     * manifestação tinha metas e a proposta não tinha plano nenhum. Agora é
-     * PlanoTrabalhoController, para os dois caminhos.
-     */
-
     public function storeDocumento(Request $request, ManifestacaoInteresse $manifestacao): RedirectResponse
     {
         $this->autorizarEdicao($manifestacao);
 
         $request->validate([
             'arquivo' => ['required', 'file', 'mimes:pdf,doc,docx,xls,xlsx,jpg,jpeg,png', 'max:10240'],
-            // Estatuto, ata e certidões estão em "Arquivos da OSC" (30/09/2026).
+            // Estatuto, ata e certidões estão em "Arquivos da OSC".
             'tipo'    => ['required', 'string', 'in:' . implode(',', array_keys(\App\Models\Documento::tiposParaAnexar()))],
         ], [
             'arquivo.max'   => 'O arquivo não pode ultrapassar 10 MB.',
@@ -172,11 +152,7 @@ class ManifestacaoController extends Controller
         return Storage::disk('local')->download($documento->path, $documento->nome_original);
     }
 
-    /**
-     * Submeter é ato que vincula a entidade: fica com o responsável legal, e o
-     * dossiê tem de estar completo — a Secretaria não tem como opinar sobre
-     * interesse público sem plano de trabalho nem habilitação.
-     */
+    /** Submeter: só o responsável legal, com o dossiê completo. */
     public function submeter(ManifestacaoInteresse $manifestacao): RedirectResponse
     {
         $this->autorizarEdicao($manifestacao);
@@ -198,12 +174,7 @@ class ManifestacaoController extends Controller
                     . '. O Setor de Convênios e Parcerias a encaminhará à Unidade Gestora adequada.');
         }
 
-        // Vai direto à Unidade Gestora da Secretaria escolhida (homologação,
-        // item 1). Antes passava pela SCP, cuja triagem era só o clique de
-        // "encaminhar à Secretaria" — a UG não sabia de nada até lá, e o
-        // detalhe dizia "está com Administração" sem dizer que era a UG. A SCP
-        // segue decidindo depois do parecer da UG, e pode indeferir a qualquer
-        // momento. O status 'submetida' fica só para as antigas.
+        // Vai direto à UG da Secretaria escolhida; a SCP decide depois do parecer dela.
         $manifestacao->enviar(['status' => 'em_analise', 'setor_atual' => 'ug']);
 
         return redirect()->route('portal.manifestacoes.show', $manifestacao)
@@ -212,11 +183,8 @@ class ManifestacaoController extends Controller
     }
 
     /**
-     * O valor pleiteado (item 2 do modelo de Plano de Trabalho) e a planilha
-     * do plano de aplicação (item 13), que a Nova Proposta já traz no primeiro
-     * formulário (decisão da gestão, 29/09/2026). O cronograma de desembolso,
-     * por meta, fica para a tela seguinte, onde as metas são lançadas. A
-     * planilha pode ficar vazia aqui — o envio é que exige o plano completo.
+     * A planilha do plano de aplicação do primeiro formulário da Nova Proposta. Pode ficar vazia
+     * aqui: o envio é que exige o plano completo.
      */
     private function validarValoresDaProposta(Request $request): array
     {

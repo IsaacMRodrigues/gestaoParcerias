@@ -1,9 +1,5 @@
-{{-- A tela do pedido de alteração (3.3).
-
-     Enquanto o pedido está com a OSC, ela edita aqui o próprio Plano de
-     Trabalho — é o que o modelo manda. O quadro "o que mudou" compara o plano
-     de agora com o retrato guardado na abertura, para quem analisa não ter de
-     adivinhar. --}}
+{{-- Pedido de alteração: com a OSC, ela edita aqui o plano; "o que mudou" compara com o
+     retrato guardado na abertura. --}}
 @php
     $u = auth()->user();
     $ehOsc = $u->ehRepresentanteOsc();

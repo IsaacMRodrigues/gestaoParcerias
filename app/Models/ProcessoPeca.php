@@ -11,11 +11,7 @@ class ProcessoPeca extends Model
     use \App\Models\Concerns\PodeSerDevolvida;
     use \App\Models\Concerns\GuardaQuemAssinou;
 
-    /**
-     * Peças do Planejamento que nascem fechadas à OSC: o que instrui o
-     * processo por dentro. O edital, os pareceres, a justificativa de dispensa
-     * e os comprovantes de publicação nascem visíveis — ver Peca::INTERNAS.
-     */
+    /** Peças do Planejamento que nascem fechadas à OSC (ver Peca::INTERNAS). */
     public const INTERNAS = [
         'oficio', 'abertura', 'pedido_parecer',
         'solicitacao_parecer_juridico', 'portaria_comissao',
@@ -46,28 +42,16 @@ class ProcessoPeca extends Model
         'parecer_cnas'           => 'Parecer Técnico (CNAS)',
     ];
 
-    /**
-     * Peças que são ARQUIVO em vez de texto: não têm editor nem assinatura
-     * digital — o documento já vem assinado/publicado de fora e é só anexado.
-     * Considera-se preenchida quando tem ao menos um anexo.
-     */
+    /** Peças que são arquivo (já vêm assinadas de fora): preenchidas quando têm ao menos um anexo. */
     public const ARQUIVO = ['portaria_comissao', 'comprovante_publicacao'];
 
-    /**
-     * Peças de texto que também aceitam anexos (o Edital tem os seus anexos,
-     * enviados na própria tela de edição, pela SCP).
-     */
+    /** Peças de texto que também aceitam anexos (o Edital e os seus anexos). */
     public const COM_ANEXOS = ['edital'];
 
-    /**
-     * Peças opcionais — não bloqueiam o avanço da etapa (ver `pendenciasParaAvancar`).
-     * Ex.: o Parecer Técnico CNAS só se aplica às parcerias do SUAS.
-     */
+    /** Peças opcionais, que não bloqueiam o avanço (o Parecer CNAS só vale para o SUAS). */
     public const OPCIONAIS = ['parecer_cnas'];
 
-    /**
-     * Setor que PREENCHE cada peça e em qual etapa do fluxo.
-     */
+    /** Setor que preenche cada peça e em que etapa. */
     public const SETOR_RESPONSAVEL = [
         'oficio'             => 'ug',
         'termo_referencia'   => 'ug',
@@ -99,18 +83,11 @@ class ProcessoPeca extends Model
         'parecer_cnas'           => 5,
     ];
 
-    /**
-     * Quem ASSINA (quando difere de quem preenche). Ex.: o Edital é elaborado
-     * pela SCP (etapa 5) mas assinado pela UG (etapa 6).
-     */
+    /** Quem assina, quando difere de quem preenche (o Edital: a SCP elabora, a UG assina). */
     public const ASSINATURA = [
         'edital' => ['setor' => 'ug', 'etapa' => 6],
     ];
 
-    /**
-     * Texto-modelo pré-preenchido em HTML (modelo padrão — substituir os "XXXX").
-     * Editável pelo editor rico (Quill).
-     */
     /** Cabeçalho com brasão (logo público da prefeitura). */
     private const CABECALHO = <<<'HTML'
 <table style="border:none;border-collapse:collapse;width:100%"><tbody><tr>
@@ -120,6 +97,7 @@ class ProcessoPeca extends Model
 <p><br></p>
 HTML;
 
+    /** Texto-modelo HTML de cada peça (substituir os "XXXX"). */
     public const MODELO = [
         'termo_referencia' => self::CABECALHO . <<<'HTML'
 <p style="text-align:center"><strong>TERMO DE REFERÊNCIA</strong></p>
@@ -265,10 +243,7 @@ HTML,
         'processo_id', 'tipo', 'visivel_osc', 'conteudo', 'assinado_por', 'assinado_em', 'assinante_nome', 'assinante_cargo', 'codigo_validacao',
     ];
 
-    /**
-     * Conteúdo inicial da peça já "puxando" os dados conhecidos do processo
-     * (número, Unidade Gestora, data) para dentro do modelo padrão.
-     */
+    /** Conteúdo inicial já com os dados conhecidos do processo (número, UG, data). */
     public static function conteudoInicial(string $tipo, Processo $processo): ?string
     {
         return \App\Support\Modelo::preencher(self::MODELO[$tipo] ?? null, [
@@ -391,9 +366,7 @@ HTML,
         return in_array($processo->status, ['em_planejamento', 'em_tramite']);
     }
 
-    /**
-     * Pode editar o CONTEÚDO (setor responsável, na etapa de edição, peça não assinada).
-     */
+    /** Pode editar o conteúdo? Setor responsável, na etapa de edição, peça não assinada. */
     public function podeEditarConteudo(Processo $processo, ?User $user): bool
     {
         return $user
@@ -406,17 +379,7 @@ HTML,
             && $processo->etapa === $this->etapaDesignada();
     }
 
-    /**
-     * Por que este usuário não pode editar agora — em português, com os fatos.
-     *
-     * A tela dizia só "esta peça é preenchida pelo setor X na etapa
-     * correspondente", o que vira uma contradição justamente para quem É do
-     * setor X: a pessoa lê o próprio setor no aviso e não entende o bloqueio.
-     * O que faltava era dizer QUAL etapa, onde o processo está agora e com
-     * quem — que é o que responde "então por que não posso?".
-     *
-     * Retorna null quando a edição está liberada.
-     */
+    /** Por que não pode editar agora (a etapa, onde o processo está e com quem); null se pode. */
     public function motivoNaoPodeEditar(Processo $processo, ?User $user): ?string
     {
         if ($this->podeEditarConteudo($processo, $user)) {
@@ -470,10 +433,7 @@ HTML,
         return $ondeEsta." Ele volta para o setor {$meuSetor} para este documento ser preenchido.";
     }
 
-    /**
-     * Pode ANEXAR arquivos a esta peça? (peça ARQUIVO ou de texto que aceita anexos,
-     * pelo setor responsável, na etapa dela, antes de assinar/encaminhar).
-     */
+    /** Pode anexar? Peça de arquivo ou que aceita anexos, pelo setor responsável, na etapa dela. */
     public function podeAnexar(Processo $processo, ?User $user): bool
     {
         return $user
@@ -486,9 +446,7 @@ HTML,
             && $processo->etapa === $this->etapaDesignada();
     }
 
-    /**
-     * Pode ASSINAR (setor de assinatura, na etapa de assinatura, com conteúdo preenchido).
-     */
+    /** Pode assinar? Setor de assinatura, na etapa de assinatura, com conteúdo preenchido. */
     public function podeAssinar(Processo $processo, ?User $user): bool
     {
         return $user

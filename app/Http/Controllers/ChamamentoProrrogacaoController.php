@@ -11,14 +11,8 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
 
 /**
- * Prorrogação do prazo de inscrições do chamamento (decisão da gestão,
- * 28/09/2026).
- *
- * Quem prorroga é a SCP, anexando os dois documentos que a fundamentam — o
- * aviso de prorrogação e o comprovante da publicação. O prazo novo vale na
- * hora: se as inscrições já tinham acabado, reabrem até a nova data. As OSCs
- * com proposta no chamamento são avisadas, e a página pública mostra a
- * prorrogação com os dois documentos, que são públicos como o edital.
+ * Prorrogação do prazo de inscrições, pela SCP, com o aviso e o comprovante de publicação. Vale
+ * na hora (reabre inscrições encerradas); as OSCs inscritas são avisadas.
  */
 class ChamamentoProrrogacaoController extends Controller
 {
@@ -73,10 +67,7 @@ class ChamamentoProrrogacaoController extends Controller
             . $chamamento->fresh()->data_fim_inscricao->format('d/m/Y') . '.');
     }
 
-    /**
-     * Os dois documentos são públicos — publicados como o edital — e abrem sem
-     * login, pela página pública do chamamento.
-     */
+    /** Os dois documentos são públicos, como o edital, e abrem sem login. */
     public function arquivo(ChamamentoProrrogacao $prorrogacao, string $documento)
     {
         abort_unless(isset(ChamamentoProrrogacao::DOCUMENTOS[$documento]), 404);

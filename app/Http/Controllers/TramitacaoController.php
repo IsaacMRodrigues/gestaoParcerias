@@ -108,18 +108,8 @@ class TramitacaoController extends Controller
     }
 
     /**
-     * Campos de recebimento de uma movimentação, conforme ela troque ou não de setor.
-     *
-     * Há etapas seguidas do mesmo setor — no Planejamento, a SCP analisa o
-     * Memorando e o Termo de Referência (etapa 2) e logo depois protocola o Pedido
-     * de Parecer à SEPLAN (etapa 3). Como toda movimentação nascia "enviada", a
-     * SCP mandava o processo para si mesma e precisava registrar o recebimento
-     * da própria remessa antes de continuar: um vaivém que não existe na mesa
-     * de ninguém, e um "encaminhado para SCP" que não dizia nada a quem lia o
-     * histórico.
-     *
-     * O processo não muda de mãos: a etapa avança e quem já estava com ele
-     * continua. Só o que atravessa setores é que precisa de aviso de chegada.
+     * Campos de recebimento da movimentação: entre etapas do mesmo setor o processo não muda de
+     * mãos e já chega recebido; só o que atravessa setores pede registro de chegada.
      */
     private function chegadaNoProprioSetor(string $destino, string $origem, string $status): array
     {
@@ -146,7 +136,7 @@ class TramitacaoController extends Controller
             'parecer.required' => 'Informe o motivo da devolução.',
         ]);
 
-        // Devolução por documento (30/09/2026): só os marcados reabrem, e o
+        // Devolução por documento: só os marcados reabrem, e o
         // processo volta para a etapa do mais antigo deles.
         $escolhidas    = Devolucao::escolhidas($request, $processo->documentosDevolviveis());
         $etapaAnterior = Devolucao::etapaDestino($escolhidas, $processo->etapa - 1);

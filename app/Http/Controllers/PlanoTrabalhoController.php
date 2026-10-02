@@ -12,27 +12,12 @@ use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
 
 /**
- * O Plano de Trabalho da OSC — o mesmo, nos dois caminhos.
- *
- * A OSC monta plano na manifestação de interesse (quando propõe sem chamamento)
- * e na proposta (quando se inscreve num chamamento aberto). É o mesmo formulário
- * e as mesmas regras, então é o mesmo controller: o tipo do dono vem da rota,
- * por `defaults('tipo', ...)`, e não há duas implementações a divergir.
- *
- * Quem pode mexer: a equipe da OSC dona, e só enquanto o plano é dela — em
- * rascunho, ou na etapa da Celebração em que o município devolveu o plano para
- * ela elaborar. Depois disso o plano é peça de processo.
+ * O Plano de Trabalho da OSC, o mesmo na manifestação e na proposta (o tipo do dono vem da
+ * rota). A OSC mexe enquanto o plano é dela; na Celebração, a UG também (ugPodeEditar).
  */
 class PlanoTrabalhoController extends Controller
 {
-    /**
-     * Declara as rotas do plano para um dono.
-     *
-     * Fica aqui, e não no arquivo de rotas, porque a lista precisa ser
-     * idêntica nos dois caminhos: acrescentar uma rota num e esquecer o outro
-     * daria uma OSC que monta o plano na manifestação e não na proposta.
-     * O tipo viaja como valor fixo da rota e é lido em donoEditavel().
-     */
+    /** Declara as rotas do plano para um dono: a lista é idêntica nos dois caminhos. */
     public static function rotas(string $tipo, string $prefixo, string $nome): void
     {
         $r = fn (string $metodo, string $verbo, string $caminho, string $sufixo) => \Illuminate\Support\Facades\Route::{$verbo}(
@@ -260,12 +245,8 @@ class PlanoTrabalhoController extends Controller
     // --------------------------------------------------------------- apoio
 
     /**
-     * O dono do plano, já confirmado como da OSC logada e ainda editável.
-     *
-     * Tipo e id saem da rota pelo nome, e não da assinatura do método: o
-     * Laravel entrega os parâmetros de rota por posição, e o `tipo` — que é
-     * valor fixo da rota, não trecho da URL — entra por último. Lido por
-     * posição, o método recebia o id no lugar do tipo.
+     * O dono do plano, da OSC logada e ainda editável. Tipo e id saem da rota pelo nome
+     * (o tipo é valor fixo da rota e viria fora de posição).
      */
     private function donoEditavel(Request $request): Proposta|ManifestacaoInteresse
     {
@@ -294,12 +275,7 @@ class PlanoTrabalhoController extends Controller
         return $dono;
     }
 
-    /**
-     * A UG edita o plano na Celebração (decisão da gestão, 30/09/2026): quem
-     * trabalha na formalização, da Secretaria da proposta, enquanto o
-     * documento do plano não foi assinado. A permissão de formalização deixa
-     * de fora a Comissão de Seleção, que também é da UG.
-     */
+    /** A UG edita o plano na Celebração: formalização, da Secretaria da proposta, até o plano ser assinado. */
     public static function ugPodeEditar(Proposta $proposta, ?User $user): bool
     {
         return $user !== null
@@ -310,13 +286,8 @@ class PlanoTrabalhoController extends Controller
     }
 
     /**
-     * O plano ainda é da OSC?
-     *
-     * Na manifestação, só no rascunho. Na proposta, enquanto não foi submetida;
-     * outra vez na Celebração, em qualquer etapa, até o documento "Plano de
-     * Trabalho" ser assinado; e outra ainda na execução, enquanto houver pedido
-     * de alteração em elaboração — é o próprio plano que a alteração altera
-     * (módulo 3.3).
+     * O plano ainda é da OSC? Na manifestação, em rascunho; na proposta, até submeter, na Celebração
+     * até o plano ser assinado e na execução com alteração em elaboração.
      */
     public static function planoEditavel(Proposta|ManifestacaoInteresse $dono): bool
     {
@@ -328,8 +299,7 @@ class PlanoTrabalhoController extends Controller
             return true;
         }
 
-        // Na Celebração, em qualquer etapa, até o documento do plano ser
-        // assinado (decisão da gestão, 30/09/2026). Antes só na etapa da OSC.
+        // Na Celebração, em qualquer etapa, até o documento do plano ser assinado.
         if ($dono->planoAbertoNaCelebracao()) {
             return true;
         }

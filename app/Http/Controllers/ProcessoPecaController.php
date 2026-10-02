@@ -34,10 +34,7 @@ class ProcessoPecaController extends Controller
         return view('processos.peca', compact('processo', 'peca', 'podeEditar', 'podeAssinar', 'podeAnexar', 'anexos', 'qrValidacao'));
     }
 
-    /**
-     * Baixa as peças selecionadas como PDF: uma só baixa o PDF direto;
-     * várias vêm num ZIP com um PDF separado por documento (download individual).
-     */
+    /** Baixa as peças selecionadas em PDF: uma, o PDF direto; várias, um ZIP com um PDF por documento. */
     public function imprimirLote(Request $request, Processo $processo)
     {
         abort_unless($processo->visivelPara(auth()->user()), 403, 'Este processo pertence a outra Secretaria.');
@@ -139,7 +136,7 @@ class ProcessoPecaController extends Controller
         $peca->update($request->validate(['conteudo' => ['nullable', 'string']]));
         $peca->limparDevolucao();
 
-        // Continua no documento: salvar não deve devolver o usuário ao fluxo (01/10/2026).
+        // Continua no documento: salvar não deve devolver o usuário ao fluxo.
         return redirect()->route('processos.pecas.edit', [$processo, $peca])
             ->with('success', ProcessoPeca::TIPOS[$peca->tipo] . ' salvo.');
     }

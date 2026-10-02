@@ -10,23 +10,9 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\View\View;
 
 /**
- * "Esqueci minha senha": o pedido vira chamado de suporte.
- *
- * O fluxo do Breeze mandava um link por e-mail, e o sistema não envia e-mail —
- * o envio está configurado para o log. A tela dizia "enviamos o link" e nada
- * chegava. Aqui o pedido abre um chamado de Acesso, e quem atende o suporte
- * confirma a identidade pelo contato informado e define uma senha provisória,
- * trocada pela pessoa no primeiro acesso (ver SuporteController::senhaProvisoria).
- *
- * É a única porta do suporte aberta a quem não está logado — e de propósito
- * só serve a isto: quem esqueceu a senha não tem como entrar para pedir. Por
- * isso as travas:
- *
- * - limite de tentativas por endereço de rede, na rota;
- * - um campo-isca que só robô preenche;
- * - a mesma resposta exista a conta ou não, para a tela não servir de
- *   consulta a quem tem cadastro;
- * - pedido repetido para a mesma conta entra no chamado que já está aberto.
+ * "Esqueci minha senha" abre um chamado de Acesso; o suporte confirma a identidade e define
+ * uma senha provisória. Única porta do suporte sem login, por isso: limite por IP na rota,
+ * campo-isca, a mesma resposta exista a conta ou não, e pedido repetido no chamado aberto.
  */
 class PedidoDeSenhaController extends Controller
 {

@@ -6,16 +6,8 @@ use App\Models\Despesa;
 use App\Models\PrestacaoContas;
 
 /**
- * Monta os documentos da prestação de contas a partir dos campos preenchidos.
- *
- * A cliente pediu duas coisas: que estes modelos fossem "para eles preencherem
- * como campo" e que as planilhas "colocassem fórmula". É isto: a OSC preenche
- * campos, e o documento que vai à assinatura é gerado com as somas já feitas —
- * ninguém digita um total, e nenhum total sai errado.
- *
- * O texto é regerado a cada gravação, enquanto o documento não estiver
- * assinado. Depois de assinado, nada mais o altera: é o que a assinatura
- * eletrônica garante a quem valida o documento pelo código.
+ * Monta os documentos da prestação de contas a partir dos campos, com as somas já feitas.
+ * Regerados a cada gravação até a assinatura; depois, nada os altera.
  */
 class PrestacaoDocumento
 {
@@ -219,12 +211,7 @@ class PrestacaoDocumento
             . '</tbody></table>';
     }
 
-    /**
-     * Anexo 16 — resumo da folha.
-     *
-     * É o modelo que veio sem nenhuma fórmula: proventos, descontos, líquido e
-     * encargos estavam todos digitados. Aqui saem calculados dos lançamentos.
-     */
+    /** Anexo 16 — resumo da folha, com proventos, descontos, líquido e encargos calculados. */
     public static function resumoFolha(PrestacaoContas $pc): string
     {
         $l = fn (string $r, float $v, bool $forte = false) => '<tr><td>' . ($forte ? "<strong>$r</strong>" : $r) . '</td>'
@@ -251,10 +238,7 @@ class PrestacaoDocumento
             . self::assinatura($pc, true);
     }
 
-    /**
-     * Fecho. As planilhas pedem a assinatura do representante legal e a do
-     * profissional de contabilidade; o memorando, só a do representante.
-     */
+    /** Fecho: representante legal e, nas planilhas, também o profissional de contabilidade. */
     private static function assinatura(PrestacaoContas $pc, bool $comContador = false): string
     {
         $osc = $pc->osc();

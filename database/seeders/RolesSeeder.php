@@ -32,14 +32,7 @@ class RolesSeeder extends Seeder
         // que ela atende sem ganhar a mesa de cadastros da Prefeitura.
         'aprovar_contas_osc' => 'Aprovar contas de integrantes de OSC',
 
-        /*
-         * Funções da equipe da OSC.
-         *
-         * Prefixadas `osc_` de propósito: são de outro mundo que as permissões
-         * acima, que abrem módulos da Prefeitura. Assim o responsável legal
-         * escolhe o que cada integrante faz sem que nada do que ele marque
-         * possa, por descuido de nomenclatura, valer dentro da Administração.
-         */
+        // Funções da equipe da OSC: prefixo osc_ para nunca valerem dentro da Administração.
         'osc_propostas'     => 'Propostas e plano de trabalho',
         'osc_documentos'    => 'Documentos da organização',
         'osc_manifestacoes' => 'Manifestações de interesse',
@@ -55,26 +48,18 @@ class RolesSeeder extends Seeder
     ];
 
     /**
-     * Matriz perfil => permissões (perfis do Módulo 1).
-     * '*' = todas. Auditores recebem todas porém apenas leitura (middleware readonly).
+     * Matriz perfil => permissões. '*' = todas; auditores recebem todas, só leitura (middleware readonly).
      */
     public const MATRIZ = [
         'administrador_setorial'           => ['*'],
         'auditor_externo'                  => ['*'], // somente leitura
         'auditor_geral'                    => ['*'], // somente leitura
         'responsavel_unidade_gestora'      => ['planejamento', 'chamamentos', 'propostas', 'pareceres_decisao', 'formalizacao', 'ordem_pagamento', 'execucao', 'prestacao_contas', 'usuarios_setor'],
-        // Chefia de setor: não abre módulo nenhum, só a porta de cadastrar a
-        // própria equipe. Acumula-se com o perfil técnico da pessoa (o chefe da
-        // PJ é 'analista_juridico' + 'chefe_setor'), para que a chefia não vire
-        // atalho para permissões que o setor não tem.
+        // Chefia: só a porta de cadastrar a equipe; acumula-se com o perfil técnico da pessoa.
         'chefe_setor'                      => ['usuarios_setor'],
         // Prefeito: assina o Termo de Adjudicação e Homologação que encerra a Seleção.
         'prefeito_municipal'               => ['chamamentos', 'formalizacao'],
-        // A SCP conduz a parceria do edital ao empenho e segue nela na
-        // execução — emite a OP, analisa as alterações. Sem `execucao`, via o
-        // item com cadeado justamente na fase em que continua trabalhando.
-        // A prestação de contas passa pela SCP (análise prévia) antes de ir à
-        // Unidade Gestora — módulo 3.4.
+        // A SCP conduz a parceria do edital ao empenho e segue na execução e na prestação de contas.
         'analista_tecnico_scp'             => ['planejamento', 'chamamentos', 'execucao', 'prestacao_contas', 'suporte', 'aprovar_contas_osc'],
         'responsavel_publicacao'           => ['chamamentos'],
         // Quem responde pela SEPLAN: o único que assina o Parecer Financeiro
@@ -87,7 +72,7 @@ class RolesSeeder extends Seeder
         'analista_aditivo_apostilamento'   => ['formalizacao'],
         'analista_prestacao_contas_previa' => ['prestacao_contas'],
         'comissao_selecao'                 => ['propostas', 'pareceres_tecnico', 'pareceres_decisao'],
-        // Separada em duas em 28/09/2026: quem acompanha não é quem avalia.
+        // Comissões separadas: quem acompanha não é quem avalia.
         'comissao_monitoramento'           => ['monitoramento'],
         'comissao_avaliacao'               => ['prestacao_contas'],
         'gestor_parceria'                  => ['planejamento', 'monitoramento', 'execucao', 'prestacao_contas'],
@@ -104,16 +89,8 @@ class RolesSeeder extends Seeder
         // vem marcado por pessoa, no cadastro, e não pelo papel.
         'membro_osc'                       => [], // equipe da OSC: portal, sem submeter/recorrer
 
-        /*
-         * Perfis do convenente (módulo 1, aba "Membros" do cadastro da OSC).
-         *
-         * Todos sem permissão, e isso não é lacuna: do lado da OSC o perfil
-         * declara o que a pessoa é na organização e sai impresso como papel de
-         * assinatura. Quem abre porta são as funções `osc_*`, marcadas por
-         * pessoa pelo responsável legal. Assim a lista pode espelhar a da tela
-         * de referência sem que marcar uma caixa conceda, por tabela, acesso a
-         * um módulo da Administração.
-         */
+        // Perfis do convenente: sem permissão; declaram o papel na OSC e saem na assinatura.
+        // Quem abre porta são as funções osc_*.
         'cadastrador_proposta'               => [],
         'cadastrador_prestacao_contas'       => [],
         'cadastrador_usuario_entidade'       => [],

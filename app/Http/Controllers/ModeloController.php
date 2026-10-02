@@ -10,17 +10,10 @@ use App\Models\Processo;
 use App\Models\Proposta;
 use Illuminate\View\View;
 
-/**
- * Catálogo dos modelos padrão do sistema — tela de apoio do TI
- * (perfil Administrador Setorial) para conferir, num lugar só, todos os
- * textos-modelo que alimentam as peças dos trâmites.
- */
+/** Catálogo dos textos-modelo das peças, para o TI conferir num lugar só. */
 class ModeloController extends Controller
 {
-    /**
-     * De onde vem cada grupo de modelos, com o rótulo mostrado na tela.
-     * A chave é usada na URL (`/modelos/{origem}/{chave}`).
-     */
+    /** De onde vem cada grupo de modelos; a chave vai na URL (/modelos/{origem}/{chave}). */
     public const ORIGENS = [
         'processo'                 => 'Planejamento — trâmite do Processo',
         'chamamento_publico'       => 'Seleção — Chamamento Público',

@@ -1,8 +1,4 @@
-{{-- A tela da prestação de contas.
-
-     O que a OSC vê aqui são campos, e não documentos para redigir: o memorando, o
-     relatório e o resumo da folha são gerados do que ela lança, com as somas
-     feitas, e aparecem no checklist prontos para assinar. --}}
+{{-- Prestação de contas: a OSC lança campos; memorando, relatório e resumo da folha são gerados. --}}
 @php
     $u = auth()->user();
     $ehOsc = $u->ehRepresentanteOsc();

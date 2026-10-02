@@ -87,10 +87,7 @@ HTML;
 <p style="text-align:center">XXXXX<br>Secretaria Municipal de XXXXX</p>
 HTML;
 
-    /**
-     * Conteúdo inicial já "puxando" os dados do instrumento/OSC para o modelo
-     * correspondente ao tipo (global ou parcial).
-     */
+    /** Conteúdo inicial com os dados do instrumento e da OSC, no modelo do tipo. */
     public static function conteudoInicial(
         Instrumento $instrumento,
         int $numero,

@@ -105,16 +105,7 @@ class LoginRequest extends FormRequest
         return Str::transliterate(Str::lower($this->string('login')).'|'.$this->ip());
     }
 
-    /**
-     * Por qual coluna procurar quem está tentando entrar.
-     *
-     * Pelo nome de usuário quando ele existe; senão, pelo e-mail. Antes a
-     * escolha vinha do formato do que foi digitado (`FILTER_VALIDATE_EMAIL`), e
-     * isso dependia de sorte: um login com cara de endereço — "admin@parcerias"
-     * — só não caía na coluna errada porque o filtro do PHP recusa domínio sem
-     * ponto. Bastaria alguém cadastrar "admin@parcerias.net" para a conta
-     * sumir do login sem explicação. Uma consulta a mais, e não se erra.
-     */
+    /** Por qual coluna procurar quem entra: o nome de usuário, se existe; senão, o e-mail. */
     private function colunaDeAcesso(): string
     {
         return \App\Models\User::where('login', $this->input('login'))->exists()

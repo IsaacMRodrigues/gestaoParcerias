@@ -1,6 +1,4 @@
-{{-- O motivo da última devolução, à vista (decisão da gestão, 30/09/2026):
-     antes ele só aparecia no histórico recolhido. Fica enquanto o trâmite não
-     andar de novo, com a lista do que ainda está para corrigir.
+{{-- O motivo da última devolução, à vista até o trâmite andar, com o que falta corrigir.
      Espera: $tramitacoes (qualquer ordem) e $pecas (os documentos do trâmite). --}}
 @php
     $ultima = collect($tramitacoes)->sortByDesc('id')->first();

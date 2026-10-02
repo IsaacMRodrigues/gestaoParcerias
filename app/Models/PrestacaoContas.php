@@ -10,14 +10,8 @@ use Illuminate\Database\Eloquent\Relations\MorphMany;
 use Illuminate\Support\Collection;
 
 /**
- * Prestação de contas de uma parceria (módulo 3.4).
- *
- * Parcial ou final, sempre de um período. O que a OSC preenche são campos, não
- * texto: os totais, o saldo e o líquido saem daqui calculados, como pediu a
- * cliente ao mandar "colocar fórmula" nas planilhas.
- *
- * Nada que a Execução já registrou é digitado de novo — os repasses e as
- * despesas do período vêm de lá, e as metas, do Plano de Trabalho.
+ * Prestação de contas de uma parceria, parcial ou final, de um período. A OSC preenche campos
+ * e os totais saem calculados; repasses, despesas e metas vêm da Execução e do Plano.
  */
 class PrestacaoContas extends Model
 {
@@ -52,14 +46,7 @@ class PrestacaoContas extends Model
     ];
 
     /**
-     * Os quatro blocos do Relatório de Metas Financeiras (Anexo VI) e as
-     * naturezas de despesa que caem em cada um.
-     */
-    /**
-     * Os quatro blocos do Anexo VI e as naturezas do plano (Despesa::NATUREZAS)
-     * que caem em cada um. Pessoal leva a contratação e os auxílios pagos à
-     * equipe; encargos, os patronais e os tributos; equipamentos, o que é
-     * permanente — inclusive obras e instalações; o resto é manutenção.
+     * Os quatro blocos do Anexo VI e as naturezas do plano (Despesa::NATUREZAS) de cada um.
      */
     public const BLOCOS = [
         'pessoal'      => ['rotulo' => '1. Pessoal',                         'naturezas' => ['contratacao_tempo_determinado', 'auxilio_alimentacao', 'auxilio_transporte']],
@@ -279,10 +266,7 @@ class PrestacaoContas extends Model
         return !$this->concluida() && !$this->ultimaEtapa();
     }
 
-    /**
-     * O que falta para encaminhar a etapa atual: as peças obrigatórias dela.
-     * Mesma régua da Celebração — só a etapa corrente é cobrada.
-     */
+    /** O que falta para encaminhar: as peças obrigatórias da etapa corrente. */
     public function pendencias(): array
     {
         $pend = [];

@@ -1,9 +1,4 @@
-{{-- Secretarias e as pessoas de cada uma, na mesma tela.
-
-     Eram duas listagens que ninguém consultava separadas: para saber quem
-     responde por uma Secretaria, abria-se Usuários e procurava-se pela coluna
-     de órgão. Aqui a Secretaria traz a sua gente logo abaixo, e quem não é de
-     Secretaria nenhuma tem bloco próprio no fim — em vez de sumir da tela. --}}
+{{-- Secretarias e as pessoas de cada uma; quem não é de Secretaria tem bloco próprio no fim. --}}
 <x-app-layout>
     <x-slot name="header">
         <div class="flex items-center justify-between gap-4">
@@ -135,10 +130,7 @@
                 @endif
             </div>
 
-            {{-- Quem atende o Município inteiro não é de Secretaria nenhuma
-                 (ver User::SETORES_TRANSVERSAIS). Sem este bloco, juntar as duas
-                 listagens faria a SCP, a Procuradoria e o próprio administrador
-                 desaparecerem da tela de cadastros. --}}
+            {{-- Setores transversais (SCP, Procuradoria, administrador): não são de Secretaria nenhuma. --}}
             @if($semOrgao->isNotEmpty())
                 <div class="bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden">
                     <div class="px-6 py-3 bg-gray-50 border-b border-gray-200">

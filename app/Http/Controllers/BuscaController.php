@@ -11,14 +11,7 @@ use App\Models\Proposta;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 
-/**
- * Busca global da barra de comandos (Ctrl+K).
- *
- * Atalho para chegar a um registro sem passar pela sequência
- * menu → listagem → filtro → paginação. Cada bloco só é consultado se o
- * usuário tem a permissão do módulo, e usa o mesmo escopo de visibilidade das
- * listagens (visiveisPara), para a busca nunca revelar o que a tela esconde.
- */
+/** Busca global (Ctrl+K): cada bloco só com a permissão do módulo e o escopo das listagens. */
 class BuscaController extends Controller
 {
     /** Poucos por grupo: a barra mostra um resumo, não uma listagem. */

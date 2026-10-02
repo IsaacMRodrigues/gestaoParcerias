@@ -10,17 +10,8 @@ use App\Models\PlanoItem;
 use App\Models\Proposta;
 
 /**
- * O Plano de Trabalho como documento.
- *
- * O item 1 do checklist da habilitação diz "a partir do preenchido": o plano
- * não é um arquivo que a OSC redige à parte e sobe, é o que ela lançou no
- * Portal, impresso para assinar. Assim o documento assinado e os dados que o
- * sistema usa nas análises são a mesma coisa — não há como divergirem.
- *
- * A estrutura é a do modelo da cliente (Docs. Desenvolvimento/
- * Planodetrabalho.docx), à risca: os 13 itens, na ordem e com os títulos
- * dele, o pedido de avaliação depois do item 2, os campos reservados ao
- * ordenador de despesa e a planilha do plano de aplicação como anexo.
+ * O Plano de Trabalho como documento: o que a OSC lançou no Portal, impresso para assinar, na
+ * estrutura do modelo da cliente (os 13 itens, o pedido de avaliação e a planilha anexa).
  */
 class PlanoDocumento
 {
@@ -274,10 +265,7 @@ class PlanoDocumento
         return $html . '</tbody></table>';
     }
 
-    /**
-     * Item 13: o título, o campo do ordenador de despesa, a ressalva e a
-     * assinatura — e, depois dela, a planilha anexa com os itens.
-     */
+    /** Item 13: título, campo do ordenador de despesa, ressalva e assinatura, e depois a planilha anexa. */
     private static function planoDeAplicacao(Proposta $p): string
     {
         $html = '<p><strong>13 – Plano de aplicação dos recursos (Planilha anexa)</strong></p>'

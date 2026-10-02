@@ -5,11 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
-/**
- * Uma das assinaturas de um documento assinado por várias partes, em
- * sequência (ver Peca::ASSINATURAS_EM_SEQUENCIA). Nome e cargo ficam gravados
- * no ato, como no carimbo das demais peças.
- */
+/** Uma das assinaturas de documento assinado em sequência; nome e cargo gravados no ato. */
 class PecaAssinatura extends Model
 {
     protected $table = 'peca_assinaturas';

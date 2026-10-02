@@ -3,13 +3,7 @@
 
     $u = auth()->user();
 
-    /**
-     * Telas oferecidas pela barra de comandos. A coluna 'quando' repete as
-     * mesmas permissões do menu lateral — a barra não pode virar uma porta dos
-     * fundos para módulos que o usuário não enxerga. 'termos' são sinônimos e
-     * erros de grafia comuns, para o usuário achar a tela pelo nome que usa no
-     * dia a dia, não pelo nome oficial.
-     */
+    // Telas da barra de comandos. 'quando' repete as permissões do menu; 'termos' são sinônimos.
     $atalhos = collect([
         ['Painel', route('dashboard'), 'inicio home dashboard visao geral', true],
         ['Portal Público', route('portal.index'), 'site publico cidadao chamamentos abertos', true],

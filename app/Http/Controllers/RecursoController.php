@@ -11,17 +11,12 @@ use Illuminate\Support\Facades\Storage;
 use Symfony\Component\HttpFoundation\StreamedResponse;
 
 /**
- * Recursos contra o resultado provisório: a OSC protocola pelo portal, com um
- * arquivo (como prevê o modelo do Resultado Provisório), e a Comissão de
- * Seleção pode respondê-los com a peça "Resposta ao recurso", opcional, na
- * mesma etapa 3 da Seleção (decisão da gestão, 29/09/2026).
+ * Recursos contra o resultado provisório: a OSC protocola um arquivo pelo portal; a Comissão de
+ * Seleção pode responder com a peça "Resposta ao recurso" (opcional), na etapa 3 da Seleção.
  */
 class RecursoController extends Controller
 {
-    /**
-     * A OSC protocola o seu recurso — só na fase recursal e só se participou
-     * do chamamento.
-     */
+    /** A OSC protocola o seu recurso: só na fase recursal e se participou do chamamento. */
     public function store(Request $request, Chamamento $chamamento): RedirectResponse
     {
         $osc = auth()->user()->osc;
@@ -45,8 +40,7 @@ class RecursoController extends Controller
             'Sua OSC já protocolou um recurso neste chamamento.'
         );
 
-        // O recurso é o arquivo que a OSC anexa, com as razões dentro dele
-        // (decisão da gestão, 29/09/2026). O campo de texto saiu.
+        // O recurso é o arquivo que a OSC anexa, com as razões dentro dele.
         $request->validate([
             'arquivo' => ['required', 'file', 'mimes:pdf', 'max:10240'],
         ], [

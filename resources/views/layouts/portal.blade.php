@@ -120,25 +120,15 @@
     <div class="min-h-screen flex flex-col">
         <div class="h-1.5 bg-gradient-to-r from-brand-600 via-brand-500 to-accent-500"></div>
 
-        {{-- Barra do portal.
-             Os rótulos longos ("Chamamentos abertos", "Minhas inscrições")
-             quebravam em duas linhas: cinco links não cabiam na largura, e cada
-             um terminava com uma altura, desalinhando a barra inteira.
-
-             Agora a barra tem três zonas de largura previsível — marca, links e
-             conta —, os links não quebram (`whitespace-nowrap`) e o que é
-             administração da OSC ("Meus usuários") saiu da barra para o menu da
-             conta, onde configuração costuma morar. Abaixo de `md`, os links
-             viram gaveta em vez de espremer. --}}
+        {{-- Barra do portal: marca, links (sem quebrar linha, com grupos em menu) e conta. Abaixo
+             de lg, os links viram gaveta. --}}
         @php
             $navItens = [
                 ['url' => route('portal.index'),   'rotulo' => 'Chamamentos abertos', 'ativo' => request()->routeIs('portal.index')],
                 ['url' => route('transparencia'), 'rotulo' => 'Transparência',       'ativo' => request()->routeIs('transparencia')],
             ];
 
-            // A OSC logada tinha nove links numa linha e a barra passava da tela
-            // (01/10/2026). Os de propor e os da execução viraram grupos; a
-            // Transparência, que é consulta pública, fica no rodapé para ela.
+            // Para a OSC logada, propor e execução viram grupos, e a Transparência fica no rodapé.
             if (auth()->check() && auth()->user()->ehRepresentanteOsc()) {
                 $navItens = [
                     $navItens[0],
@@ -289,10 +279,7 @@
             </div>
         </header>
 
-        {{-- Sua vez. Quando a UG encaminha a Celebração à OSC, o item sai da
-             caixa do município e a OSC não tinha onde ver que a bola era dela —
-             o trâmite parecia ter sumido. A faixa aparece em qualquer página do
-             portal, porque não dá para supor que ela vá procurar. --}}
+        {{-- Sua vez: a faixa aparece em qualquer página do portal quando o trâmite espera a OSC. --}}
         @auth
             @if(auth()->user()->ehRepresentanteOsc())
                 @php $minhaVez = \App\Support\CaixaDeEntrada::para(auth()->user()); @endphp
@@ -315,10 +302,7 @@
                         </div>
                     </div>
                 @endif
-            {{-- Conta de OSC sem organização (o cadastro da OSC foi removido,
-                 ou o vínculo se perdeu). Sem organização não há em nome de quem
-                 inscrever nem manifestar, e os itens somem do menu — antes
-                 somiam calados, e a pessoa não tinha como saber o porquê. --}}
+            {{-- Conta de OSC sem organização: diz por que os itens de inscrição não aparecem. --}}
             @elseif(auth()->user()->hasAnyRole(\App\Models\User::PAPEIS_OSC))
                 <div class="bg-accent-50 border-b border-accent-200">
                     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3 flex items-center justify-between gap-4 flex-wrap">

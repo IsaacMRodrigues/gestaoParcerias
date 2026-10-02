@@ -18,22 +18,9 @@ use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Mail;
 
 /**
- * Avisos por e-mail: quem recebe o quê.
- *
- * Até aqui o sistema não mandava e-mail nenhum — a vez no trâmite, a conta
- * esperando aprovação e a resposta do suporte só existiam na tela, e quem não
- * entrava não sabia. Os avisos saem da caixa parcerias@pmsgra.net, pela fila
- * (ver App\Mail\Aviso).
- *
- * Disparam de eventos dos modelos, registrados em registrar(), e não dos
- * controllers: o que importa é o setor da vez ter mudado, por qualquer
- * caminho — avançar, devolver, decidir. Um caminho novo que mude o setor já
- * avisa sem ninguém lembrar de chamar nada.
- *
- * Quem recebe a vez segue a régua da Caixa de Entrada: mesmo setor, a
- * permissão do módulo e a parceria visível para a pessoa. E-mail de algo que a
- * pessoa não enxerga na tela seria pior que nenhum. Quem fez a ação não é
- * avisado dela.
+ * Avisos por e-mail, pela fila (App\Mail\Aviso). Disparam de eventos dos modelos (registrar()),
+ * por qualquer caminho que mude a vez. Quem recebe segue a régua da Caixa de Entrada; quem
+ * fez a ação não é avisado.
  */
 class Avisos
 {
@@ -104,11 +91,7 @@ class Avisos
 
     // ════════════════════════════════════════════════════════════ envio
 
-    /**
-     * Enfileira o aviso para cada destinatário. Nunca derruba a ação que o
-     * motivou: sem SMTP, sem fila ou com endereço ruim, o aviso se perde e o
-     * registro fica no log — a gravação continua valendo.
-     */
+    /** Enfileira o aviso para cada destinatário; falha de envio vai ao log, sem derrubar a ação. */
     public static function enviar(iterable $para, Aviso $aviso): void
     {
         $autor = auth()->id();
@@ -143,10 +126,7 @@ class Avisos
             ->values();
     }
 
-    /**
-     * A equipe da OSC que deve saber: o responsável legal sempre; os demais,
-     * se o filtro os aceitar (em geral, ter a função daquele trabalho).
-     */
+    /** A equipe da OSC que deve saber: o responsável legal sempre; os demais, se o filtro aceitar. */
     public static function daOsc(?int $oscId, ?callable $filtro = null): Collection
     {
         if (!$oscId) {
@@ -344,7 +324,7 @@ class Avisos
             return;
         }
 
-        // O Gestor da Parceria é uma pessoa: só ele recebe (01/10/2026).
+        // O Gestor da Parceria é uma pessoa: só ele recebe.
         if ($p->celebracao_setor === 'gestor') {
             self::enviar(array_filter([$p->gestorDaCelebracao]),
                 self::avisoDeVez('Celebração', $p->titulo, $etapa, $p->osc?->name, $url, false));

@@ -18,18 +18,7 @@ class UserController extends Controller
         return redirect()->route('orgaos.index');
     }
 
-    /**
-     * Setores em que ninguém cadastra a própria equipe.
-     *
-     * Cadastrar a equipe do setor deixou de ser exclusividade da Unidade
-     * Gestora, mas depende de alguém receber o perfil **Chefe de Setor** — e
-     * nada avisava que isso não tinha sido feito. O resultado é uma porta que
-     * existe e ninguém encontra: o servidor da SCP entra, não vê "Meus
-     * usuários", e não tem como saber que falta um clique nesta tela.
-     *
-     * Só conta setor que já tem gente: designar chefia de setor vazio não é
-     * pendência, é convite a criar conta sem necessidade.
-     */
+    /** Setores com gente e sem ninguém com o perfil Chefe de Setor (ninguém cadastra a equipe). */
     public static function setoresSemChefia(): array
     {
         $lotados = User::query()
@@ -51,13 +40,8 @@ class UserController extends Controller
     }
 
     /**
-     * Cadastros aguardando aprovação: auto-cadastro de servidor, equipe de
-     * setor e integrante de OSC cadastrado pelo responsável legal.
-     *
-     * Quem chega por `aprovar_contas_osc` e não tem `cadastros` — a SCP — vê
-     * só as contas de OSC. O recorte é aqui e repetido em aprovar/recusar:
-     * esconder na listagem e deixar a rota aberta seria pedir para alguém
-     * aprovar um servidor pelo id.
+     * Cadastros aguardando aprovação. Quem tem só aprovar_contas_osc (a SCP) vê só as contas de
+     * OSC; o mesmo recorte vale em aprovar/recusar.
      */
     public function pendentes(): View
     {
@@ -76,13 +60,8 @@ class UserController extends Controller
      * Aprova o cadastro: define os perfis (e confirma setor/UG) e libera o acesso.
      */
     /**
-     * Aprovar é decidir sobre o cadastro, não montá-lo.
-     *
-     * Os perfis são escolhidos por quem cadastra — o responsável do setor, que
-     * sabe a função da pessoa — e o setor/órgão vêm do próprio cadastro. Aqui
-     * ficou só aprovar ou recusar. Quando não há perfil indicado (auto-cadastro,
-     * que não passa por chefe), a conta é liberada sem acesso a módulo algum e
-     * os perfis se definem em Cadastros → Usuários, onde eles moram.
+     * Aprova o cadastro com os perfis indicados por quem cadastrou. Sem perfil indicado
+     * (auto-cadastro), a conta entra sem acesso a módulo e os perfis se definem em Cadastros.
      */
     public function aprovar(Request $request, User $usuario): RedirectResponse
     {

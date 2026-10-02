@@ -11,17 +11,8 @@ use Illuminate\Validation\Rules;
 use Illuminate\View\View;
 
 /**
- * Equipe da OSC: o responsável legal cadastra as contas da própria organização.
- *
- * OSC é organização, não pessoa — quem escreve o projeto raramente é quem
- * responde juridicamente por ele. Até aqui existia uma conta só por entidade,
- * e a saída prática era compartilhar a senha do responsável legal: todo mundo
- * atuando sob a mesma identidade, sem rastro de quem fez o quê.
- *
- * Quem indica a pessoa é a entidade; quem abre a porta é a Prefeitura. O
- * cadastro nasce pendente e vai para a mesma fila das outras contas, decidida
- * pelo TI/Administrador ou pela SCP. O alcance é contido por natureza — um
- * membro só enxerga a OSC a que pertence.
+ * Equipe da OSC: o responsável legal cadastra as contas da própria organização. O cadastro
+ * nasce pendente e é aprovado pela Prefeitura; o membro só enxerga a sua OSC.
  */
 class OscUsuarioController extends Controller
 {
@@ -86,25 +77,17 @@ class OscUsuarioController extends Controller
             // no primeiro acesso (ver ExigeTrocaDeSenha).
             'deve_trocar_senha' => true,
             'status'          => true,
-            // Nasce pendente: quem responde pela entidade indica a pessoa, mas
-            // quem abre a porta do sistema é a Prefeitura (TI/Administrador ou
-            // SCP), como já acontece com servidor e equipe de setor. O login
-            // barra pendente — ver User::podeAutenticar().
+            // Nasce pendente: a Prefeitura aprova (o login barra pendente, ver User::podeAutenticar).
             'approval_status' => 'pendente',
             'created_by'      => $dono->id,
             'solicitacao_obs' => $request->cargo,
         ]);
 
-        // O papel 'membro_osc' diz de quem a pessoa é ("equipe desta OSC") e
-        // nunca falta; os demais perfis dizem o que ela é na organização e saem
-        // impressos como papel de assinatura.
+        // 'membro_osc' diz de quem a pessoa é e nunca falta; os demais perfis saem na assinatura.
         $usuario->syncRoles($this->perfisMarcados($request));
 
-        // Quem entra já entra podendo trabalhar: as quatro funções, sempre
-        // (decisão da gestão, 28/09/2026 — o cadastro deixou de perguntá-las).
-        // Restringir continua possível no "Alterar" da lista da equipe. O que
-        // vincula juridicamente a organização — submeter, recorrer,
-        // contra-assinar — nunca esteve nas funções: é do responsável legal.
+        // Entra com todas as funções; restringir é pelo "Alterar" da lista da equipe. O que vincula
+        // a organização (submeter, recorrer) é do responsável legal.
         $usuario->syncPermissions(array_keys(User::FUNCOES_OSC));
 
         return redirect()->route('portal.usuarios.index')->with('success',
@@ -112,14 +95,7 @@ class OscUsuarioController extends Controller
             .'Repasse a senha definida: ela vale a partir da liberação.');
     }
 
-    /**
-     * Troca as funções de um integrante.
-     *
-     * Quem faz o quê muda com o tempo — alguém sai da equipe do projeto, outro
-     * assume as certidões. Sem esta tela, o engano do cadastro seria definitivo
-     * e a saída viraria criar outra conta para a mesma pessoa, que é justamente
-     * o que a equipe da OSC veio evitar.
-     */
+    /** Troca as funções de um integrante. */
     public function funcoes(Request $request, User $usuario): RedirectResponse
     {
         $osc = $this->oscDoResponsavel();
@@ -147,14 +123,7 @@ class OscUsuarioController extends Controller
         return back()->with('success', "Perfil e funções de {$usuario->name} atualizados.");
     }
 
-    /**
-     * Perfis a gravar: os marcados, sempre com 'membro_osc' junto.
-     *
-     * O papel de equipe não é opcional — é ele que diz que a conta pertence a
-     * esta OSC e não à Administração. Um formulário devolvido sem ele (caixa
-     * desmarcada no navegador, POST forjado) deixaria a pessoa sem papel
-     * nenhum, e uma conta sem papel não é de lado nenhum.
-     */
+    /** Perfis a gravar: os marcados, sempre com 'membro_osc' (sem ele a conta não é de lado nenhum). */
     private function perfisMarcados(Request $request): array
     {
         return array_values(array_unique([
@@ -163,10 +132,7 @@ class OscUsuarioController extends Controller
         ]));
     }
 
-    /**
-     * Liga/desliga o acesso. É a alternativa à exclusão: a conta continua
-     * respondendo pelo que assinou e enviou, mas para de entrar.
-     */
+    /** Liga/desliga o acesso: a alternativa à exclusão (a conta segue respondendo pelo que fez). */
     public function alternarAcesso(User $usuario): RedirectResponse
     {
         $osc  = $this->oscDoResponsavel();
@@ -184,11 +150,7 @@ class OscUsuarioController extends Controller
             : "Acesso de {$usuario->name} suspenso.");
     }
 
-    /**
-     * A tela é do responsável legal, não de toda a OSC: quem ele cadastra não
-     * cadastra outros. A rota já exige o papel; aqui vale a titularidade do
-     * cadastro (oscs.user_id), que é o fato, não a atribuição de papel.
-     */
+    /** A OSC de quem é o titular do cadastro (oscs.user_id): só ele cadastra a equipe. */
     private function oscDoResponsavel(): \App\Models\Osc
     {
         $user = request()->user();

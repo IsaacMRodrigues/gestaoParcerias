@@ -5,12 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
-/**
- * Uma fala dentro do chamado — a abertura ou uma resposta.
- *
- * A nota interna existe para a equipe combinar entre si sem precisar de outro
- * canal; quem abriu o chamado não a vê em lugar nenhum.
- */
+/** Uma fala no chamado. A nota interna é só da equipe de suporte. */
 class ChamadoMensagem extends Model
 {
     protected $table = 'chamado_mensagens';

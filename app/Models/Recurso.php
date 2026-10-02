@@ -6,10 +6,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Support\Str;
 
-/**
- * Recurso administrativo da OSC contra o resultado provisório do Chamamento
- * Público (art. 27 e ss. da Lei 13.019/2014 e prazo do edital).
- */
+/** Recurso da OSC contra o resultado provisório do Chamamento Público (art. 27 da Lei 13.019/2014). */
 class Recurso extends Model
 {
     protected $table = 'recursos';
@@ -61,11 +58,7 @@ class Recurso extends Model
         return $this->belongsTo(User::class, 'respondido_por');
     }
 
-    /**
-     * Membro da Comissão de Seleção que enxerga a proposta recorrente — é a
-     * Comissão da Secretaria do chamamento que lê o recurso e, se quiser,
-     * emite a Resposta ao recurso (peça opcional da etapa 3 da Seleção).
-     */
+    /** Membro da Comissão de Seleção da Secretaria do chamamento, que lê o recurso. */
     public function comissaoPodeVer(?User $user): bool
     {
         return $user !== null

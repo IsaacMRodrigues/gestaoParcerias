@@ -3,22 +3,14 @@
 namespace App\Models\Concerns;
 
 /**
- * Quem assinou, como estava no dia em que assinou.
- *
- * O carimbo lia o cadastro do usuário no momento da exibição: bastava a pessoa
- * editar o nome no perfil, mudar de setor ou ganhar outro papel para que todos
- * os documentos que ela já tinha assinado passassem a dizer outra coisa.
- * Assinatura é ato com data certa — nome e qualificação ficam gravados na
- * própria linha, no ato.
- *
- * A leitura do usuário vivo sobrevive apenas como recurso para alguma linha
- * antiga sem o registro; toda assinatura nova nasce com os dois campos.
+ * Quem assinou, como estava no dia: nome e qualificação gravados no ato. O cadastro atual
+ * só para linha antiga sem registro.
  */
 trait GuardaQuemAssinou
 {
     public function assinanteNome(): ?string
     {
-        // Assinado em sequência (o Termo, 01/10/2026): todas as partes, na ordem.
+        // Assinado em sequência (o Termo): todas as partes, na ordem.
         if ($this->assinado_em === null && method_exists($this, 'temAssinaturasEmSequencia') && $this->temAssinaturasEmSequencia()) {
             return $this->assinaturasPartes->pluck('assinante_nome')->filter()->implode(', ') ?: null;
         }

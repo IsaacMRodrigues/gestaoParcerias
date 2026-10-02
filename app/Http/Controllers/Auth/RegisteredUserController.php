@@ -28,8 +28,7 @@ class RegisteredUserController extends Controller
     }
 
     /**
-     * Cria o cadastro como PENDENTE (sem perfil e sem login) — o administrador
-     * libera o acesso e atribui os perfis na aprovação.
+     * Cria o cadastro pendente, sem perfil; o administrador libera e atribui perfis na aprovação.
      *
      * @throws ValidationException
      */

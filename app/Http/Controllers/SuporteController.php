@@ -13,15 +13,8 @@ use Illuminate\Validation\Rule;
 use Illuminate\View\View;
 
 /**
- * Painel de suporte.
- *
- * Aberto a quem está logado, e só a quem está logado: é o próprio acesso ao
- * sistema que filtra quem escreve — não há formulário público a ser varrido.
- *
- * Duas leituras da mesma tela: quem abriu vê os seus chamados; quem tem a
- * permissão `suporte` (hoje a TI e a SCP) vê todos e responde. A categoria
- * ajuda a triar sem criar fila separada, para que nenhuma pergunta fique
- * esperando alguém reparar que caiu no lugar errado.
+ * Painel de suporte, só para quem está logado: cada um vê os seus chamados; quem tem a
+ * permissão suporte vê todos e responde.
  */
 class SuporteController extends Controller
 {
@@ -155,12 +148,8 @@ class SuporteController extends Controller
     }
 
     /**
-     * Define uma senha provisória para a conta do pedido de Acesso.
-     *
-     * A senha é gerada aqui, e não digitada por quem atende: sai aleatória, é
-     * mostrada uma única vez (não fica em lugar nenhum, nem na conversa) e a
-     * conta passa a exigir troca no próximo acesso — quem atende a conhece, e
-     * a pessoa não deve ficar com uma senha que outro sabe.
+     * Senha provisória para a conta do pedido de acesso: gerada aqui, mostrada uma única vez,
+     * com troca obrigatória no próximo acesso.
      */
     public function senhaProvisoria(Chamado $chamado): RedirectResponse
     {
@@ -197,13 +186,7 @@ class SuporteController extends Controller
         return back()->with('senha_provisoria', $senha);
     }
 
-    /**
-     * Por que esta conta não pode ter a senha definida por quem está atendendo.
-     *
-     * Quem atende sem `cadastros` (a SCP) não mexe na senha de quem tem: sem
-     * isto, definir a senha do administrador seria o atalho para entrar como
-     * ele. E ninguém redefine a própria senha por aqui — para isso há o perfil.
-     */
+    /** Por que esta conta não pode ter a senha definida aqui (a de quem tem cadastros, ou a própria). */
     private function motivoParaNaoDefinirSenha(?User $conta): ?string
     {
         $eu = auth()->user();
@@ -247,13 +230,7 @@ class SuporteController extends Controller
         return Storage::disk('local')->download($mensagem->arquivo_path, $mensagem->arquivo_nome);
     }
 
-    /**
-     * Grava a fala e move o chamado.
-     *
-     * A primeira resposta de quem atende tira o chamado de "aberto" sozinha —
-     * ninguém precisa lembrar de mudar um seletor, e a fila do suporte passa a
-     * dizer a verdade.
-     */
+    /** Grava a fala; a primeira resposta de quem atende tira o chamado de "aberto". */
     private function registrarMensagem(Chamado $chamado, string $texto, bool $interna, $arquivo = null): ChamadoMensagem
     {
         $user = auth()->user();

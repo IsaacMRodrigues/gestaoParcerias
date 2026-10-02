@@ -1,8 +1,5 @@
-{{-- O processo da parceria, como a OSC o vê (módulo 3.3).
-
-     Quatro fases numa lista só: o que o município decidiu, o que publicou e o
-     que a própria organização entregou. Só entra documento pronto e aberto —
-     ver Proposta::dossieParaOsc(). Espera: $proposta, $dossie. --}}
+{{-- O processo da parceria como a OSC o vê: só documento pronto e aberto
+     (ver Proposta::dossieParaOsc()). Espera: $proposta, $dossie. --}}
 <div class="bg-white rounded-xl shadow-sm border border-gray-200">
     <div class="px-6 py-4 border-b border-gray-100">
         <h2 class="text-base font-semibold text-gray-800">Documentos do processo</h2>

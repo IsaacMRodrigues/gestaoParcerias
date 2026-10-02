@@ -36,7 +36,7 @@
                         <dd class="text-gray-900 font-mono text-right">{{ $doc['codigo'] }}</dd>
                     </div>
 
-                    {{-- Assinado em sequência (o Termo, desde 01/10/2026): todas as
+                    {{-- Assinado em sequência (o Termo): todas as
                          partes que já assinaram, e se ainda falta alguma. --}}
                     @if(!empty($doc['partes']))
                         <div class="py-2">

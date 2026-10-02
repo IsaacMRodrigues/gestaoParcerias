@@ -7,26 +7,12 @@ use Illuminate\Http\Request;
 use Symfony\Component\HttpFoundation\Response;
 
 /**
- * Aceita dinheiro escrito como se escreve em português.
- *
- * Os campos monetários passaram a ser digitados com máscara ("40.000,00"), e a
- * validação `numeric` recusa isso. Converter em cada FormRequest espalharia a
- * mesma regra por uma dezena de arquivos — e esqueceríamos um. Aqui o request
- * chega ao controller já com o número, venha ele do campo com máscara, de um
- * `type="number"` antigo ou de alguém que colou "R$ 1.234,56".
- *
- * A conversão é conservadora com o ponto, que em português é milhar e em
- * inglês é decimal: só o trata como decimal quando sobram uma ou duas casas
- * depois dele ("40.00"); três casas viram milhar ("40.000"). Vírgula, quando
- * existe, resolve a ambiguidade sozinha.
+ * Converte dinheiro escrito em português ("40.000,00", "R$ 1.234,56") em número. O ponto só é
+ * decimal quando sobram uma ou duas casas depois dele; a vírgula resolve sozinha.
  */
 class NormalizaValoresMonetarios
 {
-    /**
-     * Campos monetários do sistema (todos `decimal(15,2)` no banco).
-     * Ver as colunas em propostas, chamamentos, programas, instrumentos,
-     * aditivos, manifestações, repasses, despesas e ordens de pagamento.
-     */
+    /** Campos monetários do sistema (todos decimal(15,2)). */
     private const CAMPOS = [
         'valor',
         'valor_solicitado',

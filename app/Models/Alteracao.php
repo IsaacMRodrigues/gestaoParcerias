@@ -8,16 +8,8 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\MorphMany;
 
 /**
- * Alteração da Parceria (módulo 3.3).
- *
- * Pedido da OSC para mudar o que foi pactuado — remanejar rubricas, prorrogar
- * prazo, rever metas. Segue o fluxograma da fase de execução: a OSC monta e
- * assina, a Unidade Gestora autoriza, a SCP processa.
- *
- * Durante o pedido a OSC edita o próprio Plano de Trabalho (é o que o modelo
- * manda: "permitir alterar o plano de aplicação, o cronograma de execução e o
- * cronograma de desembolso"). Para que a análise saiba o que mudou, o retrato
- * do plano no momento do pedido fica guardado em `plano_antes`.
+ * Alteração da Parceria: a OSC monta e assina, a UG autoriza, a SCP processa. Durante o pedido
+ * a OSC edita o plano; o retrato de antes fica em plano_antes.
  */
 class Alteracao extends Model
 {
@@ -153,12 +145,7 @@ class Alteracao extends Model
         return $pend;
     }
 
-    /**
-     * O que mudou no plano desde que o pedido foi aberto.
-     *
-     * Compara o retrato guardado com o plano de agora. Não substitui a leitura
-     * do plano — mostra de saída se o pedido mexeu em dinheiro, e quanto.
-     */
+    /** O que mudou no plano desde a abertura do pedido (compara com plano_antes). */
     public function mudancasNoPlano(): array
     {
         $antes = $this->plano_antes;

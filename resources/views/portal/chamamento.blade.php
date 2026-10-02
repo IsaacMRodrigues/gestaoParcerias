@@ -240,8 +240,7 @@
                                   enctype="multipart/form-data" class="space-y-3"
                                   data-confirm="Protocolar o recurso? Após o envio não é possível alterá-lo.">
                                 @csrf
-                                {{-- O recurso é o arquivo que a OSC anexa, com as razões
-                                     dentro dele (decisão da gestão, 29/09/2026). --}}
+                                {{-- O recurso é o arquivo que a OSC anexa, com as razões dentro dele. --}}
                                 <div>
                                     <label for="arquivo" class="block text-xs font-medium text-gray-500 mb-1">
                                         Recurso assinado, com as razões (arquivo único em PDF)

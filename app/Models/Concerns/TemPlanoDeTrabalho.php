@@ -12,12 +12,8 @@ use App\Models\PlanoItem;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
 /**
- * O Plano de Trabalho, que vive em dois lugares.
- *
- * A OSC monta o mesmo plano na manifestação de interesse e na proposta de um
- * chamamento público. Como no deferimento a manifestação *vira* proposta —
- * levando as mesmas linhas, sem cópia —, cada tabela filha tem as duas chaves e
- * quem as usa diz qual é a sua.
+ * O Plano de Trabalho, na manifestação e na proposta: no deferimento as mesmas linhas passam
+ * à proposta, por isso cada tabela filha tem as duas chaves.
  */
 trait TemPlanoDeTrabalho
 {
@@ -90,22 +86,13 @@ trait TemPlanoDeTrabalho
         return $por;
     }
 
-    /**
-     * O valor do plano é o valor pleiteado (item 2 do modelo). Contrapartida em
-     * dinheiro e outras fontes não constam do modelo e saíram do plano.
-     */
+    /** O valor do plano é o valor pleiteado (item 2 do modelo). */
     public function valorTotalDoPlano(): float
     {
         return (float) $this->valor_solicitado;
     }
 
-    /**
-     * Incoerências que a própria OSC deve resolver antes de apresentar o plano.
-     *
-     * Não bloqueiam: avisam. Quem confere de verdade é a análise técnica, e um
-     * plano legítimo pode ter arredondamento de centavos — daí a tolerância.
-     * Bloquear aqui devolveria à OSC um erro que ela não sabe corrigir sozinha.
-     */
+    /** Incoerências que a OSC deve resolver; só avisam (com tolerância de centavos), não bloqueiam. */
     public function divergenciasDoPlano(): array
     {
         $avisos = [];
@@ -147,14 +134,7 @@ trait TemPlanoDeTrabalho
         return (int) $this->{$relacao}()->max('numero') + 1;
     }
 
-    /**
-     * O plano está completo o bastante para ser apresentado?
-     *
-     * Metas dizem o que será feito; o plano de aplicação, com quanto; o
-     * desembolso, quando o dinheiro precisa entrar. Sem os três não há o que
-     * analisar — e é sobre eles que os pareceres financeiro e jurídico se
-     * pronunciam.
-     */
+    /** O plano está completo para ser apresentado? Metas, plano de aplicação e desembolso. */
     public function pendenciasDoPlano(): array
     {
         $faltam = [];

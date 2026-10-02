@@ -17,15 +17,9 @@ class Processo extends Model
     ];
 
     /**
-     * Paleta da Prefeitura: verde, laranja e cinzas. A cor diz o ESTADO, não a
-     * entidade — com duas matizes não há como dar identidade a cada módulo, e
-     * tentar isso é o que trouxe azul, roxo e dois verdes diferentes para cá.
-     *
-     *   cinza    → inerte: não começou ou já saiu de cena
-     *   laranja  → em andamento, esperando alguém agir
-     *   verde    → ativo/positivo, ou concluído com êxito
-     *   vermelho → desfecho negativo (fora da paleta de propósito: sinal de
-     *              alerta é convenção de segurança, não escolha de marca)
+     * A cor diz o estado, na paleta da Prefeitura:
+     *   cinza → inerte · laranja → em andamento · verde → ativo ou concluído com êxito
+     *   vermelho → desfecho negativo (fora da paleta: é sinal de alerta)
      */
     public const STATUS_COLORS = [
         'em_planejamento' => 'gray',
@@ -41,21 +35,12 @@ class Processo extends Model
         'pj'     => 'Procuradoria Jurídica (PJ)',
     ];
 
-    /**
-     * Setores centrais do trâmite (compartilhados por todas as secretarias) —
-     * processam processos de qualquer órgão. A UG, ao contrário, é específica de
-     * cada Secretaria e só enxerga os próprios processos.
-     */
+    /** Setores centrais, que processam processos de qualquer órgão (a UG só vê os do seu). */
     public const SETORES_CENTRAIS = ['scp', 'seplan', 'pj'];
 
     /**
-     * Etapas do trâmite do planejamento (fluxo confirmado pelo cliente).
-     * O índice da etapa é guardado na coluna `etapa`.
-     *
-     * A rota bifurca na etapa 1 (análise do SCP), quando a modalidade é decidida:
-     * Chamamento Público segue por `ETAPAS` (Edital → Jurídico → publicação);
-     * Dispensa/Inexigibilidade segue por `ETAPAS_DISPENSA` (Justificativa → publicação).
-     * As etapas 0–4 são idênticas nas duas rotas. Use sempre `$processo->etapas()`.
+     * Etapas do Planejamento (índice na coluna etapa). Na etapa 1 a SCP decide a modalidade:
+     * Chamamento segue por ETAPAS; Dispensa/Inexigibilidade, por ETAPAS_DISPENSA. Use $processo->etapas().
      */
     public const ETAPAS = [
         ['setor' => 'ug',     'acao' => 'Preencher Memorando e Termo de Referência e assinar'],
@@ -70,11 +55,7 @@ class Processo extends Model
         ['setor' => 'scp',    'acao' => 'Publicar no site oficial (trâmite externo)'],
     ];
 
-    /**
-     * Rota da Dispensa/Inexigibilidade (Lei 13.019/2014, arts. 30–32).
-     * Etapas 0–4 idênticas ao Chamamento; a partir da 5 entra a Justificativa
-     * (emitida e assinada pela UG) no lugar do Edital + Parecer Jurídico.
-     */
+    /** Rota da Dispensa/Inexigibilidade: etapas 0–4 iguais; da 5 em diante, a Justificativa da UG. */
     public const ETAPAS_DISPENSA = [
         ['setor' => 'ug',     'acao' => 'Preencher Memorando e Termo de Referência e assinar'],
         ['setor' => 'scp',    'acao' => 'Analisar o Memorando e o Termo de Referência: aprovar ou rejeitar', 'analise' => true],
@@ -92,14 +73,7 @@ class Processo extends Model
         'inexigibilidade'    => 'Inexigibilidade de Chamamento Público',
     ];
 
-    /**
-     * Cor de cada modalidade, dentro da paleta da Prefeitura.
-     *
-     * O critério é a regra do marco regulatório: o Chamamento Público é a via
-     * ordinária (competitiva) e fica no verde; Dispensa e Inexigibilidade são
-     * as exceções à competição — a primeira no laranja, a segunda no cinza
-     * escuro, para as duas não se confundirem entre si.
-     */
+    /** Cor da modalidade: Chamamento (via ordinária) verde; Dispensa laranja; Inexigibilidade cinza. */
     public const MODALIDADES_COLORS = [
         'chamamento_publico' => 'brand',
         'dispensa'           => 'accent',
@@ -150,11 +124,7 @@ class Processo extends Model
         return $this->hasOne(Chamamento::class);
     }
 
-    /**
-     * Instrumento(s) formalizado(s) desta parceria, alcançados pela cadeia
-     * Processo → Chamamento → Proposta → Instrumento. Pode ser mais de um
-     * (várias propostas/OSCs sob o mesmo chamamento).
-     */
+    /** Instrumentos desta parceria (Processo → Chamamento → Proposta → Instrumento); pode haver vários. */
     public function instrumentosDaParceria()
     {
         if (! $this->chamamento) {
@@ -183,26 +153,19 @@ class Processo extends Model
         return $this->tramitacaoAtual() !== null;
     }
 
-    /**
-     * Próximo número sequencial — contador contínuo e global (nunca reinicia).
-     */
+    /** Próximo número sequencial: contador contínuo e global (nunca reinicia). */
     public static function proximoSequencial(): int
     {
         return (static::max('sequencial') ?? 0) + 1;
     }
 
-    /**
-     * Monta o número do processo no formato UG.Sequencial.Ano.Esfera
-     * (ex.: 0206.0133.2026.01).
-     */
+    /** Número do processo no formato UG.Sequencial.Ano.Esfera (ex.: 0206.0133.2026.01). */
     public static function formatarNumero(string $codigoUg, int $sequencial, int $ano, string $esfera): string
     {
         return sprintf('%s.%04d.%04d.%s', $codigoUg, $sequencial, $ano, $esfera);
     }
 
-    /**
-     * Alertas automáticos de conformidade (🔴 / 🟢).
-     */
+    /** Alertas automáticos de conformidade (🔴 / 🟢). */
     public function alertas(): array
     {
         $alertas = [];
@@ -239,11 +202,7 @@ class Processo extends Model
         return in_array($this->modalidade, ['dispensa', 'inexigibilidade'], true);
     }
 
-    /**
-     * O usuário enxerga processos de todos os órgãos? — administrador, auditoria,
-     * ou quem atua num setor central do trâmite (SCP/SEPLAN/PJ). A UG lotada numa
-     * Secretaria só vê os processos do próprio órgão.
-     */
+    /** Vê processos de todos os órgãos? Administrador, auditoria ou setor central (SCP/SEPLAN/PJ). */
     protected static function usuarioVeTodosProcessos(User $user): bool
     {
         return $user->podeVerTodosOrgaos()
@@ -306,13 +265,8 @@ class Processo extends Model
     }
 
     /**
-     * A etapa seguinte é do mesmo setor que está com o processo?
-     *
-     * Acontece no Planejamento: a SCP analisa o Memorando e o Termo de Referência
-     * e, logo depois, protocola o Pedido de Parecer à SEPLAN. O trâmite já
-     * trata isso como continuação, e não como remessa (ver
-     * TramitacaoController::chegadaNoProprioSetor); os botões precisam dizer o
-     * mesmo, senão convidam a SCP a "encaminhar para a SCP".
+     * A etapa seguinte é do mesmo setor? Então é continuação, não remessa
+     * (ver TramitacaoController::chegadaNoProprioSetor).
      */
     public function segueNoMesmoSetor(): bool
     {
@@ -325,25 +279,19 @@ class Processo extends Model
         return $this->setorAnterior() !== null && $this->setorAnterior() === $this->setor_atual;
     }
 
-    /**
-     * Pode avançar da etapa atual? (os alertas de conformidade são consultivos,
-     * não bloqueiam — a UG decide encaminhar; só não avança na última etapa)
-     */
+    /** Pode avançar? Os alertas são consultivos; só não avança na última etapa. */
     public function podeAvancar(): bool
     {
         return !$this->ultimaEtapa();
     }
 
-    /**
-     * Peças que precisam estar ASSINADAS antes de encaminhar a etapa atual.
-     * Retorna os rótulos pendentes (vazio = pode encaminhar).
-     */
     /** Documentos que quem devolve pode marcar como errados (ver App\Support\Devolucao). */
     public function documentosDevolviveis(): \Illuminate\Support\Collection
     {
         return \App\Support\Devolucao::candidatas($this->pecas()->get(), (int) $this->etapa);
     }
 
+    /** Peças que precisam estar assinadas para encaminhar a etapa atual (vazio = pode encaminhar). */
     public function pendenciasParaAvancar(): array
     {
         $pend = [];
@@ -382,10 +330,7 @@ class Processo extends Model
         return $pend;
     }
 
-    /**
-     * Gera (idempotente) o Chamamento no módulo Programas a partir deste Processo
-     * concluído — é a ponte Planejamento → Seleção/Publicação.
-     */
+    /** Gera (idempotente) o Chamamento a partir do Processo concluído: a ponte Planejamento → Seleção. */
     public function gerarChamamentoPublicacao(): Chamamento
     {
         if ($existente = $this->chamamento) {
@@ -426,9 +371,8 @@ class Processo extends Model
             'data_publicacao' => now()->toDateString(),
         ];
 
-        // Chamamento Público é competitivo: já abre uma janela de inscrição padrão
-        // (mínimo de 30 dias da publicação, art. 26 §1º da Lei 13.019/2014) para que
-        // as OSCs possam submeter propostas no portal. A UG ajusta as datas se quiser.
+        // Chamamento Público abre uma janela de inscrição padrão (30 dias, art. 26 §1º da
+        // Lei 13.019/2014); a UG ajusta as datas se quiser.
         if ($this->modalidade === 'chamamento_publico') {
             $dados['data_inicio_inscricao'] = now()->toDateString();
             $dados['data_fim_inscricao']    = now()->addDays(30)->toDateString();

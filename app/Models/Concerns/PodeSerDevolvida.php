@@ -3,13 +3,8 @@
 namespace App\Models\Concerns;
 
 /**
- * Documento que pode ser devolvido para correção (decisão da gestão,
- * 30/09/2026).
- *
- * Devolvido, ele reabre: o texto perde a assinatura (e a contra-assinatura,
- * se houver), e o arquivo, que fica guardado, passa a pedir um novo envio. O
- * motivo fica no documento até alguém corrigi-lo — salvar o texto, enviar o
- * arquivo novo ou assinar de novo limpa a marca.
+ * Documento que pode ser devolvido para correção: reabre (o texto perde a assinatura, o arquivo
+ * pede novo envio) e guarda o motivo até alguém corrigi-lo.
  */
 trait PodeSerDevolvida
 {

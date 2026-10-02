@@ -106,10 +106,7 @@
                             Ver Detalhes
                         </a>
                         @if($chamamento->aceitaPropostas())
-                            {{-- Participar é ação de OSC. O servidor navega no portal
-                                 para consultar, e o convite não se aplica a ele: em vez
-                                 de um botão que só levaria a um aviso de bloqueio, não
-                                 aparece botão nenhum. --}}
+                            {{-- Participar é de OSC: para o servidor, nenhum botão. --}}
                             @auth
                                 @if(auth()->user()->ehRepresentanteOsc() && auth()->user()->can('osc_propostas'))
                                     <a href="{{ route('portal.participar', $chamamento) }}"

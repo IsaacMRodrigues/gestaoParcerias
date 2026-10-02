@@ -1,11 +1,5 @@
-{{-- Campo de dinheiro: mostra "R$" e formata em português enquanto se digita.
-
-     O par campo-visível + campo-oculto existe porque o que a pessoa lê
-     ("40.000,00") não é o que o banco guarda (40000.00). O visível é
-     mascarado por `resources/js/money.js`; o oculto leva o número.
-
-     Sem JavaScript o campo ainda funciona: digita-se o valor como for, e o
-     middleware NormalizaValoresMonetarios converte no servidor. --}}
+{{-- Campo de dinheiro: o visível é mascarado por resources/js/money.js e o oculto leva o
+     número. Sem JS, o middleware NormalizaValoresMonetarios converte no servidor. --}}
 @props([
     'name',
     'value' => null,

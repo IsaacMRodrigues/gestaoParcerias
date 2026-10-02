@@ -133,9 +133,8 @@
             </div>
             @endif
 
-            {{-- Recurso contra o resultado provisório: o arquivo que a OSC anexou,
-                 para a Comissão de Seleção da Secretaria ler (decisão da gestão,
-                 29/09/2026). A resposta é peça da etapa 3 da Seleção. --}}
+            {{-- Recurso contra o resultado provisório, para a Comissão de Seleção da Secretaria ler.
+                 A resposta é peça da etapa 3 da Seleção. --}}
             @foreach($proposta->recursos as $rec)
                 @php $cor = \App\Models\Recurso::RESULTADO_COLORS[$rec->resultado] ?? 'gray'; @endphp
                 <div class="bg-white rounded-xl border border-gray-200 shadow-sm p-6">
@@ -344,7 +343,7 @@
                 @endforelse
             </div>
 
-            {{-- Arquivos da OSC (30/09/2026): anexados uma vez pela organização;
+            {{-- Arquivos da OSC: anexados uma vez pela organização;
                  a análise é desta parceria, sobre a versão que se viu. --}}
             <div id="arquivos-osc" style="scroll-margin-top:7rem">
                 <div class="mb-3">
@@ -364,7 +363,7 @@
 
             @php
                 // Na Celebração, a UG edita o plano até o documento dele ser
-                // assinado (decisão da gestão, 30/09/2026).
+                // assinado.
                 $ugEditaPlano = \App\Http\Controllers\PlanoTrabalhoController::ugPodeEditar($proposta, auth()->user());
             @endphp
 

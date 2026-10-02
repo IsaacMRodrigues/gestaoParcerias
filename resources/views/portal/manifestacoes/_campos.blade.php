@@ -7,9 +7,7 @@
 </div>
 
 @php $ehProposta = ($tipo ?? $manifestacao?->tipo) === 'proposta'; @endphp
-{{-- Na Nova Proposta o fundamento (dispensa ou inexigibilidade) e a
-     Secretaria são decididos pela SCP ao encaminhar — não pela OSC (decisão
-     da gestão, 29/09/2026). --}}
+{{-- Na Nova Proposta o fundamento e a Secretaria são decididos pela SCP ao encaminhar. --}}
 @unless($ehProposta)
 <div>
     <x-input-label for="orgao_id" value="Secretaria a que se dirige *" />
@@ -48,9 +46,8 @@
               class="mt-1 block w-full border-gray-300 rounded-md shadow-sm text-sm focus:ring-brand-500 focus:border-brand-500">{{ old('publico_alvo', $manifestacao?->publico_alvo) }}</textarea>
 </div>
 
-{{-- Na Nova Proposta o valor tem bloco próprio, com o plano de aplicação: ver
-     _valores-proposta. Contrapartida em dinheiro não consta do modelo de Plano
-     de Trabalho da cliente e saiu (29/09/2026). --}}
+{{-- Na Nova Proposta o valor vem do plano de aplicação (ver _valores-proposta). Sem
+     contrapartida em dinheiro: não consta do modelo de Plano de Trabalho. --}}
 @unless($ehProposta)
 <div class="grid grid-cols-2 gap-4">
     <div>

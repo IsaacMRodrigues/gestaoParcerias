@@ -5,15 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Proposta;
 use Illuminate\View\View;
 
-/**
- * Propostas, do lado do município: ler e analisar.
- *
- * Criar, editar, remover e submeter saíram daqui — são atos da OSC, feitos no
- * portal (ver PortalController). O que havia era um CRUD completo com a OSC
- * escolhida num dropdown: o município redigia a proposta em nome de terceiro,
- * submetia por ele e depois a aprovava, sem que nada registrasse quem de fato
- * propôs. O plano de trabalho (metas e etapas) segue editável aqui.
- */
+/** Propostas do lado do município: ler e analisar (criar e submeter são da OSC, no portal). */
 class PropostaController extends Controller
 {
     public function index(): View
@@ -25,7 +17,7 @@ class PropostaController extends Controller
             ->orderBy('created_at', 'desc')
             ->paginate(15);
 
-        // Novas Propostas em andamento (28/09/2026): ainda sem chamamento, com a
+        // Novas Propostas em andamento: ainda sem chamamento, com a
         // SCP ou com a UG. Deferidas, viram proposta desta mesma lista.
         $novasPropostas = \App\Models\ManifestacaoInteresse::with(['osc', 'orgao'])
             ->doTipo('proposta')

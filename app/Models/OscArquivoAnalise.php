@@ -5,11 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
-/**
- * A análise de um arquivo da OSC numa parceria (decisão da gestão,
- * 30/09/2026): o arquivo é um só, a análise é de cada parceria — e da versão
- * que foi analisada. Versão nova pede análise nova.
- */
+/** Análise de um arquivo da OSC numa parceria, da versão analisada (versão nova pede análise nova). */
 class OscArquivoAnalise extends Model
 {
     protected $table = 'osc_arquivo_analises';

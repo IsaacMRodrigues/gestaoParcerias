@@ -10,11 +10,7 @@ use Symfony\Component\HttpFoundation\StreamedResponse;
 
 class PecaController extends Controller
 {
-    /**
-     * Autorização das peças. Peças em trâmite (Seleção/Celebração) são gated por
-     * setor + etapa — o que também abre a vez da OSC nas peças da própria
-     * parceria. Peças fora de trâmite continuam exigindo a permissão da área.
-     */
+    /** Peças em trâmite: setor + etapa (inclui a vez da OSC); fora de trâmite, a permissão da área. */
     private function autorizar(Peca $peca, string $acao = 'preencher'): void
     {
         $user = auth()->user();
@@ -44,19 +40,11 @@ class PecaController extends Controller
             .'Peça ao responsável legal da OSC para marcá-la em Usuários da Organização.');
     }
 
-    /**
-     * Volta para a linha da peça, não para o topo da página.
-     *
-     * O checklist da Celebração tem 18 itens; assinar o de baixo devolvia a
-     * tela ao cabeçalho e obrigava a rolar de novo até onde se estava — a cada
-     * documento. `back()` reconstrói a URL anterior sem fragmento porque o
-     * navegador nunca o envia ao servidor; a âncora é reposta aqui, e a linha
-     * correspondente a carrega em `pecas/_checklist`.
-     */
+    /** Volta para a linha da peça (#peca-{id}), não para o topo da página. */
     private function voltarParaPeca(Peca $peca, string $mensagem): RedirectResponse
     {
         // 'peca_aberta': o documento em que se trabalhava volta aberto — salvar ou
-        // assinar não deve fechá-lo e devolver o usuário à lista (01/10/2026).
+        // assinar não deve fechá-lo e devolver o usuário à lista.
         return back()->withFragment('peca-' . $peca->id)->with('success', $mensagem)->with('peca_aberta', $peca->id);
     }
 
@@ -99,11 +87,7 @@ class PecaController extends Controller
         return $this->voltarParaPeca($peca, $peca->rotulo . ' assinado.');
     }
 
-    /**
-     * Assinatura de uma das partes de documento assinado em sequência — o
-     * Termo de Parceria: OSC, Responsável da UG, Gestor e Gabinete, cada um na
-     * sua etapa (01/10/2026).
-     */
+    /** Assinatura de uma das partes de documento assinado em sequência (o Termo, a OP Global). */
     public function assinarParte(Peca $peca): RedirectResponse
     {
         abort_unless($peca->temAssinaturasEmSequencia(), 422, 'Este documento não é assinado em sequência.');
@@ -150,10 +134,7 @@ class PecaController extends Controller
         return $this->voltarParaPeca($peca, $peca->rotulo . ' enviado.');
     }
 
-    /**
-     * Puxa um documento que a OSC já enviou no módulo Gestão de Parcerias (proposta)
-     * e o anexa à peça, copiando o arquivo para o armazenamento próprio da peça.
-     */
+    /** Puxa um documento que a OSC já enviou na proposta e o copia para a peça. */
     public function puxar(Request $request, Peca $peca): RedirectResponse
     {
         abort_if($peca->tipo !== 'arquivo', 422);
@@ -185,13 +166,7 @@ class PecaController extends Controller
         return $this->voltarParaPeca($peca, $peca->rotulo . ' puxado do módulo Gestão de Parcerias.');
     }
 
-    /**
-     * Apaga um anexo avulso (o campo inteiro, não só o arquivo).
-     *
-     * Só vale para os criados à mão: as peças do template são a regra do fluxo
-     * e voltariam na próxima sincronização. Quem pode preencher pode remover —
-     * é a mesma vez, no mesmo setor.
-     */
+    /** Apaga um anexo avulso (o espaço inteiro). Só os criados à mão; quem preenche pode remover. */
     public function destruirExtra(Peca $peca): RedirectResponse
     {
         abort_unless($peca->extra, 403, 'Este item faz parte do checklist e não pode ser removido.');
@@ -208,15 +183,7 @@ class PecaController extends Controller
         return back()->with('success', '"' . $rotulo . '" removido do checklist.');
     }
 
-    /**
-     * Baixa um anexo do documento do Planejamento que satisfaz esta peça.
-     *
-     * O arquivo já tem rota própria no módulo de Processos, mas ela exige
-     * `planejamento` — e quem conduz a Seleção nem sempre tem essa permissão (o
-     * Prefeito, que assina a homologação, não tem). Aqui a régua é a mesma que
-     * já governa ver a peça: quem enxerga o item do checklist baixa o anexo que
-     * o cumpre.
-     */
+    /** Baixa um anexo do documento do Planejamento que satisfaz esta peça, para quem vê a peça. */
     public function baixarAnexoOrigem(Peca $peca, \App\Models\ProcessoPecaAnexo $anexo): StreamedResponse
     {
         abort_unless($peca->podeVer(auth()->user()), 403);

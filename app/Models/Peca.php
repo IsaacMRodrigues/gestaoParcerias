@@ -11,11 +11,7 @@ class Peca extends Model
     use \App\Models\Concerns\PodeSerDevolvida;
     use \App\Models\Concerns\GuardaQuemAssinou;
 
-    /**
-     * A visibilidade à OSC é decidida no nascimento da peça, qualquer que seja
-     * o caminho que a criou — o motor de peças, um anexo avulso ou um seeder.
-     * Deixar isso no sincronizar() esqueceria os outros caminhos.
-     */
+    /** A visibilidade à OSC se decide na criação, qualquer que seja o caminho (motor, anexo avulso, seeder). */
     protected static function booted(): void
     {
         static::creating(function (self $peca) {
@@ -50,10 +46,7 @@ class Peca extends Model
         ];
     }
 
-    /**
-     * Checklists documentais por categoria (Módulo Unidade Gestora 2.2 e 2.3).
-     * tipo: 'modelo' = texto + assinatura digital | 'arquivo' = upload.
-     */
+    /** Checklists por categoria. tipo: 'modelo' = texto + assinatura | 'arquivo' = upload. */
     public const TEMPLATES = [
         // 2.2.1 Chamamento Público
         'chamamento_publico' => [
@@ -70,11 +63,8 @@ class Peca extends Model
             // Etapa 3: o recurso é o arquivo que cada OSC protocola pelo portal
             // (model Recurso); a resposta é esta peça, da Comissão, opcional.
             ['chave' => 'resposta_recurso',          'rotulo' => 'Resposta ao recurso (modelo padrão)',     'tipo' => 'modelo',  'obrigatorio' => false],
-            // Os recursos não são uma peça única: cada OSC protocola o seu pelo
-            // portal e recebe resposta própria (ver o model Recurso).
             ['chave' => 'resultado_definitivo',      'rotulo' => 'Resultado definitivo (modelo padrão)',    'tipo' => 'modelo',  'obrigatorio' => true],
-            // Etapa 4: a ata da sessão do resultado definitivo, anexada pela UG
-            // (pedido da gestão, 29/09/2026).
+            // Etapa 4: a ata da sessão do resultado definitivo, anexada pela UG.
             ['chave' => 'ata_resultado_definitivo',  'rotulo' => 'Ata do resultado definitivo',             'tipo' => 'arquivo', 'obrigatorio' => false],
             ['chave' => 'pub_resultado_definitivo',  'rotulo' => 'Publicação do resultado definitivo',      'tipo' => 'arquivo', 'obrigatorio' => true],
             ['chave' => 'termo_homologacao',         'rotulo' => 'Termo de Adjudicação e Homologação (modelo padrão)', 'tipo' => 'modelo', 'obrigatorio' => true],
@@ -93,9 +83,7 @@ class Peca extends Model
             ['chave' => 'parecer_tecnico_celebracao','rotulo' => 'Parecer técnico para celebração',         'tipo' => 'modelo',  'obrigatorio' => true],
             ['chave' => 'minuta_termo',              'rotulo' => 'Minuta do termo (modelo padrão)',         'tipo' => 'modelo',  'obrigatorio' => true],
             ['chave' => 'certidao_autuacao',         'rotulo' => 'Certidão de autuação (modelo padrão)',    'tipo' => 'modelo',  'obrigatorio' => true],
-            // Instrução do pedido de parecer: as vias que seguem à Procuradoria
-            // junto com o Protocolo. A publicação do extrato veio do topo da
-            // lista — ela é emitida antes, mas é aqui que precisa estar à mão.
+            // Vias do pedido de parecer que seguem à Procuradoria com o Protocolo.
             ['chave' => 'pub_extrato',               'rotulo' => 'Publicação do extrato da justificativa',  'tipo' => 'arquivo', 'obrigatorio' => true],
             ['chave' => 'minuta_termo_anexo',        'rotulo' => 'Minuta do termo (arquivo)',               'tipo' => 'arquivo', 'obrigatorio' => true],
             ['chave' => 'certidao_autuacao_anexo',   'rotulo' => 'Certidão de autuação (arquivo)',          'tipo' => 'arquivo', 'obrigatorio' => true],
@@ -108,19 +96,12 @@ class Peca extends Model
         // Celebração (Fluxo Etapa de Celebração) — ancorada na proposta aprovada
         'celebracao' => [
             ['chave' => 'convocacao_osc',        'rotulo' => 'Convocação da OSC (modelo padrão)',                      'tipo' => 'modelo',  'obrigatorio' => true],
-            // Item 1 do checklist: "a partir do preenchido". O plano não é um
-            // arquivo à parte — é o que a OSC lançou no Portal, impresso para
-            // assinar, de modo que o documento e o dado não possam divergir.
+            // Item 1: o plano lançado no Portal, impresso para assinar (documento e dado não divergem).
             ['chave' => 'plano_trabalho',        'rotulo' => 'Plano de Trabalho (preenchido no Portal)',               'tipo' => 'modelo',  'obrigatorio' => true],
-            // Itens 2 a 6, 13, 14, 16 e 17 do checklist do módulo 3.2, um a um:
-            // a caixa única "documentos de habilitação" não deixava ninguém ver
-            // o que estava faltando.
+            // Itens 2 a 6, 13, 14, 16 e 17 do checklist do módulo 3.2, um a um.
             ['chave' => 'oficio_pedido',         'rotulo' => 'Memorando do pedido, assinado pelo representante legal',    'tipo' => 'arquivo', 'obrigatorio' => true],
             ['chave' => 'experiencia_previa',    'rotulo' => 'Comprovantes de experiência prévia (mínimo de um ano)',  'tipo' => 'arquivo', 'obrigatorio' => true],
-            // Certidões e as seis declarações estão em "Arquivos da OSC" desde
-            // 30/09/2026: anexadas uma vez, valem para todas as parcerias, e a
-            // etapa 2 (da OSC) cobra a área completa e em dia. As peças já
-            // entregues ficam como histórico.
+            // Certidões e declarações ficam em "Arquivos da OSC"; as peças já entregues ficam como histórico.
             ['chave' => 'relacao_dirigentes',    'rotulo' => 'Relação nominal atualizada dos dirigentes',              'tipo' => 'arquivo', 'obrigatorio' => true],
             ['chave' => 'docs_presidente',       'rotulo' => 'RG, CPF e comprovante de residência do presidente',      'tipo' => 'arquivo', 'obrigatorio' => true],
             ['chave' => 'planilha_pessoal',      'rotulo' => 'Planilha de detalhamento de despesas de pessoal (se houver)', 'tipo' => 'arquivo', 'obrigatorio' => false],
@@ -130,8 +111,7 @@ class Peca extends Model
             // Continua existindo para o que não cabe nos itens acima — e para
             // não perder o que as parcerias antigas já anexaram aqui.
             ['chave' => 'docs_habilitacao',      'rotulo' => 'Outros documentos de habilitação',                       'tipo' => 'arquivo', 'obrigatorio' => false],
-            // As declarações da habilitação foram para "Arquivos da OSC"
-            // (30/09/2026); a do art. 23, XIV, deixou de ser exigida.
+            // As declarações da habilitação ficam em "Arquivos da OSC"; a do art. 23, XIV, não é exigida.
             ['chave' => 'aprovacao_plano',       'rotulo' => 'Aprovação do Plano de Trabalho (modelo padrão)',         'tipo' => 'modelo',  'obrigatorio' => true],
             ['chave' => 'pedido_parecer',        'rotulo' => 'Pedido de Parecer Financeiro (modelo padrão)',           'tipo' => 'modelo',  'obrigatorio' => true],
             ['chave' => 'parecer_financeiro',    'rotulo' => 'Parecer Financeiro (modelo padrão)',                     'tipo' => 'modelo',  'obrigatorio' => true],
@@ -139,16 +119,14 @@ class Peca extends Model
             ['chave' => 'portaria_comissao_mon', 'rotulo' => 'Portaria da Comissão de Monitoramento e Avaliação',      'tipo' => 'arquivo', 'obrigatorio' => true],
             ['chave' => 'parecer_tecnico',       'rotulo' => 'Parecer Técnico para celebração (modelo padrão)',        'tipo' => 'modelo',  'obrigatorio' => true],
             // Etapa 7, com o Protocolo: a minuta do termo e a certidão de autuação,
-            // que seguem com ele à Procuradoria (pedido da gestão, 01/10/2026).
+            // que seguem com ele à Procuradoria.
             ['chave' => 'minuta_termo',          'rotulo' => 'Minuta do Termo (modelo padrão)',                        'tipo' => 'modelo',  'obrigatorio' => true],
             ['chave' => 'certidao_autuacao',     'rotulo' => 'Certidão de Autuação (modelo padrão)',                   'tipo' => 'modelo',  'obrigatorio' => true],
             ['chave' => 'protocolo_juridico',    'rotulo' => 'Protocolo na Unidade Jurídica (modelo padrão)',          'tipo' => 'modelo',  'obrigatorio' => true],
             ['chave' => 'parecer_juridico',      'rotulo' => 'Parecer Jurídico (modelo padrão)',                       'tipo' => 'modelo',  'obrigatorio' => true],
             ['chave' => 'parecer_scp',           'rotulo' => 'Parecer da SCP — conferência final (modelo padrão)',    'tipo' => 'modelo',  'obrigatorio' => true],
             ['chave' => 'termo',                 'rotulo' => 'Termo de Parceria (modelo padrão)',                      'tipo' => 'modelo',  'obrigatorio' => true],
-            // Duas publicações, dois comprovantes: o Diário Oficial e o site do
-            // Município são veículos distintos e exigidos em separado. Num campo
-            // só, cabia um arquivo — anexar o segundo apagava o primeiro.
+            // Diário Oficial e site do Município são publicações distintas: um comprovante para cada.
             ['chave' => 'comprovante_publicacao_doe',  'rotulo' => 'Comprovante de publicação no Diário Oficial',        'tipo' => 'arquivo', 'obrigatorio' => true],
             ['chave' => 'comprovante_publicacao_site', 'rotulo' => 'Comprovante de publicação no site oficial',          'tipo' => 'arquivo', 'obrigatorio' => true],
             ['chave' => 'autorizacao_inicio',    'rotulo' => 'Autorização de Início de Execução (modelo padrão)',      'tipo' => 'modelo',  'obrigatorio' => true],
@@ -229,12 +207,8 @@ class Peca extends Model
     ];
 
     /**
-     * Trâmite da Seleção (só categoria `chamamento_publico`): setor que PREENCHE
-     * cada peça e em qual etapa de `Chamamento::ETAPAS_SELECAO`.
-     *
-     * As peças anteriores ao julgamento (Edital, anexos, portaria da Comissão,
-     * parecer jurídico e publicação do extrato) vêm do Planejamento e ficam fora
-     * do trâmite — seguem editáveis por quem tem a permissão de chamamentos.
+     * Seleção: setor que preenche cada peça e em que etapa de Chamamento::ETAPAS_SELECAO.
+     * As peças anteriores ao julgamento vêm do Planejamento e ficam fora do trâmite.
      */
     public const SELECAO_SETOR = [
         'relatorio_comissao'       => 'ug',
@@ -249,16 +223,8 @@ class Peca extends Model
     ];
 
     /**
-     * Setor responsável pelas peças ANTERIORES ao julgamento.
-     *
-     * Elas continuam fora do trâmite (não têm etapa: precisam estar prontas
-     * antes de a Seleção começar, para o edital ser publicado). O que faltava
-     * era dizer de QUEM é cada uma — sem isso, qualquer usuário com permissão
-     * de chamamentos preenchia e assinava todas, e na prática a Unidade Gestora
-     * acabou assinando o próprio parecer jurídico: quem pede o parecer o emitia.
-     *
-     * Aqui vale só o setor, nunca a ordem — é a diferença entre "não é a sua
-     * vez" (trâmite) e "não é o seu papel" (segregação de função).
+     * Setor dono de cada peça anterior ao julgamento. Sem etapa: só separa funções
+     * (quem pede o parecer jurídico não o emite).
      */
     public const SELECAO_SETOR_PREVIO = [
         'edital'             => 'ug',
@@ -289,16 +255,9 @@ class Peca extends Model
     ];
 
     /**
-     * Peças que o Planejamento já produziu, por chave do checklist => tipo da
-     * peça do processo (ver ProcessoPeca::TIPOS).
-     *
-     * Tudo o que está aqui nasce, é assinado e é publicado dentro do processo
-     * de Planejamento. Pedir de novo na Seleção seria pedir um segundo original
-     * do mesmo documento — com outra assinatura e outro código de validação. A
-     * Seleção passa a apontar para o do Planejamento.
-     *
-     * `anexos` aponta para o edital de propósito: os anexos do chamamento são
-     * os anexos do edital, e é lá que a SCP os envia.
+     * Peças já feitas no Planejamento (chave => tipo em ProcessoPeca::TIPOS): a Seleção mostra o
+     * documento do processo em vez de pedir outro original. `anexos` aponta para o edital,
+     * porque os anexos do chamamento são os do edital.
      */
     public const ORIGEM_PLANEJAMENTO = [
         'chamamento_publico' => [
@@ -324,11 +283,7 @@ class Peca extends Model
         'aditivo'                  => 'Termo Aditivo',
     ];
 
-    /**
-     * Trâmite da Celebração (categoria `celebracao`, ancorada na Proposta):
-     * setor que PREENCHE cada peça e em qual etapa de
-     * `Proposta::ETAPAS_CELEBRACAO`.
-     */
+    /** Celebração: setor que preenche cada peça e em que etapa de Proposta::ETAPAS_CELEBRACAO. */
     public const CELEBRACAO_SETOR = [
         'convocacao_osc'         => 'ug',
         'plano_trabalho'         => 'osc',
@@ -343,7 +298,7 @@ class Peca extends Model
         'planilha_orcamentaria'  => 'osc',
         'docs_habilitacao'       => 'osc',
         'decl_art7'              => 'osc',
-        'decl_art23'             => 'osc',  // só a peça antiga, já assinada (saiu em 30/09/2026)
+        'decl_art23'             => 'osc',  // só a peça antiga, já assinada
         'decl_art33'             => 'osc',
         'decl_art34'             => 'osc',
         'decl_art39'             => 'osc',
@@ -401,7 +356,7 @@ class Peca extends Model
         'parecer_juridico'       => 7,
         'parecer_scp'            => 8,
         'termo'                  => 8,
-        // As etapas 9 a 15 são as assinaturas do Termo (01/10/2026): o que vem
+        // As etapas 9 a 15 são as assinaturas do Termo: o que vem
         // depois andou seis casas.
         'comprovante_publicacao_doe'  => 16,
         'comprovante_publicacao_site' => 16,
@@ -480,11 +435,8 @@ class Peca extends Model
     ];
 
     /**
-     * Documentos assinados por várias partes, em sequência, cada uma na sua
-     * etapa do trâmite (decisão da gestão, 01/10/2026). O Termo de Parceria:
-     * a SCP o emite sem assinar; assinam a OSC, o Responsável da UG, o Gestor
-     * da Parceria e, por último, o Gabinete. E a Ordem de Pagamento Global:
-     * o Gestor da Parceria e o Responsável da UG.
+     * Documentos assinados por várias partes, em sequência, cada uma na sua etapa:
+     * o Termo (OSC, UG, Gestor, Gabinete) e a OP Global (Gestor, UG).
      */
     public const ASSINATURAS_EM_SEQUENCIA = [
         'celebracao' => [
@@ -495,7 +447,7 @@ class Peca extends Model
                 'pm'     => ['etapa' => 15, 'rotulo' => 'Gabinete do Prefeito'],
             ],
             // A OP Global: a SCP elabora (etapa 19); assinam o Gestor da
-            // Parceria e o Responsável da UG (01/10/2026).
+            // Parceria e o Responsável da UG.
             'op_global' => [
                 'gestor' => ['etapa' => 19, 'rotulo' => 'Gestor da Parceria'],
                 'ug'     => ['etapa' => 20, 'rotulo' => 'Responsável da Unidade Gestora'],
@@ -504,25 +456,8 @@ class Peca extends Model
     ];
 
     /**
-     * Declarações que só o responsável legal da OSC assina.
-     *
-     * Todas abrem com "Eu, [nome], na qualidade de representante legal" ou são
-     * feitas "sob as penas da Lei". A equipe da OSC pode revisar o texto, mas
-     * assinar é afirmar em nome de quem responde pela entidade — deixar um
-     * integrante fazê-lo seria uma pessoa declarando, sob pena de falsidade,
-     * no lugar de outra. É a mesma régua de submeter proposta e contra-assinar
-     * o Termo (ver User::ehResponsavelLegalOsc).
-     */
-    /**
-     * Peças que nascem fechadas à OSC.
-     *
-     * É a instrução interna do município: designações, protocolos entre
-     * setores, empenho e ordem de pagamento. Tudo o mais — o que decide, o que
-     * se publica e o que a própria organização entregou — nasce visível, que é
-     * o que a cliente pediu ao falar em "quase todos os documentos".
-     *
-     * A lista é o padrão, não a regra final: a SCP abre e fecha cada peça na
-     * tela de curadoria do dossiê.
+     * Peças que nascem fechadas à OSC: a instrução interna do município.
+     * A SCP pode abrir ou fechar cada uma na curadoria do dossiê.
      */
     public const INTERNAS = [
         'comissao_selecao', 'portaria_gestor', 'portaria_comissao_mon',
@@ -532,6 +467,7 @@ class Peca extends Model
         'verificacao_habilitacao', 'certidao_autuacao', 'certidao_autuacao_anexo',
     ];
 
+    /** Declarações que só o responsável legal da OSC assina; a equipe pode revisar o texto. */
     public const DECLARACOES_DO_RESPONSAVEL_LEGAL = [
         'decl_art7', 'decl_art33', 'decl_art34',
         'decl_art39', 'decl_art45', 'decl_autenticidade',
@@ -543,10 +479,7 @@ class Peca extends Model
         'plano_trabalho',
     ];
 
-    /**
-     * Itens (chave) que podem ser "puxados" do módulo Gestão de Parcerias —
-     * ou seja, preenchidos a partir dos documentos que a OSC já enviou na proposta.
-     */
+    /** Itens que podem ser puxados dos documentos que a OSC já enviou na proposta. */
     public const PUXAVEIS = [
         'dispensa_inexigibilidade' => ['plano_trabalho', 'docs_habilitacao'],
         'aditivo'                  => ['manifestacao_osc', 'formulario_prorrogacao', 'ata_eleicao', 'certidoes_regularidade', 'orcamento_cotacao', 'extratos_bancarios', 'declaracao_capacidade', 'plano_trabalho_atualizado'],
@@ -562,27 +495,10 @@ class Peca extends Model
 <p><br></p>
 HTML;
 
-    /**
-     * Texto-modelo HTML das peças "modelo" da Seleção/Documentação
-     * (semeado no `sincronizar`). Usa editor rico (TinyMCE) na UI.
-     */
     /*
-     * Declarações da habilitação (módulo 3.2). Diferem dos demais modelos em
-     * duas coisas: são documentos da OSC, e por isso não levam o cabeçalho com
-     * o brasão da Prefeitura; e vêm preenchidas com o cadastro da organização,
-     * em vez de "XXXXX" — o que faltar no cadastro aparece como "XXXXX".
-     *
-     * O texto é o dos modelos entregues pela SCP, palavra por palavra — são
-     * declarações feitas sob as penas da lei, e a redação é de quem as
-     * escreveu. Só mudou o que estava errado de fato:
-     * - art. 39, VI: o modelo citava o "Município de Montes Claros" (fora
-     *   copiado de outro município); aqui é São Gonçalo do Rio Abaixo;
-     * - art. 23: "prestação de contas HÁ nenhum órgão" → "A nenhum órgão";
-     * - art. 34: "ativo há de ___ anos" → "ativo há ___ anos".
-     * E o que era lacuna virou dado: os traços e colchetes dão lugar ao
-     * cadastro, e "NOME / Presidente" dá lugar ao nome do representante legal
-     * — quem declara o faz "na qualidade de representante legal", que nem
-     * sempre é o presidente.
+     * Declarações da habilitação: documentos da OSC (sem o brasão da Prefeitura), preenchidos
+     * com o cadastro. O texto é o dos modelos da SCP, palavra por palavra, só com os erros de
+     * fato corrigidos (município trocado no art. 39, "HÁ nenhum" no art. 23, "há de" no art. 34).
      */
     private const DECL_QUALIFICACAO = 'Eu, <strong>{{rep_nome}}</strong>, portador (a) da carteira de identidade n.º {{rep_rg}} expedida pela {{rep_rg_orgao}}, inscrito (a) no CPF sob o n.º {{rep_cpf}}, na qualidade de representante legal da <strong>{{osc_nome}}</strong>, sediada no(a) {{osc_endereco}}, Bairro {{osc_bairro}}, CEP: {{osc_cep}}, inscrita no CNPJ sob o n.º {{osc_cnpj}}';
 
@@ -592,6 +508,7 @@ HTML;
         . '<p style="text-align:right">São Gonçalo do Rio Abaixo, {{data_extenso}}.</p>'
         . '<p style="text-align:center"><br>{{rep_nome}}<br>Representante legal — {{osc_nome}}</p>';
 
+    /** Texto-modelo HTML das peças 'modelo', semeado no sincronizar(). */
     public const MODELO = [
         'chamamento_publico' => [
             'edital' => self::CABECALHO . <<<'HTML'
@@ -890,11 +807,8 @@ HTML,
 HTML,
         ],
         /*
-         * Prestação de contas. O memorando, o relatório e o resumo da folha não
-         * estão aqui: nascem dos campos preenchidos pela OSC, com as somas já
-         * feitas (ver App\Support\PrestacaoDocumento). Aqui ficam os que são
-         * texto de verdade — o compromisso de guarda, o laudo de obra e os
-         * dois pareceres da Administração.
+         * Prestação de contas: só os textos de verdade. Memorando, relatório e resumo da folha
+         * saem dos campos preenchidos pela OSC (App\Support\PrestacaoDocumento).
          */
         // 3.3 Alteração da parceria. A declaração de capacidade técnica é o
         // oitavo modelo do módulo 3, e o único que faltava: ela só existe aqui.
@@ -1011,9 +925,7 @@ HTML,
                 . '<p>' . self::DECL_QUALIFICACAO . ', declaro que não EMPREGAMOS MENOR DE IDADE, conforme dispõe o art. 7º, XXXIII, CF/88.</p>'
                 . self::DECL_PENAS . self::DECL_FECHO,
 
-            // A OSC adota uma das três redações. No sistema não há "versão
-            // final" separada — o texto é editado ali mesmo —, então a
-            // observação diz o que fazer em vez de pedir que seja suprimida.
+            // A OSC adota uma das três redações; a observação diz o que fazer.
             'decl_art33' => <<<'HTML'
 <p style="text-align:center"><strong>DECLARAÇÃO</strong><br>(art. 33, V, c, da Lei nº 13.019 de 2014)</p>
 <p>Declaro, em conformidade com o art. 33, caput, inciso V, alínea “c”, da Lei nº 13.019, de 2014, que a <strong>{{osc_nome}}</strong>:</p>
@@ -1150,11 +1062,7 @@ HTML,
         ],
     ];
 
-    /**
-     * Texto-modelo da peça. A Celebração reaproveita os modelos equivalentes de
-     * outras categorias e motores (a rota Dispensa cobre os mesmos documentos),
-     * em vez de duplicar o texto.
-     */
+    /** Texto-modelo da peça. A Celebração reaproveita os modelos equivalentes de outras categorias. */
     public static function modeloTexto(string $categoria, string $chave): ?string
     {
         if (isset(self::MODELO[$categoria][$chave])) {
@@ -1270,9 +1178,8 @@ HTML,
     }
 
     /**
-     * Pode assinar agora, pela parte da vez? Quem tem a vez no trâmite (o
-     * Gestor escolhido, o Responsável da UG…), com o texto pronto e as
-     * assinaturas anteriores dadas. Pela OSC, o responsável legal dela.
+     * Pode assinar agora pela parte da vez? Com o texto pronto e as assinaturas anteriores dadas.
+     * Pela OSC, só o responsável legal.
      */
     public function podeAssinarComoParte(?User $user): bool
     {
@@ -1412,23 +1319,13 @@ HTML,
         return $this->belongsTo(ProcessoPeca::class, 'origem_processo_peca_id');
     }
 
-    /**
-     * Este item é satisfeito por um documento do Planejamento?
-     *
-     * Quando sim, não há o que preencher nem o que assinar aqui: o documento
-     * existe, assinado, no processo — a Seleção só o exibe.
-     */
+    /** Item satisfeito por um documento do Planejamento: aqui só se exibe, não se preenche nem assina. */
     public function vemDoPlanejamento(): bool
     {
         return $this->origem_processo_peca_id !== null;
     }
 
-    /**
-     * O texto ainda é o do modelo, do jeito que foi semeado — ninguém o
-     * preencheu. Serve às peças que um setor redige e outro só assina: o Termo
-     * de Adjudicação e Homologação sai da SCP pronto para o Prefeito, que não
-     * o edita (decisão da gestão, 29/09/2026).
-     */
+    /** O texto ainda é o do modelo, como foi semeado: ninguém o preencheu. */
     public function aindaEOModelo(): bool
     {
         if ($this->tipo !== 'modelo' || empty($this->conteudo) || !$this->pecaable) {
@@ -1450,23 +1347,10 @@ HTML,
         return $this->tipo === 'modelo' ? !empty($this->conteudo) : $this->temArquivo();
     }
 
-    /**
-     * A peça está pronta? Depende do tipo — e é isso que a tela confundia.
-     *
-     * Modelo é texto que alguém assina; arquivo é documento que já vem assinado
-     * (ou publicado) de fora, e o sistema não o assina nunca — podeAssinar()
-     * exige tipo 'modelo'. Ainda assim o checklist media todas as peças por
-     * assinado(), então todo anexo ficava para sempre em "Preenchido — falta
-     * assinar", cobrando uma ação que não existe e para a qual não há botão.
-     *
-     * O avanço do trâmite (Chamamento::pendenciasDaEtapa) sempre soube da
-     * diferença; quem não sabia era a exibição.
-     */
+    /** Pronta? Modelo assinado (ou só redigido, se não leva assinatura); arquivo enviado. */
     public function concluida(): bool
     {
-        // Veio do Planejamento assinado: está pronta, e a assinatura que vale é
-        // a de lá — a coluna assinado_em desta linha continua vazia de propósito,
-        // para não haver duas assinaturas do mesmo documento.
+        // Vale a assinatura do Planejamento; assinado_em aqui fica vazio de propósito.
         if ($this->vemDoPlanejamento()) {
             return true;
         }
@@ -1487,12 +1371,7 @@ HTML,
     // Trâmite da Seleção — quem pode preencher/assinar e quando
     // ------------------------------------------------------------------
 
-    /**
-     * O dono desta peça está em trâmite (Seleção, no Chamamento Público, ou
-     * Celebração, na Proposta aprovada)? Fora desses casos (Dispensa, Aditivo,
-     * Apostilamento) não há trâmite e as regras antigas valem — quem tem a
-     * permissão da tela edita.
-     */
+    /** Trâmite dono da peça, se houver. Fora de trâmite, quem tem a permissão da tela edita. */
     private function donoEmTramite(): Chamamento|Proposta|PrestacaoContas|Alteracao|null
     {
         $alvo = $this->pecaable;
@@ -1538,10 +1417,7 @@ HTML,
         };
     }
 
-    /**
-     * Setor designado para preencher. O anexo avulso guarda o seu na linha —
-     * ele não está nos mapas, que são indexados pela chave do template.
-     */
+    /** Setor que preenche. O anexo avulso guarda o seu na própria linha. */
     public function selecaoSetor(): ?string
     {
         return $this->setor ?? $this->mapaSetor()[$this->chave] ?? null;
@@ -1552,11 +1428,7 @@ HTML,
         return $this->etapa ?? $this->mapaEtapa()[$this->chave] ?? null;
     }
 
-    /**
-     * Setor dono da peça fora do trâmite (fase do edital) — null quando a peça
-     * não é dessas ou a categoria não é chamamento público (dispensa e
-     * inexigibilidade seguem sem designação, como sempre estiveram).
-     */
+    /** Setor dono da peça na fase do edital (fora do trâmite); null nas demais. */
     public function setorPrevio(): ?string
     {
         // Anexo avulso não está em mapa nenhum (a chave é um uuid): o dono vai
@@ -1588,18 +1460,7 @@ HTML,
         return $this->mapaAssinatura()[$this->chave]['etapa'] ?? $this->selecaoEtapa();
     }
 
-    /**
-     * Pode preencher (texto ou upload) agora? Só o setor designado, na etapa
-     * designada, enquanto a Seleção não estiver encerrada.
-     */
-    /**
-     * A peça é governada por um trâmite (Seleção ou Celebração)?
-     *
-     * Precisa das duas coisas: setor E etapa. Nos mapas do template as duas
-     * andam juntas (mesmas chaves), mas um anexo avulso criado na fase prévia
-     * guarda só o setor de quem o criou — sem etapa, ele fica onde nasceu, nos
-     * documentos gerais, em vez de cair no bloco da etapa 1 por falta de número.
-     */
+    /** Governada por trâmite: precisa de setor e etapa (o anexo avulso da fase prévia só tem setor). */
     public function emTramite(): bool
     {
         return $this->donoEmTramite() !== null
@@ -1608,14 +1469,8 @@ HTML,
     }
 
     /**
-     * Etapa da PRÓXIMA ação pendente desta peça — que nem sempre é a etapa em
-     * que ela é preenchida.
-     *
-     * O Termo de Adjudicação e Homologação é o caso: a SCP o emite na etapa 5 e
-     * o Prefeito o assina na etapa 6. Agrupado pela etapa de preenchimento, ele
-     * caía no bloco da SCP; com o trâmite já na etapa 6, o Prefeito abria a tela
-     * e via TODOS os blocos como "etapa vencida", sem nada marcado como dele —
-     * justamente a assinatura que ele precisa dar.
+     * Etapa da próxima ação pendente: a de assinatura, quando o documento já foi preenchido
+     * e quem assina atua numa etapa posterior.
      */
     public function etapaDaProximaAcao(): ?int
     {
@@ -1636,14 +1491,7 @@ HTML,
         return $this->selecaoSetor();
     }
 
-    /**
-     * Em que etapa o trâmite dono desta peça está AGORA — null quando a peça
-     * não é governada por trâmite nenhum.
-     *
-     * O checklist precisa disto para separar o que é a vez de agora do que só
-     * chega depois: sem esse número, a lista sabe a etapa de cada documento mas
-     * não sabe onde o processo está, e não tem como ordenar nada.
-     */
+    /** Etapa em que o trâmite dono está agora; null fora de trâmite. */
     public function etapaAtualDoTramite(): ?int
     {
         return $this->donoEmTramite()?->tramiteEtapaAtual();
@@ -1654,15 +1502,7 @@ HTML,
         return (bool) $this->donoEmTramite()?->tramiteEncerrado();
     }
 
-    /**
-     * As etapas do trâmite dono, na ordem — vazio fora de trâmite.
-     *
-     * O checklist agrupa as peças por etapa, e só desenhava os blocos que
-     * tinham documento: quando a única peça de uma etapa migrava para a etapa
-     * da assinatura, o bloco sumia e a numeração pulava (12 → 14). Com a lista
-     * completa do fluxo, a tela desenha todas as etapas, na mesma sequência da
-     * trilha do trâmite.
-     */
+    /** Todas as etapas do trâmite dono, na ordem; o checklist desenha até as sem documento. */
     public function etapasDoTramite(): array
     {
         return $this->donoEmTramite()?->tramiteEtapas() ?? [];
@@ -1695,6 +1535,7 @@ HTML,
         return $oscDoDono !== null && $user->osc->id === $oscDoDono;
     }
 
+    /** Pode preencher (texto ou upload) agora? Só o setor designado, na etapa designada. */
     public function podePreencher(?User $user): bool
     {
         if ($this->vemDoPlanejamento()) {
@@ -1726,16 +1567,7 @@ HTML,
         return $this->selecaoSetor() !== 'osc' || $this->oscDona($user, $dono);
     }
 
-    /**
-     * Por que não dá para preencher agora — em português, com os fatos.
-     *
-     * O checklist mostrava o documento num bloco cinza e mais nada: nem quem é
-     * o responsável, nem em que etapa o trâmite está, nem o que falta. Quem
-     * abria a peça não tinha como saber se era falta de permissão, se a vez era
-     * de outro setor ou se a etapa ainda não havia chegado.
-     *
-     * Retorna null quando o preenchimento está liberado.
-     */
+    /** Por que não dá para preencher agora, em português; null quando está liberado. */
     public function motivoNaoPodePreencher(?User $user): ?string
     {
         if ($this->podePreencher($user)) {
@@ -1785,10 +1617,7 @@ HTML,
             return 'Este documento já foi assinado e não pode mais ser alterado.';
         }
 
-        // Preenchido, à espera de assinatura de OUTRA etapa (a Ordem de
-        // Pagamento Global: a SCP elabora, a UG assina). Dizer que "a etapa
-        // deste documento já passou" era desnorteante — nada passou, o
-        // documento está exatamente onde deveria, esperando quem assina.
+        // Preenchido, à espera da assinatura de outra etapa: falta quem assina.
         if ($this->preenchido()
             && !$this->assinado()
             && $this->selecaoEtapaAssinatura() !== $this->selecaoEtapa()
@@ -1826,17 +1655,8 @@ HTML,
     }
 
     /**
-     * Pode assinar agora? Mesma regra, porém pelo setor/etapa de assinatura —
-     * é o que reserva o Termo de Adjudicação e Homologação ao Prefeito.
-     */
-    /**
-     * Documentos que só um perfil assina, ainda que o setor inteiro os elabore.
-     *
-     * O Parecer Financeiro é da SEPLAN: qualquer pessoa dela o escreve, mas
-     * quem o assina é o responsável pela Secretaria (decisão da gestão,
-     * 28/09/2026). Vale nos três fluxos em que ele aparece — Planejamento
-     * (ProcessoPeca), Celebração e Aditivo (Peca) —, por isso a chave é a
-     * mesma nas duas famílias de peças.
+     * Documentos que só um perfil assina, ainda que o setor inteiro os elabore (o Parecer
+     * Financeiro: a SEPLAN escreve, o responsável assina). Vale também para ProcessoPeca.
      */
     public const ASSINATURA_RESERVADA = [
         'parecer_financeiro' => 'responsavel_seplan',
@@ -1844,10 +1664,8 @@ HTML,
     ];
 
     /**
-     * Documentos-modelo que só se redigem, sem assinatura. A Minuta do Termo da
-     * Celebração é rascunho do termo que vai à Procuradoria (decisão da gestão,
-     * 01/10/2026): pronta quando redigida — o texto do modelo, como foi
-     * semeado, não basta. O termo definitivo continua assinado pelas partes.
+     * Documentos-modelo que só se redigem, sem assinatura (a Minuta do Termo).
+     * O texto do modelo, como foi semeado, não basta.
      */
     public const SEM_ASSINATURA = [
         'celebracao' => ['minuta_termo'],
@@ -1864,11 +1682,7 @@ HTML,
         return !empty($this->conteudo) && !$this->aindaEOModelo();
     }
 
-    /**
-     * Peças que só um perfil preenche, além de assinar. A Resposta ao recurso
-     * é da Comissão de Seleção (decisão da gestão, 29/09/2026): o setor dela é
-     * a UG, mas o resto da UG não responde por ela.
-     */
+    /** Peças que só um perfil preenche, além de assinar (a Resposta ao recurso é da Comissão de Seleção). */
     public const PREENCHIMENTO_RESERVADO = [
         'resposta_recurso' => 'comissao_selecao',
     ];
@@ -1879,6 +1693,7 @@ HTML,
         return self::ASSINATURA_RESERVADA[$chave] ?? null;
     }
 
+    /** Pode assinar agora? A regra de podePreencher(), pelo setor e etapa de assinatura. */
     public function podeAssinar(?User $user): bool
     {
         // Assinado em sequência tem o próprio caminho: podeAssinarComoParte().
@@ -1945,10 +1760,7 @@ HTML,
             return $this->categoria === 'celebracao' ? 'Celebração concluída.' : 'Seleção encerrada.';
         }
 
-        // Etapa e setor da MESMA ação pendente. Antes o número vinha do
-        // preenchimento e o setor, da assinatura: no bloco da Ordem de
-        // Pagamento lia-se "Disponível na etapa 13 do trâmite (Unidade
-        // Gestora)" — a etapa é da SCP, que elabora; a UG só assina, na 14.
+        // Etapa e setor da mesma ação pendente.
         $etapa = $this->etapaDaProximaAcao();
         $setor = $dono->tramiteSetorLabel($this->setorDaProximaAcao());
 
@@ -1999,10 +1811,7 @@ HTML,
                 $novos
             );
 
-            // Rótulo, ordem e obrigatoriedade moram no template: são a regra, e
-            // não algo que se edite por peça. Sem isto, mudar o template só
-            // valia para registros novos — reordenar a lista deixava os
-            // chamamentos antigos embaralhados, com metade na ordem velha.
+            // Rótulo, ordem e obrigatoriedade vêm sempre do template, também nos registros antigos.
             $metadados = collect(['rotulo', 'ordem', 'obrigatorio'])
                 ->mapWithKeys(fn ($campo) => [$campo => $novos[$campo]])
                 // Comparação frouxa de propósito: `ordem` volta do banco como
@@ -2015,9 +1824,8 @@ HTML,
                 $peca->update($metadados);
             }
 
-            // Peça semeada antes desta correção: guardou o modelo cru, com os
-            // {{marcadores}} à mostra. Se ninguém mexeu nela (conteúdo idêntico
-            // ao modelo) e ela não está assinada, recebe o texto preenchido.
+            // Peça semeada com o modelo cru ({{marcadores}} à mostra), intocada e sem assinatura:
+            // recebe o texto preenchido.
             if ($texto !== null
                 && !$peca->wasRecentlyCreated
                 && !$peca->assinado()
@@ -2033,13 +1841,8 @@ HTML,
     }
 
     /**
-     * Aponta o item do checklist para o documento que o Planejamento já fez.
-     *
-     * Só quando o item ainda está intocado: se alguém digitou, anexou ou
-     * assinou aqui, esse trabalho manda — apontar para o processo o esconderia
-     * da tela sem aviso. E só quando o documento de lá está pronto de fato
-     * (assinado, ou com anexo, conforme o tipo), para a Seleção não exibir um
-     * espaço vazio como se fosse peça cumprida.
+     * Aponta o item para o documento do Planejamento, se o item está intocado e o documento
+     * de lá está pronto.
      */
     private static function ligarAoPlanejamento(self $peca, Model $pecaable, array $modelos = []): void
     {
@@ -2065,15 +1868,7 @@ HTML,
         $peca->update(['origem_processo_peca_id' => $origem->id]);
     }
 
-    /**
-     * Ninguém mexeu neste item ainda?
-     *
-     * Texto em branco não é o único estado "intocado": as peças de modelo
-     * nascem com o texto-padrão do sistema já dentro. Medir por `conteudo`
-     * vazio deixava justamente o Edital e o Parecer Jurídico de fora da
-     * herança — os dois que mais interessavam — porque o modelo semeado
-     * passava por trabalho de alguém.
-     */
+    /** Ninguém mexeu no item? Texto igual ao modelo semeado conta como intocado. */
     private static function intocada(self $peca, array $modelos): bool
     {
         if ($peca->arquivo_path || $peca->assinado()) {
@@ -2083,44 +1878,19 @@ HTML,
         return empty($peca->conteudo) || in_array($peca->conteudo, $modelos, true);
     }
 
-    /**
-     * O documento do Planejamento está pronto para valer por este item?
-     *
-     * Quem decide é o tipo do ITEM, não o da origem — e é o que faz o mapa
-     * funcionar sem exceções. O item de modelo herda o texto e exige que ele
-     * esteja assinado; o de arquivo herda os anexos e exige que exista ao menos
-     * um. É assim que "Edital" e "Anexos" apontam para a mesma peça do processo
-     * e ainda assim mostram coisas diferentes: o texto num, os arquivos no outro.
-     */
+    /** O documento do Planejamento vale por este item? Item modelo: assinado; item arquivo: com anexo. */
     private static function origemEstaPronta(self $peca, ProcessoPeca $origem): bool
     {
         return $peca->tipo === 'modelo' ? $origem->assinado() : $origem->temAnexo();
     }
 
-    /**
-     * Dados que o sistema já conhece, para entrar no lugar dos {{marcadores}}
-     * dos modelos padrão.
-     *
-     * Os modelos emprestados de outros módulos (o memorando da Ordem de Pagamento
-     * Global, o pedido de parecer e o parecer financeiro) trazem marcadores; a
-     * semeadura das peças gravava o texto cru e eles chegavam à tela como
-     * "{{favorecido}}", "{{ano}}" — ProcessoPeca e OrdemPagamento já preenchiam
-     * os seus, só o motor de peças não.
-     *
-     * O que o sistema não tem como saber (o número do memorando, quem assina)
-     * recebe o mesmo "XXXXX" que o resto do modelo usa para o que se digita —
-     * apagar o marcador deixaria a frase truncada ("parceria com a , Termo").
-     */
-    /**
-     * Os mesmos marcadores usados ao semear, disponíveis a quem regera um
-     * documento fora do momento da criação — a Proposta de Alteração, por
-     * exemplo, que acompanha os campos enquanto não for assinada.
-     */
+    /** Os marcadores de tokensDe(), para quem regera um documento depois de criado. */
     public static function tokensPara(Model $pecaable): array
     {
         return self::tokensDe($pecaable);
     }
 
+    /** Marcadores dos modelos ({{favorecido}}, {{ano}}…) com os dados conhecidos; o resto vira "XXXXX". */
     private static function tokensDe(Model $pecaable): array
     {
         $osc = $instrumento = $orgao = $processo = null;
@@ -2190,11 +1960,7 @@ HTML,
         return array_map(fn ($v) => filled($v) ? $v : 'XXXXX', $tokens);
     }
 
-    /**
-     * O texto de uma declaração da habilitação preenchido com o cadastro da
-     * OSC, para a área "Arquivos da OSC" (30/09/2026): a OSC o imprime,
-     * assina e anexa uma vez, e ele vale para todas as parcerias.
-     */
+    /** Declaração preenchida com o cadastro, para imprimir, assinar e anexar em "Arquivos da OSC". */
     public static function declaracaoParaOsc(string $chave, Osc $osc): ?string
     {
         $bruto = self::MODELO['celebracao'][$chave] ?? null;
@@ -2222,13 +1988,8 @@ HTML,
     }
 
     /**
-     * Marcadores do cadastro da OSC e do seu representante legal.
-     *
-     * O tempo de existência vem da data de abertura do CNPJ, e sai também por
-     * extenso porque a declaração do art. 34 o pede assim ("ativo há 12 (doze)
-     * anos"). Endereço sai inteiro (logradouro, número e complemento) para as
-     * declarações que trazem a sede numa lacuna só, e por partes para a do art.
-     * 34, que separa o número.
+     * Marcadores do cadastro da OSC e do representante legal. O tempo de existência vem da
+     * abertura do CNPJ (também por extenso); o endereço, inteiro e por partes.
      */
     private static function tokensDaOsc(?Osc $osc): array
     {
@@ -2259,9 +2020,7 @@ HTML,
         ];
     }
 
-    /**
-     * Progresso (peças obrigatórias preenchidas / total obrigatórias).
-     */
+    /** Progresso: peças obrigatórias concluídas / total de obrigatórias. */
     public static function progresso($pecas): array
     {
         $obrig = $pecas->where('obrigatorio', true);

@@ -24,10 +24,7 @@ class PortalController extends Controller
         return view('portal.index', compact('chamamentos'));
     }
 
-    /**
-     * Transparência pública: as parcerias já celebradas, com valores e vigência.
-     * É o que Cidadão, Parlamentar e Conselho consultam — sem necessidade de login.
-     */
+    /** Transparência pública: as parcerias celebradas, com valores e vigência, sem login. */
     public function transparencia(Request $request): View
     {
         $filtros = $request->only(['busca', 'tipo', 'exercicio']);
@@ -63,11 +60,7 @@ class PortalController extends Controller
         return view('portal.transparencia', compact('instrumentos', 'filtros', 'totais', 'exercicios'));
     }
 
-    /**
-     * Anexo do edital, aberto ao público como o próprio edital. Só entrega o
-     * que for anexo do edital assinado do processo deste chamamento — o
-     * endereço não serve para baixar anexo de outra peça.
-     */
+    /** Anexo do edital, público como ele; só os anexos do edital do processo deste chamamento. */
     public function anexoDoEdital(Chamamento $chamamento, \App\Models\ProcessoPecaAnexo $anexo)
     {
         $edital = $chamamento->ehDispensa() ? null : $chamamento->processo?->pecas()->where('tipo', 'edital')->first();
@@ -81,10 +74,7 @@ class PortalController extends Controller
     public function chamamento(Chamamento $chamamento): View
     {
         $chamamento->load(['programa.orgao', 'processo.pecas.anexos']);
-
-        // Documentos públicos do chamamento: peças de texto assinadas do processo
-        // de origem (Edital ou Justificativa de Dispensa) — têm página pública de
-        // validação, onde a OSC lê o teor completo e confere a assinatura.
+// Recurso da OSC logada neste chamamento (para protocolar ou ver a resposta).
         // Recurso da OSC logada neste chamamento (para protocolar ou ver a resposta)
         $osc = auth()->user()?->oscVinculada();
         $meuRecurso = $osc
@@ -93,9 +83,7 @@ class PortalController extends Controller
         $participei = $osc
             ? $chamamento->propostas()->where('osc_id', $osc->id)->exists()
             : false;
-
-        // Na consulta pública, só o edital e os anexos dele (decisão da gestão,
-        // 28/09/2026); na dispensa e na inexigibilidade, que não têm edital,
+// Na consulta pública, só o edital e os anexos dele; na dispensa, a justificativa.
         // a justificativa, que a lei manda publicar. O Parecer CNAS saiu.
         $publicos = $chamamento->ehDispensa() ? ['justificativa_dispensa'] : ['edital'];
         $documentosPublicos = $chamamento->processo
@@ -110,16 +98,7 @@ class PortalController extends Controller
         ));
     }
 
-    /**
-     * Onde a OSC está envolvida, nas três origens possíveis.
-     *
-     * A tela listava só propostas, sem dizer de onde vinham — e desde a
-     * manifestação de interesse são três caminhos distintos, com regras
-     * distintas: o chamamento público (concorrência), a dispensa ou
-     * inexigibilidade (parceria direta) e a manifestação, que ainda não é
-     * proposta. Numa lista só, a OSC não distinguia o que estava disputando do
-     * que já era seu.
-     */
+    /** Onde a OSC está envolvida: chamamento público, dispensa/inexigibilidade e manifestação. */
     public function minhasPropostas(): View
     {
         $osc = auth()->user()->oscVinculada();

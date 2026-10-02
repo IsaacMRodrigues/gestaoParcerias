@@ -16,10 +16,7 @@ class Chamamento extends Model
         'inexigibilidade'    => 'Inexigibilidade de Chamamento',
     ];
 
-    /**
-     * Mesmas cores de Processo::MODALIDADES_COLORS — é a mesma categoria vista
-     * do outro lado do fluxo, e a cor tem de bater nas duas telas.
-     */
+    /** Mesmas cores de Processo::MODALIDADES_COLORS: é a mesma categoria vista do outro lado. */
     public const TIPOS_COLORS = [
         'chamamento_publico' => 'brand',
         'dispensa'           => 'accent',
@@ -35,11 +32,7 @@ class Chamamento extends Model
         'cancelado'    => 'Cancelado',
     ];
 
-    /**
-     * Ver Processo::STATUS_COLORS para a regra. 'em_inscricao' é o único verde
-     * vivo — é o estado em que o chamamento está de fato aberto ao público —, e
-     * 'encerrado' recua para o cinza, porque já saiu de cena.
-     */
+    /** Ver Processo::STATUS_COLORS. Só 'em_inscricao' é verde vivo; 'encerrado' recua para o cinza. */
     public const STATUS_COLORS = [
         'rascunho'     => 'gray',
         'publicado'    => 'accent',
@@ -69,10 +62,7 @@ class Chamamento extends Model
         ];
     }
 
-    /**
-     * Setores que atuam na Seleção. Além dos setores do trâmite do Processo,
-     * entra o Gabinete do Prefeito (PM), que assina a homologação.
-     */
+    /** Setores da Seleção: os do Processo e o Gabinete do Prefeito, que assina a homologação. */
     public const SETORES_SELECAO = [
         'ug'  => 'Unidade Gestora',
         'scp' => 'Setor de Convênios e Parcerias (SCP)',
@@ -80,18 +70,12 @@ class Chamamento extends Model
     ];
 
     /**
-     * Etapa 3 (índice 2), "Recurso e resposta ao recurso" (decisão da gestão,
-     * 29/09/2026): a OSC recorre no prazo do edital, com um arquivo; a
-     * Comissão de Seleção pode emitir a Resposta ao recurso, peça opcional.
-     * Antes o recurso corria junto com a redação do Resultado Definitivo.
+     * Etapa 3 (índice 2), "Recurso e resposta ao recurso": a OSC recorre no prazo do edital,
+     * com um arquivo; a Comissão de Seleção pode emitir a Resposta ao recurso (opcional).
      */
     public const ETAPA_PRAZO_RECURSO = 2;
 
-    /**
-     * Etapas do trâmite da Seleção (Fluxo Seleção confirmado pelo cliente).
-     * Só se aplica ao Chamamento Público — Dispensa/Inexigibilidade não tem
-     * julgamento de propostas nem recurso.
-     */
+    /** Etapas da Seleção. Só no Chamamento Público: a Dispensa/Inexigibilidade não tem julgamento. */
     public const ETAPAS_SELECAO = [
         ['setor' => 'ug',  'acao' => 'Analisar as propostas: emitir o Relatório da Comissão, a Ata e o Resultado Provisório (assinar) e encaminhar à SCP'],
         ['setor' => 'scp', 'acao' => 'Anexar o comprovante de publicação do Resultado Provisório, informar o prazo de recurso do edital e devolver à UG'],
@@ -121,9 +105,7 @@ class Chamamento extends Model
         return $this->hasMany(Proposta::class);
     }
 
-    /**
-     * Categoria de peças aplicável conforme o tipo do chamamento.
-     */
+    /** Categoria de peças conforme o tipo do chamamento. */
     public function categoriaPecas(): string
     {
         return $this->tipo === 'chamamento_publico'
@@ -131,10 +113,7 @@ class Chamamento extends Model
             : 'dispensa_inexigibilidade';
     }
 
-    /**
-     * Status derivado das datas quando o admin não mudou manualmente.
-     * publicado + dentro do período de inscrição → trata como em_inscricao.
-     */
+    /** Status pelas datas quando o admin não o mudou: publicado e no período de inscrição → em_inscricao. */
     public function getStatusEfetivoAttribute(): string
     {
         if ($this->status === 'publicado'
@@ -163,10 +142,7 @@ class Chamamento extends Model
         return in_array($this->tipo, ['dispensa', 'inexigibilidade'], true);
     }
 
-    /**
-     * Publicado, mas fora do período de inscrição por já ter passado do fim —
-     * distingue de "ainda não começou", que usa o mesmo status_efetivo.
-     */
+    /** Publicado, mas com o período de inscrição já encerrado (e não "ainda não começou"). */
     public function inscricaoEncerrada(): bool
     {
         return $this->data_fim_inscricao !== null && $this->data_fim_inscricao->isPast();
@@ -187,9 +163,8 @@ class Chamamento extends Model
     }
 
     /**
-     * A OSC pode protocolar recurso agora? Só na etapa do prazo de recurso e
-     * até o último dia dele, que vem do edital (a SCP o informa ao publicar o
-     * Resultado Provisório). Recorrer é opcional: sem recurso, a etapa só passa.
+     * A OSC pode protocolar recurso agora? Na etapa do prazo de recurso, até o último dia dele
+     * (informado pela SCP ao publicar o Resultado Provisório). Recorrer é opcional.
      */
     public function faseRecursalAberta(): bool
     {
@@ -213,13 +188,12 @@ class Chamamento extends Model
     }
 
     // ------------------------------------------------------------------
-    // Cancelamento (decisão da gestão, 28/09/2026)
+    // Cancelamento
     // ------------------------------------------------------------------
 
     /**
-     * Cancelado: não recebe inscrição nem recurso, a Seleção não anda e ninguém
-     * assina peça dele — mas nada é excluído, e a UG pode reabrir. Ver
-     * ChamamentoCancelamentoController.
+     * Cancelado: não recebe inscrição nem recurso, a Seleção não anda e ninguém assina.
+     * Nada é excluído, e a UG pode reabrir (ver ChamamentoCancelamentoController).
      */
     public function cancelado(): bool
     {
@@ -242,7 +216,7 @@ class Chamamento extends Model
     }
 
     // ------------------------------------------------------------------
-    // Prorrogação do prazo de inscrições (decisão da gestão, 28/09/2026)
+    // Prorrogação do prazo de inscrições
     // ------------------------------------------------------------------
 
     public function prorrogacoes(): \Illuminate\Database\Eloquent\Relations\HasMany
@@ -251,12 +225,7 @@ class Chamamento extends Model
     }
 
     /** Quem prorroga: a SCP, que conduz o chamamento para o Município inteiro. */
-    /**
-     * Quem mexe no cadastro do chamamento — criar, editar, remover: só a SCP
-     * (decisão da gestão, 29/09/2026). A UG segue com a Seleção e com o botão
-     * de cancelar, que têm rotas próprias; o que sai dela é a edição direta de
-     * datas, número, objeto e situação.
-     */
+    /** Criar, editar e remover o chamamento: só a SCP. A UG segue com a Seleção e o cancelamento. */
     public function cadastroEditavelPor(?User $user): bool
     {
         return self::cadastroPermitidoA($user);
@@ -273,11 +242,8 @@ class Chamamento extends Model
     }
 
     /**
-     * Por que o prazo não pode ser prorrogado agora; null se pode.
-     *
-     * Só chamamento público publicado, não cancelado, e com a Seleção ainda na
-     * etapa 1: depois dela o julgamento já andou, e reabrir inscrições mudaria
-     * um resultado em curso.
+     * Por que o prazo não pode ser prorrogado agora; null se pode. Só chamamento público publicado,
+     * não cancelado e com a Seleção ainda na etapa 1.
      */
     public function motivoParaNaoProrrogar(): ?string
     {
@@ -298,11 +264,8 @@ class Chamamento extends Model
     }
 
     /**
-     * Por que não dá para cancelar agora; null se dá.
-     *
-     * Até a Seleção ser homologada. Depois dela já há parceria em Celebração com
-     * a OSC vencedora, e desfazer isso é outro ato. Na dispensa, que não tem
-     * homologação, o marco é o mesmo: proposta aprovada ou Celebração iniciada.
+     * Por que não dá para cancelar agora; null se dá. Até a homologação (na dispensa, até a
+     * proposta ser aprovada ou a Celebração começar).
      */
     public function motivoParaNaoCancelar(): ?string
     {
@@ -357,9 +320,7 @@ class Chamamento extends Model
 
     public function tramiteSetorLabel(?string $setor): string
     {
-        // Setores de fora deste trâmite (a PJ, por exemplo, que atua nas peças
-        // da fase do edital) não estão no mapa: cai na lotação, senão a tela
-        // escreveria a sigla crua — "o setor pj".
+        // Setor de fora deste trâmite (a PJ, por exemplo): cai na lotação.
         return self::SETORES_SELECAO[$setor]
             ?? (User::LOTACOES[$setor] ?? strtoupper((string) $setor));
     }
@@ -386,10 +347,7 @@ class Chamamento extends Model
         return !$this->cancelado() && $this->temTramiteSelecao() && !$this->selecaoConcluida() && !$this->ultimaEtapaSelecao();
     }
 
-    /**
-     * Peças que precisam estar prontas antes de encaminhar a etapa atual da
-     * Seleção. Retorna os rótulos pendentes (vazio = pode encaminhar).
-     */
+    /** Peças que precisam estar prontas para encaminhar a etapa atual (vazio = pode encaminhar). */
     public function pendenciasSelecao(): array
     {
         $pend  = [];
@@ -421,10 +379,8 @@ class Chamamento extends Model
                 continue;
             }
 
-            // Modelo: precisa estar assinado — exceto o Termo, que a SCP
-            // preenche na etapa 4 e o Prefeito só assina, na 5, sem editar.
-            // Preenchido quer dizer redigido pela SCP: o texto do modelo, como
-            // foi semeado, não vai ao Gabinete (decisão da gestão, 29/09/2026).
+            // Modelo: assinado. Exceto o Termo, que a SCP redige e o Prefeito só assina:
+            // precisa estar redigido (o texto do modelo, como semeado, não vai ao Gabinete).
             if ($peca->tipo === 'modelo') {
                 $soPreencher = $chave === 'termo_homologacao' && $etapa === 4;
                 $ok = $soPreencher ? !empty($peca->conteudo) && !$peca->aindaEOModelo() && !$peca->devolvida() : $peca->assinado();

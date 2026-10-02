@@ -8,17 +8,7 @@
 ])
 
 @php
-    /**
-     * Paleta da Prefeitura: verde, laranja e cinzas — só isso.
-     *
-     * Com duas matizes não dá para dar uma identidade a cada módulo, então a
-     * cor aqui diz o ESTADO da métrica, que é informação melhor de qualquer
-     * forma: laranja = trabalho em curso esperando alguém, verde = o que está
-     * ativo e saudável, cinza = cadastro de referência, que só se consulta.
-     *
-     * A tentativa anterior de uma cor por módulo trouxe azul, roxo, rosa e
-     * verde-azulado — bonito, mas fora da identidade da Prefeitura.
-     */
+    // A cor diz o estado da métrica: laranja espera alguém, verde está ativo, cinza é consulta.
     $accents = [
         'accent' => ['bg-accent-50 text-accent-700 ring-accent-100', 'hover:border-accent-300', 'group-hover:text-accent-600', 'border-t-accent-500'],
         'brand'  => ['bg-brand-50 text-brand-700 ring-brand-100',    'hover:border-brand-300',  'group-hover:text-brand-600',  'border-t-brand-600'],

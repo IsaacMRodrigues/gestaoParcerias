@@ -1,13 +1,5 @@
-{{-- Selo da modalidade (Chamamento Público, Dispensa, Inexigibilidade).
-
-     A mesma informação aparecia em cinco telas com quatro aparências: verde
-     claro no portal, verde forte no processo, cinza na seleção e texto puro na
-     listagem. Além de inconsistente, o verde não distinguia uma modalidade da
-     outra — são três categorias com efeitos jurídicos diferentes, e agora cada
-     uma tem sua cor, igual em todo lugar.
-
-     $rotulo permite o nome longo do Processo ("Dispensa de Chamamento Público")
-     onde há espaço, mantendo a mesma cor do nome curto do Chamamento. --}}
+{{-- Selo da modalidade, com a mesma cor em todo lugar. $rotulo permite o nome longo do
+     Processo ("Dispensa de Chamamento Público"). --}}
 @props(['tipo', 'rotulo' => null])
 
 @php

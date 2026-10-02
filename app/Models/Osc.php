@@ -56,17 +56,13 @@ class Osc extends Model
         return $this->hasMany(Proposta::class);
     }
 
-    /**
-     * Contas de acesso da organização — o responsável legal e a equipe que ele
-     * cadastrou. Não confundir com membros(), que é o quadro/diretoria
-     * declarado no cadastro (documental, sem login).
-     */
+    /** Contas de acesso da organização (não confundir com membros(), a diretoria declarada). */
     public function usuarios(): HasMany
     {
         return $this->hasMany(User::class);
     }
 
-    /** Todas as versões da área "Arquivos da OSC" (30/09/2026). */
+    /** Todas as versões da área "Arquivos da OSC". */
     public function arquivos(): HasMany
     {
         return $this->hasMany(OscArquivo::class)->orderByDesc('versao');
@@ -80,10 +76,7 @@ class Osc extends Model
         return $todos->sortByDesc('versao')->unique('tipo')->keyBy('tipo');
     }
 
-    /**
-     * O que falta na área para ela valer: documento não anexado e certidão
-     * vencida. Vazio = completa.
-     */
+    /** O que falta na área: documento não anexado e certidão vencida (vazio = completa). */
     public function pendenciasDosArquivos(): array
     {
         $atuais = $this->arquivosAtuais();

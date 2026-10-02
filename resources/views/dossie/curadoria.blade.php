@@ -1,9 +1,4 @@
-{{-- Curadoria do dossiê: o município escolhe o que a OSC enxerga.
-
-     A cliente pediu "uma tela em que a SCP selecionava os documentos que
-     aparecem para a OSC". O padrão já vem razoável — aberto para o que decide
-     e para o que é publicado, fechado para a instrução interna —, e aqui se
-     ajusta caso a caso. --}}
+{{-- Curadoria do dossiê: a SCP escolhe, caso a caso, o que a OSC enxerga. --}}
 <x-app-layout>
     <x-slot name="header">
         <div class="min-w-0">

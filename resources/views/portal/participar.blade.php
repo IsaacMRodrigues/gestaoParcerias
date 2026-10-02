@@ -43,10 +43,7 @@
                               class="block w-full border-gray-300 rounded-lg shadow-sm focus:ring-brand-500 focus:border-brand-500 text-sm">{{ old('justificativa') }}</textarea>
                 </div>
 
-                {{-- Esta tela tinha a máscara escrita à mão, com o script no rodapé;
-                     virou o componente do sistema (ver x-input-dinheiro). --}}
-                {{-- Contrapartida em dinheiro não consta do modelo de Plano de
-                     Trabalho da cliente: sai daqui (29/09/2026). --}}
+                {{-- Sem contrapartida em dinheiro: não consta do modelo de Plano de Trabalho. --}}
                 <div class="grid grid-cols-2 gap-4">
                     <div>
                         <label for="valor_solicitado_display" class="block text-sm font-medium text-gray-700 mb-1">Valor pleiteado (R$) *</label>

@@ -2,10 +2,7 @@
      Espera: $peca, $qrValidacao e — quando o documento tem assinatura das
      partes (Termo de Parceria) — $qrContra. --}}
 @php
-    /* Nome e cargo vêm do que foi gravado no ato da assinatura, não do
-       cadastro de hoje: editar o perfil, mudar de setor ou ganhar outro papel
-       não pode reescrever quem assinou o quê. A leitura do usuário vivo fica
-       só como recurso para assinatura antiga que não tenha o registro. */
+    /* Nome e cargo gravados no ato da assinatura; o cadastro atual só para assinatura antiga sem registro. */
     $identidade = function (?string $nome, ?string $cargo, $u) {
         return [
             'nome'  => $nome ?: $u?->name,
@@ -13,11 +10,8 @@
         ];
     };
 
-    /* Uma entrada por assinatura. O Termo da Celebração é assinado pelas duas
-       partes (Município e OSC) e o carimbo mostrava só a primeira: quem lia o
-       documento não via de quem era a contra-assinatura, nem quando foi dada.
-       method_exists porque ProcessoPeca e OrdemPagamento usam este mesmo
-       carimbo e não têm assinatura das partes. */
+    /* Uma entrada por assinatura (inclui a contra-assinatura dos Termos antigos e as partes do
+       documento assinado em sequência). method_exists: ProcessoPeca e OrdemPagamento também usam. */
     $assinaturas = [];
 
     if ($peca->assinado_em) {
@@ -29,7 +23,7 @@
         ];
     }
 
-    /* Assinado em sequência (o Termo, desde 01/10/2026): uma entrada por parte,
+    /* Assinado em sequência (o Termo): uma entrada por parte,
        cada uma com o seu código e o seu QR. */
     if (method_exists($peca, 'temAssinaturasEmSequencia') && $peca->temAssinaturasEmSequencia()) {
         $rotulos = $peca->sequenciaDeAssinaturas();

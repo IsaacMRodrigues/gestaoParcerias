@@ -1,12 +1,4 @@
-{{-- Campo de senha com o olho de exibir.
-
-     Digita-se senha às cegas, e no celular ou num teclado desconhecido o erro
-     de digitação só aparece depois de a entrada ser recusada — com a conta mais
-     perto do bloqueio a cada tentativa. O olho deixa conferir antes de enviar.
-
-     Começa oculto, sempre: a senha à mostra por padrão exporia quem abre a tela
-     de entrada diante de outra pessoa, que é justamente o caso mais comum num
-     balcão de repartição. --}}
+{{-- Campo de senha com o olho de exibir; começa sempre oculto. --}}
 @props(['id', 'name' => null, 'autocomplete' => 'current-password'])
 
 @php $nome = $name ?? $id; @endphp

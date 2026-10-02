@@ -8,17 +8,9 @@ use Illuminate\Http\RedirectResponse;
 abstract class Controller
 {
     /**
-     * Devolve um redirect com a explicação quando o registro tem vínculos que
-     * impedem a exclusão; null quando dá para seguir com o delete().
+     * Redirect com a explicação quando há vínculos que impedem a exclusão; null quando dá para apagar.
      *
-     * Uso:
      *   if ($bloqueio = $this->bloqueioDeExclusao($chamamento)) return $bloqueio;
-     *   $chamamento->delete();
-     *
-     * Existe para a checagem ficar idêntica nos seis controllers que apagam
-     * registros protegidos por FK. O banco já barra com RESTRICT — o que
-     * faltava era perguntar antes, em vez de deixar estourar um 500 com SQL na
-     * tela do usuário.
      */
     protected function bloqueioDeExclusao(Model $registro): ?RedirectResponse
     {

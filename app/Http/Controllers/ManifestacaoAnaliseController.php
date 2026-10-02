@@ -15,15 +15,8 @@ use Illuminate\Validation\Rule;
 use Illuminate\View\View;
 
 /**
- * Manifestação de Interesse pelo lado do município.
- *
- * A SCP recebe, ouve a Secretaria da área — que diz se há interesse público e
- * orçamento — e decide o encaminhamento: dispensa ou inexigibilidade de
- * chamamento público, ou indeferimento.
- *
- * O deferimento não é um carimbo: é ele que cria o chamamento do tipo escolhido
- * e a proposta correspondente, levando junto o plano de trabalho e os
- * documentos que a OSC já entregou. Daí em diante corre o fluxo de sempre.
+ * Manifestação e Nova Proposta pelo lado do município. O deferimento cria o chamamento do
+ * tipo escolhido e a proposta, com o plano e os documentos que a OSC já entregou.
  */
 class ManifestacaoAnaliseController extends Controller
 {
@@ -126,10 +119,7 @@ class ManifestacaoAnaliseController extends Controller
         return back()->with('success', 'Manifestação técnica registrada e devolvida à SCP.');
     }
 
-    /**
-     * Deferimento: escolhe o encaminhamento e faz nascer o chamamento e a
-     * proposta, com o plano de trabalho e os documentos já entregues.
-     */
+    /** Deferimento: faz nascer o chamamento e a proposta, com o plano e os documentos já entregues. */
     public function deferir(Request $request, ManifestacaoInteresse $manifestacao): RedirectResponse
     {
         abort_if($manifestacao->decidida(), 422, 'Esta manifestação já foi decidida.');
@@ -165,11 +155,8 @@ class ManifestacaoAnaliseController extends Controller
                 'status'          => 'rascunho',
             ]);
 
-            // A proposta nasce já submetida: o dossiê foi apresentado e
-            // analisado aqui — pedir à OSC que reenvie seria pedir duas vezes.
-            // A Nova Proposta vai além: deferida pela UG, nasce aprovada e já em
-            // Celebração, sem a análise de proposta — a UG decidiu ao deferir
-            // (decisão da gestão, 01/10/2026).
+            // A proposta nasce submetida (o dossiê já foi analisado). A Nova Proposta nasce aprovada e já
+            // em Celebração: a UG decidiu ao deferir.
             $direto = $manifestacao->ehNovaProposta();
             $proposta = Proposta::create([
                 'chamamento_id'        => $chamamento->id,
@@ -240,15 +227,7 @@ class ManifestacaoAnaliseController extends Controller
                 : ''));
     }
 
-    /**
-     * O programa em que o chamamento vai nascer.
-     *
-     * A manifestação não espera programa aberto: a OSC propõe quando quer, e a
-     * Secretaria pode não ter nenhum cadastrado. Como é o programa que carrega
-     * o órgão — sem ele o chamamento ficaria sem dono e fora do recorte por
-     * Secretaria —, o sistema abre uma vez a pasta geral daquela Secretaria e
-     * reaproveita nas próximas.
-     */
+    /** O programa do chamamento: a pasta geral da Secretaria, criada uma vez e reaproveitada. */
     private function programaDoDeferimento(ManifestacaoInteresse $manifestacao, ?string $escolhido): Programa
     {
         if ($escolhido) {
@@ -289,11 +268,7 @@ class ManifestacaoAnaliseController extends Controller
         return back()->with('success', 'Manifestação indeferida. A OSC verá o motivo no portal.');
     }
 
-    /**
-     * Quem decide: na manifestação, a SCP — deferir depois de ouvir a
-     * Secretaria, indeferir a qualquer momento; na Nova Proposta, a Unidade
-     * Gestora a que a SCP a encaminhou, com ela em análise.
-     */
+    /** Quem decide: na manifestação, a SCP; na Nova Proposta, a UG a que a SCP a encaminhou. */
     private function autorizarDecisao(ManifestacaoInteresse $manifestacao, bool $indeferir = false): void
     {
         if ($manifestacao->ehNovaProposta()) {

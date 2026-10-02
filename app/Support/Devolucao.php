@@ -10,22 +10,13 @@ use Illuminate\Support\Collection;
 use Illuminate\Validation\Rule;
 
 /**
- * Devolução por documento, igual em todos os trâmites (decisão da gestão,
- * 30/09/2026): quem devolve marca quais documentos estão errados; só eles
- * reabrem, com o motivo escrito neles, e o trâmite volta para a etapa do mais
- * antigo — onde está quem pode corrigi-lo. Sem documento marcado, a devolução
- * é a de sempre (o motivo, e a etapa anterior ou a escolhida).
- *
- * Serve às peças do motor genérico (Peca) e às do Planejamento (ProcessoPeca):
- * o que muda entre elas é só de onde vem a etapa de cada documento.
+ * Devolução por documento, em todos os trâmites: só os documentos marcados reabrem, com o motivo,
+ * e o trâmite volta à etapa do mais antigo. Sem marcar, volta à etapa anterior ou à escolhida.
+ * Serve a Peca e a ProcessoPeca.
  */
 class Devolucao
 {
-    /**
-     * Documentos que podem ser devolvidos: de etapas já vencidas, e prontos —
-     * assinados ou com o arquivo enviado. Documento que ainda ninguém fez não
-     * tem o que corrigir.
-     */
+    /** Documentos que podem ser devolvidos: de etapas já vencidas e prontos. */
     public static function candidatas(iterable $pecas, int $etapaAtual): Collection
     {
         return collect($pecas)

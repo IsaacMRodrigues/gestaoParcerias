@@ -210,11 +210,7 @@
             </form>
         </div>
 
-        {{-- Situação do chamado.
-
-             Encerrar é da equipe de suporte. Para quem abriu, este bloco é
-             leitura: ele acompanha em que pé está e, se não ficou resolvido,
-             escreve de volta — o que reabre o chamado sozinho. --}}
+        {{-- Situação do chamado: encerrar é do suporte; quem abriu reabre escrevendo de volta. --}}
         <div class="bg-white rounded-xl border border-gray-200 shadow-sm p-6">
             <h2 class="font-semibold text-gray-900">Situação do chamado</h2>
 

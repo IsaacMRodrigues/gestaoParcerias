@@ -1,7 +1,5 @@
-{{-- Cabeçalho da lista de peças, com o progresso embutido.
-
-     Antes o progresso era um card separado logo acima da lista — duas caixas
-     para o mesmo assunto. Espera: $titulo, $descricao, $progresso. --}}
+{{-- Cabeçalho da lista de peças, com o progresso. Espera: $titulo, $descricao, $progresso;
+     opcionais: $rotuloProgresso, $mensagemCompleta. --}}
 <div class="px-6 py-4 border-b border-gray-200">
     <div class="flex items-start justify-between gap-4 flex-wrap">
         <div class="min-w-0">
