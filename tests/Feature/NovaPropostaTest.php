@@ -64,7 +64,7 @@ class NovaPropostaTest extends TestCase
     {
         $this->actingAs($this->rl)->post('/portal/novas-propostas', [
             'titulo' => 'Oficinas de música',
-            'objeto' => 'x', 'justificativa' => 'x', 'valor_solicitado' => '8.000,00',
+            'objeto' => 'x', 'justificativa' => 'x',
             'itens'       => [['descricao' => 'Instrutor', 'tipo_despesa' => 'servicos_pf', 'quantidade' => 10, 'valor_unitario' => 800]],
         ])->assertSessionHasNoErrors();
 
@@ -100,21 +100,22 @@ class NovaPropostaTest extends TestCase
         $this->actingAs($this->rl)->get('/portal/novas-propostas')->assertOk()->assertSee('Nova Proposta');
         $this->actingAs($this->rl)->get('/portal/novas-propostas/nova')->assertOk()
             ->assertDontSee('name="fundamento_pedido"', false)->assertDontSee('name="orgao_id"', false)
-            ->assertSee('name="valor_solicitado"', false)->assertSee('Plano de aplicação dos recursos')
+            ->assertDontSee('name="valor_solicitado"', false)->assertDontSee('13 – Plano')
+            ->assertSee('Plano de aplicação dos recursos (Anexar planilha)')
             ->assertDontSee('name="valor_proprio"', false)->assertDontSee('Cronograma de desembolso');
 
         // Mesmo que mande, não grava: quem decide é a SCP.
         $this->actingAs($this->rl)->post('/portal/novas-propostas', [
-            'titulo' => 'Tentativa', 'fundamento_pedido' => 'dispensa', 'objeto' => 'x', 'justificativa' => 'x', 'valor_solicitado' => 1,
+            'titulo' => 'Tentativa', 'fundamento_pedido' => 'dispensa', 'objeto' => 'x', 'justificativa' => 'x',
         ])->assertSessionHasNoErrors();
         $this->assertNull(ManifestacaoInteresse::where('titulo', 'Tentativa')->value('fundamento_pedido'));
     }
 
-    public function test_o_primeiro_formulario_grava_o_valor_pleiteado_e_a_planilha(): void
+    public function test_o_valor_pleiteado_comeca_como_o_total_da_planilha(): void
     {
         $this->actingAs($this->rl)->post('/portal/novas-propostas', [
             'titulo' => 'Com valores', 'objeto' => 'x', 'justificativa' => 'x',
-            'valor_solicitado' => '10.000,00',
+            'valor_solicitado' => '99.999,00', // não vem mais do formulário; se vier, é ignorado
             'itens' => [
                 ['descricao' => 'Instrutor', 'tipo_despesa' => 'servicos_pf', 'unidade' => 'mês', 'quantidade' => 10, 'valor_unitario' => 1000],
                 ['descricao' => 'Lanche', 'tipo_despesa' => 'auxilio_alimentacao', 'quantidade' => 1, 'valor_unitario' => 1500],
@@ -122,24 +123,21 @@ class NovaPropostaTest extends TestCase
         ])->assertSessionHasNoErrors();
 
         $p = ManifestacaoInteresse::where('titulo', 'Com valores')->sole();
-        $this->assertSame('10000.00', $p->valor_solicitado);
+        $this->assertSame('11500.00', $p->valor_solicitado);
         $this->assertSame(['Instrutor', 'Lanche'], $p->planoItens()->orderBy('numero')->pluck('descricao')->all());
         $this->assertSame(11500.0, $p->fresh()->totalPlanoAplicacao());
         $this->assertSame(0, $p->desembolsos()->count(), 'o desembolso é por meta, na tela seguinte');
     }
 
-    public function test_sem_valor_ou_com_linha_incompleta_nao_cria(): void
+    public function test_com_linha_incompleta_nao_cria(): void
     {
         $base = ['titulo' => 'Incompleta', 'objeto' => 'x', 'justificativa' => 'x'];
 
-        $this->actingAs($this->rl)->post('/portal/novas-propostas', $base)->assertSessionHasErrors('valor_solicitado');
         $this->actingAs($this->rl)->post('/portal/novas-propostas', $base + [
-            'valor_solicitado' => 100,
             'itens'            => [['descricao' => '', 'tipo_despesa' => 'material_consumo', 'quantidade' => 1, 'valor_unitario' => 10]],
         ])->assertSessionHasErrors(['itens.0.descricao']);
         // "Outros" era da lista antiga: não se escolhe mais.
         $this->actingAs($this->rl)->post('/portal/novas-propostas', $base + [
-            'valor_solicitado' => 100,
             'itens'            => [['descricao' => 'x', 'tipo_despesa' => 'outros', 'quantidade' => 1, 'valor_unitario' => 10]],
         ])->assertSessionHasErrors(['itens.0.tipo_despesa']);
 

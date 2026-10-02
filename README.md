@@ -591,6 +591,13 @@ Trazer os demais cenários para `tests/Feature` é uma das [Pendências](#pendê
 Da mais recente para a mais antiga. Cada entrada diz o que mudou, **por quê** e como foi
 conferido — o porquê é o que falta a quem pega o código depois.
 
+- [2026-10-02] **Nova Proposta: primeiro formulário sem o campo de valor** (`portal/manifestacoes/_valores-proposta`)
+  - A pedido da gestão, sai o "Valor pleiteado" do primeiro formulário, e o título da planilha passa a
+    "Plano de aplicação dos recursos (Anexar planilha)", sem o número 13. O valor pleiteado começa como o total da
+    planilha (quantidade × valor unitário) e continua editável no plano de trabalho, na tela seguinte; o envio segue
+    exigindo valor maior que zero. O editor do plano e o documento impresso mantêm a numeração do modelo
+  - Conferido: `NovaPropostaTest`
+
 - [2026-10-02] **Arquivos da OSC no desenho do resto do sistema** (`arquivos-osc/_lista`)
   - A lista copiava o portal do DF (faixa verde, títulos em caixa alta, selos coloridos, "Histórico • 00") e destoava
     das outras telas. Agora usa o mesmo desenho da lista de documentos dos trâmites: cabeçalho com contagem e barra

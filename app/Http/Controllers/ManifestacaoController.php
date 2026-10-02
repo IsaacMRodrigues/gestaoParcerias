@@ -221,7 +221,6 @@ class ManifestacaoController extends Controller
     private function validarValoresDaProposta(Request $request): array
     {
         $dados = $request->validate([
-            'valor_solicitado'              => ['required', 'numeric', 'min:0'],
             'itens'                         => ['nullable', 'array', 'max:200'],
             'itens.*.descricao'             => ['required', 'string', 'max:255'],
             'itens.*.tipo_despesa'          => ['required', Rule::in(array_keys(Despesa::NATUREZAS))],
@@ -230,12 +229,15 @@ class ManifestacaoController extends Controller
             'itens.*.valor_unitario'        => ['required', 'numeric', 'min:0'],
             'itens.*.atividades_vinculadas' => ['nullable', 'string', 'max:255'],
         ], [
-            'valor_solicitado.required'       => 'Informe o valor pleiteado.',
             'itens.*.descricao.required'      => 'Descreva cada item do plano de aplicação.',
             'itens.*.valor_unitario.required' => 'Informe o valor unitário de cada item.',
         ]);
 
-        return [['valor_solicitado' => $dados['valor_solicitado']], $dados['itens'] ?? []];
+        // O valor pleiteado começa como o total da planilha; a OSC o ajusta no plano.
+        $itens = $dados['itens'] ?? [];
+        $total = collect($itens)->sum(fn ($i) => round((float) $i['quantidade'] * (float) $i['valor_unitario'], 2));
+
+        return [['valor_solicitado' => $total], $itens];
     }
 
     private function validarDados(Request $request, bool $proposta = false): array

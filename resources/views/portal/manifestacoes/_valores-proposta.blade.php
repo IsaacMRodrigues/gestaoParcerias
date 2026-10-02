@@ -1,9 +1,7 @@
 {{--
-    Nova Proposta, primeiro formulário (decisão da gestão, 29/09/2026): o valor
-    pleiteado (item 2 do modelo de Plano de Trabalho) e a planilha do plano de
-    aplicação (item 13). Grava tudo junto com a proposta; na tela seguinte o
-    mesmo plano segue editável, com as metas e o cronograma de desembolso, que
-    é por meta.
+    Nova Proposta, primeiro formulário: a planilha do plano de aplicação. O
+    valor pleiteado não se digita aqui: começa como o total da planilha e segue
+    editável no plano de trabalho, na tela seguinte.
 
     As linhas vêm de old() quando a validação devolve o formulário, para a OSC
     não perder o que digitou.
@@ -20,16 +18,6 @@
     $inputCls = 'mt-1 block w-full border-gray-300 rounded-md shadow-sm text-sm focus:ring-brand-500 focus:border-brand-500';
 @endphp
 
-{{-- Item 2 do modelo: o valor pleiteado --}}
-<div class="pt-4 border-t border-gray-100">
-    <div class="grid sm:grid-cols-2 gap-4"><div>
-        <x-input-label for="valor_solicitado" value="Valor pleiteado (R$) *" />
-        <x-input-dinheiro name="valor_solicitado" required class="mt-1" />
-        <x-input-error :messages="$errors->get('valor_solicitado')" class="mt-1" />
-    </div></div>
-</div>
-
-{{-- Item 13 do modelo: plano de aplicação dos recursos (planilha anexa) --}}
 <div class="pt-4 border-t border-gray-100"
      x-data="{
         itens: @js($itensIniciais),
@@ -38,7 +26,7 @@
         total() { return this.itens.reduce((s, i) => s + this.linha(i), 0) },
         moeda(v) { return 'R$ ' + v.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) },
      }">
-    <h2 class="text-base font-semibold text-gray-800">13 – Plano de aplicação dos recursos (Planilha anexa)</h2>
+    <h2 class="text-base font-semibold text-gray-800">Plano de aplicação dos recursos (Anexar planilha)</h2>
     <p class="text-xs text-gray-400 mt-0.5 mb-3">O que será comprado ou contratado, e por quanto.</p>
     <x-input-error :messages="$errors->get('itens')" class="mb-2" />
 
