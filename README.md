@@ -477,13 +477,11 @@ Procedimento:
 
 ## Verificação
 
-`php artisan test` (sqlite em memória) roda **164 testes** em `tests/Feature`, um arquivo por regra de
+`php artisan test` (sqlite em memória) roda **170 testes** em `tests/Feature`, um arquivo por regra de
 negócio (quem abre qual parceria, contas e senhas, avisos por e-mail, segregação de encargos,
 cancelamento e prorrogação de chamamento, Nova Proposta, prazo e resposta de recurso, plano de
-trabalho do modelo, etapa conjunta, devolução por documento, Termo e OP em sequência…). **159 passam.**
-Os 5 que falham vieram com o Breeze e esperam regras que o sistema não tem mais (login sem aprovação,
-perfil aberto a todos) — ver [Pendências](#pendências). Os testes de regra nova são conferidos falhando
-com a regra desligada antes de entrar.
+trabalho do modelo, etapa conjunta, devolução por documento, Termo e OP em sequência…). **Todos passam.**
+Os testes de regra nova são conferidos falhando com a regra desligada antes de entrar.
 
 Antes disso, as entregas desde o módulo 3 foram
 conferidas por **scripts que exercitam o HTTP de verdade** — com os usuários reais do banco local,
@@ -565,7 +563,6 @@ Trazer os demais cenários para `tests/Feature` é uma das [Pendências](#pendê
   proposta aprovada. Exigir a Celebração concluída é decisão pendente.
 - `DELETE /instrumentos/{id}` aponta para um método que não existe (500). Nada na tela chama.
 - O selo da **Celebração** ainda diz "Com …" o setor; o da Seleção já diz "Em análise".
-- **5 testes do Breeze** falham por esperarem regras antigas — atualizar para as regras atuais.
 - `/programas/{id}` devolve **500**: `ProgramaController@show` aponta para uma view que não existe.
   Nada na interface leva até lá.
 - Na prestação de contas, o **laudo de obra** e os **pareceres** saem com `XXXXX` no corpo.
@@ -590,6 +587,12 @@ Trazer os demais cenários para `tests/Feature` é uma das [Pendências](#pendê
 
 Da mais recente para a mais antiga. Cada entrada diz o que mudou, **por quê** e como foi
 conferido — o porquê é o que falta a quem pega o código depois.
+
+- [2026-10-02] **Saem os 5 testes do Breeze que falhavam**
+  - Login de qualquer usuário criado, cadastro já logado e `/profile` aberto a todos: o Breeze os testava, mas o
+    sistema exige aprovação e conta ativa para entrar, cadastra como pendente e reserva `/profile` ao servidor.
+    Apagados a pedido (`ProfileTest` inteiro; um teste em `AuthenticationTest` e um em `RegistrationTest`)
+  - Conferido: suíte 170/170
 
 - [2026-10-02] **Limpeza do código**
   - Código sem uso removido: a contra-assinatura do Termo (rota, ação, regras e telas; fica só a exibição das
