@@ -480,22 +480,6 @@ class Peca extends Model
     ];
 
     /**
-     * Quem assina, quando difere de quem preenche, na Celebração. Era a OP
-     * Global (SCP elabora, UG assina); desde 01/10/2026 ela é assinada em
-     * sequência — ver ASSINATURAS_EM_SEQUENCIA.
-     */
-    public const CELEBRACAO_ASSINATURA = [];
-
-    /**
-     * Contra-assinatura ("assinatura das partes"). Era a do Termo, que o
-     * Município assinava e a OSC contra-assinava; desde 01/10/2026 o Termo é
-     * assinado em sequência (ASSINATURAS_EM_SEQUENCIA). A estrutura fica para
-     * os Termos antigos, que continuam mostrando e validando as duas
-     * assinaturas que têm.
-     */
-    public const CELEBRACAO_CONTRA_ASSINATURA = [];
-
-    /**
      * Documentos assinados por várias partes, em sequência, cada uma na sua
      * etapa do trâmite (decisão da gestão, 01/10/2026). O Termo de Parceria:
      * a SCP o emite sem assinar; assinam a OSC, o Responsável da UG, o Gestor
@@ -1370,97 +1354,6 @@ HTML,
         return !is_null($this->contra_assinado_em);
     }
 
-    /** A peça exige assinatura das partes (Município + OSC)? */
-    public function exigeContraAssinatura(): bool
-    {
-        return $this->categoria === 'celebracao'
-            && isset(self::CELEBRACAO_CONTRA_ASSINATURA[$this->chave]);
-    }
-
-    /**
-     * Pode contra-assinar agora? Exige a assinatura do Município já lançada e,
-     * como é a vez da OSC, que seja a OSC daquela parceria.
-     *
-     * A comparação de setor é por `setorNoTramite()`, como em podePreencher() e
-     * podeAssinar(). Era o único ponto do motor que lia `$user->setor` direto:
-     * a OSC não tem lotação (users.setor é NULL), então `NULL !== 'osc'` era
-     * sempre verdadeiro e o botão de contra-assinar nunca aparecia para
-     * ninguém — o Termo ficava eternamente "aguardando a contra-assinatura da
-     * OSC", travando a etapa 10 da Celebração.
-     *
-     * E quem assina pela OSC é o responsável legal: o próprio Termo diz
-     * "representada por seu(sua) representante legal". A equipe prepara os
-     * documentos; o ato que vincula a entidade é de uma pessoa só — a mesma
-     * régua de submeter proposta e interpor recurso.
-     */
-    public function podeContraAssinar(?User $user): bool
-    {
-        if (!$this->exigeContraAssinatura() || !$this->assinado() || $this->contraAssinado()) {
-            return false;
-        }
-
-        $dono = $this->donoEmTramite();
-        if (!$dono || $dono->tramiteEncerrado()) {
-            return false;
-        }
-
-        $regra = self::CELEBRACAO_CONTRA_ASSINATURA[$this->chave];
-
-        if (!$user
-            || $user->setorNoTramite() !== $regra['setor']
-            || $dono->tramiteEtapaAtual() !== $regra['etapa']
-        ) {
-            return false;
-        }
-
-        return $regra['setor'] !== 'osc'
-            || ($this->oscDona($user, $dono) && $user->ehResponsavelLegalOsc());
-    }
-
-    /**
-     * Por que não dá para contra-assinar agora — em português, com os fatos.
-     * Null quando está liberado. Mesmo princípio de motivoNaoPodePreencher():
-     * em vez de sumir com o botão, a tela diz de quem é a vez e o que falta.
-     */
-    public function motivoNaoPodeContraAssinar(?User $user): ?string
-    {
-        if (!$this->exigeContraAssinatura() || $this->contraAssinado() || $this->podeContraAssinar($user)) {
-            return null;
-        }
-
-        if (!$this->assinado()) {
-            return 'O Município ainda não assinou este documento.';
-        }
-
-        $dono  = $this->donoEmTramite();
-        $regra = self::CELEBRACAO_CONTRA_ASSINATURA[$this->chave];
-
-        if (!$dono || $dono->tramiteEncerrado()) {
-            return 'O trâmite já foi concluído — os documentos ficam apenas para consulta.';
-        }
-
-        if (!$user || $user->setorNoTramite() !== $regra['setor']) {
-            return 'A assinatura das partes é da OSC parceira.';
-        }
-
-        if (!$this->oscDona($user, $dono)) {
-            return 'Este documento pertence a outra OSC.';
-        }
-
-        if (!$user->ehResponsavelLegalOsc()) {
-            return 'Somente o responsável legal da OSC pode assinar o Termo.';
-        }
-
-        $etapaDoc   = $regra['etapa'] + 1;
-        $etapaAtual = $dono->tramiteEtapaAtual() + 1;
-
-        return $etapaDoc > $etapaAtual
-            ? "Ainda não é a vez da assinatura das partes: ela ocorre na etapa {$etapaDoc}, "
-                ."e o trâmite está na etapa {$etapaAtual}."
-            : "A etapa da assinatura das partes (etapa {$etapaDoc}) já passou — "
-                ."o trâmite está na etapa {$etapaAtual}.";
-    }
-
     /** Gera um código de validação único (ex.: A1B2-C3D4-E5). */
     public static function gerarCodigoValidacao(): string
     {
@@ -1640,13 +1533,11 @@ HTML,
         // A prestação de contas não tem documento assinado por setor diferente
         // de quem o preenche — cada peça é assinada por quem a emite.
         return match ($this->categoria) {
-            'celebracao'       => self::CELEBRACAO_ASSINATURA,
-            'prestacao_contas', 'alteracao' => [],
+            'celebracao', 'prestacao_contas', 'alteracao' => [],
             default            => self::SELECAO_ASSINATURA,
         };
     }
 
-    /** Setor designado para preencher a peça no trâmite. */
     /**
      * Setor designado para preencher. O anexo avulso guarda o seu na linha —
      * ele não está nos mapas, que são indexados pela chave do template.
@@ -1732,15 +1623,6 @@ HTML,
             return $this->selecaoEtapaAssinatura();
         }
 
-        // Assinado pelo Município e à espera da OSC: a ação pendente é a
-        // contra-assinatura, na etapa dela. Sem isto o Termo ficava no bloco de
-        // quem já assinou — "etapa vencida" — enquanto a OSC, na etapa seguinte,
-        // não via nada marcado como seu. Mesmo defeito que a assinatura do
-        // Prefeito tinha na Seleção.
-        if ($this->contraAssinaturaPendente()) {
-            return self::CELEBRACAO_CONTRA_ASSINATURA[$this->chave]['etapa'];
-        }
-
         return $this->selecaoEtapa();
     }
 
@@ -1751,17 +1633,7 @@ HTML,
             return $this->selecaoSetorAssinatura();
         }
 
-        if ($this->contraAssinaturaPendente()) {
-            return self::CELEBRACAO_CONTRA_ASSINATURA[$this->chave]['setor'];
-        }
-
         return $this->selecaoSetor();
-    }
-
-    /** Assinado pela Administração e ainda esperando a assinatura das partes. */
-    public function contraAssinaturaPendente(): bool
-    {
-        return $this->exigeContraAssinatura() && $this->assinado() && !$this->contraAssinado();
     }
 
     /**

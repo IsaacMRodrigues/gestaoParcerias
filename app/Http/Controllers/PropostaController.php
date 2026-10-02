@@ -45,5 +45,4 @@ class PropostaController extends Controller
 
         return view('propostas.show', compact('proposta'));
     }
-
 }

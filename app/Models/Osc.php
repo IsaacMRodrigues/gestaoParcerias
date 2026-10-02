@@ -66,12 +66,6 @@ class Osc extends Model
         return $this->hasMany(User::class);
     }
 
-    /** Quem responde legalmente pela OSC (dono do cadastro). */
-    public function responsavelLegal(): BelongsTo
-    {
-        return $this->user();
-    }
-
     /** Todas as versões da área "Arquivos da OSC" (30/09/2026). */
     public function arquivos(): HasMany
     {

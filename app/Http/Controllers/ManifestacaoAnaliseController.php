@@ -30,7 +30,6 @@ class ManifestacaoAnaliseController extends Controller
     /** Pasta geral que recebe as parcerias de Secretaria sem programa próprio. */
     private const PROGRAMA_PADRAO = 'Parcerias por manifestação de interesse';
 
-
     public function index(Request $request): View
     {
         $manifestacoes = ManifestacaoInteresse::with(['osc', 'orgao'])

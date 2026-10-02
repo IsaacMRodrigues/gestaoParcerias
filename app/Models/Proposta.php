@@ -459,13 +459,6 @@ class Proposta extends Model
             && !$this->ultimaEtapaCelebracao();
     }
 
-    public function setorAnteriorCelebracao(): ?string
-    {
-        return (int) $this->celebracao_etapa > 0
-            ? (self::ETAPAS_CELEBRACAO[$this->celebracao_etapa - 1]['setor'] ?? null)
-            : null;
-    }
-
     public function pecaCelebracao(string $chave): ?Peca
     {
         return $this->relationLoaded('pecas')

@@ -321,14 +321,6 @@ class Chamamento extends Model
         return null;
     }
 
-    /** Recursos protocolados que ainda não têm resposta da UG. */
-    public function recursosSemResposta(): int
-    {
-        return $this->relationLoaded('recursos')
-            ? $this->recursos->whereNull('respondido_em')->count()
-            : $this->recursos()->whereNull('respondido_em')->count();
-    }
-
     /** O trâmite da Seleção só existe no Chamamento Público. */
     public function temTramiteSelecao(): bool
     {
@@ -394,13 +386,6 @@ class Chamamento extends Model
         return !$this->cancelado() && $this->temTramiteSelecao() && !$this->selecaoConcluida() && !$this->ultimaEtapaSelecao();
     }
 
-    public function setorAnteriorSelecao(): ?string
-    {
-        return (int) $this->selecao_etapa > 0
-            ? (self::ETAPAS_SELECAO[$this->selecao_etapa - 1]['setor'] ?? null)
-            : null;
-    }
-
     /**
      * Peças que precisam estar prontas antes de encaminhar a etapa atual da
      * Seleção. Retorna os rótulos pendentes (vazio = pode encaminhar).
@@ -429,7 +414,6 @@ class Chamamento extends Model
                 $pend[] = 'Prazo de recurso aberto até ' . $this->prazo_recurso_ate->format('d/m/Y') . ' — a etapa se encerra depois dele';
             }
         }
-
 
         foreach ($exigidas[$etapa] ?? [] as $chave) {
             $peca = $this->pecaSelecao($chave);

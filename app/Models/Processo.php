@@ -85,17 +85,6 @@ class Processo extends Model
         ['setor' => 'scp',    'acao' => 'Publicar a Justificativa no site oficial (trâmite externo)'],
     ];
 
-    public const AREAS_TEMATICAS = [
-        'saude'                  => 'Saúde',
-        'educacao'               => 'Educação',
-        'assistencia_social'     => 'Assistência Social',
-        'cultura'                => 'Cultura',
-        'esporte'                => 'Esporte',
-        'meio_ambiente'          => 'Meio Ambiente',
-        'desenvolvimento_economico' => 'Desenvolvimento Econômico',
-        'outra'                  => 'Outra',
-    ];
-
     // Modalidade da seleção — decidida pelo SCP na etapa de análise; define o caminho do processo.
     public const MODALIDADES = [
         'chamamento_publico' => 'Chamamento Público',

@@ -79,7 +79,6 @@ class SelecaoController extends Controller
             Avisos::prazoDeRecursoAberto($chamamento);
         }
 
-
         return redirect()->route('chamamentos.selecao', $chamamento)
             ->with('success', 'Seleção encaminhada para ' . Chamamento::SETORES_SELECAO[$proxSetor] . '.');
     }

@@ -359,11 +359,6 @@ class User extends Authenticatable
         return $query->where('approval_status', 'pendente');
     }
 
-    public function aprovadoPor(): \Illuminate\Database\Eloquent\Relations\BelongsTo
-    {
-        return $this->belongsTo(User::class, 'approved_by');
-    }
-
     public function criadoPor(): \Illuminate\Database\Eloquent\Relations\BelongsTo
     {
         return $this->belongsTo(User::class, 'created_by');

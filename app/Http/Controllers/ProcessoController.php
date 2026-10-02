@@ -20,24 +20,6 @@ class ProcessoController extends Controller
         return view('processos.index', compact('processos'));
     }
 
-    /**
-     * Caixa de entrada do setor do usuário logado.
-     */
-    public function caixa(): View
-    {
-        $setor = auth()->user()->setor;
-        abort_unless($setor, 403, 'Seu usuário não está vinculado a nenhum setor.');
-
-        $processos = Processo::with(['orgao', 'criador'])
-            ->visiveisPara(auth()->user())
-            ->where('setor_atual', $setor)
-            ->where('status', 'em_tramite')
-            ->orderByDesc('updated_at')
-            ->paginate(15);
-
-        return view('processos.caixa', compact('processos', 'setor'));
-    }
-
     public function create(): View
     {
         // UG do próprio usuário (preenchida automaticamente, se cadastrada)

@@ -15,7 +15,7 @@
         ['Portal Público', route('portal.index'), 'site publico cidadao chamamentos abertos', true],
 
         ['Planejamento — Processos', route('processos.index'), 'processo etapa 1 abertura', $u->can('planejamento')],
-        ['Caixa de Entrada', route('processos.caixa'), 'recebidos pendentes meu setor tramitacao', $u->can('planejamento') && $u->setor],
+        ['Caixa de Entrada', route('caixa'), 'recebidos pendentes meu setor tramitacao', $u->can('planejamento') && $u->setor],
         ['Novo Processo', route('processos.create'), 'abrir criar cadastrar processo', $u->can('planejamento')],
 
         ['Chamamentos', route('programas.index'), 'programas edital selecao etapa 2', $u->can('chamamentos')],

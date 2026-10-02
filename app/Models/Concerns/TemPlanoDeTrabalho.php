@@ -141,12 +141,6 @@ trait TemPlanoDeTrabalho
         return $avisos;
     }
 
-    /** Naturezas de despesa aceitas no plano de aplicação. */
-    public static function tiposDeDespesa(): array
-    {
-        return Despesa::NATUREZAS;
-    }
-
     /** Próximo número de uma lista numerada (metas e itens do plano). */
     public function proximoNumero(string $relacao): int
     {

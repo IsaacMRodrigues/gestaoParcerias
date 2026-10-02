@@ -64,12 +64,10 @@
                 ->map(fn ($s) => $pecasDoGrupo->first()->rotuloDoSetor($s))->implode(' e ')
             : $governadas->first()->rotuloDoSetor($etapasTramite[$nEtapa]['setor'] ?? null);
 
-        // Alguma peça deste grupo é minha para fazer agora? Contra-assinar conta:
-        // é a única ação pendente do Termo quando ele espera a OSC.
+        // Alguma peça deste grupo é minha para fazer agora?
         $minhaVez = $pecasDoGrupo->contains(fn ($p) =>
             $p->podePreencher(auth()->user())
-            || $p->podeAssinar(auth()->user())
-            || $p->podeContraAssinar(auth()->user()));
+            || $p->podeAssinar(auth()->user()));
     @endphp
 
     @if($agrupar)
@@ -218,14 +216,11 @@
                                 <p class="text-xs text-gray-400 mt-0.5">
                                     Assinado por {{ $peca->assinanteNome() }} em {{ $peca->dataDaAssinatura()?->format('d/m/Y H:i') }}
                                 </p>
-                                @if($peca->exigeContraAssinatura())
-                                    <p class="text-xs mt-0.5 {{ $peca->contraAssinado() ? 'text-gray-400' : 'text-accent-700' }}">
-                                        @if($peca->contraAssinado())
-                                            Contra-assinado pela OSC — {{ $peca->contraAssinante->name ?? '—' }}
-                                            em {{ $peca->contra_assinado_em->format('d/m/Y H:i') }}
-                                        @else
-                                            Aguardando a contra-assinatura da OSC
-                                        @endif
+                                @if($peca->contraAssinado())
+                                    {{-- Termos anteriores à assinatura em sequência --}}
+                                    <p class="text-xs text-gray-400 mt-0.5">
+                                        Contra-assinado pela OSC — {{ $peca->contraAssinante->name ?? '—' }}
+                                        em {{ $peca->contra_assinado_em->format('d/m/Y H:i') }}
                                     </p>
                                 @endif
                             @elseif($trava)
@@ -351,15 +346,10 @@
 
                     {{-- MODELO: editor rico (brasão + HTML) + assinar --}}
                     @elseif($ehModelo)
-                        {{-- Recolhido por padrão: com várias peças preenchidas e não
-                             assinadas, abrir todas empilhava um editor rico atrás do
-                             outro e a lista virava uma parede de documentos.
-                             A exceção é a vez de contra-assinar — o botão da OSC mora
-                             dentro do documento, e recolhido a tela dizia "aguardando a
-                             contra-assinatura da OSC" sem nada visível em que clicar. --}}
-                        {{-- E fica aberto o documento em que se acabou de salvar ou assinar. --}}
+                        {{-- Recolhido por padrão; abre quando é a vez de assinar como parte
+                             e no documento em que se acabou de salvar ou assinar. --}}
                         @php $assinaComoParte = $peca->podeAssinarComoParte(auth()->user()); @endphp
-                        <details class="mt-2 group" @if($peca->podeContraAssinar(auth()->user()) || $assinaComoParte || (int) session('peca_aberta') === $peca->id) open @endif>
+                        <details class="mt-2 group" @if($assinaComoParte || (int) session('peca_aberta') === $peca->id) open @endif>
                             <summary class="{{ $acao }} {{ $peca->assinado()
                                         ? 'text-gray-600 bg-gray-100 hover:bg-gray-200'
                                         : 'text-brand-800 bg-brand-50 hover:bg-brand-100' }}">
@@ -400,26 +390,6 @@
                                             Contra-assinatura da OSC:
                                             <strong class="font-mono">{{ $peca->codigo_validacao_contra }}</strong>
                                             · <a href="{{ route('validacao.mostrar', $peca->codigo_validacao_contra) }}" target="_blank" class="text-brand-700 font-medium hover:underline">Validar</a>
-                                        </p>
-                                    @endif
-                                    @if($peca->podeContraAssinar(auth()->user()))
-                                        <form action="{{ route('pecas.contra-assinar', $peca) }}" method="POST" class="mt-3"
-                                              data-confirm="Confirma a assinatura deste Termo pela OSC?">
-                                            @csrf @method('PATCH')
-                                            <button type="submit"
-                                                    class="btn btn-primary btn-sm">
-                                                Assinar como OSC (contra-assinatura)
-                                            </button>
-                                        </form>
-                                    {{-- Sem botão, a tela dizia só "aguardando a contra-assinatura
-                                         da OSC" e ninguém sabia o que falta. Agora diz — inclusive
-                                         ao membro da OSC, que vê o Termo mas não o assina. --}}
-                                    @elseif($motivoContra = $peca->motivoNaoPodeContraAssinar(auth()->user()))
-                                        <p class="mt-3 flex items-start gap-2 text-xs text-accent-800 bg-accent-50 border border-accent-200 rounded-lg px-3 py-2">
-                                            <svg class="w-4 h-4 shrink-0 mt-px" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.8">
-                                                <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m9-.75a9 9 0 11-18 0 9 9 0 0118 0zm-9 3.75h.008v.008H12v-.008z"/>
-                                            </svg>
-                                            <span><strong>Assinatura das partes.</strong> {{ $motivoContra }}</span>
                                         </p>
                                     @endif
                                 @elseif($podePreencher)
