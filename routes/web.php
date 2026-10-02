@@ -283,6 +283,7 @@ Route::middleware(['auth', 'staff', 'readonly'])->group(function () {
         // Proposta e plano de trabalho são da OSC (no portal): aqui só ler, analisar e decidir.
         // Para mudar o plano, devolve-se para ajuste ou, na vigência, pede-se alteração.
         Route::resource('propostas', PropostaController::class)->only(['index', 'show']);
+        Route::post('propostas/{proposta}/decidir', [PropostaController::class, 'decidir'])->name('propostas.decidir');
         // Análise dos Arquivos da OSC nesta parceria.
         Route::post('propostas/{proposta}/arquivos-osc/{arquivo}/analisar', [OscArquivoController::class, 'analisar'])
             ->name('propostas.arquivos-osc.analisar');

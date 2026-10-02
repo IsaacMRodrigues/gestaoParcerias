@@ -26,8 +26,13 @@
                 </p>
                 <h1 class="text-2xl font-bold text-gray-900">{{ $proposta->titulo }}</h1>
                 <p class="text-sm text-gray-500 mt-1">
-                    {{ $proposta->chamamento->programa->name }} — {{ $proposta->chamamento->titulo }}
+                    {{ $proposta->chamamento->programa?->orgao?->name }} — {{ $proposta->chamamento->titulo }}
                 </p>
+                @if($proposta->status === 'reprovada' && $proposta->decisao_motivo)
+                    <p class="mt-3 text-sm text-red-800 bg-red-50 border border-red-200 rounded-lg px-3 py-2">
+                        <span class="font-semibold">Motivo da reprovação:</span> {{ $proposta->decisao_motivo }}
+                    </p>
+                @endif
             </div>
             <div class="flex items-center gap-3 shrink-0">
                 @php $color = \App\Models\Proposta::STATUS_COLORS[$proposta->status] ?? 'gray'; @endphp

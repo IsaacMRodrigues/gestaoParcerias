@@ -359,6 +359,7 @@ class User extends Authenticatable
         'osc_arquivos.enviado_por'               => ['arquivo da OSC enviado', 'arquivos da OSC enviados'],
         'osc_arquivo_analises.analisado_por'     => ['arquivo da OSC analisado', 'arquivos da OSC analisados'],
         'propostas.celebracao_gestor_id'         => ['parceria da qual é Gestor', 'parcerias das quais é Gestor'],
+        'propostas.decidida_por'                 => ['proposta decidida', 'propostas decididas'],
         'pecas.criado_por'                       => ['peça criada', 'peças criadas'],
         'ordens_pagamento.assinado_por'          => ['ordem de pagamento assinada', 'ordens de pagamento assinadas'],
         'selecao_tramitacoes.enviado_por'        => ['tramitação da Seleção', 'tramitações da Seleção'],

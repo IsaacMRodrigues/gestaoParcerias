@@ -584,6 +584,20 @@ Trazer os demais cenários para `tests/Feature` é uma das [Pendências](#pendê
 Da mais recente para a mais antiga. Cada entrada diz o que mudou, **por quê** e como foi
 conferido — o porquê é o que falta a quem pega o código depois.
 
+- [2026-10-02] **A UG decide a proposta de dispensa ou inexigibilidade** (`PropostaController::decidir`)
+  - A manifestação deferida como dispensa ou inexigibilidade gera a proposta "Submetida", e ela não passa pela
+    Seleção. O único caminho para aprová-la era a "Decisão Final" do parecer avulso, que saiu no mesmo dia — e a
+    proposta ficava parada. Agora a tela da proposta traz o quadro **Decisão da proposta**: o Responsável da UG da
+    Secretaria do chamamento aprova (a Celebração começa, na etapa 1, com a UG) ou reprova com motivo, que vai
+    para a OSC no e-mail e no portal. Documentos sem conferência ou recusados aparecem como aviso, sem travar.
+    Chamamento público continua decidido pela Seleção
+  - Migração `2026_10_02_100000_decisao_da_proposta_sem_selecao`: `decidida_por`, `decidida_em`, `decisao_motivo`
+    em `propostas` (a primeira entra em `User::AUTORIA_REGISTRADA`)
+  - "Programa" saiu dos dados da proposta e do portal (cabeçalho da inscrição, página e lista de chamamentos); no
+    lugar, a Secretaria
+  - Conferido: `DecisaoDaPropostaSemSelecaoTest` (falha com a trava de quem decide desligada); suíte 180/180; a
+    proposta 30 local mostra o quadro ao Secretário de Obras
+
 - [2026-10-02] **Sai o parecer avulso da proposta, e a diligência com ele**
   - O bloco "Análise da Proposta" (+ Parecer Técnico, + Parecer Jurídico, + Decisão Final) era da primeira fase:
     texto livre, sem documento nem assinatura, e mudava o status da proposta por fora da Seleção (uma "Decisão

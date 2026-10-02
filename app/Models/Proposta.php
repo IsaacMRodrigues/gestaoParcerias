@@ -55,7 +55,7 @@ class Proposta extends Model
         'valor_solicitado', 'valor_proprio', 'valor_outras_fontes',
         'data_inicio_prevista', 'data_fim_prevista', 'vigencia_dias',
         'atuacao_rede', 'rede_cnpj', 'rede_razao_social', 'rede_municipio', 'rede_data_termo',
-        'status', 'submitted_at',
+        'status', 'submitted_at', 'decidida_por', 'decidida_em', 'decisao_motivo',
         'celebracao_etapa', 'celebracao_setor', 'celebracao_partes_concluidas', 'celebracao_gestor_id', 'celebracao_iniciada_em', 'celebracao_concluida_em',
     ];
 
@@ -66,6 +66,7 @@ class Proposta extends Model
             'data_inicio_prevista'    => 'date',
             'data_fim_prevista'       => 'date',
             'submitted_at'            => 'datetime',
+            'decidida_em'             => 'datetime',
             'valor_solicitado'        => 'decimal:2',
             'valor_proprio'           => 'decimal:2',
             'valor_outras_fontes'     => 'decimal:2',
@@ -245,6 +246,26 @@ class Proposta extends Model
     }
 
     /** A OSC ainda pode apresentar documentos? Até o caminho acabar (inclusive na Celebração). */
+    public function decididaPor(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'decidida_por');
+    }
+
+    /** Dispensa ou inexigibilidade não passa pela Seleção: a UG aprova ou reprova na tela da proposta. */
+    public function aguardaDecisaoDaUg(): bool
+    {
+        return $this->chamamento && ! $this->chamamento->temTramiteSelecao()
+            && in_array($this->status, ['submetida', 'em_analise'], true);
+    }
+
+    /** Quem decide é o Responsável da UG da Secretaria do chamamento. */
+    public function podeSerDecididaPor(?User $user): bool
+    {
+        return $user !== null && $this->aguardaDecisaoDaUg()
+            && $user->setor === 'ug' && $user->hasRole('responsavel_unidade_gestora')
+            && $user->orgao_id !== null && $user->orgao_id === $this->chamamento->programa?->orgao_id;
+    }
+
     public function aceitaDocumentosDaOsc(): bool
     {
         return !in_array($this->status, ['reprovada', 'cancelada'], true);

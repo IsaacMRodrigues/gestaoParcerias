@@ -49,7 +49,6 @@
                     </h1>
                     <p class="text-gray-500 mt-1 text-sm">
                         {{ $chamamento->programa->orgao->name }}
-                        &middot; Programa: {{ $chamamento->programa->name }}
                     </p>
                 </div>
 

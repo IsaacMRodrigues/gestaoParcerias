@@ -102,6 +102,56 @@
                 </div>
             @endforeach
 
+            {{-- Dispensa/inexigibilidade não passa pela Seleção: a UG decide aqui. --}}
+            @if($proposta->aguardaDecisaoDaUg())
+                @php
+                    $docsSemConferencia = $proposta->documentos->filter->pendenteDeAnalise()->count();
+                    $docsRecusados      = $proposta->documentos->filter->recusado()->count();
+                @endphp
+                <div class="bg-white rounded-xl border border-accent-200 shadow-sm p-6" x-data="{ reprovar: {{ $errors->has('motivo') ? 'true' : 'false' }} }">
+                    <h3 class="text-base font-semibold text-gray-800">Decisão da proposta</h3>
+                    <p class="text-xs text-gray-500 mt-0.5">
+                        {{ \App\Models\Chamamento::TIPOS[$proposta->chamamento->tipo] ?? 'Dispensa' }} não passa pela Seleção:
+                        a Unidade Gestora aprova, e a Celebração começa, ou reprova, dizendo à OSC o motivo.
+                    </p>
+
+                    @if($proposta->podeSerDecididaPor(auth()->user()))
+                        @if($docsSemConferencia || $docsRecusados)
+                            <p class="mt-3 text-sm text-accent-800 bg-accent-50 border border-accent-200 rounded-lg px-3 py-2">
+                                @if($docsSemConferencia){{ $docsSemConferencia }} documento(s) ainda sem conferência. @endif
+                                @if($docsRecusados){{ $docsRecusados }} documento(s) recusado(s). @endif
+                            </p>
+                        @endif
+
+                        <div class="mt-4 flex flex-wrap items-start gap-3">
+                            <form action="{{ route('propostas.decidir', $proposta) }}" method="POST"
+                                  data-confirm="Aprovar a proposta e iniciar a Celebração?">
+                                @csrf
+                                <input type="hidden" name="decisao" value="aprovar">
+                                <button type="submit" class="btn btn-primary">Aprovar e iniciar a Celebração</button>
+                            </form>
+                            <button type="button" x-show="! reprovar" @click="reprovar = true" class="btn btn-outline">Reprovar</button>
+                        </div>
+
+                        <form x-show="reprovar" x-cloak action="{{ route('propostas.decidir', $proposta) }}" method="POST" class="mt-4 space-y-2"
+                              data-confirm="Reprovar a proposta? A OSC recebe o motivo.">
+                            @csrf
+                            <input type="hidden" name="decisao" value="reprovar">
+                            <x-input-label for="motivo" value="Motivo da reprovação (vai para a OSC) *" />
+                            <textarea id="motivo" name="motivo" rows="3"
+                                      class="block w-full border-gray-300 rounded-lg shadow-sm text-sm focus:ring-brand-500 focus:border-brand-500">{{ old('motivo') }}</textarea>
+                            <x-input-error :messages="$errors->get('motivo')" />
+                            <div class="flex items-center gap-3">
+                                <button type="submit" class="btn btn-danger">Reprovar a proposta</button>
+                                <button type="button" @click="reprovar = false" class="text-sm text-gray-500 hover:text-gray-800">Cancelar</button>
+                            </div>
+                        </form>
+                    @else
+                        <p class="mt-3 text-sm text-gray-600">Aguardando a decisão do Responsável da Unidade Gestora da Secretaria.</p>
+                    @endif
+                </div>
+            @endif
+
             {{-- Dados da Proposta --}}
             <div class="bg-white rounded-xl border border-gray-200 shadow-sm p-6">
                 <h3 class="text-base font-semibold text-gray-800 mb-4">Dados da Proposta</h3>
@@ -115,8 +165,8 @@
                         </dd>
                     </div>
                     <div>
-                        <dt class="text-gray-500">Programa</dt>
-                        <dd class="text-gray-900">{{ $proposta->chamamento->programa->name }}</dd>
+                        <dt class="text-gray-500">Secretaria</dt>
+                        <dd class="text-gray-900">{{ $proposta->chamamento->programa?->orgao?->name ?? '—' }}</dd>
                     </div>
                     <div>
                         <dt class="text-gray-500">OSC</dt>
@@ -129,8 +179,15 @@
                             <span class="px-2 py-1 text-xs font-medium bg-{{ $color }}-100 text-{{ $color }}-800 rounded-full">
                                 {{ \App\Models\Proposta::STATUS[$proposta->status] }}
                             </span>
-                            @if($proposta->submitted_at)
+                            @if($proposta->decidida_em)
+                                <span class="ml-2 text-gray-400 text-xs">
+                                    por {{ $proposta->decididaPor?->name ?? '—' }} em {{ $proposta->decidida_em->format('d/m/Y H:i') }}
+                                </span>
+                            @elseif($proposta->submitted_at)
                                 <span class="ml-2 text-gray-400 text-xs">em {{ $proposta->submitted_at->format('d/m/Y H:i') }}</span>
+                            @endif
+                            @if($proposta->decisao_motivo)
+                                <p class="mt-1 text-xs text-red-800">Motivo: {{ $proposta->decisao_motivo }}</p>
                             @endif
                         </dd>
                     </div>

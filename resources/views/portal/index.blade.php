@@ -77,7 +77,7 @@
                             {{ $chamamento->titulo }}
                         </h2>
                         <p class="text-sm text-gray-600 mt-1">
-                            Programa: <strong>{{ $chamamento->programa->name }}</strong>
+                            Secretaria: <strong>{{ $chamamento->programa->orgao->name ?? '—' }}</strong>
                         </p>
                         @if($chamamento->objeto)
                             <p class="text-sm text-gray-500 mt-2 line-clamp-2">{{ $chamamento->objeto }}</p>

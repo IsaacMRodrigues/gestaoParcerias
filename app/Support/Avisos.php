@@ -433,6 +433,7 @@ class Avisos
                     $p->titulo,
                     $p->chamamento?->titulo,
                     $aprovada ? 'O próximo passo é a Celebração da parceria; o município avisa quando for a vez da organização.' : null,
+                    ! $aprovada && $p->decisao_motivo ? 'Motivo: ' . $p->decisao_motivo : null,
                 ])),
                 url: route('portal.proposta.show', $p),
                 botao: 'Ver a proposta',
