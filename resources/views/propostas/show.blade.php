@@ -111,7 +111,7 @@
                 <div class="bg-white rounded-xl border border-accent-200 shadow-sm p-6" x-data="{ reprovar: {{ $errors->has('motivo') ? 'true' : 'false' }} }">
                     <h3 class="text-base font-semibold text-gray-800">Decisão da proposta</h3>
                     <p class="text-xs text-gray-500 mt-0.5">
-                        {{ \App\Models\Chamamento::TIPOS[$proposta->chamamento->tipo] ?? 'Dispensa' }} não passa pela Seleção:
+                        Proposta não passa pela Seleção:
                         a Unidade Gestora aprova, e a Celebração começa, ou reprova, dizendo à OSC o motivo.
                     </p>
 
