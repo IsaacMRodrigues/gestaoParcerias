@@ -2,14 +2,11 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Despesa;
 use App\Models\ManifestacaoInteresse;
 use App\Models\Orgao;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
-use Illuminate\Validation\Rule;
 use Illuminate\View\View;
 
 /**
@@ -73,22 +70,18 @@ class ManifestacaoController extends Controller
     /** A Secretaria não se escolhe aqui: quem a define é a SCP, ao encaminhar. */
     public function storeProposta(Request $request): RedirectResponse
     {
-        $data = $this->validarDados($request, proposta: true);
-        [$valores, $itens] = $this->validarValoresDaProposta($request);
+        $data = $this->validarDados($request, proposta: true) + $request->validate(
+            ['plano_aplicacao' => ['required', 'string', 'max:1000']],
+            ['plano_aplicacao.required' => 'Descreva o plano de aplicação dos recursos.'],
+        );
 
-        $manifestacao = DB::transaction(function () use ($data, $valores, $itens) {
-            $manifestacao = ManifestacaoInteresse::create($data + $valores + [
-                'tipo'   => 'proposta',
-                'osc_id' => auth()->user()->osc_id,
-                'status' => 'rascunho',
-            ]);
-
-            foreach (array_values($itens) as $n => $item) {
-                $manifestacao->planoItens()->create($item + ['numero' => $n + 1]);
-            }
-
-            return $manifestacao;
-        });
+        // O valor pleiteado e a planilha de itens se lançam no plano de trabalho, na tela seguinte.
+        $manifestacao = ManifestacaoInteresse::create($data + [
+            'tipo'             => 'proposta',
+            'osc_id'           => auth()->user()->osc_id,
+            'status'           => 'rascunho',
+            'valor_solicitado' => 0,
+        ]);
 
         return redirect()->route('portal.manifestacoes.show', $manifestacao)
             ->with('success', 'Proposta criada. Monte o plano de trabalho e anexe a habilitação para enviar.');
@@ -182,32 +175,6 @@ class ManifestacaoController extends Controller
                 . '. A Unidade Gestora — ' . $manifestacao->orgao->name . ' — fará a análise.');
     }
 
-    /**
-     * A planilha do plano de aplicação do primeiro formulário da Nova Proposta. Pode ficar vazia
-     * aqui: o envio é que exige o plano completo.
-     */
-    private function validarValoresDaProposta(Request $request): array
-    {
-        $dados = $request->validate([
-            'itens'                         => ['nullable', 'array', 'max:200'],
-            'itens.*.descricao'             => ['required', 'string', 'max:255'],
-            'itens.*.tipo_despesa'          => ['required', Rule::in(array_keys(Despesa::NATUREZAS))],
-            'itens.*.unidade'               => ['nullable', 'string', 'max:30'],
-            'itens.*.quantidade'            => ['required', 'numeric', 'min:0.01'],
-            'itens.*.valor_unitario'        => ['required', 'numeric', 'min:0'],
-            'itens.*.atividades_vinculadas' => ['nullable', 'string', 'max:255'],
-        ], [
-            'itens.*.descricao.required'      => 'Descreva cada item do plano de aplicação.',
-            'itens.*.valor_unitario.required' => 'Informe o valor unitário de cada item.',
-        ]);
-
-        // O valor pleiteado começa como o total da planilha; a OSC o ajusta no plano.
-        $itens = $dados['itens'] ?? [];
-        $total = collect($itens)->sum(fn ($i) => round((float) $i['quantidade'] * (float) $i['valor_unitario'], 2));
-
-        return [['valor_solicitado' => $total], $itens];
-    }
-
     private function validarDados(Request $request, bool $proposta = false): array
     {
         return $request->validate([
@@ -216,9 +183,9 @@ class ManifestacaoController extends Controller
             'orgao_id'             => $proposta ? ['exclude'] : ['required', 'exists:orgaos,id'],
             'fundamento_pedido'    => ['exclude'],
             'titulo'               => ['required', 'string', 'max:255'],
-            'objeto'               => ['required', 'string'],
-            'justificativa'        => ['required', 'string'],
-            'publico_alvo'         => ['nullable', 'string'],
+            'objeto'               => ['required', 'string', 'max:1000'],
+            'justificativa'        => ['required', 'string', 'max:1000'],
+            'publico_alvo'         => ['nullable', 'string', 'max:1000'],
             // Na Nova Proposta o valor tem validação própria, com a planilha do
             // plano de aplicação: ver validarValoresDaProposta.
             'valor_solicitado'     => $proposta ? ['exclude'] : ['required', 'numeric', 'min:0'],

@@ -581,6 +581,20 @@ Trazer os demais cenários para `tests/Feature` é uma das [Pendências](#pendê
 Da mais recente para a mais antiga. Cada entrada diz o que mudou, **por quê** e como foi
 conferido — o porquê é o que falta a quem pega o código depois.
 
+- [2026-10-07] **Plano de aplicação digitado na Nova Proposta; textos até 1000 caracteres**
+  - No primeiro formulário da Nova Proposta, a planilha de itens deu lugar a um campo de texto, **Plano de
+    aplicação dos recursos** (obrigatório), como Objeto e Justificativa. Valor pleiteado, planilha de itens e
+    desembolso se lançam no plano de trabalho, na tela seguinte; o texto segue editável lá (item 13, "Salvar
+    descrição"), vai junto no deferimento e sai no plano impresso. Campo novo `plano_aplicacao` em
+    `manifestacoes_interesse` e `propostas`
+  - Todos os textos da proposta e do plano aceitam até **1000 caracteres** (validação e `maxlength`): objeto,
+    justificativa, público, realidade, objetivos, metodologia, plano de aplicação, metas (descrição, indicador,
+    meta quantitativa, objetivo, resultados, meios de verificação), atividades, itens da planilha, contrapartidas e
+    equipe. As descrições que eram `varchar(255)` viraram texto. Ficam curtos título (255), unidade, quantidade e
+    carga horária. Nenhum texto gravado (local e produção) passava de 1000
+  - Migração `2026_10_07_100000_textos_do_plano_ate_mil_caracteres`
+  - Conferido: `NovaPropostaTest`, `PlanoDeTrabalhoModeloTest`; suíte 185/185; telas abertas com os dados locais
+
 - [2026-10-07] **Download de documentos em todos os fluxos** (`Peca::podeBaixar`, `App\Support\DocumentoPdf`)
   - Regra: a **SCP** (e o administrador) baixa todos os documentos de todos os fluxos; a **UG** e os demais
     setores, os da própria Secretaria que leem, preenchem ou assinam; a **OSC**, os abertos a ela da própria

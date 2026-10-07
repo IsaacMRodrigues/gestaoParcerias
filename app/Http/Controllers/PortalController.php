@@ -155,8 +155,8 @@ class PortalController extends Controller
 
         $data = $request->validate([
             'titulo'               => ['required', 'string', 'max:255'],
-            'objeto'               => ['required', 'string'],
-            'justificativa'        => ['nullable', 'string'],
+            'objeto'               => ['required', 'string', 'max:1000'],
+            'justificativa'        => ['nullable', 'string', 'max:1000'],
             'valor_solicitado'     => ['required', 'numeric', 'min:0'],
             'data_inicio_prevista' => ['nullable', 'date'],
             'data_fim_prevista'    => ['nullable', 'date', 'after_or_equal:data_inicio_prevista'],

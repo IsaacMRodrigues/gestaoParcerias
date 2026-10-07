@@ -87,6 +87,26 @@ class PlanoDeTrabalhoModeloTest extends TestCase
         $this->assertSame(1000.0, $this->plano->fresh()->load('metas.etapas')->totalDasMetas(), 'item 10: soma das atividades');
     }
 
+    public function test_textos_vao_ate_mil_caracteres(): void
+    {
+        $mil = str_repeat('a', 1000);
+        $demais = str_repeat('a', 1001);
+        $dados = ['titulo' => 'Oficinas', 'objeto' => 'Aulas', 'valor_solicitado' => 5000];
+
+        $this->actingAs($this->rl)->put($this->url(), $dados + ['metodologia' => $mil, 'descricao_realidade' => $mil])->assertSessionHasNoErrors();
+        $this->assertSame(1000, mb_strlen($this->plano->fresh()->metodologia));
+        $this->actingAs($this->rl)->put($this->url(), $dados + ['metodologia' => $demais])->assertSessionHasErrors('metodologia');
+
+        // As descrições que eram de 255 caracteres agora cabem 1000.
+        $this->actingAs($this->rl)->post($this->url('/metas'), ['descricao' => $mil, 'indicador' => $mil])->assertSessionHasNoErrors();
+        $meta = $this->plano->metas()->sole();
+        $this->assertSame(1000, mb_strlen($meta->descricao));
+        $this->actingAs($this->rl)->post($this->url("/metas/{$meta->id}/etapas"), ['descricao' => $mil])->assertSessionHasNoErrors();
+        $this->actingAs($this->rl)->post($this->url("/metas/{$meta->id}/etapas"), ['descricao' => $demais])->assertSessionHasErrors('descricao');
+        $this->actingAs($this->rl)->post($this->url('/itens'), ['descricao' => $mil, 'tipo_despesa' => array_key_first(\App\Models\Despesa::NATUREZAS),
+            'quantidade' => 1, 'valor_unitario' => 10, 'atividades_vinculadas' => $mil])->assertSessionHasNoErrors();
+    }
+
     public function test_desembolso_por_meta_e_parcela(): void
     {
         $meta = $this->plano->criarMeta(['descricao' => 'Meta 1']);

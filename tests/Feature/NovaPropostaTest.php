@@ -64,12 +64,13 @@ class NovaPropostaTest extends TestCase
     {
         $this->actingAs($this->rl)->post('/portal/novas-propostas', [
             'titulo' => 'Oficinas de música',
-            'objeto' => 'x', 'justificativa' => 'x',
-            'itens'       => [['descricao' => 'Instrutor', 'tipo_despesa' => 'servicos_pf', 'quantidade' => 10, 'valor_unitario' => 800]],
+            'objeto' => 'x', 'justificativa' => 'x', 'plano_aplicacao' => 'Instrutor de música, 10 meses.',
         ])->assertSessionHasNoErrors();
 
         $p = ManifestacaoInteresse::where('titulo', 'Oficinas de música')->sole();
-        // O desembolso é por meta (item 11 do modelo): vem na tela seguinte.
+        // Valor, planilha de itens e desembolso por meta vêm na tela seguinte, no plano de trabalho.
+        $p->update(['valor_solicitado' => 8000]);
+        $p->planoItens()->create(['numero' => 1, 'descricao' => 'Instrutor', 'tipo_despesa' => 'servicos_pf', 'quantidade' => 10, 'valor_unitario' => 800]);
         $meta = $p->criarMeta(['descricao' => 'Meta 1']);
         $p->desembolsos()->create(['meta_id' => $meta->id, 'parcela' => 1, 'valor' => 8000]);
         Documento::forceCreate(['manifestacao_id' => $p->id, 'nome_original' => 'estatuto.pdf', 'path' => 'x.pdf',
@@ -101,45 +102,44 @@ class NovaPropostaTest extends TestCase
         $this->actingAs($this->rl)->get('/portal/novas-propostas/nova')->assertOk()
             ->assertDontSee('name="fundamento_pedido"', false)->assertDontSee('name="orgao_id"', false)
             ->assertDontSee('name="valor_solicitado"', false)->assertDontSee('13 – Plano')
-            ->assertSee('Plano de aplicação dos recursos (Anexar planilha)')
+            ->assertSee('name="plano_aplicacao"', false)->assertDontSee('Adicionar item')
             ->assertDontSee('name="valor_proprio"', false)->assertDontSee('Cronograma de desembolso');
 
         // Mesmo que mande, não grava: quem decide é a SCP.
         $this->actingAs($this->rl)->post('/portal/novas-propostas', [
-            'titulo' => 'Tentativa', 'fundamento_pedido' => 'dispensa', 'objeto' => 'x', 'justificativa' => 'x',
+            'titulo' => 'Tentativa', 'fundamento_pedido' => 'dispensa', 'objeto' => 'x', 'justificativa' => 'x', 'plano_aplicacao' => 'x',
         ])->assertSessionHasNoErrors();
         $this->assertNull(ManifestacaoInteresse::where('titulo', 'Tentativa')->value('fundamento_pedido'));
     }
 
-    public function test_o_valor_pleiteado_comeca_como_o_total_da_planilha(): void
+    public function test_o_plano_de_aplicacao_e_digitado_no_primeiro_formulario(): void
     {
         $this->actingAs($this->rl)->post('/portal/novas-propostas', [
-            'titulo' => 'Com valores', 'objeto' => 'x', 'justificativa' => 'x',
-            'valor_solicitado' => '99.999,00', // não vem mais do formulário; se vier, é ignorado
-            'itens' => [
-                ['descricao' => 'Instrutor', 'tipo_despesa' => 'servicos_pf', 'unidade' => 'mês', 'quantidade' => 10, 'valor_unitario' => 1000],
-                ['descricao' => 'Lanche', 'tipo_despesa' => 'auxilio_alimentacao', 'quantidade' => 1, 'valor_unitario' => 1500],
-            ],
+            'titulo' => 'Com plano', 'objeto' => 'x', 'justificativa' => 'x',
+            'plano_aplicacao' => "Instrutor de música por 10 meses.\nLanche para as turmas.",
+            'valor_solicitado' => '99.999,00', // não vem do formulário; se vier, é ignorado
         ])->assertSessionHasNoErrors();
 
-        $p = ManifestacaoInteresse::where('titulo', 'Com valores')->sole();
-        $this->assertSame('11500.00', $p->valor_solicitado);
-        $this->assertSame(['Instrutor', 'Lanche'], $p->planoItens()->orderBy('numero')->pluck('descricao')->all());
-        $this->assertSame(11500.0, $p->fresh()->totalPlanoAplicacao());
-        $this->assertSame(0, $p->desembolsos()->count(), 'o desembolso é por meta, na tela seguinte');
+        $p = ManifestacaoInteresse::where('titulo', 'Com plano')->sole();
+        $this->assertSame("Instrutor de música por 10 meses.\nLanche para as turmas.", $p->plano_aplicacao);
+        $this->assertSame('0.00', $p->valor_solicitado, 'o valor se lança no plano de trabalho');
+        $this->assertSame(0, $p->planoItens()->count());
+
+        // O texto segue editável no plano (item 13) e aparece nele.
+        $this->actingAs($this->rl)->put("/portal/manifestacoes/{$p->id}/plano/aplicacao", ['plano_aplicacao' => 'Revisto.'])
+            ->assertSessionHasNoErrors();
+        $this->assertSame('Revisto.', $p->fresh()->plano_aplicacao);
     }
 
-    public function test_com_linha_incompleta_nao_cria(): void
+    public function test_sem_plano_de_aplicacao_ou_com_texto_acima_de_mil_caracteres_nao_cria(): void
     {
         $base = ['titulo' => 'Incompleta', 'objeto' => 'x', 'justificativa' => 'x'];
 
-        $this->actingAs($this->rl)->post('/portal/novas-propostas', $base + [
-            'itens'            => [['descricao' => '', 'tipo_despesa' => 'material_consumo', 'quantidade' => 1, 'valor_unitario' => 10]],
-        ])->assertSessionHasErrors(['itens.0.descricao']);
-        // "Outros" era da lista antiga: não se escolhe mais.
-        $this->actingAs($this->rl)->post('/portal/novas-propostas', $base + [
-            'itens'            => [['descricao' => 'x', 'tipo_despesa' => 'outros', 'quantidade' => 1, 'valor_unitario' => 10]],
-        ])->assertSessionHasErrors(['itens.0.tipo_despesa']);
+        $this->actingAs($this->rl)->post('/portal/novas-propostas', $base)->assertSessionHasErrors('plano_aplicacao');
+        $this->actingAs($this->rl)->post('/portal/novas-propostas', $base + ['plano_aplicacao' => str_repeat('a', 1001)])
+            ->assertSessionHasErrors('plano_aplicacao');
+        $this->actingAs($this->rl)->post('/portal/novas-propostas', ['objeto' => str_repeat('a', 1001), 'plano_aplicacao' => 'x'] + $base)
+            ->assertSessionHasErrors('objeto');
 
         $this->assertSame(0, ManifestacaoInteresse::where('titulo', 'Incompleta')->count());
     }

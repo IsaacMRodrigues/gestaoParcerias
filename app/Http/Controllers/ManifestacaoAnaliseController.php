@@ -163,6 +163,7 @@ class ManifestacaoAnaliseController extends Controller
                 'objetivos'            => $manifestacao->objetivos,
                 'objetivos_especificos' => $manifestacao->objetivos_especificos,
                 'metodologia'          => $manifestacao->metodologia,
+                'plano_aplicacao'      => $manifestacao->plano_aplicacao,
                 'valor_solicitado'     => $manifestacao->valor_solicitado,
                 // A contrapartida é opcional na manifestação e obrigatória na
                 // proposta: sem contrapartida declarada, é zero.

@@ -25,6 +25,7 @@ class PlanoTrabalhoController extends Controller
         )->defaults('tipo', $tipo)->name($nome . '.' . $sufixo);
 
         $r('atualizar',        'put',    '',                                  'atualizar');
+        $r('atualizarAplicacao', 'put',  '/aplicacao',                        'aplicacao');
         $r('storeMeta',        'post',   '/metas',                            'metas.store');
         $r('destroyMeta',      'delete', '/metas/{meta}',                     'metas.destroy');
         $r('storeEtapa',       'post',   '/metas/{meta}/etapas',              'etapas.store');
@@ -50,22 +51,32 @@ class PlanoTrabalhoController extends Controller
         // constam do modelo: saíram da tela, e o que já estava gravado fica.
         $data = $request->validate([
             'titulo'                => ['required', 'string', 'max:255'],
-            'objeto'                => ['required', 'string'],
-            'publico_alvo'          => ['nullable', 'string'],
+            'objeto'                => ['required', 'string', 'max:1000'],
+            'publico_alvo'          => ['nullable', 'string', 'max:1000'],
             'vigencia_dias'         => ['nullable', 'integer', 'min:1', 'max:3650'],
             'data_inicio_prevista'  => ['nullable', 'date'],
             'data_fim_prevista'     => ['nullable', 'date', 'after_or_equal:data_inicio_prevista'],
             'valor_solicitado'      => ['required', 'numeric', 'min:0'],
-            'descricao_realidade'   => ['nullable', 'string'],
-            'objetivos'             => ['nullable', 'string'],
-            'objetivos_especificos' => ['nullable', 'string'],
-            'metodologia'           => ['nullable', 'string'],
-            'justificativa'         => ['nullable', 'string'],
+            'descricao_realidade'   => ['nullable', 'string', 'max:1000'],
+            'objetivos'             => ['nullable', 'string', 'max:1000'],
+            'objetivos_especificos' => ['nullable', 'string', 'max:1000'],
+            'metodologia'           => ['nullable', 'string', 'max:1000'],
+            'justificativa'         => ['nullable', 'string', 'max:1000'],
         ]);
 
         $dono->update($data);
 
         return back()->with('success', 'Plano de trabalho atualizado.');
+    }
+
+    /** O texto do plano de aplicação dos recursos (item 13), à parte da planilha de itens. */
+    public function atualizarAplicacao(Request $request): RedirectResponse
+    {
+        $this->donoEditavel($request)->update($request->validate([
+            'plano_aplicacao' => ['nullable', 'string', 'max:1000'],
+        ]));
+
+        return back()->with('success', 'Plano de aplicação atualizado.');
     }
 
     // ----------------------------------------------------------------- metas
@@ -78,12 +89,12 @@ class PlanoTrabalhoController extends Controller
         // (qualitativos e quantitativos), resultados esperados e meios de
         // verificação. As atividades são lançadas na própria meta.
         $dono->criarMeta($request->validate([
-            'objetivo_especifico'  => ['nullable', 'string'],
-            'descricao'            => ['required', 'string', 'max:255'],
-            'indicador'            => ['nullable', 'string', 'max:255'],
-            'meta_quantitativa'    => ['nullable', 'string', 'max:255'],
-            'resultados_esperados' => ['nullable', 'string'],
-            'meios_verificacao'    => ['nullable', 'string'],
+            'objetivo_especifico'  => ['nullable', 'string', 'max:1000'],
+            'descricao'            => ['required', 'string', 'max:1000'],
+            'indicador'            => ['nullable', 'string', 'max:1000'],
+            'meta_quantitativa'    => ['nullable', 'string', 'max:1000'],
+            'resultados_esperados' => ['nullable', 'string', 'max:1000'],
+            'meios_verificacao'    => ['nullable', 'string', 'max:1000'],
         ]));
 
         return back()->with('success', 'Meta adicionada.');
@@ -106,7 +117,7 @@ class PlanoTrabalhoController extends Controller
         // Atividade da meta, com o período e o estimado do item 10 do modelo
         // (cronograma de execução física e financeira).
         $meta->etapas()->create($request->validate([
-            'descricao'   => ['required', 'string', 'max:255'],
+            'descricao'   => ['required', 'string', 'max:1000'],
             'data_inicio' => ['nullable', 'date'],
             'data_fim'    => ['nullable', 'date', 'after_or_equal:data_inicio'],
             'valor'       => ['nullable', 'numeric', 'min:0'],
@@ -132,12 +143,12 @@ class PlanoTrabalhoController extends Controller
         $dono = $this->donoEditavel($request);
 
         $dados = $request->validate([
-            'descricao'             => ['required', 'string', 'max:255'],
+            'descricao'             => ['required', 'string', 'max:1000'],
             'tipo_despesa'          => ['required', Rule::in(array_keys(Despesa::NATUREZAS))],
             'unidade'               => ['nullable', 'string', 'max:30'],
             'quantidade'            => ['required', 'numeric', 'min:0.01'],
             'valor_unitario'        => ['required', 'numeric', 'min:0'],
-            'atividades_vinculadas' => ['nullable', 'string', 'max:255'],
+            'atividades_vinculadas' => ['nullable', 'string', 'max:1000'],
         ]);
 
         $dono->planoItens()->create($dados + ['numero' => $dono->proximoNumero('planoItens')]);
@@ -201,7 +212,7 @@ class PlanoTrabalhoController extends Controller
         $dono = $this->donoEditavel($request);
 
         $dono->contrapartidas()->create($request->validate([
-            'descricao'  => ['required', 'string', 'max:255'],
+            'descricao'  => ['required', 'string', 'max:1000'],
             'quantidade' => ['nullable', 'string', 'max:100'],
         ]) + ['numero' => $dono->proximoNumero('contrapartidas')]);
 
@@ -224,8 +235,8 @@ class PlanoTrabalhoController extends Controller
         $dono = $this->donoEditavel($request);
 
         $dono->equipe()->create($request->validate([
-            'cargo_funcao'         => ['required', 'string', 'max:255'],
-            'formacao'             => ['nullable', 'string', 'max:255'],
+            'cargo_funcao'         => ['required', 'string', 'max:1000'],
+            'formacao'             => ['nullable', 'string', 'max:1000'],
             'carga_horaria_mensal' => ['nullable', 'string', 'max:50'],
             'vinculo'              => ['required', Rule::in(array_keys(PlanoEquipe::VINCULOS))],
         ]));

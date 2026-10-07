@@ -50,12 +50,12 @@
                         </div>
                         <div class="sm:col-span-2">
                             <x-input-label for="objeto" value="Objeto de execução *" />
-                            <textarea name="objeto" id="objeto" rows="2" required class="{{ $campo }}">{{ old('objeto', $dono->objeto) }}</textarea>
+                            <textarea name="objeto" maxlength="1000" id="objeto" rows="2" required class="{{ $campo }}">{{ old('objeto', $dono->objeto) }}</textarea>
                             <x-input-error :messages="$errors->get('objeto')" class="mt-1" />
                         </div>
                         <div class="sm:col-span-2">
                             <x-input-label for="publico_alvo" value="Público alvo" />
-                            <textarea name="publico_alvo" id="publico_alvo" rows="2" class="{{ $campo }}">{{ old('publico_alvo', $dono->publico_alvo) }}</textarea>
+                            <textarea name="publico_alvo" maxlength="1000" id="publico_alvo" rows="2" class="{{ $campo }}">{{ old('publico_alvo', $dono->publico_alvo) }}</textarea>
                         </div>
                         <div class="sm:col-span-2">
                             <span class="block text-sm font-medium text-gray-700">Duração execução</span>
@@ -91,7 +91,7 @@
 
                 <div>
                     <x-input-label for="descricao_realidade" value="3 – Descrição da realidade (por que o projeto deve ser implementado?)" />
-                    <textarea name="descricao_realidade" id="descricao_realidade" rows="4" class="{{ $campo }}">{{ old('descricao_realidade', $dono->descricao_realidade) }}</textarea>
+                    <textarea name="descricao_realidade" maxlength="1000" id="descricao_realidade" rows="4" class="{{ $campo }}">{{ old('descricao_realidade', $dono->descricao_realidade) }}</textarea>
                 </div>
 
                 <div>
@@ -100,11 +100,11 @@
                     <div class="grid sm:grid-cols-2 gap-4">
                         <div>
                             <x-input-label for="objetivos" value="Geral" />
-                            <textarea name="objetivos" id="objetivos" rows="3" class="{{ $campo }}">{{ old('objetivos', $dono->objetivos) }}</textarea>
+                            <textarea name="objetivos" maxlength="1000" id="objetivos" rows="3" class="{{ $campo }}">{{ old('objetivos', $dono->objetivos) }}</textarea>
                         </div>
                         <div>
                             <x-input-label for="objetivos_especificos" value="Específicos" />
-                            <textarea name="objetivos_especificos" id="objetivos_especificos" rows="3" class="{{ $campo }}">{{ old('objetivos_especificos', $dono->objetivos_especificos) }}</textarea>
+                            <textarea name="objetivos_especificos" maxlength="1000" id="objetivos_especificos" rows="3" class="{{ $campo }}">{{ old('objetivos_especificos', $dono->objetivos_especificos) }}</textarea>
                         </div>
                     </div>
                 </div>
@@ -114,7 +114,7 @@
                     <p class="text-xs text-gray-400">
                         Como o projeto vai alcançar seus objetivos? Descrever as estratégias e técnicas que serão empregadas.
                     </p>
-                    <textarea name="metodologia" id="metodologia" rows="4" class="{{ $campo }}">{{ old('metodologia', $dono->metodologia) }}</textarea>
+                    <textarea name="metodologia" maxlength="1000" id="metodologia" rows="4" class="{{ $campo }}">{{ old('metodologia', $dono->metodologia) }}</textarea>
                 </div>
 
                 <div>
@@ -124,7 +124,7 @@
                         beneficiários do projeto, devendo ser demonstrado o nexo entre essa realidade e a atividade e
                         metas a serem atingidas.
                     </p>
-                    <textarea name="justificativa" id="justificativa" rows="4" class="{{ $campo }}">{{ old('justificativa', $dono->justificativa) }}</textarea>
+                    <textarea name="justificativa" maxlength="1000" id="justificativa" rows="4" class="{{ $campo }}">{{ old('justificativa', $dono->justificativa) }}</textarea>
                 </div>
 
                 <button class="btn btn-primary">Salvar plano</button>
@@ -201,7 +201,7 @@
                             @csrf
                             <div class="sm:col-span-6">
                                 <label class="block text-xs text-gray-500">Nova atividade desta meta *</label>
-                                <input type="text" name="descricao" required maxlength="255" placeholder="Tarefa que será executada para alcançar a meta"
+                                <input type="text" name="descricao" required maxlength="1000" placeholder="Tarefa que será executada para alcançar a meta"
                                        class="{{ $campo }}">
                             </div>
                             <div class="sm:col-span-2">
@@ -233,29 +233,29 @@
                 @csrf
                 <div class="sm:col-span-2">
                     <x-input-label for="meta_objetivo" value="Objetivo específico (conforme já descrito no item 4)" />
-                    <input type="text" name="objetivo_especifico" id="meta_objetivo" class="{{ $campo }}">
+                    <input type="text" name="objetivo_especifico" maxlength="1000" id="meta_objetivo" class="{{ $campo }}">
                 </div>
                 <div class="sm:col-span-2">
                     <x-input-label for="meta_descricao" value="Nova meta *" />
                     <p class="text-xs text-gray-400">Marco concreto, expressando quantidades e/ou qualidades.</p>
-                    <input type="text" name="descricao" id="meta_descricao" required maxlength="255" class="{{ $campo }}">
+                    <input type="text" name="descricao" id="meta_descricao" required maxlength="1000" class="{{ $campo }}">
                     <x-input-error :messages="$errors->get('descricao')" class="mt-1" />
                 </div>
                 <div>
                     <x-input-label for="meta_indicador" value="Indicadores qualitativos" />
-                    <input type="text" name="indicador" id="meta_indicador" maxlength="255" class="{{ $campo }}">
+                    <input type="text" name="indicador" id="meta_indicador" maxlength="1000" class="{{ $campo }}">
                 </div>
                 <div>
                     <x-input-label for="meta_quantitativa" value="Indicadores quantitativos" />
-                    <input type="text" name="meta_quantitativa" id="meta_quantitativa" maxlength="255" class="{{ $campo }}">
+                    <input type="text" name="meta_quantitativa" id="meta_quantitativa" maxlength="1000" class="{{ $campo }}">
                 </div>
                 <div>
                     <x-input-label for="meta_resultados" value="Resultados esperados" />
-                    <input type="text" name="resultados_esperados" id="meta_resultados" class="{{ $campo }}">
+                    <input type="text" name="resultados_esperados" maxlength="1000" id="meta_resultados" class="{{ $campo }}">
                 </div>
                 <div>
                     <x-input-label for="meta_meios" value="Meios de verificação (comprovantes da realização)" />
-                    <input type="text" name="meios_verificacao" id="meta_meios" class="{{ $campo }}">
+                    <input type="text" name="meios_verificacao" maxlength="1000" id="meta_meios" class="{{ $campo }}">
                 </div>
                 <div class="sm:col-span-2">
                     <button class="btn btn-secondary btn-sm">Adicionar meta</button>
@@ -305,7 +305,7 @@
                 @csrf
                 <div class="sm:col-span-2">
                     <x-input-label for="cp_descricao" value="Descrição *" />
-                    <input type="text" name="descricao" id="cp_descricao" required maxlength="255" class="{{ $campo }}">
+                    <input type="text" name="descricao" id="cp_descricao" required maxlength="1000" class="{{ $campo }}">
                 </div>
                 <div>
                     <x-input-label for="cp_quantidade" value="Quantidade" />
@@ -533,11 +533,11 @@
                 @csrf
                 <div>
                     <x-input-label for="equipe_cargo" value="Cargo/função *" />
-                    <input type="text" name="cargo_funcao" id="equipe_cargo" required maxlength="255" class="{{ $campo }}">
+                    <input type="text" name="cargo_funcao" id="equipe_cargo" required maxlength="1000" class="{{ $campo }}">
                 </div>
                 <div>
                     <x-input-label for="equipe_formacao" value="Formação profissional" />
-                    <input type="text" name="formacao" id="equipe_formacao" maxlength="255" class="{{ $campo }}">
+                    <input type="text" name="formacao" id="equipe_formacao" maxlength="1000" class="{{ $campo }}">
                 </div>
                 <div>
                     <x-input-label for="equipe_carga" value="Carga horária mensal" />
@@ -564,6 +564,18 @@
         <p class="text-xs text-gray-400 mt-0.5 mb-4">
             A natureza de cada item alimenta o item 9, e é a mesma usada na execução e na prestação de contas.
         </p>
+
+        @if($podeEditar)
+            <form action="{{ route($rota . '.aplicacao', $id) }}" method="POST" class="mb-5 space-y-2">
+                @csrf @method('PUT')
+                <x-input-label for="plano_aplicacao" value="Descrição do plano de aplicação" />
+                <textarea name="plano_aplicacao" id="plano_aplicacao" rows="4" maxlength="1000" class="{{ $campo }}">{{ old('plano_aplicacao', $dono->plano_aplicacao) }}</textarea>
+                <x-input-error :messages="$errors->get('plano_aplicacao')" />
+                <button type="submit" class="btn btn-secondary btn-sm">Salvar descrição</button>
+            </form>
+        @elseif(filled($dono->plano_aplicacao))
+            <p class="mb-5 text-sm text-gray-700 whitespace-pre-line">{{ $dono->plano_aplicacao }}</p>
+        @endif
 
         <div class="overflow-x-auto">
             <table class="min-w-full text-sm">
@@ -622,7 +634,7 @@
                 @csrf
                 <div class="sm:col-span-2">
                     <x-input-label for="item_descricao" value="Descrição *" />
-                    <input type="text" name="descricao" id="item_descricao" required maxlength="255" class="{{ $campo }}">
+                    <input type="text" name="descricao" id="item_descricao" required maxlength="1000" class="{{ $campo }}">
                 </div>
                 <div>
                     <x-input-label for="tipo_despesa" value="Natureza da despesa *" />
@@ -646,7 +658,7 @@
                 </div>
                 <div class="sm:col-span-2">
                     <x-input-label for="item_atividades" value="Atividades vinculadas" />
-                    <input type="text" name="atividades_vinculadas" id="item_atividades" maxlength="255" class="{{ $campo }}">
+                    <input type="text" name="atividades_vinculadas" id="item_atividades" maxlength="1000" class="{{ $campo }}">
                 </div>
                 <div class="sm:col-span-3">
                     <button class="btn btn-secondary btn-sm">Adicionar item</button>

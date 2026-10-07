@@ -39,6 +39,7 @@
         '4 – Objetivos — Específicos' => $dono->objetivos_especificos,
         '5 – Metodologia'            => $dono->metodologia,
         '6 – Diagnóstico/Justificativa' => $dono->justificativa,
+        '13 – Plano de aplicação dos recursos' => $dono->plano_aplicacao,
     ] as $rotulo => $valor)
         <div>
             <dt class="font-medium text-gray-700">{{ $rotulo }}</dt>

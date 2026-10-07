@@ -30,7 +30,7 @@
 
                 <div>
                     <label for="objeto" class="block text-sm font-medium text-gray-700 mb-1">Objeto da Proposta *</label>
-                    <textarea id="objeto" name="objeto" rows="3" required
+                    <textarea id="objeto" name="objeto" maxlength="1000" rows="3" required
                               placeholder="Descreva o que sua organização irá realizar com este parceria..."
                               class="block w-full border-gray-300 rounded-lg shadow-sm focus:ring-brand-500 focus:border-brand-500 text-sm @error('objeto') border-red-300 @enderror">{{ old('objeto') }}</textarea>
                     @error('objeto') <p class="text-red-600 text-xs mt-1">{{ $message }}</p> @enderror
@@ -38,7 +38,7 @@
 
                 <div>
                     <label for="justificativa" class="block text-sm font-medium text-gray-700 mb-1">Justificativa</label>
-                    <textarea id="justificativa" name="justificativa" rows="3"
+                    <textarea id="justificativa" name="justificativa" maxlength="1000" rows="3"
                               placeholder="Por que sua organização é adequada para este chamamento?"
                               class="block w-full border-gray-300 rounded-lg shadow-sm focus:ring-brand-500 focus:border-brand-500 text-sm">{{ old('justificativa') }}</textarea>
                 </div>

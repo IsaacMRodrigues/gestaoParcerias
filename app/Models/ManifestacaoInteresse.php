@@ -28,7 +28,7 @@ class ManifestacaoInteresse extends Model
     protected $fillable = [
         'tipo', 'protocolo', 'fundamento_pedido',
         'osc_id', 'orgao_id', 'titulo', 'objeto', 'justificativa', 'publico_alvo',
-        'descricao_realidade', 'objetivos', 'objetivos_especificos', 'metodologia', 'valor_outras_fontes', 'vigencia_dias',
+        'descricao_realidade', 'objetivos', 'objetivos_especificos', 'metodologia', 'plano_aplicacao', 'valor_outras_fontes', 'vigencia_dias',
         'atuacao_rede', 'rede_cnpj', 'rede_razao_social', 'rede_municipio', 'rede_data_termo',
         'valor_solicitado', 'valor_proprio', 'data_inicio_prevista', 'data_fim_prevista',
         'status', 'setor_atual', 'submetida_em',

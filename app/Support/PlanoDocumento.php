@@ -269,6 +269,7 @@ class PlanoDocumento
     private static function planoDeAplicacao(Proposta $p): string
     {
         $html = '<p><strong>13 – Plano de aplicação dos recursos (Planilha anexa)</strong></p>'
+            . (filled($p->plano_aplicacao) ? '<p>' . self::paragrafo($p->plano_aplicacao) . '</p>' : '')
             . '<p><strong>Campo reservado ao ordenador de despesa (PMSGRA)</strong></p>'
             . self::quadro([
                 'Secretaria municipal' => $p->chamamento?->programa?->orgao?->name,
