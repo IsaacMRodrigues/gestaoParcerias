@@ -13,6 +13,7 @@ class InstrumentoController extends Controller
     public function index(): View
     {
         $instrumentos = Instrumento::with(['proposta.osc', 'proposta.chamamento.programa.orgao'])
+            ->visiveisPara(auth()->user())
             ->orderBy('created_at', 'desc')
             ->paginate(15);
 

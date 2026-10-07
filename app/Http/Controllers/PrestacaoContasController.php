@@ -65,6 +65,7 @@ class PrestacaoContasController extends Controller
 
         $prestacoes = PrestacaoContas::with(['instrumento.proposta.osc'])
             ->when($oscId, fn ($q) => $q->whereHas('instrumento.proposta', fn ($p) => $p->where('osc_id', $oscId)))
+            ->unless($oscId, fn ($q) => $q->whereHas('instrumento', fn ($i) => $i->visiveisPara(auth()->user())))
             ->latest('periodo_fim')
             ->get();
 
@@ -73,6 +74,7 @@ class PrestacaoContasController extends Controller
         $instrumentos = Instrumento::with('proposta.osc')
             ->whereIn('status', ['vigente', 'assinado', 'encerrado'])
             ->when($oscId, fn ($q) => $q->whereHas('proposta', fn ($p) => $p->where('osc_id', $oscId)))
+            ->unless($oscId, fn ($q) => $q->visiveisPara(auth()->user()))
             ->get();
 
         return view('prestacao-contas.index', compact('prestacoes', 'instrumentos', 'oscId'));

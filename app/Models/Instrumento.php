@@ -62,6 +62,12 @@ class Instrumento extends Model
         return str_pad((string) ($maior + 1), 3, '0', STR_PAD_LEFT) . '/' . $ano;
     }
 
+    /** Instrumentos que o servidor vê: os da sua Secretaria (setores transversais e administração, todos). */
+    public function scopeVisiveisPara($query, User $user)
+    {
+        return $user->podeVerTodosOrgaos() ? $query : $query->whereHas('proposta', fn ($p) => $p->visiveisPara($user));
+    }
+
     public function proposta(): BelongsTo
     {
         return $this->belongsTo(Proposta::class);

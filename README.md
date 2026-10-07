@@ -586,6 +586,15 @@ Trazer os demais cenários para `tests/Feature` é uma das [Pendências](#pendê
 Da mais recente para a mais antiga. Cada entrada diz o que mudou, **por quê** e como foi
 conferido — o porquê é o que falta a quem pega o código depois.
 
+- [2026-10-07] **Listas só com o que é da Secretaria** (`Instrumento::visiveisPara`, `Chamamento::visiveisPara`)
+  - A tela de cada instrumento já barrava a UG de outra Secretaria ("Acesso restrito"), mas as **listas** mostravam
+    tudo: Instrumentos, Execução, Prestação de Contas (para servidor) e Chamamentos, além da busca do topo e dos
+    números do painel (processos, chamamentos, propostas, instrumentos). Agora todas usam o mesmo recorte das
+    telas — a UG vê o da sua Secretaria; a SCP, os setores transversais e a administração, tudo
+  - Três ordenações e a lista de anos da Transparência usavam funções só do MySQL (`FIELD`, `YEAR`), o que
+    impedia testá-las; passaram a SQL comum (`CASE`) e a cálculo no PHP. Sem mudança na produção
+  - Conferido: `ListasPorSecretariaTest` (falha com o filtro da Execução desligado); suíte 189/189; 435 telas sem erro
+
 - [2026-10-07] **Limpeza, otimização e testes antes do deploy**
   - Sem uso, saíram: o componente `nav-link`, as constantes `Programa::TIPOS`/`STATUS` e `Tramitacao::STATUS`,
     as regras de exclusão de programa (não há mais tela que exclua), os status de proposta "Em Negociação" e

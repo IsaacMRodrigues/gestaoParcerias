@@ -285,6 +285,12 @@ class Chamamento extends Model
     }
 
     /** O trâmite da Seleção só existe no Chamamento Público. */
+    /** A versão de visivelPara() para as listas. */
+    public function scopeVisiveisPara($query, User $user)
+    {
+        return $user->podeVerTodosOrgaos() ? $query : $query->whereHas('programa', fn ($p) => $p->where('orgao_id', $user->orgao_id));
+    }
+
     /** O servidor vê o chamamento da sua Secretaria; setores transversais e administração, todos. */
     public function visivelPara(User $user): bool
     {

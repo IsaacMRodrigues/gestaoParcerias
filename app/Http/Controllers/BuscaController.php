@@ -60,7 +60,7 @@ class BuscaController extends Controller
         }
 
         if ($user->can('chamamentos')) {
-            $grupos[] = $this->grupo('Chamamentos', 'chamamento', Chamamento::query()
+            $grupos[] = $this->grupo('Chamamentos', 'chamamento', Chamamento::visiveisPara($user)
                 ->where(fn ($q) => $q->where('numero', 'like', $like)
                     ->orWhere('titulo', 'like', $like)
                     ->orWhere('objeto', 'like', $like))
@@ -73,7 +73,7 @@ class BuscaController extends Controller
         }
 
         if ($user->can('formalizacao')) {
-            $grupos[] = $this->grupo('Instrumentos', 'instrumento', Instrumento::query()
+            $grupos[] = $this->grupo('Instrumentos', 'instrumento', Instrumento::visiveisPara($user)
                 ->with('proposta.osc')
                 ->where(fn ($q) => $q->where('numero', 'like', $like)
                     ->orWhere('objeto', 'like', $like)

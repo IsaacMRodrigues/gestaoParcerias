@@ -9,23 +9,23 @@
 
     $u = auth()->user();
 
-    $processosTotal   = Processo::count();
-    $processosTramite = Processo::where('status', 'em_tramite')->count();
+    $processosTotal   = Processo::visiveisPara($u)->count();
+    $processosTramite = Processo::visiveisPara($u)->where('status', 'em_tramite')->count();
 
     // Pendências dos três trâmites, pela Caixa de Entrada.
     $minhaCaixa = $u->setor ? \App\Support\CaixaDeEntrada::para($u) : null;
 
-    $chamamentosTotal   = Chamamento::count();
-    $chamamentosAbertos = Chamamento::whereIn('status', ['publicado', 'em_inscricao'])->count();
+    $chamamentosTotal   = Chamamento::visiveisPara($u)->count();
+    $chamamentosAbertos = Chamamento::visiveisPara($u)->whereIn('status', ['publicado', 'em_inscricao'])->count();
 
-    $propostasTotal = Proposta::count();
+    $propostasTotal = Proposta::visiveisPara($u)->count();
     // Contava só 'em_analise', então a proposta recém-submetida — o trabalho
     // que mais espera alguém — ficava fora do número e o card marcava zero com
     // proposta parada na fila. As duas situações são pendência da UG.
-    $propostasAnalise = Proposta::whereIn('status', ['submetida', 'em_analise'])->count();
+    $propostasAnalise = Proposta::visiveisPara($u)->whereIn('status', ['submetida', 'em_analise'])->count();
 
-    $instrumentosTotal    = Instrumento::count();
-    $instrumentosVigentes = Instrumento::where('status', 'vigente')->count();
+    $instrumentosTotal    = Instrumento::visiveisPara($u)->count();
+    $instrumentosVigentes = Instrumento::visiveisPara($u)->where('status', 'vigente')->count();
 
     // Manifestações esperando o município, no recorte por Secretaria.
     $manifestacoesFila  = ManifestacaoInteresse::visiveisPara($u)->emTramite()->count();

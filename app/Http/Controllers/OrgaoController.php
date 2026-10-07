@@ -24,7 +24,7 @@ class OrgaoController extends Controller
         $semOrgao = User::whereNull('orgao_id')
             ->whereNull('osc_id')
             ->with('roles')
-            ->orderByRaw("FIELD(setor,'ti','scp','seplan','pj','pm')")
+            ->orderByRaw("CASE setor WHEN 'ti' THEN 1 WHEN 'scp' THEN 2 WHEN 'seplan' THEN 3 WHEN 'pj' THEN 4 WHEN 'pm' THEN 5 ELSE 6 END")
             ->orderBy('name')
             ->get();
 

@@ -16,7 +16,7 @@ class PortalController extends Controller
     {
         $chamamentos = Chamamento::with(['programa.orgao'])
             ->whereIn('status', ['publicado', 'em_inscricao'])
-            ->orderByRaw("FIELD(status, 'em_inscricao', 'publicado')")
+            ->orderByRaw("CASE status WHEN 'em_inscricao' THEN 1 WHEN 'publicado' THEN 2 ELSE 3 END")
             ->orderByDesc('data_publicacao')
             ->orderBy('data_fim_inscricao')
             ->paginate(12);
@@ -53,9 +53,9 @@ class PortalController extends Controller
 
         $exercicios = Instrumento::whereIn('status', ['assinado', 'vigente', 'encerrado'])
             ->whereNotNull('data_assinatura')
-            ->selectRaw('DISTINCT YEAR(data_assinatura) AS ano')
-            ->orderByDesc('ano')
-            ->pluck('ano');
+            ->pluck('data_assinatura')
+            ->map(fn ($data) => $data->year)
+            ->unique()->sortDesc()->values();
 
         return view('portal.transparencia', compact('instrumentos', 'filtros', 'totais', 'exercicios'));
     }

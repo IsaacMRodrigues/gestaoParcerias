@@ -31,6 +31,7 @@ class ChamamentoController extends Controller
             : 'abertos';
 
         $chamamentos = Chamamento::with(['programa.orgao', 'processo'])
+            ->visiveisPara($request->user())
             ->when($filtros['busca'] ?? null, fn ($q, $busca) => $q->where(fn ($sub) => $sub
                 ->where('numero', 'like', "%{$busca}%")
                 ->orWhere('titulo', 'like', "%{$busca}%")

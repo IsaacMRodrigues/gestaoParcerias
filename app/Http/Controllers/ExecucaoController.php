@@ -20,6 +20,7 @@ class ExecucaoController extends Controller
         $filtros = $request->only(['busca', 'status']);
 
         $instrumentos = Instrumento::with(['proposta.osc'])
+            ->visiveisPara($request->user())
             ->withSum('repasses as total_repassado', 'valor')
             ->withSum('despesas as total_gasto', 'valor')
             // só faz sentido executar o que já foi assinado
@@ -32,7 +33,7 @@ class ExecucaoController extends Controller
                 });
             })
             ->when($filtros['status'] ?? null, fn ($q, $v) => $q->where('status', $v))
-            ->orderByRaw("FIELD(status, 'vigente', 'assinado', 'encerrado')")
+            ->orderByRaw("CASE status WHEN 'vigente' THEN 1 WHEN 'assinado' THEN 2 WHEN 'encerrado' THEN 3 ELSE 4 END")
             ->orderByDesc('data_inicio')
             ->paginate(15)
             ->withQueryString();
