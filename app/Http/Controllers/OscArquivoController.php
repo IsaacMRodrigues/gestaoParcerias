@@ -101,10 +101,14 @@ class OscArquivoController extends Controller
             'motivo.required_if' => 'Diga o motivo da recusa — é o que a OSC vai ler para corrigir.',
         ]);
 
-        OscArquivoAnalise::updateOrCreate(
+        $analise = OscArquivoAnalise::updateOrCreate(
             ['proposta_id' => $proposta->id, 'osc_arquivo_id' => $arquivo->id],
             $dados + ['analisado_por' => auth()->id(), 'analisado_em' => now()],
         );
+
+        if ($analise->situacao === 'recusado') {
+            \App\Support\Avisos::arquivoRecusado($analise);
+        }
 
         return back()->withFragment('arquivos-osc')
             ->with('success', OscArquivo::rotulo($arquivo->tipo) . ': ' . mb_strtolower(OscArquivoAnalise::SITUACOES[$dados['situacao']]) . '.');

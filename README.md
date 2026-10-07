@@ -586,6 +586,19 @@ Trazer os demais cenários para `tests/Feature` é uma das [Pendências](#pendê
 Da mais recente para a mais antiga. Cada entrada diz o que mudou, **por quê** e como foi
 conferido — o porquê é o que falta a quem pega o código depois.
 
+- [2026-10-07] **Arquivos da OSC valendo em todos os fluxos**
+  - **Recusa da UG trava a Celebração:** a parte da UG na etapa 3 (conjunta) só conclui com cada arquivo da OSC
+    aprovado nesta parceria (`Proposta::pendenciasDaAnaliseDosArquivos`). Recusado, a UG devolve à OSC, que recebe
+    e-mail com o motivo (`Avisos::arquivoRecusado`) e, na etapa dela, só avança depois de enviar nova versão
+    (`Osc::pendenciasDosArquivos($parceria)` conta as recusas daquela parceria). A versão nova pede análise nova
+  - **Inscrição no chamamento público** exige a área completa e em dia, como a manifestação e a Nova Proposta
+    (`Proposta::pendenciasParaSubmeter`), no botão e no servidor
+  - **Alteração e Aditivo usam a área:** saíram do checklist da Alteração as certidões e a declaração de
+    autenticidade, e do Aditivo as certidões e a ata de eleição (e do "puxar"). As duas telas mostram a situação da
+    área (`arquivos-osc/_situacao`), e a Alteração só sai da etapa da OSC com ela completa e em dia
+  - Conferido: `ArquivosDaOscNosFluxosTest` (a recusa falha sem a trava), `CelebracaoEtapaConjuntaTest` atualizado;
+    suíte 193/193; 435 telas sem erro
+
 - [2026-10-07] **Todos os campos de dinheiro com R$ e vírgula** (`x-input-dinheiro`)
   - Sete campos ainda eram número cru (digitava-se `87978978078` sem separador): no plano de trabalho, o valor
     pleiteado, o estimado de cada atividade, a parcela do desembolso e o valor unitário da planilha; na prestação de

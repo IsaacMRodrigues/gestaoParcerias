@@ -163,9 +163,7 @@ class Peca extends Model
             ['chave' => 'extrato_conta',       'rotulo' => 'Extrato da conta corrente, atual',                                    'tipo' => 'arquivo', 'obrigatorio' => true],
             ['chave' => 'extrato_aplicacao',   'rotulo' => 'Extrato da conta de aplicação/poupança, atual',                       'tipo' => 'arquivo', 'obrigatorio' => true],
             ['chave' => 'comprovacao_contrapartida', 'rotulo' => 'Comprovação de cumprimento de contrapartida (se for o caso)',   'tipo' => 'arquivo', 'obrigatorio' => false],
-            ['chave' => 'certidoes',           'rotulo' => 'Certidões de regularidade fiscal, previdenciária e tributária',       'tipo' => 'arquivo', 'obrigatorio' => true],
             ['chave' => 'orcamentos',          'rotulo' => 'Orçamentos (se for o caso)',                                          'tipo' => 'arquivo', 'obrigatorio' => false],
-            ['chave' => 'decl_autenticidade',  'rotulo' => 'Declaração de autenticidade dos documentos apresentados',             'tipo' => 'modelo',  'obrigatorio' => true],
             // Análise da Administração
             ['chave' => 'autorizacao_ug',      'rotulo' => 'Autorização da Unidade Gestora (modelo padrão)',                      'tipo' => 'modelo',  'obrigatorio' => true],
             ['chave' => 'despacho_scp',        'rotulo' => 'Despacho da SCP sobre a alteração (modelo padrão)',                   'tipo' => 'modelo',  'obrigatorio' => true],
@@ -187,8 +185,6 @@ class Peca extends Model
             ['chave' => 'manifestacao_osc',          'rotulo' => 'Manifestação da OSC',                     'tipo' => 'arquivo', 'obrigatorio' => true],
             ['chave' => 'formulario_prorrogacao',    'rotulo' => 'Formulário de prorrogação de prazo',      'tipo' => 'arquivo', 'obrigatorio' => false],
             ['chave' => 'justificativa_tecnica_osc', 'rotulo' => 'Justificativa Técnica da OSC',            'tipo' => 'modelo',  'obrigatorio' => true],
-            ['chave' => 'ata_eleicao',               'rotulo' => 'Ata de eleição/diretoria (se houver)',    'tipo' => 'arquivo', 'obrigatorio' => false],
-            ['chave' => 'certidoes_regularidade',    'rotulo' => 'Certidões de regularidade atualizadas',   'tipo' => 'arquivo', 'obrigatorio' => true],
             ['chave' => 'orcamento_cotacao',         'rotulo' => 'Orçamento/Cotação',                       'tipo' => 'arquivo', 'obrigatorio' => false],
             ['chave' => 'extratos_bancarios',        'rotulo' => 'Extratos bancários',                      'tipo' => 'arquivo', 'obrigatorio' => false],
             ['chave' => 'declaracao_capacidade',     'rotulo' => 'Declaração de Manutenção da Capacidade Técnica','tipo' => 'arquivo','obrigatorio' => false],
@@ -412,9 +408,7 @@ class Peca extends Model
         'extrato_conta'            => 'osc',
         'extrato_aplicacao'        => 'osc',
         'comprovacao_contrapartida' => 'osc',
-        'certidoes'                => 'osc',
         'orcamentos'               => 'osc',
-        'decl_autenticidade'       => 'osc',
         'autorizacao_ug'           => 'ug',
         'despacho_scp'             => 'scp',
     ];
@@ -427,9 +421,7 @@ class Peca extends Model
         'extrato_conta'            => 0,
         'extrato_aplicacao'        => 0,
         'comprovacao_contrapartida' => 0,
-        'certidoes'                => 0,
         'orcamentos'               => 0,
-        'decl_autenticidade'       => 0,
         'autorizacao_ug'           => 1,
         'despacho_scp'             => 2,
     ];
@@ -482,7 +474,7 @@ class Peca extends Model
     /** Itens que podem ser puxados dos documentos que a OSC já enviou na proposta. */
     public const PUXAVEIS = [
         'dispensa_inexigibilidade' => ['plano_trabalho', 'docs_habilitacao'],
-        'aditivo'                  => ['manifestacao_osc', 'formulario_prorrogacao', 'ata_eleicao', 'certidoes_regularidade', 'orcamento_cotacao', 'extratos_bancarios', 'declaracao_capacidade', 'plano_trabalho_atualizado'],
+        'aditivo'                  => ['manifestacao_osc', 'formulario_prorrogacao', 'orcamento_cotacao', 'extratos_bancarios', 'declaracao_capacidade', 'plano_trabalho_atualizado'],
         'apostilamento'            => ['manifestacao_osc', 'orcamento_cotacao', 'extratos_bancarios', 'plano_trabalho_atualizado'],
     ];
 
@@ -836,13 +828,6 @@ HTML,
 <p style="text-align:center"><br>{{rep_nome}}<br>CPF {{rep_cpf}}<br>Representante legal — {{osc_nome}}</p>
 HTML,
 
-            'decl_autenticidade' => <<<'HTML'
-<p style="text-align:center"><strong>DECLARAÇÃO DE AUTENTICIDADE DOS DOCUMENTOS</strong></p>
-<p>DECLARO, sob as penas do art. 299 do Código Penal, serem autênticos e verdadeiros todos os documentos e cópias juntados ao pedido de alteração do {{instrumento_tipo}} nº {{instrumento}}, observadas as demais determinações previstas na legislação.</p>
-<p>DECLARO, ainda, que são de minha exclusiva responsabilidade a conformidade entre os dados informados e a documentação enviada, bem como a conservação, em papel, dos originais dos documentos digitalizados até que decaia o direito de revisão dos atos praticados no processo, para que, caso solicitado, sejam apresentados para qualquer tipo de conferência.</p>
-<p style="text-align:right">São Gonçalo do Rio Abaixo, {{data_extenso}}.</p>
-<p style="text-align:center"><br>{{rep_nome}}<br>Representante legal — {{osc_nome}}</p>
-HTML,
 
             'autorizacao_ug' => self::CABECALHO . <<<'HTML'
 <p style="text-align:center"><strong>AUTORIZAÇÃO DE ALTERAÇÃO DA PARCERIA</strong></p>

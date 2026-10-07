@@ -456,6 +456,35 @@ class Proposta extends Model
      *
      * @param string|null $setor na etapa conjunta, só as da parte deste setor.
      */
+    /** O que falta para a OSC submeter a inscrição: o plano completo e os Arquivos da OSC completos e em dia. */
+    public function pendenciasParaSubmeter(): array
+    {
+        return array_merge(
+            $this->pendenciasDoPlano(),
+            array_map(fn ($p) => 'Arquivos da OSC: ' . $p, $this->osc?->pendenciasDosArquivos() ?? []),
+        );
+    }
+
+    /** Para a UG: arquivos da OSC ainda não analisados nesta parceria, ou recusados sem nova versão. */
+    public function pendenciasDaAnaliseDosArquivos(): array
+    {
+        $atuais = $this->osc?->arquivosAtuais() ?? collect();
+        $analises = OscArquivoAnalise::where('proposta_id', $this->id)->whereIn('osc_arquivo_id', $atuais->pluck('id'))
+            ->get()->keyBy('osc_arquivo_id');
+        $pend = [];
+
+        foreach ($atuais as $arquivo) {
+            $analise = $analises[$arquivo->id] ?? null;
+            if (!$analise) {
+                $pend[] = 'Arquivos da OSC: analisar ' . OscArquivo::rotulo($arquivo->tipo);
+            } elseif ($analise->situacao === 'recusado') {
+                $pend[] = 'Arquivos da OSC: ' . OscArquivo::rotulo($arquivo->tipo) . ' recusado — devolva à OSC para enviar nova versão';
+            }
+        }
+
+        return $pend;
+    }
+
     public function pendenciasCelebracao(?string $setor = null): array
     {
         $pend  = [];
@@ -506,9 +535,14 @@ class Proposta extends Model
         // Etapa 2 (da OSC): a área "Arquivos da OSC" completa e em dia — as
         // certidões e as declarações saíram do checklist para lá.
         if ($etapa === 1 && ($setor === null || $setor === 'osc')) {
-            foreach ($this->osc?->pendenciasDosArquivos() ?? [] as $pendencia) {
+            foreach ($this->osc?->pendenciasDosArquivos($this) ?? [] as $pendencia) {
                 $pend[] = 'Arquivos da OSC: ' . $pendencia;
             }
+        }
+
+        // Etapa 3 (conjunta): a parte da UG só conclui com cada arquivo da OSC aprovado nesta parceria.
+        if ($etapa === 2 && ($setor === null || $setor === 'ug')) {
+            array_push($pend, ...$this->pendenciasDaAnaliseDosArquivos());
         }
 
         // Etapas de assinatura dos documentos em sequência — o Termo (OSC, UG,

@@ -23,6 +23,8 @@
         <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 space-y-6">
             <x-flash-message />
 
+            @include('arquivos-osc._situacao', ['osc' => $instrumento->proposta?->osc, 'parceria' => $instrumento->proposta])
+
             <div class="bg-white rounded-xl border border-gray-200 shadow-sm">
                 @include('pecas._cabecalho', [
                     'titulo' => 'Documentos do Processo',

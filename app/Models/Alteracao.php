@@ -142,6 +142,13 @@ class Alteracao extends Model
             }
         }
 
+        // Na etapa da OSC: certidões e declarações vêm da área "Arquivos da OSC", completa e em dia.
+        if ((int) $this->etapa === 0) {
+            foreach ($this->osc()?->pendenciasDosArquivos($this->proposta()) ?? [] as $pendencia) {
+                $pend[] = 'Arquivos da OSC: ' . $pendencia;
+            }
+        }
+
         return $pend;
     }
 

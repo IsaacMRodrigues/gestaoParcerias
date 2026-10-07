@@ -103,6 +103,9 @@ class CelebracaoEtapaConjuntaTest extends TestCase
         $this->avancar($this->scp)->assertForbidden();
 
         $this->proposta->pecas()->where('chave', 'aprovacao_plano')->update(['assinado_em' => now()]);
+        // A parte da UG também pede os Arquivos da OSC analisados nesta parceria.
+        $this->avancar($this->ug)->assertStatus(422);
+        $this->aprovarArquivosDaOsc($this->proposta);
         $this->avancar($this->ug)->assertSessionHasNoErrors();
 
         $p = $this->proposta->fresh();

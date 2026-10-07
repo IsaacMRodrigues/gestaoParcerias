@@ -157,6 +157,8 @@
         @include('tramite._ultima-devolucao', ['tramitacoes' => $alteracao->tramitacoes, 'pecas' => $pecas])
 
         {{-- Checklist --}}
+        @include('arquivos-osc._situacao', ['osc' => $proposta?->osc, 'parceria' => $proposta])
+
         <div class="bg-white rounded-xl border border-gray-200 shadow-sm">
             @include('pecas._cabecalho', [
                 'titulo'    => 'Documentos da alteração',

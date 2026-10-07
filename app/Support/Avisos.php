@@ -549,6 +549,25 @@ class Avisos
         ));
     }
 
+    /** Arquivo da OSC recusado numa parceria: a OSC precisa enviar nova versão para a parceria seguir. */
+    public static function arquivoRecusado(\App\Models\OscArquivoAnalise $analise): void
+    {
+        $arquivo = $analise->arquivo;
+        $proposta = $analise->proposta;
+
+        self::enviar(self::daOsc($arquivo->osc_id, self::comFuncao('osc_documentos')), new Aviso(
+            assunto: 'Documento recusado — ' . \App\Models\OscArquivo::rotulo($arquivo->tipo),
+            titulo: 'A Prefeitura recusou um documento da organização',
+            linhas: array_values(array_filter([
+                \App\Models\OscArquivo::rotulo($arquivo->tipo) . ', na parceria "' . ($proposta?->titulo ?? '') . '".',
+                $analise->motivo ? 'Motivo: ' . $analise->motivo : null,
+                'Envie a nova versão em "Arquivos da OSC": a parceria só segue depois disso.',
+            ])),
+            url: route('portal.arquivos.index'),
+            botao: 'Abrir Arquivos da OSC',
+        ));
+    }
+
     /** Recurso protocolado: a Comissão de Seleção da Secretaria do chamamento fica sabendo. */
     public static function recursoProtocolado(\App\Models\Recurso $r): void
     {

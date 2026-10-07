@@ -95,7 +95,7 @@
 
             {{-- Arquivos da OSC: certidões e declarações saíram do
                  checklist; a etapa 2 cobra a área completa e em dia. --}}
-            @php $faltamArquivos = $proposta->osc?->pendenciasDosArquivos() ?? []; @endphp
+            @php $faltamArquivos = $proposta->osc?->pendenciasDosArquivos($proposta) ?? []; @endphp
             <div class="bg-white rounded-xl border border-gray-200 shadow-sm px-6 py-4 flex items-start justify-between gap-4">
                 <div class="text-sm">
                     <p class="font-semibold text-gray-800">Arquivos da OSC</p>
