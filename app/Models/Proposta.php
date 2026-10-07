@@ -23,24 +23,20 @@ class Proposta extends Model
         'rascunho'      => 'Rascunho',
         'submetida'     => 'Submetida',
         'em_analise'    => 'Em Análise',
-        'em_negociacao' => 'Em Negociação',
         'aprovada'      => 'Aprovada',
         'reprovada'     => 'Reprovada',
-        'cancelada'     => 'Cancelada',
     ];
 
     /**
-     * Ver Processo::STATUS_COLORS. Submetida, em análise e em negociação dividem o laranja
+     * Ver Processo::STATUS_COLORS. Submetida e em análise dividem o laranja
      * (a proposta espera a Administração); quem os separa é o rótulo.
      */
     public const STATUS_COLORS = [
         'rascunho'      => 'gray',
         'submetida'     => 'accent',
         'em_analise'    => 'accent',
-        'em_negociacao' => 'accent',
         'aprovada'      => 'brand',
         'reprovada'     => 'red',
-        'cancelada'     => 'red',
     ];
 
     /** Recurso da OSC contra o resultado provisório do chamamento (um por OSC). */
@@ -268,7 +264,7 @@ class Proposta extends Model
     /** Peças da Celebração (checklist documental desta parceria). */
     public function pecas(): \Illuminate\Database\Eloquent\Relations\MorphMany
     {
-        return $this->morphMany(Peca::class, 'pecaable')->orderBy('ordem');
+        return $this->morphMany(Peca::class, 'pecaable')->chaperone('pecaable')->orderBy('ordem');
     }
 
     public function celebracaoTramitacoes(): HasMany
@@ -299,7 +295,7 @@ class Proposta extends Model
 
     public function aceitaDocumentosDaOsc(): bool
     {
-        return !in_array($this->status, ['reprovada', 'cancelada'], true);
+        return $this->status !== 'reprovada';
     }
 
     /** A Celebração só existe para a proposta aprovada. */

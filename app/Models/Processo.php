@@ -144,6 +144,11 @@ class Processo extends Model
 
     public function tramitacaoAtual(): ?Tramitacao
     {
+        // Com as tramitações já carregadas (a tela do processo as carrega para o histórico), sem nova consulta.
+        if ($this->relationLoaded('tramitacoes')) {
+            return $this->tramitacoes->whereNull('recebido_em')->sortByDesc('enviado_em')->first();
+        }
+
         return $this->tramitacoes()->whereNull('recebido_em')->latest('enviado_em')->first();
     }
 

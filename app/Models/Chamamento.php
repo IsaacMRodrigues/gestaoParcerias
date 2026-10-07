@@ -97,7 +97,7 @@ class Chamamento extends Model
 
     public function pecas(): \Illuminate\Database\Eloquent\Relations\MorphMany
     {
-        return $this->morphMany(Peca::class, 'pecaable')->orderBy('ordem');
+        return $this->morphMany(Peca::class, 'pecaable')->chaperone('pecaable')->orderBy('ordem');
     }
 
     public function propostas(): \Illuminate\Database\Eloquent\Relations\HasMany

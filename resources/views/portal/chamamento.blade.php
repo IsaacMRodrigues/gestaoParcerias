@@ -167,7 +167,7 @@
                                 </a>
                                 {{-- Anexos do edital: arquivos, baixados direto. --}}
                                 @if($doc->tipo === 'edital' && $doc->anexos->isNotEmpty())
-                                    <ul class="mt-1 ml-6 space-y-1">
+                                    <ul class="mt-1 ml-4 space-y-1">
                                         @foreach($doc->anexos as $anexo)
                                             <li>
                                                 <a href="{{ route('portal.edital.anexo', [$chamamento, $anexo]) }}"

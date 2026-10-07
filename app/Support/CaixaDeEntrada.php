@@ -65,7 +65,7 @@ class CaixaDeEntrada
             return collect();
         }
 
-        return Processo::with('orgao')
+        return Processo::with(['orgao', 'tramitacoes' => fn ($q) => $q->whereNull('recebido_em')])
             ->visiveisPara($user)
             ->where('setor_atual', $user->setor)
             ->where('status', 'em_tramite')

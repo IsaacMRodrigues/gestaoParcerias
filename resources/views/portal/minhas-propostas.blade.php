@@ -82,7 +82,7 @@
                                         <span class="block text-[11px] font-semibold text-gray-400 uppercase tracking-wider">Manifestação de interesse</span>
                                         <span class="block text-sm font-semibold text-gray-900 group-hover:text-brand-800">{{ $m->titulo }}</span>
                                         <span class="block text-xs text-gray-500 mt-0.5">
-                                            {{ $m->orgao->name }} · R$ {{ number_format($m->valor_solicitado, 2, ',', '.') }}
+                                            {{ $m->orgao?->name ?? 'Secretaria a definir pela SCP' }} · R$ {{ number_format($m->valor_solicitado, 2, ',', '.') }}
                                         </span>
                                         @if($m->status === 'deferida')
                                             <span class="block text-xs text-brand-700 mt-1">

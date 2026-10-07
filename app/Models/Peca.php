@@ -1826,6 +1826,8 @@ HTML,
     {
         $template = self::TEMPLATES[$categoria] ?? [];
         $tokens   = self::tokensDe($pecaable);
+        // As peças que já existem, numa consulta só; cada uma recebe o dono já carregado.
+        $existentes = $pecaable->{$relacao}()->where('categoria', $categoria)->get()->keyBy('chave');
 
         foreach ($template as $i => $item) {
             $novos = [
@@ -1845,10 +1847,9 @@ HTML,
                 $novos['conteudo'] = $texto;
             }
 
-            $peca = $pecaable->{$relacao}()->firstOrCreate(
-                ['categoria' => $categoria, 'chave' => $item['chave']],
-                $novos
-            );
+            $peca = $existentes[$item['chave']]
+                ?? $pecaable->{$relacao}()->create(['categoria' => $categoria, 'chave' => $item['chave']] + $novos);
+            $peca->setRelation('pecaable', $pecaable);
 
             // Rótulo, ordem e obrigatoriedade vêm sempre do template, também nos registros antigos.
             $metadados = collect(['rotulo', 'ordem', 'obrigatorio'])

@@ -82,7 +82,7 @@ class Alteracao extends Model
 
     public function pecas(): MorphMany
     {
-        return $this->morphMany(Peca::class, 'pecaable')->orderBy('ordem');
+        return $this->morphMany(Peca::class, 'pecaable')->chaperone('pecaable')->orderBy('ordem');
     }
 
     public function proposta(): ?Proposta

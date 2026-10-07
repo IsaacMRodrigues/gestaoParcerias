@@ -9,12 +9,6 @@ class Tramitacao extends Model
 {
     protected $table = 'tramitacoes';
 
-    public const STATUS = [
-        'enviado'  => 'Enviado',
-        'recebido' => 'Recebido',
-        'devolvido'=> 'Devolvido',
-    ];
-
     protected $fillable = [
         'processo_id', 'de_setor', 'para_setor',
         'enviado_por', 'enviado_em', 'recebido_por', 'recebido_em',

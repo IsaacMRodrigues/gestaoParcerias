@@ -123,7 +123,7 @@
             {{-- Manifestação técnica da Secretaria --}}
             @if($manifestacao->parecer_em)
                 <div class="bg-white rounded-xl border border-gray-200 shadow-sm p-6">
-                    <h3 class="text-base font-semibold text-gray-800">Manifestação técnica — {{ $manifestacao->orgao->name }}</h3>
+                    <h3 class="text-base font-semibold text-gray-800">Manifestação técnica — {{ $manifestacao->orgao?->name }}</h3>
                     <p class="mt-1 text-sm font-semibold {{ $manifestacao->parecer_favoravel ? 'text-brand-700' : 'text-red-700' }}">
                         {{ $manifestacao->parecer_favoravel ? 'Favorável' : 'Desfavorável' }}
                     </p>
@@ -197,12 +197,12 @@
                         <div>
                             <h3 class="text-base font-semibold text-gray-800">Ouvir a Secretaria</h3>
                             <p class="text-xs text-gray-500 mt-0.5 mb-3">
-                                A {{ $manifestacao->orgao->name }} dirá se há interesse público e orçamento — é o que
+                                A {{ $manifestacao->orgao?->name ?? 'Secretaria' }} dirá se há interesse público e orçamento — é o que
                                 fundamenta o encaminhamento.
                             </p>
                             <form action="{{ route('manifestacoes.encaminhar', $manifestacao) }}" method="POST">
                                 @csrf
-                                <button class="btn btn-primary">Encaminhar à {{ $manifestacao->orgao->sigla ?: 'Secretaria' }}</button>
+                                <button class="btn btn-primary">Encaminhar à {{ $manifestacao->orgao?->sigla ?: 'Secretaria' }}</button>
                             </form>
                         </div>
                     @endif

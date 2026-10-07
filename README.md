@@ -25,17 +25,18 @@ assinados eletronicamente e validáveis por QR Code.
 
 ## Estado atual
 
-*Atualizado em 01/10/2026.*
+*Atualizado em 07/10/2026.*
 
 | Etapa do ciclo | Situação | Onde fica |
 |---|---|---|
 | **1. Planejamento** (módulo 2.1) | ✅ Completo | `ProcessoController`, `Processo`, `ProcessoPeca` |
-| **2. Seleção** (2.2) — chamamento, prazo e resposta de recurso, manifestação de interesse, Nova Proposta | ✅ Completo | `SelecaoController`, `ManifestacaoAnaliseController`, `PropostaController` |
+| **2. Seleção** (2.2) — lista de chamamentos, prazo e resposta de recurso, manifestação de interesse, Nova Proposta, decisão da UG na dispensa | ✅ Completo | `SelecaoController`, `ManifestacaoAnaliseController`, `PropostaController` |
 | **Plano de Trabalho** (3.1) — os 13 itens do modelo da cliente | ✅ Completo | `PlanoTrabalhoController`, `Concerns\TemPlanoDeTrabalho`, `Support\PlanoDocumento` |
 | **3. Celebração** (2.2 / 3.2) — 22 etapas: habilitação, etapa conjunta UG + SCP, Termo e OP Global assinados em sequência, empenho | ✅ Completo | `CelebracaoController`, motor `Peca`, `PecaAssinatura` |
 | **Devolução por documento** — em todos os trâmites | ✅ Completo | `Support\Devolucao` |
 | **Arquivos da OSC** — certidões, estatuto, ata e declarações anexados uma vez | ✅ Completo | `OscArquivoController`, `OscArquivo` |
-| **Formalização** (2.3) — instrumento, aditivo, apostilamento, OP | ✅ Completo | `InstrumentoController`, `AditivoController`, `OrdemPagamentoController` |
+| **Formalização** (2.3) — instrumento (nasce na conclusão da Celebração), aditivo, apostilamento, OP parcial | ✅ Completo | `Proposta::criarInstrumento`, `AditivoController`, `OrdemPagamentoController` |
+| **Download de documentos** — PDF e ZIP em todos os fluxos, por quem pode | ✅ Completo | `Peca::podeBaixar`, `Support\DocumentoPdf` |
 | **4. Execução** (4.4) — repasses, despesas, notas, saldo | ✅ Completo | `ExecucaoController` |
 | **Alterações da Parceria** (3.3) | ✅ Completo | `AlteracaoController`, `Alteracao` |
 | **Dossiê da OSC** (3.3) — o processo visível à organização | ✅ Completo | `DossieController`, `Proposta::dossieParaOsc()` |
@@ -46,23 +47,19 @@ assinados eletronicamente e validáveis por QR Code.
 | **Avisos por e-mail** (4.7) — contas, suporte, vez no trâmite, resultados | ✅ Completo | `Support\Avisos`, `Mail\Aviso` |
 | **Integrações** (banco, Diário Oficial, GOV.BR) | ⏳ Última fase | — |
 
-**Em produção** está o que havia no GitHub até 25/09/2026 (commit `65f5591`): avisos por e-mail e os
-itens 1, 2, 3, 8 e 9 da homologação. **Falta o agendamento no painel da Hostinger** (ver
-[Deploy](#deploy), passo 7): sem ele, os avisos entram na fila e esperam — não se perdem, saem quando
-ele existir.
+**Em produção** está o que havia no GitHub em 07/10/2026 (deploy de 07/10, ver o
+[Histórico](#histórico-de-entregas)): tudo de 26/09 a 07/10, com as 18 migrações e o `RolesSeeder`, ensaiados
+antes sobre uma cópia do banco de produção.
 
-**No GitHub, ainda não em produção:** tudo o que está no [Histórico](#histórico-de-entregas) de 26/09 a
-01/10/2026. O próximo deploy precisa, além do de sempre:
+Ações de produção que o deploy não faz (são dados ou painel, não código):
 
-- rodar as **15 migrações** novas (de `2026_09_28_100000` a `2026_10_01_120000`) e o `RolesSeeder`
-  (perfis novos: Comissão de Monitoramento e de Avaliação separadas, Responsável pela SEPLAN, Contador
-  e Responsável por Execução da OSC);
+- **agendamento no hPanel** ([Deploy](#deploy), passo 7): sem ele, os avisos por e-mail ficam na fila;
 - mover a conta `planejamento@saogoncalo.mg.gov.br` para o setor SEPLAN, com o perfil Responsável pela
-  SEPLAN (depois do seeder);
+  SEPLAN;
 - antes de a primeira parceria chegar à assinatura do Termo, haver usuário com o perfil **Gestor da
   Parceria** em cada Secretaria — sem ele, a SCP não tem quem escolher na etapa 13 da Celebração;
-- avisar as OSCs de que, a partir do deploy, a área **Arquivos da OSC** precisa estar completa e em dia para
-  enviar manifestação de interesse ou Nova Proposta (as cadastradas hoje começam com ela vazia).
+- avisar as OSCs de que a área **Arquivos da OSC** precisa estar completa e em dia para enviar
+  manifestação de interesse ou Nova Proposta (as cadastradas começam com ela vazia).
 
 ---
 
@@ -477,11 +474,19 @@ Procedimento:
 
 ## Verificação
 
-`php artisan test` (sqlite em memória) roda **170 testes** em `tests/Feature`, um arquivo por regra de
+`php artisan test` (sqlite em memória) roda **185 testes** em `tests/Feature`, um arquivo por regra de
 negócio (quem abre qual parceria, contas e senhas, avisos por e-mail, segregação de encargos,
 cancelamento e prorrogação de chamamento, Nova Proposta, prazo e resposta de recurso, plano de
-trabalho do modelo, etapa conjunta, devolução por documento, Termo e OP em sequência…). **Todos passam.**
-Os testes de regra nova são conferidos falhando com a regra desligada antes de entrar.
+trabalho do modelo, etapa conjunta, devolução por documento, Termo e OP em sequência, download de
+documentos, instrumento na conclusão…). **Todos passam**, também em MySQL (o banco da produção): basta
+um `phpunit.xml` na raiz com `DB_CONNECTION=mysql`, um banco descartável e `force="true"` nos `<env>`. Os
+testes de regra nova são conferidos falhando com a regra desligada antes de entrar.
+
+Antes de cada deploy, além da suíte: (1) **todas as telas** abertas por administrador, SCP, UG, OSC e
+visitante, procurando erro 500; (2) as **migrações e o seeder ensaiados sobre uma cópia do banco de
+produção** num banco local descartável, e as telas abertas de novo sobre ela; (3) as classes do Tailwind das
+views alteradas conferidas contra o CSS compilado. No deploy de 07/10: 435 telas no banco local e 390 na
+cópia de produção, sem erro.
 
 Antes disso, as entregas desde o módulo 3 foram
 conferidas por **scripts que exercitam o HTTP de verdade** — com os usuários reais do banco local,
@@ -504,7 +509,7 @@ Trazer os demais cenários para `tests/Feature` é uma das [Pendências](#pendê
 
 ## Pendências
 
-*Atualizado em 01/10/2026.*
+*Atualizado em 07/10/2026.*
 
 ### Segurança
 
@@ -580,6 +585,21 @@ Trazer os demais cenários para `tests/Feature` é uma das [Pendências](#pendê
 
 Da mais recente para a mais antiga. Cada entrada diz o que mudou, **por quê** e como foi
 conferido — o porquê é o que falta a quem pega o código depois.
+
+- [2026-10-07] **Limpeza, otimização e testes antes do deploy**
+  - Sem uso, saíram: o componente `nav-link`, as constantes `Programa::TIPOS`/`STATUS` e `Tramitacao::STATUS`,
+    as regras de exclusão de programa (não há mais tela que exclua), os status de proposta "Em Negociação" e
+    "Cancelada" (nada os grava desde que a diligência saiu) e 17 traduções das telas do Breeze removidas
+  - **Menos consultas ao banco** nas telas pesadas: `Peca::sincronizar` lê as peças do dono numa consulta só
+    (antes, uma por item do modelo); as relações `pecas()` entregam o dono a cada peça (`chaperone`), em vez
+    de cada uma recarregá-lo; `Processo::tramitacaoAtual()` usa as tramitações já carregadas, e a Caixa de
+    Entrada as carrega junto. Celebração: de 106 para 44 consultas; Seleção: 69 → 42; Prestação de Contas:
+    78 → 55; Processo: 32 → 21
+  - Defeito corrigido: em "Minhas inscrições", a Nova Proposta ainda sem Secretaria (a SCP a define) gerava
+    erro ao ler o nome dela; agora diz "Secretaria a definir pela SCP". Duas classes de estilo que não
+    existiam no CSS compilado (`ml-6`, `text-[10px]`) trocadas pelas existentes
+  - Conferido: suíte 185/185 em sqlite e em MySQL; 435 telas × perfis sem erro no banco local; migrações e
+    `RolesSeeder` ensaiados sobre cópia da produção e 390 telas abertas nela sem erro
 
 - [2026-10-07] **Plano de aplicação digitado na Nova Proposta; textos até 1000 caracteres**
   - No primeiro formulário da Nova Proposta, a planilha de itens deu lugar a um campo de texto, **Plano de
