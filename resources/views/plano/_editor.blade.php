@@ -82,8 +82,7 @@
                         </div>
                         <div>
                             <x-input-label for="valor_solicitado" value="Valor pleiteado (R$) *" />
-                            <x-text-input id="valor_solicitado" name="valor_solicitado" type="number" step="0.01" min="0" required
-                                          :value="old('valor_solicitado', $dono->valor_solicitado)" class="mt-1 block w-full" />
+                            <x-input-dinheiro name="valor_solicitado" :value="$dono->valor_solicitado" required class="mt-1" />
                             <x-input-error :messages="$errors->get('valor_solicitado')" class="mt-1" />
                         </div>
                     </div>
@@ -214,7 +213,7 @@
                             </div>
                             <div class="sm:col-span-2">
                                 <label class="block text-xs text-gray-500">Estimado (R$)</label>
-                                <input type="number" name="valor" step="0.01" min="0" class="{{ $campo }}">
+                                <x-input-dinheiro name="valor" :id="'etapa_valor_' . $meta->id" class="mt-1" />
                             </div>
                             <div class="sm:col-span-6">
                                 <button class="btn btn-secondary btn-sm">Adicionar atividade</button>
@@ -481,8 +480,7 @@
                 </div>
                 <div>
                     <x-input-label for="desembolso_valor" value="Valor (R$) *" />
-                    <input type="number" name="valor" id="desembolso_valor" step="0.01" min="0.01" required
-                           class="mt-1 w-40 border-gray-300 rounded-md shadow-sm text-sm focus:ring-brand-500 focus:border-brand-500">
+                    <div class="mt-1 w-40"><x-input-dinheiro name="valor" id="desembolso_valor" required /></div>
                 </div>
                 <button class="btn btn-secondary btn-sm">Adicionar parcela</button>
             </form>
@@ -654,7 +652,7 @@
                 </div>
                 <div>
                     <x-input-label for="item_valor" value="Valor unitário (R$) *" />
-                    <input type="number" name="valor_unitario" id="item_valor" step="0.01" min="0" required class="{{ $campo }}">
+                    <x-input-dinheiro name="valor_unitario" id="item_valor" required class="mt-1" />
                 </div>
                 <div class="sm:col-span-2">
                     <x-input-label for="item_atividades" value="Atividades vinculadas" />

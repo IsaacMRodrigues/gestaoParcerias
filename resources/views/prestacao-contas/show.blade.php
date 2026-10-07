@@ -152,7 +152,7 @@
                         'valor_ressarcido' => 'Ressarcido aos cofres',
                     ] as $campo => $rotulo)
                         <div><x-input-label :for="$campo" :value="$rotulo" />
-                            <x-text-input :id="$campo" :name="$campo" type="number" step="0.01" class="mt-1 block w-full" :value="$pc->{$campo}" /></div>
+                            <x-input-dinheiro :name="$campo" :value="$pc->{$campo}" class="mt-1" /></div>
                     @endforeach
                 </div>
 
@@ -169,11 +169,9 @@
                                 @php $g = $pc->glosas->firstWhere('natureza', $chave); @endphp
                                 <tr>
                                     <td class="px-3 py-2 text-gray-700">{{ $bloco['rotulo'] }}</td>
-                                    <td class="px-3 py-2"><input type="number" step="0.01" name="glosas[{{ $chave }}][valor_aprovado]" value="{{ $g?->valor_aprovado }}"
-                                        class="w-28 border-gray-300 rounded text-sm focus:ring-brand-500 focus:border-brand-500"></td>
+                                    <td class="px-3 py-2"><div class="w-40"><x-input-dinheiro :name="'glosas[' . $chave . '][valor_aprovado]'" :id="'glosa_' . $chave . '_aprovado'" :value="$g?->valor_aprovado" /></div></td>
                                     @foreach(range(1, 6) as $mes)
-                                        <td class="px-3 py-2"><input type="number" step="0.01" name="glosas[{{ $chave }}][glosa_mes_{{ $mes }}]" value="{{ $g?->{'glosa_mes_' . $mes} }}"
-                                            class="w-24 border-gray-300 rounded text-sm focus:ring-brand-500 focus:border-brand-500"></td>
+                                        <td class="px-3 py-2"><div class="w-40"><x-input-dinheiro :name="'glosas[' . $chave . '][glosa_mes_' . $mes . ']'" :id="'glosa_' . $chave . '_' . $mes" :value="$g?->{'glosa_mes_' . $mes}" /></div></td>
                                     @endforeach
                                     <td class="px-3 py-2 text-right text-gray-600">{{ $dinheiro($pc->totalDoBloco($chave)) }}</td>
                                 </tr>
@@ -215,7 +213,7 @@
                     <div><x-input-label for="quantidade" value="Quantidade" />
                         <x-text-input id="quantidade" name="quantidade" type="number" step="0.01" value="1" class="mt-1 block w-full" /></div>
                     <div><x-input-label for="valor_unitario" value="Valor unitário" />
-                        <x-text-input id="valor_unitario" name="valor_unitario" type="number" step="0.01" class="mt-1 block w-full" /></div>
+                        <x-input-dinheiro name="valor_unitario" class="mt-1" /></div>
                     <div><button class="btn btn-secondary btn-sm w-full">Incluir bem</button></div>
                 </form>
             </div>

@@ -22,6 +22,12 @@ class NormalizaValoresMonetarios
         'valor_total',
         'valor_repasse',
         'valor_adicional',
+        'valor_unitario',
+        'saldo_anterior',
+        'outros_creditos',
+        'recursos_proprios',
+        'despesas_bancarias',
+        'valor_ressarcido',
     ];
 
     public function handle(Request $request, Closure $next): Response

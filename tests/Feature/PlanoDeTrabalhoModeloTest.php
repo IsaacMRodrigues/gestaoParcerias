@@ -107,6 +107,25 @@ class PlanoDeTrabalhoModeloTest extends TestCase
             'quantidade' => 1, 'valor_unitario' => 10, 'atividades_vinculadas' => $mil])->assertSessionHasNoErrors();
     }
 
+    public function test_campos_de_dinheiro_com_mascara_e_valor_em_formato_brasileiro(): void
+    {
+        $meta = $this->plano->criarMeta(['descricao' => 'Meta 1']);
+        $tela = $this->actingAs($this->rl)->get("/portal/manifestacoes/{$this->plano->id}")->assertOk()->getContent();
+
+        // Valor pleiteado, estimado da atividade, desembolso e valor unitário: todos com R$ e máscara.
+        foreach (['valor_solicitado', 'etapa_valor_' . $meta->id, 'desembolso_valor', 'item_valor'] as $id) {
+            $this->assertStringContainsString('data-money="' . $id . '"', $tela, $id);
+        }
+        $ids = [];
+        preg_match_all('/\bid="([^"]+)"/', $tela, $ids);
+        $this->assertSame([], array_keys(array_filter(array_count_values($ids[1]), fn ($n) => $n > 1)), 'sem id repetido');
+
+        // Sem JavaScript, o servidor entende o valor escrito em português.
+        $this->actingAs($this->rl)->post($this->url('/itens'), ['descricao' => 'Instrutor', 'tipo_despesa' => array_key_first(\App\Models\Despesa::NATUREZAS),
+            'quantidade' => 1, 'valor_unitario' => '1.234,56'])->assertSessionHasNoErrors();
+        $this->assertSame('1234.56', $this->plano->planoItens()->sole()->valor_unitario);
+    }
+
     public function test_desembolso_por_meta_e_parcela(): void
     {
         $meta = $this->plano->criarMeta(['descricao' => 'Meta 1']);

@@ -586,6 +586,17 @@ Trazer os demais cenários para `tests/Feature` é uma das [Pendências](#pendê
 Da mais recente para a mais antiga. Cada entrada diz o que mudou, **por quê** e como foi
 conferido — o porquê é o que falta a quem pega o código depois.
 
+- [2026-10-07] **Todos os campos de dinheiro com R$ e vírgula** (`x-input-dinheiro`)
+  - Sete campos ainda eram número cru (digitava-se `87978978078` sem separador): no plano de trabalho, o valor
+    pleiteado, o estimado de cada atividade, a parcela do desembolso e o valor unitário da planilha; na prestação de
+    contas, os saldos e créditos, as glosas (aprovado e os seis meses de cada natureza) e o valor unitário dos bens.
+    Passaram ao componente de dinheiro: "R$" fixo, ponto de milhar e vírgula dos centavos enquanto se digita. O
+    campo da atividade, que se repete por meta, ganhou id próprio (`etapa_valor_{meta}`)
+  - `NormalizaValoresMonetarios` passou a converter também `valor_unitario`, `saldo_anterior`, `outros_creditos`,
+    `recursos_proprios`, `despesas_bancarias` e `valor_ressarcido` (vale quando o navegador está sem JavaScript)
+  - Conferido: `PlanoDeTrabalhoModeloTest` (máscara nos quatro campos, sem id repetido, "1.234,56" gravado como
+    1234.56); a prestação mostra 34 campos com máscara; suíte 190/190; 435 telas sem erro
+
 - [2026-10-07] **Listas só com o que é da Secretaria** (`Instrumento::visiveisPara`, `Chamamento::visiveisPara`)
   - A tela de cada instrumento já barrava a UG de outra Secretaria ("Acesso restrito"), mas as **listas** mostravam
     tudo: Instrumentos, Execução, Prestação de Contas (para servidor) e Chamamentos, além da busca do topo e dos
