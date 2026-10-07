@@ -52,6 +52,16 @@ class Instrumento extends Model
         ];
     }
 
+    /** Próximo número do ano (001/2026): pelo maior do ano, com trava de linha. */
+    public static function proximoNumero(?int $ano = null): string
+    {
+        $ano ??= now()->year;
+        $maior = self::where('numero', 'like', "%/{$ano}")->lockForUpdate()->pluck('numero')
+            ->map(fn ($n) => (int) strtok($n, '/'))->max() ?? 0;
+
+        return str_pad((string) ($maior + 1), 3, '0', STR_PAD_LEFT) . '/' . $ano;
+    }
+
     public function proposta(): BelongsTo
     {
         return $this->belongsTo(Proposta::class);

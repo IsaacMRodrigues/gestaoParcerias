@@ -207,25 +207,9 @@
                                     @endif
                                 </p>
 
-                                @if($meuRecurso->respondido())
-                                    @php $cor = \App\Models\Recurso::RESULTADO_COLORS[$meuRecurso->resultado] ?? 'gray'; @endphp
-                                    <div class="mt-3 pt-3 border-t border-gray-200">
-                                        <span class="px-2 py-1 text-xs font-medium bg-{{ $cor }}-100 text-{{ $cor }}-800 rounded-full">
-                                            {{ $meuRecurso->resultadoLabel() }}
-                                        </span>
-                                        <p class="text-sm text-gray-700 mt-2 whitespace-pre-line">{{ $meuRecurso->resposta }}</p>
-                                        <p class="text-xs text-gray-400 mt-2">
-                                            Resposta em {{ $meuRecurso->respondido_em->format('d/m/Y H:i') }}
-                                            @if($meuRecurso->codigo_validacao)
-                                                · código <strong class="font-mono">{{ $meuRecurso->codigo_validacao }}</strong>
-                                            @endif
-                                        </p>
-                                    </div>
-                                @else
-                                    <p class="text-xs text-gray-500 mt-2">
-                                        A Comissão de Seleção analisará o recurso. A resposta, se houver, aparecerá nos documentos da sua inscrição.
-                                    </p>
-                                @endif
+                                <p class="text-xs text-gray-500 mt-2">
+                                    A Comissão de Seleção analisará o recurso. A resposta, se houver, aparecerá nos documentos da sua inscrição.
+                                </p>
                             </div>
                         @elseif(! auth()->user()->ehResponsavelLegalOsc())
                             {{-- Membro da OSC vê que há prazo aberto, mas o

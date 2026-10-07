@@ -131,11 +131,6 @@ HTML;
         return !is_null($this->assinado_em);
     }
 
-    public function temDadosBancarios(): bool
-    {
-        return !is_null($this->dados_bancarios_path);
-    }
-
     /** Gera um código de validação único (ex.: A1B2-C3D4-E5). */
     public static function gerarCodigoValidacao(): string
     {

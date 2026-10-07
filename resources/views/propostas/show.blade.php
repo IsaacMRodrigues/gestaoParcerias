@@ -20,12 +20,6 @@
                         Celebração
                     </a>
                 @endif
-                @if($proposta->status === 'aprovada' && !$proposta->instrumento)
-                    <a href="{{ route('instrumentos.create', $proposta) }}"
-                       class="btn btn-primary">
-                        Formalizar Instrumento
-                    </a>
-                @endif
                 @if($proposta->instrumento)
                     <a href="{{ route('instrumentos.show', $proposta->instrumento) }}"
                        class="btn btn-outline">
@@ -48,7 +42,6 @@
             {{-- Recurso contra o resultado provisório, para a Comissão de Seleção da Secretaria ler.
                  A resposta é peça da etapa 3 da Seleção. --}}
             @foreach($proposta->recursos as $rec)
-                @php $cor = \App\Models\Recurso::RESULTADO_COLORS[$rec->resultado] ?? 'gray'; @endphp
                 <div class="bg-white rounded-xl border border-gray-200 shadow-sm p-6">
                     <div class="flex items-start justify-between gap-3">
                         <div>
@@ -60,45 +53,21 @@
                                 @endif
                             </p>
                         </div>
-                        @if($rec->respondido())
-                            {{-- Recurso antigo, julgado pelo formulário que existia antes da peça. --}}
-                            <span class="px-2 py-1 text-xs font-medium bg-{{ $cor }}-100 text-{{ $cor }}-800 rounded-full whitespace-nowrap">{{ $rec->resultadoLabel() }}</span>
-                        @endif
                     </div>
 
-                    {{-- O recurso é o arquivo da OSC. Texto só nos recursos antigos,
-                         de quando o formulário também o pedia. --}}
                     @if($rec->temArquivo())
                         <a href="{{ route('recursos.download', $rec) }}" class="mt-3 inline-flex btn btn-outline btn-sm">
                             Baixar o recurso da OSC (PDF)
                         </a>
                     @endif
-                    @if($rec->fundamentacao)
-                        <div class="mt-3 bg-gray-50 rounded-md p-3">
-                            <p class="text-xs font-medium text-gray-500 uppercase tracking-wide">Fundamentação da OSC</p>
-                            <p class="text-sm text-gray-700 mt-1 whitespace-pre-line">{{ $rec->fundamentacao }}</p>
-                        </div>
-                    @endif
 
-                    @if($rec->respondido())
-                        <div class="mt-3 border-l-2 border-brand-200 pl-3">
-                            <p class="text-xs font-medium text-gray-500 uppercase tracking-wide">Julgamento da Comissão de Seleção</p>
-                            <p class="text-sm text-gray-700 mt-1 whitespace-pre-line">{{ $rec->resposta }}</p>
-                            <p class="text-xs text-gray-400 mt-1">
-                                {{ $rec->respondente->name ?? '—' }} · {{ $rec->respondido_em->format('d/m/Y H:i') }}
-                                @if($rec->codigo_validacao) · código <strong class="font-mono">{{ $rec->codigo_validacao }}</strong> @endif
-                            </p>
-                        </div>
-                    @else
-                        {{-- A resposta é a peça "Resposta ao recurso", opcional, da etapa 3
-                             da Seleção — preenchida e assinada pela Comissão de Seleção. --}}
-                        <p class="mt-3 text-xs text-gray-500">
-                            A resposta, se houver, é o documento "Resposta ao recurso" da etapa 3 da Seleção, emitido pela Comissão de Seleção.
-                            @if(auth()->user()->can('chamamentos') || $rec->comissaoPodeVer(auth()->user()))
-                                <a href="{{ route('chamamentos.selecao', $rec->chamamento_id) }}" class="text-brand-600 hover:underline">Abrir a Seleção</a>
-                            @endif
-                        </p>
-                    @endif
+                    {{-- A resposta é a peça "Resposta ao recurso" (opcional) da etapa 3 da Seleção. --}}
+                    <p class="mt-3 text-xs text-gray-500">
+                        A resposta, se houver, é o documento "Resposta ao recurso" da etapa 3 da Seleção, emitido pela Comissão de Seleção.
+                        @if(auth()->user()->can('chamamentos') || $rec->comissaoPodeVer(auth()->user()))
+                            <a href="{{ route('chamamentos.selecao', $rec->chamamento_id) }}" class="text-brand-600 hover:underline">Abrir a Seleção</a>
+                        @endif
+                    </p>
                 </div>
             @endforeach
 

@@ -4,51 +4,24 @@ namespace App\Http\Controllers;
 
 use App\Http\Requests\InstrumentoRequest;
 use App\Models\Instrumento;
-use App\Models\Proposta;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\View\View;
 
+/** Instrumentos: nascem na conclusão da Celebração (Proposta::criarInstrumento); aqui se consultam e corrigem. */
 class InstrumentoController extends Controller
 {
     public function index(): View
     {
-        $instrumentos = Instrumento::with(['proposta.osc', 'proposta.chamamento.programa'])
+        $instrumentos = Instrumento::with(['proposta.osc', 'proposta.chamamento.programa.orgao'])
             ->orderBy('created_at', 'desc')
             ->paginate(15);
 
         return view('instrumentos.index', compact('instrumentos'));
     }
 
-    /** A mesma trava para abrir o formulário e gravar (um instrumento por proposta aprovada). */
-    private function autorizarFormalizacao(Proposta $proposta): void
-    {
-        abort_unless($proposta->status === 'aprovada', 403,
-            'Só se formaliza instrumento de proposta aprovada.');
-        abort_if($proposta->instrumento()->exists(), 403,
-            'Esta parceria já tem instrumento.');
-    }
-
-    public function create(Proposta $proposta): View
-    {
-        $this->autorizarFormalizacao($proposta);
-
-        // Pré-popula a partir da proposta aprovada
-        return view('instrumentos.create', compact('proposta'));
-    }
-
-    public function store(InstrumentoRequest $request, Proposta $proposta): RedirectResponse
-    {
-        $this->autorizarFormalizacao($proposta);
-
-        $instrumento = $proposta->instrumento()->create($request->validated());
-
-        return redirect()->route('instrumentos.show', $instrumento)
-            ->with('success', 'Instrumento criado com sucesso.');
-    }
-
     public function show(Instrumento $instrumento): View
     {
-        $instrumento->load(['proposta.osc', 'proposta.chamamento.programa', 'aditivos']);
+        $instrumento->load(['proposta.osc', 'proposta.chamamento.programa.orgao', 'aditivos']);
 
         return view('instrumentos.show', compact('instrumento'));
     }
@@ -64,35 +37,5 @@ class InstrumentoController extends Controller
 
         return redirect()->route('instrumentos.show', $instrumento)
             ->with('success', 'Instrumento atualizado com sucesso.');
-    }
-
-    public function minuta(Instrumento $instrumento): View
-    {
-        $instrumento->load(['proposta.osc', 'proposta.chamamento.programa', 'aditivos']);
-
-        return view('instrumentos.minuta', compact('instrumento'));
-    }
-
-    public function assinar(Instrumento $instrumento): RedirectResponse
-    {
-        $instrumento->update([
-            'status'          => 'assinado',
-            'data_assinatura' => today(),
-        ]);
-
-        return redirect()->route('instrumentos.show', $instrumento)
-            ->with('success', 'Instrumento marcado como assinado.');
-    }
-
-    public function publicar(Instrumento $instrumento): RedirectResponse
-    {
-        $instrumento->update([
-            'publicado_doe'       => true,
-            'data_publicacao_doe' => today(),
-            'status'              => 'vigente',
-        ]);
-
-        return redirect()->route('instrumentos.show', $instrumento)
-            ->with('success', 'Publicação registrada. Instrumento agora está vigente.');
     }
 }

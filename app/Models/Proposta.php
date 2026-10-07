@@ -173,6 +173,37 @@ class Proposta extends Model
         return $this->hasOne(Instrumento::class);
     }
 
+    /**
+     * O instrumento da parceria, criado na conclusão da Celebração com os dados do Termo assinado e
+     * publicado: é a base da Execução, da Alteração, da Prestação de Contas e da Transparência.
+     */
+    public function criarInstrumento(): Instrumento
+    {
+        if ($this->instrumento) {
+            return $this->instrumento;
+        }
+
+        $this->loadMissing(['chamamento.programa', 'pecas.assinaturasPartes']);
+        $peca = fn (string $chave) => $this->pecas->firstWhere('chave', $chave);
+        $tipo = $this->chamamento?->programa?->tipo;
+        $inicio = $this->data_inicio_prevista ?? now();
+
+        return $this->instrumento()->create([
+            'numero'              => Instrumento::proximoNumero(),
+            'tipo'                => isset(Instrumento::TIPOS[$tipo]) ? $tipo : 'termo_colaboracao',
+            'objeto'              => $this->objeto,
+            'valor_repasse'       => $this->valor_solicitado ?? 0,
+            'valor_proprio'       => $this->valor_proprio ?? 0,
+            'data_assinatura'     => $peca('termo')?->dataDaAssinatura() ?? now(),
+            'data_inicio'         => $inicio,
+            'data_fim'            => $this->data_fim_prevista && $this->data_fim_prevista->gt($inicio)
+                ? $this->data_fim_prevista : $inicio->copy()->addYear(),
+            'publicado_doe'       => true,
+            'data_publicacao_doe' => $peca('comprovante_publicacao_doe')?->updated_at ?? now(),
+            'status'              => 'vigente',
+        ]);
+    }
+
     public function documentos(): HasMany
     {
         return $this->hasMany(Documento::class)->latest();

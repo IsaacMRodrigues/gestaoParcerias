@@ -8,6 +8,7 @@ use App\Models\User;
 use App\Support\Devolucao;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 use Illuminate\Validation\Rule;
 use Illuminate\View\View;
@@ -298,20 +299,24 @@ class CelebracaoController extends Controller
         abort_unless(empty($pendentes), 422,
             'Conclua antes de encerrar: ' . implode(', ', $pendentes) . '.');
 
-        $proposta->celebracaoTramitacoes()->create([
-            'de_setor'    => $proposta->celebracao_setor,
-            'para_setor'  => 'ug',
-            'enviado_por' => auth()->id(),
-            'enviado_em'  => now(),
-            'status'      => 'concluido',
-        ]);
+        $instrumento = DB::transaction(function () use ($proposta) {
+            $proposta->celebracaoTramitacoes()->create([
+                'de_setor'    => $proposta->celebracao_setor,
+                'para_setor'  => 'ug',
+                'enviado_por' => auth()->id(),
+                'enviado_em'  => now(),
+                'status'      => 'concluido',
+            ]);
 
-        $proposta->update([
-            'celebracao_setor'        => 'ug',
-            'celebracao_concluida_em' => now(),
-        ]);
+            $proposta->update([
+                'celebracao_setor'        => 'ug',
+                'celebracao_concluida_em' => now(),
+            ]);
+
+            return $proposta->criarInstrumento();
+        });
 
         return redirect()->route('celebracao.show', $proposta)
-            ->with('success', 'Celebração concluída. A parceria está apta a iniciar a execução.');
+            ->with('success', "Celebração concluída. A parceria segue para a execução como o instrumento nº {$instrumento->numero}.");
     }
 }

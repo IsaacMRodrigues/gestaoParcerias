@@ -472,12 +472,6 @@
                                 A Comissão de Seleção pode respondê-los com o documento "Resposta ao recurso" desta etapa (opcional).
                             </p>
                         </div>
-                        @php $semResp = $chamamento->recursos->whereNull('respondido_em')->count(); @endphp
-                        @if($semResp > 0)
-                            <span class="px-2.5 py-1 text-xs font-medium bg-accent-100 text-accent-800 rounded-full whitespace-nowrap">
-                                {{ $semResp }} sem resposta
-                            </span>
-                        @endif
                     </div>
 
                     @forelse($chamamento->recursos as $rec)
@@ -494,39 +488,7 @@
                                         @endif
                                     </p>
                                 </div>
-                                @if($rec->respondido())
-                                    @php $cor = \App\Models\Recurso::RESULTADO_COLORS[$rec->resultado] ?? 'gray'; @endphp
-                                    <span class="px-2 py-1 text-xs font-medium bg-{{ $cor }}-100 text-{{ $cor }}-800 rounded-full whitespace-nowrap">
-                                        {{ $rec->resultadoLabel() }}
-                                    </span>
-                                @else
-                                    <span class="px-2 py-1 text-xs font-medium bg-gray-100 text-gray-600 rounded-full whitespace-nowrap">
-                                        Aguardando resposta
-                                    </span>
-                                @endif
                             </div>
-
-                            @if($rec->fundamentacao)
-                                <div class="mt-2 bg-gray-50 rounded-md p-3">
-                                    <p class="text-xs font-medium text-gray-500 uppercase tracking-wide">Fundamentação da OSC</p>
-                                    <p class="text-sm text-gray-700 mt-1 whitespace-pre-line">{{ $rec->fundamentacao }}</p>
-                                </div>
-                            @endif
-
-                            @if($rec->respondido())
-                                <div class="mt-2 border-l-2 border-brand-200 pl-3">
-                                    <p class="text-xs font-medium text-gray-500 uppercase tracking-wide">
-                                        Julgamento da Comissão de Seleção
-                                    </p>
-                                    <p class="text-sm text-gray-700 mt-1 whitespace-pre-line">{{ $rec->resposta }}</p>
-                                    <p class="text-xs text-gray-400 mt-1">
-                                        {{ $rec->respondente->name ?? '—' }} · {{ $rec->respondido_em->format('d/m/Y H:i') }}
-                                        @if($rec->codigo_validacao)
-                                            · código <strong class="font-mono">{{ $rec->codigo_validacao }}</strong>
-                                        @endif
-                                    </p>
-                                </div>
-                            @endif
                         </div>
                     @empty
                         <div class="px-6 py-6 text-sm text-gray-500">

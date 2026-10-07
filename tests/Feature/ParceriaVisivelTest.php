@@ -137,7 +137,8 @@ class ParceriaVisivelTest extends TestCase
         $this->actingAs($contador)->get("/celebracao/{$this->proposta->id}")->assertForbidden();
     }
 
-    public function test_nao_se_cria_segundo_instrumento_nem_instrumento_de_proposta_nao_aprovada(): void
+    /** O instrumento nasce na conclusão da Celebração; não há rota para criá-lo à mão. */
+    public function test_instrumento_nao_se_cria_a_mao(): void
     {
         $admin = $this->servidor($this->educacao, 'administrador_setorial', 'ti');
         $dados = [
@@ -146,13 +147,13 @@ class ParceriaVisivelTest extends TestCase
             'status' => array_key_first(Instrumento::STATUS),
         ];
 
-        $this->actingAs($admin)->post("/propostas/{$this->proposta->id}/instrumentos", $dados)->assertForbidden();
+        $this->actingAs($admin)->post("/propostas/{$this->proposta->id}/instrumentos", $dados)->assertNotFound();
 
         $rascunho = Proposta::forceCreate([
             'chamamento_id' => $this->proposta->chamamento_id, 'osc_id' => $this->proposta->osc_id,
             'titulo' => 'Rascunho', 'objeto' => 'x', 'status' => 'rascunho', 'valor_solicitado' => 1,
         ]);
-        $this->actingAs($admin)->post("/propostas/{$rascunho->id}/instrumentos", $dados)->assertForbidden();
+        $this->actingAs($admin)->post("/propostas/{$rascunho->id}/instrumentos", $dados)->assertNotFound();
 
         $this->assertSame(1, Instrumento::count());
     }

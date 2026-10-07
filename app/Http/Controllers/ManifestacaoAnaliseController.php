@@ -45,14 +45,10 @@ class ManifestacaoAnaliseController extends Controller
         $manifestacao->load(['osc', 'orgao', 'metas.etapas', 'planoItens', 'desembolsos', 'contrapartidas', 'equipe',
             'documentos', 'parecerPor', 'decididaPor', 'chamamento', 'proposta']);
 
-        // Só programas da Secretaria a que a manifestação se dirige: o
-        // chamamento nasce dentro de um programa, e é ele que define o órgão.
-        $programas = Programa::where('orgao_id', $manifestacao->orgao_id)->orderBy('name')->get();
-
         // Nova Proposta: a SCP escolhe a Secretaria que a atende.
         $orgaos = $manifestacao->ehNovaProposta() ? \App\Models\Orgao::orderBy('name')->get() : collect();
 
-        return view('manifestacoes.show', compact('manifestacao', 'programas', 'orgaos'));
+        return view('manifestacoes.show', compact('manifestacao', 'orgaos'));
     }
 
     public function downloadDocumento(ManifestacaoInteresse $manifestacao, \App\Models\Documento $documento)
@@ -133,17 +129,15 @@ class ManifestacaoAnaliseController extends Controller
 
         $data = $request->validate([
             'decisao'     => ['required', Rule::in(array_keys(ManifestacaoInteresse::ENCAMINHAMENTOS))],
-            'programa_id' => ['nullable', Rule::exists('programas', 'id')->where('orgao_id', $manifestacao->orgao_id)],
             'numero'      => ['required', 'string', 'max:50'],
             'fundamento'  => ['required', 'string'],
         ], [
-            'programa_id.exists'  => 'O programa precisa ser da mesma Secretaria da manifestação.',
             'numero.required'     => 'Dê o número do chamamento: é por ele que a parceria é citada nos atos e na publicidade.',
             'fundamento.required' => 'Fundamente o enquadramento (arts. 30 e 31 da Lei 13.019/2014).',
         ]);
 
         DB::transaction(function () use ($manifestacao, $data) {
-            $programa = $this->programaDoDeferimento($manifestacao, $data['programa_id'] ?? null);
+            $programa = $this->programaDoDeferimento($manifestacao);
 
             $chamamento = Chamamento::create([
                 'programa_id'     => $programa->id,
@@ -222,12 +216,8 @@ class ManifestacaoAnaliseController extends Controller
     }
 
     /** O programa do chamamento: a pasta geral da Secretaria, criada uma vez e reaproveitada. */
-    private function programaDoDeferimento(ManifestacaoInteresse $manifestacao, ?string $escolhido): Programa
+    private function programaDoDeferimento(ManifestacaoInteresse $manifestacao): Programa
     {
-        if ($escolhido) {
-            return Programa::findOrFail($escolhido);
-        }
-
         return Programa::firstOrCreate(
             ['orgao_id' => $manifestacao->orgao_id, 'name' => self::PROGRAMA_PADRAO],
             [

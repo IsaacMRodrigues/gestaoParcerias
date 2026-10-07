@@ -136,7 +136,7 @@ class ChamamentoController extends Controller
             // de lá (ver Peca::ORIGEM_PLANEJAMENTO), não uma cópia.
             'pecas.origem.processo', 'pecas.origem.anexos', 'pecas.origem.assinante',
             'selecaoTramitacoes.remetente',
-            'recursos.osc', 'recursos.respondente',
+            'recursos.osc',
             'propostas.osc',
         ]);
         $pecas = $chamamento->pecas;

@@ -13,7 +13,7 @@
                         <tr>
                             <th class="px-6 py-3.5 text-left text-[12px] font-bold text-gray-500 uppercase tracking-wider">Número</th>
                             <th class="px-6 py-3.5 text-left text-[12px] font-bold text-gray-500 uppercase tracking-wider">OSC</th>
-                            <th class="px-6 py-3.5 text-left text-[12px] font-bold text-gray-500 uppercase tracking-wider">Programa</th>
+                            <th class="px-6 py-3.5 text-left text-[12px] font-bold text-gray-500 uppercase tracking-wider">Secretaria</th>
                             <th class="px-6 py-3.5 text-left text-[12px] font-bold text-gray-500 uppercase tracking-wider">Vigência</th>
                             <th class="px-6 py-3.5 text-left text-[12px] font-bold text-gray-500 uppercase tracking-wider">Valor Repasse</th>
                             <th class="px-6 py-3.5 text-left text-[12px] font-bold text-gray-500 uppercase tracking-wider">Status</th>
@@ -31,7 +31,7 @@
                                 </td>
                                 <td class="px-6 py-4 text-sm text-gray-600">{{ $instrumento->proposta->osc->name }}</td>
                                 <td class="px-6 py-4 text-sm text-gray-600">
-                                    {{ $instrumento->proposta->chamamento->programa->sigla ?? $instrumento->proposta->chamamento->programa->name }}
+                                    {{ $instrumento->proposta->chamamento->programa?->orgao?->sigla ?? $instrumento->proposta->chamamento->programa?->orgao?->name ?? '—' }}
                                 </td>
                                 <td class="px-6 py-4 text-sm text-gray-600 whitespace-nowrap">
                                     {{ $instrumento->data_inicio->format('d/m/Y') }}
@@ -46,15 +46,13 @@
                                     </span>
                                 </td>
                                 <td class="px-6 py-4 text-right text-sm font-medium space-x-3 whitespace-nowrap">
-                                    <a href="{{ route('instrumentos.minuta', $instrumento) }}" target="_blank"
-                                       class="text-gray-500 hover:text-gray-800">Minuta</a>
                                     <a href="{{ route('instrumentos.show', $instrumento) }}" class="font-semibold text-brand-700 hover:text-brand-800 transition">Ver</a>
                                 </td>
                             </tr>
                         @empty
                             <tr>
                                 <td colspan="7" class="px-6 py-12">
-                                    <x-empty-state icone="pasta">Nenhum instrumento formalizado.</x-empty-state>
+                                    <x-empty-state icone="pasta">Nenhum instrumento ainda: ele nasce quando a Celebração é concluída.</x-empty-state>
                                 </td>
                             </tr>
                         @endforelse

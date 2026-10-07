@@ -13,9 +13,9 @@
                 </h2>
             </div>
             <div class="flex gap-2">
-                <a href="{{ route('instrumentos.minuta', $instrumento) }}" target="_blank"
+                <a href="{{ route('celebracao.show', $instrumento->proposta) }}"
                    class="btn btn-secondary btn-sm">
-                    Imprimir Minuta
+                    Termo e documentos (Celebração)
                 </a>
                 @can('execucao')
                     @if($instrumento->status === 'vigente')
@@ -25,24 +25,6 @@
                         </a>
                     @endif
                 @endcan
-                @if($instrumento->status === 'minuta')
-                    <form action="{{ route('instrumentos.assinar', $instrumento) }}" method="POST">
-                        @csrf @method('PATCH')
-                        <button type="submit"
-                                class="btn btn-primary btn-sm">
-                            Marcar como Assinado
-                        </button>
-                    </form>
-                @endif
-                @if($instrumento->status === 'assinado' && !$instrumento->publicado_doe)
-                    <form action="{{ route('instrumentos.publicar', $instrumento) }}" method="POST">
-                        @csrf @method('PATCH')
-                        <button type="submit"
-                                class="btn btn-primary btn-sm">
-                            Registrar Publicação (DOE)
-                        </button>
-                    </form>
-                @endif
                 <a href="{{ route('instrumentos.edit', $instrumento) }}"
                    class="btn btn-secondary btn-sm">
                     Editar
@@ -68,8 +50,8 @@
                         <dd class="text-gray-900">{{ $instrumento->proposta->osc->cnpj }}</dd>
                     </div>
                     <div>
-                        <dt class="text-gray-500">Programa</dt>
-                        <dd class="text-gray-900">{{ $instrumento->proposta->chamamento->programa->name }}</dd>
+                        <dt class="text-gray-500">Secretaria</dt>
+                        <dd class="text-gray-900">{{ $instrumento->proposta->chamamento->programa?->orgao?->name ?? '—' }}</dd>
                     </div>
                     <div>
                         <dt class="text-gray-500">Status</dt>
@@ -174,20 +156,10 @@
                 <div class="flex items-center justify-between px-6 py-4 border-b border-gray-200">
                     <h3 class="text-base font-semibold text-gray-800">Ordens de Pagamento</h3>
                     @if($instrumento->status === 'vigente')
-                        @php $temGlobal = $instrumento->ordensPagamento->contains('tipo', 'global'); @endphp
-                        <form action="{{ route('ordens-pagamento.create', $instrumento) }}" method="POST"
-                              class="flex items-center gap-2">
+                        <form action="{{ route('ordens-pagamento.create', $instrumento) }}" method="POST">
                             @csrf
-                            <select name="tipo"
-                                    class="border-gray-300 rounded-md shadow-sm text-sm focus:ring-brand-500 focus:border-brand-500">
-                                @foreach(\App\Models\OrdemPagamento::TIPOS as $key => $label)
-                                    <option value="{{ $key }}" {{ $key === 'global' && $temGlobal ? 'disabled' : '' }}>
-                                        {{ $label }}{{ $key === 'global' && $temGlobal ? ' — já emitida' : '' }}
-                                    </option>
-                                @endforeach
-                            </select>
                             <button type="submit" class="btn btn-primary btn-sm whitespace-nowrap">
-                                + Nova OP
+                                + Nova OP da parcela
                             </button>
                         </form>
                     @else
@@ -209,7 +181,6 @@
                                 <p class="text-xs text-gray-400 mt-0.5">
                                     @if($op->valor) R$ {{ number_format($op->valor, 2, ',', '.') }} @endif
                                     @if($op->data_emissao) · Emissão: {{ $op->data_emissao->format('d/m/Y') }} @endif
-                                    @if($op->temDadosBancarios()) · 📎 dados bancários @endif
                                 </p>
                             </div>
                             <div class="flex items-center gap-3 ml-4 shrink-0">

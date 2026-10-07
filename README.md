@@ -557,9 +557,6 @@ Trazer os demais cenários para `tests/Feature` é uma das [Pendências](#pendê
 - As permissões `pareceres_tecnico`, `pareceres_juridico` e `pareceres_decisao` e as tabelas `pareceres` e
   `diligencias` ficaram sem tela (o parecer avulso saiu em 02/10/2026). Tirá-las mexe nos perfis em produção
   (o `analista_viabilidade_tecnica` só tem a primeira) — decidir junto com a revisão dos perfis.
-- **Formalizar instrumento antes da Celebração concluída** continua possível: o botão aparece com a
-  proposta aprovada. Exigir a Celebração concluída é decisão pendente.
-- `DELETE /instrumentos/{id}` aponta para um método que não existe (500). Nada na tela chama.
 - O selo da **Celebração** ainda diz "Com …" o setor; o da Seleção já diz "Em análise".
 - Na prestação de contas, o **laudo de obra** e os **pareceres** saem com `XXXXX` no corpo.
 - Checklist da dispensa: itens 16 a 18 e a publicação do termo (item 15).
@@ -583,6 +580,24 @@ Trazer os demais cenários para `tests/Feature` é uma das [Pendências](#pendê
 
 Da mais recente para a mais antiga. Cada entrada diz o que mudou, **por quê** e como foi
 conferido — o porquê é o que falta a quem pega o código depois.
+
+- [2026-10-06] **O instrumento nasce na conclusão da Celebração; saem as sobras sem uso**
+  - **Instrumento automático** (`Proposta::criarInstrumento`): ao concluir a Celebração, a parceria ganha o
+    instrumento vigente, com número do ano (`001/2026`, `Instrumento::proximoNumero`), tipo do programa, objeto,
+    valores e datas da proposta, data da última assinatura do Termo e da publicação no DOE. Saíram o "Formalizar
+    Instrumento", o "Marcar como Assinado" (que só trocava o status), o "Registrar Publicação" e a minuta própria
+    — o Termo assinado e publicado é o da Celebração, aberto pelo botão "Termo e documentos". A tela do
+    instrumento fica para consultar e corrigir dados. Sem isso a parceria concluída não chegava à Execução nem
+    à Transparência. A migração `2026_10_06_100000` cria o das Celebrações já concluídas
+  - **Ordem de Pagamento no instrumento só parcial** (por parcela): a Global é peça da Celebração (etapas 19 a
+    21). O anexo de dados bancários da OP saiu; a OP mostra os enviados pela OSC na Celebração
+  - **Sobras sem uso**: a resposta antiga do recurso (Provido/Improvido, texto e "respondido por", que ninguém
+    preenche desde que a resposta virou peça); a verificação de e-mail e o "confirmar senha" do Breeze
+    (controllers, telas, rotas e os dois testes deles); o campo de programa no deferimento da manifestação (o
+    chamamento nasce sempre na pasta geral da Secretaria); "Programa" virou Secretaria nas telas de Instrumentos.
+    As colunas antigas do recurso ficam no banco, vazias
+  - Conferido: `InstrumentoNaConclusaoTest` (falha sem a criação automática), `ParceriaVisivelTest` (não há rota
+    para criar instrumento à mão); suíte 177/177; telas abertas com os dados locais
 
 - [2026-10-02] **A UG decide a proposta de dispensa ou inexigibilidade** (`PropostaController::decidir`)
   - A manifestação deferida como dispensa ou inexigibilidade gera a proposta "Submetida", e ela não passa pela

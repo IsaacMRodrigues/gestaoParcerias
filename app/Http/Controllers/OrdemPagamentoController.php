@@ -8,7 +8,6 @@ use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\View\View;
-use Symfony\Component\HttpFoundation\StreamedResponse;
 
 class OrdemPagamentoController extends Controller
 {
@@ -17,12 +16,8 @@ class OrdemPagamentoController extends Controller
         abort_unless($instrumento->status === 'vigente', 403,
             'Ordens de pagamento só podem ser emitidas em instrumentos vigentes.');
 
-        $tipo = $request->input('tipo') === 'global' ? 'global' : 'parcial';
-
-        // O empenho global é solicitado uma única vez por instrumento.
-        if ($tipo === 'global' && $instrumento->ordensPagamento()->where('tipo', 'global')->exists()) {
-            return back()->with('info', 'Este instrumento já possui uma Ordem de Pagamento Global.');
-        }
+        // A OP Global é peça da Celebração (etapas 18 a 20); aqui, só as parciais de cada parcela.
+        $tipo = 'parcial';
 
         $numero = (int) $instrumento->ordensPagamento()->max('numero') + 1;
 
@@ -33,7 +28,7 @@ class OrdemPagamentoController extends Controller
         ]);
 
         return redirect()->route('ordens-pagamento.edit', $op)
-            ->with('success', 'Ordem de pagamento criada. Preencha os dados, anexe o comprovante bancário e assine.');
+            ->with('success', 'Ordem de pagamento criada. Preencha os dados e assine.');
     }
 
     public function edit(OrdemPagamento $ordem): View
@@ -77,32 +72,6 @@ class OrdemPagamentoController extends Controller
 
         return redirect()->route('ordens-pagamento.edit', $ordem)
             ->with('success', 'Ordem de pagamento assinada eletronicamente.');
-    }
-
-    public function uploadDadosBancarios(Request $request, OrdemPagamento $ordem): RedirectResponse
-    {
-        $request->validate([
-            'arquivo' => ['required', 'file', 'mimes:pdf,jpg,jpeg,png', 'max:10240'],
-        ]);
-
-        if ($ordem->dados_bancarios_path) {
-            Storage::disk('local')->delete($ordem->dados_bancarios_path);
-        }
-
-        $file = $request->file('arquivo');
-        $ordem->update([
-            'dados_bancarios_path' => $file->store('ordens-pagamento', 'local'),
-            'dados_bancarios_nome' => $file->getClientOriginalName(),
-        ]);
-
-        return back()->with('success', 'Dados bancários anexados.');
-    }
-
-    public function downloadDadosBancarios(OrdemPagamento $ordem): StreamedResponse
-    {
-        abort_unless($ordem->dados_bancarios_path && Storage::disk('local')->exists($ordem->dados_bancarios_path), 404);
-
-        return Storage::disk('local')->download($ordem->dados_bancarios_path, $ordem->dados_bancarios_nome);
     }
 
     public function imprimir(OrdemPagamento $ordem): View

@@ -36,7 +36,7 @@ class PropostaController extends Controller
     {
         $proposta->load(['chamamento.programa.orgao', 'decididaPor', 'osc', 'metas.etapas', 'planoItens', 'desembolsos',
             'contrapartidas', 'equipe', 'documentos.uploader',
-            'recursos.chamamento', 'recursos.respondente']);
+            'recursos.chamamento']);
 
         return view('propostas.show', compact('proposta'));
     }

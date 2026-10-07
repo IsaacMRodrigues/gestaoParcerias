@@ -294,17 +294,7 @@ Route::middleware(['auth', 'staff', 'readonly'])->group(function () {
 
     // Formalização (instrumentos e aditivos)
     Route::middleware('permission:formalizacao')->group(function () {
-        Route::resource('instrumentos', InstrumentoController::class)->except(['create', 'store']);
-        Route::get('propostas/{proposta}/instrumentos/create', [InstrumentoController::class, 'create'])
-            ->name('instrumentos.create');
-        Route::post('propostas/{proposta}/instrumentos', [InstrumentoController::class, 'store'])
-            ->name('instrumentos.store');
-        Route::get('instrumentos/{instrumento}/minuta', [InstrumentoController::class, 'minuta'])
-            ->name('instrumentos.minuta');
-        Route::patch('instrumentos/{instrumento}/assinar', [InstrumentoController::class, 'assinar'])
-            ->name('instrumentos.assinar');
-        Route::patch('instrumentos/{instrumento}/publicar', [InstrumentoController::class, 'publicar'])
-            ->name('instrumentos.publicar');
+        Route::resource('instrumentos', InstrumentoController::class)->only(['index', 'show', 'edit', 'update']);
         Route::resource('instrumentos.aditivos', AditivoController::class)->except(['index', 'show']);
         Route::get('instrumentos/{instrumento}/aditivos/{aditivo}/documentacao', [AditivoController::class, 'documentacao'])
             ->name('instrumentos.aditivos.documentacao');
@@ -316,8 +306,6 @@ Route::middleware(['auth', 'staff', 'readonly'])->group(function () {
         Route::get('ordens-pagamento/{ordem}/editar', [OrdemPagamentoController::class, 'edit'])->name('ordens-pagamento.edit');
         Route::put('ordens-pagamento/{ordem}', [OrdemPagamentoController::class, 'update'])->name('ordens-pagamento.update');
         Route::patch('ordens-pagamento/{ordem}/assinar', [OrdemPagamentoController::class, 'assinar'])->name('ordens-pagamento.assinar');
-        Route::post('ordens-pagamento/{ordem}/dados-bancarios', [OrdemPagamentoController::class, 'uploadDadosBancarios'])->name('ordens-pagamento.dados-bancarios.upload');
-        Route::get('ordens-pagamento/{ordem}/dados-bancarios', [OrdemPagamentoController::class, 'downloadDadosBancarios'])->name('ordens-pagamento.dados-bancarios.download');
         Route::get('ordens-pagamento/{ordem}/imprimir', [OrdemPagamentoController::class, 'imprimir'])->name('ordens-pagamento.imprimir');
         Route::delete('ordens-pagamento/{ordem}', [OrdemPagamentoController::class, 'destroy'])->name('ordens-pagamento.destroy');
     });

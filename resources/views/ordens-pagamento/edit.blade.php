@@ -61,25 +61,18 @@
                 @endunless
             </form>
 
-            {{-- Dados bancários --}}
+            {{-- Os dados bancários são os da Celebração (enviados pela OSC na etapa 18). --}}
+            @php $dadosBancarios = $instrumento->proposta?->pecas()->where('chave', 'dados_bancarios')->first(); @endphp
             <div class="bg-white rounded-xl border border-gray-200 p-6">
-                <h3 class="text-sm font-semibold text-gray-900 mb-3">Dados bancários (comprovante)</h3>
-                @if($op->temDadosBancarios())
+                <h3 class="text-sm font-semibold text-gray-900 mb-2">Dados bancários</h3>
+                @if($dadosBancarios?->temArquivo())
                     <div class="flex items-center justify-between gap-4 text-sm">
-                        <span class="text-gray-700">📎 {{ $op->dados_bancarios_nome }}</span>
-                        <a href="{{ route('ordens-pagamento.dados-bancarios.download', $op) }}" class="font-semibold text-brand-700 hover:text-brand-800 transition">Baixar</a>
+                        <span class="text-gray-700">{{ $dadosBancarios->arquivo_nome }} <span class="text-gray-400">· enviados pela OSC na Celebração</span></span>
+                        <a href="{{ route('pecas.download', $dadosBancarios) }}" class="font-semibold text-brand-700 hover:text-brand-800 transition">Baixar</a>
                     </div>
                 @else
-                    <p class="text-sm text-gray-400 mb-3">Nenhum arquivo anexado.</p>
+                    <p class="text-sm text-gray-400">A OSC ainda não enviou os dados bancários na Celebração.</p>
                 @endif
-                <form method="POST" action="{{ route('ordens-pagamento.dados-bancarios.upload', $op) }}"
-                      enctype="multipart/form-data" class="flex items-center gap-3 mt-3">
-                    @csrf
-                    <input type="file" name="arquivo" required accept=".pdf,.jpg,.jpeg,.png"
-                           class="text-sm text-gray-600 file:mr-3 file:py-1.5 file:px-3 file:rounded-md file:border-0 file:text-sm file:bg-brand-50 file:text-brand-700 hover:file:bg-brand-100" />
-                    <button type="submit" class="btn btn-primary btn-sm">Anexar</button>
-                </form>
-                <x-input-error :messages="$errors->get('arquivo')" class="mt-2" />
             </div>
 
             {{-- Ações --}}
