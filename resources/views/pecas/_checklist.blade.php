@@ -24,7 +24,21 @@
         $grupos = $grupos->sortKeysUsing(fn ($a, $b) => // o bloco sem etapa vem primeiro
             ($a === $SEM_ETAPA ? -1 : (int) $a) <=> ($b === $SEM_ETAPA ? -1 : (int) $b));
     }
+
+    // O que esta pessoa pode baixar, e já tem conteúdo: texto escrito ou arquivo enviado.
+    $temConteudo = fn ($p) => $p->tipo === 'modelo'
+        ? filled($p->vemDoPlanejamento() ? $p->origem?->conteudo : $p->conteudo)
+        : ($p->vemDoPlanejamento() ? (bool) $p->origem?->temAnexo() : $p->temArquivo());
+    $baixaveis = $pecas->filter(fn ($p) => $temConteudo($p) && $p->podeBaixar(auth()->user()));
 @endphp
+
+@if($baixaveis->isNotEmpty())
+    <div class="px-6 py-2.5 border-b border-gray-100 flex items-center justify-end gap-3 text-xs">
+        <span class="text-gray-400">{{ $baixaveis->count() }} documento(s) disponível(is) para você</span>
+        <a href="{{ route('pecas.lote', ['pecas' => $baixaveis->pluck('id')->all(), 'nome' => $nomeDoLote ?? 'documentos']) }}"
+           class="font-semibold text-brand-700 hover:text-brand-800 transition">Baixar todos (ZIP)</a>
+    </div>
+@endif
 
 @foreach($grupos as $chaveGrupo => $pecasDoGrupo)
     @php
@@ -216,7 +230,10 @@
                         </div>
 
                         {{-- Arquivo já enviado: chip compacto no lugar do formulário --}}
-                        @if($peca->vemDoPlanejamento())
+                        @if($ehModelo && $baixaveis->contains('id', $peca->id))
+                            <a href="{{ route('pecas.pdf', $peca) }}"
+                               class="shrink-0 text-xs font-semibold text-brand-700 hover:text-brand-800 transition">Baixar PDF</a>
+                        @elseif($peca->vemDoPlanejamento())
                             {{-- Nada a enviar nem a remover: o arquivo é o do processo. --}}
                         @elseif(! $ehModelo && $peca->temArquivo())
                             <div class="flex items-center gap-2 shrink-0">
@@ -227,8 +244,10 @@
                                     <span class="text-xs text-gray-700 truncate">{{ $peca->arquivo_nome }}</span>
                                     <span class="text-xs text-gray-400 shrink-0">{{ $peca->tamanhoFormatado() }}</span>
                                 </span>
-                                <a href="{{ route('pecas.download', $peca) }}"
-                                   class="text-xs font-semibold text-brand-700 hover:text-brand-800 transition">Baixar</a>
+                                @if($baixaveis->contains('id', $peca->id))
+                                    <a href="{{ route('pecas.download', $peca) }}"
+                                       class="text-xs font-semibold text-brand-700 hover:text-brand-800 transition">Baixar</a>
+                                @endif
                                 @if($podePreencher)
                                     <form action="{{ route('pecas.arquivo.remover', $peca) }}" method="POST"
                                           data-confirm="Remover este arquivo?">
@@ -290,8 +309,10 @@
                                             <span class="text-xs text-gray-700 truncate">{{ $anexo->arquivo_nome }}</span>
                                             <span class="text-xs text-gray-400 shrink-0">{{ $anexo->tamanhoLegivel() }}</span>
                                         </span>
-                                        <a href="{{ route('pecas.origem.anexo', [$peca, $anexo]) }}"
-                                           class="text-xs font-semibold text-brand-700 hover:text-brand-800 transition">Baixar</a>
+                                        @if($baixaveis->contains('id', $peca->id))
+                                            <a href="{{ route('pecas.origem.anexo', [$peca, $anexo]) }}"
+                                               class="text-xs font-semibold text-brand-700 hover:text-brand-800 transition">Baixar</a>
+                                        @endif
                                     </div>
                                 @empty
                                     <p class="text-xs text-gray-400">O documento do processo não tem anexo.</p>

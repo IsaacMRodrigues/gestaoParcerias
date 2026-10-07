@@ -427,6 +427,12 @@ class User extends Authenticatable
         return $this->hasAnyRole(self::PERFIS_SOMENTE_LEITURA);
     }
 
+    /** Baixa os documentos de todos os fluxos: a SCP e o administrador do sistema. */
+    public function baixaTodosOsDocumentos(): bool
+    {
+        return $this->setor === 'scp' || $this->hasRole('administrador_setorial');
+    }
+
     /**
      * Cadastra a equipe do próprio setor? Pela permissão usuarios_setor e com lotação (o novo
      * usuário herda o setor). Quem tem cadastros usa a tela de Cadastros.

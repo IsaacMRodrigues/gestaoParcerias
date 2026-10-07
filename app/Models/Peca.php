@@ -1641,6 +1641,45 @@ HTML,
      * Pode ver o conteúdo/arquivo da peça: quem atua no sistema, ou a OSC nas
      * peças da própria parceria.
      */
+    /**
+     * Pode baixar? A SCP, tudo. A OSC, as peças abertas a ela da própria parceria (na Seleção, do
+     * chamamento em que se inscreveu). Os demais, o que leem, preenchem ou assinam, da própria Secretaria.
+     */
+    public function podeBaixar(?User $user): bool
+    {
+        if ($user === null) {
+            return false;
+        }
+        if ($user->baixaTodosOsDocumentos()) {
+            return true;
+        }
+
+        $alvo = $this->pecaable;
+
+        if ($user->ehRepresentanteOsc()) {
+            $osc = $user->osc?->id;
+            $daOsc = $alvo instanceof Chamamento
+                ? $alvo->propostas()->where('osc_id', $osc)->where('status', '!=', 'rascunho')->exists()
+                : \App\Http\Middleware\ParceriaVisivel::parceriaDe($alvo)?->osc_id === $osc;
+
+            return $daOsc && ($this->visivel_osc || $this->podePreencher($user) || $this->podeAssinarComoParte($user));
+        }
+
+        $daSecretaria = $alvo instanceof Chamamento
+            ? $alvo->visivelPara($user)
+            : (\App\Http\Middleware\ParceriaVisivel::parceriaDe($alvo)?->visivelPara($user) ?? true);
+        if (! $daSecretaria) {
+            return false;
+        }
+
+        $setor = $user->setorNoTramite();
+        $doSetor = $setor !== null && (in_array($setor, [$this->selecaoSetor(), $this->selecaoSetorAssinatura()], true)
+            || array_key_exists($setor, $this->sequenciaDeAssinaturas()));
+
+        return $this->podeVer($user) || $doSetor
+            || $this->podePreencher($user) || $this->podeAssinar($user) || $this->podeAssinarComoParte($user);
+    }
+
     public function podeVer(?User $user): bool
     {
         if (!$user) {

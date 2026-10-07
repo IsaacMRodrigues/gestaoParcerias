@@ -30,7 +30,11 @@
                 <a href="{{ route('validacao.mostrar', $peca->codigo_validacao) }}"
                    class="btn btn-secondary">Verificar autenticidade</a>
             @endif
-            <button onclick="window.print()" class="btn btn-primary">Imprimir / PDF</button>
+            @if($peca instanceof \App\Models\Peca && $peca->podeBaixar(auth()->user()))
+                <a href="{{ route('pecas.pdf', $peca) }}" class="btn btn-primary">Baixar PDF</a>
+            @else
+                <button onclick="window.print()" class="btn btn-primary">Imprimir / PDF</button>
+            @endif
         </div>
     </div>
 </x-portal-layout>

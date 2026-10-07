@@ -76,6 +76,7 @@ class OrdemPagamentoController extends Controller
 
     public function imprimir(OrdemPagamento $ordem): View
     {
+        abort_unless(auth()->user()->can('ordem_pagamento') || auth()->user()->baixaTodosOsDocumentos(), 403);
         $ordem->load('instrumento', 'assinante.roles', 'assinante.orgao');
 
         $qrValidacao = null;

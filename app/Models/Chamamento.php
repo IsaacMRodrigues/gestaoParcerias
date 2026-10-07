@@ -285,6 +285,12 @@ class Chamamento extends Model
     }
 
     /** O trâmite da Seleção só existe no Chamamento Público. */
+    /** O servidor vê o chamamento da sua Secretaria; setores transversais e administração, todos. */
+    public function visivelPara(User $user): bool
+    {
+        return $user->podeVerTodosOrgaos() || ($user->orgao_id !== null && $user->orgao_id === $this->programa?->orgao_id);
+    }
+
     public function temTramiteSelecao(): bool
     {
         return $this->tipo === 'chamamento_publico';

@@ -17,33 +17,32 @@
 </head>
 <body>
 <div class="doc">
-    {!! $peca->conteudo !!}
+    {!! $conteudo !!}
 
-    @if($peca->assinado())
-        {{-- Nome e cargo de quem assinou, como gravados no ato — ver
-             Concerns\GuardaQuemAssinou. --}}
-        @php
-            $nomeAssinante = $peca->assinanteNome();
-            $cargo = $peca->assinanteCargo();
-        @endphp
-        <table style="border:none;border-collapse:collapse;width:100%;margin-top:28px;border-top:2px solid #1e3a8a;">
+    {{-- Uma faixa por assinatura, com nome e cargo gravados no ato (ver Concerns\GuardaQuemAssinou). --}}
+    @foreach($assinaturas as $a)
+        <table style="border:none;border-collapse:collapse;width:100%;margin-top:{{ $loop->first ? '28px' : '10px' }};border-top:2px solid #1e3a8a;">
             <tr>
                 <td style="border:none;vertical-align:top;padding-top:8px;font-size:11px;color:#1e293b;line-height:1.5;">
                     <p style="margin:0;"><strong>ASSINATURA ELETRÔNICA.</strong> Documento assinado eletronicamente por
-                        <strong>{{ $nomeAssinante }}</strong>@if($cargo), {{ $cargo }}@endif,
-                        em <strong>{{ $peca->assinado_em->format('d/m/Y') }}</strong>,
-                        às <strong>{{ $peca->assinado_em->format('H:i') }}</strong>,
+                        <strong>{{ $a['nome'] }}</strong>@if($a['cargo']), {{ $a['cargo'] }}@endif,
+                        em <strong>{{ $a['em']->format('d/m/Y') }}</strong>,
+                        às <strong>{{ $a['em']->format('H:i') }}</strong>,
                         conforme horário oficial de Brasília, com fundamento na Lei Federal nº 13.019/2014.</p>
-                    <p style="margin:4px 0 0;">A autenticidade pode ser verificada em
-                        <strong>{{ url('/validar') }}</strong> com o código
-                        <strong style="font-family:monospace;letter-spacing:.5px;">{{ $peca->codigo_validacao }}</strong>.</p>
+                    @if($a['codigo'])
+                        <p style="margin:4px 0 0;">A autenticidade pode ser verificada em
+                            <strong>{{ url('/validar') }}</strong> com o código
+                            <strong style="font-family:monospace;letter-spacing:.5px;">{{ $a['codigo'] }}</strong>.</p>
+                    @endif
                 </td>
-                @if($qrImg)
-                    <td style="border:none;width:120px;vertical-align:top;padding-top:8px;text-align:center;">{!! $qrImg !!}</td>
+                @if($a['qr'])
+                    <td style="border:none;width:120px;vertical-align:top;padding-top:8px;text-align:center;">
+                        <img src="{{ $a['qr'] }}" style="width:110px;height:110px;">
+                    </td>
                 @endif
             </tr>
         </table>
-    @endif
+    @endforeach
 </div>
 </body>
 </html>

@@ -77,7 +77,9 @@ class RecursoController extends Controller
         $user = auth()->user();
         $daOsc = $user->ehRepresentanteOsc() && $user->osc->id === $recurso->osc_id;
 
-        abort_unless($daOsc || $user->can('chamamentos') || $recurso->comissaoPodeVer($user), 403);
+        $daSecretaria = $user->can('chamamentos') && (bool) $recurso->proposta?->visivelPara($user);
+
+        abort_unless($daOsc || $user->baixaTodosOsDocumentos() || $daSecretaria || $recurso->comissaoPodeVer($user), 403);
         abort_unless($recurso->arquivo_path && Storage::disk('local')->exists($recurso->arquivo_path), 404);
 
         return Storage::disk('local')->download($recurso->arquivo_path, $recurso->arquivo_nome);

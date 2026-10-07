@@ -581,6 +581,25 @@ Trazer os demais cenários para `tests/Feature` é uma das [Pendências](#pendê
 Da mais recente para a mais antiga. Cada entrada diz o que mudou, **por quê** e como foi
 conferido — o porquê é o que falta a quem pega o código depois.
 
+- [2026-10-07] **Download de documentos em todos os fluxos** (`Peca::podeBaixar`, `App\Support\DocumentoPdf`)
+  - Regra: a **SCP** (e o administrador) baixa todos os documentos de todos os fluxos; a **UG** e os demais
+    setores, os da própria Secretaria que leem, preenchem ou assinam; a **OSC**, os abertos a ela da própria
+    parceria (na Seleção, do chamamento em que se inscreveu)
+  - Documento de texto (Termo, pareceres, atas, resultados…) passa a sair em **PDF**, com uma faixa por
+    assinatura e o QR de validação de cada uma — o Termo assinado em sequência mostra as quatro. Antes só o
+    Planejamento tinha PDF; o gerador agora é o mesmo para os dois (`documentos/pdf`)
+  - No checklist de Seleção, Celebração, Prestação de Contas, Alteração e Aditivo: "Baixar PDF" em cada texto,
+    "Baixar" em cada arquivo (só para quem pode) e **"Baixar todos (ZIP)"** com o que a pessoa pode baixar. No
+    portal, o documento do dossiê ganha "Baixar PDF" no lugar do imprimir do navegador
+  - A SCP passou a baixar o que antes não alcançava: os anexos da proposta (exigiam `propostas`), a impressão da
+    OP (exigia `ordem_pagamento`) e os anexos do cadastro da OSC (exigiam `cadastros`). A UG deixou de baixar o
+    que não é dela: Arquivos da OSC só de OSC com parceria na sua Secretaria, recurso só de chamamento dela
+  - **Brecha fechada:** o chamamento não passava pelo `ParceriaVisivel`, e a UG de outra Secretaria abria a
+    Seleção, preenchia e assinava peças e encaminhava pelo endereço. O middleware agora confere
+    `Chamamento::visivelPara` para o servidor (a página pública segue aberta às OSCs)
+  - Conferido: `DownloadDeDocumentosTest`, `SelecaoDaSecretariaTest` (falha sem a trava), `ArquivosDaOscTest`;
+    suíte 184/184; PDF e ZIP gerados com os dados locais (PDF de Termo com duas partes simuladas: duas faixas)
+
 - [2026-10-06] **O instrumento nasce na conclusão da Celebração; saem as sobras sem uso**
   - **Instrumento automático** (`Proposta::criarInstrumento`): ao concluir a Celebração, a parceria ganha o
     instrumento vigente, com número do ano (`001/2026`, `Instrumento::proximoNumero`), tipo do programa, objeto,

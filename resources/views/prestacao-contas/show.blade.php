@@ -256,7 +256,7 @@
                 'descricao' => 'O memorando, o relatório e o resumo da folha são gerados dos campos acima, com as somas prontas — basta conferir e assinar.',
                 'progresso' => $progresso,
             ])
-            @include('pecas._checklist', ['pecas' => $pecas])
+            @include('pecas._checklist', ['pecas' => $pecas, 'nomeDoLote' => 'prestacao-de-contas-' . $pc->id])
         </div>
 
         {{-- Trâmite --}}

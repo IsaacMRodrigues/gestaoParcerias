@@ -62,6 +62,7 @@ class OscController extends Controller
      */
     public function baixarAnexo(Osc $osc, string $campo): StreamedResponse
     {
+        abort_unless(auth()->user()->can('cadastros') || auth()->user()->baixaTodosOsDocumentos(), 403);
         abort_unless(array_key_exists($campo, Osc::ANEXOS) && $osc->{$campo}, 404);
 
         return Storage::disk('local')->download($osc->{$campo});

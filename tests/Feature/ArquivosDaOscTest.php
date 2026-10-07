@@ -182,8 +182,14 @@ class ArquivosDaOscTest extends TestCase
         $outraOsc->forceFill(['user_id' => $deOutra->id])->save();
 
         $this->actingAs($this->rl)->get("/arquivos-osc/{$arquivo->id}")->assertOk();
-        $this->actingAs($this->ug)->get("/arquivos-osc/{$arquivo->id}")->assertOk();
         $this->actingAs($deOutra)->get("/arquivos-osc/{$arquivo->id}")->assertForbidden();
+
+        // A UG baixa só os arquivos de OSC com parceria na sua Secretaria; a SCP, todos.
+        $this->actingAs($this->ug)->get("/arquivos-osc/{$arquivo->id}")->assertForbidden();
+        $scp = User::factory()->create(['setor' => 'scp', 'status' => true, 'approval_status' => 'aprovado']);
+        $scp->assignRole('analista_tecnico_scp');
+        $this->actingAs($scp)->get("/arquivos-osc/{$arquivo->id}")->assertOk();
+        $this->proposta();
         $this->actingAs($this->ug)->get("/oscs/{$this->osc->id}/arquivos")->assertOk()->assertSee('estatuto.pdf');
     }
 

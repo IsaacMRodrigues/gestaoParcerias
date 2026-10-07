@@ -114,10 +114,7 @@ class OscArquivoController extends Controller
 
     public function download(OscArquivo $arquivo): StreamedResponse
     {
-        $user = auth()->user();
-        $daOsc = $user->oscVinculada()?->id === $arquivo->osc_id;
-
-        abort_unless($daOsc || $user->temAcessoInterno(), 403);
+        abort_unless($arquivo->podeBaixar(auth()->user()), 403);
         abort_unless(Storage::disk('local')->exists($arquivo->arquivo_path), 404, 'Arquivo não encontrado.');
 
         return Storage::disk('local')->download($arquivo->arquivo_path, $arquivo->arquivo_nome);

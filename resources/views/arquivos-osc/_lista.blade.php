@@ -10,6 +10,7 @@
 --}}
 @php
     $atuais   = $osc->arquivosAtuais();
+    $baixa    = $osc->arquivos->first()?->podeBaixar(auth()->user()) ?? false;
     $versoes  = $osc->arquivos->groupBy('tipo');
     $proposta = $proposta ?? null;
     $podeAnalisar = $podeAnalisar ?? false;
@@ -116,8 +117,10 @@
                                                 <span class="text-xs text-gray-700 truncate">{{ $atual->arquivo_nome }}</span>
                                                 <span class="text-xs text-gray-400 shrink-0">{{ $atual->tamanhoFormatado() }}</span>
                                             </span>
-                                            <a href="{{ route('arquivos-osc.download', $atual) }}"
-                                               class="text-xs font-semibold text-brand-700 hover:text-brand-800 transition">Baixar</a>
+                                            @if($baixa)
+                                                <a href="{{ route('arquivos-osc.download', $atual) }}"
+                                                   class="text-xs font-semibold text-brand-700 hover:text-brand-800 transition">Baixar</a>
+                                            @endif
                                         </div>
                                     @elseif(! $podeEditar)
                                         <span class="text-xs text-gray-400 shrink-0">Nenhum arquivo enviado</span>
@@ -165,7 +168,11 @@
                                                 @foreach($historico as $versao)
                                                     <li>
                                                         Versão {{ $versao->versao }} ·
-                                                        <a href="{{ route('arquivos-osc.download', $versao) }}" class="text-brand-700 font-medium hover:underline">{{ $versao->arquivo_nome }}</a>
+                                                        @if($baixa)
+                                                            <a href="{{ route('arquivos-osc.download', $versao) }}" class="text-brand-700 font-medium hover:underline">{{ $versao->arquivo_nome }}</a>
+                                                        @else
+                                                            {{ $versao->arquivo_nome }}
+                                                        @endif
                                                         · {{ $versao->created_at->format('d/m/Y H:i') }}
                                                         @if($versao->remetente) · {{ $versao->remetente->name }} @endif
                                                         @if($versao->validade) · validade {{ $versao->validade->format('d/m/Y') }} @endif

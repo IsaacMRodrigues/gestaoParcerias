@@ -127,6 +127,10 @@ class DocumentoController extends Controller
             return;
         }
 
+        if ($user->baixaTodosOsDocumentos()) {
+            return;
+        }
+
         // Servidor: mesma permissão e mesmo recorte por órgão da listagem de
         // propostas — o que a tela não mostra, o download não entrega.
         abort_unless($user->can('propostas'), 403);

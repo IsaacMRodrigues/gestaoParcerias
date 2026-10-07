@@ -342,6 +342,7 @@
                 @include('pecas._checklist', [
                     'pecas'          => $pecas,
                     'rotaAnexoExtra' => route('celebracao.anexos.store', $proposta),
+                    'nomeDoLote'     => 'celebracao-' . $proposta->titulo,
                 ])
             </div>
         </div>

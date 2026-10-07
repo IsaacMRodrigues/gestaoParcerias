@@ -514,6 +514,7 @@
                 @include('pecas._checklist', [
                     'pecas'          => $pecas,
                     'rotaAnexoExtra' => auth()->user()->can('chamamentos') ? route('chamamentos.selecao.anexos.store', $chamamento) : null,
+                    'nomeDoLote'     => 'selecao-' . ($chamamento->numero ?: $chamamento->titulo),
                 ])
             </div>
         </div>

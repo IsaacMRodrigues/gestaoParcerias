@@ -3,9 +3,12 @@
 namespace App\Http\Controllers;
 
 use App\Models\Peca;
+use App\Support\DocumentoPdf;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Http\Response;
 use Illuminate\Support\Facades\Storage;
+use Symfony\Component\HttpFoundation\BinaryFileResponse;
 use Symfony\Component\HttpFoundation\StreamedResponse;
 
 class PecaController extends Controller
@@ -186,7 +189,7 @@ class PecaController extends Controller
     /** Baixa um anexo do documento do Planejamento que satisfaz esta peça, para quem vê a peça. */
     public function baixarAnexoOrigem(Peca $peca, \App\Models\ProcessoPecaAnexo $anexo): StreamedResponse
     {
-        abort_unless($peca->podeVer(auth()->user()), 403);
+        abort_unless($peca->podeBaixar(auth()->user()), 403);
         abort_unless($peca->vemDoPlanejamento()
             && $anexo->processo_peca_id === $peca->origem_processo_peca_id, 404);
         abort_unless(Storage::disk('local')->exists($anexo->arquivo_path), 404, 'Arquivo não encontrado.');
@@ -196,10 +199,60 @@ class PecaController extends Controller
 
     public function download(Peca $peca): StreamedResponse
     {
-        abort_unless($peca->podeVer(auth()->user()), 403);
+        abort_unless($peca->podeBaixar(auth()->user()), 403);
         abort_unless($peca->arquivo_path && Storage::disk('local')->exists($peca->arquivo_path), 404);
 
         return Storage::disk('local')->download($peca->arquivo_path, $peca->arquivo_nome);
+    }
+
+    /** O documento de texto em PDF, com as assinaturas. O que vem do Planejamento sai do processo. */
+    public function pdf(Peca $peca): Response
+    {
+        abort_unless($peca->podeBaixar(auth()->user()), 403);
+        $doc = $peca->vemDoPlanejamento() ? $peca->origem : $peca;
+        abort_unless($peca->tipo === 'modelo' && filled($doc?->conteudo), 404, 'Este documento não tem texto para gerar o PDF.');
+
+        return response(DocumentoPdf::gerar($doc), 200, [
+            'Content-Type'        => 'application/pdf',
+            'Content-Disposition' => 'attachment; filename="' . DocumentoPdf::nomeArquivo($peca->rotulo) . '"',
+        ]);
+    }
+
+    /** Os documentos escolhidos num ZIP: o texto em PDF, o arquivo como foi enviado. Só o que a pessoa pode baixar. */
+    public function lote(Request $request): BinaryFileResponse
+    {
+        $user = auth()->user();
+        $pecas = Peca::with('origem.anexos', 'assinaturasPartes')
+            ->whereIn('id', array_map('intval', (array) $request->query('pecas', [])))
+            ->orderBy('ordem')->get()
+            ->filter(fn (Peca $p) => $p->podeBaixar($user))->values();
+
+        $zipPath = tempnam(sys_get_temp_dir(), 'docs_') . '.zip';
+        $zip = new \ZipArchive();
+        $zip->open($zipPath, \ZipArchive::CREATE | \ZipArchive::OVERWRITE);
+        $disco = Storage::disk('local');
+
+        foreach ($pecas as $n => $peca) {
+            $doc = $peca->vemDoPlanejamento() ? $peca->origem : $peca;
+            if ($peca->tipo === 'modelo' && filled($doc?->conteudo)) {
+                $zip->addFromString(DocumentoPdf::nomeArquivo($peca->rotulo, $n + 1), DocumentoPdf::gerar($doc));
+            } elseif ($peca->vemDoPlanejamento()) {
+                foreach ($doc->anexos as $anexo) {
+                    if ($disco->exists($anexo->arquivo_path)) {
+                        $zip->addFile($disco->path($anexo->arquivo_path), sprintf('%02d-', $n + 1) . $anexo->arquivo_nome);
+                    }
+                }
+            } elseif ($peca->arquivo_path && $disco->exists($peca->arquivo_path)) {
+                $zip->addFile($disco->path($peca->arquivo_path), sprintf('%02d-', $n + 1) . $peca->arquivo_nome);
+            }
+        }
+
+        abort_if($zip->numFiles === 0, 404, 'Nenhum documento disponível para baixar.');
+        $zip->close();
+
+        $nome = \Illuminate\Support\Str::slug($request->query('nome', 'documentos')) ?: 'documentos';
+
+        return response()->download($zipPath, $nome . '.zip')->deleteFileAfterSend(true);
     }
 
     public function removerArquivo(Peca $peca): RedirectResponse

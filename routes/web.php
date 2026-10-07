@@ -222,7 +222,6 @@ Route::middleware(['auth', 'staff', 'readonly'])->group(function () {
         // Sem create/store: quem abre o cadastro de uma OSC é a própria OSC,
         // em /cadastro/osc. Ver o cabeçalho do OscController.
         Route::resource('oscs', OscController::class)->only(['index', 'edit', 'update', 'destroy']);
-        Route::get('oscs/{osc}/anexo/{campo}', [OscController::class, 'baixarAnexo'])->name('oscs.anexo');
     });
 
     // Módulo Unidade Gestora — Planejamento (Processos)
@@ -306,9 +305,12 @@ Route::middleware(['auth', 'staff', 'readonly'])->group(function () {
         Route::get('ordens-pagamento/{ordem}/editar', [OrdemPagamentoController::class, 'edit'])->name('ordens-pagamento.edit');
         Route::put('ordens-pagamento/{ordem}', [OrdemPagamentoController::class, 'update'])->name('ordens-pagamento.update');
         Route::patch('ordens-pagamento/{ordem}/assinar', [OrdemPagamentoController::class, 'assinar'])->name('ordens-pagamento.assinar');
-        Route::get('ordens-pagamento/{ordem}/imprimir', [OrdemPagamentoController::class, 'imprimir'])->name('ordens-pagamento.imprimir');
         Route::delete('ordens-pagamento/{ordem}', [OrdemPagamentoController::class, 'destroy'])->name('ordens-pagamento.destroy');
     });
+    // Anexos do cadastro da OSC: quem cuida dos cadastros e a SCP (ver OscController::baixarAnexo).
+    Route::get('oscs/{osc}/anexo/{campo}', [OscController::class, 'baixarAnexo'])->name('oscs.anexo');
+    // A impressão também é da SCP, que baixa os documentos de todos os fluxos.
+    Route::get('ordens-pagamento/{ordem}/imprimir', [OrdemPagamentoController::class, 'imprimir'])->name('ordens-pagamento.imprimir');
 
     // 4.4 Execução — repasses, despesas e controle de saldo do instrumento vigente
     Route::middleware('permission:execucao')->group(function () {
@@ -345,6 +347,8 @@ Route::middleware('auth')->group(function () {
     Route::post('pecas/{peca}/arquivo', [PecaController::class, 'upload'])->name('pecas.upload');
     Route::post('pecas/{peca}/puxar', [PecaController::class, 'puxar'])->name('pecas.puxar');
     Route::get('pecas/{peca}/arquivo', [PecaController::class, 'download'])->name('pecas.download');
+    Route::get('pecas/{peca}/pdf', [PecaController::class, 'pdf'])->name('pecas.pdf');
+    Route::get('pecas-lote', [PecaController::class, 'lote'])->name('pecas.lote');
     // Anexo do documento do Planejamento que cumpre a peça — a rota do módulo
     // de Processos exige `planejamento`, que nem todo condutor da Seleção tem.
     Route::get('pecas/{peca}/origem/anexos/{anexo}', [PecaController::class, 'baixarAnexoOrigem'])->name('pecas.origem.anexo');

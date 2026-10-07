@@ -29,7 +29,7 @@
                     'descricao' => 'Itens "puxar do módulo Gestão de Parcerias" podem ser anexados manualmente nesta versão.',
                     'progresso' => $progresso,
                 ])
-                @include('pecas._checklist', ['pecas' => $pecas])
+                @include('pecas._checklist', ['pecas' => $pecas, 'nomeDoLote' => 'aditivo-' . $aditivo->numero . '-instrumento-' . $instrumento->numero])
             </div>
         </div>
     </div>

@@ -105,6 +105,20 @@ class OscArquivo extends Model
             && $this->validade->lte(now()->addDays(self::DIAS_AVISO_VENCIMENTO)->endOfDay());
     }
 
+    /** Baixa: a própria OSC, a SCP, e o servidor da Secretaria em que a OSC tem parceria. */
+    public function podeBaixar(?User $user): bool
+    {
+        if ($user === null) {
+            return false;
+        }
+        if ($user->oscVinculada()?->id === $this->osc_id) {
+            return true;
+        }
+
+        return $user->temAcessoInterno() && ($user->baixaTodosOsDocumentos()
+            || Proposta::visiveisPara($user)->where('osc_id', $this->osc_id)->exists());
+    }
+
     public function tamanhoFormatado(): string
     {
         $kb = (int) $this->tamanho / 1024;

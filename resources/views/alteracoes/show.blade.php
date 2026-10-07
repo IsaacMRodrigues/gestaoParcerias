@@ -163,7 +163,7 @@
                 'descricao' => 'A Proposta de Alteração e as declarações são geradas do que foi preenchido — basta conferir e assinar. O resto é anexo.',
                 'progresso' => $progresso,
             ])
-            @include('pecas._checklist', ['pecas' => $pecas])
+            @include('pecas._checklist', ['pecas' => $pecas, 'nomeDoLote' => 'alteracao-' . $alteracao->numero . '-' . $proposta->titulo])
         </div>
 
         {{-- Trâmite --}}

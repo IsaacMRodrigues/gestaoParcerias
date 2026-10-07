@@ -78,26 +78,7 @@ class ProcessoPecaController extends Controller
     /** Gera o PDF (bytes) de uma peça do processo. */
     private function pdfDaPeca(ProcessoPeca $peca): string
     {
-        $qrImg = null;
-        if ($peca->assinado() && $peca->codigo_validacao) {
-            $svg = \SimpleSoftwareIO\QrCode\Facades\QrCode::format('svg')
-                ->size(110)->margin(0)
-                ->generate(route('validacao.mostrar', $peca->codigo_validacao));
-            $qrImg = '<img src="data:image/svg+xml;base64,' . base64_encode($svg) . '" style="width:110px;height:110px;">';
-        }
-
-        $html = view('processos.peca-pdf', compact('peca', 'qrImg'))->render();
-
-        $dompdf = new \Dompdf\Dompdf([
-            'isRemoteEnabled'      => true,   // permite carregar o brasão (logo remoto)
-            'isHtml5ParserEnabled' => true,
-            'defaultFont'          => 'Helvetica',
-        ]);
-        $dompdf->setPaper('A4');
-        $dompdf->loadHtml($html, 'UTF-8');
-        $dompdf->render();
-
-        return $dompdf->output();
+        return \App\Support\DocumentoPdf::gerar($peca);
     }
 
     /** Nome do arquivo PDF: "03-pedido-de-parecer-financeiro.pdf" (na ordem oficial). */
