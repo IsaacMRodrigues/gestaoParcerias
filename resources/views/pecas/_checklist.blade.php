@@ -39,15 +39,26 @@
         url(ids) { return @js(route('pecas.lote')) + '?' + ids.map(i => 'pecas[]=' + i).join('&') + '&nome=' + encodeURIComponent(@js($nomeDoLote ?? 'documentos')) },
      }">
 @if($baixaveis->isNotEmpty())
-    <div class="px-6 py-2.5 border-b border-gray-100 flex flex-wrap items-center justify-end gap-x-4 gap-y-1 text-xs">
-        <span class="text-gray-400">{{ $baixaveis->count() }} documento(s) disponível(is) para você</span>
-        <button type="button" class="text-gray-500 hover:text-gray-800 transition"
-                @click="sel = sel.length === todos.length ? [] : [...todos]"
-                x-text="sel.length === todos.length ? 'Desmarcar todos' : 'Marcar todos'">Marcar todos</button>
-        <a :href="sel.length ? url(sel) : null" x-show="sel.length" x-cloak
-           class="font-semibold text-brand-700 hover:text-brand-800 transition">Baixar selecionados (<span x-text="sel.length"></span>) em ZIP</a>
-        <a href="{{ route('pecas.lote', ['pecas' => $baixaveis->pluck('id')->all(), 'nome' => $nomeDoLote ?? 'documentos']) }}"
-           x-show="! sel.length" class="font-semibold text-brand-700 hover:text-brand-800 transition">Baixar todos (ZIP)</a>
+    <div class="px-6 py-3 bg-brand-50 border-y border-brand-100 flex flex-wrap items-center gap-3">
+        <svg class="w-5 h-5 shrink-0 text-brand-700" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2" aria-hidden="true">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5M16.5 12L12 16.5m0 0L7.5 12m4.5 4.5V3"/>
+        </svg>
+        <div class="min-w-0">
+            <p class="text-sm font-semibold text-brand-800">Baixar documentos</p>
+            <p class="text-xs text-brand-700">
+                <span x-show="! sel.length">Marque os documentos na lista, ou baixe os {{ $baixaveis->count() }} disponíveis para você.</span>
+                <span x-show="sel.length" x-cloak><span x-text="sel.length"></span> de {{ $baixaveis->count() }} marcado(s).</span>
+            </p>
+        </div>
+        <div class="ml-auto flex flex-wrap items-center gap-2">
+            <button type="button" class="btn btn-outline btn-sm bg-white"
+                    @click="sel = sel.length === todos.length ? [] : [...todos]"
+                    x-text="sel.length === todos.length ? 'Desmarcar todos' : 'Marcar todos'">Marcar todos</button>
+            <a :href="sel.length ? url(sel) : null" x-show="sel.length" x-cloak class="btn btn-primary btn-sm"
+               x-text="'Baixar selecionados (' + sel.length + ')'">Baixar selecionados</a>
+            <a href="{{ route('pecas.lote', ['pecas' => $baixaveis->pluck('id')->all(), 'nome' => $nomeDoLote ?? 'documentos']) }}"
+               x-show="! sel.length" class="btn btn-primary btn-sm">Baixar todos (ZIP)</a>
+        </div>
     </div>
 @endif
 
@@ -161,9 +172,9 @@
                 @if($baixaveis->isNotEmpty())
                     @if($baixaveis->contains('id', $peca->id))
                         <input type="checkbox" value="{{ $peca->id }}" x-model="sel" aria-label="Selecionar {{ $peca->rotulo }} para download"
-                               class="mt-1 shrink-0 rounded border-gray-300 text-brand-600 focus:ring-brand-500">
+                               class="mt-0.5 w-5 h-5 shrink-0 rounded border-gray-300 text-brand-600 focus:ring-brand-500 cursor-pointer">
                     @else
-                        <span class="inline-block w-4 shrink-0" title="Nada para baixar ainda"></span>
+                        <span class="inline-block w-5 shrink-0" title="Nada para baixar ainda"></span>
                     @endif
                 @endif
 

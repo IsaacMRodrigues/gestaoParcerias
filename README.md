@@ -591,6 +591,8 @@ conferido — o porquê é o que falta a quem pega o código depois.
     pessoa pode baixar ganha uma caixa à esquerda; no topo, "Marcar todos"/"Desmarcar todos" e "Baixar selecionados
     (N) em ZIP" (sem nada marcado, segue o "Baixar todos"). Feito com Alpine, sem mudar o JavaScript compilado; o ZIP
     é o mesmo `pecas.lote`, que só entrega o que a pessoa pode baixar. O Planejamento já tinha a seleção
+  - A barra fica em destaque (fundo verde-claro, ícone, "Baixar documentos" e quantos estão marcados), com "Marcar
+    todos" e o download como botões; as caixas são maiores que as padrão
   - Conferido: `DownloadDeDocumentosTest` (caixas só onde se pode baixar); no navegador, duas marcadas geraram um ZIP
     com os dois documentos e "Marcar todos" marcou as 14; suíte 193/193; 435 telas sem erro
 
