@@ -21,6 +21,7 @@
         'certidoes'      => 'Com data de validade. Um aviso chega por e-mail ' . \App\Models\OscArquivo::DIAS_AVISO_VENCIMENTO . ' dias antes de vencer.',
         'institucionais' => 'Estatuto e ata de eleição da diretoria atual.',
         'declaracoes'    => 'Abra o texto já preenchido com o cadastro, imprima, assine e anexe.',
+        'complementares' => 'Opcionais. Enviados aqui, já preenchem os itens iguais da Celebração de cada parceria. O balanço tem validade.',
     ];
     $acao = 'inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold cursor-pointer select-none transition marker:content-none';
     $seta = '<svg class="w-3.5 h-3.5 transition group-open:rotate-90" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.6"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/></svg>';
@@ -144,7 +145,7 @@
                                                 </div>
                                                 @if(\App\Models\OscArquivo::exigeValidade($tipo))
                                                     <div>
-                                                        <label class="block text-xs text-gray-500 mb-1">Válida até *</label>
+                                                        <label class="block text-xs text-gray-500 mb-1">{{ $tipo === 'balanco_patrimonial' ? 'Válido até' : 'Válida até' }} *</label>
                                                         <input type="date" name="validade" required min="{{ now()->format('Y-m-d') }}" class="{{ $campo }}">
                                                     </div>
                                                 @endif

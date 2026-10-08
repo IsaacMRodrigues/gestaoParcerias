@@ -17,7 +17,7 @@ class OscArquivo extends Model
     /** Avisa a OSC por e-mail esta quantidade de dias antes de a certidão vencer. */
     public const DIAS_AVISO_VENCIMENTO = 7;
 
-    /** Grupos e documentos. Certidões têm validade; declarações têm texto-modelo para assinar. */
+    /** Grupos e documentos. Certidões e balanço têm validade; declarações têm texto-modelo; complementares são opcionais. */
     public const GRUPOS = [
         'certidoes' => [
             'rotulo' => 'CND — Certidões negativas',
@@ -46,6 +46,15 @@ class OscArquivo extends Model
                 'decl_autenticidade' => 'Declaração de autenticidade dos documentos',
             ],
         ],
+        'complementares' => [
+            'rotulo' => 'Documentos complementares',
+            'itens'  => [
+                'docs_presidente'     => 'RG, CPF e comprovante de residência do presidente',
+                'relacao_dirigentes'  => 'Relação nominal atualizada dos dirigentes',
+                'balanco_patrimonial' => 'Balanço patrimonial do exercício anterior',
+                'experiencia_previa'  => 'Comprovantes de experiência prévia (mínimo de um ano)',
+            ],
+        ],
     ];
 
     protected $fillable = [
@@ -69,9 +78,16 @@ class OscArquivo extends Model
         return self::tipos()[$tipo] ?? $tipo;
     }
 
+    /** Certidões e balanço: valem até uma data. */
     public static function exigeValidade(string $tipo): bool
     {
-        return array_key_exists($tipo, self::GRUPOS['certidoes']['itens']);
+        return array_key_exists($tipo, self::GRUPOS['certidoes']['itens']) || $tipo === 'balanco_patrimonial';
+    }
+
+    /** Opcional na área: quando enviado, já preenche o item igual da Celebração. */
+    public static function ehComplementar(string $tipo): bool
+    {
+        return array_key_exists($tipo, self::GRUPOS['complementares']['itens']);
     }
 
     public static function ehDeclaracao(string $tipo): bool

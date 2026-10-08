@@ -90,6 +90,10 @@ class Osc extends Model
 
         foreach (OscArquivo::tipos() as $tipo => $rotulo) {
             $arquivo = $atuais[$tipo] ?? null;
+            // Complementar não é exigido na área: só pesa a recusa nesta parceria.
+            if (OscArquivo::ehComplementar($tipo) && (!$arquivo || $arquivo->vencida())) {
+                continue;
+            }
             if (!$arquivo) {
                 $pend[] = $rotulo . ' (não anexado)';
             } elseif ($arquivo->vencida()) {

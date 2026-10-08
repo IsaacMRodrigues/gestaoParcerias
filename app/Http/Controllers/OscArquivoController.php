@@ -47,8 +47,8 @@ class OscArquivoController extends Controller
         ], [
             'arquivo.required'        => 'Escolha o arquivo.',
             'arquivo.mimes'           => 'Envie em PDF, JPG ou PNG.',
-            'validade.required'       => 'Informe até quando a certidão é válida.',
-            'validade.after_or_equal' => 'A certidão já está vencida: emita uma nova.',
+            'validade.required'       => 'Informe até quando o documento é válido.',
+            'validade.after_or_equal' => 'O documento já está vencido: envie um atualizado.',
         ]);
 
         $arquivo = $request->file('arquivo');
@@ -62,6 +62,8 @@ class OscArquivoController extends Controller
             'validade'     => $dados['validade'] ?? null,
             'enviado_por'  => auth()->id(),
         ]);
+
+        $this->atualizarCelebracoes($osc->propostas()->whereNotNull('celebracao_iniciada_em')->whereNull('celebracao_concluida_em')->get());
 
         return back()->withFragment('arquivo-' . $tipo)
             ->with('success', OscArquivo::rotulo($tipo) . ': nova versão anexada.');
@@ -109,9 +111,20 @@ class OscArquivoController extends Controller
         if ($analise->situacao === 'recusado') {
             \App\Support\Avisos::arquivoRecusado($analise);
         }
+        $this->atualizarCelebracoes([$proposta]);
 
         return back()->withFragment('arquivos-osc')
             ->with('success', OscArquivo::rotulo($arquivo->tipo) . ': ' . mb_strtolower(OscArquivoAnalise::SITUACOES[$dados['situacao']]) . '.');
+    }
+
+    /** Os itens da Celebração que vêm da área acompanham a versão nova ou a recusa. */
+    private function atualizarCelebracoes(iterable $propostas): void
+    {
+        foreach ($propostas as $proposta) {
+            if ($proposta->celebracao_iniciada_em) {
+                Peca::puxarDaAreaDaOsc($proposta);
+            }
+        }
     }
 
     // ---------------------------------------------------------- download

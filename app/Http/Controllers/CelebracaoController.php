@@ -93,7 +93,7 @@ class CelebracaoController extends Controller
             // O carimbo do Termo nomeia também quem contra-assinou pela OSC.
             'pecas.contraAssinante.roles', 'pecas.contraAssinante.osc',
             // E as assinaturas em sequência do Termo.
-            'pecas.assinaturasPartes', 'gestorDaCelebracao',
+            'pecas.assinaturasPartes', 'pecas.arquivoDaOsc.osc', 'gestorDaCelebracao',
             'celebracaoTramitacoes.remetente',
         ]);
 

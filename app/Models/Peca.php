@@ -26,7 +26,7 @@ class Peca extends Model
     protected $fillable = [
         'pecaable_type', 'pecaable_id', 'categoria', 'chave', 'rotulo',
         'tipo', 'obrigatorio', 'ordem', 'visivel_osc',
-        'extra', 'setor', 'etapa', 'criado_por', 'origem_processo_peca_id',
+        'extra', 'setor', 'etapa', 'criado_por', 'origem_processo_peca_id', 'osc_arquivo_id',
         'conteudo', 'arquivo_path', 'arquivo_nome', 'tamanho', 'mime_type',
         'assinado_por', 'assinado_em', 'assinante_nome', 'assinante_cargo', 'codigo_validacao',
         'contra_assinado_por', 'contra_assinado_em', 'contra_assinante_nome',
@@ -478,6 +478,19 @@ class Peca extends Model
         'apostilamento'            => ['manifestacao_osc', 'orcamento_cotacao', 'extratos_bancarios', 'plano_trabalho_atualizado'],
     ];
 
+    /** Itens da Celebração que "Arquivos da OSC" preenche: chave do item => tipo na área (ver puxarDaAreaDaOsc). */
+    public const DA_AREA_DA_OSC = [
+        'docs_presidente'     => 'docs_presidente',
+        'relacao_dirigentes'  => 'relacao_dirigentes',
+        'balanco_patrimonial' => 'balanco_patrimonial',
+        'experiencia_previa'  => 'experiencia_previa',
+    ];
+
+    /** Itens que a área inteira, completa e em dia, já atende. */
+    public const ATENDIDOS_PELA_AREA_DA_OSC = [
+        'dispensa_inexigibilidade' => ['docs_habilitacao'],
+    ];
+
     /** Cabeçalho com brasão (mesmo padrão das peças do trâmite). */
     private const CABECALHO = <<<'HTML'
 <table style="border:none;border-collapse:collapse;width:100%"><tbody><tr>
@@ -637,7 +650,7 @@ HTML,
 <p style="text-align:center"><strong>JUSTIFICATIVA PARA INEXIGIBILIDADE OU DISPENSA</strong><br>(art. 32 da Lei nº 13.019/2014)</p>
 <p style="text-align:right">São Gonçalo do Rio Abaixo, XX de XXXX de 20XX.</p>
 <p><strong>ÓRGÃO RESPONSÁVEL:</strong> Secretaria Municipal de XXXXXX</p>
-<p><strong>OSC:</strong> XXXXXXXXXX</p>
+<p><strong>OSC:</strong> {{osc_nome}}</p>
 <p><strong>DOTAÇÃO ORÇAMENTÁRIA:</strong> XXXX &nbsp; Ficha XXXX &nbsp; Fonte XXXX</p>
 <p><strong>DURAÇÃO:</strong> XX meses</p>
 <p><strong>OBJETO DA PARCERIA:</strong> XXXXXXXXXX.</p>
@@ -651,10 +664,21 @@ HTML,
 <p>Diante do exposto, entendemos haver justificativa válida, idônea e de interesse público para a celebração de Termo de XXXXXX por XXXXXX de Chamamento Público, conforme art. 30, VI, da Lei nº 13.019/2014.</p>
 <p style="text-align:center">XXXXXXXXXX<br>Secretária Municipal de XXXXXX<br>Unidade Gestora</p>
 HTML,
+            // O quadro sai de "Arquivos da OSC" e se refaz enquanto o texto em volta não é editado.
+            'verificacao_habilitacao' => self::CABECALHO . <<<'HTML'
+<p style="text-align:center"><strong>VERIFICAÇÃO DA HABILITAÇÃO</strong><br>(art. 34 da Lei nº 13.019/2014)</p>
+<p><strong>OSC:</strong> {{osc_nome}}<br><strong>CNPJ:</strong> {{osc_cnpj}}<br><strong>Processo nº:</strong> {{numero_processo}}</p>
+<p>Documentos de habilitação apresentados pela OSC em "Arquivos da OSC", no Portal de Gestão de Parcerias:</p>
+{{arquivos_da_osc}}
+<p><strong>Observações:</strong> XXXXXXXXXX</p>
+<p><strong>Conclusão:</strong> ( ) OSC habilitada &nbsp; ( ) OSC não habilitada</p>
+<p style="text-align:right">São Gonçalo do Rio Abaixo, XX de XXXX de 20XX.</p>
+<p style="text-align:center">XXXXXXXXXX<br>Secretaria Municipal de XXXXXX<br>Unidade Gestora</p>
+HTML,
             'parecer_tecnico_cnas' => self::CABECALHO . <<<'HTML'
 <p style="text-align:center"><strong>PARECER TÉCNICO</strong><br>(Art. 3º, §2º, II da Resolução nº 21/2016 - CNAS)</p>
 <p><strong>ÓRGÃO RESPONSÁVEL:</strong> Secretaria Municipal de XXXXXX</p>
-<p><strong>OSC:</strong> XXXXXXXXXX</p>
+<p><strong>OSC:</strong> {{osc_nome}}</p>
 <p><strong>OBJETO DA PARCERIA:</strong> XXXXXXXXXX.</p>
 <p>O presente parecer foi elaborado observando o disposto na Resolução nº 21/2016 - CNAS, que trata dos requisitos para a dispensa de chamamento público de OSC.</p>
 <p>A OSC oferece serviço nos moldes da Política Nacional de Assistência Social e da Tipificação Nacional de Serviços Socioassistenciais (Resolução CNAS nº 109/2009), enquadrando-se na proteção social XXXXXX.</p>
@@ -664,7 +688,7 @@ HTML,
 HTML,
             'aprovacao_plano' => self::CABECALHO . <<<'HTML'
 <p style="text-align:center"><strong>APROVAÇÃO DO PLANO DE TRABALHO</strong></p>
-<p><strong>OSC:</strong> XXXXXXXXXX<br><strong>CNPJ:</strong> XXXXXXXX<br><strong>Objeto da Parceria:</strong> XXXXXXXXXX<br><strong>Instrumento:</strong> ( ) Termo de Fomento &nbsp; ( ) Termo de Colaboração &nbsp; ( ) Acordo de Cooperação<br><strong>Secretaria/Unidade Gestora:</strong> XXXXXXXXXX</p>
+<p><strong>OSC:</strong> {{osc_nome}}<br><strong>CNPJ:</strong> {{osc_cnpj}}<br><strong>Objeto da Parceria:</strong> XXXXXXXXXX<br><strong>Instrumento:</strong> ( ) Termo de Fomento &nbsp; ( ) Termo de Colaboração &nbsp; ( ) Acordo de Cooperação<br><strong>Secretaria/Unidade Gestora:</strong> XXXXXXXXXX</p>
 <p><strong>ANÁLISE DO PLANO DE TRABALHO</strong></p>
 <table><thead><tr><th>Item</th><th>Verificação</th><th>Sim</th><th>Não</th><th>Observações</th></tr></thead><tbody>
 <tr><td>1</td><td>O Plano de Trabalho foi apresentado pela OSC selecionada no Chamamento Público?</td><td>( )</td><td>( )</td><td></td></tr>
@@ -692,7 +716,7 @@ HTML,
 HTML,
             'parecer_tecnico_celebracao' => self::CABECALHO . <<<'HTML'
 <p style="text-align:center"><strong>PARECER TÉCNICO PARA CELEBRAÇÃO DA PARCERIA</strong></p>
-<p>A Secretaria Municipal de XXXXXX, com base no que estabelece o inciso V do art. 35 da Lei 13.019/2014, referente à parceria a ser firmada entre o Município de São Gonçalo do Rio Abaixo e a OSC XXXXXXXXXX, conforme o processo nº XXXXXXXX, que tem por objeto XXXXXXXXXX, vem por meio deste parecer se pronunciar de forma expressa sobre os pontos abaixo:</p>
+<p>A Secretaria Municipal de XXXXXX, com base no que estabelece o inciso V do art. 35 da Lei 13.019/2014, referente à parceria a ser firmada entre o Município de São Gonçalo do Rio Abaixo e a OSC {{osc_nome}}, conforme o processo nº XXXXXXXX, que tem por objeto XXXXXXXXXX, vem por meio deste parecer se pronunciar de forma expressa sobre os pontos abaixo:</p>
 <p>a) Quanto ao mérito do plano de trabalho, em conformidade com a modalidade de parceria adotada: <strong>FAVORÁVEL</strong>.</p>
 <p>b) Quanto à identidade e reciprocidade de interesse das partes: <strong>FAVORÁVEL</strong>.</p>
 <p>c) Quanto à viabilidade de execução: <strong>FAVORÁVEL</strong>.</p>
@@ -972,7 +996,7 @@ HTML
             'convocacao_osc' => self::CABECALHO . <<<'HTML'
 <p style="text-align:right">São Gonçalo do Rio Abaixo, XX de XXXX de 20XX.</p>
 <p style="text-align:center"><strong>CONVOCAÇÃO PARA APRESENTAÇÃO DE PLANO DE TRABALHO E DOCUMENTOS DE HABILITAÇÃO</strong></p>
-<p><strong>OSC:</strong> XXXXXXXXXX<br><strong>CNPJ:</strong> XXXXXXXX<br><strong>Chamamento Público nº:</strong> XXX/20XX<br><strong>Processo nº:</strong> XXXXXXXX</p>
+<p><strong>OSC:</strong> {{osc_nome}}<br><strong>CNPJ:</strong> {{osc_cnpj}}<br><strong>Chamamento Público nº:</strong> XXX/20XX<br><strong>Processo nº:</strong> XXXXXXXX</p>
 <p>Prezado(a) Representante Legal,</p>
 <p>Considerando a homologação do resultado definitivo do Chamamento Público nº XXX/20XX, na qual essa Organização da Sociedade Civil foi selecionada, e nos termos dos arts. 22 e 34 da Lei Federal nº 13.019/2014 e do Decreto Municipal nº 048/2020, fica essa OSC <strong>CONVOCADA</strong> a apresentar, no prazo de XX (XXXXX) dias, por meio do PGP:</p>
 <p>a) o <strong>Plano de Trabalho</strong>, contendo a descrição da realidade, as metas, os indicadores, o cronograma de execução e o plano de aplicação dos recursos, conforme art. 22 da Lei nº 13.019/2014;</p>
@@ -982,9 +1006,9 @@ HTML
 HTML,
             'termo' => self::CABECALHO . <<<'HTML'
 <p style="text-align:center"><strong>TERMO DE XXXXXX Nº XXX/20XX</strong></p>
-<p>TERMO DE XXXXXX QUE ENTRE SI CELEBRAM O <strong>MUNICÍPIO DE SÃO GONÇALO DO RIO ABAIXO</strong>, por intermédio da Secretaria Municipal de XXXXXX, e a organização da sociedade civil <strong>XXXXXXXXXX</strong>, na forma abaixo:</p>
+<p>TERMO DE XXXXXX QUE ENTRE SI CELEBRAM O <strong>MUNICÍPIO DE SÃO GONÇALO DO RIO ABAIXO</strong>, por intermédio da Secretaria Municipal de XXXXXX, e a organização da sociedade civil <strong>{{osc_nome}}</strong>, na forma abaixo:</p>
 <p><strong>ADMINISTRAÇÃO PÚBLICA:</strong> MUNICÍPIO DE SÃO GONÇALO DO RIO ABAIXO, CNPJ nº XXXXXXXX, neste ato representado pelo(a) Secretário(a) Municipal de XXXXXX, Sr(a). XXXXXXXXXX.</p>
-<p><strong>ORGANIZAÇÃO DA SOCIEDADE CIVIL:</strong> XXXXXXXXXX, CNPJ nº XXXXXXXX, com sede em XXXXXXXXXX, neste ato representada por seu(sua) representante legal, Sr(a). XXXXXXXXXX, CPF nº XXXXXXXX.</p>
+<p><strong>ORGANIZAÇÃO DA SOCIEDADE CIVIL:</strong> {{osc_nome}}, CNPJ nº {{osc_cnpj}}, com sede em {{osc_endereco}}, Bairro {{osc_bairro}}, {{osc_cidade}}/{{osc_uf}}, neste ato representada por seu(sua) representante legal, Sr(a). {{rep_nome}}, CPF nº {{rep_cpf}}.</p>
 <p><strong>CLÁUSULA PRIMEIRA — DO OBJETO</strong></p>
 <p>1.1. O presente Termo tem por objeto XXXXXXXXXX, conforme o Plano de Trabalho aprovado, que integra este instrumento independentemente de transcrição.</p>
 <p><strong>CLÁUSULA SEGUNDA — DAS OBRIGAÇÕES DAS PARTES</strong></p>
@@ -1008,11 +1032,11 @@ HTML,
 <p>10.1. Fica eleito o foro da Comarca de XXXXXXXX para dirimir as questões oriundas deste Termo.</p>
 <p style="text-align:right">São Gonçalo do Rio Abaixo, XX de XXXX de 20XX.</p>
 <p style="text-align:center">XXXXXXXXXX<br>Secretária Municipal de XXXXXX<br>Administração Pública Municipal</p>
-<p style="text-align:center">XXXXXXXXXX<br>Representante Legal<br>Organização da Sociedade Civil</p>
+<p style="text-align:center">{{rep_nome}}<br>Representante Legal<br>Organização da Sociedade Civil</p>
 HTML,
             'parecer_scp' => self::CABECALHO . <<<'HTML'
 <p style="text-align:center"><strong>PARECER DO SETOR DE CONVÊNIOS E PARCERIAS Nº XXX/20XX</strong><br>(conferência final do processo de celebração)</p>
-<p><strong>PROCESSO:</strong> XXXXXXXX<br><strong>OSC:</strong> XXXXXXXXXX &nbsp; <strong>CNPJ:</strong> XXXXXXXX<br><strong>UNIDADE GESTORA:</strong> Secretaria Municipal de XXXXXX<br><strong>OBJETO:</strong> XXXXXXXXXX</p>
+<p><strong>PROCESSO:</strong> XXXXXXXX<br><strong>OSC:</strong> {{osc_nome}} &nbsp; <strong>CNPJ:</strong> {{osc_cnpj}}<br><strong>UNIDADE GESTORA:</strong> Secretaria Municipal de XXXXXX<br><strong>OBJETO:</strong> XXXXXXXXXX</p>
 <p><strong>I — DA CONFERÊNCIA</strong></p>
 <p>O Setor de Convênios e Parcerias procedeu à conferência final do processo, verificando a presença e a regularidade formal das peças abaixo, na forma da Lei Federal nº 13.019/2014 e do Decreto Municipal nº 048/2020:</p>
 <table><thead><tr><th>Item</th><th>Peça</th><th>Conforme</th></tr></thead><tbody>
@@ -1037,7 +1061,7 @@ HTML,
             'autorizacao_inicio' => self::CABECALHO . <<<'HTML'
 <p style="text-align:right">São Gonçalo do Rio Abaixo, XX de XXXX de 20XX.</p>
 <p style="text-align:center"><strong>AUTORIZAÇÃO DE INÍCIO DE EXECUÇÃO</strong></p>
-<p><strong>OSC:</strong> XXXXXXXXXX<br><strong>CNPJ:</strong> XXXXXXXX<br><strong>Termo de XXXXXX nº:</strong> XXX/20XX<br><strong>Processo nº:</strong> XXXXXXXX</p>
+<p><strong>OSC:</strong> {{osc_nome}}<br><strong>CNPJ:</strong> {{osc_cnpj}}<br><strong>Termo de XXXXXX nº:</strong> XXX/20XX<br><strong>Processo nº:</strong> XXXXXXXX</p>
 <p>Prezado(a) Representante Legal,</p>
 <p>Comunicamos que, cumpridas as exigências legais e publicado o extrato do Termo de XXXXXX nº XXX/20XX no Diário Oficial e no site oficial do Município, fica essa Organização da Sociedade Civil <strong>AUTORIZADA a iniciar a execução</strong> do objeto pactuado a partir de XX/XX/XXXX, observado o Plano de Trabalho aprovado.</p>
 <p>Solicitamos, ainda, a informação dos <strong>dados bancários</strong> da <strong>conta específica</strong> desta parceria (banco, agência, operação e conta corrente), a ser aberta exclusivamente para a movimentação dos recursos, conforme art. 51 da Lei Federal nº 13.019/2014, por meio do PGP.</p>
@@ -1310,6 +1334,32 @@ HTML,
         return $this->origem_processo_peca_id !== null;
     }
 
+    /** Versão de "Arquivos da OSC" copiada para este item. */
+    public function arquivoDaOsc(): BelongsTo
+    {
+        return $this->belongsTo(OscArquivo::class, 'osc_arquivo_id');
+    }
+
+    /** O arquivo do item é a cópia do que está em "Arquivos da OSC". */
+    public function vemDaAreaDaOsc(): bool
+    {
+        return $this->osc_arquivo_id !== null;
+    }
+
+    private ?bool $atendidoPelaArea = null;
+
+    /** Item sem arquivo próprio que a área da OSC, completa e em dia, já atende (a habilitação da dispensa). */
+    public function atendidoPelaAreaDaOsc(): bool
+    {
+        if (!in_array($this->chave, self::ATENDIDOS_PELA_AREA_DA_OSC[$this->categoria] ?? [], true) || $this->temArquivo()) {
+            return false;
+        }
+
+        $osc = $this->pecaable instanceof Chamamento ? $this->pecaable->oscDaDispensa() : null;
+
+        return $this->atendidoPelaArea ??= $osc !== null && $osc->pendenciasDosArquivos() === [];
+    }
+
     /** O texto ainda é o do modelo, como foi semeado: ninguém o preencheu. */
     public function aindaEOModelo(): bool
     {
@@ -1325,7 +1375,7 @@ HTML,
 
     public function preenchido(): bool
     {
-        if ($this->vemDoPlanejamento()) {
+        if ($this->vemDoPlanejamento() || $this->atendidoPelaAreaDaOsc()) {
             return true;
         }
 
@@ -1813,6 +1863,7 @@ HTML,
         $tokens   = self::tokensDe($pecaable);
         // As peças que já existem, numa consulta só; cada uma recebe o dono já carregado.
         $existentes = $pecaable->{$relacao}()->where('categoria', $categoria)->get()->keyBy('chave');
+        $sincronizadas = [];
 
         foreach ($template as $i => $item) {
             $novos = [
@@ -1849,12 +1900,13 @@ HTML,
                 $peca->update($metadados);
             }
 
-            // Peça semeada com o modelo cru ({{marcadores}} à mostra), intocada e sem assinatura:
-            // recebe o texto preenchido.
+            // Peça semeada com o modelo cru ({{marcadores}} à mostra), vazia ou só com o quadro dos
+            // arquivos da OSC desatualizado, sem assinatura: recebe o texto preenchido.
             if ($texto !== null
                 && !$peca->wasRecentlyCreated
                 && !$peca->assinado()
-                && $peca->conteudo === $bruto
+                && $peca->conteudo !== $texto
+                && ($peca->conteudo === $bruto || empty($peca->conteudo) || self::soMudouOQuadro($peca->conteudo, $texto))
             ) {
                 $peca->update(['conteudo' => $texto]);
             }
@@ -1862,6 +1914,70 @@ HTML,
             // O modelo semeado não conta como preenchimento: é o texto em
             // branco que o sistema põe, não algo que alguém escreveu.
             self::ligarAoPlanejamento($peca, $pecaable, array_filter([$texto, $bruto]));
+            $sincronizadas[] = $peca;
+        }
+
+        if ($pecaable instanceof Proposta && $categoria === 'celebracao') {
+            self::puxarDaAreaDaOsc($pecaable, $sincronizadas);
+        }
+    }
+
+    /**
+     * Preenche os itens da Celebração com a cópia do arquivo igual de "Arquivos da OSC" (DA_AREA_DA_OSC):
+     * acompanha a versão nova e sai quando a versão vence ou a UG a recusa nesta parceria. O arquivo
+     * enviado no próprio item vale por cima. Concluída a Celebração, nada mais muda.
+     */
+    public static function puxarDaAreaDaOsc(Proposta $proposta, ?iterable $pecas = null): void
+    {
+        $osc = $proposta->osc;
+        if (!$osc || $proposta->celebracaoConcluida()) {
+            return;
+        }
+
+        $pecas = collect($pecas ?? $proposta->pecas()->where('categoria', 'celebracao')
+            ->whereIn('chave', array_keys(self::DA_AREA_DA_OSC))->get())
+            ->filter(fn (self $p) => isset(self::DA_AREA_DA_OSC[$p->chave]) && $p->categoria === 'celebracao'
+                && !($p->arquivo_path && !$p->vemDaAreaDaOsc()));
+        if ($pecas->isEmpty()) {
+            return;
+        }
+
+        $atuais = $osc->arquivosAtuais();
+        $recusadas = OscArquivoAnalise::where('proposta_id', $proposta->id)->where('situacao', 'recusado')
+            ->pluck('osc_arquivo_id')->map(fn ($id) => (int) $id)->all();
+        $disco = \Illuminate\Support\Facades\Storage::disk('local');
+
+        foreach ($pecas as $peca) {
+            $arquivo = $atuais[self::DA_AREA_DA_OSC[$peca->chave]] ?? null;
+            $vale = $arquivo && !$arquivo->vencida() && !in_array((int) $arquivo->id, $recusadas, true)
+                && $disco->exists($arquivo->arquivo_path);
+
+            if ($vale ? (int) $peca->osc_arquivo_id === (int) $arquivo->id : !$peca->vemDaAreaDaOsc()) {
+                continue;
+            }
+
+            if ($peca->arquivo_path) {
+                $disco->delete($peca->arquivo_path);
+            }
+
+            if (!$vale) {
+                $peca->update(['arquivo_path' => null, 'arquivo_nome' => null, 'tamanho' => null, 'mime_type' => null, 'osc_arquivo_id' => null]);
+
+                continue;
+            }
+
+            $ext = pathinfo($arquivo->arquivo_nome, PATHINFO_EXTENSION);
+            $destino = 'pecas/' . $peca->id . '/' . \Illuminate\Support\Str::random(20) . ($ext ? '.' . $ext : '');
+            $disco->copy($arquivo->arquivo_path, $destino);
+
+            $peca->update([
+                'arquivo_path'   => $destino,
+                'arquivo_nome'   => $arquivo->arquivo_nome,
+                'tamanho'        => $arquivo->tamanho,
+                'mime_type'      => $arquivo->mime_type,
+                'osc_arquivo_id' => $arquivo->id,
+            ]);
+            $peca->limparDevolucao();
         }
     }
 
@@ -1909,6 +2025,36 @@ HTML,
         return $peca->tipo === 'modelo' ? $origem->assinado() : $origem->temAnexo();
     }
 
+    /** Quadro dos arquivos da área da OSC para a verificação da habilitação: os exigidos e os complementares enviados. */
+    private static function quadroDosArquivosDaOsc(Osc $osc): string
+    {
+        $atuais = $osc->arquivosAtuais();
+        $linhas = '';
+
+        foreach (OscArquivo::tipos() as $tipo => $rotulo) {
+            $a = $atuais[$tipo] ?? null;
+            if (!$a && OscArquivo::ehComplementar($tipo)) {
+                continue;
+            }
+
+            $situacao = !$a ? 'Não anexado'
+                : 'Versão ' . $a->versao . ', enviada em ' . $a->created_at->format('d/m/Y')
+                    . ($a->validade ? ($a->vencida() ? ' — vencida em ' : ' — válida até ') . $a->validade->format('d/m/Y') : '');
+            $linhas .= '<tr><td>' . e($rotulo) . '</td><td>' . e($situacao) . '</td><td>( ) Sim ( ) Não</td></tr>';
+        }
+
+        return '<table data-arquivos-osc="1"><thead><tr><th>Documento</th><th>Situação</th><th>Conforme</th></tr></thead><tbody>'
+            . $linhas . '</tbody></table>';
+    }
+
+    /** O texto só difere do novo no quadro dos arquivos da OSC: ninguém o editou, e o quadro pode se refazer. */
+    private static function soMudouOQuadro(string $atual, string $novo): bool
+    {
+        $semQuadro = fn (string $html) => preg_replace('#<table data-arquivos-osc="1">.*?</table>#s', '', $html, -1, $n) . '|' . $n;
+
+        return str_contains($novo, 'data-arquivos-osc') && $semQuadro($atual) === $semQuadro($novo);
+    }
+
     /** Os marcadores de tokensDe(), para quem regera um documento depois de criado. */
     public static function tokensPara(Model $pecaable): array
     {
@@ -1930,6 +2076,10 @@ HTML,
         } elseif ($pecaable instanceof Chamamento) {
             $orgao    = $pecaable->programa?->orgao?->name;
             $processo = $pecaable->processo?->numero;
+            // A dispensa e a inexigibilidade têm uma OSC só: a da proposta.
+            $cadastro = $pecaable->oscDaDispensa();
+            $osc      = $cadastro?->name;
+            $quadro   = $cadastro ? self::quadroDosArquivosDaOsc($cadastro) : null;
         } elseif ($pecaable instanceof PrestacaoContas) {
             $proposta    = $pecaable->instrumento?->proposta;
             $cadastro    = $proposta?->osc;
@@ -1939,7 +2089,8 @@ HTML,
             $processo    = $proposta?->chamamento?->processo?->numero;
         } elseif ($pecaable instanceof Aditivo) {
             $proposta    = $pecaable->instrumento?->proposta;
-            $osc         = $proposta?->osc?->name;
+            $cadastro    = $proposta?->osc;
+            $osc         = $cadastro?->name;
             $instrumento = $pecaable->instrumento?->numero;
             $orgao       = $proposta?->chamamento?->programa?->orgao?->name;
         } elseif ($pecaable instanceof Alteracao) {
@@ -1960,6 +2111,7 @@ HTML,
         $daAlteracao = $daAlteracao ?? [];
 
         $tokens = [
+            'arquivos_da_osc' => $quadro ?? null,
             'favorecido'      => $osc,
             'instrumento'     => $instrumento,
             'unidade_gestora' => $orgao,
@@ -1974,8 +2126,7 @@ HTML,
             'data_extenso'     => now()->locale('pt_BR')->translatedFormat('j \\d\\e F \\d\\e Y'),
         ];
 
-        // Dados do cadastro da OSC — é deles que as declarações da habilitação
-        // se preenchem. Só a Proposta tem OSC; nos demais donos ficam "XXXXX".
+        // Dados do cadastro da OSC; sem OSC (chamamento público), ficam "XXXXX".
         $tokens += self::tokensDaOsc($cadastro);
 
         // Campos que só a alteração tem (título, descrição e justificativa do

@@ -533,13 +533,19 @@ class Avisos
         ));
     }
 
-    /** Certidão de "Arquivos da OSC" perto de vencer: avisa quem cuida dos documentos da OSC. */
+    /** Certidão (ou balanço) de "Arquivos da OSC" perto de vencer: avisa quem cuida dos documentos da OSC. */
     public static function certidaoVencendo(\App\Models\OscArquivo $arquivo): void
     {
+        $balanco = $arquivo->tipo === 'balanco_patrimonial';
+
         self::enviar(self::daOsc($arquivo->osc_id, self::comFuncao('osc_documentos')), new Aviso(
-            assunto: 'Certidão vence em ' . $arquivo->validade->format('d/m/Y'),
-            titulo: 'Uma certidão da organização está perto de vencer',
-            linhas: [
+            assunto: ($balanco ? 'Balanço patrimonial' : 'Certidão') . ' vence em ' . $arquivo->validade->format('d/m/Y'),
+            titulo: $balanco ? 'O balanço patrimonial da organização está perto de vencer' : 'Uma certidão da organização está perto de vencer',
+            linhas: $balanco ? [
+                \App\Models\OscArquivo::rotulo($arquivo->tipo) . ' — válido até ' . $arquivo->validade->format('d/m/Y') . '.',
+                'Vencido, ele deixa de preencher sozinho o item da Celebração.',
+                'Envie o balanço do novo exercício em "Arquivos da OSC".',
+            ] : [
                 \App\Models\OscArquivo::rotulo($arquivo->tipo) . ' — válida até ' . $arquivo->validade->format('d/m/Y') . '.',
                 'Vencida, ela passa a impedir o envio de manifestação de interesse e Nova Proposta e a etapa da OSC na Celebração.',
                 'Emita a certidão atualizada e envie a nova versão em "Arquivos da OSC".',

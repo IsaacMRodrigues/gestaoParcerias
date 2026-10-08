@@ -225,6 +225,22 @@
                                         em {{ $peca->origem->assinado_em->format('d/m/Y H:i') }}
                                     @endif
                                 </p>
+                            @elseif($peca->vemDaAreaDaOsc() || $peca->atendidoPelaAreaDaOsc())
+                                @php
+                                    $oscDaArea = $peca->vemDaAreaDaOsc() ? $peca->arquivoDaOsc?->osc : $peca->pecaable->oscDaDispensa();
+                                    $linkDaArea = auth()->user()->ehRepresentanteOsc() ? route('portal.arquivos.index')
+                                        : ($oscDaArea ? route('oscs.arquivos', $oscDaArea) : null);
+                                @endphp
+                                <p class="text-xs text-brand-700 mt-0.5">
+                                    @if($peca->vemDaAreaDaOsc())
+                                        Preenchido com "Arquivos da OSC"{{ $peca->arquivoDaOsc ? ' — versão ' . $peca->arquivoDaOsc->versao . ' de ' . $peca->arquivoDaOsc->created_at->format('d/m/Y') : '' }}
+                                    @else
+                                        Atendido por "Arquivos da OSC", completos e em dia
+                                    @endif
+                                    @if($linkDaArea)
+                                        · <a href="{{ $linkDaArea }}" class="font-semibold hover:underline">ver os arquivos</a>
+                                    @endif
+                                </p>
                             @elseif($peca->assinado())
                                 <p class="text-xs text-gray-400 mt-0.5">
                                     Assinado por {{ $peca->assinanteNome() }} em {{ $peca->dataDaAssinatura()?->format('d/m/Y H:i') }}
@@ -280,7 +296,7 @@
                                     <a href="{{ route('pecas.download', $peca) }}"
                                        class="text-xs font-semibold text-brand-700 hover:text-brand-800 transition">Baixar</a>
                                 @endif
-                                @if($podePreencher)
+                                @if($podePreencher && ! $peca->vemDaAreaDaOsc())
                                     <form action="{{ route('pecas.arquivo.remover', $peca) }}" method="POST"
                                           data-confirm="Remover este arquivo?">
                                         @csrf @method('DELETE')
@@ -288,7 +304,7 @@
                                     </form>
                                 @endif
                             </div>
-                        @elseif(! $ehModelo && ! $podePreencher)
+                        @elseif(! $ehModelo && ! $podePreencher && ! $peca->atendidoPelaAreaDaOsc())
                             <span class="text-xs text-gray-400 shrink-0">Nenhum arquivo enviado</span>
                         @endif
 
@@ -475,14 +491,14 @@
                             </div>
                         </details>
 
-                    {{-- ARQUIVO pendente: upload recolhido --}}
-                    @elseif($podePreencher && ! $peca->temArquivo())
+                    {{-- ARQUIVO pendente (ou vindo da área, que se pode trocar por outro): upload recolhido --}}
+                    @elseif($podePreencher && (! $peca->temArquivo() || $peca->vemDaAreaDaOsc()))
                         <details class="mt-2 group">
-                            <summary class="{{ $acao }} text-brand-800 bg-brand-50 hover:bg-brand-100">
+                            <summary class="{{ $acao }} {{ $peca->vemDaAreaDaOsc() ? 'text-gray-600 bg-gray-100 hover:bg-gray-200' : 'text-brand-800 bg-brand-50 hover:bg-brand-100' }}">
                                 <svg class="w-3.5 h-3.5 transition group-open:rotate-90" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.6">
                                     <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/>
                                 </svg>
-                                Enviar arquivo
+                                {{ $peca->vemDaAreaDaOsc() ? 'Enviar outro arquivo' : 'Enviar arquivo' }}
                             </summary>
 
                             <div class="mt-3">

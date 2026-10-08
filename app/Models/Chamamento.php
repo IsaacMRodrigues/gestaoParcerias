@@ -105,6 +105,12 @@ class Chamamento extends Model
         return $this->hasMany(Proposta::class);
     }
 
+    /** A OSC da dispensa ou inexigibilidade, que nasce com uma proposta só; null no chamamento público. */
+    public function oscDaDispensa(): ?Osc
+    {
+        return $this->ehDispensa() ? $this->propostas->first()?->osc : null;
+    }
+
     /** Categoria de peças conforme o tipo do chamamento. */
     public function categoriaPecas(): string
     {

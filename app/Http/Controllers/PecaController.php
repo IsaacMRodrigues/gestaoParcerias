@@ -125,11 +125,13 @@ class PecaController extends Controller
         $arquivo = $request->file('arquivo');
         $path = $arquivo->store('pecas/' . $peca->id, 'local');
 
+        // O arquivo enviado aqui vale por cima do que vinha de "Arquivos da OSC".
         $peca->update([
-            'arquivo_path' => $path,
-            'arquivo_nome' => $arquivo->getClientOriginalName(),
-            'tamanho'      => $arquivo->getSize(),
-            'mime_type'    => $arquivo->getMimeType(),
+            'arquivo_path'   => $path,
+            'arquivo_nome'   => $arquivo->getClientOriginalName(),
+            'tamanho'        => $arquivo->getSize(),
+            'mime_type'      => $arquivo->getMimeType(),
+            'osc_arquivo_id' => null,
         ]);
 
         $peca->limparDevolucao();
@@ -160,10 +162,11 @@ class PecaController extends Controller
         Storage::disk('local')->copy($documento->path, $destino);
 
         $peca->update([
-            'arquivo_path' => $destino,
-            'arquivo_nome' => $documento->nome_original,
-            'tamanho'      => $documento->tamanho,
-            'mime_type'    => $documento->mime_type,
+            'arquivo_path'   => $destino,
+            'arquivo_nome'   => $documento->nome_original,
+            'tamanho'        => $documento->tamanho,
+            'mime_type'      => $documento->mime_type,
+            'osc_arquivo_id' => null,
         ]);
 
         return $this->voltarParaPeca($peca, $peca->rotulo . ' puxado do módulo Gestão de Parcerias.');
@@ -258,6 +261,7 @@ class PecaController extends Controller
     public function removerArquivo(Peca $peca): RedirectResponse
     {
         $this->autorizar($peca);
+        abort_if($peca->vemDaAreaDaOsc(), 422, 'Este arquivo vem de "Arquivos da OSC": troque a versão lá ou envie outro arquivo aqui.');
 
         if ($peca->arquivo_path) {
             Storage::disk('local')->delete($peca->arquivo_path);

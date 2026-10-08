@@ -25,7 +25,7 @@ assinados eletronicamente e validáveis por QR Code.
 
 ## Estado atual
 
-*Atualizado em 07/10/2026.*
+*Atualizado em 08/10/2026.*
 
 | Etapa do ciclo | Situação | Onde fica |
 |---|---|---|
@@ -34,7 +34,7 @@ assinados eletronicamente e validáveis por QR Code.
 | **Plano de Trabalho** (3.1) — os 13 itens do modelo da cliente | ✅ Completo | `PlanoTrabalhoController`, `Concerns\TemPlanoDeTrabalho`, `Support\PlanoDocumento` |
 | **3. Celebração** (2.2 / 3.2) — 22 etapas: habilitação, etapa conjunta UG + SCP, Termo e OP Global assinados em sequência, empenho | ✅ Completo | `CelebracaoController`, motor `Peca`, `PecaAssinatura` |
 | **Devolução por documento** — em todos os trâmites | ✅ Completo | `Support\Devolucao` |
-| **Arquivos da OSC** — certidões, estatuto, ata e declarações anexados uma vez | ✅ Completo | `OscArquivoController`, `OscArquivo` |
+| **Arquivos da OSC** — certidões, estatuto, ata, declarações e complementares anexados uma vez, preenchendo os fluxos | ✅ Completo | `OscArquivoController`, `OscArquivo`, `Peca::puxarDaAreaDaOsc` |
 | **Formalização** (2.3) — instrumento (nasce na conclusão da Celebração), aditivo, apostilamento, OP parcial | ✅ Completo | `Proposta::criarInstrumento`, `AditivoController`, `OrdemPagamentoController` |
 | **Download de documentos** — PDF e ZIP em todos os fluxos, por quem pode | ✅ Completo | `Peca::podeBaixar`, `Support\DocumentoPdf` |
 | **4. Execução** (4.4) — repasses, despesas, notas, saldo | ✅ Completo | `ExecucaoController` |
@@ -585,6 +585,26 @@ Trazer os demais cenários para `tests/Feature` é uma das [Pendências](#pendê
 
 Da mais recente para a mais antiga. Cada entrada diz o que mudou, **por quê** e como foi
 conferido — o porquê é o que falta a quem pega o código depois.
+
+- [2026-10-08] **O que a OSC já tem em "Arquivos da OSC" preenche os fluxos** (migração `2026_10_08_100000`)
+  - **Documentos complementares** na área, opcionais (não travam manifestação, inscrição, Celebração nem Alteração):
+    RG/CPF/comprovante de residência do presidente, relação nominal dos dirigentes, balanço patrimonial (com
+    validade e aviso de vencimento) e comprovantes de experiência prévia — documentos da organização, que a OSC
+    reenviava em cada Celebração
+  - **Os itens iguais da Celebração continuam no checklist, já preenchidos:** recebem a cópia do arquivo da área
+    (`Peca::puxarDaAreaDaOsc`, coluna `pecas.osc_arquivo_id`) e mostram "Preenchido com Arquivos da OSC — versão N".
+    Acompanham a versão nova enviada na área; saem (o item volta a pedir o arquivo) quando a versão vence ou a UG a
+    recusa nesta parceria. O arquivo enviado no próprio item vale por cima; concluída a Celebração, nada muda. Cópia,
+    e não link, para o processo guardar o que foi apresentado e para download, ZIP e pendências seguirem iguais
+  - **Dispensa/inexigibilidade:** "Documentos de habilitação" conta como preenchido com a área completa e em dia
+    (`Peca::atendidoPelaAreaDaOsc`); a "Verificação da habilitação", que era um modelo em branco, vem com o quadro
+    dos arquivos da área (versão, data, validade, "Conforme") e o refaz enquanto ninguém edita o texto em volta
+  - **Modelos com o cadastro da OSC:** convocação, aprovação do plano, parecer técnico, parecer da SCP, autorização
+    de início, Termo (nome, CNPJ, sede, representante e CPF), justificativa e parecer CNAS trocaram os "XXXXXXXXXX"
+    da OSC pelos marcadores que as declarações já usavam. Vale para os documentos criados daqui em diante; o
+    Chamamento da dispensa e o Aditivo passaram a ter o cadastro da OSC nos marcadores
+  - Conferido: `ArquivosDaOscPreenchemOsFluxosTest` (6 testes; falham com a cópia e o atendimento desligados);
+    suíte 199/199; 435 telas sem erro
 
 - [2026-10-08] **Caixas de seleção para baixar documentos nos fluxos** (`pecas/_checklist`)
   - Nas listas de documentos da Seleção, Celebração, Prestação de Contas, Alteração e Aditivo, cada documento que a
