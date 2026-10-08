@@ -32,11 +32,22 @@
     $baixaveis = $pecas->filter(fn ($p) => $temConteudo($p) && $p->podeBaixar(auth()->user()));
 @endphp
 
+{{-- Seleção para download: as caixas ficam nas linhas e o botão monta o ZIP com os marcados. --}}
+<div x-data="{
+        sel: [],
+        todos: @js($baixaveis->pluck('id')->map(fn ($id) => (string) $id)->values()),
+        url(ids) { return @js(route('pecas.lote')) + '?' + ids.map(i => 'pecas[]=' + i).join('&') + '&nome=' + encodeURIComponent(@js($nomeDoLote ?? 'documentos')) },
+     }">
 @if($baixaveis->isNotEmpty())
-    <div class="px-6 py-2.5 border-b border-gray-100 flex items-center justify-end gap-3 text-xs">
+    <div class="px-6 py-2.5 border-b border-gray-100 flex flex-wrap items-center justify-end gap-x-4 gap-y-1 text-xs">
         <span class="text-gray-400">{{ $baixaveis->count() }} documento(s) disponível(is) para você</span>
+        <button type="button" class="text-gray-500 hover:text-gray-800 transition"
+                @click="sel = sel.length === todos.length ? [] : [...todos]"
+                x-text="sel.length === todos.length ? 'Desmarcar todos' : 'Marcar todos'">Marcar todos</button>
+        <a :href="sel.length ? url(sel) : null" x-show="sel.length" x-cloak
+           class="font-semibold text-brand-700 hover:text-brand-800 transition">Baixar selecionados (<span x-text="sel.length"></span>) em ZIP</a>
         <a href="{{ route('pecas.lote', ['pecas' => $baixaveis->pluck('id')->all(), 'nome' => $nomeDoLote ?? 'documentos']) }}"
-           class="font-semibold text-brand-700 hover:text-brand-800 transition">Baixar todos (ZIP)</a>
+           x-show="! sel.length" class="font-semibold text-brand-700 hover:text-brand-800 transition">Baixar todos (ZIP)</a>
     </div>
 @endif
 
@@ -145,6 +156,16 @@
              cabeçalho fixo. --}}
         <div id="peca-{{ $peca->id }}" style="scroll-margin-top:7rem" class="px-6 py-3.5">
             <div class="flex items-start gap-3">
+
+                {{-- Caixa de seleção para download; as linhas sem o que baixar guardam o espaço. --}}
+                @if($baixaveis->isNotEmpty())
+                    @if($baixaveis->contains('id', $peca->id))
+                        <input type="checkbox" value="{{ $peca->id }}" x-model="sel" aria-label="Selecionar {{ $peca->rotulo }} para download"
+                               class="mt-1 shrink-0 rounded border-gray-300 text-brand-600 focus:ring-brand-500">
+                    @else
+                        <span class="inline-block w-4 shrink-0" title="Nada para baixar ainda"></span>
+                    @endif
+                @endif
 
                 {{-- Estado da peça --}}
                 <span class="mt-0.5 shrink-0" title="{{ $peca->concluida() ? ($peca->semAssinatura() ? 'Redigido' : ($ehModelo ? 'Assinado' : 'Arquivo enviado')) : ($peca->preenchido() && ! $peca->semAssinatura() ? 'Preenchido, aguardando assinatura' : 'Pendente') }}">
@@ -560,3 +581,4 @@
     @endif
     </div>
 @endforeach
+</div>

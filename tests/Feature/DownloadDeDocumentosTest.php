@@ -147,5 +147,12 @@ class DownloadDeDocumentosTest extends TestCase
         $this->actingAs($this->rl)->get("/celebracao/{$this->proposta->id}")->assertOk()
             ->assertSee(route('pecas.pdf', $this->termo), false)
             ->assertDontSee(route('pecas.pdf', $this->interna), false);
+
+        // Caixas de seleção só nos documentos que a pessoa pode baixar.
+        $caixa = fn (\App\Models\Peca $p) => 'value="' . $p->id . '" x-model="sel"';
+        $this->actingAs($this->scp)->get("/celebracao/{$this->proposta->id}")
+            ->assertSee($caixa($this->termo), false)->assertSee($caixa($this->interna), false)->assertSee('Marcar todos');
+        $this->actingAs($this->rl)->get("/celebracao/{$this->proposta->id}")
+            ->assertSee($caixa($this->termo), false)->assertDontSee($caixa($this->interna), false);
     }
 }

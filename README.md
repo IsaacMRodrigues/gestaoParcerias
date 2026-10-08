@@ -586,6 +586,14 @@ Trazer os demais cenários para `tests/Feature` é uma das [Pendências](#pendê
 Da mais recente para a mais antiga. Cada entrada diz o que mudou, **por quê** e como foi
 conferido — o porquê é o que falta a quem pega o código depois.
 
+- [2026-10-08] **Caixas de seleção para baixar documentos nos fluxos** (`pecas/_checklist`)
+  - Nas listas de documentos da Seleção, Celebração, Prestação de Contas, Alteração e Aditivo, cada documento que a
+    pessoa pode baixar ganha uma caixa à esquerda; no topo, "Marcar todos"/"Desmarcar todos" e "Baixar selecionados
+    (N) em ZIP" (sem nada marcado, segue o "Baixar todos"). Feito com Alpine, sem mudar o JavaScript compilado; o ZIP
+    é o mesmo `pecas.lote`, que só entrega o que a pessoa pode baixar. O Planejamento já tinha a seleção
+  - Conferido: `DownloadDeDocumentosTest` (caixas só onde se pode baixar); no navegador, duas marcadas geraram um ZIP
+    com os dois documentos e "Marcar todos" marcou as 14; suíte 193/193; 435 telas sem erro
+
 - [2026-10-07] **Arquivos da OSC valendo em todos os fluxos**
   - **Recusa da UG trava a Celebração:** a parte da UG na etapa 3 (conjunta) só conclui com cada arquivo da OSC
     aprovado nesta parceria (`Proposta::pendenciasDaAnaliseDosArquivos`). Recusado, a UG devolve à OSC, que recebe
