@@ -1,9 +1,10 @@
 # Plataforma de Gestão de Parcerias — PGP
 
 > **Instrução para IA e para quem continuar o trabalho:** este README é documento vivo. Ao terminar
-> qualquer entrega, registre-a no topo do [Histórico de entregas](#histórico-de-entregas) e atualize
-> [Estado atual](#estado-atual) e [Pendências](#pendências) se algo mudou. Não apague entradas
-> antigas — o histórico completo importa para quem continuar.
+> qualquer entrega, registre-a no topo do [Histórico de entregas](#histórico-de-entregas), acrescente
+> uma linha ao [Resumo das entregas](#resumo-das-entregas) e atualize [Estado atual](#estado-atual) e
+> [Pendências](#pendências) se algo mudou. Não apague entradas antigas — o histórico completo importa
+> para quem continuar.
 >
 > **O repositório é público.** Nada de senha, IP de servidor, usuário SSH ou conteúdo de `.env`
 > aqui ou em comentário de código.
@@ -18,7 +19,8 @@ assinados eletronicamente e validáveis por QR Code.
 - **Stack:** Laravel 13 (PHP ≥ 8.3), MySQL, Blade + Tailwind CSS v4 (Vite), Alpine.js
 - **Pacotes:** Laravel Breeze (autenticação), Spatie Laravel Permission (perfis), simple-qrcode
   (validação), dompdf (PDF)
-- **Tamanho:** 84 migrações · 51 tabelas · 38 models · 39 controllers · 139 views · 153 rotas
+- **Tamanho** (08/10/2026): 105 migrações · 60 tabelas · 43 models · 42 controllers · 124 views · 246 rotas ·
+  199 testes automatizados
 - **Equipe:** 2 desenvolvedores
 
 ---
@@ -27,39 +29,112 @@ assinados eletronicamente e validáveis por QR Code.
 
 *Atualizado em 08/10/2026.*
 
-| Etapa do ciclo | Situação | Onde fica |
-|---|---|---|
-| **1. Planejamento** (módulo 2.1) | ✅ Completo | `ProcessoController`, `Processo`, `ProcessoPeca` |
-| **2. Seleção** (2.2) — lista de chamamentos, prazo e resposta de recurso, manifestação de interesse, Nova Proposta, decisão da UG na dispensa | ✅ Completo | `SelecaoController`, `ManifestacaoAnaliseController`, `PropostaController` |
-| **Plano de Trabalho** (3.1) — os 13 itens do modelo da cliente | ✅ Completo | `PlanoTrabalhoController`, `Concerns\TemPlanoDeTrabalho`, `Support\PlanoDocumento` |
-| **3. Celebração** (2.2 / 3.2) — 22 etapas: habilitação, etapa conjunta UG + SCP, Termo e OP Global assinados em sequência, empenho | ✅ Completo | `CelebracaoController`, motor `Peca`, `PecaAssinatura` |
-| **Devolução por documento** — em todos os trâmites | ✅ Completo | `Support\Devolucao` |
-| **Arquivos da OSC** — certidões, estatuto, ata, declarações e complementares anexados uma vez, preenchendo os fluxos | ✅ Completo | `OscArquivoController`, `OscArquivo`, `Peca::puxarDaAreaDaOsc` |
-| **Formalização** (2.3) — instrumento (nasce na conclusão da Celebração), aditivo, apostilamento, OP parcial | ✅ Completo | `Proposta::criarInstrumento`, `AditivoController`, `OrdemPagamentoController` |
-| **Download de documentos** — PDF e ZIP em todos os fluxos, por quem pode | ✅ Completo | `Peca::podeBaixar`, `Support\DocumentoPdf` |
-| **4. Execução** (4.4) — repasses, despesas, notas, saldo | ✅ Completo | `ExecucaoController` |
-| **Alterações da Parceria** (3.3) | ✅ Completo | `AlteracaoController`, `Alteracao` |
-| **Dossiê da OSC** (3.3) — o processo visível à organização | ✅ Completo | `DossieController`, `Proposta::dossieParaOsc()` |
-| **6. Prestação de Contas** (3.4) | ✅ Completo | `PrestacaoContasController`, `Support\PrestacaoDocumento` |
-| **Suporte** — dúvidas, problemas e sugestões | ✅ Completo | `SuporteController`, `Chamado` |
-| **5. Monitoramento e Fiscalização** (4.5) | ⏳ Não iniciado | aparece no menu como "em breve" |
-| **Solicitação de assinatura** (Aprovador de Assinatura) | ⏳ Aguarda definição | ver [Pendências](#pendências) |
-| **Avisos por e-mail** (4.7) — contas, suporte, vez no trâmite, resultados | ✅ Completo | `Support\Avisos`, `Mail\Aviso` |
-| **Integrações** (banco, Diário Oficial, GOV.BR) | ⏳ Última fase | — |
+| Etapa do ciclo                                                                                                                                            | Situação             | Onde fica                                                                                |
+| --------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------- | ---------------------------------------------------------------------------------------- |
+| **1. Planejamento** (módulo 2.1)                                                                                                                   | ✅ Completo            | `ProcessoController`, `Processo`, `ProcessoPeca`                                   |
+| **2. Seleção** (2.2) — lista de chamamentos, prazo e resposta de recurso, manifestação de interesse, Nova Proposta, decisão da UG na dispensa | ✅ Completo            | `SelecaoController`, `ManifestacaoAnaliseController`, `PropostaController`         |
+| **Plano de Trabalho** (3.1) — os 13 itens do modelo da cliente                                                                                     | ✅ Completo            | `PlanoTrabalhoController`, `Concerns\TemPlanoDeTrabalho`, `Support\PlanoDocumento` |
+| **3. Celebração** (2.2 / 3.2) — 22 etapas: habilitação, etapa conjunta UG + SCP, Termo e OP Global assinados em sequência, empenho            | ✅ Completo            | `CelebracaoController`, motor `Peca`, `PecaAssinatura`                             |
+| **Devolução por documento** — em todos os trâmites                                                                                              | ✅ Completo            | `Support\Devolucao`                                                                    |
+| **Arquivos da OSC** — certidões, estatuto, ata, declarações e complementares anexados uma vez, preenchendo os fluxos                            | ✅ Completo            | `OscArquivoController`, `OscArquivo`, `Peca::puxarDaAreaDaOsc`                     |
+| **Formalização** (2.3) — instrumento (nasce na conclusão da Celebração), aditivo, apostilamento, OP parcial                                   | ✅ Completo            | `Proposta::criarInstrumento`, `AditivoController`, `OrdemPagamentoController`      |
+| **Download de documentos** — PDF e ZIP em todos os fluxos, por quem pode                                                                           | ✅ Completo            | `Peca::podeBaixar`, `Support\DocumentoPdf`                                           |
+| **4. Execução** (4.4) — repasses, despesas, notas, saldo                                                                                         | ✅ Completo            | `ExecucaoController`                                                                   |
+| **Alterações da Parceria** (3.3)                                                                                                                  | ✅ Completo            | `AlteracaoController`, `Alteracao`                                                   |
+| **Dossiê da OSC** (3.3) — o processo visível à organização                                                                                    | ✅ Completo            | `DossieController`, `Proposta::dossieParaOsc()`                                      |
+| **6. Prestação de Contas** (3.4)                                                                                                                  | ✅ Completo            | `PrestacaoContasController`, `Support\PrestacaoDocumento`                            |
+| **Suporte** — dúvidas, problemas e sugestões                                                                                                     | ✅ Completo            | `SuporteController`, `Chamado`                                                       |
+| **5. Monitoramento e Fiscalização** (4.5)                                                                                                         | ⏳ Não iniciado       | aparece no menu como "em breve"                                                          |
+| **Solicitação de assinatura** (Aprovador de Assinatura)                                                                                           | ⏳ Aguarda definição | ver[Pendências](#pendências)                                                            |
+| **Avisos por e-mail** (4.7) — contas, suporte, vez no trâmite, resultados                                                                         | ✅ Completo            | `Support\Avisos`, `Mail\Aviso`                                                       |
+| **Integrações** (banco, Diário Oficial, GOV.BR)                                                                                                  | ⏳ Última fase        | —                                                                                       |
 
-**Em produção** está o que havia no GitHub em 07/10/2026 (deploy de 07/10, ver o
-[Histórico](#histórico-de-entregas)): tudo de 26/09 a 07/10, com as 18 migrações e o `RolesSeeder`, ensaiados
-antes sobre uma cópia do banco de produção.
+**Em produção** está o deploy de 07/10/2026 (commit `ef5391d`): tudo de 26/09 a 07/10, com as 18 migrações e
+o `RolesSeeder`, ensaiados antes sobre uma cópia do banco de produção.
 
-Ações de produção que o deploy não faz (são dados ou painel, não código):
+**No GitHub e ainda fora da produção** (sobem só quando pedido): listas por Secretaria, campos de dinheiro com
+R$, Arquivos da OSC valendo nos fluxos, caixas de seleção e barra de download, e os Arquivos da OSC
+preenchendo os fluxos — este com a migração `2026_10_08_100000`. Ao subir, avisar que a inscrição em
+chamamento público passa a exigir a área Arquivos da OSC completa.
 
-- **agendamento no hPanel** ([Deploy](#deploy), passo 7): sem ele, os avisos por e-mail ficam na fila;
-- mover a conta `planejamento@saogoncalo.mg.gov.br` para o setor SEPLAN, com o perfil Responsável pela
-  SEPLAN;
-- antes de a primeira parceria chegar à assinatura do Termo, haver usuário com o perfil **Gestor da
-  Parceria** em cada Secretaria — sem ele, a SCP não tem quem escolher na etapa 13 da Celebração;
-- avisar as OSCs de que a área **Arquivos da OSC** precisa estar completa e em dia para enviar
-  manifestação de interesse ou Nova Proposta (as cadastradas começam com ela vazia).
+As ações de produção que o deploy não faz (dados e painel) estão em
+[Pendências → Produção](#produção-ação-não-código).
+
+---
+
+## Resumo das entregas
+
+Linha do tempo do projeto, do início até hoje, em uma linha por dia de entrega. O porquê e a conferência de
+cada item estão no [Histórico de entregas](#histórico-de-entregas). 🚀 marca os deploys em produção.
+
+### Junho de 2026 — a base do sistema
+
+| Data | O que foi entregue |
+|---|---|
+| 16/06 | **Início do projeto.** Especificação recebida; Laravel 13 com autenticação e perfis. Cadastros de usuários, Secretarias e OSCs; banco de programas e chamamentos; propostas com plano de trabalho; análise por pareceres; instrumentos e termos aditivos |
+| 17/06 | **Portal público** e auto-cadastro da OSC. **Planejamento** (módulo 2.1): processos com trâmite entre setores e caixa de entrada. **Motor de peças** (os checklists de documentos de todos os fluxos) e controle de acesso por permissão |
+| 18/06 | Número do processo no padrão municipal `UG.Sequencial.Ano.Esfera` |
+| 19/06 | **21 perfis oficiais** (vários por usuário, exclusivos por setor). Trâmite do Planejamento guiado por etapas, com Termo de Referência, Pedido de Parecer e Edital nos modelos da cliente. Editor de texto rico (TinyMCE) com tabelas |
+| 22–23/06 | Documento travado ao setor e à etapa; assinatura exigida para encaminhar; análise da SCP com aprovar ou rejeitar; recebimento obrigatório antes de editar |
+| 24/06 | **Assinatura eletrônica**: carimbo com nome, cargo e data, código de validação, QR Code e validação pública; versão para impressão em PDF |
+| 25/06 | Painel inicial; **Ordem de Pagamento**; preenchimento automático dos modelos; **Execução financeira** (repasses, despesas, saldo) |
+| 29/06 | Procuradoria Jurídica no trâmite; modalidade decidida pela SCP; "puxar" documentos da proposta; PDF e ZIP dos documentos do processo; cadastro de servidor com aprovação do administrador; sistema em português |
+
+### Julho de 2026 — Seleção, Celebração e a cara da Prefeitura
+
+| Data | O que foi entregue |
+|---|---|
+| 03/07 | **Dispensa e inexigibilidade** no Planejamento (rota própria, justificativa e parecer CNAS) com os modelos oficiais VII a XI |
+| 09/07 | Rota da dispensa conferida contra o checklist oficial (itens 1 a 14) |
+| 13/07 | Modelos da Seleção com os textos oficiais e o brasão; o processo concluído **gera o chamamento** |
+| 15/07 | Seleção unificada no chamamento; cadeia Processo → Chamamento → Termo ligada; período de inscrição; máscara de moeda |
+| 16/07 | Cada gestor vê só os processos da sua Secretaria; navegação pelas etapas do ciclo |
+| 27/07 | "Documentos do Processo" e **anexos** nas peças do trâmite (portaria da comissão, comprovante de publicação) |
+| 29/07 | Janelas de confirmação próprias no lugar das do navegador; documentos públicos no portal; **cadastro completo da OSC** e matrícula do servidor |
+| 30/07 | Pacote "Modelos novos" e "Atualizações.txt" da cliente: **trâmite da Seleção** até o Prefeito, **trâmite da Celebração** com a OSC no fluxo, **recurso** da OSC, tela principal por perfil e **Transparência** pública, OP Global e Parcial, tela própria da Execução, catálogo de modelos do TI e a **identidade visual da Prefeitura** com barra lateral |
+
+### Agosto de 2026 — acabamento, perfis e Manifestação de Interesse
+
+| Data | O que foi entregue |
+|---|---|
+| 12/08 | Revisão visual de todas as telas |
+| 14/08 | Exclusão com vínculo deixa de dar erro; busca global e atalho Ctrl+K; cores com função (verde, laranja e cinza); OSC e servidor separados na rota; brecha corrigida: qualquer servidor baixava e apagava documentos de qualquer proposta |
+| 17/08 | Gabinete do Prefeito no fim da Seleção; checklist com ordem e estado; caixa de entrada para todos os setores e trâmites |
+| 19/08 | Equipe da OSC com acesso próprio; quem assina cada peça da Seleção; perfis escolhidos por quem cadastra; documentos da proposta aprovados ou recusados com motivo |
+| 21/08 | Celebração aberta a quem participa do trâmite; assinatura das partes destravada; checklist que não pula etapas |
+| 24/08 | Devolução para a etapa que errou; comprovantes de publicação e anexos avulsos; **cada setor cadastra a própria equipe** (Chefe de Setor) |
+| 25/08 | **Manifestação de Interesse** (a OSC propõe sem chamamento); portal com vitrine e participações; dinheiro com R$ e vírgula; funções da equipe da OSC |
+| 26/08 | A Seleção reaproveita o que o Planejamento já fez; login por nome de usuário; proposta volta a ser ato só da OSC; Gestor e Comissões designáveis pela UG |
+| 28/08 | Setores que atendem o município inteiro (SCP, SEPLAN, PJ…) veem tudo; Cadastros: a Secretaria e sua equipe na mesma tela |
+
+### Setembro de 2026 — Módulo da OSC, Prestação de Contas e primeiros deploys
+
+| Data | O que foi entregue |
+|---|---|
+| 04/09 | Ajustes pedidos em teste (rótulos, anexo de qualquer formato, perfis); a OSC cadastra os próprios usuários |
+| 09/09 | Barra lateral clara; quem clona o repositório recebe o sistema com as contas da Prefeitura; a OSC se cadastra sozinha |
+| 10–11/09 | Perfis do convenente no cadastro da equipe da OSC; olho para exibir a senha; trâmite sem enviar ao próprio setor |
+| 15/09 | **Módulo 3**: portal da OSC, RG no cadastro e as declarações da habilitação geradas do cadastro; SCP com acesso à Execução |
+| 16/09 | **Prestação de Contas** (módulo 3.4): relatório, memorando e resumo da folha gerados, análise da SCP e parecer da UG |
+| 17/09 | Deferir manifestação mesmo sem programa aberto na Secretaria |
+| 18/09 | Módulo 3 completo: **Plano de Trabalho**, **Alterações da Parceria** e habilitação item a item; a assinatura guarda quem assinou; **dossiê**: a OSC vê o processo e o município escolhe o que ela vê. 🚀 em produção (primeiro registro no README) |
+| 19/09 | **Suporte**: chamados de dúvidas, problemas e sugestões |
+| 22/09 | README reescrito; contas da equipe da OSC com aprovação e senha própria; plano de trabalho só leitura para o município. 🚀 deploy |
+| 23/09 | Segurança: parceria de outra OSC ou Secretaria barrada pelo endereço; contas protegidas; exclusão que não apaga autoria; senha esquecida pelo suporte e troca obrigatória da senha provisória. 🚀 deploy |
+| 24–25/09 | **Avisos por e-mail** (contas, suporte, vez no trâmite, resultados) e os itens 1, 2, 3, 8 e 9 da homologação. 🚀 deploy |
+| 28/09 | Encargos que não se acumulam; "Ofício" vira "Memorando"; cancelar, reabrir e **prorrogar** chamamento; **Nova Proposta** da OSC (dispensa ou inexigibilidade); Parecer Financeiro assinado só pelo responsável da SEPLAN |
+| 29/09 | Só a SCP edita o chamamento; etapa própria do prazo de recurso; recurso julgado pela Comissão de Seleção; **Plano de Trabalho à risca do modelo da cliente**; protocolo da manifestação; várias vencedoras na Celebração |
+| 30/09 | Celebração: plano editável pela OSC e pela UG até a assinatura; etapa 3 conjunta (UG e SCP ao mesmo tempo) |
+
+### Outubro de 2026 — Celebração completa, Arquivos da OSC e limpeza
+
+| Data | O que foi entregue |
+|---|---|
+| 01/10 | **Devolução por documento** em todos os trâmites; Termo assinado em sequência (OSC, UG, Gestor, Gabinete) e OP Global (Gestor e UG); Nova Proposta deferida vai direto à Celebração; **Arquivos da OSC**: documentos anexados uma vez, para todas as parcerias |
+| 02/10 | Limpeza de código e comentários; Chamamentos numa lista única (sai a tela de Programas); sai o parecer avulso; **a UG decide a proposta de dispensa**; linha de assinatura nas declarações da OSC |
+| 06–07/10 | Instrumento nasce na conclusão da Celebração; **download** em PDF e ZIP em todos os fluxos; plano de aplicação digitado e textos até 1000 caracteres; otimização (Celebração de 106 para 44 consultas ao banco). 🚀 deploy de 07/10, ensaiado sobre uma cópia do banco de produção |
+| 07/10 | Depois do deploy: listas só com o que é da Secretaria; R$ e vírgula em todos os campos de dinheiro; Arquivos da OSC valendo em todos os fluxos (recusa da UG trava a Celebração) |
+| 08/10 | Caixas de seleção e barra de download nos fluxos; **Arquivos da OSC preenchendo os fluxos** (documentos complementares, habilitação da dispensa e modelos com os dados da OSC); revisão do README |
 
 ---
 
@@ -81,13 +156,13 @@ administrador, o Prefeito, a SCP, a SEPLAN, a Procuradoria e um responsável por
 A senha provisória está nessa migração. **Ela é pública, como todo este repositório: não use essas
 contas fora do ambiente local sem trocar a senha.**
 
-| Para entrar como | Login |
-|---|---|
-| Administrador do sistema | `admin_parcerias` |
+| Para entrar como               | Login                                                               |
+| ------------------------------ | ------------------------------------------------------------------- |
+| Administrador do sistema       | `admin_parcerias`                                                 |
 | Responsável de uma Secretaria | o e-mail institucional dela (`educacao@saogoncalo.mg.gov.br`, …) |
-| Saúde, Fazenda e Trabalho | `saude`, `fazenda`, `trabalho` |
-| Procuradoria Jurídica | `procurador@saogoncalo.mg.gov.br` |
-| SCP / SEPLAN / Prefeito | `scp@gmail.com`, `seplan@gmail.com`, `prefeito@gmail.com` |
+| Saúde, Fazenda e Trabalho     | `saude`, `fazenda`, `trabalho`                                |
+| Procuradoria Jurídica         | `procurador@saogoncalo.mg.gov.br`                                 |
+| SCP / SEPLAN / Prefeito        | `scp@gmail.com`, `seplan@gmail.com`, `prefeito@gmail.com`     |
 
 A tela de entrada aceita e-mail ou nome de usuário. **Não há conta de OSC pronta:** a organização
 entra pelo auto-cadastro em `/cadastro/osc`, que é o único caminho dela — percorrê-lo faz parte do
@@ -138,21 +213,23 @@ que a etapa existe e por que não entra.
 
 ### Menu do portal (OSC logada)
 
-Chamamentos abertos · Transparência · Minhas inscrições · Manifestar interesse · Nova Proposta · Alterações ·
-Prestação de contas · Suporte — e, no menu da conta, **Meus dados e senha** (toda a equipe) e
-**Usuários da organização** (só o responsável legal).
+Chamamentos abertos · Minhas inscrições · **Propor parceria** (Manifestar interesse, Nova Proposta) ·
+**Execução** (Alterações, Prestação de contas) · Arquivos da OSC · Suporte — a Transparência fica no rodapé. No
+menu da conta, **Meus dados e senha** (toda a equipe) e **Usuários da organização** (só o responsável legal).
 
 ### Peças que atravessam o sistema
 
-| Peça | O que faz |
-|---|---|
-| **Motor de peças** (`Peca`) | Checklist documental por categoria — `chamamento_publico`, `dispensa_inexigibilidade`, `celebracao`, `aditivo`, `apostilamento`, `prestacao_contas`, `alteracao`. Cada item tem setor e etapa (`*_SETOR`, `*_ETAPA`); `podePreencher()` e `podeAssinar()` decidem pela vez no trâmite. `sincronizar()` cria os itens e semeia o texto dos modelos |
-| **Modelos** (`Peca::MODELO`, `Support\Modelo`) | Textos com `{{marcadores}}`, preenchidos por `Peca::tokensDe()`: dados da OSC, do representante, do instrumento, datas por extenso (`Support\Extenso`). O que o sistema não sabe fica como `XXXXX` para quem redige |
-| **Documentos gerados** | Não são redigidos: saem dos campos e se regeneram até alguém assinar — `PlanoDocumento` (plano de trabalho), `PrestacaoDocumento` (memorando, relatório, resumo da folha), a Proposta de Alteração |
-| **Assinatura** (`Concerns\GuardaQuemAssinou`) | Grava **nome e cargo no ato**: editar o perfil ou trocar de setor não reescreve o carimbo. Código de validação + QR Code, conferível em `/validar` sem login |
-| **Plano de Trabalho** (`Concerns\TemPlanoDeTrabalho`) | O mesmo plano na manifestação e na proposta; no deferimento a **mesma linha** passa à proposta. O tipo de despesa é `Despesa::NATUREZAS`, o que torna o aprovado comparável ao executado |
-| **Visibilidade à OSC** (`visivel_osc`) | Cada documento carrega a marca; `Peca::INTERNAS` / `ProcessoPeca::INTERNAS` nascem fechados. Só circula documento pronto |
-| **Recorte por órgão** | `visiveisPara()` e `podeVerTodosOrgaos()`: quem é lotado numa Secretaria vê só o que é dela; SCP, SEPLAN, PJ, TI e auditoria veem tudo |
+| Peça                                                         | O que faz                                                                                                                                                                                                                                                                                                                                                                  |
+| ------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Motor de peças** (`Peca`)                          | Checklist documental por categoria —`chamamento_publico`, `dispensa_inexigibilidade`, `celebracao`, `aditivo`, `apostilamento`, `prestacao_contas`, `alteracao`. Cada item tem setor e etapa (`*_SETOR`, `*_ETAPA`); `podePreencher()` e `podeAssinar()` decidem pela vez no trâmite. `sincronizar()` cria os itens e semeia o texto dos modelos |
+| **Modelos** (`Peca::MODELO`, `Support\Modelo`)      | Textos com`{{marcadores}}`, preenchidos por `Peca::tokensDe()`: dados da OSC, do representante, do instrumento, datas por extenso (`Support\Extenso`). O que o sistema não sabe fica como `XXXXX` para quem redige                                                                                                                                                |
+| **Documentos gerados**                                  | Não são redigidos: saem dos campos e se regeneram até alguém assinar —`PlanoDocumento` (plano de trabalho), `PrestacaoDocumento` (memorando, relatório, resumo da folha), a Proposta de Alteração                                                                                                                                                              |
+| **Assinatura** (`Concerns\GuardaQuemAssinou`)         | Grava**nome e cargo no ato**: editar o perfil ou trocar de setor não reescreve o carimbo. Código de validação + QR Code, conferível em `/validar` sem login                                                                                                                                                                                                   |
+| **Plano de Trabalho** (`Concerns\TemPlanoDeTrabalho`) | O mesmo plano na manifestação e na proposta; no deferimento a**mesma linha** passa à proposta. O tipo de despesa é `Despesa::NATUREZAS`, o que torna o aprovado comparável ao executado                                                                                                                                                                       |
+| **Visibilidade à OSC** (`visivel_osc`)               | Cada documento carrega a marca;`Peca::INTERNAS` / `ProcessoPeca::INTERNAS` nascem fechados. Só circula documento pronto                                                                                                                                                                                                                                               |
+| **Recorte por órgão**                                 | `visiveisPara()` e `podeVerTodosOrgaos()`: quem é lotado numa Secretaria vê só o que é dela — nas telas, nas listas, na busca e no painel; SCP, SEPLAN, PJ, TI e auditoria veem tudo                                                                                                                                                                                                                             |
+| **Arquivos da OSC** (`OscArquivo`) | Certidões, estatuto, ata, declarações e documentos complementares, anexados uma vez e versionados. Exigidos para manifestação, Nova Proposta, inscrição e a etapa da OSC na Celebração; a UG os analisa em cada parceria; os complementares já preenchem os itens iguais da Celebração (`Peca::puxarDaAreaDaOsc`) |
+| **Download** (`Peca::podeBaixar`, `Support\DocumentoPdf`) | Cada documento em PDF (texto) ou no arquivo original, e vários num ZIP pelas caixas de seleção. A SCP baixa tudo; a UG, o da sua Secretaria; a OSC, o que está aberto a ela |
 
 ---
 
@@ -210,14 +287,14 @@ Todos seguem a mesma interface (`tramiteEtapaAtual()`, `tramiteEtapas()`, `trami
 `tramiteSetorLabel()`), que o motor de peças usa para decidir quem age. **A OSC é setor do trâmite**
 na Celebração, nas Alterações e na Prestação — ver `User::setorNoTramite()`, logo abaixo.
 
-| Trâmite | Etapas | Onde |
-|---|---|---|
-| **Seleção** (chamamento público) | UG → SCP → UG (prazo de recurso) → UG → SCP → **Prefeito** (6) | `Chamamento::ETAPAS_SELECAO` |
-| **Manifestação de Interesse** | OSC submete → SCP recebe → Secretaria opina → SCP defere ou indefere | `ManifestacaoInteresse` |
-| **Celebração** | UG → **OSC** → UG + SCP (em paralelo) → SCP → SEPLAN → UG → SCP → PJ → SCP → **OSC** → SCP → **UG** → SCP → **Gestor** → SCP → **Gabinete** → SCP → **OSC** → SCP → **Gestor** → **UG** → SCP (22) | `Proposta::ETAPAS_CELEBRACAO` |
-| **Alteração da Parceria** | **OSC** → UG autoriza → SCP processa e decide (3) | `Alteracao::ETAPAS` |
-| **Prestação de Contas** | **OSC** → SCP (análise prévia) → UG com Gestor e Comissão (3) | `PrestacaoContas::ETAPAS` |
-| **Suporte** | quem abre ↔ equipe (TI e SCP) | `Chamado` |
+| Trâmite                                  | Etapas                                                                                                                                                                                                                                                                 | Onde                            |
+| ----------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------- |
+| **Seleção** (chamamento público) | UG → SCP → UG (prazo de recurso) → UG → SCP →**Prefeito** (6)                                                                                                                                                                                               | `Chamamento::ETAPAS_SELECAO`  |
+| **Manifestação de Interesse**     | OSC submete → SCP recebe → Secretaria opina → SCP defere ou indefere                                                                                                                                                                                                | `ManifestacaoInteresse`       |
+| **Celebração**                    | UG →**OSC** → UG + SCP (em paralelo) → SCP → SEPLAN → UG → SCP → PJ → SCP → **OSC** → SCP → **UG** → SCP → **Gestor** → SCP → **Gabinete** → SCP → **OSC** → SCP → **Gestor** → **UG** → SCP (22) | `Proposta::ETAPAS_CELEBRACAO` |
+| **Alteração da Parceria**         | **OSC** → UG autoriza → SCP processa e decide (3)                                                                                                                                                                                                              | `Alteracao::ETAPAS`           |
+| **Prestação de Contas**           | **OSC** → SCP (análise prévia) → UG com Gestor e Comissão (3)                                                                                                                                                                                               | `PrestacaoContas::ETAPAS`     |
+| **Suporte**                         | quem abre ↔ equipe (TI e SCP)                                                                                                                                                                                                                                         | `Chamado`                     |
 
 No deferimento, a manifestação **vira** chamamento (tipo dispensa ou inexigibilidade) e proposta,
 levando plano e documentos — as mesmas linhas, sem cópia. Sem programa aberto na Secretaria, o
@@ -227,40 +304,40 @@ chamamento nasce na pasta geral "Parcerias por manifestação de interesse".
 
 ## Perfis e acesso
 
-**24 perfis da Prefeitura** e **5 da OSC**. Um usuário pode ter vários; os com setor marcado são
+**24 perfis da Prefeitura** e **7 da OSC**. Um usuário pode ter vários; os com setor marcado são
 **exclusivos** (só atribuíveis a quem é lotado nele — `User::PERFIS_EXCLUSIVOS`). A matriz vive em
 `RolesSeeder::MATRIZ`; mudou a matriz, rode `php artisan db:seed --class=RolesSeeder` (a produção
 também precisa).
 
-| Slug | Perfil | Setor exclusivo | Permissões |
-|---|---|---|---|
-| `administrador_setorial` | Administrador Setorial | TI | todas |
-| `auditor_externo` | Auditor Externo | — | todas (**somente leitura**) |
-| `auditor_geral` | Auditor Geral | — | todas (**somente leitura**) |
-| `prefeito_municipal` | Prefeito Municipal | PM | chamamentos, formalizacao |
-| `responsavel_unidade_gestora` | Responsável da Unidade Gestora | UG | planejamento, chamamentos, propostas, pareceres_decisao, formalizacao, ordem_pagamento, execucao, prestacao_contas, usuarios_setor |
-| `chefe_setor` | Chefe de Setor | — | usuarios_setor |
-| `analista_tecnico_scp` | Analista Técnico do SCP | SCP | planejamento, chamamentos, execucao, prestacao_contas, suporte |
-| `responsavel_publicacao` | Responsável pela Publicação | SCP | chamamentos |
-| `responsavel_seplan` | Responsável pela SEPLAN | SEPLAN | planejamento, usuarios_setor — **único que assina o Parecer Financeiro** |
-| `analista_orcamentario_financeiro` | Analista Orçamentário Financeiro | SEPLAN | planejamento |
-| `analista_juridico` | Analista Jurídico | — | pareceres_juridico, planejamento |
-| `analista_viabilidade_tecnica` | Analista de Viabilidade Técnica | — | pareceres_tecnico |
-| `analista_aditivo_apostilamento` | Analista de Aditivo e Apostilamento | — | formalizacao |
-| `analista_prestacao_contas_previa` | Analista de Prestação de Contas Prévia | — | prestacao_contas |
-| `comissao_selecao` | Comissão de Seleção | — | propostas, pareceres_tecnico, pareceres_decisao |
-| `comissao_monitoramento` | Comissão de Monitoramento | — | monitoramento |
-| `comissao_avaliacao` | Comissão de Avaliação | — | prestacao_contas |
-| `gestor_parceria` | Gestor da Parceria | — | planejamento, monitoramento, execucao, prestacao_contas |
-| `cadastrador` | Cadastrador | — | chamamentos, propostas, formalizacao |
-| `contador` | Contador | — | prestacao_contas |
-| `encaminhador` | Encaminhador | — | formalizacao |
-| `operador_ordem_pagamento` | Operador de Ordem de Pagamento | — | ordem_pagamento |
-| `aprovador_assinatura_eletronica` | Aprovador de Assinatura Eletrônica | — | — *(o fluxo ainda não existe)* |
-| `analista` | Analista (em descontinuação) | — | — |
+| Slug                                 | Perfil                                    | Setor exclusivo | Permissões                                                                                                                        |
+| ------------------------------------ | ----------------------------------------- | --------------- | ---------------------------------------------------------------------------------------------------------------------------------- |
+| `administrador_setorial`           | Administrador Setorial                    | TI              | todas                                                                                                                              |
+| `auditor_externo`                  | Auditor Externo                           | —              | todas (**somente leitura**)                                                                                                  |
+| `auditor_geral`                    | Auditor Geral                             | —              | todas (**somente leitura**)                                                                                                  |
+| `prefeito_municipal`               | Prefeito Municipal                        | PM              | chamamentos, formalizacao                                                                                                          |
+| `responsavel_unidade_gestora`      | Responsável da Unidade Gestora           | UG              | planejamento, chamamentos, propostas, pareceres_decisao, formalizacao, ordem_pagamento, execucao, prestacao_contas, usuarios_setor |
+| `chefe_setor`                      | Chefe de Setor                            | —              | usuarios_setor                                                                                                                     |
+| `analista_tecnico_scp`             | Analista Técnico do SCP                  | SCP             | planejamento, chamamentos, execucao, prestacao_contas, suporte                                                                     |
+| `responsavel_publicacao`           | Responsável pela Publicação            | SCP             | chamamentos                                                                                                                        |
+| `responsavel_seplan`               | Responsável pela SEPLAN                  | SEPLAN          | planejamento, usuarios_setor —**único que assina o Parecer Financeiro**                                                    |
+| `analista_orcamentario_financeiro` | Analista Orçamentário Financeiro        | SEPLAN          | planejamento                                                                                                                       |
+| `analista_juridico`                | Analista Jurídico                        | —              | pareceres_juridico, planejamento                                                                                                   |
+| `analista_viabilidade_tecnica`     | Analista de Viabilidade Técnica          | —              | pareceres_tecnico                                                                                                                  |
+| `analista_aditivo_apostilamento`   | Analista de Aditivo e Apostilamento       | —              | formalizacao                                                                                                                       |
+| `analista_prestacao_contas_previa` | Analista de Prestação de Contas Prévia | —              | prestacao_contas                                                                                                                   |
+| `comissao_selecao`                 | Comissão de Seleção                    | —              | propostas, pareceres_tecnico, pareceres_decisao                                                                                    |
+| `comissao_monitoramento`           | Comissão de Monitoramento                | —              | monitoramento                                                                                                                      |
+| `comissao_avaliacao`               | Comissão de Avaliação                  | —              | prestacao_contas                                                                                                                   |
+| `gestor_parceria`                  | Gestor da Parceria                        | —              | planejamento, monitoramento, execucao, prestacao_contas                                                                            |
+| `cadastrador`                      | Cadastrador                               | —              | chamamentos, propostas, formalizacao                                                                                               |
+| `contador`                         | Contador                                  | —              | prestacao_contas                                                                                                                   |
+| `encaminhador`                     | Encaminhador                              | —              | formalizacao                                                                                                                       |
+| `operador_ordem_pagamento`         | Operador de Ordem de Pagamento            | —              | ordem_pagamento                                                                                                                    |
+| `aprovador_assinatura_eletronica`  | Aprovador de Assinatura Eletrônica       | —              | —*(o fluxo ainda não existe)*                                                                                                  |
+| `analista`                         | Analista (em descontinuação)            | —              | —                                                                                                                                 |
 
 **OSC:** `responsavel_legal` (exclusivo do setor OSC — faz tudo no portal), `membro_osc` (a
-identidade de quem é da equipe; o que faz vem das funções `osc_*`) e os três perfis de convenente,
+identidade de quem é da equipe; o que faz vem das funções `osc_*`) e os cinco perfis de convenente,
 sem permissão — ver [Equipe da OSC](#equipe-da-osc-contas-da-organização).
 
 **Quem cadastra a equipe é o responsável do setor** (`User::RESPONSAVEL_DO_SETOR`). Na UG e na SEPLAN o
@@ -310,8 +387,8 @@ dois lugares, nunca na aprovação — na **criação** (responsável do setor) 
 ### A OSC como setor do trâmite (`User::setorNoTramite()`)
 
 Os fluxos designam etapas a setores, e **um deles é a própria OSC** — na Celebração ela elabora
-o Plano de Trabalho, anexa a habilitação, assina o Termo e informa os dados bancários (3 das 15
-etapas). Mas OSC não tem lotação: `users.setor` é **NULL**.
+o Plano de Trabalho, anexa a habilitação, assina o Termo e informa os dados bancários (etapas 2, 10 e
+18 das 22). Mas OSC não tem lotação: `users.setor` é **NULL**.
 
 Quem comparava `$user->setor === 'osc'` obtinha sempre falso. Efeito: quando a UG encaminhava a
 Celebração à OSC, o item saía da caixa do município e **não entrava em lugar nenhum** — o trâmite
@@ -328,9 +405,15 @@ não tinha botão para devolver. Beco sem saída: ninguém no sistema podia movi
 - **Faixa "É a sua vez"** no layout do portal, em qualquer página — não dá para supor que a OSC vá
   procurar. Mostra a etapa, a ação esperada e o link para continuar.
 
-### Documentos da proposta: a OSC apresenta, o município confere
+### Documentos da OSC: a OSC apresenta, o município confere
 
-São documentos **da OSC** (estatuto, certidões, ata, habilitação). O envio é exclusivo dela;
+**Arquivos da OSC** (desde 01/10/2026) é onde ficam os documentos da organização — certidões com validade,
+estatuto, ata de eleição, as seis declarações e os complementares. Cada envio é uma versão; a certidão vencida
+e o que faltar travam a manifestação, a Nova Proposta, a inscrição no chamamento e a etapa da OSC na
+Celebração. A UG analisa cada arquivo **em cada parceria** (etapa 3 da Celebração); recusado, a OSC é avisada e
+só avança com nova versão. A Alteração e o Aditivo usam a mesma área.
+
+Os **anexos da proposta e da manifestação** (`Documento`) seguem o rito abaixo. O envio é exclusivo da OSC;
 ao município cabe **baixar, aprovar ou recusar** — `documentos.analisar` (PATCH).
 
 - Antes os dois lados viam o mesmo botão **Remover**: o servidor apagava o documento da OSC,
@@ -340,7 +423,7 @@ ao município cabe **baixar, aprovar ou recusar** — `documentos.analisar` (PAT
   parte de corrigir); **aprovado** já integra a instrução do processo e sai do alcance dela.
 - `Proposta::aceitaDocumentosDaOsc()` — o envio era limitado a `rascunho`, o que fechava a porta
   justamente quando ela precisa estar aberta: reenviar o que foi recusado e anexar a habilitação
-  na **Celebração etapa 2**, com a proposta já aprovada. Agora só fecha em `reprovada`/`cancelada`.
+  na Celebração, com a proposta já aprovada. Agora só fecha em `reprovada`.
 - **Quem aprova ainda está em aberto:** hoje qualquer perfil interno com a permissão `propostas`
   aprova ou recusa — inclusive o Cadastrador. O fluxograma do módulo 3.2 diz que a habilitação vai
   "para a SCP", que "analisa a documentação". Ver [Pendências](#pendências).
@@ -355,10 +438,10 @@ OSC é organização, e organização tem equipe. O vínculo mora em **`users.os
 > cadastrar um segundo usuário significaria reapontar a coluna e desvincular o primeiro.
 > Na prática a saída era compartilhar a senha, e todo mundo atuava sob a mesma identidade.
 
-| Quem | Faz | Não faz |
-|---|---|---|
-| **Responsável legal** (`oscs.user_id`) | tudo do portal + **cadastra e suspende** a equipe e marca as funções de cada um | — |
-| **Membro** (`membro_osc`) | acompanha tudo; **age** só nas funções que o responsável marcou para ele: `osc_propostas`, `osc_documentos`, `osc_manifestacoes`, `osc_celebracao` | **submeter**, **recorrer**, **contra-assinar o Termo**, assinar as declarações e o plano de trabalho, administrar acessos |
+| Quem                                            | Faz                                                                                                                                                                 | Não faz                                                                                                                                      |
+| ----------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Responsável legal** (`oscs.user_id`) | tudo do portal +**cadastra e suspende** a equipe e marca as funções de cada um                                                                              | —                                                                                                                                            |
+| **Membro** (`membro_osc`)               | acompanha tudo; **age** só nas funções que o responsável marcou para ele: `osc_propostas`, `osc_documentos`, `osc_manifestacoes`, `osc_celebracao` | **submeter**, **recorrer**, **assinar o Termo**, assinar as declarações e o plano de trabalho, administrar acessos |
 
 No cadastro do integrante há ainda cinco perfis — Cadastrador de Proposta, de Prestação de
 Contas e de Usuário do Ente, **Contador** e **Responsável por Execução** — que **não abrem porta
@@ -383,22 +466,22 @@ responsável legal restringe depois, no "Alterar" da listagem.
 
 ### O que cada permissão libera
 
-| Permissão | Dá acesso a |
-|---|---|
-| `cadastros` | **Cadastros**: órgãos e usuários, OSCs, aprovação de contas |
-| `planejamento` | **1 · Planejamento**: processos, termo de referência, peças e trâmite |
-| `chamamentos` | **2 · Seleção**: chamamentos, checklist e trâmite da seleção, **manifestações de interesse** |
-| `propostas` | **Propostas**: análise da proposta, plano de trabalho, conferência dos documentos da OSC |
-| `pareceres_tecnico` / `pareceres_juridico` / `pareceres_decisao` | Emitir o parecer correspondente na análise da proposta |
-| `formalizacao` | **Instrumentos**: instrumento, aditivos, apostilamento e sua documentação |
-| `ordem_pagamento` | Emitir **ordens de pagamento** no instrumento vigente |
-| `execucao` | **4 · Execução** (repasses, despesas, notas, saldo) e **Alterações da Parceria** |
-| `prestacao_contas` | **6 · Prestação de Contas** |
-| `monitoramento` | Leitura de alterações e prestações; o módulo próprio ainda não existe |
-| `usuarios_setor` | **Meus usuários**: cadastrar a equipe do próprio setor (o administrador aprova) |
-| `aprovar_contas_osc` | **Aprovações pendentes**, só as contas de OSC — é como a SCP decide sobre a equipe da organização sem ganhar a mesa de cadastros |
-| `suporte` | **Atender** o suporte: ver e responder os chamados de todos, nota interna, encerrar |
-| `osc_*` | Funções da equipe da OSC, marcadas por pessoa — nunca valem dentro da Administração |
+| Permissão                                                             | Dá acesso a                                                                                                                                  |
+| ---------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------- |
+| `cadastros`                                                          | **Cadastros**: órgãos e usuários, OSCs, aprovação de contas                                                                        |
+| `planejamento`                                                       | **1 · Planejamento**: processos, termo de referência, peças e trâmite                                                               |
+| `chamamentos`                                                        | **2 · Seleção**: chamamentos, checklist e trâmite da seleção, **manifestações de interesse**                              |
+| `propostas`                                                          | **Propostas**: análise da proposta, plano de trabalho, conferência dos documentos da OSC                                              |
+| `pareceres_tecnico` / `pareceres_juridico` / `pareceres_decisao` | Nada, desde que o parecer avulso da proposta saiu (02/10/2026) — ver [Pendências](#código)                                                                                       |
+| `formalizacao`                                                       | **Instrumentos**: instrumento, aditivos, apostilamento e sua documentação                                                             |
+| `ordem_pagamento`                                                    | Emitir **ordens de pagamento parciais** no instrumento vigente (a Global nasce na Celebração)                                                                                    |
+| `execucao`                                                           | **4 · Execução** (repasses, despesas, notas, saldo) e **Alterações da Parceria**                                             |
+| `prestacao_contas`                                                   | **6 · Prestação de Contas**                                                                                                          |
+| `monitoramento`                                                      | Leitura de alterações e prestações; o módulo próprio ainda não existe                                                                  |
+| `usuarios_setor`                                                     | **Meus usuários**: cadastrar a equipe do próprio setor (o administrador aprova)                                                       |
+| `aprovar_contas_osc`                                                 | **Aprovações pendentes**, só as contas de OSC — é como a SCP decide sobre a equipe da organização sem ganhar a mesa de cadastros |
+| `suporte`                                                            | **Atender** o suporte: ver e responder os chamados de todos, nota interna, encerrar                                                     |
+| `osc_*`                                                              | Funções da equipe da OSC, marcadas por pessoa — nunca valem dentro da Administração                                                      |
 
 Exceções à régua por permissão, todas de propósito:
 
@@ -421,10 +504,11 @@ middlewares `osc` e `staff`, que perguntam a `User::temAcessoInterno()`.
 Dois middlewares do grupo `web` valem para toda rota, e por isso rota nova já nasce coberta:
 
 - **`ParceriaVisivel`** — se a rota recebe uma parceria ou algo pendurado nela (instrumento,
-  aditivo, ordem de pagamento, despesa, repasse, prestação de contas, alteração, diligência,
-  documento, peça), sobe até a proposta e pergunta a `Proposta::visivelPara()`: a OSC dona, a
-  Secretaria dona ou quem atende o município inteiro. O recorte por Secretaria vivia só nas
-  listagens; a tela de detalhe abria pelo endereço o que a lista escondia.
+  aditivo, ordem de pagamento, despesa, repasse, prestação de contas, alteração, documento, peça),
+  sobe até a proposta e pergunta a `Proposta::visivelPara()`: a OSC dona, a Secretaria dona ou quem
+  atende o município inteiro. Para o servidor, o chamamento, as peças da Seleção e os recursos passam
+  por `Chamamento::visivelPara()`. O recorte por Secretaria vivia só nas listagens; a tela de detalhe
+  abria pelo endereço o que a lista escondia.
 - **`ExigeTrocaDeSenha`** — conta com `deve_trocar_senha` só chega à tela de troca. A marca vem de
   quem definiu a senha por outra pessoa: suporte, administrador, chefia de setor, responsável legal.
 
@@ -474,11 +558,11 @@ Procedimento:
 
 ## Verificação
 
-`php artisan test` (sqlite em memória) roda **185 testes** em `tests/Feature`, um arquivo por regra de
+`php artisan test` (sqlite em memória) roda **199 testes** em `tests/Feature`, um arquivo por regra de
 negócio (quem abre qual parceria, contas e senhas, avisos por e-mail, segregação de encargos,
 cancelamento e prorrogação de chamamento, Nova Proposta, prazo e resposta de recurso, plano de
 trabalho do modelo, etapa conjunta, devolução por documento, Termo e OP em sequência, download de
-documentos, instrumento na conclusão…). **Todos passam**, também em MySQL (o banco da produção): basta
+documentos, instrumento na conclusão, listas por Secretaria, Arquivos da OSC nos fluxos…). **Todos passam**, também em MySQL (o banco da produção): basta
 um `phpunit.xml` na raiz com `DB_CONNECTION=mysql`, um banco descartável e `force="true"` nos `<env>`. Os
 testes de regra nova são conferidos falhando com a regra desligada antes de entrar.
 
@@ -509,7 +593,7 @@ Trazer os demais cenários para `tests/Feature` é uma das [Pendências](#pendê
 
 ## Pendências
 
-*Atualizado em 07/10/2026.*
+*Atualizado em 08/10/2026.*
 
 ### Segurança
 
@@ -531,16 +615,17 @@ Trazer os demais cenários para `tests/Feature` é uma das [Pendências](#pendê
 - **Solicitação de assinatura** (perfil Aprovador de Assinatura Eletrônica, pedido no módulo 3.1 como
   botão "Enviar para assinatura"): falta definir quem solicita e quem aprova em cada tipo de
   documento. Hoje quem tem a vez assina direto.
-- **Quem aprova os documentos da OSC:** hoje qualquer perfil interno com `propostas`, inclusive o
-  Cadastrador. O fluxograma do 3.2 diz que a habilitação vai à SCP, que analisa; o Plano de Trabalho
-  é aprovado pela UG (etapa 3 da Celebração).
+- **Quem aprova os anexos da proposta** (`Documento`): hoje qualquer perfil interno com `propostas`,
+  inclusive o Cadastrador. A habilitação já saiu desse caminho — os Arquivos da OSC são analisados pela UG
+  na etapa 3 da Celebração —, mas o fluxograma do 3.2 diz que a documentação vai à SCP.
 - **Auto-preenchimento dos `XXXXX`** — levantamento de 23/09: dos 73 documentos dos fluxos, 14 saem
   completos, 12 não têm texto-modelo e os demais somam 530 lacunas. Cerca de 154 pedem dado que o
   sistema já tem em marcador pronto (data, Secretaria, OSC, CNPJ, processo) e 127 dado que está no
   banco sem marcador (valor, objeto, vigência, nº do chamamento e do termo); 146 pedem dado que o
   sistema não tem (73 são dotação, ficha e fonte; 51, numeração de memorandos e pareceres) e 66 são
-  texto de quem redige. Aguardando: a data do documento é a da criação ou a da assinatura? Onde
-  nascem dotação, ficha e fonte? Numerar os documentos automaticamente?
+  texto de quem redige. Em 08/10 os oito modelos da Celebração e da dispensa que pediam OSC, CNPJ e
+  representante passaram a usar os marcadores. Aguardando: a data do documento é a da criação ou a da
+  assinatura? Onde nascem dotação, ficha e fonte? Numerar os documentos automaticamente?
 - **Limite de anexo de 10 MB**: foto de câmera passa disso (28 de 50 fotos de teste). Aumentar o
   limite ou reduzir a imagem ao receber — o servidor aceita até 256 MB.
 - O que **Parlamentar** e **Conselho** veem de diferente na tela principal (hoje ambos vão à
@@ -566,18 +651,25 @@ Trazer os demais cenários para `tests/Feature` é uma das [Pendências](#pendê
 - Na prestação de contas, o **laudo de obra** e os **pareceres** saem com `XXXXX` no corpo.
 - Checklist da dispensa: itens 16 a 18 e a publicação do termo (item 15).
 - Trazer as verificações HTTP para `tests/Feature`.
+- Itens finos anotados em agosto, a confirmar com a SCP: campos **Exercício** e **Prazo de Execução** no
+  chamamento (2.2.1 do módulo 2) e reajuste/reequilíbrio na formalização.
 
 ### Produção (ação, não código)
 
+- **Deploy pendente:** o que está no GitHub depois de 07/10 (ver [Estado atual](#estado-atual)), com uma
+  migração.
+- **Agendamento no hPanel** ([Deploy](#deploy), passo 7): sem ele, os avisos por e-mail ficam na fila.
+- Mover a conta `planejamento@saogoncalo.mg.gov.br` para o setor SEPLAN, com o perfil Responsável pela
+  SEPLAN.
+- Cadastrar o **Gestor da Parceria** (perfil) em cada Secretaria antes de a primeira parceria chegar à
+  assinatura do Termo — sem ele, a SCP não tem quem escolher na etapa 13 da Celebração.
 - Designar **Chefe de Setor** em cada Secretaria, senão o cadastro da própria equipe não tem quem o
   use fora da UG.
-- Contas a rever: o login do administrador, uma conta de teste de Saúde ativa sem perfil, e a
-  Associação Bem Viver, sem RG do representante. A OSC de teste criada em 23/09 (CNPJ zerado) sai
-  quando os testes em produção acabarem.
-- Parcerias paradas na **etapa 2 da Celebração** passaram a exigir seis documentos de habilitação
-  que antes cabiam numa caixa só — avisar a cliente antes de cobrar.
-- Cadastrar o **Gestor da Parceria** (perfil) em cada Secretaria antes do próximo Termo, e criar o
-  **agendamento** no hPanel (ver acima).
+- Avisar as OSCs de que a área **Arquivos da OSC** precisa estar completa e em dia (as cadastradas começam
+  com ela vazia; em 08/10 nenhuma tinha enviado arquivo).
+- Há **um único administrador** (TI): se a conta ficar inacessível, ninguém mais concede perfis.
+- Contas a rever: a Associação Bem Viver, sem RG do representante, e a OSC de teste criada em 23/09 (CNPJ
+  zerado), que sai quando os testes em produção acabarem. A Saúde ficou só com `gestor.saude` (07/10).
 
 ---
 
@@ -586,7 +678,19 @@ Trazer os demais cenários para `tests/Feature` é uma das [Pendências](#pendê
 Da mais recente para a mais antiga. Cada entrada diz o que mudou, **por quê** e como foi
 conferido — o porquê é o que falta a quem pega o código depois.
 
+- [2026-10-08] **Revisão do README e o Resumo das entregas**
+  - Seção nova [Resumo das entregas](#resumo-das-entregas): a linha do tempo de 16/06 a 08/10, uma linha por dia
+    de entrega, com os deploys marcados — as datas são as deste Histórico e, onde ele não registrou, as dos commits
+  - Este Histórico ficou todo do mais recente ao mais antigo (junho e julho estavam em ordem crescente no fim) e as
+    sete linhas soltas de 16/06 viraram uma entrada; do quadro de agosto saíram os "Próximos passos" — os que
+    seguem abertos foram para as Pendências
+  - Corrigido o que tinha envelhecido: tamanho do sistema, o que está e o que não está em produção, menu do portal,
+    7 perfis da OSC, etapas da OSC na Celebração (2, 10 e 18 de 22), Arquivos da OSC e download no mapa, Termo
+    assinado (não mais contra-assinado), permissões de parecer sem tela, middleware `ParceriaVisivel`, número de
+    testes e as Pendências de produção, reunidas num lugar só
+
 - [2026-10-08] **O que a OSC já tem em "Arquivos da OSC" preenche os fluxos** (migração `2026_10_08_100000`)
+
   - **Documentos complementares** na área, opcionais (não travam manifestação, inscrição, Celebração nem Alteração):
     RG/CPF/comprovante de residência do presidente, relação nominal dos dirigentes, balanço patrimonial (com
     validade e aviso de vencimento) e comprovantes de experiência prévia — documentos da organização, que a OSC
@@ -605,8 +709,8 @@ conferido — o porquê é o que falta a quem pega o código depois.
     Chamamento da dispensa e o Aditivo passaram a ter o cadastro da OSC nos marcadores
   - Conferido: `ArquivosDaOscPreenchemOsFluxosTest` (6 testes; falham com a cópia e o atendimento desligados);
     suíte 199/199; 435 telas sem erro
-
 - [2026-10-08] **Caixas de seleção para baixar documentos nos fluxos** (`pecas/_checklist`)
+
   - Nas listas de documentos da Seleção, Celebração, Prestação de Contas, Alteração e Aditivo, cada documento que a
     pessoa pode baixar ganha uma caixa à esquerda; no topo, "Marcar todos"/"Desmarcar todos" e "Baixar selecionados
     (N) em ZIP" (sem nada marcado, segue o "Baixar todos"). Feito com Alpine, sem mudar o JavaScript compilado; o ZIP
@@ -615,8 +719,8 @@ conferido — o porquê é o que falta a quem pega o código depois.
     todos" e o download como botões; as caixas são maiores que as padrão
   - Conferido: `DownloadDeDocumentosTest` (caixas só onde se pode baixar); no navegador, duas marcadas geraram um ZIP
     com os dois documentos e "Marcar todos" marcou as 14; suíte 193/193; 435 telas sem erro
-
 - [2026-10-07] **Arquivos da OSC valendo em todos os fluxos**
+
   - **Recusa da UG trava a Celebração:** a parte da UG na etapa 3 (conjunta) só conclui com cada arquivo da OSC
     aprovado nesta parceria (`Proposta::pendenciasDaAnaliseDosArquivos`). Recusado, a UG devolve à OSC, que recebe
     e-mail com o motivo (`Avisos::arquivoRecusado`) e, na etapa dela, só avança depois de enviar nova versão
@@ -628,8 +732,8 @@ conferido — o porquê é o que falta a quem pega o código depois.
     área (`arquivos-osc/_situacao`), e a Alteração só sai da etapa da OSC com ela completa e em dia
   - Conferido: `ArquivosDaOscNosFluxosTest` (a recusa falha sem a trava), `CelebracaoEtapaConjuntaTest` atualizado;
     suíte 193/193; 435 telas sem erro
-
 - [2026-10-07] **Todos os campos de dinheiro com R$ e vírgula** (`x-input-dinheiro`)
+
   - Sete campos ainda eram número cru (digitava-se `87978978078` sem separador): no plano de trabalho, o valor
     pleiteado, o estimado de cada atividade, a parcela do desembolso e o valor unitário da planilha; na prestação de
     contas, os saldos e créditos, as glosas (aprovado e os seis meses de cada natureza) e o valor unitário dos bens.
@@ -639,8 +743,8 @@ conferido — o porquê é o que falta a quem pega o código depois.
     `recursos_proprios`, `despesas_bancarias` e `valor_ressarcido` (vale quando o navegador está sem JavaScript)
   - Conferido: `PlanoDeTrabalhoModeloTest` (máscara nos quatro campos, sem id repetido, "1.234,56" gravado como
     1234.56); a prestação mostra 34 campos com máscara; suíte 190/190; 435 telas sem erro
-
 - [2026-10-07] **Listas só com o que é da Secretaria** (`Instrumento::visiveisPara`, `Chamamento::visiveisPara`)
+
   - A tela de cada instrumento já barrava a UG de outra Secretaria ("Acesso restrito"), mas as **listas** mostravam
     tudo: Instrumentos, Execução, Prestação de Contas (para servidor) e Chamamentos, além da busca do topo e dos
     números do painel (processos, chamamentos, propostas, instrumentos). Agora todas usam o mesmo recorte das
@@ -648,8 +752,8 @@ conferido — o porquê é o que falta a quem pega o código depois.
   - Três ordenações e a lista de anos da Transparência usavam funções só do MySQL (`FIELD`, `YEAR`), o que
     impedia testá-las; passaram a SQL comum (`CASE`) e a cálculo no PHP. Sem mudança na produção
   - Conferido: `ListasPorSecretariaTest` (falha com o filtro da Execução desligado); suíte 189/189; 435 telas sem erro
-
 - [2026-10-07] **Limpeza, otimização e testes antes do deploy**
+
   - Sem uso, saíram: o componente `nav-link`, as constantes `Programa::TIPOS`/`STATUS` e `Tramitacao::STATUS`,
     as regras de exclusão de programa (não há mais tela que exclua), os status de proposta "Em Negociação" e
     "Cancelada" (nada os grava desde que a diligência saiu) e 17 traduções das telas do Breeze removidas
@@ -663,8 +767,8 @@ conferido — o porquê é o que falta a quem pega o código depois.
     existiam no CSS compilado (`ml-6`, `text-[10px]`) trocadas pelas existentes
   - Conferido: suíte 185/185 em sqlite e em MySQL; 435 telas × perfis sem erro no banco local; migrações e
     `RolesSeeder` ensaiados sobre cópia da produção e 390 telas abertas nela sem erro
-
 - [2026-10-07] **Plano de aplicação digitado na Nova Proposta; textos até 1000 caracteres**
+
   - No primeiro formulário da Nova Proposta, a planilha de itens deu lugar a um campo de texto, **Plano de
     aplicação dos recursos** (obrigatório), como Objeto e Justificativa. Valor pleiteado, planilha de itens e
     desembolso se lançam no plano de trabalho, na tela seguinte; o texto segue editável lá (item 13, "Salvar
@@ -677,8 +781,8 @@ conferido — o porquê é o que falta a quem pega o código depois.
     carga horária. Nenhum texto gravado (local e produção) passava de 1000
   - Migração `2026_10_07_100000_textos_do_plano_ate_mil_caracteres`
   - Conferido: `NovaPropostaTest`, `PlanoDeTrabalhoModeloTest`; suíte 185/185; telas abertas com os dados locais
-
 - [2026-10-07] **Download de documentos em todos os fluxos** (`Peca::podeBaixar`, `App\Support\DocumentoPdf`)
+
   - Regra: a **SCP** (e o administrador) baixa todos os documentos de todos os fluxos; a **UG** e os demais
     setores, os da própria Secretaria que leem, preenchem ou assinam; a **OSC**, os abertos a ela da própria
     parceria (na Seleção, do chamamento em que se inscreveu)
@@ -696,8 +800,8 @@ conferido — o porquê é o que falta a quem pega o código depois.
     `Chamamento::visivelPara` para o servidor (a página pública segue aberta às OSCs)
   - Conferido: `DownloadDeDocumentosTest`, `SelecaoDaSecretariaTest` (falha sem a trava), `ArquivosDaOscTest`;
     suíte 184/184; PDF e ZIP gerados com os dados locais (PDF de Termo com duas partes simuladas: duas faixas)
-
 - [2026-10-06] **O instrumento nasce na conclusão da Celebração; saem as sobras sem uso**
+
   - **Instrumento automático** (`Proposta::criarInstrumento`): ao concluir a Celebração, a parceria ganha o
     instrumento vigente, com número do ano (`001/2026`, `Instrumento::proximoNumero`), tipo do programa, objeto,
     valores e datas da proposta, data da última assinatura do Termo e da publicação no DOE. Saíram o "Formalizar
@@ -714,8 +818,8 @@ conferido — o porquê é o que falta a quem pega o código depois.
     As colunas antigas do recurso ficam no banco, vazias
   - Conferido: `InstrumentoNaConclusaoTest` (falha sem a criação automática), `ParceriaVisivelTest` (não há rota
     para criar instrumento à mão); suíte 177/177; telas abertas com os dados locais
-
 - [2026-10-02] **A UG decide a proposta de dispensa ou inexigibilidade** (`PropostaController::decidir`)
+
   - A manifestação deferida como dispensa ou inexigibilidade gera a proposta "Submetida", e ela não passa pela
     Seleção. O único caminho para aprová-la era a "Decisão Final" do parecer avulso, que saiu no mesmo dia — e a
     proposta ficava parada. Agora a tela da proposta traz o quadro **Decisão da proposta**: o Responsável da UG da
@@ -728,8 +832,8 @@ conferido — o porquê é o que falta a quem pega o código depois.
     lugar, a Secretaria
   - Conferido: `DecisaoDaPropostaSemSelecaoTest` (falha com a trava de quem decide desligada); suíte 180/180; a
     proposta 30 local mostra o quadro ao Secretário de Obras
-
 - [2026-10-02] **Sai o parecer avulso da proposta, e a diligência com ele**
+
   - O bloco "Análise da Proposta" (+ Parecer Técnico, + Parecer Jurídico, + Decisão Final) era da primeira fase:
     texto livre, sem documento nem assinatura, e mudava o status da proposta por fora da Seleção (uma "Decisão
     Final" aprovava sem julgamento nem adjudicação). Nenhum registro no banco. Saíram `ParecerController`,
@@ -737,8 +841,8 @@ conferido — o porquê é o que falta a quem pega o código depois.
     tela interna e no portal e o aviso por e-mail de diligência. Os pareceres que valem são as peças dos trâmites
   - Ficaram as tabelas e as permissões `pareceres_*`, sem uso (ver Pendências)
   - Conferido: `ParecerAvulsoForaTest` (falha sem a mudança); suíte 175/175
-
 - [2026-10-02] **"Chamamentos" vai direto à lista; a tela de Programas saiu** (`ChamamentoController`, `chamamentos/index`)
+
   - O menu passava por "Programas Governamentais" para chegar aos chamamentos de cada programa. Agora "Chamamentos"
     abre uma lista só, de todas as Secretarias, já filtrada nos **abertos** (publicados e em inscrição, a mesma
     régua do card do painel), com filtros de busca, Secretaria, modalidade e situação (em análise, encerrados,
@@ -750,14 +854,14 @@ conferido — o porquê é o que falta a quem pega o código depois.
     `/programas/{id}`). Painel, busca global, Seleção e Processo apontam para a lista nova
   - Conferido: `ListaDeChamamentosTest` (falha com o filtro padrão desligado), `ChamamentoSoScpEditaTest`,
     `ChamamentoCanceladoTest`; suíte 174/174; telas abertas com os dados locais
-
 - [2026-10-02] **Saem os 5 testes do Breeze que falhavam**
+
   - Login de qualquer usuário criado, cadastro já logado e `/profile` aberto a todos: o Breeze os testava, mas o
     sistema exige aprovação e conta ativa para entrar, cadastra como pendente e reserva `/profile` ao servidor.
     Apagados a pedido (`ProfileTest` inteiro; um teste em `AuthenticationTest` e um em `RegistrationTest`)
   - Conferido: suíte 170/170
-
 - [2026-10-02] **Limpeza do código**
+
   - Código sem uso removido: a contra-assinatura do Termo (rota, ação, regras e telas; fica só a exibição das
     contra-assinaturas já feitas), as constantes vazias da Celebração, oito métodos e constantes sem chamada,
     a view `processos/caixa`, a `welcome` e sete componentes do Breeze, imports e linhas em branco sobrando
@@ -766,37 +870,37 @@ conferido — o porquê é o que falta a quem pega o código depois.
     que tinham ficado soltos, longe do código que descreviam, voltaram para o lugar
   - Conferido: um verificador comparou cada arquivo com a versão anterior sem comentários nem espaços (só
     comentários mudaram); `view:cache` compila todas as views; suíte 170/175, as mesmas 5 falhas do Breeze
-
 - [2026-10-02] **Linha de assinatura nas declarações impressas da OSC** (`Peca::declaracaoParaOsc`)
+
   - As seis declarações de "Arquivos da OSC" são impressas e assinadas à mão, e saíam sem lugar para a assinatura.
     O bloco do representante legal ganha a linha acima do nome. Só na versão para imprimir: o texto do modelo não muda
   - Conferido: `ArquivosDaOscTest`
-
 - [2026-10-02] **Nova Proposta: primeiro formulário sem o campo de valor** (`portal/manifestacoes/_valores-proposta`)
+
   - A pedido da gestão, sai o "Valor pleiteado" do primeiro formulário, e o título da planilha passa a
     "Plano de aplicação dos recursos (Anexar planilha)", sem o número 13. O valor pleiteado começa como o total da
     planilha (quantidade × valor unitário) e continua editável no plano de trabalho, na tela seguinte; o envio segue
     exigindo valor maior que zero. O editor do plano e o documento impresso mantêm a numeração do modelo
   - Conferido: `NovaPropostaTest`
-
 - [2026-10-02] **Arquivos da OSC no desenho do resto do sistema** (`arquivos-osc/_lista`)
+
   - A lista copiava o portal do DF (faixa verde, títulos em caixa alta, selos coloridos, "Histórico • 00") e destoava
     das outras telas. Agora usa o mesmo desenho da lista de documentos dos trâmites: cabeçalho com contagem e barra
     de progresso por grupo (`pecas/_cabecalho`, que ganhou rótulos configuráveis), bolinha de situação, versão e
     validade numa linha só, arquivo atual como chip com "Baixar", e "Enviar arquivo / nova versão", "Histórico" e
     "Analisar nesta parceria" como os botões recolhíveis do checklist. O histórico só aparece quando há o que mostrar
   - Conferido: `ArquivosDaOscTest`; portal, cadastro da OSC e proposta renderizados com dados locais
-
 - [2026-10-01] **Barra do portal da OSC em grupos** (`layouts/portal`)
+
   - Com "Arquivos da OSC", a OSC logada tinha nove links numa linha e a barra passava da largura da tela. Agora:
     Chamamentos abertos · Minhas inscrições · **Propor parceria ▾** (Manifestar interesse, Nova Proposta) ·
     **Execução ▾** (Alterações, Prestação de contas) · Arquivos da OSC · Suporte. A Transparência continua na barra
     para quem não está logado e, para a OSC, no rodapé. A gaveta (menu de celular) passa a valer abaixo de telas
     grandes (`lg`), com os grupos como títulos
   - Conferido: `BarraDoPortalTest`
-
 - [2026-10-01] **Arquivos da OSC: documentos anexados uma vez, para todas as parcerias** (`OscArquivoController`,
   `OscArquivo`, `OscArquivoAnalise`, `arquivos-osc/_lista`, comando `osc:avisar-vencimento-certidoes`)
+
   - Pedido da Raquel (30/09), com o portal do DF (parcerias.df.gov.br/pmis) como modelo: para diminuir a
     quantidade de arquivos, a OSC anexa **uma vez** os seus documentos, numa área própria do portal ("Arquivos da
     OSC", no menu), em três grupos: **certidões negativas** (federal/Dívida Ativa, estadual, trabalhista e FGTS),
@@ -814,30 +918,30 @@ conferido — o porquê é o que falta a quem pega o código depois.
     da proposta, o estatuto, a ata e as certidões. A inscrição em chamamento não mudou
   - Conferido: 9 testes em `ArquivosDaOscTest`; os testes que enviam manifestação ou passam pela etapa da OSC
     usam `Concerns\PreencheArquivosDaOsc`; telas abertas com os dados locais, sem erro
-
 - [2026-10-01] **Nova Proposta deferida vai direto à Celebração** (`ManifestacaoAnaliseController::deferir`)
+
   - Decisão da gestão. Deferida pela UG, a Nova Proposta cria o chamamento (dispensa ou inexigibilidade) e a
     proposta **já aprovada e com a Celebração iniciada** (etapa 1, com a UG) — sem a análise de proposta com
     pareceres, porque a UG já decidiu ao deferir. A UG recebe a Celebração na caixa e por e-mail; a OSC é
     avisada da aprovação. A manifestação de interesse deferida continua como antes (proposta submetida, com
     análise)
   - Conferido: `NovaPropostaTest` (deferimento direto à Celebração; manifestação sem mudança)
-
 - [2026-10-01] **Celebração: "Processo" e "Edital nº" no lugar de "Chamamento"** (`celebracao/show`)
+
   - Pedido da gestão. A identificação da Celebração mostra o número do **processo** do Planejamento e o **número do
     edital**; na dispensa e na inexigibilidade, que não têm edital, "Dispensa nº" / "Inexigibilidade nº"
   - Conferido: `CelebracaoIdentificacaoTest`
-
 - [2026-10-01] **Ordem de Pagamento Global com duas assinaturas: Gestor da Parceria e Responsável da UG**
   (`Peca::ASSINATURAS_EM_SEQUENCIA['celebracao']['op_global']`)
+
   - Decisão da gestão. A OP Global, elaborada pela SCP, passa a ser assinada pelo **Gestor da Parceria** e depois
     pelo **Responsável da UG**, cada um na sua etapa (20ª e 21ª); o empenho vai para a 22ª, e a Celebração passa
     de 21 para 22 etapas (migração). O Gestor é o mesmo escolhido pela SCP para o Termo — ela pode trocá-lo ao
     encaminhar, e o escolhe se ainda não houver. A OP assinada do jeito antigo (pela UG) continua valendo
   - Conferido: `OpGlobalDuasAssinaturasTest`
-
 - [2026-10-01] **Termo de Parceria assinado em sequência: OSC, UG, Gestor e Gabinete**
   (`Peca::ASSINATURAS_EM_SEQUENCIA`, `peca_assinaturas`, `Proposta::usuarioTemAVezNaCelebracao`)
+
   - Decisão da gestão. A SCP emite o Termo **sem assinar** (etapa 9). Assinam, nesta ordem: a **OSC** (responsável
     legal), o **Responsável da UG**, o **Gestor da Parceria** e o **Gabinete**, que faz a última assinatura. Entre
     uma e outra o Termo volta à SCP, que o encaminha: a Celebração passa de 15 para 21 etapas (as seis novas são
@@ -851,9 +955,9 @@ conferido — o porquê é o que falta a quem pega o código depois.
     sequência. Termos antigos (SCP pelo Município + contra-assinatura da OSC) continuam valendo como estão
   - Conferido: 2 testes em `TermoAssinadoEmSequenciaTest` (a sequência inteira, com quem pode e quem não pode
     assinar em cada etapa, a escolha do Gestor, a caixa de entrada e a validação; ninguém assina fora da vez)
-
 - [2026-10-01] **Celebração, etapa 7: Minuta do Termo e Certidão de Autuação junto com o Protocolo**
   (`Peca::TEMPLATES['celebracao']`)
+
   - Pedido da gestão. A etapa 7 (SCP) ganha dois documentos-modelo, antes do Protocolo na Unidade Jurídica:
     a **Minuta do Termo**, que nasce com o texto do Termo de Parceria, e a **Certidão de Autuação**, com o
     texto da rota de Dispensa (que já lista a minuta entre os documentos autuados). Os dois são da SCP,
@@ -863,15 +967,15 @@ conferido — o porquê é o que falta a quem pega o código depois.
     demais documentos. O Termo de Parceria definitivo continua assinado pelo Município e pela OSC
   - Celebrações que já passaram da etapa 7 ganham os dois itens no checklist, sem travar nada
   - Conferido: `CelebracaoEtapa7Test`
-
 - [2026-10-01] **Salvar ou assinar não fecha o documento** (`PecaController::voltarParaPeca`, `ProcessoPecaController`)
+
   - Pedido da gestão. Nos checklists (Seleção, Celebração, Alteração, Prestação de contas), o documento em que
     se salvou ou assinou volta **aberto**, no mesmo lugar da página (antes voltava recolhido). No Planejamento,
     salvar e assinar ficam na página do documento, com a mensagem de confirmação (antes voltavam ao processo)
   - Conferido: 2 testes em `DocumentoContinuaAbertoTest`
-
 - [2026-10-01] **Devolução por documento, em todos os trâmites** (`App\Support\Devolucao`,
   `Concerns\PodeSerDevolvida`, `tramite/_devolver-documentos`, `tramite/_ultima-devolucao`)
+
   - Decisão da gestão. No Planejamento, na Seleção, na Celebração, na Alteração e na Prestação de contas, o
     formulário de devolução lista os documentos já feitos em etapas anteriores, e quem devolve **marca os que
     estão errados**. Só eles reabrem: o texto perde a assinatura (e a contra-assinatura; ganha outro código ao
@@ -885,9 +989,9 @@ conferido — o porquê é o que falta a quem pega o código depois.
     tinha como corrigir; o motivo só aparecia no histórico recolhido
   - Conferido: 5 testes em `DevolucaoPorDocumentoTest` (Celebração, Seleção com arquivo, devolução sem
     documento, documento de etapa futura recusado, Planejamento); telas dos cinco trâmites abertas sem erro
-
 - [2026-09-30] **Celebração: etapa 3 conjunta, UG e SCP ao mesmo tempo** (`Proposta::setoresComAVezNaCelebracao`,
   `propostas.celebracao_partes_concluidas`)
+
   - Decisão da gestão. Quando a OSC encaminha a etapa 2, a etapa 3 vai **à UG e à SCP ao mesmo tempo**: a UG
     analisa e assina a Aprovação do Plano de Trabalho; a SCP analisa o plano e a habilitação. Cada setor
     clica em "Concluir a minha parte"; a Celebração só avança quando os dois concluírem. Os dois recebem
@@ -896,15 +1000,15 @@ conferido — o porquê é o que falta a quem pega o código depois.
   - A etapa, na trilha, aparece como "Unidade Gestora + SCP". O modelo guarda um setor principal (UG) para o
     que só entende um setor por etapa; a lista de setores da etapa fica em `ETAPAS_CELEBRACAO[2]['setores']`
   - Conferido: 3 testes em `CelebracaoEtapaConjuntaTest`
-
 - [2026-09-30] **Declaração do art. 23, XIV, fora da Celebração** (`Peca::TEMPLATES['celebracao']`)
+
   - Decisão da gestão: não é mais exigida. Saiu do checklist da Celebração e do modelo de texto. Na
     migração, as peças ainda não assinadas foram apagadas; as assinadas ficam como histórico, sem ser
     obrigatórias (havia 1, na base local e na de produção)
   - Conferido: `DeclaracaoArt23ForaTest`
-
 - [2026-09-30] **Plano de trabalho editável na Celebração, pela OSC e pela UG** (`Proposta::planoAbertoNaCelebracao`,
   `PlanoTrabalhoController::ugPodeEditar`)
+
   - Decisão da gestão. Na Celebração, o plano fica aberto a edição **em qualquer etapa** (antes, só na etapa
     da OSC), até o documento "Plano de Trabalho" do checklist ser **assinado** — aí o texto congela e mudar o
     plano volta a ser por Alteração
@@ -913,17 +1017,17 @@ conferido — o porquê é o que falta a quem pega o código depois.
     — a Comissão de Seleção, que também é UG, fica de fora. Fora da Celebração a UG continua só lendo o plano
   - A tela da Celebração mostra "Editar o plano" a quem pode editar
   - Conferido: 5 testes em `PlanoNaCelebracaoTest` (o da OSC falha com a regra antiga)
-
 - [2026-09-29] **Várias vencedoras no mesmo chamamento, todas na Celebração** (`CelebracaoController`)
+
   - Pedido da gestão. A adjudicação já aceitava várias vencedoras, e cada uma já ganhava a sua Celebração;
     faltava a tela deixar isso claro. A lista da **Celebração** agora agrupa as parcerias por chamamento,
     com o número e o título dele e o total de parcerias vencedoras. Na Celebração de cada uma, a Prefeitura
     vê as outras vencedoras do mesmo chamamento, com link; a OSC continua vendo só a sua
   - Conferido: `VariasVencedorasTest` (3 propostas, 2 adjudicadas: as duas aparecem agrupadas, uma aponta
     para a outra, a reprovada não aparece, a OSC não vê as outras)
-
 - [2026-09-29] **Seleção: etapa 3 "Recurso e resposta ao recurso", Ata do resultado definitivo e Termo
   preenchido pela SCP** (`Chamamento::ETAPAS_SELECAO`, `Peca::PREENCHIMENTO_RESERVADO`, `Peca::aindaEOModelo`)
+
   - Decisões da gestão, no mesmo dia. **Etapa 3** passa a ser "Recurso e resposta ao recurso": a OSC recorre
     no prazo do edital com um arquivo, e a **Resposta ao recurso** é uma peça nova da etapa, **opcional**
     (a etapa se encerra sem ela), que só a **Comissão de Seleção** preenche e assina. O formulário "Julgar
@@ -938,9 +1042,9 @@ conferido — o porquê é o que falta a quem pega o código depois.
     Prefeito só assina: não tem editor, e a SCP também não edita depois de enviado
   - Conferido: `RecursoPelaComissaoTest` (reescrito: arquivo para a Comissão, peça só dela e opcional, Ata
     na etapa 4), `TermoDeHomologacaoTest` (2 testes), `PrazoDeRecursoTest` atualizado
-
 - [2026-09-29] **O recurso é o arquivo anexado pela OSC, e aparece para a Comissão de Seleção**
   (`RecursoController::store`, `propostas/show`, `propostas/index`)
+
   - Decisão da gestão. O formulário de recurso do portal pede só o PDF assinado, com as razões dentro dele;
     o campo de texto "Fundamentação" saiu. Recursos antigos, que têm texto, continuam mostrando-o
   - O arquivo aparece para a Comissão de Seleção da Secretaria do chamamento: na tela da proposta, com o
@@ -948,8 +1052,8 @@ conferido — o porquê é o que falta a quem pega o código depois.
     julgado". Comissão de outra Secretaria não vê nem baixa
   - Conferido: `PrazoDeRecursoTest` (sem arquivo não protocola) e `RecursoPelaComissaoTest` (a Comissão
     baixa o arquivo e vê a marca; a de outra Secretaria não)
-
 - [2026-09-29] **O recurso é julgado pela Comissão de Seleção** (`Recurso::julgavelPor`, `propostas/show`)
+
   - Decisão da gestão. Quem julga o recurso contra o resultado provisório (provido, parcialmente provido
     ou improvido, com a fundamentação que vai à OSC) passa a ser a **Comissão de Seleção** da Secretaria
     do chamamento — não mais "o setor com a Seleção" (a UG). A UG só emite o Resultado Definitivo depois
@@ -960,17 +1064,17 @@ conferido — o porquê é o que falta a quem pega o código depois.
   - A tela de Seleção da UG mostra os recursos só para leitura, com o link para a proposta
   - Conferido: 4 testes em `RecursoPelaComissaoTest` (3 falham se a UG puder julgar); `PrazoDeRecursoTest`
     atualizado
-
 - [2026-09-29] **Protocolo da manifestação de interesse e da Nova Proposta** (`ManifestacaoInteresse::proximoProtocolo`)
+
   - Pedido da gestão. Ao ser enviada, cada uma recebe um número de protocolo, por ano e no formato dos
     chamados (2026/0001), num livro só para as duas. O número vem do maior do ano (não de contagem), com
     trava de linha e índice único; reenvio não troca o número
   - Aparece na mensagem de envio, no cabeçalho e nas listas do portal, nas telas da SCP/UG (Manifestações e
     Propostas) e no aviso por e-mail ao setor. As já enviadas ganharam número na ordem de envio (migração)
   - Conferido: 2 testes em `ProtocoloDaManifestacaoTest` (sequência entre os dois tipos, virada do ano)
-
 - [2026-09-29] **Plano de Trabalho à risca do modelo da cliente** (`Docs. Desenvolvimento/Planodetrabalho.docx`,
   `PlanoDocumento`, `plano/_editor`, migração `plano_de_trabalho_conforme_o_modelo_da_cliente`)
+
   - Pedido da cliente: seguir o modelo à risca, sem novidades. A tela do plano e o documento impresso
     passam a ter os **13 itens do modelo**, na ordem e com os títulos dele (o item 1 vem do cadastro da
     OSC; o documento traz o "Pedido de avaliação" depois do item 2 e a planilha do item 13 como anexo)
@@ -992,9 +1096,9 @@ conferido — o porquê é o que falta a quem pega o código depois.
     dados antigos ficam no banco; a contrapartida do instrumento (termo) não mudou
   - Conferido: 6 testes em `PlanoDeTrabalhoModeloTest` (os 13 itens na ordem, desembolso por meta, as
     12 naturezas nos blocos da prestação); telas do plano abertas com os dados locais, sem erro
-
 - [2026-09-29] **Nova Proposta: valores, plano de aplicação e desembolso no primeiro formulário**
   (`portal/manifestacoes/_valores-proposta`, `ManifestacaoController::validarValoresDaProposta`)
+
   - Pedido da gestão, em dois passos no mesmo dia: primeiro saíram os campos soltos de valor; depois
     entraram, no lugar, os itens 5, 6 e 7 do Plano de Trabalho — o **plano de aplicação** (tabela de
     itens, com total por linha e geral), o **valor total e contrapartida** (valor solicitado, obrigatório;
@@ -1003,17 +1107,17 @@ conferido — o porquê é o que falta a quem pega o código depois.
     completo é o envio. Na tela seguinte o mesmo plano segue editável. A manifestação de interesse não mudou
   - O aviso "a SCP decide o fundamento" também saiu do formulário, a pedido
   - Conferido: `NovaPropostaTest` (grava valores, itens e parcelas; linha incompleta ou sem valor não cria)
-
 - [2026-09-29] **Nova Proposta: o fundamento é decidido pela SCP** (`ManifestacaoAnaliseController::encaminhar`)
+
   - Decisão da gestão. A OSC não escolhe mais dispensa ou inexigibilidade: o campo saiu do formulário
     do portal (e, se vier na requisição, é ignorado). A SCP decide o fundamento no mesmo passo em que
     escolhe a Unidade Gestora; sem ele, não encaminha. A UG defere com o fundamento que a SCP decidiu
   - A coluna continua `fundamento_pedido` (nome de quando a OSC o informava). Proposta antiga que já
     veio com fundamento chega à SCP com ele pré-selecionado
   - Conferido: `NovaPropostaTest` (7 testes, 1 novo para a decisão da SCP)
-
 - [2026-09-29] **Etapa própria para o prazo de recurso na Seleção** (`Chamamento::ETAPA_PRAZO_RECURSO`,
   `chamamentos.prazo_recurso_ate`)
+
   - Pedido da gestão. A Seleção passa de 5 para 6 etapas: depois da publicação do Resultado Provisório
     entra o **prazo de recurso**, com a UG. Antes, a OSC podia recorrer na mesma etapa em que a UG já
     redigia o Resultado Definitivo
@@ -1025,8 +1129,8 @@ conferido — o porquê é o que falta a quem pega o código depois.
   - Migração: as etapas a partir da antiga 3 andam uma casa (e os anexos avulsos criados nelas). Quem
     estava na antiga etapa de análise de recursos vai para a de resposta — o prazo dele já tinha corrido
   - Conferido: 5 testes em `PrazoDeRecursoTest` (o do prazo falha com a data desligada)
-
 - [2026-09-29] **Só a SCP edita o chamamento** (`Chamamento::cadastroPermitidoA`, `ChamamentoController`)
+
   - Decisão da gestão. Criar, editar e remover o chamamento (datas de inscrição, número, objeto,
     situação) passa a ser só da SCP. Até aqui bastava a permissão de chamamentos, que a UG também tem
   - A UG continua com a Seleção e com o botão de cancelar, que têm rotas próprias. Gerar o chamamento
@@ -1034,9 +1138,9 @@ conferido — o porquê é o que falta a quem pega o código depois.
   - Botões "Novo Chamamento", "Editar", "Remover" e "Editar dados" só aparecem para a SCP. Para a UG,
     o aviso de período de inscrição em falta diz que a SCP o define
   - Conferido: 3 testes em `ChamamentoSoScpEditaTest` (2 falham com a trava desligada)
-
 - [2026-09-28] **Página pública do chamamento: só o edital e os anexos** (`PortalController::chamamento`,
   `PortalController::anexoDoEdital`)
+
   - Decisão da gestão: a consulta pública mostra **só o edital e os anexos dele**. Os documentos da
     prorrogação contam como anexos do edital e continuam lá. Na dispensa e na inexigibilidade, que
     não têm edital, aparece **só a justificativa**. O **Parecer CNAS saiu** da página
@@ -1045,9 +1149,9 @@ conferido — o porquê é o que falta a quem pega o código depois.
     assinado** daquele chamamento; anexo de outra peça, de outro chamamento, de edital ainda não
     assinado ou de dispensa dá 404
   - Conferido: 5 testes em `ConsultaPublicaDoChamamentoTest` (os da página falham com a lista antiga)
-
 - [2026-09-28] **Nova Proposta da OSC (dispensa ou inexigibilidade)** (`ManifestacaoInteresse::TIPOS`,
   `ManifestacaoController`, `ManifestacaoAnaliseController`, `propostas/index`)
+
   - Pedido da gestão: um processo novo, parecido com a manifestação de interesse mas não igual. Mesmo
     conteúdo (dados, plano de trabalho completo, documentos), por isso a mesma tabela, com `tipo`
   - **Caminho:** a OSC envia informando o fundamento (dispensa ou inexigibilidade) → a **SCP** recebe e
@@ -1061,9 +1165,9 @@ conferido — o porquê é o que falta a quem pega o código depois.
     do encaminhamento
   - Conferido: 6 testes em `NovaPropostaTest` (4 falham sem o caminho próprio); a manifestação de
     interesse continua igual
-
 - [2026-09-28] **Prorrogação do prazo de inscrições do chamamento** (`ChamamentoProrrogacaoController`,
   `chamamento_prorrogacoes`)
+
   - Pedido da gestão. Feita pela **SCP**, na tela de Seleção e Celebração, com **dois anexos
     obrigatórios**: o aviso de prorrogação e o comprovante de publicação. O prazo novo vale na hora —
     se as inscrições já tinham acabado, reabrem até a nova data
@@ -1073,9 +1177,9 @@ conferido — o porquê é o que falta a quem pega o código depois.
   - As OSCs com proposta recebem aviso por e-mail. A página pública do chamamento mostra o novo prazo e
     os dois documentos, que abrem sem login, como o edital — contam como anexos dele
   - Conferido: 5 testes em `ChamamentoProrrogacaoTest` (os das travas falham com elas desligadas)
-
 - [2026-09-28] **Só o responsável do setor cadastra a equipe** (`User::RESPONSAVEL_DO_SETOR`,
   `UserRequest`, `User::PERFIS_VEDADOS_AO_CHEFE`)
+
   - Decisão da gestão: na UG, o Chefe de Setor e o Responsável da UG são a mesma pessoa. O perfil
     Chefe de Setor passa a ser recusado a quem, na UG, não é o responsável. A mesma regra vale na
     SEPLAN, que também tem responsável próprio: o Responsável pela SEPLAN ganha `usuarios_setor`
@@ -1084,9 +1188,9 @@ conferido — o porquê é o que falta a quem pega o código depois.
   - Em produção a regra já era cumprida: na UG, cadastra só o responsável de cada Secretaria; na SCP,
     o Chefe de Setor. Na OSC nada muda: cadastra só o responsável legal
   - Conferido: 3 testes em `ResponsavelDoSetorTest` (os das travas falham com elas desligadas)
-
 - [2026-09-28] **Cadastro da equipe da OSC: perfis Contador e Responsável por Execução; funções
   fora do cadastro** (`User::PERFIS_OSC`, `OscUsuarioController`, `portal/usuarios/create`)
+
   - Pedido da gestão. Os dois perfis novos são papéis de assinatura, sem permissão — chaves próprias
     (`contador_osc`, `responsavel_execucao_osc`), porque o "Contador" da Prefeitura abre a prestação
     de contas de todas as parcerias
@@ -1095,9 +1199,9 @@ conferido — o porquê é o que falta a quem pega o código depois.
   - Saiu também a frase "o portal ainda não tem a tela para a organização enviar a prestação de
     contas", escrita em 22/09 e errada: o portal tem essa tela
   - Conferido: 2 testes novos em `PerfisDaOscTest`
-
 - [2026-09-28] **Parecer Financeiro: qualquer um da SEPLAN elabora, só o responsável assina**
   (`Peca::ASSINATURA_RESERVADA`, perfil `responsavel_seplan`)
+
   - Decisão da gestão. Antes, qualquer pessoa lotada na SEPLAN assinava. Vale nos três fluxos em
     que o parecer aparece: Planejamento (`ProcessoPeca`), Celebração e Aditivo (`Peca`)
   - Perfil novo **Responsável pela SEPLAN**, exclusivo da lotação SEPLAN. Quem elabora vê o aviso
@@ -1108,9 +1212,9 @@ conferido — o porquê é o que falta a quem pega o código depois.
     Em produção ela era a UG do Planejamento, que não tinha parceria nenhuma
   - Conferido: 4 testes em `ParecerFinanceiroReservadoTest` (os 2 de "a analista não assina" falham
     com a reserva desligada)
-
 - [2026-09-28] **Cancelar e reabrir chamamento** (`ChamamentoCancelamentoController`,
   `Chamamento::cancelado`, `chamamento_cancelamentos`)
+
   - Botão para a **Unidade Gestora da Secretaria dona**, na tela de Seleção e Celebração. Cancela o
     chamamento inteiro sem excluir nada, e pode ser reaberto; reabrir devolve o status que ele tinha
   - **Motivo obrigatório** nos dois atos, com histórico (quem, quando, por quê) e **aviso por e-mail**
@@ -1124,18 +1228,18 @@ conferido — o porquê é o que falta a quem pega o código depois.
     travar nada; chamamento cancelado só sai pelo botão de reabrir
   - Conferido: 8 testes em `ChamamentoCanceladoTest` (5 falham com a trava desligada) e o ciclo
     completo com dados reais
-
 - [2026-09-28] **Título do memorando só cita parcerias**
   (`ProcessoPeca::MODELO['oficio']`, migração `titulo_do_memorando_so_parcerias`)
+
   - "MEMORANDO PARA SOLICITAÇÃO DE CONVÊNIOS/PARCERIAS" vira "MEMORANDO PARA SOLICITAÇÃO DE
     PARCERIAS". Era o único lugar do sistema com "Convênios/Parcerias"; o nome do Setor de
     Convênios e Parcerias não muda
   - Documentos gravados também, inclusive os assinados (decisão da gestão); em produção eram 10,
     5 deles assinados. O original fica em `backup_titulo_memorando`, e desfazer restaura
   - Conferido: dois testes em `OficioViraMemorandoTest`, com a forma acentuada e a codificada
-
 - [2026-09-28] **"Ofício" passa a se chamar "Memorando" em todo o sistema**
   (modelos, rótulos, telas; migração `oficio_passa_a_se_chamar_memorando`)
+
   - Decisão da gestão: todos, inclusive os documentos que a OSC envia (memorando do pedido, de
     encaminhamento da prestação, com justificativa da alteração) e o da Ordem de Pagamento
   - 33 trocas em 10 arquivos. Os identificadores internos (`oficio`, `oficio_pedido`,
@@ -1149,10 +1253,10 @@ conferido — o porquê é o que falta a quem pega o código depois.
   - As entradas antigas deste histórico mantêm "ofício": registram o que existia na época
   - Conferido: `OficioViraMemorandoTest` — varre o código atrás de "ofício" escrito (e pega a
     regressão, com arquivo e linha) e confere a migração trocando e restaurando
-
 - [2026-09-28] **Encargos que não se acumulam; Monitoramento e Avaliação separados**
   (`User::ENCARGOS_QUE_NAO_ACUMULAM`, `UserRequest`, `SubusuarioController`, `UserController::aprovar`,
   migração `separa_comissao_de_monitoramento_e_de_avaliacao`)
+
   - Decisão da gestão: Gestor da Parceria, Comissão de Seleção, Comissão de Monitoramento e Comissão
     de Avaliação não podem ser a mesma pessoa — cada encargo fiscaliza o outro. Vale por pessoa,
     porque os perfis são da pessoa e não da parceria
@@ -1164,34 +1268,34 @@ conferido — o porquê é o que falta a quem pega o código depois.
   - Em produção, a única conta que acumulava (a de teste "teste 1", com os três) perdeu os três
     perfis, a pedido da gestão, e ficou sem acesso interno
   - Conferido: 7 testes em `SegregacaoDeEncargosTest` (5 falham com a regra desligada)
-
 - [2026-09-25] **Homologação, item 2 — perfis da OSC persistem (teste de integração)**
   (`PerfisDaOscTest`)
+
   - Pelo portal os perfis sempre gravaram; o que os apagava era a tela da Prefeitura
     (Cadastros → Usuários), corrigida em 23/09. Faltava o teste do aceite: cadastrar com 2 ou mais
     perfis, reabrir o "Alterar" da lista da equipe e ver todos marcados; alterar pela lista; e
     passar pela aprovação da Prefeitura sem perder nenhum
   - Conferido: com o defeito relatado simulado (gravar só "Membro da OSC"), os 4 testes falham
-
 - [2026-09-25] **Homologação, item 8 — "Aguardando o SCP" vira "Aguardando análise"**
   (`ManifestacaoInteresse::STATUS`)
+
   - Só o rótulo exibido; a chave `submetida` e os registros antigos ficam como estão. Era a única
     ocorrência do texto no sistema. Desde o item 1, nenhuma manifestação nova passa por esse status
   - Conferido: `RotuloAguardandoAnaliseTest` e o filtro da lista de manifestações
-
 - [2026-09-24] **Homologação, item 1 — manifestação vai direto à Unidade Gestora**
   (`ManifestacaoController::submeter`, `manifestacoes/show`)
+
   - A manifestação enviada parava na triagem da SCP, cujo único ato era "encaminhar à Secretaria";
     a UG não recebia nada até lá, e o detalhe dizia "está com Administração" sem dizer que era a
     UG. Decisão da gestão: vai direto à UG da Secretaria escolhida
   - O resto do fluxo não muda: a UG emite o parecer, a SCP decide (e pode indeferir a qualquer
     momento). O status `submetida` fica só para registros antigos — em produção não havia nenhum
-  - O rodapé do detalhe diz "a Unidade Gestora — <Secretaria>"; o rótulo do status virou "Em
+  - O rodapé do detalhe diz "a Unidade Gestora — <Secretaria></secretaria>"; o rótulo do status virou "Em
     análise na Unidade Gestora"; a mensagem de envio e o texto do portal falam da UG
   - Conferido: 4 testes em `ManifestacaoParaUgTest`, todos falhando sem a correção
-
 - [2026-09-24] **Homologação, item 3 — documentos do Planejamento são internos**
   (`Proposta::dossieParaOsc`, `DossieController::barrarPlanejamento`, `portal/proposta`, `dossie/curadoria`)
+
   - A aba "Documentos do processo" mostrava à OSC o Termo de Referência, os Pareceres Financeiro e
     Jurídico e o Edital — em produção, exatamente esses quatro, para a única OSC real. Decisão: todo
     o Planejamento sai da visão da OSC
@@ -1202,9 +1306,9 @@ conferido — o porquê é o que falta a quem pega o código depois.
     do município deixa de oferecer o Planejamento. O Edital segue na página pública do chamamento
   - Conferido: 5 testes em `DocumentosInternosTest` (4 falham sem a correção; o quinto confirma
     que os perfis internos continuam vendo o Planejamento)
-
 - [2026-09-24] **Avisos por e-mail** (`Support\Avisos`, `Mail\Aviso`, `emails/aviso`, agenda em
   `routes/console.php`)
+
   - O sistema não mandava e-mail nenhum: a vez no trâmite, a conta esperando aprovação e a resposta do
     suporte só existiam na tela. Agora saem da caixa `parcerias@pmsgra.net`
   - **Contas:** conta pendente → quem aprova (TI/Admin; SCP se for de OSC); aprovada ou recusada → a
@@ -1221,9 +1325,9 @@ conferido — o porquê é o que falta a quem pega o código depois.
     hospedagem a esvazia a cada minuto. Falha de e-mail nunca derruba a ação
   - Conferido: 8 testes em `AvisosPorEmailTest` (6 falham sem os avisos registrados), um aviso real
     passando pela fila local, e o login no SMTP de produção com um e-mail de teste à própria caixa
-
 - [2026-09-23] **Conta de OSC sem organização: aviso no portal e senha sempre acessível**
   (`layouts/portal`, rotas de `portal.perfil`)
+
   - Em produção, a conta de teste da OSC era responsável legal sem organização — o cadastro da OSC
     dela tinha sumido. O portal escondia "Minhas inscrições" e "Manifestar interesse" sem dizer por
     quê, e "Meus dados e senha" devolvia à página inicial, porque ficava atrás do middleware `osc`
@@ -1232,9 +1336,9 @@ conferido — o porquê é o que falta a quem pega o código depois.
     vai para o perfil interno
   - Em produção foi criada a OSC **"OSC TESTE (conta de teste — não é organização real)"**, CNPJ e
     CPF zerados, vinculada a `oscteste@gmail.com`
-
 - [2026-09-23] **Senha esquecida pelo suporte e troca obrigatória** (`PedidoDeSenhaController`,
   `ExigeTrocaDeSenha`, `TrocaDeSenhaController`, `SuporteController::senhaProvisoria`)
+
   - O "esqueci minha senha" do Breeze prometia um link por e-mail que nunca chegava: o sistema não
     envia e-mail (o envio vai para o log). Saiu o fluxo inteiro; o pedido agora abre chamado de
     **Acesso e senha**, sem login — a única porta do suporte aberta a visitante, com limite de
@@ -1247,9 +1351,9 @@ conferido — o porquê é o que falta a quem pega o código depois.
   - Migração `exige_troca_da_senha_provisoria_publica`: marca quem ainda usa a senha provisória
     pública do quadro da Prefeitura (lida da migração de origem, sem repeti-la aqui)
   - Conferido: 12 testes em `SenhaPeloSuporteTest` e o fluxo inteiro com dados reais
-
 - [2026-09-23] **Contas: a tela da Prefeitura não corrompe conta de OSC, e ninguém apaga o autor**
   (`UserController`, `UserRequest`, `User::motivosParaNaoExcluir`)
+
   - Editar integrante de OSC em Cadastros → Usuários exigia marcar um perfil da Prefeitura e, ao
     salvar, trocava o "Membro da OSC" por ele. Agora a tela serve para nome, e-mail, senha e acesso;
     perfil, lotação e Secretaria ficam com a organização, e o que vier num envio forjado é descartado
@@ -1259,9 +1363,9 @@ conferido — o porquê é o que falta a quem pega o código depois.
     (contra-assinatura, ordem de pagamento assinada, tramitações, recursos, a OSC de que a pessoa é
     responsável legal…) viravam `NULL` em silêncio. Agora confere todas — conferido contra o banco
   - Conferido: 7 testes em `ContasDeUsuarioTest`, 5 deles falhando sem a correção
-
 - [2026-09-23] **Parceria alheia não abre mais pelo endereço** (`ParceriaVisivel`,
   `Proposta::visivelPara`, `CelebracaoController::show`, `InstrumentoController`)
+
   - O recorte por Secretaria vivia só nas listagens: servidor de uma Secretaria abria proposta,
     instrumento, Celebração e prestação de contas de outra pelo endereço; e a **Celebração não
     conferia nada** — uma OSC abria a de outra, com nome, CNPJ, valor e Termo à vista. Pior: abrir a
@@ -1274,9 +1378,9 @@ conferido — o porquê é o que falta a quem pega o código depois.
   - Conferido: 26 tipos de usuário abrindo todas as telas de parceria antes e depois — os 390
     resultados que mudaram são todos de servidor abrindo parceria de outra Secretaria; 8 testes em
     `ParceriaVisivelTest`
-
 - [2026-09-22] **Conta da equipe da OSC: funções, aprovação e senha própria**
   (`OscUsuarioController`, `PerfilOscController`, `UserController`, permissão `aprovar_contas_osc`)
+
   - **Funções no cadastro**: o formulário concedia as quatro `osc_*` sem perguntar, e só dava para
     restringir depois. Agora vêm marcadas — quem abre a conta raramente sabe de antemão o que a
     pessoa vai pegar — e quem cadastra desmarca ali mesmo. A lista permitida é conferida no
@@ -1291,9 +1395,9 @@ conferido — o porquê é o que falta a quem pega o código depois.
     senha (pedindo a atual); o e-mail de acesso, não
   - Conferido por script HTTP: 16 verificações, incluindo o 403 quando a SCP tenta aprovar servidor
     pelo id e o redirecionamento do servidor que tenta abrir a tela da OSC
-
 - [2026-09-22] **Plano de trabalho é só leitura para o município** (`propostas/show`, rotas de
   `propostas.metas.*` removidas)
+
   - Metas e etapas são o que a OSC se comprometeu a fazer; editá-las do lado de cá mudava o
     compromisso sem que a organização soubesse e sem rastro de quem mudou
   - Saíram as rotas (não há mais endereço, nem forjando o POST), os botões da tela e os
@@ -1305,12 +1409,12 @@ conferido — o porquê é o que falta a quem pega o código depois.
     quatro rotas antigas, e a OSC continua criando meta e etapa pelo portal
   - No editor do plano, o **cronograma de execução subiu** para logo depois dos dados: quem
     preenche pensa primeiro no que vai fazer, o endereço é detalhe de onde
-
 - [2026-09-22] **Trâmite da Seleção: "Em análise"** (`chamamentos/selecao`)
+
   - O selo laranja anunciava "Com Unidade Gestora" — informação de bastidor para quem lê a tela.
     O setor continua no texto da etapa e no título do selo
-
 - [2026-09-19] **Painel de suporte** (`Chamado`, `SuporteController`, `suporte/*`, permissão `suporte`)
+
   - Canal para dúvidas, problemas e sugestões **sobre o próprio sistema** — até aqui isso corria por
     telefone e WhatsApp, sem registro e sem fila
   - **Só para quem está logado**, e é isso que basta de filtro: quem não tem acesso ao sistema não
@@ -1336,9 +1440,9 @@ conferido — o porquê é o que falta a quem pega o código depois.
   - **39 verificações**: visitante barrado nas duas pontas, chamado alheio invisível para terceiros
     (inclusive na lista), a nota interna que não vaza, o anexo que só as duas partes baixam, a
     reabertura automática e a numeração sequencial por ano
-
 - [2026-09-18] **A OSC passou a ver o processo, e o município escolhe o que ela vê**
   (`DossieController`, `Proposta::dossieParaOsc`, `pecas.visivel_osc`, `portal/_dossie`)
+
   - Último item aberto do módulo 3.3. A cliente pediu que, ao abrir a inscrição, a organização
     encontrasse "todo o processo: proposta, plano de trabalho, documentos da habilitação, pareceres
     (orçamentário e jurídico) assinados, termo assinado, publicação", e sugeriu "uma tela em que a
@@ -1361,9 +1465,9 @@ conferido — o porquê é o que falta a quem pega o código depois.
   - **22 verificações**: o padrão de visibilidade, o documento em elaboração que não aparece, a OSC
     alheia e o visitante barrados, o identificador de outra parceria que não entra pela URL desta,
     a curadoria aplicando exatamente o que foi marcado
-
 - [2026-09-18] **A assinatura passou a guardar quem assinou** (`GuardaQuemAssinou`,
   `User::cargoParaAssinatura`, `processos/_carimbo`, `ValidacaoController`)
+
   - O carimbo lia o **cadastro de agora**: bastava a pessoa editar o nome no perfil, mudar de setor
     ou ganhar outro papel para que **todos os documentos que ela já tinha assinado** passassem a
     dizer outra coisa. Assinatura eletrônica é ato com data certa — quem assinou, e em que
@@ -1379,10 +1483,10 @@ conferido — o porquê é o que falta a quem pega o código depois.
     só como recurso para linha antiga sem registro
   - Conferido: assinar grava os dois campos; renomear o usuário e trocá-lo de setor não mudam o
     carimbo nem a página de validação; as 48 assinaturas que já existiam foram congeladas
-
 - [2026-09-18] **Módulo 3 completo: Plano de Trabalho, Alterações da Parceria e o checklist da
   habilitação item a item** (`TemPlanoDeTrabalho`, `PlanoTrabalhoController`, `Alteracao`,
   `PlanoDocumento`, `plano/*`, `alteracoes/*`)
+
   - **1. A tela que a cliente anotou como inexistente.** O plano era título, objeto, valores, datas e
     metas; faltavam **plano de aplicação**, **cronograma de desembolso**, quadro de contrapartida,
     atuação em rede, endereços de execução e quatro colunas da tabela de metas. Pior: no caminho do
@@ -1423,9 +1527,9 @@ conferido — o porquê é o que falta a quem pega o código depois.
   - **158 verificações, nenhuma falha**: 39 no plano, 36 nas alterações, 42 na habilitação e 41 telas
     abrindo — incluindo os barramentos (OSC alheia, setor errado, plano fechado depois de submetido,
     aprovar sem o despacho) e a parceria antiga que não pode quebrar
-
 - [2026-09-17] **Deferir manifestação sem programa aberto** (`ManifestacaoAnaliseController`,
   `manifestacoes/show`)
+
   - A SCP não conseguia deferir: o **Programa** era obrigatório e a Secretaria de Obras não tinha
     nenhum cadastrado — o único item da lista era "Selecione…". A manifestação não espera programa
     aberto, então o campo virou **opcional**
@@ -1441,9 +1545,9 @@ conferido — o porquê é o que falta a quem pega o código depois.
   - Conferido de verdade na manifestação de Obras, desfazendo no fim: sem programa cria a pasta e o
     chamamento; com programa escolhido usa o escolhido; programa de outra Secretaria é recusado;
     número vazio ou ausente é barrado
-
 - [2026-09-16] **Módulo 3.4 — Prestação de Contas** (`PrestacaoContas`, `PrestacaoDocumento`,
   `PrestacaoContasController`, `prestacao-contas/*`)
+
   - O item 6 do ciclo deixou de ser "em breve". Fluxo do módulo 3.4: a **OSC** monta e envia, a
     **SCP** faz a análise prévia, a **Unidade Gestora** — com o Gestor da Parceria e a Comissão de
     Monitoramento — decide
@@ -1470,8 +1574,8 @@ conferido — o porquê é o que falta a quem pega o código depois.
     e a UG encerra. 34 verificações, nenhuma falha
   - **Fica para depois**: o laudo de obra e o parecer de cada etapa seguem como texto a redigir; a
     tabela de fotos do REO usa o anexo "documentos que comprovam a execução"
-
 - [2026-09-15] **A SCP passou a ter acesso à Execução** (`RolesSeeder`, `layouts/sidebar`)
+
   - O item Execução do menu é travado só pela permissão `execucao`, que estava em cinco perfis (Gestor
     da Parceria, Responsável da UG, Administrador e os dois Auditores). A SCP — que conduz a parceria
     do edital ao empenho e segue nela na execução — via o cadeado
@@ -1484,9 +1588,9 @@ conferido — o porquê é o que falta a quem pega o código depois.
     "Seu perfil não tem acesso à Execução", como os demais itens travados
   - Seguem sem acesso: SEPLAN, Procuradoria, Prefeito e o Analista de Prestação de Contas Prévia
   - Conferido com login real: a SCP abre "Parcerias em Execução"; a SEPLAN recebe 403 e vê a dica nova
-
 - [2026-09-15] **Módulo 3: ajustes do portal, RG no cadastro e as sete declarações da habilitação**
   (`Peca`, `Osc`, `portal/*`, `pecas/_checklist`, `Support/Extenso`)
+
   - **Leitura das imagens do módulo 3.** As especificações trazem 13 capturas; nove do 3.3 são telas
     *deste* sistema com anotações da cliente. Dali saíram os ajustes abaixo. A anotação sobre
     "Quero Participar" descrevia o comportamento atual (abre a proposta existente) e não pedia mudança
@@ -1517,8 +1621,8 @@ conferido — o porquê é o que falta a quem pega o código depois.
     assinar, e o responsável legal vê **sete**. Registros de teste removidos, sem vínculo órfão
   - **Fica para depois:** a oitava declaração (manutenção da capacidade técnica) pertence às
     Alterações da Parceria (3.3), tela que ainda não existe
-
 - [2026-09-11] **Olho de exibir senha na tela de entrada** (`components/input-senha`, `auth/login`)
+
   - Senha se digita às cegas, e no celular ou num teclado desconhecido o erro só aparece depois de a
     entrada ser recusada — com a conta um passo mais perto do bloqueio a cada tentativa
   - Componente `<x-input-senha>`: envolve o campo, reserva o lugar do botão (`pr-11`, senão o texto
@@ -1528,8 +1632,8 @@ conferido — o porquê é o que falta a quem pega o código depois.
     está à mostra. `tabindex="-1"` para o botão não entrar no caminho do Tab entre senha e "Entrar"
   - Conferido com clique de verdade em navegador: `password → text → password`
   - Só a tela de entrada por ora; os demais campos de senha (cadastros, redefinição) seguem sem o olho
-
 - [2026-09-11] **Dos treze perfis do convenente ficaram quatro** (`User::PERFIS_OSC`, `RolesSeeder`)
+
   - A lista veio inteira da tela de referência, e a maior parte descreve trabalho que esta parceria
     não tem — licitação da organização, órgão de controle próprio, relatoria de agenda, ordenação de
     despesa. Em quinze caixas, os perfis que importam se escondiam entre os que nunca seriam marcados
@@ -1544,9 +1648,9 @@ conferido — o porquê é o que falta a quem pega o código depois.
     contas de teste que apaguei nos dias anteriores deixaram vínculos órfãos em `model_has_roles` —
     e foi por causa deles que dois papéis resistiram à primeira remoção. Limpos (15 vínculos de papel
     e 6 de permissão, todos apontando para usuários que não existem mais). Só no banco local
-
 - [2026-09-11] **Os botões do trâmite pararam de oferecer envio ao próprio setor** (`Processo`,
   `processos/show`)
+
   - O registro da movimentação já tratava as duas etapas seguidas da SCP como continuação, não como
     remessa ([2026-09-09]), mas os **rótulos dos botões** continuavam montados sobre o nome do setor
     de destino: na etapa de análise lia-se "✓ Aprovar e liberar para a SCP", com o processo já na SCP
@@ -1557,9 +1661,9 @@ conferido — o porquê é o que falta a quem pega o código depois.
     etapa seguinte — não há encaminhamento a registrar
   - Conferido no navegador, autenticado como a SCP, no processo 0210.0002.2026.01, que está
     exatamente nessa etapa
-
 - [2026-09-11] **O cadastro da equipe da OSC parou de perguntar as funções** (`OscUsuarioController`,
   `portal/usuarios/*`)
+
   - Com o campo Perfil no ar, o formulário pedia duas coisas para a mesma pessoa: quinze perfis e,
     logo abaixo, quatro caixas de função. E perguntava cedo demais — quem abre a conta ainda não sabe
     o que a pessoa vai pegar, e a resposta errada era uma conta que só olha
@@ -1571,8 +1675,8 @@ conferido — o porquê é o que falta a quem pega o código depois.
     restringido — repetir quatro selos em toda linha enchia a coluna sem dizer nada
   - Conferido no navegador: conta criada sem marcar função nenhuma nasce com as quatro permissões
     `osc_*` e o perfil escolhido
-
 - [2026-09-10] **Os treze perfis do convenente** (`User::PERFIS_OSC`, `RolesSeeder`, `portal/usuarios/*`)
+
   - O `.docx` do módulo 1 tem o mesmo texto do `.txt`, mas traz **três imagens que o `.txt` não tinha**.
     A tabela de 21 perfis já estava toda no sistema (conferida uma a uma); o que faltava estava na
     imagem: o painel **"Perfis" da aba Membros**, com a lista do convenente — outra lista, e nenhum
@@ -1597,8 +1701,8 @@ conferido — o porquê é o que falta a quem pega o código depois.
   - Conferido no navegador: cadastrada uma integrante com Gestor Financeiro + Ordenador de Despesa +
     Contador, os quatro papéis gravam, ela entra no portal e é barrada no `/dashboard`; o
     administrador do Município segue interno
-
 - [2026-09-10] **Perfil no cadastro de usuário da OSC** (`OscUsuarioController`, `portal/usuarios/*`)
+
   - Módulo 1, item 1.2.3 (Membros): "CPF, nome completo, telefone, e-mail, cargo/função, **Perfil (com
     várias opções e podendo marcar mais de 01)**". O campo de perfil não existia — a conta nascia
     sempre `membro_osc`, e nada disso aparecia em tela
@@ -1621,8 +1725,8 @@ conferido — o porquê é o que falta a quem pega o código depois.
     já trocava as funções passa a trocar o perfil
   - Conferido no navegador: cadastrada uma contadora pelo formulário do portal, ela nasce com
     `contador` + `membro_osc`, entra no portal e é **barrada no `/dashboard`**, devolvida ao portal
-
 - [2026-09-09] **A SCP deixou de enviar o processo para si mesma** (`TramitacaoController`, `processos/show`)
+
   - Relatado em teste: a etapa 2 do Planejamento manda o processo "para a SCP" — que é quem já está
     com ele. São duas etapas seguidas do mesmo setor (2: analisar o Ofício e o Termo de Referência;
     3: protocolar o Pedido de Parecer à SEPLAN), e como toda movimentação nascia `enviado`, a SCP
@@ -1638,8 +1742,8 @@ conferido — o porquê é o que falta a quem pega o código depois.
     ponto e voltou a permitir "Encaminhar para SEPLAN" direto
   - Verificado que a Seleção e a Celebração não têm etapas seguidas do mesmo setor — o caso é só do
     Planejamento, e o conserto fica no fluxo que o tem
-
 - [2026-09-09] **Barra lateral clara, como o resto do sistema** (`layouts/sidebar`)
+
   - A coluna era `slate-900` e ocupava 256px de altura inteira em toda tela: uma parede que partia a
     interface em dois ambientes, o menu com uma lógica de cor e o conteúdo com outra
   - Branca sobre o cinza-claro do conteúdo, separada só por um fio (`border-r`), a coluna vira
@@ -1651,9 +1755,9 @@ conferido — o porquê é o que falta a quem pega o código depois.
     com texto `brand-800`. O logotipo voltou às cores originais (não mais rebatido para branco)
   - Conferido no navegador, autenticado: painel (item ativo em verde) e uma tela de dentro da Seleção
     (seção em verde claro + subitem ativo em verde sólido)
-
 - [2026-09-09] **Quem clonar o repositório recebe o sistema com gente dentro**
   (`2026_08_27_120000_cria_quadro_de_usuarios_da_prefeitura`)
+
   - As 23 contas da Prefeitura existiam só no banco de quem as digitou. Clonar dava um sistema vazio:
     sem gestor de Secretaria, sem Procuradoria, sem quem assina — nenhum processo podia ser percorrido
     do começo ao fim para testar
@@ -1668,25 +1772,25 @@ conferido — o porquê é o que falta a quem pega o código depois.
     é lido — passou para depois
   - O login do administrador estava `admin@parcerias`; o combinado era `admin_parcerias`. Corrigido
     no código e no banco local. **Produção segue com o antigo** até que se peça a correção
-
 - [2026-09-09] **Quem cadastra a OSC é a OSC** (`OscController`, `routes/web`)
+
   - A tela de OSCs trazia "+ Nova OSC" para o servidor da Prefeitura: um segundo caminho de entrada,
     paralelo ao auto-cadastro em `/cadastro/osc`. O cadastro que nascia dele não tinha dono — sem
     conta de acesso, sem ninguém dentro da organização respondendo pelo que estava escrito
   - Saiu a autoria, não só o botão: `create` e `store` deixaram de existir, o formulário foi apagado
     e o atalho "Nova OSC" saiu da busca global. Editar e remover continuam, porque erro de digitação
     e cadastro duplicado precisam de conserto
-
 - [2026-09-09] **Secretarias herdaram o e-mail de quem responde por elas**
   (`2026_08_27_130000_preenche_email_dos_orgaos`)
+
   - Os órgãos foram cadastrados antes das contas e ficaram todos sem e-mail, embora o endereço já
     existisse: `educacao@` é a caixa da Educação e é com ela que o gestor entra no sistema
   - 15 Secretarias preenchidas. Ficam de fora o e-mail provisório de Saúde, Fazenda e Trabalho
     (propagá-lo espalharia um endereço que não existe) e os órgãos sem nenhum usuário
   - Onde há mais de uma conta e nenhum responsável de UG, o campo segue em branco em vez de escolher
     no lugar de quem sabe
-
 - [2026-09-04] **Chamamento com inscrição encerrada não dizia mais "em breve"**
+
   - Relatado em teste: um chamamento com inscrições até 28/08/2026, visto em 04/09/2026 (já encerrado),
     aparecia com o rótulo "Inscrições em breve" — como se ainda não tivesse começado
   - Causa: `status_efetivo` só distingue "dentro do período" de "fora do período", e as três telas do
@@ -1695,8 +1799,8 @@ conferido — o porquê é o que falta a quem pega o código depois.
   - Adicionado `Chamamento::inscricaoEncerrada()` (compara `data_fim_inscricao` com hoje) e as três
     telas agora mostram "Inscrições encerradas" quando é o caso, mantendo "Inscrições em breve" só para
     quem realmente ainda não abriu
-
 - [2026-09-04] **Confirmado: a OSC cadastra os próprios usuários** — e um redirecionamento corrigido
+
   - Testado ponta a ponta: responsável legal cadastra um integrante em *Usuários da OSC*, o registro
     grava papel `membro_osc` + as funções marcadas, e a conta nova entra e vê exatamente o que a
     função permite (sem enxergar a administração da equipe, que é só do responsável legal)
@@ -1707,8 +1811,8 @@ conferido — o porquê é o que falta a quem pega o código depois.
     destino do login por `hasRole('responsavel_legal')`, o mesmo ponto cego que `EnsureIsStaff` já
     documentava ter corrigido (papel específico não cobre `membro_osc`). Login agora usa
     `!temAcessoInterno()`, a mesma régua única — vai direto ao portal, sem o salto
-
 - [2026-09-04] **Quatro ajustes de uso relatados em teste** (rótulos, anexo e perfis)
+
   - **"Peças do Processo de Seleção" → "Documentos da Seleção"**: última tela que ainda dizia "Peças"
     onde o resto do sistema já dizia "Documentos" (o `processos/show` e a Documentação do Aditivo já
     tinham sido renomeados antes)
@@ -1730,8 +1834,8 @@ conferido — o porquê é o que falta a quem pega o código depois.
     autocadastro novo pelo formulário público — nos dois casos os links **"Manifestar interesse"** e
     **"Usuários da OSC"** aparecem e as telas abrem normalmente. Requer mais detalhe (conta usada,
     ambiente) para reproduzir
-
 - [2026-08-28] **Cadastros: a Secretaria e a sua gente na mesma tela** (`orgaos.index`, `oscs.index`)
+
   - Eram três listagens que ninguém consultava separadas — Usuários, Órgãos/Secretarias e OSCs. Para
     saber quem responde por uma Secretaria, abria-se Usuários e procurava-se pela coluna de órgão;
     para saber quem entra em nome de uma OSC, a mesma caça na lista geral
@@ -1754,8 +1858,8 @@ conferido — o porquê é o que falta a quem pega o código depois.
     OSCs — "Responsável da Unidade Gestora" não cabia na largura que a tabela dava
   - Conferido: as cinco telas rendem, a Secretaria mostra a sua gente, o bloco transversal traz
     SEPLAN/TI/Gabinete, e as duas contas da OSC aparecem na linha dela
-
 - [2026-08-28] **Setor transversal deixou de ser cegado pela própria lotação** (`User::SETORES_TRANSVERSAIS`)
+
   - A visibilidade de processos, propostas e manifestações era medida só por `orgao_id`: quem tem
     Secretaria vê a dela, quem não tem vê tudo. Isso funcionava por omissão — SCP, SEPLAN e
     Procuradoria enxergavam o Município inteiro **porque estavam sem órgão nenhum**
@@ -1772,8 +1876,8 @@ conferido — o porquê é o que falta a quem pega o código depois.
     `juridico@` segue Unidade Gestora daquela Secretaria, que é outra coisa
   - Conferido com dois processos e duas manifestações, de Educação e de Obras: SEPLAN, SCP e
     Procuradoria veem os dois; cada UG vê só o seu
-
 - [2026-08-28] **A busca do login deixou de adivinhar pelo formato** (`LoginRequest::colunaDeAcesso`)
+
   - A escolha entre procurar por e-mail ou por nome de usuário vinha de `FILTER_VALIDATE_EMAIL`, o
     formato do que foi digitado. `admin@parcerias` — o login da conta de administração — só não caía
     na coluna errada porque o filtro do PHP recusa domínio sem ponto. Bastaria alguém cadastrar
@@ -1782,8 +1886,8 @@ conferido — o porquê é o que falta a quem pega o código depois.
     e-mail. Uma consulta a mais por tentativa, e não se erra
   - A arroba entrou no formato aceito do nome de usuário — `admin@parcerias` não é endereço, é nome
     de conta
-
 - [2026-08-26] **Entrada por nome de usuário, ao lado do e-mail** (`users.login`, `LoginRequest`)
+
   - A conta principal de administração precisava de um identificador curto (`admin_parcerias`), que
     não é endereço de ninguém. Gravar isso na coluna `email` quebraria o que depende dela ser um
     e-mail de verdade: recuperação de senha, notificações e a própria validação do cadastro
@@ -1803,8 +1907,8 @@ conferido — o porquê é o que falta a quem pega o código depois.
     em 22/09/2026, por ser o repositório público) é fraca para uma conta de acesso total num
     sistema com documentos de OSC, CPFs e dados bancários. Foi pedido assim; vale trocar no primeiro
     acesso
-
 - [2026-08-26] **Etapa 2 do ciclo virou recolhível na barra lateral** (`layouts/sidebar`)
+
   - Seleção é a única etapa com três subitens (Chamamentos, Manifestações, Propostas). Para quem
     trabalha em outra fase do ciclo, eram três linhas fixas empurrando o resto do menu para baixo
   - Seta própria ao lado do rótulo: o texto continua levando ao primeiro subitem, e só a seta
@@ -1816,14 +1920,13 @@ conferido — o porquê é o que falta a quem pega o código depois.
   - Conferido: a expressão Alpine roda como JS puro (abre por padrão, alterna, persiste, e devolve
     "aberto" quando o `localStorage` lança), e a barra rende certo para UG, SCP e PJ — que continua
     vendo a etapa cadeada, sem seta
-
 - [2026-08-26] **Proposta voltou a ser ato da OSC** (`PropostaController`)
+
   - A Unidade Gestora tinha CRUD completo de propostas: criava escolhendo a OSC num dropdown,
     editava, removia e **submetia no lugar dela**. Na prática, o município podia redigir uma proposta
     em nome de terceiro, apresentá-la por ele e depois aprová-la — sem que nada registrasse quem de
     fato propôs
-  - Criar, editar, remover e submeter saíram do módulo interno, **rotas inclusive** (`->only(['index',
-    'show'])`), não só os botões: esconder o botão deixaria a URL funcionando. `create`, `edit`,
+  - Criar, editar, remover e submeter saíram do módulo interno, **rotas inclusive** (`->only(['index', 'show'])`), não só os botões: esconder o botão deixaria a URL funcionando. `create`, `edit`,
     `_form` e o `PropostaRequest` foram removidos por terem virado código morto
   - A listagem passa a se apresentar pelo que é — "apresentadas pelas OSCs no portal, aqui elas são
     analisadas" — e a ação da linha virou **Analisar**. No detalhe, rascunho da OSC agora se explica
@@ -1831,12 +1934,12 @@ conferido — o porquê é o que falta a quem pega o código depois.
   - Fica o que é do município: ler, analisar (parecer, diligência, decisão) e editar o plano de
     trabalho. **Pendência conhecida**: metas e etapas ainda são montadas pelo município, não pela OSC
     — na manifestação de interesse é o contrário. Vale unificar
-
 - [2026-08-26] **"Programas e Chamamentos" virou "Chamamentos"** (sidebar, painel, busca)
+
   - Um nome mais curto para o que a tela é. Na busca global, "programas" continua valendo como
     palavra-chave, para quem procurar pelo nome antigo ainda encontrar
-
 - [2026-08-26] **Gestor e Comissões voltaram a ser designáveis pela Unidade Gestora** (`User::PERFIS_DE_DESIGNACAO`)
+
   - Gestor da Parceria e as duas Comissões (Lei nº 13.019/2014, art. 2º, VI, X e XI) estavam
     modelados como perfis exclusivos de três "setores" — Gestoria de Parcerias, Comissão de Seleção,
     Comissão de Avaliação — que ninguém nunca ocupou, nem aqui nem em produção
@@ -1852,8 +1955,8 @@ conferido — o porquê é o que falta a quem pega o código depois.
   - Conferido ponta a ponta: a UG cria um gestor pela tela "Meus usuários", ele nasce lotado na UG
     com os dois encargos, e a aprovação do administrador passa — antes a invariante barrava. SCP e PJ
     seguem sem poder conceder esses perfis
-
 - [2026-08-26] **Manifestações de Interesse no painel** (`dashboard`, `x-stat-card`)
+
   - A manifestação chega pelo portal e fica esperando o município encaminhar, ouvir a Secretaria e
     decidir. A única porta era o item de menu, e nada no painel dizia que havia OSC aguardando
     resposta — a fila só aparecia para quem lembrasse de ir olhar
@@ -1864,8 +1967,8 @@ conferido — o porquê é o que falta a quem pega o código depois.
   - Ícone próprio no `x-stat-card`: mão levantada, que é literalmente o gesto de manifestar interesse
   - Conferido nos três setores: SCP conta 2 de 3 (a deferida fica de fora), UG vê o card com a fila
     do próprio órgão, SEPLAN não vê nem card nem atalho por não ter `chamamentos`
-
 - [2026-08-26] **O administrador passa a ver quais setores não têm quem cadastre a equipe** (`usuarios.index`)
+
   - Cadastrar a própria equipe deixou de ser exclusividade da UG em 24/08, mas depende de alguém
     receber o perfil **Chefe de Setor** — e nada avisava que isso não tinha sido feito. O resultado
     era uma porta que existe e ninguém encontra: o servidor da SCP entrava, não via "Meus usuários",
@@ -1874,8 +1977,8 @@ conferido — o porquê é o que falta a quem pega o código depois.
     Só conta setor que já tem gente lotada e ativa: designar chefia de setor vazio não é pendência
   - O TI fica de fora da conta por definição — quem tem `cadastros` cria e aprova direto ali, e a
     porta do setor nem aparece para ele (ver `User::podeCadastrarNoSetor`)
-
 - [2026-08-26] **A Seleção deixou de pedir de novo o que o Planejamento já fez** (`Peca::ORIGEM_PLANEJAMENTO`)
+
   - O Edital nasce, é revisado, assinado pela UG e publicado dentro do processo de Planejamento. Ao
     chegar na Seleção, o checklist pedia tudo outra vez — o mesmo edital, a mesma portaria da
     comissão, o mesmo parecer jurídico, o mesmo comprovante de publicação
@@ -1903,15 +2006,15 @@ conferido — o porquê é o que falta a quem pega o código depois.
     assinar, o Edital mostra o texto e o "Anexos" mostra o arquivo, sincronizar de novo não muda nada,
     o item com texto próprio não é ligado, anexo de outra peça dá 404, e Celebração (15 etapas) e
     Seleção seguem desenhando a numeração sem buraco
-
 - [2026-08-25] **Selo de papel parou de quebrar ao meio** (`portal/usuarios/index`)
+
   - "Responsável Legal" não cabia na largura que a coluna recebia e a pílula quebrava em duas linhas,
     com metade do fundo verde em cada — quebrado assim, deixa de parecer selo
   - A coluna passa a ceder (`whitespace-nowrap`), não o selo; a função por extenso abaixo dele
     continua quebrando, com largura máxima própria. As cinco colunas ganharam `align-top`, para as
     linhas não flutuarem no meio quando a de Funções cresce
-
 - [2026-08-25] **Equipe da OSC: cada integrante com as funções que lhe cabem** (`User::FUNCOES_OSC`)
+
   - A equipe da OSC era um bloco só: quem entrava podia tudo o que a organização pode. Entidade não
     trabalha assim — quem escreve o projeto não é quem cuida das certidões, e os dados bancários da
     Celebração não são assunto de todo mundo
@@ -1934,8 +2037,8 @@ conferido — o porquê é o que falta a quem pega o código depois.
     a tela do chamamento troca o botão pelo aviso, POST forjado com `cadastros` é recusado na validação,
     as funções do responsável legal não são alteráveis nem por ele, e servidor da SCP/UG segue atuando
     normalmente nas peças
-
 - [2026-08-25] **Espaço extra de anexo também na Seleção e na Dispensa** (`SelecaoController::adicionarAnexo`)
+
   - O botão de abrir mais um espaço de anexo existia só na Celebração. Nos comprovantes de
     publicação do chamamento — extrato do edital, resultado provisório, resultado definitivo — o
     template prevê um campo cada, e quantas publicações um chamamento exige não é regra fixa:
@@ -1955,8 +2058,8 @@ conferido — o porquê é o que falta a quem pega o código depois.
   - Conferido: SCP com a vez vê os dois botões, quem não está com a vez vê só o dos gerais, UG
     tentando criar na etapa da SCP leva 403, re-sincronizar não apaga nem move os extras, e a
     numeração das etapas continua sem buraco (Seleção 1–5, Celebração 1–15)
-
 - [2026-08-25] **Dinheiro se digita como se escreve** (`x-input-dinheiro`, `NormalizaValoresMonetarios`)
+
   - Os 12 campos monetários do sistema eram `type="number"`: sem "R$" à vista, com ponto no lugar da
     vírgula e sem separador de milhar. Quem digitava 40000 não tinha como conferir a ordem de
     grandeza, e a vírgula do teclado numérico simplesmente não entrava
@@ -1980,8 +2083,8 @@ conferido — o porquê é o que falta a quem pega o código depois.
   - Conferido: oito formatos de entrada convertem certo, campos que parecem número mas não são
     dinheiro (`parcela`, `meta_quantitativa`: "1.200 atendimentos") ficam intactos, e a edição de
     instrumento mostra 1.251,25 para o 1251.25 do banco
-
 - [2026-08-25] **Barra do portal parou de quebrar em duas linhas** (`layouts/portal`)
+
   - Com os itens novos, eram cinco links mais o nome do usuário em `max-w-6xl`: os rótulos longos
     ("Chamamentos abertos", "Minhas participações") quebravam no meio, cada um terminava com uma
     altura e a barra inteira saía desalinhada
@@ -1994,8 +2097,8 @@ conferido — o porquê é o que falta a quem pega o código depois.
     alimenta as duas formas, então não há lista duplicada para divergir
   - Conferido nos quatro casos: responsável legal, membro da OSC, servidor navegando o portal e
     visitante — cada um vê o que lhe cabe
-
 - [2026-08-25] **Portal da OSC: a vitrine e as participações, separadas** (`portal.index`, `minhas-propostas`)
+
   - "Minhas Propostas" listava tudo numa fila só, sem dizer de onde cada coisa vinha — e desde a
     manifestação de interesse são **três caminhos com regras diferentes**: chamamento público
     (concorrência), dispensa/inexigibilidade (parceria direta) e manifestação (que ainda não é
@@ -2010,8 +2113,8 @@ conferido — o porquê é o que falta a quem pega o código depois.
     **Minhas participações**
   - Card de proposta virou partial (`portal/_card-proposta`), reaproveitado nos dois blocos, e passou
     a mostrar o número do Termo quando já existe instrumento, com atalho para a Celebração
-
 - [2026-08-25] **Manifestação de Interesse: a OSC propõe sem chamamento aberto** (MROSC, arts. 18–21)
+
   - Faltava a porta de entrada para a parceria que nasce da sociedade civil: sem chamamento
     publicado, a OSC não tinha como apresentar nada, e a dispensa/inexigibilidade só existia como
     processo aberto por dentro do município
@@ -2037,8 +2140,8 @@ conferido — o porquê é o que falta a quem pega o código depois.
     encaminhar → parecer da UG → deferir como inexigibilidade → chamamento e proposta criados com o
     plano migrado. E as travas: outra OSC não abre, membro da OSC não submete, e a SCP não defere
     antes de ouvir a Secretaria
-
 - [2026-08-24] **Devolução dirigida: volta para a etapa que errou** (`CelebracaoController@devolver`)
+
   - A devolução andava um passo por vez. Com o trâmite na etapa 9 e o erro na 6, a SCP teria de
     devolver três vezes, e três setores reprocessariam o que estava certo — ou passariam o problema
     adiante para não refazer trabalho alheio
@@ -2048,8 +2151,8 @@ conferido — o porquê é o que falta a quem pega o código depois.
   - O salto entra no histórico por escrito ("Devolvido da etapa 9 para a etapa 6." antes do motivo),
     senão quem lesse depois veria o trâmite reaparecer três etapas atrás sem explicação
   - Vale para qualquer setor interno com a vez, não só a SCP — a OSC segue sem devolver, como antes
-
 - [2026-08-24] **Comprovante de publicação vira dois campos + anexos avulsos** (Celebração, etapa 11)
+
   - Diário Oficial e site do Município são veículos distintos e exigidos em separado, mas havia **um
     campo só**: anexar o segundo comprovante apagava o primeiro. Agora são
     `comprovante_publicacao_doe` e `comprovante_publicacao_site`, ambos obrigatórios. A migration
@@ -2067,8 +2170,8 @@ conferido — o porquê é o que falta a quem pega o código depois.
   - Conferido em transação: os dois comprovantes na etapa 11 (com o arquivo antigo no do Diário
     Oficial e a pendência cobrando o do site), anexo criado cai no bloco da própria etapa, não entra
     nas pendências, e o botão só aparece uma vez na tela
-
 - [2026-08-24] **Dispensa/Inexigibilidade: as vias que instruem o pedido de parecer** (`Peca::TEMPLATES`)
+
   - A minuta do termo e a certidão de autuação só existiam como documento **gerado** no PGP, e a
     publicação do extrato ficava no topo da lista — longe do Protocolo na Unidade Jurídica, que é
     onde as três precisam estar à mão para instruir o pedido
@@ -2085,8 +2188,8 @@ conferido — o porquê é o que falta a quem pega o código depois.
     arquivo e assinatura seguem intocados — o que se sincroniza é a regra, não o trabalho
   - Conferido em transação com um chamamento de dispensa: 18 itens na ordem nova, os três anexos
     imediatamente antes do Protocolo, e uma peça com ordem/rótulo antigos volta ao lugar sozinha
-
 - [2026-08-24] **Cada setor cadastra a própria equipe** (`chefe_setor`, `SubusuarioController`)
+
   - A porta "Meus usuários" existia só para o chefe da Unidade Gestora. SCP, SEPLAN, PJ, Gabinete e
     Gestoria dependiam do administrador criar conta por conta — quem conhece a equipe não era quem
     cadastrava, e o TI virava gargalo de um trabalho que não é dele
@@ -2106,8 +2209,8 @@ conferido — o porquê é o que falta a quem pega o código depois.
     no POST é barrada ("Perfil fora do que você pode conceder")
   - **Para valer em cada setor, o administrador precisa atribuir "Chefe de Setor"** a alguém em
     Cadastros → Usuários. Em produção, exige rodar o `RolesSeeder` (já faz parte do deploy)
-
 - [2026-08-21] **Modelos chegavam com `{{marcadores}}` à mostra** (`Peca::sincronizar`)
+
   - Sintoma: a Ordem de Pagamento Global abria escrita *"Ofício n.: {{op_numero}}/{{ano}}"*,
     *"parceria com a {{favorecido}}"*, *"{{responsavel_nome}}"*
   - Causa: `ProcessoPeca::conteudoInicial()` e `OrdemPagamento::conteudoInicial()` passam o modelo
@@ -2126,8 +2229,8 @@ conferido — o porquê é o que falta a quem pega o código depois.
     corpo, ficou como está: corrigi-lo exigiria reemissão
   - Idempotente: conferido que a segunda passada não reescreve nada (a data não fica mudando) e que
     a Seleção, cujos modelos não têm marcador, não teve peça nenhuma tocada
-
 - [2026-08-21] **Checklist parava de pular etapas** (`pecas/_checklist`, `Peca::etapaDaProximaAcao`)
+
   - Sintoma: na Celebração a lista ia da **etapa 12 para a 14** — e, antes, da 9 para a 11. O fluxo
     tem 15 etapas na trilha logo acima, então parecia buraco no trâmite
   - Causa: o checklist só desenhava blocos que tinham documento. A Ordem de Pagamento é elaborada
@@ -2148,8 +2251,8 @@ conferido — o porquê é o que falta a quem pega o código depois.
     assinatura de Unidade Gestora, na etapa 14"*
   - Conferido: Celebração com 15 blocos contínuos; Seleção com 5; a UG vê "é a sua vez" e o botão de
     assinar na etapa 14
-
 - [2026-08-21] **Selo de situação parava de se partir ao meio** (`celebracao/show`)
+
   - Com um setor de nome longo — *"Com Setor de Convênios e Parcerias (SCP)"* — o selo quebrava em
     duas linhas e a moldura quebrava junto: duas meias caixas, cada uma com metade da borda e do
     arredondamento, uma sobrando para fora do card
@@ -2157,8 +2260,8 @@ conferido — o porquê é o que falta a quem pega o código depois.
     texto quebra dentro de uma caixa só, e `leading-snug` fecha o espaço entre as duas linhas
   - Os selos irmãos do sistema ("Ativa", "Em análise", "Assinada") são curtos e ficam em células
     largas — conferi e nenhum corre o mesmo risco
-
 - [2026-08-21] **Atalhos de rolagem na Celebração** (`components/atalhos-rolagem`)
+
   - A tela tem trilha de 15 etapas, histórico e checklist de 18 documentos: depois de descer até o
     último item, voltar ao trâmite — onde ficam encaminhar e devolver — era rolagem cega
   - Par de setas fixo na lateral direita, centralizado na altura da janela. Cada uma **some quando
@@ -2172,8 +2275,8 @@ conferido — o porquê é o que falta a quem pega o código depois.
   - Reaproveitável — a Seleção e o Processo têm telas igualmente longas
   - Exigiu `npm run build`: as classes de posicionamento (`right-5`, `top-1/2`, `-translate-y-1/2`,
     `lg:flex`, `print:hidden`) não existiam no CSS compilado
-
 - [2026-08-21] **Carimbo do Termo passa a mostrar as duas assinaturas** (`processos/_carimbo`)
+
   - O Termo de Parceria é assinado pelas **duas partes**, mas o carimbo ao pé do documento nomeava
     só o Município. Quem lia o Termo não via de quem era a contra-assinatura nem quando foi dada —
     o código da OSC aparecia solto, fora do documento, numa linha do checklist
@@ -2189,8 +2292,8 @@ conferido — o porquê é o que falta a quem pega o código depois.
     página de validação mostra quem contra-assinou, quando e sob qual código
   - De quebra: peça de Celebração tem `Proposta` como dona, caso que faltava no `match` da
     referência — a validação exibia "—" no lugar do nome da parceria
-
 - [2026-08-21] **Contra-assinatura da OSC destravada** (`Peca::podeContraAssinar`)
+
   - Sintoma: o Termo de Parceria ficava parado em *"Aguardando a contra-assinatura da OSC"* e **não
     havia botão para assinar** — para ninguém, nem para a OSC
   - Causa: `podeContraAssinar()` comparava `$user->setor !== 'osc'`. Era o **último ponto do motor
@@ -2208,8 +2311,8 @@ conferido — o porquê é o que falta a quem pega o código depois.
     dele, e recolhido não havia nada visível em que clicar
   - Conferido na parceria de teste (etapa 10, vez da OSC): responsável legal vê o botão e um único
     bloco aberto; membro da OSC e SCP veem o aviso, sem botão
-
 - [2026-08-21] **Assinar um documento deixa de jogar a tela para o topo** (`PecaController`, `pecas/_checklist`)
+
   - O checklist da Celebração tem **18 itens**: assinar o de baixo devolvia a página ao cabeçalho e
     obrigava a rolar tudo de novo — a cada documento
   - Causa: as seis ações da peça terminavam em `back()`, e a URL anterior nunca traz fragmento (o
@@ -2218,8 +2321,8 @@ conferido — o porquê é o que falta a quem pega o código depois.
     `withFragment()` — salvar, assinar, contra-assinar, enviar, puxar e remover arquivo
   - `scroll-margin-top: 7rem` na linha para o cabeçalho fixo não cobrir o item de destino
   - Vale também para a Seleção e a Documentação de Aditivos, que usam o mesmo partial
-
 - [2026-08-21] **Celebração deixa de ser cadeado para quem conduz o trâmite** (`layouts/sidebar`)
+
   - Sintoma: a SCP recebia na caixa de entrada *"Etapa 7/15 — conferir o processo e emitir o
     Protocolo na Unidade Jurídica"* e, no menu ao lado, via **Celebração com cadeado**
   - Causa: o item era gateado por `@can('formalizacao')` e apontava para `instrumentos.index`.
@@ -2237,8 +2340,8 @@ conferido — o porquê é o que falta a quem pega o código depois.
     `formalizacao`) vê o subitem Instrumentos; a PJ, com a vez, vê o selo *"Com o seu setor"*
   - De quebra: `instrumentos.execucao` é rota do trâmite 4 e acendia **Celebração e Execução ao
     mesmo tempo** no menu — agora é excluída do casamento de `instrumentos.*`
-
 - [2026-08-17] **Etapa do Gabinete do Prefeito ativada** (encerramento da Seleção)
+
   - O fluxo já previa tudo: `Chamamento::ETAPAS_SELECAO[4]` = PM, `Peca::SELECAO_ASSINATURA` manda o
     Termo de Adjudicação e Homologação ser assinado pelo setor `pm` na etapa 5, `SelecaoController`
     é genérico e a view já troca o botão por *"Encerrar Seleção (homologar)"* na última etapa
@@ -2258,8 +2361,8 @@ conferido — o porquê é o que falta a quem pega o código depois.
     assinar o Termo → **403 para SCP, 302 para o Prefeito**; encerrar a Seleção → **403 para a UG,
     302 para o Prefeito**; chamamento passa a `encerrado` com `selecao_concluida_em` e o trâmite
     `pm → ug (concluído)` registrado
-
 - [2026-08-17] **Checklist de peças passa a ter ordem e leitura de estado** (`pecas/_checklist`)
+
   - Relato: não dava para saber, batendo o olho, qual documento preencher agora e qual é de depois —
     "não tem uma ordem definida na tela e tudo tem as cores iguais"
   - Diagnóstico: a lista saía na ordem do template, **misturando etapas** (um documento da etapa 4
@@ -2276,8 +2379,8 @@ conferido — o porquê é o que falta a quem pega o código depois.
   - **Degrada para a lista simples de antes** quando nenhuma peça é governada por trâmite (Dispensa,
     Aditivo, Apostilamento). Verificado nos dois caminhos: Dispensa → 0 cabeçalhos, 16 peças em
     lista corrida; Chamamento Público → 5 blocos, com a etapa atual destacada e a futura recuada
-
 - [2026-08-17] **Peça de arquivo bloqueada deixa de ser beco sem saída** (`pecas/_checklist`)
+
   - Sintoma: nas linhas *Publicação do resultado provisório* e *definitivo* não havia nada em que
     clicar — nem botão, nem link. Só o cadeado e "Nenhum arquivo enviado"
   - Causa: assimetria entre os dois tipos de peça. As de **modelo** sempre renderizam o botão (que
@@ -2291,8 +2394,8 @@ conferido — o porquê é o que falta a quem pega o código depois.
     nenhuma saída**, antes 2, para SCP e para UG
   - No caso relatado o bloqueio estava correto: o trâmite está na **etapa 1, com a UG**, e as duas
     peças são da **SCP nas etapas 2 e 4**
-
 - [2026-08-17] **Caixa de entrada passa a servir todos os setores** — e aos três trâmites
+
   - A caixa nasceu olhando só para o **Planejamento** (`Processo::where('setor_atual', ...)`), então
     servia aos quatro setores daquele fluxo e **mentia para todos os demais**: quem tinha trabalho
     parado na Seleção ou na Celebração lia "nenhum processo aguardando"
@@ -2322,8 +2425,8 @@ conferido — o porquê é o que falta a quem pega o código depois.
   - Verificado numa transação desfeita ao final, com trabalho plantado em cada trâmite:
     SCP 1 (Seleção) · **PJ 1 (Celebração)** · SEPLAN 2 (Planejamento + Celebração) · UG 0.
     Auditoria e OSC, que não têm lotação, seguem sem caixa (403/302)
-
 - [2026-08-17] **Trâmite sobe para cima dos documentos** (`processos/show`)
+
   - O bloco *Trâmite entre Setores* ficava no fim da página, e é ele que contém a ação que
     **destrava a tela**: sem registrar o recebimento, as dez peças acima ficam todas em modo
     leitura. O usuário percorria os documentos sem conseguir mexer em nenhum e só descobria o
@@ -2332,8 +2435,8 @@ conferido — o porquê é o que falta a quem pega o código depois.
     tela, acima da lista de documentos
   - Celebração e Seleção já traziam o trâmite antes dos documentos; a tela de Processo era a
     exceção e agora segue o mesmo arranjo
-
 - [2026-08-14] **"Modo leitura" passa a dizer POR QUE** — nas peças do Processo e do checklist
+
   - Sintoma relatado: usuário da SCP abre o *Pedido de Parecer Financeiro*, que é **da SCP**, e a
     tela responde *"esta peça é preenchida pelo setor SCP na etapa correspondente. Você está no
     modo leitura."* — lê-se como contradição
@@ -2350,8 +2453,8 @@ conferido — o porquê é o que falta a quem pega o código depois.
     variável ("pelo Unidade Gestora" saía errado)
   - Verificado com o processo real do relato (SCP, UG, SEPLAN e PJ) e, numa transação desfeita ao
     final, os casos de etapa certa (libera a edição), etapa já passada e processo concluído
-
 - [2026-08-14] **Exclusão bloqueada por vínculo deixa de virar erro 500**
+
   - Sintoma: apagar um chamamento com propostas devolvia a tela de erro do Laravel com o SQL do
     `SQLSTATE[23000] ... 1451` na cara do usuário. O banco estava certo — o `ON DELETE RESTRICT`
     protegeu propostas que OSCs enviaram. Errado era o controller chamar `delete()` sem perguntar
@@ -2377,8 +2480,8 @@ conferido — o porquê é o que falta a quem pega o código depois.
     com a explicação e **não apaga nada**; os 6 casos bloqueiam com mensagem específica; exclusões
     legítimas continuam funcionando (programa e órgão descartáveis criados e removidos); e a rede
     global foi testada desativando a guarda de um controller de propósito
-
 - [2026-08-14] **Paleta restrita à identidade da Prefeitura** — verde, laranja e cinzas
+
   - Pedido do cliente: só as cores do Município. A passagem anterior tinha dado uma cor a cada
     módulo (azul, roxo, rosa, verde-azulado) — resolvia a monotonia, mas fora da identidade
   - **Consequência de projeto:** com duas matizes não existe "uma cor por módulo". A cor passou a
@@ -2398,8 +2501,8 @@ conferido — o porquê é o que falta a quem pega o código depois.
     **CSS caiu de 278kB para 236kB**
   - Verificado no navegador varrendo `color`/`backgroundColor`/`borderTopColor` de todos os
     elementos e convertendo para matiz: **nenhuma cor fora de verde, laranja, cinza e vermelho**
-
 - [2026-08-14] **Cor com função** — verde deixa de ser o fundo de tudo e passa a significar algo
+
   - **Regra adotada:** verde da marca = **onde você está** (item ativo do menu) e ação primária;
     **laranja = pendência que espera por você**; verde suave = concluído. (A ideia de "uma cor por
     módulo" desta passagem foi substituída no mesmo dia pela restrição à paleta da Prefeitura —
@@ -2421,13 +2524,13 @@ conferido — o porquê é o que falta a quem pega o código depois.
     aparecia em **cinco telas com quatro aparências** (verde claro no portal, verde forte no processo,
     cinza na seleção, texto puro na listagem) e o verde não distinguia uma modalidade da outra — são
     três categorias com efeitos jurídicos diferentes
-  - O verde estava sendo usado como **negrito**: "Modalidade definida pelo SCP: <verde>" virou selo
+  - O verde estava sendo usado como **negrito**: "Modalidade definida pelo SCP: <verde></verde>" virou selo
     colorido, e "Trâmite concluído" virou texto normal com um ícone de visto — a linha inteira em
     verde competia com a trilha logo acima, que já dizia o mesmo com sete vistos
   - `safelist` do Tailwind ampliada com `ring-`, porque os selos usam anel no lugar de borda e a
     classe é montada em tempo de execução a partir dos mapas de cor dos models
-
 - [2026-08-14] **OSC e usuário interno separados de vez** — regra fechada na rota, não na tela
+
   - Regra do cliente: **servidor é usuário interno dos setores**. Não participa de chamamento, não
     tem OSC e não interage como OSC — ele analisa, tramita e decide sobre a proposta alheia
   - Definição única em `User::ehRepresentanteOsc()` (**papel `responsavel_legal` E vínculo com a
@@ -2444,14 +2547,13 @@ conferido — o porquê é o que falta a quem pega o código depois.
     nenhuma, e **qualquer servidor autenticado baixava e apagava documentos de qualquer proposta do
     município**. Agora há `autorizarLeitura()` (OSC → só a própria; servidor → permissão `propostas`
     + escopo `visiveisPara`) e `autorizarEscrita()`, que ainda barra os perfis de auditoria — estas
-    rotas ficam fora do grupo `readonly` porque a OSC também as usa. Verificado: `analista_juridico`
-    passou de 200 para 403; auditoria lê (200) e não apaga (403)
+      rotas ficam fora do grupo `readonly` porque a OSC também as usa. Verificado: `analista_juridico`
+      passou de 200 para 403; auditoria lê (200) e não apaga (403)
   - Telas: "Quero Participar" some para o servidor no `portal/index` (antes o botão existia e levava
     a um aviso de bloqueio) e a chamada "Cadastrar minha OSC" da landing virou `@guest`
-
 - [2026-08-14] **Navegação dinâmica** — barra de comandos, busca global e resposta ao clique
-  - **Barra de comandos (Ctrl+K / Cmd+K, ou `/`)**: encurta o caminho `menu → listagem → filtro →
-    paginação` para digitar o que se procura. Gatilho com cara de campo de busca no cabeçalho, que
+
+  - **Barra de comandos (Ctrl+K / Cmd+K, ou `/`)**: encurta o caminho `menu → listagem → filtro → paginação` para digitar o que se procura. Gatilho com cara de campo de busca no cabeçalho, que
     ensina o atalho. Setas navegam, Enter abre, Esc fecha
   - **Busca global** (`BuscaController`, rota `/busca`): processos, propostas, chamamentos, programas,
     instrumentos e OSCs. Cada bloco **só é consultado se o usuário tem a permissão do módulo** e usa
@@ -2466,8 +2568,8 @@ conferido — o porquê é o que falta a quem pega o código depois.
     cada clique e nada mudava entre o clique e a resposta — o usuário clicava de novo. A faixa de 3px
     responde na hora e avança em passos decrescentes, sem nunca fingir que terminou. Ignora âncora,
     link externo, download, nova aba, ctrl+clique e `data-confirm` (7 casos verificados)
-
 - [2026-08-12] **Revisão visual de todas as telas** — contraste, identidade e densidade
+
   - **Identidade ocupando espaço**: a paleta (verde `#00A859`, laranja `#EE7736`) só aparecia numa
     listra de 4px. Agora: hero verde-escuro na tela inicial, **sidebar em `brand-900`**, painel
     institucional no login (tela dividida). Laranja fica como cor de ação (consulta pública, badges)
@@ -2490,625 +2592,38 @@ conferido — o porquê é o que falta a quem pega o código depois.
     ícone de "em breve" — antes só ficavam apagados, passando por botão quebrado
   - Verificação: 29/32 rotas GET estáticas em 200 (as 3 restantes são negação de permissão correta)
     e detector de estouro de texto sem ocorrências nas telas revisadas
-
-- [2026-07-29] **Modais no lugar de `alert()`/`confirm()` nativos** — UX consistente em todo o sistema
-  - Módulo global `resources/js/confirm-modal.js` + estilos `.cmodal-*` em `resources/css/app.css`
-    (tema claro/escuro, variante *danger* vermelho, animação, fecha por Esc/backdrop/Cancelar)
-  - **Sem JS na página**: os forms usam atributos — `data-confirm="..."` (pergunta antes de enviar),
-    `data-confirm-variant="danger"`, `data-confirm-title`, `data-confirm-text`; links `<a data-confirm>`
-    também são interceptados. O variante *danger* é inferido por palavras (Remover/Excluir/Recusar…)
-  - Validação "selecione ao menos um" (download de peças em lote) virou `data-require-checked` +
-    `data-require-checked-message` (antes era `alert()`)
-  - Converteu **25 `confirm()`** e **1 `alert()`** em 17 views; `requestSubmit()` preserva a validação
-    nativa dos campos obrigatórios (ex.: modalidade na aprovação do SCP)
-
-- [2026-06-16] Especificação inicial recebida (`txt.txt`) e analisada
-- [2026-06-16] Repositório privado criado no GitHub
-- [2026-06-16] Projeto Laravel 13 criado com Breeze (Blade + TailwindCSS)
-- [2026-06-16] Spatie Laravel Permission instalado e configurado
-- [2026-06-16] `User` model atualizado com `HasRoles`
-- [2026-06-16] `RolesSeeder` criado com os 9 perfis do sistema
-- [2026-06-16] `.env` configurado para MySQL e locale `pt_BR`
-- [2026-06-16] CRUD de usuários completo (listagem, criação, edição, remoção)
-  - Campos: nome, e-mail, CPF, telefone, senha, perfil, status
-  - Paginação, feedback de sucesso, confirmação de remoção
-  - Link "Usuários" adicionado na navegação principal
-- [2026-06-16] Cadastro institucional completo (Órgãos/Secretarias e OSCs)
-  - Órgãos: nome, sigla, CNPJ, e-mail, telefone, endereço completo, status
-  - OSCs: nome, tipo, CNPJ, contato, endereço, responsável legal, status
-  - Componente reutilizável `x-address-fields` para bloco de endereço
-  - Componente `x-flash-message` para mensagens de sessão
-  - Dropdown "Cadastros" na navegação com Órgãos e OSCs
-
----
-
-- [2026-06-16] Banco de Programas e Chamamentos Públicos
-  - Programas: tipo de instrumento (Fomento/Colaboração/Cooperação), órgão, valor, vigência, status
-  - Chamamentos: aninhados ao programa, tipo, valor, datas, status com 6 etapas
-  - Chamamentos acessados por `/programas/{id}/chamamentos`
-  - Navegação reorganizada: Usuários entrou no dropdown Cadastros; Programas no topo
-
----
-
-- [2026-06-16] Propostas e Plano de Trabalho
-  - Proposta vincula Chamamento + OSC com dados financeiros e datas
-  - Botão "Submeter Proposta" muda status e registra timestamp
-  - Plano de Trabalho: Metas (indicador, meta quantitativa, datas)
-  - Etapas dentro de cada Meta (responsável, período, recursos)
-  - Página show da proposta concentra todo o plano em uma única tela
-  - Rotas aninhadas: propostas → metas → etapas
-
----
-
-- [2026-06-16] Workflow de Análise e Aprovação
-  - Pareceres: Técnico → Jurídico → Decisão Final (cada um desbloqueia o próximo)
-  - Resultados: Aprovado / Aprovado com Ressalvas / Reprovado / Diligência
-  - Transições de status automáticas na proposta via mapa de transições no model
-  - Diligência criada junto ao parecer; OSC responde na página da diligência
-  - Proposta volta para `em_analise` automaticamente quando todas as diligências são respondidas
-  - Seção "Análise" aparece no show da proposta com botões contextuais por etapa
-
----
-
-- [2026-06-16] Formalização — Instrumentos e Termos Aditivos
-  - Models `Instrumento` e `Aditivo` com constantes TIPOS, STATUS, STATUS_COLORS
-  - Instrumento vincula Proposta (1-para-1), registra número, tipo, objeto, valores, vigência
-  - Método `dataFimVigente()` considera o último aditivo de prazo
-  - Botão "Formalizar Instrumento" aparece na proposta aprovada sem instrumento
-  - Botão "Ver Instrumento" aparece na proposta que já tem instrumento
-  - Fluxo de status: Minuta → Assinado → Vigente (via publicação no DOE)
-  - PATCH `assinar` e PATCH `publicar` para transições rápidas de status
-  - Termos aditivos aninhados ao instrumento (prazo, valor, objeto, apostilamento)
-  - Minuta para impressão (view sem layout, botão nativo de print)
-  - "Instrumentos" adicionado na navegação principal
-  - Tabelas `instrumentos` e `aditivos` migradas com sucesso
-
----
-
-- [2026-06-17] Portal público, auto-cadastro de OSC e upload de documentos
-  - Portal `/portal` lista chamamentos `publicado`/`em_inscricao` sem login
-  - `status_efetivo` deriva "em inscrição" a partir das datas de inscrição
-  - Auto-cadastro `/cadastro/osc` cria User (representante_legal) + Osc vinculados
-  - Upload de documentos na proposta (admin e portal), download e remoção
-  - Middleware `staff`: representante_legal só acessa o portal, não a área admin
-
----
-
-- [2026-06-17] Módulo Unidade Gestora — 2.1 Planejamento (Processos)
-  - `Processo` com número automático (NNNN/AAAA), vinculado à Unidade Gestora (Órgão)
-  - `TermoReferencia` estruturado com as 5 seções do documento (2.1–2.5)
-  - `ProcessoPeca`: Ofício, Parecer Financeiro, Abertura de Processo (texto + assinatura)
-  - **Assinatura simples**: registra quem assinou e data/hora (carimbo)
-  - **Trâmite real entre setores** (UG → SCP → SEPLAN → SPC) com caixa de entrada
-    - Campo `setor` no usuário define em qual caixa ele recebe os processos
-    - Histórico de tramitação (enviar / receber / parecer por setor)
-    - Só o setor que está com o processo pode encaminhá-lo
-  - Alertas automáticos de conformidade (🔴 dotação, objeto genérico, meta sem indicador,
-    sem justificativa, sem valor / 🟢 apto para abertura)
-  - UG conclui o planejamento com "Marcar Apto" quando não há pendências
-  - Tabelas: `processos`, `termo_referencias`, `processo_pecas`, `tramitacoes` + `setor` em `users`
-
----
-
-- [2026-06-17] Módulo Unidade Gestora — 2.2 Seleção/Celebração e 2.3 Execução
-  - **Motor genérico de peças documentais** (`Peca`, polimórfico via `pecaable`)
-    - Cada item é "modelo padrão" (texto + assinatura simples) ou "arquivo" (upload)
-    - Templates por categoria em `Peca::TEMPLATES`; `sincronizar()` cria o checklist (idempotente)
-    - Progresso calculado sobre itens obrigatórios preenchidos
-  - **2.2 Seleção e Celebração** anexada ao Chamamento (`/chamamentos/{id}/selecao`)
-    - Template escolhido pelo tipo: Chamamento Público vs Dispensa/Inexigibilidade
-    - Edital, comissão, pareceres, publicações, resultados, homologação, etc.
-    - Link "Seleção" na listagem de chamamentos
-  - **2.3 Execução** anexada a cada Aditivo (`.../aditivos/{id}/documentacao`)
-    - Apostilamento usa checklist próprio; demais aditivos usam checklist de aditivo
-    - Link "Documentação" em cada aditivo no show do instrumento
-  - **Adiado**: 2.3.1 Ordem de Pagamento (envolve dados bancários — integração bancária
-    foi definida para a última fase do projeto)
-  - Tabela: `pecas` (polimórfica)
-
----
-
-- [2026-06-17] Controle granular de acesso por perfil
-  - Novo perfil **Administrador** (acesso total, gerencia usuários/órgãos/OSCs)
-  - 10 permissões por área definidas em `RolesSeeder` e atribuídas via matriz
-  - Rotas admin agrupadas por `permission:<área>`; navegação filtrada com `@can`
-  - **Controle Interno**: acesso de leitura a tudo, escrita bloqueada (middleware `readonly`)
-  - Pareceres autorizados por tipo (técnico/jurídico/decisão) no controller
-  - Campo `setor` no usuário (já existente) continua governando o trâmite do planejamento
-  - Antes: qualquer servidor autenticado fazia tudo. Agora cada perfil vê/faz só a sua área.
-
----
-
-- [2026-06-18] Numeração padronizada do Processo — `UG.Sequencial.Ano.Esfera`
-  - Número do Processo passa a seguir o padrão municipal `UG.NNNN.AAAA.EE` (ex.: `0206.0133.2026.01`)
-    - UG = código da Unidade Gestora (4 díg.) · Sequencial = contador contínuo e global (nunca reinicia)
-      · Ano = ano de abertura do processo · Esfera = concedente (01 Município, 02 Estado, 03 União, 04 Outros)
-  - Campo `codigo` adicionado ao cadastro de Órgãos; de-para das 26 UGs em `UnidadesGestorasSeeder`
-  - Esfera como constante `Processo::ESFERAS`, selecionável no formulário (default Município)
-  - `Processo::proximoSequencial()` + `Processo::formatarNumero()`; geração no `ProcessoController@store`
-    (valida esfera e exige que a UG tenha código)
-  - Migrations: `codigo` (único) em `orgaos`; `sequencial` (único) + `esfera` em `processos`
-  - **A confirmar com a área:** ano usado é o de abertura do processo (não do instrumento, que ainda não
-    existe nessa fase); e qual UG entra quando há fundo (ex.: FIA `0213` vs Sec. de Trabalho `0209`)
-
----
-
-- [2026-06-19] Perfis do Módulo 1 (reescrita do controle de acesso)
-  - Substituídos os 9 perfis antigos pelos **21 perfis oficiais do Módulo 1**
-  - Usuário pode ter **vários perfis** (cadastro com seleção múltipla)
-  - **Perfis exclusivos** travados por setor de lotação (`User::PERFIS_EXCLUSIVOS`)
-  - Setor de lotação ampliado (`User::LOTACOES`: UG, SCP, SEPLAN, PJ, TI, Comissões, Gestoria, OSC)
-  - Auditores (Externo/Geral) com acesso somente leitura; Responsável Legal só portal
-  - Permissões por área inalteradas — apenas remapeadas para os novos perfis
-  - Setores do trâmite (Módulo 2) corrigidos: SCP/SEPLAN/PJ (SPC era erro); fluxo atualizado
-  - Respostas do cliente registradas em `Docs. Desenvolvimento/respostas-cliente.md`
-
----
-
-- [2026-06-19] Módulo 2 — Trâmite guiado (fiel ao fluxo do cliente)
-  - 7 etapas em `Processo::ETAPAS`: UG → SCP → SEPLAN → UG → SCP → UG → SCP (publicação)
-  - Coluna `etapa` controla a posição no fluxo (setores se repetem)
-  - **Encaminhar** avança automaticamente para o próximo setor (sem escolha livre)
-  - **Devolver** retorna à etapa anterior exigindo motivo; **Receber** registra o recebimento
-  - 1ª etapa só avança com o planejamento **apto** (alertas de conformidade)
-  - Última etapa (SCP) → **Concluir** marca o processo como publicação (trâmite externo)
-  - Stepper visual no topo do processo mostrando a etapa atual
-  - Só o setor que está com o processo pode movimentá-lo (validação no controller)
-
----
-
-- [2026-06-19] Módulo 2 alinhado às respostas da cliente + modelos (Arquivos I–V)
-  - **Termo de Referência** reescrito conforme o modelo real (Arquivo II): descrição da
-    realidade, justificativa, objeto, objetivos, orçamento (valor/dotação/ficha/fonte), prazo
-  - 🆕 Peça **Pedido de Parecer Financeiro** (Arquivo III) — SCP, na etapa de análise
-  - 🆕 Peça **Edital** — SCP elabora (editor de texto) e **UG assina** na etapa seguinte
-  - Documentos abrem **pré-preenchidos com o texto-modelo** do cliente (`ProcessoPeca::MODELO`)
-  - Cada peça travada por **setor + etapa**; edição e assinatura podem ser de setores diferentes
-    (`podeEditarConteudo` × `podeAssinar`) — caso do Edital (SCP edita, UG assina)
-  - **UG automática**: usuário ganha `orgao_id` (Secretaria); na abertura do processo a UG
-    vem preenchida da lotação (fallback: seleção manual p/ quem não tem UG)
-  - Modelos do cliente em `Docs. Desenvolvimento/Modelos/`; respostas em `respostaduvidas.md`
-
----
-
-- [2026-06-19] Módulo 2 — editor rico, documentos modelo e refinos do fluxo
-  - **Editor rico TinyMCE** (self-hosted, `license_key: gpl`, offline) substitui o textarea,
-    com **suporte a tabelas** (usado no Parecer Financeiro), fonte, alinhamento, listas, etc.
-    Init em `resources/js/editor.js` sobre `textarea[data-editor-rico]`
-  - **Termo de Referência virou documento modelo** (peça `termo_referencia`) editável no
-    editor rico, igual ao Ofício — removidos model/tabela/controller estruturados antigos
-  - Todos os documentos modelo são **HTML** (`ProcessoPeca::MODELO`), pré-preenchidos e fiéis
-    aos Arquivos I–V; **brasão** (`https://pmsgra.net/logo.png`) no cabeçalho em tabela (logo ao lado)
-  - **Fluxo corrigido (8 etapas)**: UG (Ofício+TR) → SCP **analisa e aprova/rejeita** → UG
-    **solicita o Parecer** (Pedido de Parecer) → SEPLAN (Parecer) → UG (Abertura) → SCP (Edital)
-    → UG (assina Edital) → SCP (publicação externa)
-  - Etapa de análise do SCP com botões **Aprovar** / **Rejeitar** (`Processo::etapaEhAnalise`)
-  - **Recebimento obrigatório**: só edita/assina após “Registrar Recebimento”
-    (`Processo::aguardandoRecebimento` em `podeEditarConteudo`/`podeAssinar`)
-  - Alertas de conformidade são **consultivos** (não bloqueiam encaminhar)
-
-> **Editor:** TinyMCE self-hosted via npm (`npm install`), empacotado pelo Vite — **rode
-> `npm run build`** após clonar. Interface do editor em inglês (ícones universais); pacote
-> pt-BR pode ser adicionado depois. O brasão vem de URL pública (precisa de internet ou baixar local).
-
----
-
-- [2026-06-25] Identidade visual unificada (PGP) e UX
-  - Login com gradiente indigo + marca PGP; navegação rebrandizada com badge PGP e chip de
-    usuário (avatar de iniciais + perfil + setor)
-  - **Dashboard real** (substitui o stub): cards de métricas por permissão, caixa de entrada
-    do setor e atalhos rápidos (`x-stat-card`, `x-quick-link`)
-  - Portal público enriquecido: hero, empty-state e seção "Como participar"
-  - Botões/links no tema indigo; shell com título PGP e rodapé
-
-- [2026-06-25] Ordem de Pagamento (Módulo UG 2.3.1)
-  - `OrdemPagamento` (várias por instrumento vigente): documento modelo padrão com assinatura
-    eletrônica (carimbo + QR + validação pública) e anexo de dados bancários
-  - Validação pública (`/validar`) estendida para reconhecer OP além das peças de processo
-  - Permissão `ordem_pagamento` (perfil `operador_ordem_pagamento` + Responsável da UG)
-
-- [2026-06-25] Preenchimento automático ("puxar") dos modelos
-  - `App\Support\Modelo` substitui marcadores `{{token}}` pelos dados conhecidos ao criar o
-    documento: nº do processo, Unidade Gestora, responsável, data; na OP: nº da OP, instrumento,
-    OSC favorecida. O conteúdo autoral/orçamentário permanece manual. Nº do Ofício é manual
-    (numeração externa ao sistema).
-
-- [2026-06-25] Execução Financeira (Módulo 4.4 — fase 11, parcial)
-  - `Repasse` e `Despesa` (com **natureza de despesa** e upload de **nota fiscal**) no instrumento
-  - **Painel de saldo**: total repassado, total gasto, saldo, % executado + alertas de
-    inconsistência (saldo negativo, despesa sem NF) e resumo por natureza
-  - Permissão `execucao` (Responsável da UG + Gestor da Parceria)
-  - Falta: rendimentos, conciliação/integração bancária (fase 14), auto-relato pela OSC
-
-- [2026-06-25] Acesso do jurídico à caixa (permissão `planejamento` ao `analista_juridico`) e
-  **tela 403 amigável** (`errors/403.blade.php`) na identidade PGP, exibindo a mensagem específica
-  do `abort()` quando houver.
-
-- [2026-06-29] Módulo 2 — etapa da Procuradoria Jurídica no trâmite (8 → 9 etapas)
-  - Depois do Edital, antes da publicação, o trâmite ganha o Jurídico em `Processo::ETAPAS`:
-    **(7) UG** assina o Edital **e**, no mesmo passo, preenche e assina a **Solicitação de Parecer
-    Jurídico** (Modelo VI, texto do Arquivo VI do cliente) e encaminha à PJ; **(8) PJ** preenche e
-    assina o **Parecer Jurídico** e devolve à SCP; **(9) SCP** publica
-  - Duas peças novas em `ProcessoPeca` (`solicitacao_parecer_juridico`, `parecer_juridico`) com modelo
-    pré-preenchido (a da PJ é modelo-padrão em branco, a definir com a Procuradoria), assinatura
-    carimbo+QR e validação pública — reaproveitam todo o motor de peças/tramitação existente
-  - Migration `add_etapa_juridico_to_processos`: cria as peças nos processos já abertos e remapeia
-    quem estava na antiga última etapa (7 = publicação) para a nova (8)
-  - **Setup:** o usuário que atua na etapa do PJ precisa de **lotação `pj`** + perfil com permissão
-    `planejamento` (ex.: `analista_juridico`)
-
-- [2026-06-29] Módulo 2 — modalidade da seleção definida pelo SCP na análise
-  - Na etapa de análise (SCP), ao **Aprovar**, o setor escolhe a **modalidade** que define o caminho
-    do processo: **Chamamento Público**, **Dispensa** ou **Inexigibilidade** (`Processo::MODALIDADES`,
-    com descrições em `MODALIDADES_DESC`); obrigatório para aprovar (validado em `TramitacaoController`)
-  - Coluna `modalidade` em `processos`; a escolha aparece no card do fluxo e orienta o passo do Edital
-    (Edital × justificativa de dispensa/inexigibilidade) e o checklist de Seleção 2.2
-  - Cabeçalho (brasão) + título "PEDIDO DE PARECER FINANCEIRO" no modelo do `pedido_parecer`, que era
-    o único documento financeiro sem cabeçalho — alinhado aos demais
-
-- [2026-06-29] Checklists 2.2/2.3 — "puxar do módulo Gestão de Parcerias"
-  - Itens de arquivo marcados como puxáveis (`Peca::PUXAVEIS`) agora podem ser preenchidos a partir
-    dos documentos que a OSC já enviou na proposta, além do upload manual
-  - Seleção 2.2 (Dispensa/Inexigibilidade): Plano de trabalho, Documentos de habilitação;
-    Aditivo/Apostilamento 2.3: Manifestação da OSC, Plano atualizado, Orçamento, Extratos, etc.
-  - Origem resolvida por `Peca::documentosDisponiveis()` (Chamamento → propostas; Aditivo →
-    instrumento → proposta); `PecaController@puxar` copia o arquivo para a peça (rota `pecas.puxar`)
-  - UI no partial compartilhado `pecas/_checklist` (vale para Seleção e Documentação do Aditivo)
-
-- [2026-06-29] Processo — baixar peças selecionadas em PDF (individual)
-  - Checkbox ao lado de cada documento preenchido na lista "Peças do Processo" + botão
-    "Baixar selecionados (PDF)" → **1 documento** baixa o PDF direto; **vários** vêm num **ZIP com
-    um PDF separado por documento** (download individual), nomeados na ordem oficial
-  - PDF gerado no servidor com **dompdf** (`ProcessoPecaController@imprimirLote` → `pdfDaPeca`), brasão
-    remoto + carimbo de assinatura + QR (SVG embutido) nos assinados; view `processos/peca-pdf`
-  - `imprimirLote` valida que as peças pertencem ao processo e ignora as vazias
-
-- [2026-06-29] Validação pública mostra uma cópia do documento
-  - Em `/validar/{codigo}` (pelo QR ou pelo código), além dos metadados de autenticidade, a página
-    agora exibe a **cópia fiel do documento assinado** (conteúdo HTML renderizado com brasão/tabelas)
-  - `ValidacaoController@mostrar` passa o `conteudo`; vale para peça de processo e ordem de pagamento
-
-- [2026-06-29] Onboarding de usuários com aprovação do administrador
-  - **Auto-cadastro** (`/register`) reescrito para servidores internos: informa dados, **setor**,
-    **Secretaria/UG** (lista de Órgãos) e **escolhe a própria senha** → cria usuário **pendente, sem
-    perfil e sem login**. OSC continua pelo portal (`/cadastro/osc`)
-  - **Trava de login** (`LoginRequest`/`User::podeAutenticar`): pendente, recusado ou inativo não
-    autentica, com mensagem explicando o motivo (antes o login não checava `status`)
-  - **Aprovação pelo admin** (permissão `cadastros`): tela `usuarios/pendentes` lista os cadastros,
-    o admin **atribui os perfis** (confirma setor/UG) e **aprova**, ou **recusa** com motivo
-    (`UserController@pendentes/aprovar/recusar`); badge de contagem na navegação e na lista de Usuários
-  - **Subusuários da UG**: o `responsavel_unidade_gestora` cadastra usuários da sua Secretaria
-    (`/meus-usuarios`, `SubusuarioController`) — herdam a UG, ficam **pendentes** e o admin define os
-    perfis na aprovação
-  - Migration `add_approval_to_users` (`approval_status` default `aprovado`, `approved_at/by`,
-    `created_by`, `solicitacao_obs`, `rejeitado_motivo`) — usuários existentes seguem aprovados.
-    Usuários criados pelo admin (CRUD) e OSCs entram já aprovados
-
-- [2026-06-29] Interface em pt-BR + política de senha
-  - `APP_LOCALE=pt_BR` (estava `en`); senha mínima **6 caracteres** (texto e/ou números, sem
-    complexidade) via `Password::defaults()` no `AppServiceProvider` + ajustes em UserRequest/OscRegistro
-  - Traduções: `lang/pt_BR.json` (strings do Breeze: login, perfil, etc.) e
-    `lang/pt_BR/{validation,auth,passwords,pagination}.php` (mensagens do framework); rótulo
-    "Dashboard" → "Painel". Mensagens de validação e telas de auth/perfil agora em português
-
-- [2026-06-29] Refinamentos de UI do onboarding
-  - **Navbar responsiva** corrigida (estava espremida): quebra de linha desligada nos itens,
-    container mais largo (`max-w-screen-2xl`) e breakpoint do menu `sm` → `lg` (menu completo só
-    em telas grandes; hambúrguer nas demais)
-  - **Matrícula** virou campo **obrigatório** e **Função/observação** passou a exigir preenchimento
-    no cadastro de subusuário da UG (`SubusuarioController` + view); migration `add_matricula_to_users`
-    (`matricula` única, opcional no modelo)
-
-- [2026-07-03] Módulo 2 — rota de **Dispensa/Inexigibilidade** no trâmite (Lei 13.019/2014, arts. 30–32)
-  - Quando o SCP decide **Dispensa** ou **Inexigibilidade** na análise (etapa 1), o trâmite passa a
-    seguir uma rota própria de **7 etapas** (`Processo::ETAPAS_DISPENSA`), em vez das 9 do Chamamento:
-    depois da Abertura, no lugar de *Edital → Solicitação/Parecer Jurídico*, a **UG emite e assina a
-    Justificativa** de Dispensa/Inexigibilidade e o **SCP publica**. Etapas 0–4 são idênticas nas duas rotas
-  - `ETAPAS` virou **ciente da modalidade**: `Processo::etapas()`/`ehDispensa()` resolvem a sequência;
-    todos os consumidores (`etapaInfo`, `proximoSetor`, `setorAnterior`, `totalEtapas`, `pendenciasParaAvancar`,
-    `TramitacaoController@avancar/devolver`, stepper e lista de peças no `show`) passaram a usar `etapas()`
-  - Duas peças novas em `ProcessoPeca`: **Justificativa de Dispensa/Inexigibilidade** (UG, etapa 5,
-    modelo com cabeçalho + fundamento legal) e **Parecer Técnico (CNAS)** — opcional, só parcerias do SUAS.
-    Reaproveitam o motor de assinatura (carimbo+QR), validação pública e PDF já existentes
-  - Migration `add_rota_dispensa_pecas`: cria as peças nos processos abertos e **realinha** os de
-    dispensa/inexigibilidade que já estavam além da rota curta (a publicação final 8→6; Edital/Jurídico 5–7→5)
-  - Peças opcionais têm fonte única em `ProcessoPeca::OPCIONAIS` (não bloqueiam o avanço) + badge "opcional" no `show`
-
-- [2026-07-03] Ponte **Processo → Seleção 2.2** para a rota de dispensa (itens 7–18 do checklist)
-  - A partir da Justificativa (etapa ≥ 5) o processo de dispensa ganha o card **"Seleção 2.2 — Celebração"**
-    (`processos/{processo}/selecao`), reunindo plano de trabalho, habilitação, pareceres, minuta e termo
-  - Reusa **integralmente** o motor `Peca` ancorando o checklist `dispensa_inexigibilidade` **ao próprio
-    Processo** (relação polimórfica `Processo::pecasSelecao()`), já que na dispensa não há Chamamento
-    competitivo. `Peca::sincronizar()` ganhou parâmetro de relação (default `pecas`) para não colidir com
-    as peças do trâmite. O partial `pecas/_checklist` e as rotas `pecas.*` (por id) servem sem alteração
-  - Guardas: `abort 404` fora da modalidade dispensa; `abort 403` antes da etapa da Justificativa
-    (`Processo::podeVerSelecao()`). O "puxar do módulo Gestão de Parcerias" fica indisponível (sem proposta
-    ligada ao Processo) — o partial já degrada com aviso; upload/assinatura manuais funcionam normalmente
-
-- [2026-07-03] Modelos oficiais VII–XI encaixados na rota de dispensa
-  - **Trâmite** (`ProcessoPeca::MODELO`): a **Justificativa** (Modelo VIII, art. 30, VI / 32) e o **Parecer
-    Técnico CNAS** (Modelo IX, Res. 21/2016) trocaram o texto-placeholder pelos **textos oficiais** do
-    cliente (HTML com cabeçalho/brasão + tokens `{{...}}`)
-  - **Seleção 2.2** ganhou pré-preenchimento: novo `Peca::MODELO` (por categoria→chave) semeado no
-    `sincronizar()` — **Certidão de Autuação** (VII), **Parecer Técnico da UG p/ celebração** (X) e
-    **Protocolo ao Jurídico** (XI), além de Justificativa e Parecer CNAS. Motor `Peca` não tinha modelo;
-    agora as peças "modelo" nascem com o texto oficial (texto puro, pois a Seleção usa textarea simples)
-  - Migration `seed_modelos_selecao_dispensa`: preenche as peças de Seleção vazias e re-semeia as peças
-    do trâmite que ainda tinham placeholder — **conservador**: nunca sobrescreve conteúdo assinado ou editado
-
-- [2026-07-09] Rota de Dispensa/Inexigibilidade conferida com o checklist oficial e commitada
-  - Cruzamento com `Docs. Desenvolvimento/checklist_dispensa⁄inexigibilidade.pdf` (Lei 13.019/2014,
-    arts. 30–32): itens **1–14** cobertos (trâmite 1–6 + Seleção 2.2 itens 7–14); item **15** parcial
-    (upload de extrato, sem integração DOE/GovBr); itens **16–18** ainda não implementados
-    (autorização de início à OSC, solicitação de dados bancários, Nota de Empenho Global)
-  - Código, migrations, view `processos/selecao`, modelos VII–XI e PDFs de checklist versionados
-    no GitHub (`main`)
-
-- [2026-07-13] Modelos padrão da Seleção/Documentação preenchidos com os arquivos oficiais
-  - Novos textos em `Peca::MODELO`: Chamamento (Edital + Parecer jurídico), Dispensa (+ Parecer
-    jurídico), Aditivo (Parecer financeiro, Certidão, Protocolo, Parecer jurídico). Restam 13
-    sem arquivo do cliente (aprovação plano, minutas, termos, justificativas/autorizações)
-
-- [2026-07-13] Ponte **Processo concluído → Chamamento** no módulo Programas
-  - Ao **Concluir** o trâmite, o sistema cria automaticamente um `Chamamento` (status
-    `publicado`) vinculado ao Processo (`processo_id`) e a um Programa da UG (criado se
-    necessário). Card no `processos/show` com links; botão **Gerar Chamamento** para
-    processos já concluídos sem publicação. Portal público lista só `chamamento_publico`
-
-- [2026-07-13] Modelos da Seleção 2.2 com **HTML + brasão + TinyMCE** (igual ao trâmite)
-  - `Peca::MODELO` passou de texto puro para HTML com cabeçalho/brasão; checklist usa
-    `data-editor-rico`; migration converte peças não assinadas ainda em TXT
-  - Assinatura da Seleção ganhou **carimbo + QR + código de validação** (`codigo_validacao`
-    em `pecas`, validação pública em `/validar`) — antes só gravava quem/quando
-
-- [2026-07-15] Unificação da Seleção 2.2 e ligações da cadeia completa
-  - **Seleção 2.2 unificada no Chamamento**: como todo processo concluído passou a gerar um
-    Chamamento (que já carrega a Seleção), a ponte antiga que ancorava o checklist da dispensa
-    **no Processo** virou duplicata — removida (`processos.selecao`, `Processo::pecasSelecao/
-    categoriaSelecao/podeVerSelecao`, view `processos/selecao`). Migration
-    `remover_selecao_ancorada_no_processo` apaga as peças órfãs (preserva assinadas). Agora
-    dispensa e chamamento_publico usam o **mesmo** caminho: `chamamentos/{chamamento}/selecao`
-  - **Backlink Chamamento → Processo**: a listagem de chamamentos mostra "← originado do
-    Processo NNNN" com link (`ChamamentoController@index` faz eager-load de `processo`)
-  - **Atalho Processo → Termo**: o `processos/show` lista os Instrumento(s) formalizados desta
-    parceria (`Processo::instrumentosDaParceria()`, via Chamamento → Proposta → Instrumento)
-    com status e OSC, linkando para o Termo
-  - **Cadeia verificada ponta a ponta** (chamamento_publico): concluir → Chamamento `publicado`
-    → aparece no Portal. ⚠️ o chamamento nasce **sem período de inscrição**; enquanto a UG não
-    o define, não aceita propostas — o `show` agora exibe aviso com link "Definir datas"
-
-- [2026-07-27] Ajustes de UX e base para **anexos das peças do trâmite** (em andamento)
-  - **"Peças do Processo" → "Documentos do Processo"** no `processos/show` e na Documentação do
-    Aditivo — "peça" é jargão interno; a tela agora fala a língua do usuário
-  - **Cadastro de OSC**: blocos reordenados — *Dados da OSC* primeiro, *Dados do Representante
-    Legal* depois (quem se cadastra pensa primeiro na entidade, depois em quem responde por ela)
-  - **Modelos oficiais XII–XX recebidos do cliente** e versionados em
-    `Docs. Desenvolvimento/Modelos/`: Relatório da Comissão de Seleção, Ata, Resultado
-    provisório e definitivo do Edital, Aprovação do Plano de Trabalho, Termo de Adjudicação e
-    Homologação, Ordem de Pagamento GLOBAL e PARCIAL. **Ainda não encaixados** em `Peca::MODELO`
-    — reduzem a lista dos 13 modelos pendentes, mas o texto precisa ser transposto para HTML
-  - **Limpeza dos assets**: removidos 5 CSS antigos de `public/build/assets` que não eram mais
-    referenciados pelo `manifest.json` (sobras de builds anteriores versionadas por engano)
-  - **Base (ainda não ligada na interface) para peças do tipo ARQUIVO**: tabela
-    `processo_peca_anexos` (1:N) + model `ProcessoPecaAnexo`, e duas peças novas em
-    `ProcessoPeca` — **Portaria da Comissão de Seleção** (UG, etapa 6) e **Comprovante de
-    Publicação** (SCP, etapa 8, Diário Oficial + site). Constantes `ProcessoPeca::ARQUIVO`
-    (peça é só upload, sem editor nem assinatura — preenchida quando tem ≥ 1 anexo) e
-    `COM_ANEXOS` (peça de texto que também aceita anexos — caso do Edital)
-  - ⚠️ **Falta para concluir**: relação `anexos()` em `ProcessoPeca`; rotas/controller de
-    upload, download e remoção; exibir as duas peças no `$ordem` do `processos/show` e tratar o
-    tipo ARQUIVO na tela de edição; considerar os anexos em `pendenciasParaAvancar`; e migration
-    que cria as peças novas nos processos já abertos (hoje só nascem em processos novos)
-
-- [2026-07-27] **Anexos das peças do trâmite — concluído** (fechou a lista "Falta para concluir" acima)
-  - `ProcessoPeca::anexos()` (HasMany p/ `ProcessoPecaAnexo`) + helpers `ehArquivo()`,
-    `aceitaAnexos()`, `temAnexo()` e `podeAnexar()` (mesma regra de `podeEditarConteudo`, mas
-    para arquivos). `podeEditarConteudo()` agora ignora peças ARQUIVO (não têm texto)
-  - **Upload / download / remoção** de anexos: `ProcessoPecaController@anexar|baixarAnexo|removerAnexo`
-    e rotas `processos.pecas.anexos.{store,download,destroy}` (disco `local`, em
-    `processo-pecas/{peca_id}/`, mesmos limites do motor de peças: PDF/Word/Excel/JPG/PNG, 10 MB)
-  - **Interface**: partial reutilizável `processos/_anexos.blade.php`; `processos/peca` mostra a
-    seção de anexos (peça ARQUIVO substitui o editor; o **Edital** mostra editor **e** anexos);
-    `processos/show` inclui `portaria_comissao` e `comprovante_publicacao` no `$ordem` do
-    Chamamento (ordenadas por etapa) com rótulo "Anexar" e status por nº de arquivos
-  - **Bloqueio de avanço**: na etapa 6 (Chamamento), a **Portaria da Comissão de Seleção** exige
-    ≥ 1 anexo para encaminhar. O Comprovante de Publicação (etapa final) **não** bloqueia o
-    "Concluir" — a prova de publicação é anexada depois de publicar
-  - **Backfill**: migration `2026_07_27_120000_seed_pecas_arquivo_processos_existentes` cria as
-    duas peças ARQUIVO nos processos já abertos (nos novos já nascem pelo `store`)
-
-- [2026-07-29] Portal público, publicação por modalidade e clareza do checklist de Seleção
-  - **Documentos no portal público**: `portal/chamamento` ganhou a seção **"Documentos do Chamamento"**,
-    que lista as peças assinadas do processo de origem (Edital / Justificativa de Dispensa / Parecer
-    CNAS) com link para a **página oficial de validação** (`validacao.mostrar`), onde a OSC lê o teor
-    completo e confere a assinatura. `PortalController@chamamento` monta `$documentosPublicos`
-    (peças `assinado()` + `codigo_validacao`) a partir de `processo.pecas`
-  - **Card "Dados do Chamamento"** na tela interna de Seleção (`chamamentos/selecao`): objeto, tipo/status,
-    órgão, valor, datas, requisitos e atalhos (processo de origem, editar, ver no portal).
-    `ChamamentoController@selecao` passou a carregar a relação `processo`
-  - **Publicação com modalidade escolhida no ato**: correção do **422** ao gerar publicação/chamamento
-    quando o processo estava concluído sem `modalidade`. `TramitacaoController@publicar` agora aceita e
-    valida `modalidade` (`Rule::in(Processo::MODALIDADES)`) quando ausente, e `processos/show` mostra o
-    seletor de modalidade antes de gerar
-  - **Checklist de Seleção mais claro** (`pecas/_checklist`): toda peça exibe selo explícito —
-    🔴 **obrigatório** ou ⚪ **opcional** — em vez de só marcar as opcionais. Fecha a dúvida do "2/7":
-    o percentual só chega a 100% no fim do ciclo (resultado definitivo + termo de homologação), o que
-    é o comportamento correto — a publicação já é travada pela **conclusão do trâmite do processo**
-  - **Portal x usuário interno**: `User::temAcessoInterno()` (qualquer papel além de `responsavel_legal`).
-    O layout do portal (`layouts/portal`) passa a renderizar o **menu administrativo** (`layouts/navigation`)
-    no topo quando um usuário interno navega pelo portal, em vez do header simplificado — mantendo a
-    navegação do sistema. Os CTAs **"Cadastre sua OSC"** (hero, estado vazio, "Como participar", bloco
-    de inscrições e submenu do usuário) agora só aparecem para **visitantes** (`@guest`)
-  - **Participação só para OSC**: o botão **"Submeter Proposta"** aparece apenas para usuários com OSC
-    (`auth()->user()->osc`); o usuário interno vê um aviso de que a submissão é exclusiva das OSCs e
-    o visitante vê "Entrar para Participar". `PortalController@participar` redireciona o interno de volta
-    ao chamamento com flash `info` (em vez de mandá-lo ao cadastro de OSC, que não se aplica a ele)
-
-- [2026-07-29] Cadastro completo de OSC (Módulo 1.2) e Matrícula do usuário interno
-  - **Usuário interno (1.1)**: campo **Matrícula** no formulário (`usuarios/_form`), validação `unique`
-    em `UserRequest` e persistência no `UserController` (a coluna já existia)
-  - **OSC — dados básicos**: novas colunas **Data de abertura do CNPJ**, **CNAE primário** e
-    **CNAE secundário** (migration `add_cadastro_fields_to_oscs_table`)
-  - **OSC — representante legal**: **endereço completo** próprio (`resp_*`) — o componente
-    `x-address-fields` ganhou props `prefix`/`title` e é reaproveitado para os dois endereços
-  - **OSC — anexos** (disco privado `local`, PDF/JPG/PNG até 10 MB): **Cartão CNPJ** e, do
-    representante, **CPF**, **Comprovante de endereço** e **Ata da diretoria**. Componente
-    `x-osc-anexo` (upload + link do arquivo atual); rota `oscs.anexo` e `OscController@baixarAnexo`
-    para download autenticado; `destroy` limpa a pasta `oscs/{id}`
-  - **OSC — Membros/Diretoria**: nova tabela `osc_membros` + model `OscMembro` (relação `Osc::membros`),
-    repeater dinâmico (Alpine.js) no formulário; `OscController` recria os membros a cada gravação
-    (ignora linhas em branco)
-
-- [2026-07-29] Ajustes na navbar administrativa (`layouts/navigation`)
-  - **Execução** deixou de ser botão morto: agora é link para **Instrumentos / Termos** (onde ficam
-    repasses, despesas e saldo), quando o usuário tem `formalizacao` — no desktop e no mobile
-  - Corrigido o rótulo **"Monitoramento & Avaliação"** (aparecia `&amp;` escapado em dobro)
-  - Logo enxuto: removido o texto "Gestão de Parcerias / Sistema público municipal" (a trilha de
-    etapas tem prioridade de espaço)
-  - Menu do usuário reduzido a **apenas o avatar** (iniciais), com o nome no `title`; nome completo e
-    perfil saíram do topo (continuam dentro do dropdown)
-
-- [2026-07-30] **Execução** ganha tela própria e correções de lançamento
-  - A opção **Execução** da sidebar apontava para a lista de Instrumentos — clicava e caía na
-    Celebração, sem sentido próprio. Agora existe **`/execucao`**: lista as parcerias já assinadas com
-    **repassado, gasto, saldo e % executado**, filtros por OSC/termo/objeto e situação; clicando, abre
-    a execução daquela parceria. Passou a ser gated por `permission:execucao` (era `formalizacao`)
-  - **Despesa lançada sem nota fiscal não podia mais receber a nota** — caso corriqueiro, já que a
-    despesa costuma ser registrada antes de a nota chegar. Novo `updateDespesa`: permite **anexar
-    depois**, **substituir** ou **remover** a nota, além de corrigir data, valor, natureza, fornecedor
-    e descrição. Na listagem, quem está sem nota mostra o botão **"anexar NF"**
-  - **Repasses também não tinham edição** — novo `updateRepasse` corrige parcela, data, valor e
-    documento/OB
-  - Edição **inline** na própria tabela: cada linha vira um `<tbody>` com escopo Alpine próprio,
-    alternando entre leitura e formulário (HTML válido, sem modal)
-
-- [2026-07-30] Tela **Modelos padrão** — catálogo de apoio do TI
-  - Nova tela `/modelos`, **exclusiva do perfil Administrador Setorial** (`role:administrador_setorial`
-    na rota e `@role` no link da sidebar, sob a seção "Tecnologia da Informação"): reúne num só lugar
-    **todos os textos-modelo** que alimentam as peças dos trâmites
-  - Agrupados por origem: **Planejamento** (trâmite do Processo), **Seleção**, **Celebração**,
-    **Dispensa/Inexigibilidade**, **Aditivo**, **Apostilamento** e **Ordem de Pagamento** —
-    54 itens no total, dos quais **42 já têm texto**
-  - Cada linha mostra a chave, o **setor responsável** e a **etapa** em que o documento é preenchido;
-    quem ainda não tem texto fica marcado como **"sem texto"** (é a lista de modelos a pedir ao cliente)
-  - `modelos.show` faz a **pré-visualização** do documento como ele nasce na peça, com brasão e tudo
-  - `ModeloController` monta o catálogo a partir das próprias constantes (`Peca::TEMPLATES`/`MODELO`,
-    `ProcessoPeca::MODELO`, `OrdemPagamento::MODELO*`) — não duplica conteúdo, então a tela reflete
-    automaticamente qualquer modelo novo
-
-- [2026-07-30] Ajuste do uso da cor — **neutro na base, marca nos detalhes**
-  - Os blocos grandes de verde saturado (splash da tela principal, hero do portal, cabeçalho da
-    Transparência, fundo do login e header/footer do portal) davam ar de site de campanha, não de
-    ferramenta institucional. Todos passaram a **fundo neutro** (branco / `gray-50`) com texto escuro
-  - A marca aparece agora como **detalhe**: faixa institucional de 4px no topo de todos os layouts
-    (gradiente **verde → laranja**, mostrando as duas cores sem dominar), botões, estados ativos,
-    links, ícones em chips `brand-50` e bordas de destaque
-  - **O laranja ganhou função**, em vez de enfeite: identifica a **consulta pública** (cartões Cidadão /
-    Parlamentar / Conselho na tela principal, com borda superior laranja), o selo da **Transparência**,
-    o total de valor pactuado e os **badges de pendência** na sidebar
-  - Tela principal redesenhada como página institucional: cabeçalho com a marca, chamada, e os acessos
-    em **cartões** separados por finalidade (Acesso ao sistema × Consulta pública) em vez de pílulas
-    sobre um fundo colorido
-  - A sidebar passou a `top-1` para não cobrir a faixa institucional
-
-- [2026-07-30] **Identidade visual da Prefeitura** e **sidebar** no lugar da navbar
-  - **Paleta oficial** no `tailwind.config.js`: `brand` (verde **#00A859**, escuro **#008A48**, claro
-    **#E6F9F0**) e `accent` (laranja **#EE7736**, escuro **#D4622A**, claro **#FEF3EC**), com as escalas
-    50–900 interpoladas. O antigo índigo foi substituído pelo verde da marca em **590 ocorrências**
-    nas views, mais os mapas de cor dos models (`STATUS_COLORS`) e o componente `stat-card`
-  - **`safelist` no Tailwind**: as classes montadas em tempo de execução (`bg-{{ $color }}-100`, vindas
-    dos `STATUS_COLORS`) não aparecem no código-fonte e vinham sobrevivendo à purga por acaso, porque
-    as mesmas classes existiam literalmente em outro lugar. Agora estão garantidas
-  - **Marca**: novo componente `x-marca` com o `logotipo.png` oficial (variante `branco` para fundos
-    escuros) no lugar do badge de texto "PGP", e **favicon** `ico.png` em todos os layouts
-  - Gradientes que terminavam em roxo passaram ao verde escuro da marca; os botões de consulta pública
-    da tela principal (Cidadão, Parlamentar, Conselho) passaram ao **laranja de destaque**
-  - **Navegação por sidebar**: a área administrativa deixou a barra horizontal (que espremia a trilha de
-    6 etapas) e passou a `layouts/sidebar` — coluna fixa de 256px com a marca, o ciclo da parceria
-    numerado, Cadastros e os badges de pendências; no topo restou apenas o menu do usuário (avatar).
-    No celular vira gaveta com sobreposição (Alpine). A sidebar vale **também no portal** para o usuário interno; visitante e OSC seguem
-    com o cabeçalho verde da marca. A barra horizontal (`layouts/navigation`) foi **removida**
-
-- [2026-07-30] Conferência dos 8 modelos da pasta `Modelos novos` contra os `.docx` originais
-  - Verificação trecho a trecho de cada modelo já incorporado. **Uma divergência encontrada e
-    corrigida**: o texto do **Relatório da Comissão de Seleção** havia sido condensado demais e perdeu
-    as menções ao **controle interno e ao TCE/MG** (alíneas "c" e "e") e o parágrafo de fecho sobre
-    rastreabilidade e risco de glosa — restaurados
-  - Migration `ressemeia_relatorio_comissao_controle_interno` atualiza as peças ainda **não assinadas**
-    (peça assinada é documento definitivo e não é alterada)
-  - Os demais 7 modelos conferem integralmente com o original
-
-- [2026-07-30] **Assinatura das partes** e **Parecer da SCP** (fecha os itens que faltavam da Celebração)
-  - **Contra-assinatura do Termo (assinatura das partes)**: o Fluxo Celebração diz "SCP encaminha para
-    assinatura das partes", mas só a Administração assinava. A peça passou a guardar a **segunda
-    assinatura** (`contra_assinado_por/em` + `codigo_validacao_contra`), com o mapa
-    `Peca::CELEBRACAO_CONTRA_ASSINATURA` e `podeContraAssinar()` — o Termo é assinado pelo **Município**
-    (SCP, etapa 8) e **contra-assinado pela OSC** (etapa 9). Só a OSC daquela parceria contra-assina, e
-    só depois da assinatura da Administração
-  - **Parecer da SCP** (conferência final): novo modelo com checklist de 9 itens conferindo plano,
-    habilitação, pareceres e minuta, com conclusão favorável / com ressalvas / devolução
-  - A Celebração foi de **14 para 15 etapas** — entrou a etapa 9 (OSC contra-assina) e as seguintes
-    deslocaram +1; a migration reajusta as celebrações em andamento e cria a peça nova
-  - Checklist da Celebração: 17 → **18 itens**; a peça mostra o estado da contra-assinatura
-    (⏳ aguardando / assinado por, com o código de validação próprio)
-
-- [2026-07-30] **Recurso administrativo da OSC** (item que faltava do Fluxo Seleção)
-  - O Fluxo Seleção prevê "UG … analisa os recursos, se houver, emite resposta e envia a OSC", e o
-    próprio modelo do Resultado Provisório promete que "o recurso deverá ser protocolado
-    eletronicamente por meio do PGP" — o sistema não fazia nem uma coisa nem outra
-  - Novo **motor de recursos** (tabela `recursos` + model `Recurso`): a **OSC protocola** pelo portal
-    (fundamentação + peça recursal em PDF único) e a **UG responde** com resultado
-    (**provido / parcialmente provido / improvido**) e fundamentação, gerando **código de validação**
-  - Substitui a peça única "Recursos" do checklist, que não dava conta de vários recursos de OSCs
-    diferentes, cada um com a sua resposta — o checklist de Seleção foi de 13 para 12 itens
-  - **Fase recursal** controlada pelo trâmite: abre na etapa 3 da Seleção (após a publicação do
-    resultado provisório) e só então a OSC participante pode recorrer; um recurso por OSC
-  - **Trava de avanço**: a UG não emite o resultado definitivo enquanto houver recurso sem resposta
-  - Isolamento: a OSC só protocola se apresentou proposta e só baixa/vê o **próprio** recurso
-  - Interface: formulário e resposta na página pública do chamamento (lado da OSC) e card **Recursos**
-    na tela de Seleção, com o julgamento de cada um (lado da UG)
-
-- [2026-07-30] **Tela principal por perfil** e **Transparência pública** (fecha o `Atualizações.txt`)
-  - `/` deixou de redirecionar ao portal e passou a ser a **tela principal** (`landing`), com os cinco
-    acessos do modelo enviado pelo cliente: **Prefeitura** e **OSC** (levam ao login) e **Cidadão**,
-    **Parlamentar** e **Conselho** (consulta livre, sem cadastro). Quem já está logado é redirecionado
-    ao seu destino — interno vai ao Painel, OSC vai ao portal
-  - Nova página pública **`/transparencia`** — as **parcerias celebradas**, que o texto do modelo promete:
-    OSC, objeto, órgão, valor do repasse, vigência e publicação no DOE, com totalizadores (nº de
-    parcerias e valor pactuado) e filtros por pesquisa, tipo de instrumento e exercício
-  - **Só instrumentos assinados são públicos** (`assinado`, `vigente`, `encerrado`) — minuta não aparece
-  - Link **Transparência** no menu do portal; a tela principal também atalha para cadastro de OSC,
-    chamamentos abertos e validação de documentos
-
-- [2026-07-30] **Trâmite da Celebração** (Fluxo Etapa de Celebração) — com a OSC dentro do fluxo
-  - Ancorado na **proposta aprovada** (é ela que vira a parceria): `celebracao_etapa`,
-    `celebracao_setor`, `celebracao_iniciada_em`/`concluida_em` em `propostas` e histórico em
-    **`celebracao_tramitacoes`**
-  - **`Proposta::ETAPAS_CELEBRACAO`** — 14 etapas, agora incluindo a própria **OSC** como setor:
-    UG convoca → **OSC** (plano de trabalho + habilitação) → UG (aprova o plano) → SCP (pede parecer)
-    → SEPLAN (parecer financeiro) → UG (portarias + parecer técnico) → SCP (protocolo) → PJ (parecer)
-    → SCP (termo + assinatura das partes + publicação) → SCP (autorização de início) → **OSC** (dados
-    bancários) → SCP (OP Global) → UG (assina a OP) → SCP (comprovante de empenho) → conclui
-  - **Nova categoria de peças `celebracao`** com 17 documentos. Os textos-modelo são **reaproveitados**
-    das categorias equivalentes via `Peca::modeloTexto()` (a rota Dispensa cobre os mesmos documentos;
-    o Pedido/Parecer Financeiro vêm do trâmite do Processo; a OP Global vem de `OrdemPagamento`),
-    e só os próprios da etapa são novos: **Convocação da OSC**, **Termo de Parceria** e
-    **Autorização de Início de Execução**
-  - **Motor de peças generalizado**: `Peca` deixou de ser específico da Seleção — `donoEmTramite()` e os
-    mapas por categoria atendem Seleção (Chamamento) e Celebração (Proposta), com a interface uniforme
-    `tramiteEtapaAtual()`/`tramiteEncerrado()`/`tramiteSetorLabel()` nos dois donos
-  - **Segurança da vez da OSC**: quando a etapa é da OSC, além de setor + etapa exige-se que seja a
-    **OSC daquela parceria** (`oscDona`); `podeVer()` impede que uma OSC baixe peça de outra. A OSC
-    **não devolve** o trâmite (bloqueado no controller, não só na interface)
-  - As rotas `pecas.*` saíram do grupo `permission:chamamentos|formalizacao` para `auth`: a autorização
-    passou ao `PecaController` — peça em trâmite é liberada por setor + etapa (o que abre a vez da OSC);
-    peça fora de trâmite continua exigindo a permissão da área
-  - Tela `celebracao/show` serve **os dois públicos** (`x-dynamic-component`): layout administrativo para
-    a equipe e layout do portal para a OSC. Trilha extraída para o componente reutilizável
-    `x-tramite-trilha`. Link "Celebração" na proposta (interno) e em Minhas Propostas, com selo
-    **"sua vez"** quando a bola está com a OSC
+- [2026-07-30] Filtros na tela de Programas Governamentais (`programas/index`)
+
+  - Barra de filtros por **pesquisa** (nome/sigla), **órgão**, **tipo** e **status**;
+    `ProgramaController@index` aplica com `when()`, preserva a query na paginação (`withQueryString`)
+    e devolve `$orgaos`/`$filtros`. Contador de resultados, "Limpar filtros" e mensagem de vazio
+    específica quando há filtro sem resultado
+
+- [2026-07-30] `Atualizações.txt` — protocolo pela SCP e modelos novos de Seleção/Celebração
+
+  - **Protocolos passam à SCP** (linha 4 do documento): `pedido_parecer` e
+    `solicitacao_parecer_juridico` mudaram de `ug` para `scp` em `ProcessoPeca::SETOR_RESPONSAVEL`
+  - **Rota do Chamamento ganhou uma etapa** (10 no total): a UG revisa/assina o Edital e anexa a
+    Portaria da Comissão (etapa 6) e encaminha **à SCP**, que emite e assina o **Protocolo
+    (Solicitação de Parecer Jurídico)** na nova etapa 7 e então segue à Procuradoria (8) e publica (9).
+    Consequência: ao devolver, o PJ volta para a **SCP**, que devolve à UG se houver pendência
+  - Etapa 2 (Pedido de Parecer Financeiro) passou a ser da **SCP** nas duas rotas — fecha o
+    "SCP recebe, analisa e envia SEPLAN" do Fluxo CP
+  - Migration `reajusta_etapas_protocolo_juridico_scp` desloca +1 as etapas 7→8 e 8→9 dos processos
+    já existentes na rota Chamamento
+  - **Modelos novos da Seleção** (`Peca::TEMPLATES['chamamento_publico']` passou de 11 para 13 itens):
+    novos **Relatório da Comissão de Seleção** e **Ata da Comissão**; o **Resultado provisório**, o
+    **Resultado definitivo** e o **Termo de Adjudicação e Homologação** deixaram de ser "arquivo" e
+    viraram **modelo padrão assinável**, com o texto oficial dos `.docx` em `Peca::MODELO`
+  - **Aprovação do Plano de Trabalho** (Celebração) ganhou o texto-modelo com o checklist de 15 itens
+  - Migration `atualiza_pecas_selecao_modelos_novos` realinha rótulo/tipo/obrigatoriedade/ordem das
+    peças já criadas e semeia os textos (mantém como arquivo o que já tinha upload, para não órfãos)
+  - **Ordem de Pagamento ganhou tipo**: **Global** (empenho do exercício, uma vez por instrumento) e
+    **Parcial** (subempenho de cada parcela), cada um com seu texto-modelo; seletor na tela do
+    Instrumento e selo do tipo na listagem
 
 - [2026-07-30] **Trâmite da Seleção** (Fluxo Seleção) e perfil do **Prefeito Municipal**
+
   - **Perfil novo `prefeito_municipal`** (Módulo 1): lotação **`pm` — Gabinete do Prefeito**, perfil
     exclusivo desse setor, com as permissões `chamamentos` e `formalizacao`. Assina o Termo de
     Adjudicação e Homologação que encerra a Seleção
@@ -3153,44 +2668,640 @@ conferido — o porquê é o que falta a quem pega o código depois.
     Encaminhar/Devolver/Encerrar e histórico de movimentações na tela de Seleção; no checklist as peças
     travadas mostram 🔒 com o motivo
 
-- [2026-07-30] `Atualizações.txt` — protocolo pela SCP e modelos novos de Seleção/Celebração
-  - **Protocolos passam à SCP** (linha 4 do documento): `pedido_parecer` e
-    `solicitacao_parecer_juridico` mudaram de `ug` para `scp` em `ProcessoPeca::SETOR_RESPONSAVEL`
-  - **Rota do Chamamento ganhou uma etapa** (10 no total): a UG revisa/assina o Edital e anexa a
-    Portaria da Comissão (etapa 6) e encaminha **à SCP**, que emite e assina o **Protocolo
-    (Solicitação de Parecer Jurídico)** na nova etapa 7 e então segue à Procuradoria (8) e publica (9).
-    Consequência: ao devolver, o PJ volta para a **SCP**, que devolve à UG se houver pendência
-  - Etapa 2 (Pedido de Parecer Financeiro) passou a ser da **SCP** nas duas rotas — fecha o
-    "SCP recebe, analisa e envia SEPLAN" do Fluxo CP
-  - Migration `reajusta_etapas_protocolo_juridico_scp` desloca +1 as etapas 7→8 e 8→9 dos processos
-    já existentes na rota Chamamento
-  - **Modelos novos da Seleção** (`Peca::TEMPLATES['chamamento_publico']` passou de 11 para 13 itens):
-    novos **Relatório da Comissão de Seleção** e **Ata da Comissão**; o **Resultado provisório**, o
-    **Resultado definitivo** e o **Termo de Adjudicação e Homologação** deixaram de ser "arquivo" e
-    viraram **modelo padrão assinável**, com o texto oficial dos `.docx` em `Peca::MODELO`
-  - **Aprovação do Plano de Trabalho** (Celebração) ganhou o texto-modelo com o checklist de 15 itens
-  - Migration `atualiza_pecas_selecao_modelos_novos` realinha rótulo/tipo/obrigatoriedade/ordem das
-    peças já criadas e semeia os textos (mantém como arquivo o que já tinha upload, para não órfãos)
-  - **Ordem de Pagamento ganhou tipo**: **Global** (empenho do exercício, uma vez por instrumento) e
-    **Parcial** (subempenho de cada parcela), cada um com seu texto-modelo; seletor na tela do
-    Instrumento e selo do tipo na listagem
+- [2026-07-30] **Trâmite da Celebração** (Fluxo Etapa de Celebração) — com a OSC dentro do fluxo
 
-- [2026-07-30] Filtros na tela de Programas Governamentais (`programas/index`)
-  - Barra de filtros por **pesquisa** (nome/sigla), **órgão**, **tipo** e **status**;
-    `ProgramaController@index` aplica com `when()`, preserva a query na paginação (`withQueryString`)
-    e devolve `$orgaos`/`$filtros`. Contador de resultados, "Limpar filtros" e mensagem de vazio
-    específica quando há filtro sem resultado
+  - Ancorado na **proposta aprovada** (é ela que vira a parceria): `celebracao_etapa`,
+    `celebracao_setor`, `celebracao_iniciada_em`/`concluida_em` em `propostas` e histórico em
+    **`celebracao_tramitacoes`**
+  - **`Proposta::ETAPAS_CELEBRACAO`** — 14 etapas, agora incluindo a própria **OSC** como setor:
+    UG convoca → **OSC** (plano de trabalho + habilitação) → UG (aprova o plano) → SCP (pede parecer)
+    → SEPLAN (parecer financeiro) → UG (portarias + parecer técnico) → SCP (protocolo) → PJ (parecer)
+    → SCP (termo + assinatura das partes + publicação) → SCP (autorização de início) → **OSC** (dados
+    bancários) → SCP (OP Global) → UG (assina a OP) → SCP (comprovante de empenho) → conclui
+  - **Nova categoria de peças `celebracao`** com 17 documentos. Os textos-modelo são **reaproveitados**
+    das categorias equivalentes via `Peca::modeloTexto()` (a rota Dispensa cobre os mesmos documentos;
+    o Pedido/Parecer Financeiro vêm do trâmite do Processo; a OP Global vem de `OrdemPagamento`),
+    e só os próprios da etapa são novos: **Convocação da OSC**, **Termo de Parceria** e
+    **Autorização de Início de Execução**
+  - **Motor de peças generalizado**: `Peca` deixou de ser específico da Seleção — `donoEmTramite()` e os
+    mapas por categoria atendem Seleção (Chamamento) e Celebração (Proposta), com a interface uniforme
+    `tramiteEtapaAtual()`/`tramiteEncerrado()`/`tramiteSetorLabel()` nos dois donos
+  - **Segurança da vez da OSC**: quando a etapa é da OSC, além de setor + etapa exige-se que seja a
+    **OSC daquela parceria** (`oscDona`); `podeVer()` impede que uma OSC baixe peça de outra. A OSC
+    **não devolve** o trâmite (bloqueado no controller, não só na interface)
+  - As rotas `pecas.*` saíram do grupo `permission:chamamentos|formalizacao` para `auth`: a autorização
+    passou ao `PecaController` — peça em trâmite é liberada por setor + etapa (o que abre a vez da OSC);
+    peça fora de trâmite continua exigindo a permissão da área
+  - Tela `celebracao/show` serve **os dois públicos** (`x-dynamic-component`): layout administrativo para
+    a equipe e layout do portal para a OSC. Trilha extraída para o componente reutilizável
+    `x-tramite-trilha`. Link "Celebração" na proposta (interno) e em Minhas Propostas, com selo
+    **"sua vez"** quando a bola está com a OSC
+
+- [2026-07-30] **Tela principal por perfil** e **Transparência pública** (fecha o `Atualizações.txt`)
+
+  - `/` deixou de redirecionar ao portal e passou a ser a **tela principal** (`landing`), com os cinco
+    acessos do modelo enviado pelo cliente: **Prefeitura** e **OSC** (levam ao login) e **Cidadão**,
+    **Parlamentar** e **Conselho** (consulta livre, sem cadastro). Quem já está logado é redirecionado
+    ao seu destino — interno vai ao Painel, OSC vai ao portal
+  - Nova página pública **`/transparencia`** — as **parcerias celebradas**, que o texto do modelo promete:
+    OSC, objeto, órgão, valor do repasse, vigência e publicação no DOE, com totalizadores (nº de
+    parcerias e valor pactuado) e filtros por pesquisa, tipo de instrumento e exercício
+  - **Só instrumentos assinados são públicos** (`assinado`, `vigente`, `encerrado`) — minuta não aparece
+  - Link **Transparência** no menu do portal; a tela principal também atalha para cadastro de OSC,
+    chamamentos abertos e validação de documentos
+
+- [2026-07-30] **Recurso administrativo da OSC** (item que faltava do Fluxo Seleção)
+
+  - O Fluxo Seleção prevê "UG … analisa os recursos, se houver, emite resposta e envia a OSC", e o
+    próprio modelo do Resultado Provisório promete que "o recurso deverá ser protocolado
+    eletronicamente por meio do PGP" — o sistema não fazia nem uma coisa nem outra
+  - Novo **motor de recursos** (tabela `recursos` + model `Recurso`): a **OSC protocola** pelo portal
+    (fundamentação + peça recursal em PDF único) e a **UG responde** com resultado
+    (**provido / parcialmente provido / improvido**) e fundamentação, gerando **código de validação**
+  - Substitui a peça única "Recursos" do checklist, que não dava conta de vários recursos de OSCs
+    diferentes, cada um com a sua resposta — o checklist de Seleção foi de 13 para 12 itens
+  - **Fase recursal** controlada pelo trâmite: abre na etapa 3 da Seleção (após a publicação do
+    resultado provisório) e só então a OSC participante pode recorrer; um recurso por OSC
+  - **Trava de avanço**: a UG não emite o resultado definitivo enquanto houver recurso sem resposta
+  - Isolamento: a OSC só protocola se apresentou proposta e só baixa/vê o **próprio** recurso
+  - Interface: formulário e resposta na página pública do chamamento (lado da OSC) e card **Recursos**
+    na tela de Seleção, com o julgamento de cada um (lado da UG)
+
+- [2026-07-30] **Assinatura das partes** e **Parecer da SCP** (fecha os itens que faltavam da Celebração)
+
+  - **Contra-assinatura do Termo (assinatura das partes)**: o Fluxo Celebração diz "SCP encaminha para
+    assinatura das partes", mas só a Administração assinava. A peça passou a guardar a **segunda
+    assinatura** (`contra_assinado_por/em` + `codigo_validacao_contra`), com o mapa
+    `Peca::CELEBRACAO_CONTRA_ASSINATURA` e `podeContraAssinar()` — o Termo é assinado pelo **Município**
+    (SCP, etapa 8) e **contra-assinado pela OSC** (etapa 9). Só a OSC daquela parceria contra-assina, e
+    só depois da assinatura da Administração
+  - **Parecer da SCP** (conferência final): novo modelo com checklist de 9 itens conferindo plano,
+    habilitação, pareceres e minuta, com conclusão favorável / com ressalvas / devolução
+  - A Celebração foi de **14 para 15 etapas** — entrou a etapa 9 (OSC contra-assina) e as seguintes
+    deslocaram +1; a migration reajusta as celebrações em andamento e cria a peça nova
+  - Checklist da Celebração: 17 → **18 itens**; a peça mostra o estado da contra-assinatura
+    (⏳ aguardando / assinado por, com o código de validação próprio)
+
+- [2026-07-30] Conferência dos 8 modelos da pasta `Modelos novos` contra os `.docx` originais
+
+  - Verificação trecho a trecho de cada modelo já incorporado. **Uma divergência encontrada e
+    corrigida**: o texto do **Relatório da Comissão de Seleção** havia sido condensado demais e perdeu
+    as menções ao **controle interno e ao TCE/MG** (alíneas "c" e "e") e o parágrafo de fecho sobre
+    rastreabilidade e risco de glosa — restaurados
+  - Migration `ressemeia_relatorio_comissao_controle_interno` atualiza as peças ainda **não assinadas**
+    (peça assinada é documento definitivo e não é alterada)
+  - Os demais 7 modelos conferem integralmente com o original
+
+- [2026-07-30] **Identidade visual da Prefeitura** e **sidebar** no lugar da navbar
+
+  - **Paleta oficial** no `tailwind.config.js`: `brand` (verde **#00A859**, escuro **#008A48**, claro
+    **#E6F9F0**) e `accent` (laranja **#EE7736**, escuro **#D4622A**, claro **#FEF3EC**), com as escalas
+    50–900 interpoladas. O antigo índigo foi substituído pelo verde da marca em **590 ocorrências**
+    nas views, mais os mapas de cor dos models (`STATUS_COLORS`) e o componente `stat-card`
+  - **`safelist` no Tailwind**: as classes montadas em tempo de execução (`bg-{{ $color }}-100`, vindas
+    dos `STATUS_COLORS`) não aparecem no código-fonte e vinham sobrevivendo à purga por acaso, porque
+    as mesmas classes existiam literalmente em outro lugar. Agora estão garantidas
+  - **Marca**: novo componente `x-marca` com o `logotipo.png` oficial (variante `branco` para fundos
+    escuros) no lugar do badge de texto "PGP", e **favicon** `ico.png` em todos os layouts
+  - Gradientes que terminavam em roxo passaram ao verde escuro da marca; os botões de consulta pública
+    da tela principal (Cidadão, Parlamentar, Conselho) passaram ao **laranja de destaque**
+  - **Navegação por sidebar**: a área administrativa deixou a barra horizontal (que espremia a trilha de
+    6 etapas) e passou a `layouts/sidebar` — coluna fixa de 256px com a marca, o ciclo da parceria
+    numerado, Cadastros e os badges de pendências; no topo restou apenas o menu do usuário (avatar).
+    No celular vira gaveta com sobreposição (Alpine). A sidebar vale **também no portal** para o usuário interno; visitante e OSC seguem
+    com o cabeçalho verde da marca. A barra horizontal (`layouts/navigation`) foi **removida**
+
+- [2026-07-30] Ajuste do uso da cor — **neutro na base, marca nos detalhes**
+
+  - Os blocos grandes de verde saturado (splash da tela principal, hero do portal, cabeçalho da
+    Transparência, fundo do login e header/footer do portal) davam ar de site de campanha, não de
+    ferramenta institucional. Todos passaram a **fundo neutro** (branco / `gray-50`) com texto escuro
+  - A marca aparece agora como **detalhe**: faixa institucional de 4px no topo de todos os layouts
+    (gradiente **verde → laranja**, mostrando as duas cores sem dominar), botões, estados ativos,
+    links, ícones em chips `brand-50` e bordas de destaque
+  - **O laranja ganhou função**, em vez de enfeite: identifica a **consulta pública** (cartões Cidadão /
+    Parlamentar / Conselho na tela principal, com borda superior laranja), o selo da **Transparência**,
+    o total de valor pactuado e os **badges de pendência** na sidebar
+  - Tela principal redesenhada como página institucional: cabeçalho com a marca, chamada, e os acessos
+    em **cartões** separados por finalidade (Acesso ao sistema × Consulta pública) em vez de pílulas
+    sobre um fundo colorido
+  - A sidebar passou a `top-1` para não cobrir a faixa institucional
+
+- [2026-07-30] Tela **Modelos padrão** — catálogo de apoio do TI
+
+  - Nova tela `/modelos`, **exclusiva do perfil Administrador Setorial** (`role:administrador_setorial`
+    na rota e `@role` no link da sidebar, sob a seção "Tecnologia da Informação"): reúne num só lugar
+    **todos os textos-modelo** que alimentam as peças dos trâmites
+  - Agrupados por origem: **Planejamento** (trâmite do Processo), **Seleção**, **Celebração**,
+    **Dispensa/Inexigibilidade**, **Aditivo**, **Apostilamento** e **Ordem de Pagamento** —
+    54 itens no total, dos quais **42 já têm texto**
+  - Cada linha mostra a chave, o **setor responsável** e a **etapa** em que o documento é preenchido;
+    quem ainda não tem texto fica marcado como **"sem texto"** (é a lista de modelos a pedir ao cliente)
+  - `modelos.show` faz a **pré-visualização** do documento como ele nasce na peça, com brasão e tudo
+  - `ModeloController` monta o catálogo a partir das próprias constantes (`Peca::TEMPLATES`/`MODELO`,
+    `ProcessoPeca::MODELO`, `OrdemPagamento::MODELO*`) — não duplica conteúdo, então a tela reflete
+    automaticamente qualquer modelo novo
+
+- [2026-07-30] **Execução** ganha tela própria e correções de lançamento
+
+  - A opção **Execução** da sidebar apontava para a lista de Instrumentos — clicava e caía na
+    Celebração, sem sentido próprio. Agora existe **`/execucao`**: lista as parcerias já assinadas com
+    **repassado, gasto, saldo e % executado**, filtros por OSC/termo/objeto e situação; clicando, abre
+    a execução daquela parceria. Passou a ser gated por `permission:execucao` (era `formalizacao`)
+  - **Despesa lançada sem nota fiscal não podia mais receber a nota** — caso corriqueiro, já que a
+    despesa costuma ser registrada antes de a nota chegar. Novo `updateDespesa`: permite **anexar
+    depois**, **substituir** ou **remover** a nota, além de corrigir data, valor, natureza, fornecedor
+    e descrição. Na listagem, quem está sem nota mostra o botão **"anexar NF"**
+  - **Repasses também não tinham edição** — novo `updateRepasse` corrige parcela, data, valor e
+    documento/OB
+  - Edição **inline** na própria tabela: cada linha vira um `<tbody>` com escopo Alpine próprio,
+    alternando entre leitura e formulário (HTML válido, sem modal)
+
+- [2026-07-29] Ajustes na navbar administrativa (`layouts/navigation`)
+
+  - **Execução** deixou de ser botão morto: agora é link para **Instrumentos / Termos** (onde ficam
+    repasses, despesas e saldo), quando o usuário tem `formalizacao` — no desktop e no mobile
+  - Corrigido o rótulo **"Monitoramento & Avaliação"** (aparecia `&amp;` escapado em dobro)
+  - Logo enxuto: removido o texto "Gestão de Parcerias / Sistema público municipal" (a trilha de
+    etapas tem prioridade de espaço)
+  - Menu do usuário reduzido a **apenas o avatar** (iniciais), com o nome no `title`; nome completo e
+    perfil saíram do topo (continuam dentro do dropdown)
+
+- [2026-07-29] Cadastro completo de OSC (Módulo 1.2) e Matrícula do usuário interno
+
+  - **Usuário interno (1.1)**: campo **Matrícula** no formulário (`usuarios/_form`), validação `unique`
+    em `UserRequest` e persistência no `UserController` (a coluna já existia)
+  - **OSC — dados básicos**: novas colunas **Data de abertura do CNPJ**, **CNAE primário** e
+    **CNAE secundário** (migration `add_cadastro_fields_to_oscs_table`)
+  - **OSC — representante legal**: **endereço completo** próprio (`resp_*`) — o componente
+    `x-address-fields` ganhou props `prefix`/`title` e é reaproveitado para os dois endereços
+  - **OSC — anexos** (disco privado `local`, PDF/JPG/PNG até 10 MB): **Cartão CNPJ** e, do
+    representante, **CPF**, **Comprovante de endereço** e **Ata da diretoria**. Componente
+    `x-osc-anexo` (upload + link do arquivo atual); rota `oscs.anexo` e `OscController@baixarAnexo`
+    para download autenticado; `destroy` limpa a pasta `oscs/{id}`
+  - **OSC — Membros/Diretoria**: nova tabela `osc_membros` + model `OscMembro` (relação `Osc::membros`),
+    repeater dinâmico (Alpine.js) no formulário; `OscController` recria os membros a cada gravação
+    (ignora linhas em branco)
+
+- [2026-07-29] Portal público, publicação por modalidade e clareza do checklist de Seleção
+
+  - **Documentos no portal público**: `portal/chamamento` ganhou a seção **"Documentos do Chamamento"**,
+    que lista as peças assinadas do processo de origem (Edital / Justificativa de Dispensa / Parecer
+    CNAS) com link para a **página oficial de validação** (`validacao.mostrar`), onde a OSC lê o teor
+    completo e confere a assinatura. `PortalController@chamamento` monta `$documentosPublicos`
+    (peças `assinado()` + `codigo_validacao`) a partir de `processo.pecas`
+  - **Card "Dados do Chamamento"** na tela interna de Seleção (`chamamentos/selecao`): objeto, tipo/status,
+    órgão, valor, datas, requisitos e atalhos (processo de origem, editar, ver no portal).
+    `ChamamentoController@selecao` passou a carregar a relação `processo`
+  - **Publicação com modalidade escolhida no ato**: correção do **422** ao gerar publicação/chamamento
+    quando o processo estava concluído sem `modalidade`. `TramitacaoController@publicar` agora aceita e
+    valida `modalidade` (`Rule::in(Processo::MODALIDADES)`) quando ausente, e `processos/show` mostra o
+    seletor de modalidade antes de gerar
+  - **Checklist de Seleção mais claro** (`pecas/_checklist`): toda peça exibe selo explícito —
+    🔴 **obrigatório** ou ⚪ **opcional** — em vez de só marcar as opcionais. Fecha a dúvida do "2/7":
+    o percentual só chega a 100% no fim do ciclo (resultado definitivo + termo de homologação), o que
+    é o comportamento correto — a publicação já é travada pela **conclusão do trâmite do processo**
+  - **Portal x usuário interno**: `User::temAcessoInterno()` (qualquer papel além de `responsavel_legal`).
+    O layout do portal (`layouts/portal`) passa a renderizar o **menu administrativo** (`layouts/navigation`)
+    no topo quando um usuário interno navega pelo portal, em vez do header simplificado — mantendo a
+    navegação do sistema. Os CTAs **"Cadastre sua OSC"** (hero, estado vazio, "Como participar", bloco
+    de inscrições e submenu do usuário) agora só aparecem para **visitantes** (`@guest`)
+  - **Participação só para OSC**: o botão **"Submeter Proposta"** aparece apenas para usuários com OSC
+    (`auth()->user()->osc`); o usuário interno vê um aviso de que a submissão é exclusiva das OSCs e
+    o visitante vê "Entrar para Participar". `PortalController@participar` redireciona o interno de volta
+    ao chamamento com flash `info` (em vez de mandá-lo ao cadastro de OSC, que não se aplica a ele)
+
+- [2026-07-29] **Modais no lugar de `alert()`/`confirm()` nativos** — UX consistente em todo o sistema
+
+  - Módulo global `resources/js/confirm-modal.js` + estilos `.cmodal-*` em `resources/css/app.css`
+    (tema claro/escuro, variante *danger* vermelho, animação, fecha por Esc/backdrop/Cancelar)
+  - **Sem JS na página**: os forms usam atributos — `data-confirm="..."` (pergunta antes de enviar),
+    `data-confirm-variant="danger"`, `data-confirm-title`, `data-confirm-text`; links `<a data-confirm>`
+    também são interceptados. O variante *danger* é inferido por palavras (Remover/Excluir/Recusar…)
+  - Validação "selecione ao menos um" (download de peças em lote) virou `data-require-checked` +
+    `data-require-checked-message` (antes era `alert()`)
+  - Converteu **25 `confirm()`** e **1 `alert()`** em 17 views; `requestSubmit()` preserva a validação
+    nativa dos campos obrigatórios (ex.: modalidade na aprovação do SCP)
+
+- [2026-07-27] **Anexos das peças do trâmite — concluído** (fechou a lista "Falta para concluir" acima)
+
+  - `ProcessoPeca::anexos()` (HasMany p/ `ProcessoPecaAnexo`) + helpers `ehArquivo()`,
+    `aceitaAnexos()`, `temAnexo()` e `podeAnexar()` (mesma regra de `podeEditarConteudo`, mas
+    para arquivos). `podeEditarConteudo()` agora ignora peças ARQUIVO (não têm texto)
+  - **Upload / download / remoção** de anexos: `ProcessoPecaController@anexar|baixarAnexo|removerAnexo`
+    e rotas `processos.pecas.anexos.{store,download,destroy}` (disco `local`, em
+    `processo-pecas/{peca_id}/`, mesmos limites do motor de peças: PDF/Word/Excel/JPG/PNG, 10 MB)
+  - **Interface**: partial reutilizável `processos/_anexos.blade.php`; `processos/peca` mostra a
+    seção de anexos (peça ARQUIVO substitui o editor; o **Edital** mostra editor **e** anexos);
+    `processos/show` inclui `portaria_comissao` e `comprovante_publicacao` no `$ordem` do
+    Chamamento (ordenadas por etapa) com rótulo "Anexar" e status por nº de arquivos
+  - **Bloqueio de avanço**: na etapa 6 (Chamamento), a **Portaria da Comissão de Seleção** exige
+    ≥ 1 anexo para encaminhar. O Comprovante de Publicação (etapa final) **não** bloqueia o
+    "Concluir" — a prova de publicação é anexada depois de publicar
+  - **Backfill**: migration `2026_07_27_120000_seed_pecas_arquivo_processos_existentes` cria as
+    duas peças ARQUIVO nos processos já abertos (nos novos já nascem pelo `store`)
+
+- [2026-07-27] Ajustes de UX e base para **anexos das peças do trâmite** (em andamento)
+
+  - **"Peças do Processo" → "Documentos do Processo"** no `processos/show` e na Documentação do
+    Aditivo — "peça" é jargão interno; a tela agora fala a língua do usuário
+  - **Cadastro de OSC**: blocos reordenados — *Dados da OSC* primeiro, *Dados do Representante
+    Legal* depois (quem se cadastra pensa primeiro na entidade, depois em quem responde por ela)
+  - **Modelos oficiais XII–XX recebidos do cliente** e versionados em
+    `Docs. Desenvolvimento/Modelos/`: Relatório da Comissão de Seleção, Ata, Resultado
+    provisório e definitivo do Edital, Aprovação do Plano de Trabalho, Termo de Adjudicação e
+    Homologação, Ordem de Pagamento GLOBAL e PARCIAL. **Ainda não encaixados** em `Peca::MODELO`
+    — reduzem a lista dos 13 modelos pendentes, mas o texto precisa ser transposto para HTML
+  - **Limpeza dos assets**: removidos 5 CSS antigos de `public/build/assets` que não eram mais
+    referenciados pelo `manifest.json` (sobras de builds anteriores versionadas por engano)
+  - **Base (ainda não ligada na interface) para peças do tipo ARQUIVO**: tabela
+    `processo_peca_anexos` (1:N) + model `ProcessoPecaAnexo`, e duas peças novas em
+    `ProcessoPeca` — **Portaria da Comissão de Seleção** (UG, etapa 6) e **Comprovante de
+    Publicação** (SCP, etapa 8, Diário Oficial + site). Constantes `ProcessoPeca::ARQUIVO`
+    (peça é só upload, sem editor nem assinatura — preenchida quando tem ≥ 1 anexo) e
+    `COM_ANEXOS` (peça de texto que também aceita anexos — caso do Edital)
+  - ⚠️ **Falta para concluir**: relação `anexos()` em `ProcessoPeca`; rotas/controller de
+    upload, download e remoção; exibir as duas peças no `$ordem` do `processos/show` e tratar o
+    tipo ARQUIVO na tela de edição; considerar os anexos em `pendenciasParaAvancar`; e migration
+    que cria as peças novas nos processos já abertos (hoje só nascem em processos novos)
+
+- [2026-07-15] Unificação da Seleção 2.2 e ligações da cadeia completa
+
+  - **Seleção 2.2 unificada no Chamamento**: como todo processo concluído passou a gerar um
+    Chamamento (que já carrega a Seleção), a ponte antiga que ancorava o checklist da dispensa
+    **no Processo** virou duplicata — removida (`processos.selecao`, `Processo::pecasSelecao/ categoriaSelecao/podeVerSelecao`, view `processos/selecao`). Migration
+    `remover_selecao_ancorada_no_processo` apaga as peças órfãs (preserva assinadas). Agora
+    dispensa e chamamento_publico usam o **mesmo** caminho: `chamamentos/{chamamento}/selecao`
+  - **Backlink Chamamento → Processo**: a listagem de chamamentos mostra "← originado do
+    Processo NNNN" com link (`ChamamentoController@index` faz eager-load de `processo`)
+  - **Atalho Processo → Termo**: o `processos/show` lista os Instrumento(s) formalizados desta
+    parceria (`Processo::instrumentosDaParceria()`, via Chamamento → Proposta → Instrumento)
+    com status e OSC, linkando para o Termo
+  - **Cadeia verificada ponta a ponta** (chamamento_publico): concluir → Chamamento `publicado`
+    → aparece no Portal. ⚠️ o chamamento nasce **sem período de inscrição**; enquanto a UG não
+    o define, não aceita propostas — o `show` agora exibe aviso com link "Definir datas"
+
+- [2026-07-13] Modelos da Seleção 2.2 com **HTML + brasão + TinyMCE** (igual ao trâmite)
+
+  - `Peca::MODELO` passou de texto puro para HTML com cabeçalho/brasão; checklist usa
+    `data-editor-rico`; migration converte peças não assinadas ainda em TXT
+  - Assinatura da Seleção ganhou **carimbo + QR + código de validação** (`codigo_validacao`
+    em `pecas`, validação pública em `/validar`) — antes só gravava quem/quando
+
+- [2026-07-13] Ponte **Processo concluído → Chamamento** no módulo Programas
+
+  - Ao **Concluir** o trâmite, o sistema cria automaticamente um `Chamamento` (status
+    `publicado`) vinculado ao Processo (`processo_id`) e a um Programa da UG (criado se
+    necessário). Card no `processos/show` com links; botão **Gerar Chamamento** para
+    processos já concluídos sem publicação. Portal público lista só `chamamento_publico`
+
+- [2026-07-13] Modelos padrão da Seleção/Documentação preenchidos com os arquivos oficiais
+
+  - Novos textos em `Peca::MODELO`: Chamamento (Edital + Parecer jurídico), Dispensa (+ Parecer
+    jurídico), Aditivo (Parecer financeiro, Certidão, Protocolo, Parecer jurídico). Restam 13
+    sem arquivo do cliente (aprovação plano, minutas, termos, justificativas/autorizações)
+
+- [2026-07-09] Rota de Dispensa/Inexigibilidade conferida com o checklist oficial e commitada
+
+  - Cruzamento com `Docs. Desenvolvimento/checklist_dispensa⁄inexigibilidade.pdf` (Lei 13.019/2014,
+    arts. 30–32): itens **1–14** cobertos (trâmite 1–6 + Seleção 2.2 itens 7–14); item **15** parcial
+    (upload de extrato, sem integração DOE/GovBr); itens **16–18** ainda não implementados
+    (autorização de início à OSC, solicitação de dados bancários, Nota de Empenho Global)
+  - Código, migrations, view `processos/selecao`, modelos VII–XI e PDFs de checklist versionados
+    no GitHub (`main`)
+
+- [2026-07-03] Modelos oficiais VII–XI encaixados na rota de dispensa
+
+  - **Trâmite** (`ProcessoPeca::MODELO`): a **Justificativa** (Modelo VIII, art. 30, VI / 32) e o **Parecer
+    Técnico CNAS** (Modelo IX, Res. 21/2016) trocaram o texto-placeholder pelos **textos oficiais** do
+    cliente (HTML com cabeçalho/brasão + tokens `{{...}}`)
+  - **Seleção 2.2** ganhou pré-preenchimento: novo `Peca::MODELO` (por categoria→chave) semeado no
+    `sincronizar()` — **Certidão de Autuação** (VII), **Parecer Técnico da UG p/ celebração** (X) e
+    **Protocolo ao Jurídico** (XI), além de Justificativa e Parecer CNAS. Motor `Peca` não tinha modelo;
+    agora as peças "modelo" nascem com o texto oficial (texto puro, pois a Seleção usa textarea simples)
+  - Migration `seed_modelos_selecao_dispensa`: preenche as peças de Seleção vazias e re-semeia as peças
+    do trâmite que ainda tinham placeholder — **conservador**: nunca sobrescreve conteúdo assinado ou editado
+
+- [2026-07-03] Ponte **Processo → Seleção 2.2** para a rota de dispensa (itens 7–18 do checklist)
+
+  - A partir da Justificativa (etapa ≥ 5) o processo de dispensa ganha o card **"Seleção 2.2 — Celebração"**
+    (`processos/{processo}/selecao`), reunindo plano de trabalho, habilitação, pareceres, minuta e termo
+  - Reusa **integralmente** o motor `Peca` ancorando o checklist `dispensa_inexigibilidade` **ao próprio
+    Processo** (relação polimórfica `Processo::pecasSelecao()`), já que na dispensa não há Chamamento
+    competitivo. `Peca::sincronizar()` ganhou parâmetro de relação (default `pecas`) para não colidir com
+    as peças do trâmite. O partial `pecas/_checklist` e as rotas `pecas.*` (por id) servem sem alteração
+  - Guardas: `abort 404` fora da modalidade dispensa; `abort 403` antes da etapa da Justificativa
+    (`Processo::podeVerSelecao()`). O "puxar do módulo Gestão de Parcerias" fica indisponível (sem proposta
+    ligada ao Processo) — o partial já degrada com aviso; upload/assinatura manuais funcionam normalmente
+
+- [2026-07-03] Módulo 2 — rota de **Dispensa/Inexigibilidade** no trâmite (Lei 13.019/2014, arts. 30–32)
+
+  - Quando o SCP decide **Dispensa** ou **Inexigibilidade** na análise (etapa 1), o trâmite passa a
+    seguir uma rota própria de **7 etapas** (`Processo::ETAPAS_DISPENSA`), em vez das 9 do Chamamento:
+    depois da Abertura, no lugar de *Edital → Solicitação/Parecer Jurídico*, a **UG emite e assina a
+    Justificativa** de Dispensa/Inexigibilidade e o **SCP publica**. Etapas 0–4 são idênticas nas duas rotas
+  - `ETAPAS` virou **ciente da modalidade**: `Processo::etapas()`/`ehDispensa()` resolvem a sequência;
+    todos os consumidores (`etapaInfo`, `proximoSetor`, `setorAnterior`, `totalEtapas`, `pendenciasParaAvancar`,
+    `TramitacaoController@avancar/devolver`, stepper e lista de peças no `show`) passaram a usar `etapas()`
+  - Duas peças novas em `ProcessoPeca`: **Justificativa de Dispensa/Inexigibilidade** (UG, etapa 5,
+    modelo com cabeçalho + fundamento legal) e **Parecer Técnico (CNAS)** — opcional, só parcerias do SUAS.
+    Reaproveitam o motor de assinatura (carimbo+QR), validação pública e PDF já existentes
+  - Migration `add_rota_dispensa_pecas`: cria as peças nos processos abertos e **realinha** os de
+    dispensa/inexigibilidade que já estavam além da rota curta (a publicação final 8→6; Edital/Jurídico 5–7→5)
+  - Peças opcionais têm fonte única em `ProcessoPeca::OPCIONAIS` (não bloqueiam o avanço) + badge "opcional" no `show`
+
+- [2026-06-29] Refinamentos de UI do onboarding
+
+  - **Navbar responsiva** corrigida (estava espremida): quebra de linha desligada nos itens,
+    container mais largo (`max-w-screen-2xl`) e breakpoint do menu `sm` → `lg` (menu completo só
+    em telas grandes; hambúrguer nas demais)
+  - **Matrícula** virou campo **obrigatório** e **Função/observação** passou a exigir preenchimento
+    no cadastro de subusuário da UG (`SubusuarioController` + view); migration `add_matricula_to_users`
+    (`matricula` única, opcional no modelo)
+
+- [2026-06-29] Interface em pt-BR + política de senha
+
+  - `APP_LOCALE=pt_BR` (estava `en`); senha mínima **6 caracteres** (texto e/ou números, sem
+    complexidade) via `Password::defaults()` no `AppServiceProvider` + ajustes em UserRequest/OscRegistro
+  - Traduções: `lang/pt_BR.json` (strings do Breeze: login, perfil, etc.) e
+    `lang/pt_BR/{validation,auth,passwords,pagination}.php` (mensagens do framework); rótulo
+    "Dashboard" → "Painel". Mensagens de validação e telas de auth/perfil agora em português
+
+- [2026-06-29] Onboarding de usuários com aprovação do administrador
+
+  - **Auto-cadastro** (`/register`) reescrito para servidores internos: informa dados, **setor**,
+    **Secretaria/UG** (lista de Órgãos) e **escolhe a própria senha** → cria usuário **pendente, sem
+    perfil e sem login**. OSC continua pelo portal (`/cadastro/osc`)
+  - **Trava de login** (`LoginRequest`/`User::podeAutenticar`): pendente, recusado ou inativo não
+    autentica, com mensagem explicando o motivo (antes o login não checava `status`)
+  - **Aprovação pelo admin** (permissão `cadastros`): tela `usuarios/pendentes` lista os cadastros,
+    o admin **atribui os perfis** (confirma setor/UG) e **aprova**, ou **recusa** com motivo
+    (`UserController@pendentes/aprovar/recusar`); badge de contagem na navegação e na lista de Usuários
+  - **Subusuários da UG**: o `responsavel_unidade_gestora` cadastra usuários da sua Secretaria
+    (`/meus-usuarios`, `SubusuarioController`) — herdam a UG, ficam **pendentes** e o admin define os
+    perfis na aprovação
+  - Migration `add_approval_to_users` (`approval_status` default `aprovado`, `approved_at/by`,
+    `created_by`, `solicitacao_obs`, `rejeitado_motivo`) — usuários existentes seguem aprovados.
+    Usuários criados pelo admin (CRUD) e OSCs entram já aprovados
+
+- [2026-06-29] Validação pública mostra uma cópia do documento
+
+  - Em `/validar/{codigo}` (pelo QR ou pelo código), além dos metadados de autenticidade, a página
+    agora exibe a **cópia fiel do documento assinado** (conteúdo HTML renderizado com brasão/tabelas)
+  - `ValidacaoController@mostrar` passa o `conteudo`; vale para peça de processo e ordem de pagamento
+
+- [2026-06-29] Processo — baixar peças selecionadas em PDF (individual)
+
+  - Checkbox ao lado de cada documento preenchido na lista "Peças do Processo" + botão
+    "Baixar selecionados (PDF)" → **1 documento** baixa o PDF direto; **vários** vêm num **ZIP com
+    um PDF separado por documento** (download individual), nomeados na ordem oficial
+  - PDF gerado no servidor com **dompdf** (`ProcessoPecaController@imprimirLote` → `pdfDaPeca`), brasão
+    remoto + carimbo de assinatura + QR (SVG embutido) nos assinados; view `processos/peca-pdf`
+  - `imprimirLote` valida que as peças pertencem ao processo e ignora as vazias
+
+- [2026-06-29] Checklists 2.2/2.3 — "puxar do módulo Gestão de Parcerias"
+
+  - Itens de arquivo marcados como puxáveis (`Peca::PUXAVEIS`) agora podem ser preenchidos a partir
+    dos documentos que a OSC já enviou na proposta, além do upload manual
+  - Seleção 2.2 (Dispensa/Inexigibilidade): Plano de trabalho, Documentos de habilitação;
+    Aditivo/Apostilamento 2.3: Manifestação da OSC, Plano atualizado, Orçamento, Extratos, etc.
+  - Origem resolvida por `Peca::documentosDisponiveis()` (Chamamento → propostas; Aditivo →
+    instrumento → proposta); `PecaController@puxar` copia o arquivo para a peça (rota `pecas.puxar`)
+  - UI no partial compartilhado `pecas/_checklist` (vale para Seleção e Documentação do Aditivo)
+
+- [2026-06-29] Módulo 2 — modalidade da seleção definida pelo SCP na análise
+
+  - Na etapa de análise (SCP), ao **Aprovar**, o setor escolhe a **modalidade** que define o caminho
+    do processo: **Chamamento Público**, **Dispensa** ou **Inexigibilidade** (`Processo::MODALIDADES`,
+    com descrições em `MODALIDADES_DESC`); obrigatório para aprovar (validado em `TramitacaoController`)
+  - Coluna `modalidade` em `processos`; a escolha aparece no card do fluxo e orienta o passo do Edital
+    (Edital × justificativa de dispensa/inexigibilidade) e o checklist de Seleção 2.2
+  - Cabeçalho (brasão) + título "PEDIDO DE PARECER FINANCEIRO" no modelo do `pedido_parecer`, que era
+    o único documento financeiro sem cabeçalho — alinhado aos demais
+
+- [2026-06-29] Módulo 2 — etapa da Procuradoria Jurídica no trâmite (8 → 9 etapas)
+
+  - Depois do Edital, antes da publicação, o trâmite ganha o Jurídico em `Processo::ETAPAS`:
+    **(7) UG** assina o Edital **e**, no mesmo passo, preenche e assina a **Solicitação de Parecer
+    Jurídico** (Modelo VI, texto do Arquivo VI do cliente) e encaminha à PJ; **(8) PJ** preenche e
+    assina o **Parecer Jurídico** e devolve à SCP; **(9) SCP** publica
+  - Duas peças novas em `ProcessoPeca` (`solicitacao_parecer_juridico`, `parecer_juridico`) com modelo
+    pré-preenchido (a da PJ é modelo-padrão em branco, a definir com a Procuradoria), assinatura
+    carimbo+QR e validação pública — reaproveitam todo o motor de peças/tramitação existente
+  - Migration `add_etapa_juridico_to_processos`: cria as peças nos processos já abertos e remapeia
+    quem estava na antiga última etapa (7 = publicação) para a nova (8)
+  - **Setup:** o usuário que atua na etapa do PJ precisa de **lotação `pj`** + perfil com permissão
+    `planejamento` (ex.: `analista_juridico`)
+
+- [2026-06-25] Acesso do jurídico à caixa (permissão `planejamento` ao `analista_juridico`) e
+  **tela 403 amigável** (`errors/403.blade.php`) na identidade PGP, exibindo a mensagem específica
+  do `abort()` quando houver.
+
+- [2026-06-25] Execução Financeira (Módulo 4.4 — fase 11, parcial)
+
+  - `Repasse` e `Despesa` (com **natureza de despesa** e upload de **nota fiscal**) no instrumento
+  - **Painel de saldo**: total repassado, total gasto, saldo, % executado + alertas de
+    inconsistência (saldo negativo, despesa sem NF) e resumo por natureza
+  - Permissão `execucao` (Responsável da UG + Gestor da Parceria)
+  - Falta: rendimentos, conciliação/integração bancária (fase 14), auto-relato pela OSC
+
+- [2026-06-25] Preenchimento automático ("puxar") dos modelos
+
+  - `App\Support\Modelo` substitui marcadores `{{token}}` pelos dados conhecidos ao criar o
+    documento: nº do processo, Unidade Gestora, responsável, data; na OP: nº da OP, instrumento,
+    OSC favorecida. O conteúdo autoral/orçamentário permanece manual. Nº do Ofício é manual
+    (numeração externa ao sistema).
+
+- [2026-06-25] Ordem de Pagamento (Módulo UG 2.3.1)
+
+  - `OrdemPagamento` (várias por instrumento vigente): documento modelo padrão com assinatura
+    eletrônica (carimbo + QR + validação pública) e anexo de dados bancários
+  - Validação pública (`/validar`) estendida para reconhecer OP além das peças de processo
+  - Permissão `ordem_pagamento` (perfil `operador_ordem_pagamento` + Responsável da UG)
+
+- [2026-06-25] Identidade visual unificada (PGP) e UX
+
+  - Login com gradiente indigo + marca PGP; navegação rebrandizada com badge PGP e chip de
+    usuário (avatar de iniciais + perfil + setor)
+  - **Dashboard real** (substitui o stub): cards de métricas por permissão, caixa de entrada
+    do setor e atalhos rápidos (`x-stat-card`, `x-quick-link`)
+  - Portal público enriquecido: hero, empty-state e seção "Como participar"
+  - Botões/links no tema indigo; shell com título PGP e rodapé
+
+- [2026-06-19] Módulo 2 — editor rico, documentos modelo e refinos do fluxo
+  - **Editor rico TinyMCE** (self-hosted, `license_key: gpl`, offline) substitui o textarea,
+    com **suporte a tabelas** (usado no Parecer Financeiro), fonte, alinhamento, listas, etc.
+    Init em `resources/js/editor.js` sobre `textarea[data-editor-rico]`
+  - **Termo de Referência virou documento modelo** (peça `termo_referencia`) editável no
+    editor rico, igual ao Ofício — removidos model/tabela/controller estruturados antigos
+  - Todos os documentos modelo são **HTML** (`ProcessoPeca::MODELO`), pré-preenchidos e fiéis
+    aos Arquivos I–V; **brasão** (`https://pmsgra.net/logo.png`) no cabeçalho em tabela (logo ao lado)
+  - **Fluxo corrigido (8 etapas)**: UG (Ofício+TR) → SCP **analisa e aprova/rejeita** → UG
+    **solicita o Parecer** (Pedido de Parecer) → SEPLAN (Parecer) → UG (Abertura) → SCP (Edital)
+    → UG (assina Edital) → SCP (publicação externa)
+  - Etapa de análise do SCP com botões **Aprovar** / **Rejeitar** (`Processo::etapaEhAnalise`)
+  - **Recebimento obrigatório**: só edita/assina após “Registrar Recebimento”
+    (`Processo::aguardandoRecebimento` em `podeEditarConteudo`/`podeAssinar`)
+  - Alertas de conformidade são **consultivos** (não bloqueiam encaminhar)
+
+> **Editor:** TinyMCE self-hosted via npm (`npm install`), empacotado pelo Vite — **rode
+> `npm run build`** após clonar. Interface do editor em inglês (ícones universais); pacote
+> pt-BR pode ser adicionado depois. O brasão vem de URL pública (precisa de internet ou baixar local).
+
+- [2026-06-19] Módulo 2 alinhado às respostas da cliente + modelos (Arquivos I–V)
+  - **Termo de Referência** reescrito conforme o modelo real (Arquivo II): descrição da
+    realidade, justificativa, objeto, objetivos, orçamento (valor/dotação/ficha/fonte), prazo
+  - 🆕 Peça **Pedido de Parecer Financeiro** (Arquivo III) — SCP, na etapa de análise
+  - 🆕 Peça **Edital** — SCP elabora (editor de texto) e **UG assina** na etapa seguinte
+  - Documentos abrem **pré-preenchidos com o texto-modelo** do cliente (`ProcessoPeca::MODELO`)
+  - Cada peça travada por **setor + etapa**; edição e assinatura podem ser de setores diferentes
+    (`podeEditarConteudo` × `podeAssinar`) — caso do Edital (SCP edita, UG assina)
+  - **UG automática**: usuário ganha `orgao_id` (Secretaria); na abertura do processo a UG
+    vem preenchida da lotação (fallback: seleção manual p/ quem não tem UG)
+  - Modelos do cliente em `Docs. Desenvolvimento/Modelos/`; respostas em `respostaduvidas.md`
+
+- [2026-06-19] Módulo 2 — Trâmite guiado (fiel ao fluxo do cliente)
+  - 7 etapas em `Processo::ETAPAS`: UG → SCP → SEPLAN → UG → SCP → UG → SCP (publicação)
+  - Coluna `etapa` controla a posição no fluxo (setores se repetem)
+  - **Encaminhar** avança automaticamente para o próximo setor (sem escolha livre)
+  - **Devolver** retorna à etapa anterior exigindo motivo; **Receber** registra o recebimento
+  - 1ª etapa só avança com o planejamento **apto** (alertas de conformidade)
+  - Última etapa (SCP) → **Concluir** marca o processo como publicação (trâmite externo)
+  - Stepper visual no topo do processo mostrando a etapa atual
+  - Só o setor que está com o processo pode movimentá-lo (validação no controller)
+
+- [2026-06-19] Perfis do Módulo 1 (reescrita do controle de acesso)
+  - Substituídos os 9 perfis antigos pelos **21 perfis oficiais do Módulo 1**
+  - Usuário pode ter **vários perfis** (cadastro com seleção múltipla)
+  - **Perfis exclusivos** travados por setor de lotação (`User::PERFIS_EXCLUSIVOS`)
+  - Setor de lotação ampliado (`User::LOTACOES`: UG, SCP, SEPLAN, PJ, TI, Comissões, Gestoria, OSC)
+  - Auditores (Externo/Geral) com acesso somente leitura; Responsável Legal só portal
+  - Permissões por área inalteradas — apenas remapeadas para os novos perfis
+  - Setores do trâmite (Módulo 2) corrigidos: SCP/SEPLAN/PJ (SPC era erro); fluxo atualizado
+  - Respostas do cliente registradas em `Docs. Desenvolvimento/respostas-cliente.md`
+
+- [2026-06-18] Numeração padronizada do Processo — `UG.Sequencial.Ano.Esfera`
+  - Número do Processo passa a seguir o padrão municipal `UG.NNNN.AAAA.EE` (ex.: `0206.0133.2026.01`)
+    - UG = código da Unidade Gestora (4 díg.) · Sequencial = contador contínuo e global (nunca reinicia)
+      · Ano = ano de abertura do processo · Esfera = concedente (01 Município, 02 Estado, 03 União, 04 Outros)
+  - Campo `codigo` adicionado ao cadastro de Órgãos; de-para das 26 UGs em `UnidadesGestorasSeeder`
+  - Esfera como constante `Processo::ESFERAS`, selecionável no formulário (default Município)
+  - `Processo::proximoSequencial()` + `Processo::formatarNumero()`; geração no `ProcessoController@store`
+    (valida esfera e exige que a UG tenha código)
+  - Migrations: `codigo` (único) em `orgaos`; `sequencial` (único) + `esfera` em `processos`
+  - **A confirmar com a área:** ano usado é o de abertura do processo (não do instrumento, que ainda não
+    existe nessa fase); e qual UG entra quando há fundo (ex.: FIA `0213` vs Sec. de Trabalho `0209`)
+
+- [2026-06-17] Controle granular de acesso por perfil
+  - Novo perfil **Administrador** (acesso total, gerencia usuários/órgãos/OSCs)
+  - 10 permissões por área definidas em `RolesSeeder` e atribuídas via matriz
+  - Rotas admin agrupadas por `permission:<área>`; navegação filtrada com `@can`
+  - **Controle Interno**: acesso de leitura a tudo, escrita bloqueada (middleware `readonly`)
+  - Pareceres autorizados por tipo (técnico/jurídico/decisão) no controller
+  - Campo `setor` no usuário (já existente) continua governando o trâmite do planejamento
+  - Antes: qualquer servidor autenticado fazia tudo. Agora cada perfil vê/faz só a sua área.
+
+- [2026-06-17] Módulo Unidade Gestora — 2.2 Seleção/Celebração e 2.3 Execução
+  - **Motor genérico de peças documentais** (`Peca`, polimórfico via `pecaable`)
+    - Cada item é "modelo padrão" (texto + assinatura simples) ou "arquivo" (upload)
+    - Templates por categoria em `Peca::TEMPLATES`; `sincronizar()` cria o checklist (idempotente)
+    - Progresso calculado sobre itens obrigatórios preenchidos
+  - **2.2 Seleção e Celebração** anexada ao Chamamento (`/chamamentos/{id}/selecao`)
+    - Template escolhido pelo tipo: Chamamento Público vs Dispensa/Inexigibilidade
+    - Edital, comissão, pareceres, publicações, resultados, homologação, etc.
+    - Link "Seleção" na listagem de chamamentos
+  - **2.3 Execução** anexada a cada Aditivo (`.../aditivos/{id}/documentacao`)
+    - Apostilamento usa checklist próprio; demais aditivos usam checklist de aditivo
+    - Link "Documentação" em cada aditivo no show do instrumento
+  - **Adiado**: 2.3.1 Ordem de Pagamento (envolve dados bancários — integração bancária
+    foi definida para a última fase do projeto)
+  - Tabela: `pecas` (polimórfica)
+
+- [2026-06-17] Módulo Unidade Gestora — 2.1 Planejamento (Processos)
+  - `Processo` com número automático (NNNN/AAAA), vinculado à Unidade Gestora (Órgão)
+  - `TermoReferencia` estruturado com as 5 seções do documento (2.1–2.5)
+  - `ProcessoPeca`: Ofício, Parecer Financeiro, Abertura de Processo (texto + assinatura)
+  - **Assinatura simples**: registra quem assinou e data/hora (carimbo)
+  - **Trâmite real entre setores** (UG → SCP → SEPLAN → SPC) com caixa de entrada
+    - Campo `setor` no usuário define em qual caixa ele recebe os processos
+    - Histórico de tramitação (enviar / receber / parecer por setor)
+    - Só o setor que está com o processo pode encaminhá-lo
+  - Alertas automáticos de conformidade (🔴 dotação, objeto genérico, meta sem indicador,
+    sem justificativa, sem valor / 🟢 apto para abertura)
+  - UG conclui o planejamento com "Marcar Apto" quando não há pendências
+  - Tabelas: `processos`, `termo_referencias`, `processo_pecas`, `tramitacoes` + `setor` em `users`
+
+- [2026-06-17] Portal público, auto-cadastro de OSC e upload de documentos
+  - Portal `/portal` lista chamamentos `publicado`/`em_inscricao` sem login
+  - `status_efetivo` deriva "em inscrição" a partir das datas de inscrição
+  - Auto-cadastro `/cadastro/osc` cria User (representante_legal) + Osc vinculados
+  - Upload de documentos na proposta (admin e portal), download e remoção
+  - Middleware `staff`: representante_legal só acessa o portal, não a área admin
+
+- [2026-06-16] Formalização — Instrumentos e Termos Aditivos
+  - Models `Instrumento` e `Aditivo` com constantes TIPOS, STATUS, STATUS_COLORS
+  - Instrumento vincula Proposta (1-para-1), registra número, tipo, objeto, valores, vigência
+  - Método `dataFimVigente()` considera o último aditivo de prazo
+  - Botão "Formalizar Instrumento" aparece na proposta aprovada sem instrumento
+  - Botão "Ver Instrumento" aparece na proposta que já tem instrumento
+  - Fluxo de status: Minuta → Assinado → Vigente (via publicação no DOE)
+  - PATCH `assinar` e PATCH `publicar` para transições rápidas de status
+  - Termos aditivos aninhados ao instrumento (prazo, valor, objeto, apostilamento)
+  - Minuta para impressão (view sem layout, botão nativo de print)
+  - "Instrumentos" adicionado na navegação principal
+  - Tabelas `instrumentos` e `aditivos` migradas com sucesso
+
+- [2026-06-16] Workflow de Análise e Aprovação
+  - Pareceres: Técnico → Jurídico → Decisão Final (cada um desbloqueia o próximo)
+  - Resultados: Aprovado / Aprovado com Ressalvas / Reprovado / Diligência
+  - Transições de status automáticas na proposta via mapa de transições no model
+  - Diligência criada junto ao parecer; OSC responde na página da diligência
+  - Proposta volta para `em_analise` automaticamente quando todas as diligências são respondidas
+  - Seção "Análise" aparece no show da proposta com botões contextuais por etapa
+
+- [2026-06-16] Propostas e Plano de Trabalho
+  - Proposta vincula Chamamento + OSC com dados financeiros e datas
+  - Botão "Submeter Proposta" muda status e registra timestamp
+  - Plano de Trabalho: Metas (indicador, meta quantitativa, datas)
+  - Etapas dentro de cada Meta (responsável, período, recursos)
+  - Página show da proposta concentra todo o plano em uma única tela
+  - Rotas aninhadas: propostas → metas → etapas
+
+- [2026-06-16] Banco de Programas e Chamamentos Públicos
+  - Programas: tipo de instrumento (Fomento/Colaboração/Cooperação), órgão, valor, vigência, status
+  - Chamamentos: aninhados ao programa, tipo, valor, datas, status com 6 etapas
+  - Chamamentos acessados por `/programas/{id}/chamamentos`
+  - Navegação reorganizada: Usuários entrou no dropdown Cadastros; Programas no topo
+
+- [2026-06-16] Cadastro institucional completo (Órgãos/Secretarias e OSCs)
+  - Órgãos: nome, sigla, CNPJ, e-mail, telefone, endereço completo, status
+  - OSCs: nome, tipo, CNPJ, contato, endereço, responsável legal, status
+  - Componente reutilizável `x-address-fields` para bloco de endereço
+  - Componente `x-flash-message` para mensagens de sessão
+  - Dropdown "Cadastros" na navegação com Órgãos e OSCs
+
+- [2026-06-16] CRUD de usuários completo (listagem, criação, edição, remoção)
+  - Campos: nome, e-mail, CPF, telefone, senha, perfil, status
+  - Paginação, feedback de sucesso, confirmação de remoção
+  - Link "Usuários" adicionado na navegação principal
+
+- [2026-06-16] **Início do projeto**
+  - Especificação inicial recebida (`txt.txt`) e analisada; repositório criado no GitHub (privado, na época)
+  - Projeto Laravel 13 criado com Breeze (Blade + TailwindCSS); Spatie Laravel Permission instalado, com
+    `HasRoles` no `User` e o `RolesSeeder` com os 9 perfis da época
+  - `.env` configurado para MySQL e locale `pt_BR`
 
 ---
 
 ### Resumos das entregas de agosto (arquivo)
 
 Quadro que ficava em "O que está sendo feito" até 21/08/2026. O detalhe de cada item está nas
-entradas acima; fica aqui como estava, para não se perder a leitura de conjunto da época.
+entradas acima; fica aqui como estava, para não se perder a leitura de conjunto da época. As pendências
+citadas aqui são as de agosto: as que seguem abertas estão em [Pendências](#pendências).
 
 #### 📌 Última entrega — Celebração: acesso, assinatura das partes e leitura do trâmite (21/08/2026)
 
-Frentes desta rodada, detalhadas nas primeiras entradas de `## O que foi feito`:
+Frentes desta rodada, detalhadas no Histórico acima:
 
 1. **Quem entra na Celebração**: o menu era gateado por `formalizacao` e mostrava cadeado à SCP, à
    SEPLAN e à PJ — que conduzem etapas do fluxo. Agora a régua é participar do trâmite, e existe
@@ -3207,43 +3318,42 @@ Frentes desta rodada, detalhadas nas primeiras entradas de `## O que foi feito`:
    tela. Auditados os 35 modelos do sistema: nenhum outro escapa.
 5. **Acabamento**: assinar não joga mais a tela para o topo, atalhos de rolagem na Celebração e nas
    telas da OSC, e o selo de situação parou de se partir ao meio.
-
-20. **Login por nome de usuário** (26/08): as duas contas de administrador viraram uma só,
+6. **Login por nome de usuário** (26/08): as duas contas de administrador viraram uma só,
    `admin_parcerias`, e a tela de entrada passa a aceitar e-mail ou nome de usuário.
-19. **Etapa 2 recolhível** (26/08): a Seleção, única com três subitens, pode ser recolhida na barra
+7. **Etapa 2 recolhível** (26/08): a Seleção, única com três subitens, pode ser recolhida na barra
    lateral; a escolha fica no navegador de cada um.
-18. **Proposta é ato da OSC** (26/08): a UG deixou de criar, editar, remover e submeter proposta —
+8. **Proposta é ato da OSC** (26/08): a UG deixou de criar, editar, remover e submeter proposta —
    rotas inclusive. A tela interna virou análise.
-17. **Gestor e Comissões designáveis pela UG** (26/08): os três perfis estavam presos a setores
+9. **Gestor e Comissões designáveis pela UG** (26/08): os três perfis estavam presos a setores
    que ninguém ocupa; viraram encargo por portaria, concedido por quem publica o ato.
-16. **Manifestações no painel** (26/08): card com a fila de manifestações a decidir e atalho, para
-   a SCP ver que há OSC esperando resposta sem depender de lembrar do menu.
-15. **Chefia de setor visível** (26/08): a tela de Usuários passa a apontar os setores em que
-   ninguém cadastra a própria equipe — a porta existia desde 24/08 e ninguém sabia que faltava
-   designar quem a abre.
-14. **Seleção não repete o Planejamento** (26/08): o edital, a portaria da comissão, o parecer
-   jurídico e o comprovante de publicação passam a ser exibidos a partir do processo, com a
-   assinatura que já têm, em vez de serem pedidos de novo.
+10. **Manifestações no painel** (26/08): card com a fila de manifestações a decidir e atalho, para
+    a SCP ver que há OSC esperando resposta sem depender de lembrar do menu.
+11. **Chefia de setor visível** (26/08): a tela de Usuários passa a apontar os setores em que
+    ninguém cadastra a própria equipe — a porta existia desde 24/08 e ninguém sabia que faltava
+    designar quem a abre.
+12. **Seleção não repete o Planejamento** (26/08): o edital, a portaria da comissão, o parecer
+    jurídico e o comprovante de publicação passam a ser exibidos a partir do processo, com a
+    assinatura que já têm, em vez de serem pedidos de novo.
 13. **Funções da equipe da OSC** (25/08): o responsável legal marca, por pessoa, quais das quatro
-   funções o integrante exerce — propostas, documentos, manifestações e Celebração. Ver segue sendo
-   de toda a equipe; submeter, recorrer e assinar continuam com quem responde pela entidade.
-12. **Espaço extra de anexo na Seleção e na Dispensa** (25/08): o botão que só existia na Celebração
-   passou a valer nos comprovantes do chamamento, onde o número de publicações varia caso a caso.
-11. **Dinheiro com R$ e vírgula** (25/08): os 12 campos monetários do sistema passaram a ter máscara
-   em português, com conversão no servidor para quem não tem JavaScript.
-10. **Portal da OSC** (25/08): vitrine dos chamamentos abertos e "Minhas participações" separando
-   chamamento público, dispensa/inexigibilidade e manifestações — com a barra do portal
-   reorganizada para caber sem quebrar.
-9. **Manifestação de Interesse** (25/08): a OSC propõe parceria sem chamamento aberto; a SCP ouve a
-   Secretaria e decide entre dispensa e inexigibilidade — e o deferimento cria o chamamento e a
-   proposta com o plano de trabalho que a OSC já entregou.
-8. **Celebração, etapa 11 e devolução** (24/08): comprovante de publicação virou dois campos
-   (Diário Oficial e site), a etapa ganhou botão para criar espaços de anexo sob demanda, e a
-   devolução passou a escolher para qual etapa vencida voltar.
-7. **Dispensa/Inexigibilidade** (24/08): publicação, minuta e certidão de autuação agora se anexam
-   no bloco do pedido de parecer jurídico, ao lado dos documentos que o PGP gera.
-6. **Cada setor cadastra a própria equipe** (24/08): "Meus usuários" era só da UG; agora qualquer
-   setor tem a porta, por meio do perfil **Chefe de Setor**, e ao administrador cabe só aprovar.
+    funções o integrante exerce — propostas, documentos, manifestações e Celebração. Ver segue sendo
+    de toda a equipe; submeter, recorrer e assinar continuam com quem responde pela entidade.
+14. **Espaço extra de anexo na Seleção e na Dispensa** (25/08): o botão que só existia na Celebração
+    passou a valer nos comprovantes do chamamento, onde o número de publicações varia caso a caso.
+15. **Dinheiro com R$ e vírgula** (25/08): os 12 campos monetários do sistema passaram a ter máscara
+    em português, com conversão no servidor para quem não tem JavaScript.
+16. **Portal da OSC** (25/08): vitrine dos chamamentos abertos e "Minhas participações" separando
+    chamamento público, dispensa/inexigibilidade e manifestações — com a barra do portal
+    reorganizada para caber sem quebrar.
+17. **Manifestação de Interesse** (25/08): a OSC propõe parceria sem chamamento aberto; a SCP ouve a
+    Secretaria e decide entre dispensa e inexigibilidade — e o deferimento cria o chamamento e a
+    proposta com o plano de trabalho que a OSC já entregou.
+18. **Celebração, etapa 11 e devolução** (24/08): comprovante de publicação virou dois campos
+    (Diário Oficial e site), a etapa ganhou botão para criar espaços de anexo sob demanda, e a
+    devolução passou a escolher para qual etapa vencida voltar.
+19. **Dispensa/Inexigibilidade** (24/08): publicação, minuta e certidão de autuação agora se anexam
+    no bloco do pedido de parecer jurídico, ao lado dos documentos que o PGP gera.
+20. **Cada setor cadastra a própria equipe** (24/08): "Meus usuários" era só da UG; agora qualquer
+    setor tem a porta, por meio do perfil **Chefe de Setor**, e ao administrador cabe só aprovar.
 
 **Documentos da proposta ganharam conferência** (trabalho da véspera, 19/08): a OSC envia, o
 município aprova ou recusa com motivo registrado — antes só existia "Remover", que apagava a prova
@@ -3256,11 +3366,10 @@ já monta tudo do banco. Vale unificar.
 
 #### Entrega anterior — Navegação, permissões, paleta e exclusões seguras (14/08/2026)
 
-Quatro frentes, detalhadas nas primeiras entradas de `## O que foi feito`:
+Quatro frentes, detalhadas no Histórico acima:
 
 0. **Exclusão com vínculo**: os 14 `destroy` do sistema apagavam sem checar; seis tabelas podiam
    estourar 500 com SQL na tela. Agora há checagem antes, mensagem específica e rede de segurança.
-
 1. **Navegação**: barra de comandos com Ctrl+K, busca global respeitando permissão e escopo por
    órgão, telas recentes e barra de progresso a cada clique.
 2. **Regra de perfil**: servidor não participa de chamamento nem age como OSC. Fechado na rota
@@ -3284,22 +3393,21 @@ Passagem de acabamento sobre as 113 views, sem mexer em regra de negócio: ident
 Prefeitura ocupando espaço de verdade, tipografia 10% maior, densidade revista nas telas mais
 carregadas e a camada de componentes compartilhados padronizada. No caminho apareceram bugs reais
 (largura do `x-dropdown`, capitalização da data, texto cortado na sidebar, "Seleção" que parecia
-link e não era) — todos corrigidos. Detalhes na primeira entrada de `## O que foi feito`.
+link e não era) — todos corrigidos. Detalhes no Histórico acima.
 
 **Pendências conhecidas desta passagem:**
 
 - `programas.show` **não existe** — o `ProgramaController@show` aponta para uma view que nunca foi
   criada, então `/programas/{id}` devolve 500. Nada na interface leva até lá (é rota órfã,
   alcançável só digitando a URL), por isso a tela não foi inventada nesta entrega
-- O logotipo sobre fundo escuro é rebatido para branco monocromático via CSS (`brightness-0
-  invert`). Se o manual de identidade da Prefeitura exigir o cata-vento colorido, a alternativa é
+- O logotipo sobre fundo escuro é rebatido para branco monocromático via CSS (`brightness-0 invert`). Se o manual de identidade da Prefeitura exigir o cata-vento colorido, a alternativa é
   um bloco de fundo branco no topo da coluna
 
 #### Entregas anteriores — `Docs. Desenvolvimento/Modelos novos/` e `Atualizações.txt`
 
 O trabalho mais recente do projeto foi a implementação **completa** da pasta **`Modelos novos`** e do
 arquivo **`Atualizações.txt`** que o cliente entregou (30/07/2026). Foi executado nesta ordem — as
-entradas correspondentes estão em `## O que foi feito`, da mais antiga para a mais recente:
+entradas correspondentes estão no Histórico acima:
 
 1. **Protocolos passam à SCP** (linha 4 do documento) + os **modelos novos** de Seleção/Celebração e a
    Ordem de Pagamento **Global × Parcial**
@@ -3317,24 +3425,6 @@ Pagamento Global e Parcial, além da Tela principal.
 **Única pendência do documento é uma decisão do cliente, não código:** como a UG passou a encaminhar à
 **SCP** (e não direto ao PJ), a devolução do Parecer Jurídico por pendência agora vai para a **SCP**,
 que devolve à UG — o texto do Fluxo CP dizia "envia para UG". Funciona, mas é um desvio da letra.
-
-#### Próximos passos
-
-- Próximos blocos do roadmap, em ordem: **Monitoramento (4.5)** e **Prestação de Contas (4.6)**
-  — apoiada nas despesas/saldo da Execução —, e **Notificações/e-mails (4.7)**. São o que falta para
-  fechar o ciclo da parceria.
-- **Fluxo real de assinatura eletrônica**: hoje assina-se direto na peça; falta a *solicitação* de
-  assinatura com aprovação pelo perfil **Aprovador de Assinatura Eletrônica** (o perfil existe, o
-  workflow não), com aprovação automática para o Responsável Legal.
-- Pedir ao cliente os **modelos padrão ainda sem arquivo** — restam os de **aditivo e apostilamento**
-  (justificativas, autorizações, minutas e termos).
-- Fechar o checklist de dispensa: itens **16–18** (autorização à OSC, dados bancários, Nota de
-  Empenho) e completar a **publicação do Termo** (item 15 — DOE / site / GovBr).
-- Pendência transversal: **trilhas de auditoria / logs imutáveis** (requisito não-funcional).
-- Itens finos: campos **Exercício** e **Prazo de Execução** no Chamamento (2.2.1 do módulo 2);
-  reajuste/reequilíbrio na Formalização.
-- Definir com o cliente o que **Parlamentar** e **Conselho** veem de diferente na tela principal —
-  hoje ambos apontam para a Transparência, por falta dessa definição.
 
 ---
 
