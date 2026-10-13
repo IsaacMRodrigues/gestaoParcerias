@@ -62,6 +62,23 @@
                     </div>
                 @endforeach
             </div>
+
+            {{-- De onde vêm as despesas, os extratos, as evidências, a folha e os bens --}}
+            <div class="mt-4 pt-4 border-t border-gray-100 flex flex-wrap items-center justify-between gap-3">
+                <p class="text-sm text-gray-600">
+                    Montada com o que a OSC lançou no painel neste período.
+                    @if($podeEditar) Lançou ou corrigiu algo depois? Atualize — documentos já assinados não mudam. @endif
+                </p>
+                <div class="flex flex-wrap items-center gap-2">
+                    <a href="{{ route('lancamentos.painel', $pc->instrumento) }}" class="btn btn-outline btn-sm">Abrir o painel</a>
+                    @if($podeEditar)
+                        <form action="{{ route('prestacao-contas.montar', $pc) }}" method="POST">
+                            @csrf
+                            <button class="btn btn-primary btn-sm">Atualizar com os lançamentos</button>
+                        </form>
+                    @endif
+                </div>
+            </div>
         </div>
 
         @if($podeEditar)
@@ -185,6 +202,7 @@
             {{-- 4. Bens móveis --}}
             <div class="bg-white rounded-xl border border-gray-200 shadow-sm p-6 space-y-4">
                 <h2 class="font-semibold text-gray-900">Bens móveis adquiridos</h2>
+                <p class="text-xs text-gray-500 -mt-2">Os bens lançados no painel entram sozinhos; inclua aqui só o que faltar.</p>
                 @if($pc->bens->isNotEmpty())
                     <table class="min-w-full text-sm">
                         <tbody class="divide-y divide-gray-100">
@@ -222,7 +240,7 @@
             <form action="{{ route('prestacao-contas.atualizar', $pc) }}" method="POST" class="bg-white rounded-xl border border-gray-200 shadow-sm p-6 space-y-4">
                 @csrf @method('PUT') <input type="hidden" name="bloco" value="folha">
                 <h2 class="font-semibold text-gray-900">Resumo da folha de pagamento</h2>
-                <p class="text-xs text-gray-500 -mt-1">Só se houver despesa com pessoal. Proventos, descontos, líquido e encargos são calculados.</p>
+                <p class="text-xs text-gray-500 -mt-1">Só se houver despesa com pessoal. Vem somada das folhas lançadas no painel; proventos, descontos, líquido e encargos são calculados.</p>
                 <div class="grid sm:grid-cols-5 gap-3">
                     @foreach([
                         'folha_funcionarios' => 'Nº de funcionários', 'folha_salarios' => 'Salários',

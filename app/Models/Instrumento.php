@@ -99,6 +99,12 @@ class Instrumento extends Model
         return $this->hasMany(Despesa::class)->orderBy('data_despesa');
     }
 
+    /** O que a OSC lança no painel da prestação de contas, fora as despesas. */
+    public function lancamentos(): HasMany
+    {
+        return $this->hasMany(Lancamento::class)->orderByDesc('competencia')->orderByDesc('id');
+    }
+
     // ----- Controle de saldo (4.4 Execução) -----
 
     public function totalRepassado(): float

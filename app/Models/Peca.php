@@ -26,7 +26,7 @@ class Peca extends Model
     protected $fillable = [
         'pecaable_type', 'pecaable_id', 'categoria', 'chave', 'rotulo',
         'tipo', 'obrigatorio', 'ordem', 'visivel_osc',
-        'extra', 'setor', 'etapa', 'criado_por', 'origem_processo_peca_id', 'osc_arquivo_id',
+        'extra', 'setor', 'etapa', 'criado_por', 'origem_processo_peca_id', 'osc_arquivo_id', 'dos_lancamentos',
         'conteudo', 'arquivo_path', 'arquivo_nome', 'tamanho', 'mime_type',
         'assinado_por', 'assinado_em', 'assinante_nome', 'assinante_cargo', 'codigo_validacao',
         'contra_assinado_por', 'contra_assinado_em', 'contra_assinante_nome',
@@ -43,6 +43,7 @@ class Peca extends Model
             'assinado_em'        => 'datetime',
             'contra_assinado_em' => 'datetime',
             'devolvida_em'       => 'datetime',
+            'dos_lancamentos'    => 'boolean',
         ];
     }
 

@@ -99,7 +99,23 @@ class PrestacaoDocumento
             . '<table style="width:100%;border-collapse:collapse" border="1" cellpadding="6"><thead><tr>'
             . '<th>Meta</th><th>Quantidade prevista</th><th>Quantidade atendida</th>'
             . '<th>Cumprimento das ações programadas</th><th>Justificativa</th></tr></thead>'
-            . '<tbody>' . $linhas . '</tbody></table>';
+            . '<tbody>' . $linhas . '</tbody></table>'
+            . self::evidencias($pc);
+    }
+
+    /** As evidências que a OSC lançou no painel durante o período; os arquivos vão nos documentos da execução. */
+    private static function evidencias(PrestacaoContas $pc): string
+    {
+        $evidencias = PrestacaoDosLancamentos::lancamentos($pc)->where('tipo', 'evidencia')->load('meta');
+        if ($evidencias->isEmpty()) {
+            return '';
+        }
+
+        $itens = $evidencias->map(fn ($l) => '<li>' . $l->competencia->format('d/m/Y')
+            . ($l->meta ? ' — ' . e($l->meta->descricao) : '') . ': ' . e((string) $l->descricao) . '</li>')->implode('');
+
+        return '<p>Evidências da execução lançadas no período (arquivos em "Documentos que comprovam a execução do objeto"):</p>'
+            . '<ul>' . $itens . '</ul>';
     }
 
     /** Anexo IV — o saldo sai da conta, não do teclado. */

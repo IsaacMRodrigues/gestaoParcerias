@@ -8,6 +8,7 @@ use App\Models\PrestacaoBem;
 use App\Models\PrestacaoContas;
 use App\Models\PrestacaoGlosa;
 use App\Support\PrestacaoDocumento;
+use App\Support\PrestacaoDosLancamentos;
 use App\Support\Devolucao;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -15,8 +16,9 @@ use Illuminate\Validation\Rule;
 use Illuminate\View\View;
 
 /**
- * Prestação de contas: a OSC preenche campos e os documentos são gerados deles até a
- * assinatura. A OSC monta e envia, a SCP analisa e a UG decide.
+ * Prestação de contas: nasce montada com o que a OSC lançou no painel durante o período
+ * (PrestacaoDosLancamentos); a OSC completa os campos, os documentos são gerados deles até a
+ * assinatura, e ela envia. A SCP analisa e a UG decide.
  */
 class PrestacaoContasController extends Controller
 {
@@ -69,9 +71,14 @@ class PrestacaoContasController extends Controller
             ->latest('periodo_fim')
             ->get();
 
-        // Parcerias que ainda podem receber uma prestação: vigentes, e da OSC
-        // quando quem olha é a OSC.
+        // Parcerias em execução, cada uma com o seu painel de lançamentos — da OSC, quando quem olha é
+        // a OSC. Contam o que está a conferir e o que foi devolvido.
+        $contar = fn (string $situacao) => [
+            'despesas as ' . $situacao . '_despesas'       => fn ($q) => $q->where('situacao', $situacao),
+            'lancamentos as ' . $situacao . '_lancamentos' => fn ($q) => $q->where('situacao', $situacao),
+        ];
         $instrumentos = Instrumento::with('proposta.osc')
+            ->withCount($contar('pendente') + $contar('devolvido'))
             ->whereIn('status', ['vigente', 'assinado', 'encerrado'])
             ->when($oscId, fn ($q) => $q->whereHas('proposta', fn ($p) => $p->where('osc_id', $oscId)))
             ->unless($oscId, fn ($q) => $q->visiveisPara(auth()->user()))
@@ -109,8 +116,24 @@ class PrestacaoContasController extends Controller
             'responsavel_email' => auth()->user()->email,
         ]);
 
+        Peca::sincronizar($pc, 'prestacao_contas');
+        $this->semear($pc);
+        PrestacaoDosLancamentos::montar($pc);
+
         return redirect()->route('prestacao-contas.show', $pc)
-            ->with('success', 'Prestação de contas aberta. Preencha os campos e anexe os documentos.');
+            ->with('success', 'Prestação de contas gerada com os lançamentos do período. Confira, complete o relatório e assine.');
+    }
+
+    /** Refaz a montagem com o que foi lançado (ou corrigido) no painel desde a geração. */
+    public function montar(PrestacaoContas $pc): RedirectResponse
+    {
+        $this->autorizarSetor($pc);
+        abort_unless($pc->setor === 'osc', 403, 'A prestação é montada pela OSC.');
+
+        PrestacaoDosLancamentos::montar($pc, true);
+        $this->regerarDocumentos($pc->fresh());
+
+        return back()->with('success', 'Prestação atualizada com os lançamentos do painel. Documentos já assinados não mudam.');
     }
 
     public function show(PrestacaoContas $pc): View

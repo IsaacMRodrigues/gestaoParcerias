@@ -8,10 +8,10 @@ use App\Models\Repasse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
-use Illuminate\Validation\Rule;
 use Illuminate\View\View;
 use Symfony\Component\HttpFoundation\StreamedResponse;
 
+/** Execução da parceria: a Prefeitura registra os repasses; as despesas vêm do painel da OSC (LancamentoController). */
 class ExecucaoController extends Controller
 {
     /** Parcerias em execução, para escolher de qual instrumento ver repasses, despesas e saldo. */
@@ -104,90 +104,6 @@ class ExecucaoController extends Controller
 
         return redirect()->route('instrumentos.execucao', $instrumento)
             ->with('success', 'Repasse removido.');
-    }
-
-    public function storeDespesa(Request $request, Instrumento $instrumento): RedirectResponse
-    {
-        $data = $request->validate([
-            'data_despesa'       => ['required', 'date'],
-            'valor'              => ['required', 'numeric', 'min:0.01'],
-            'natureza'           => ['required', Rule::in(array_keys(Despesa::NATUREZAS))],
-            'fornecedor'         => ['nullable', 'string', 'max:255'],
-            'doc_fornecedor'     => ['nullable', 'string', 'max:18'],
-            'descricao'          => ['nullable', 'string', 'max:255'],
-            'nota_fiscal_numero' => ['nullable', 'string', 'max:255'],
-            'nota_fiscal'        => ['nullable', 'file', 'mimes:pdf,jpg,jpeg,png', 'max:10240'],
-        ]);
-
-        $despesa = $instrumento->despesas()->make($request->only([
-            'data_despesa', 'valor', 'natureza', 'fornecedor', 'doc_fornecedor', 'descricao', 'nota_fiscal_numero',
-        ]));
-
-        if ($request->hasFile('nota_fiscal')) {
-            $file = $request->file('nota_fiscal');
-            $despesa->nota_fiscal_path = $file->store('notas-fiscais', 'local');
-            $despesa->nota_fiscal_nome = $file->getClientOriginalName();
-        }
-
-        $despesa->save();
-
-        return back()->with('success', 'Despesa registrada.');
-    }
-
-    /** Corrige uma despesa lançada; a nota fiscal pode ser anexada depois, trocada ou removida. */
-    public function updateDespesa(Request $request, Despesa $despesa): RedirectResponse
-    {
-        $data = $request->validate([
-            'data_despesa'       => ['required', 'date'],
-            'valor'              => ['required', 'numeric', 'min:0.01'],
-            'natureza'           => ['required', Rule::in(array_keys(Despesa::NATUREZAS))],
-            'fornecedor'         => ['nullable', 'string', 'max:255'],
-            'doc_fornecedor'     => ['nullable', 'string', 'max:18'],
-            'descricao'          => ['nullable', 'string', 'max:255'],
-            'nota_fiscal_numero' => ['nullable', 'string', 'max:255'],
-            'nota_fiscal'        => ['nullable', 'file', 'mimes:pdf,jpg,jpeg,png', 'max:10240'],
-            'remover_nota'       => ['nullable', 'boolean'],
-        ], [
-            'nota_fiscal.mimes' => 'A nota fiscal deve ser PDF, JPG ou PNG.',
-            'nota_fiscal.max'   => 'A nota fiscal não pode ultrapassar 10 MB.',
-        ]);
-
-        $despesa->fill(collect($data)->only([
-            'data_despesa', 'valor', 'natureza', 'fornecedor',
-            'doc_fornecedor', 'descricao', 'nota_fiscal_numero',
-        ])->all());
-
-        // Novo arquivo substitui o anterior; a caixa "remover" apaga o atual.
-        if ($request->hasFile('nota_fiscal')) {
-            if ($despesa->nota_fiscal_path) {
-                Storage::disk('local')->delete($despesa->nota_fiscal_path);
-            }
-            $file = $request->file('nota_fiscal');
-            $despesa->nota_fiscal_path = $file->store('notas-fiscais', 'local');
-            $despesa->nota_fiscal_nome = $file->getClientOriginalName();
-        } elseif ($request->boolean('remover_nota') && $despesa->nota_fiscal_path) {
-            Storage::disk('local')->delete($despesa->nota_fiscal_path);
-            $despesa->nota_fiscal_path = null;
-            $despesa->nota_fiscal_nome = null;
-        }
-
-        $despesa->save();
-
-        return redirect()->route('instrumentos.execucao', $despesa->instrumento)
-            ->with('success', 'Despesa atualizada.');
-    }
-
-    public function destroyDespesa(Despesa $despesa): RedirectResponse
-    {
-        $instrumento = $despesa->instrumento;
-
-        if ($despesa->nota_fiscal_path) {
-            Storage::disk('local')->delete($despesa->nota_fiscal_path);
-        }
-        $despesa->delete();
-
-        return redirect()->route('instrumentos.execucao', $instrumento)
-            ->with('success', 'Despesa removida.');
     }
 
     public function downloadNotaFiscal(Despesa $despesa): StreamedResponse

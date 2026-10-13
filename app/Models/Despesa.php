@@ -5,8 +5,11 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
+/** Despesa da parceria: a OSC lança no painel da prestação de contas, com a nota, e a Prefeitura confere. */
 class Despesa extends Model
 {
+    use \App\Models\Concerns\ConferidoPeloMunicipio;
+
     /**
      * As 12 naturezas de despesa do modelo de Plano de Trabalho, as mesmas no plano, na execução e
      * na prestação de contas.
@@ -39,7 +42,7 @@ class Despesa extends Model
     protected $fillable = [
         'instrumento_id', 'data_despesa', 'valor', 'natureza',
         'fornecedor', 'doc_fornecedor', 'descricao',
-        'nota_fiscal_numero', 'nota_fiscal_path', 'nota_fiscal_nome',
+        'nota_fiscal_numero', 'nota_fiscal_path', 'nota_fiscal_nome', 'lancado_por',
     ];
 
     protected function casts(): array
@@ -47,12 +50,18 @@ class Despesa extends Model
         return [
             'data_despesa' => 'date',
             'valor'        => 'decimal:2',
+            'conferido_em' => 'datetime',
         ];
     }
 
     public function instrumento(): BelongsTo
     {
         return $this->belongsTo(Instrumento::class);
+    }
+
+    public function dataDoLancamento(): ?\Carbon\CarbonInterface
+    {
+        return $this->data_despesa;
     }
 
     public function naturezaLabel(): string

@@ -136,134 +136,40 @@
                 </table>
             </div>
 
-            {{-- Despesas --}}
+            {{-- Despesas: lançadas pela OSC no painel da prestação de contas, conferidas lá --}}
             <div class="bg-white rounded-xl border border-gray-200">
-                <div class="px-6 py-4 border-b border-gray-200">
-                    <h3 class="text-base font-semibold text-gray-800">Despesas</h3>
+                <div class="px-6 py-4 border-b border-gray-200 flex flex-wrap items-center justify-between gap-3">
+                    <div>
+                        <h3 class="text-base font-semibold text-gray-800">Despesas</h3>
+                        <p class="text-xs text-gray-500 mt-0.5">A OSC lança cada despesa, com a nota, no painel da prestação de contas; a conferência é feita lá.</p>
+                    </div>
+                    <a href="{{ route('lancamentos.painel', $instrumento) }}" class="btn btn-outline btn-sm">Abrir o painel de lançamentos</a>
                 </div>
-                <form method="POST" action="{{ route('despesas.store', $instrumento) }}" enctype="multipart/form-data"
-                      class="px-6 py-4 border-b border-gray-100 grid grid-cols-2 sm:grid-cols-6 gap-3 items-end">
-                    @csrf
-                    <div><x-input-label for="data_despesa" value="Data *" /><x-text-input id="data_despesa" name="data_despesa" type="date" required class="mt-1 block w-full" /></div>
-                    <div><x-input-label for="valor_d" value="Valor (R$) *" /><x-input-dinheiro name="valor" id="valor_d" required class="mt-1" /></div>
-                    <div class="sm:col-span-2">
-                        <x-input-label for="natureza" value="Natureza *" />
-                        <select id="natureza" name="natureza" required class="mt-1 block w-full border-gray-300 rounded-md shadow-sm text-sm focus:ring-brand-500 focus:border-brand-500">
-                            @foreach(\App\Models\Despesa::NATUREZAS as $k => $label)<option value="{{ $k }}">{{ $label }}</option>@endforeach
-                        </select>
-                    </div>
-                    <div class="sm:col-span-2"><x-input-label for="fornecedor" value="Fornecedor" /><x-text-input id="fornecedor" name="fornecedor" type="text" class="mt-1 block w-full" /></div>
-                    <div class="sm:col-span-2"><x-input-label for="descricao" value="Descrição" /><x-text-input id="descricao" name="descricao" type="text" class="mt-1 block w-full" /></div>
-                    <div><x-input-label for="nota_fiscal_numero" value="NF nº" /><x-text-input id="nota_fiscal_numero" name="nota_fiscal_numero" type="text" class="mt-1 block w-full" /></div>
-                    <div class="sm:col-span-2">
-                        <x-input-label for="nota_fiscal" value="Nota fiscal (arquivo)" />
-                        <input id="nota_fiscal" name="nota_fiscal" type="file" accept=".pdf,.jpg,.jpeg,.png"
-                               class="mt-1 block w-full text-sm text-gray-600 file:mr-3 file:py-1.5 file:px-3 file:rounded-md file:border-0 file:text-sm file:bg-brand-50 file:text-brand-700 hover:file:bg-brand-100" />
-                    </div>
-                    <div><x-primary-button class="w-full justify-center">Lançar</x-primary-button></div>
-                </form>
                 <table class="min-w-full divide-y divide-gray-100 text-sm">
                     <thead class="bg-gray-50 text-xs uppercase text-gray-500">
-                        <tr><th class="px-6 py-2 text-left">Data</th><th class="px-6 py-2 text-left">Natureza</th><th class="px-6 py-2 text-left">Fornecedor</th><th class="px-6 py-2 text-right">Valor</th><th class="px-6 py-2 text-left">NF</th><th class="px-6 py-2"></th></tr>
+                        <tr><th class="px-6 py-2 text-left">Data</th><th class="px-6 py-2 text-left">Natureza</th><th class="px-6 py-2 text-left">Fornecedor</th><th class="px-6 py-2 text-right">Valor</th><th class="px-6 py-2 text-left">NF</th><th class="px-6 py-2 text-left">Situação</th></tr>
                     </thead>
-                    @forelse($instrumento->despesas as $d)
-                        <tbody x-data="{ editando: false }" class="border-t border-gray-100">
-                            <tr x-show="!editando">
+                    <tbody class="divide-y divide-gray-100">
+                        @forelse($instrumento->despesas as $d)
+                            <tr>
                                 <td class="px-6 py-2">{{ $d->data_despesa->format('d/m/Y') }}</td>
                                 <td class="px-6 py-2">{{ $d->naturezaLabel() }}</td>
                                 <td class="px-6 py-2 text-gray-600">{{ $d->fornecedor ?? '—' }}@if($d->descricao)<span class="block text-xs text-gray-400">{{ $d->descricao }}</span>@endif</td>
                                 <td class="px-6 py-2 text-right font-medium">R$ {{ number_format($d->valor, 2, ',', '.') }}</td>
                                 <td class="px-6 py-2">
                                     @if($d->temNotaFiscal())
-                                        <a href="{{ route('despesas.nota.download', $d) }}" class="font-semibold text-brand-700 hover:text-brand-800 transition">📎 {{ $d->nota_fiscal_numero ?? 'baixar' }}</a>
+                                        <a href="{{ route('despesas.nota.download', $d) }}" class="font-semibold text-brand-700 hover:text-brand-800 transition">{{ $d->nota_fiscal_numero ?? 'baixar' }}</a>
                                     @else
-                                        <button type="button" @click="editando = true"
-                                                class="text-xs text-accent-700 bg-accent-50 border border-accent-200 px-2 py-0.5 rounded hover:bg-accent-100">
-                                            anexar NF
-                                        </button>
+                                        <span class="text-xs text-accent-700">sem nota</span>
                                     @endif
                                 </td>
                                 <td class="px-6 py-2">
-                                    <div class="flex items-center justify-end gap-3">
-                                        <button type="button" @click="editando = true"
-                                                class="text-xs text-brand-600 hover:text-brand-800">Editar</button>
-                                        <form action="{{ route('despesas.destroy', $d) }}" method="POST" data-confirm="Remover esta despesa?">
-                                            @csrf @method('DELETE')
-                                            <button class="text-xs text-red-500 hover:text-red-700">Remover</button>
-                                        </form>
-                                    </div>
+                                    <span class="px-2 py-0.5 text-[11px] font-semibold rounded ring-1 {{ ['pendente' => 'bg-accent-50 text-accent-800 ring-accent-200', 'conferido' => 'bg-brand-50 text-brand-800 ring-brand-200', 'devolvido' => 'bg-red-50 text-red-700 ring-red-200'][$d->situacao] ?? '' }}">{{ $d->rotuloDaSituacao() }}</span>
                                 </td>
                             </tr>
-                            <tr x-show="editando" style="display:none" class="bg-brand-50/50">
-                                <td colspan="6" class="px-6 py-4">
-                                    <form action="{{ route('despesas.update', $d) }}" method="POST" enctype="multipart/form-data"
-                                          class="grid grid-cols-2 sm:grid-cols-6 gap-3 items-end">
-                                        @csrf @method('PUT')
-                                        <div>
-                                            <x-input-label value="Data *" />
-                                            <x-text-input name="data_despesa" type="date" required class="mt-1 block w-full"
-                                                          value="{{ $d->data_despesa->format('Y-m-d') }}" />
-                                        </div>
-                                        <div>
-                                            <x-input-label value="Valor (R$) *" />
-                                            <x-input-dinheiro name="valor" id="valor_despesa_{{ $d->id }}"
-                                                              :value="$d->valor" required class="mt-1" />
-                                        </div>
-                                        <div class="sm:col-span-2">
-                                            <x-input-label value="Natureza *" />
-                                            <select name="natureza" required
-                                                    class="mt-1 block w-full border-gray-300 rounded-md shadow-sm text-sm focus:ring-brand-500 focus:border-brand-500">
-                                                @foreach(\App\Models\Despesa::NATUREZAS as $k => $label)
-                                                    <option value="{{ $k }}" {{ $d->natureza === $k ? 'selected' : '' }}>{{ $label }}</option>
-                                                @endforeach
-                                            </select>
-                                        </div>
-                                        <div class="sm:col-span-2">
-                                            <x-input-label value="Fornecedor" />
-                                            <x-text-input name="fornecedor" type="text" class="mt-1 block w-full"
-                                                          value="{{ $d->fornecedor }}" />
-                                        </div>
-                                        <div class="sm:col-span-3">
-                                            <x-input-label value="Descrição" />
-                                            <x-text-input name="descricao" type="text" class="mt-1 block w-full"
-                                                          value="{{ $d->descricao }}" />
-                                        </div>
-                                        <div>
-                                            <x-input-label value="NF nº" />
-                                            <x-text-input name="nota_fiscal_numero" type="text" class="mt-1 block w-full"
-                                                          value="{{ $d->nota_fiscal_numero }}" />
-                                        </div>
-                                        <div class="sm:col-span-2">
-                                            <x-input-label value="{{ $d->temNotaFiscal() ? 'Substituir a nota fiscal' : 'Anexar a nota fiscal' }}" />
-                                            <input name="nota_fiscal" type="file" accept=".pdf,.jpg,.jpeg,.png"
-                                                   class="mt-1 block w-full text-sm text-gray-600 file:mr-3 file:py-1.5 file:px-3 file:rounded-md file:border-0 file:text-sm file:bg-brand-50 file:text-brand-700 hover:file:bg-brand-100" />
-                                            @if($d->temNotaFiscal())
-                                                <label class="flex items-center gap-2 mt-2 text-xs text-gray-600">
-                                                    <input type="checkbox" name="remover_nota" value="1"
-                                                           class="rounded border-gray-300 text-red-600 focus:ring-red-500">
-                                                    Remover a nota atual ({{ $d->nota_fiscal_nome }})
-                                                </label>
-                                            @endif
-                                        </div>
-                                        <div class="sm:col-span-6 flex items-center gap-2">
-                                            <button type="submit"
-                                                    class="btn btn-primary btn-sm">
-                                                Salvar
-                                            </button>
-                                            <button type="button" @click="editando = false"
-                                                    class="px-3 py-2 text-sm text-gray-600 hover:text-gray-900">
-                                                Cancelar
-                                            </button>
-                                        </div>
-                                    </form>
-                                </td>
-                            </tr>
-                        </tbody>
-                    @empty
-                        <tbody>
-                            <tr><td colspan="6" class="px-6 py-10"><x-empty-state icone="dinheiro">Nenhuma despesa lançada.</x-empty-state></td></tr>
-                        </tbody>
-                    @endforelse
+                        @empty
+                            <tr><td colspan="6" class="px-6 py-10"><x-empty-state icone="dinheiro">Nenhuma despesa lançada pela OSC.</x-empty-state></td></tr>
+                        @endforelse
                     </tbody>
                 </table>
                 @if($porNatureza->count())

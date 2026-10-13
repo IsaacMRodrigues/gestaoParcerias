@@ -556,6 +556,27 @@ class Avisos
     }
 
     /** Arquivo da OSC recusado numa parceria: a OSC precisa enviar nova versão para a parceria seguir. */
+    /** Lançamento do painel da prestação devolvido pela Prefeitura: avisa a equipe da OSC. */
+    public static function lancamentoDevolvido(\App\Models\Despesa|\App\Models\Lancamento $item): void
+    {
+        $instrumento = $item->instrumento;
+        $rotulo = $item instanceof \App\Models\Despesa
+            ? 'Despesa de ' . $item->data_despesa->format('d/m/Y') . ' (R$ ' . number_format((float) $item->valor, 2, ',', '.') . ')'
+            : $item->rotuloDoTipo() . ' — ' . $item->referencia();
+
+        self::enviar(self::daOsc($instrumento?->proposta?->osc_id), new Aviso(
+            assunto: 'Lançamento devolvido — prestação de contas',
+            titulo: 'A Prefeitura devolveu um lançamento do painel da prestação de contas',
+            linhas: array_values(array_filter([
+                $rotulo . ', na parceria ' . ($instrumento?->numero ?? '') . '.',
+                $item->devolucao_motivo ? 'Motivo: ' . $item->devolucao_motivo : null,
+                'Corrija o lançamento no painel: ele volta para a conferência.',
+            ])),
+            url: route('lancamentos.painel', $instrumento),
+            botao: 'Abrir o painel',
+        ));
+    }
+
     public static function arquivoRecusado(\App\Models\OscArquivoAnalise $analise): void
     {
         $arquivo = $analise->arquivo;

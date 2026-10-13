@@ -25,6 +25,7 @@ use App\Http\Controllers\ManifestacaoAnaliseController;
 use App\Http\Controllers\ManifestacaoController;
 use App\Http\Controllers\PortalController;
 use App\Http\Controllers\PrestacaoContasController;
+use App\Http\Controllers\LancamentoController;
 use App\Http\Controllers\ProcessoController;
 use App\Http\Controllers\SuporteController;
 use App\Http\Controllers\ProcessoPecaController;
@@ -319,9 +320,6 @@ Route::middleware(['auth', 'staff', 'readonly'])->group(function () {
         Route::post('instrumentos/{instrumento}/repasses', [ExecucaoController::class, 'storeRepasse'])->name('repasses.store');
         Route::put('repasses/{repasse}', [ExecucaoController::class, 'updateRepasse'])->name('repasses.update');
         Route::delete('repasses/{repasse}', [ExecucaoController::class, 'destroyRepasse'])->name('repasses.destroy');
-        Route::post('instrumentos/{instrumento}/despesas', [ExecucaoController::class, 'storeDespesa'])->name('despesas.store');
-        Route::put('despesas/{despesa}', [ExecucaoController::class, 'updateDespesa'])->name('despesas.update');
-        Route::delete('despesas/{despesa}', [ExecucaoController::class, 'destroyDespesa'])->name('despesas.destroy');
         Route::get('despesas/{despesa}/nota-fiscal', [ExecucaoController::class, 'downloadNotaFiscal'])->name('despesas.nota.download');
     });
 
@@ -367,6 +365,22 @@ Route::middleware('auth')->group(function () {
     Route::post('prestacao-contas/{pc}/avancar', [PrestacaoContasController::class, 'avancar'])->name('prestacao-contas.avancar');
     Route::post('prestacao-contas/{pc}/devolver', [PrestacaoContasController::class, 'devolver'])->name('prestacao-contas.devolver');
     Route::post('prestacao-contas/{pc}/concluir', [PrestacaoContasController::class, 'concluir'])->name('prestacao-contas.concluir');
+    Route::post('prestacao-contas/{pc}/montar', [PrestacaoContasController::class, 'montar'])->name('prestacao-contas.montar');
+
+    // Painel da prestação de contas: a OSC lança ao longo da execução e a Prefeitura confere.
+    // Autorização no controller (a OSC da parceria lança; quem trata a execução confere).
+    Route::get('instrumentos/{instrumento}/painel', [LancamentoController::class, 'painel'])->name('lancamentos.painel');
+    Route::post('instrumentos/{instrumento}/painel/despesas', [LancamentoController::class, 'storeDespesa'])->name('lancamentos.despesas.store');
+    Route::post('instrumentos/{instrumento}/painel/lancamentos', [LancamentoController::class, 'store'])->name('lancamentos.store');
+    Route::post('instrumentos/{instrumento}/painel/conferir-todos', [LancamentoController::class, 'conferirTodos'])->name('lancamentos.conferir-todos');
+    Route::put('painel/despesas/{despesa}', [LancamentoController::class, 'updateDespesa'])->name('lancamentos.despesas.update');
+    Route::delete('painel/despesas/{despesa}', [LancamentoController::class, 'destroyDespesa'])->name('lancamentos.despesas.destroy');
+    Route::post('painel/despesas/{despesa}/conferencia', [LancamentoController::class, 'conferirDespesa'])->name('lancamentos.despesas.conferir');
+    Route::get('painel/despesas/{despesa}/nota-fiscal', [LancamentoController::class, 'notaFiscal'])->name('lancamentos.despesas.nota');
+    Route::put('painel/lancamentos/{lancamento}', [LancamentoController::class, 'update'])->name('lancamentos.update');
+    Route::delete('painel/lancamentos/{lancamento}', [LancamentoController::class, 'destroy'])->name('lancamentos.destroy');
+    Route::post('painel/lancamentos/{lancamento}/conferencia', [LancamentoController::class, 'conferir'])->name('lancamentos.conferir');
+    Route::get('painel/lancamentos/{lancamento}/arquivo', [LancamentoController::class, 'arquivo'])->name('lancamentos.arquivo');
 
     // Alterações da Parceria (módulo 3.3) — a OSC pede, a UG autoriza, a SCP
     // processa. Mesma régua da prestação de contas: a tela serve aos dois

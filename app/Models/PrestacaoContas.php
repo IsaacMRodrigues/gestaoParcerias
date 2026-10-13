@@ -266,10 +266,39 @@ class PrestacaoContas extends Model
         return !$this->concluida() && !$this->ultimaEtapa();
     }
 
-    /** O que falta para encaminhar: as peças obrigatórias da etapa corrente. */
+    /** Despesas e demais lançamentos do painel dentro do período, em qualquer situação. */
+    public function lancamentosDoPeriodo(): Collection
+    {
+        if (!$this->instrumento_id) {
+            return collect();
+        }
+
+        $periodo = [$this->periodo_inicio->toDateString(), $this->periodo_fim->toDateString()];
+
+        return Despesa::where('instrumento_id', $this->instrumento_id)->whereBetween('data_despesa', $periodo)->get()
+            ->concat(Lancamento::where('instrumento_id', $this->instrumento_id)->whereBetween('competencia', $periodo)->get());
+    }
+
+    /**
+     * O que falta para encaminhar: as peças obrigatórias da etapa corrente. Do painel: a OSC não envia
+     * com lançamento devolvido no período, e a UG não encerra com lançamento ainda a conferir.
+     */
     public function pendencias(): array
     {
         $pend = [];
+
+        if (!$this->concluida() && ($this->etapa === 0 || $this->ultimaEtapa())) {
+            $lancamentos = $this->lancamentosDoPeriodo();
+            $devolvidos = $lancamentos->filter->devolvido()->count();
+            $aConferir = $lancamentos->filter->aConferir()->count();
+
+            if ($this->etapa === 0 && $devolvidos) {
+                $pend[] = $devolvidos . ' lançamento(s) do período devolvido(s) pela Prefeitura (corrigir no painel)';
+            }
+            if ($this->ultimaEtapa() && $aConferir) {
+                $pend[] = $aConferir . ' lançamento(s) do período ainda a conferir no painel';
+            }
+        }
 
         foreach ($this->pecas as $peca) {
             if (!$peca->obrigatorio || ($peca->selecaoEtapa() !== $this->etapa)) {

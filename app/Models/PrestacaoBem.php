@@ -10,7 +10,7 @@ class PrestacaoBem extends Model
 {
     protected $table = 'prestacao_bens';
 
-    protected $fillable = ['prestacao_id', 'especificacao', 'quantidade', 'valor_unitario', 'documento'];
+    protected $fillable = ['prestacao_id', 'lancamento_id', 'especificacao', 'quantidade', 'valor_unitario', 'documento'];
 
     public function prestacao(): BelongsTo
     {

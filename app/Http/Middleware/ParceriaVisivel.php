@@ -73,6 +73,7 @@ class ParceriaVisivel
             $valor instanceof Aditivo,
             $valor instanceof OrdemPagamento,
             $valor instanceof Despesa,
+            $valor instanceof \App\Models\Lancamento,
             $valor instanceof Repasse,
             $valor instanceof PrestacaoContas,
             $valor instanceof Alteracao   => $valor->instrumento?->proposta,

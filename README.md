@@ -19,15 +19,15 @@ assinados eletronicamente e validáveis por QR Code.
 - **Stack:** Laravel 13 (PHP ≥ 8.3), MySQL, Blade + Tailwind CSS v4 (Vite), Alpine.js
 - **Pacotes:** Laravel Breeze (autenticação), Spatie Laravel Permission (perfis), simple-qrcode
   (validação), dompdf (PDF)
-- **Tamanho** (08/10/2026): 105 migrações · 60 tabelas · 43 models · 42 controllers · 124 views · 246 rotas ·
-  199 testes automatizados
+- **Tamanho** (13/10/2026): 106 migrações · 61 tabelas · 44 models · 43 controllers · 127 views · 256 rotas ·
+  204 testes automatizados
 - **Equipe:** 2 desenvolvedores
 
 ---
 
 ## Estado atual
 
-*Atualizado em 08/10/2026.*
+*Atualizado em 13/10/2026.*
 
 | Etapa do ciclo                                                                                                                                            | Situação             | Onde fica                                                                                |
 | --------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------- | ---------------------------------------------------------------------------------------- |
@@ -39,10 +39,10 @@ assinados eletronicamente e validáveis por QR Code.
 | **Arquivos da OSC** — certidões, estatuto, ata, declarações e complementares anexados uma vez, preenchendo os fluxos                            | ✅ Completo            | `OscArquivoController`, `OscArquivo`, `Peca::puxarDaAreaDaOsc`                     |
 | **Formalização** (2.3) — instrumento (nasce na conclusão da Celebração), aditivo, apostilamento, OP parcial                                   | ✅ Completo            | `Proposta::criarInstrumento`, `AditivoController`, `OrdemPagamentoController`      |
 | **Download de documentos** — PDF e ZIP em todos os fluxos, por quem pode                                                                           | ✅ Completo            | `Peca::podeBaixar`, `Support\DocumentoPdf`                                           |
-| **4. Execução** (4.4) — repasses, despesas, notas, saldo                                                                                         | ✅ Completo            | `ExecucaoController`                                                                   |
+| **4. Execução** (4.4) — repasses (Prefeitura), despesas com nota (lançadas pela OSC no painel), saldo | ✅ Completo | `ExecucaoController` |
 | **Alterações da Parceria** (3.3)                                                                                                                  | ✅ Completo            | `AlteracaoController`, `Alteracao`                                                   |
 | **Dossiê da OSC** (3.3) — o processo visível à organização                                                                                    | ✅ Completo            | `DossieController`, `Proposta::dossieParaOsc()`                                      |
-| **6. Prestação de Contas** (3.4)                                                                                                                  | ✅ Completo            | `PrestacaoContasController`, `Support\PrestacaoDocumento`                            |
+| **6. Prestação de Contas** (3.4) — painel em que a OSC lança ao longo da execução, conferência pela Prefeitura e a prestação do período gerada dos lançamentos | ✅ Completo | `LancamentoController`, `PrestacaoContasController`, `Support\PrestacaoDosLancamentos` |
 | **Suporte** — dúvidas, problemas e sugestões                                                                                                     | ✅ Completo            | `SuporteController`, `Chamado`                                                       |
 | **5. Monitoramento e Fiscalização** (4.5)                                                                                                         | ⏳ Não iniciado       | aparece no menu como "em breve"                                                          |
 | **Solicitação de assinatura** (Aprovador de Assinatura)                                                                                           | ⏳ Aguarda definição | ver[Pendências](#pendências)                                                            |
@@ -54,8 +54,9 @@ o `RolesSeeder`, ensaiados antes sobre uma cópia do banco de produção.
 
 **No GitHub e ainda fora da produção** (sobem só quando pedido): listas por Secretaria, campos de dinheiro com
 R$, Arquivos da OSC valendo nos fluxos, caixas de seleção e barra de download, e os Arquivos da OSC
-preenchendo os fluxos — este com a migração `2026_10_08_100000`. Ao subir, avisar que a inscrição em
-chamamento público passa a exigir a área Arquivos da OSC completa.
+preenchendo os fluxos (migração `2026_10_08_100000`) e o **painel da prestação de contas** (migração
+`2026_10_13_100000`). Ao subir, avisar que a inscrição em chamamento público passa a exigir a área Arquivos da OSC
+completa, e que as despesas passam a ser lançadas pela OSC (as já lançadas pela Prefeitura entram como conferidas).
 
 As ações de produção que o deploy não faz (dados e painel) estão em
 [Pendências → Produção](#produção-ação-não-código).
@@ -135,6 +136,7 @@ cada item estão no [Histórico de entregas](#histórico-de-entregas). 🚀 marc
 | 06–07/10 | Instrumento nasce na conclusão da Celebração; **download** em PDF e ZIP em todos os fluxos; plano de aplicação digitado e textos até 1000 caracteres; otimização (Celebração de 106 para 44 consultas ao banco). 🚀 deploy de 07/10, ensaiado sobre uma cópia do banco de produção |
 | 07/10 | Depois do deploy: listas só com o que é da Secretaria; R$ e vírgula em todos os campos de dinheiro; Arquivos da OSC valendo em todos os fluxos (recusa da UG trava a Celebração) |
 | 08/10 | Caixas de seleção e barra de download nos fluxos; **Arquivos da OSC preenchendo os fluxos** (documentos complementares, habilitação da dispensa e modelos com os dados da OSC); revisão do README |
+| 13/10 | **Painel da prestação de contas**: a OSC lança despesas, extratos, evidências, folha e bens ao longo da execução; a Prefeitura confere ou devolve cada um; a prestação do período é gerada já montada com o que foi lançado |
 
 ---
 
@@ -293,7 +295,7 @@ na Celebração, nas Alterações e na Prestação — ver `User::setorNoTramite
 | **Manifestação de Interesse**     | OSC submete → SCP recebe → Secretaria opina → SCP defere ou indefere                                                                                                                                                                                                | `ManifestacaoInteresse`       |
 | **Celebração**                    | UG →**OSC** → UG + SCP (em paralelo) → SCP → SEPLAN → UG → SCP → PJ → SCP → **OSC** → SCP → **UG** → SCP → **Gestor** → SCP → **Gabinete** → SCP → **OSC** → SCP → **Gestor** → **UG** → SCP (22) | `Proposta::ETAPAS_CELEBRACAO` |
 | **Alteração da Parceria**         | **OSC** → UG autoriza → SCP processa e decide (3)                                                                                                                                                                                                              | `Alteracao::ETAPAS`           |
-| **Prestação de Contas**           | **OSC** → SCP (análise prévia) → UG com Gestor e Comissão (3)                                                                                                                                                                                               | `PrestacaoContas::ETAPAS`     |
+| **Prestação de Contas**           | **OSC** gera do painel e envia → SCP (análise prévia) → UG com Gestor e Comissão (3)                                                                                                                                                                                               | `PrestacaoContas::ETAPAS`     |
 | **Suporte**                         | quem abre ↔ equipe (TI e SCP)                                                                                                                                                                                                                                         | `Chamado`                     |
 
 No deferimento, a manifestação **vira** chamamento (tipo dispensa ou inexigibilidade) e proposta,
@@ -475,7 +477,7 @@ responsável legal restringe depois, no "Alterar" da listagem.
 | `pareceres_tecnico` / `pareceres_juridico` / `pareceres_decisao` | Nada, desde que o parecer avulso da proposta saiu (02/10/2026) — ver [Pendências](#código)                                                                                       |
 | `formalizacao`                                                       | **Instrumentos**: instrumento, aditivos, apostilamento e sua documentação                                                             |
 | `ordem_pagamento`                                                    | Emitir **ordens de pagamento parciais** no instrumento vigente (a Global nasce na Celebração)                                                                                    |
-| `execucao`                                                           | **4 · Execução** (repasses, despesas, notas, saldo) e **Alterações da Parceria**                                             |
+| `execucao` | **4 · Execução** (repasses, despesas, notas, saldo), **Alterações da Parceria** e a conferência do painel da prestação de contas |
 | `prestacao_contas`                                                   | **6 · Prestação de Contas**                                                                                                          |
 | `monitoramento`                                                      | Leitura de alterações e prestações; o módulo próprio ainda não existe                                                                  |
 | `usuarios_setor`                                                     | **Meus usuários**: cadastrar a equipe do próprio setor (o administrador aprova)                                                       |
@@ -558,11 +560,11 @@ Procedimento:
 
 ## Verificação
 
-`php artisan test` (sqlite em memória) roda **199 testes** em `tests/Feature`, um arquivo por regra de
+`php artisan test` (sqlite em memória) roda **204 testes** em `tests/Feature`, um arquivo por regra de
 negócio (quem abre qual parceria, contas e senhas, avisos por e-mail, segregação de encargos,
 cancelamento e prorrogação de chamamento, Nova Proposta, prazo e resposta de recurso, plano de
 trabalho do modelo, etapa conjunta, devolução por documento, Termo e OP em sequência, download de
-documentos, instrumento na conclusão, listas por Secretaria, Arquivos da OSC nos fluxos…). **Todos passam**, também em MySQL (o banco da produção): basta
+documentos, instrumento na conclusão, listas por Secretaria, Arquivos da OSC nos fluxos, painel da prestação…). **Todos passam**, também em MySQL (o banco da produção): basta
 um `phpunit.xml` na raiz com `DB_CONNECTION=mysql`, um banco descartável e `force="true"` nos `<env>`. Os
 testes de regra nova são conferidos falhando com a regra desligada antes de entrar.
 
@@ -593,7 +595,7 @@ Trazer os demais cenários para `tests/Feature` é uma das [Pendências](#pendê
 
 ## Pendências
 
-*Atualizado em 08/10/2026.*
+*Atualizado em 13/10/2026.*
 
 ### Segurança
 
@@ -635,6 +637,9 @@ Trazer os demais cenários para `tests/Feature` é uma das [Pendências](#pendê
   Resposta ao recurso): falta definir quem assina — três membros quaisquer da Comissão da Secretaria? — e
   se os já assinados continuam valendo. O mecanismo de várias assinaturas já existe (o do Termo).
 - **Ata do resultado definitivo** (etapa 4 da Seleção) está opcional: deve ser obrigatória?
+- **Quem confere o painel da prestação de contas:** hoje quem tem `execucao` ou `prestacao_contas` na Secretaria
+  da parceria (Responsável da UG, Gestor da Parceria) e a SCP. Restringir ao Gestor da Parceria? E a
+  periodicidade: a prestação parcial tem prazo fixo no termo, para o sistema avisar a OSC?
 - Validar com a cliente a divisão das **12 naturezas de despesa** nos 4 blocos do Anexo VI da prestação de
   contas (auxílios em Pessoal, tributos em Encargos, obras em Equipamentos, diárias e passagens em
   Manutenção).
@@ -677,6 +682,31 @@ Trazer os demais cenários para `tests/Feature` é uma das [Pendências](#pendê
 
 Da mais recente para a mais antiga. Cada entrada diz o que mudou, **por quê** e como foi
 conferido — o porquê é o que falta a quem pega o código depois.
+
+- [2026-10-13] **Painel da prestação de contas** (`LancamentoController`, `Lancamento`, `Support\PrestacaoDosLancamentos`;
+  migração `2026_10_13_100000`)
+  - Antes a OSC montava a prestação inteira de uma vez, no fim do período, e a Prefeitura lançava as despesas na
+    Execução. Agora cada parceria tem um **painel** (Prestação de contas → Painel de cada parceria, ou o botão na
+    Execução) com cinco abas — **Despesas** (com a nota ou o comprovante, obrigatório), **Extratos** (conta corrente e
+    aplicação, por mês), **Evidências** (fotos, listas, relatórios, ligadas a uma meta), **Folha** (do mês) e **Bens**
+    permanentes —, e a OSC lança à medida que acontecem. Filtro por mês
+  - **Conferência ao longo da execução:** cada lançamento fica *a conferir*, *conferido* ou *devolvido* com motivo
+    (`Concerns\ConferidoPeloMunicipio`, usado por `Despesa` e `Lancamento`). Quem tem `execucao` ou `prestacao_contas`
+    na Secretaria confere um a um ou "todos os pendentes" da aba; a devolução manda e-mail à OSC
+    (`Avisos::lancamentoDevolvido`), que corrige e o lançamento volta à conferência. Conferido não se altera
+  - **A prestação nasce montada:** ao gerar (tipo e período, no painel), entram a folha somada (funcionários: o maior
+    do período), os bens no Anexo VII, e os arquivos dos documentos — extratos, evidências e notas fiscais em ordem
+    cronológica (um arquivo vai como veio; vários, num ZIP) e folha e bens em "Outros documentos"; o relatório lista as
+    evidências por meta. Devolvidos ficam de fora. "Atualizar com os lançamentos" refaz a montagem; documento assinado
+    e arquivo enviado à mão na peça não mudam (`pecas.dos_lancamentos`)
+  - **Travas:** a OSC não envia com lançamento devolvido no período; a UG não encerra com lançamento a conferir;
+    enviada a prestação, os lançamentos do período não se alteram nem se conferem mais, e não se lança com data num
+    período já enviado (ficaria preso sem conferência — achado olhando a tela)
+  - A Prefeitura deixou de lançar despesas (`despesas.store/update/destroy` da Execução saíram); a Execução mostra a
+    situação de cada uma. As despesas que já existiam entram como conferidas
+  - Conferido: `PainelDaPrestacaoTest` (5 testes; falham com a montagem, a trava e o filtro do devolvido desligados);
+    suíte 204/204; 430 telas sem erro; no navegador, o painel da OSC e o da Prefeitura com dados de exemplo
+    (apagados depois)
 
 - [2026-10-08] **Revisão do README e o Resumo das entregas**
   - Seção nova [Resumo das entregas](#resumo-das-entregas): a linha do tempo de 16/06 a 08/10, uma linha por dia

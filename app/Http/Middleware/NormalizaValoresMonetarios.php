@@ -28,6 +28,8 @@ class NormalizaValoresMonetarios
         'recursos_proprios',
         'despesas_bancarias',
         'valor_ressarcido',
+        'folha_salarios', 'folha_vantagens', 'folha_adicionais', 'folha_inss', 'folha_irrf',
+        'folha_plano_saude', 'folha_fgts', 'folha_ferias', 'folha_rescisao',
     ];
 
     public function handle(Request $request, Closure $next): Response

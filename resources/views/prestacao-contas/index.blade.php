@@ -15,49 +15,42 @@
         @endif
         <x-flash-message />
 
-        @if($oscId)
-            <div class="bg-white rounded-xl border border-gray-200 shadow-sm p-6">
-                <h2 class="font-semibold text-gray-900">Nova prestação de contas</h2>
-                <p class="text-sm text-gray-500 mt-0.5 mb-4">
-                    Escolha a parceria e o período. O que já foi lançado na execução — repasses e despesas —
-                    entra sozinho no relatório; você completa o resto.
+        {{-- O painel de cada parceria: a OSC lança ao longo da execução e gera a prestação de lá. --}}
+        @php
+            $paineis = $oscId ? $instrumentos
+                : $instrumentos->filter(fn ($i) => $i->pendente_despesas + $i->pendente_lancamentos > 0);
+        @endphp
+        <div class="bg-white rounded-xl border border-gray-200 shadow-sm">
+            <div class="px-6 py-4 border-b border-gray-100">
+                <h2 class="font-semibold text-gray-900">{{ $oscId ? 'Painel de cada parceria' : 'Lançamentos a conferir' }}</h2>
+                <p class="text-sm text-gray-500 mt-0.5">
+                    {{ $oscId
+                        ? 'Lance despesas, extratos, evidências, folha e bens à medida que acontecem. A prestação de contas do período é gerada no painel, já montada.'
+                        : 'Parcerias em que a OSC lançou despesas, extratos, evidências, folha ou bens que ainda não foram conferidos.' }}
                 </p>
-                @if($instrumentos->isEmpty())
-                    <p class="text-sm text-gray-500">Nenhuma parceria em execução para prestar contas.</p>
-                @else
-                    <form action="{{ route('prestacao-contas.store') }}" method="POST" class="grid sm:grid-cols-5 gap-3 items-end">
-                        @csrf
-                        <div class="sm:col-span-2">
-                            <x-input-label for="instrumento_id" value="Parceria" />
-                            <select id="instrumento_id" name="instrumento_id" required
-                                    class="mt-1 block w-full border-gray-300 rounded-lg shadow-sm text-sm focus:ring-brand-500 focus:border-brand-500">
-                                @foreach($instrumentos as $i)
-                                    <option value="{{ $i->id }}">{{ $i->numero }} — {{ \Illuminate\Support\Str::limit($i->objeto, 50) }}</option>
-                                @endforeach
-                            </select>
-                        </div>
-                        <div>
-                            <x-input-label for="tipo" value="Tipo" />
-                            <select id="tipo" name="tipo" class="mt-1 block w-full border-gray-300 rounded-lg shadow-sm text-sm focus:ring-brand-500 focus:border-brand-500">
-                                @foreach(\App\Models\PrestacaoContas::TIPOS as $k => $r)<option value="{{ $k }}">{{ $r }}</option>@endforeach
-                            </select>
-                        </div>
-                        <div>
-                            <x-input-label for="periodo_inicio" value="Início do período" />
-                            <x-text-input id="periodo_inicio" name="periodo_inicio" type="date" class="mt-1 block w-full" required />
-                        </div>
-                        <div>
-                            <x-input-label for="periodo_fim" value="Fim do período" />
-                            <x-text-input id="periodo_fim" name="periodo_fim" type="date" class="mt-1 block w-full" required />
-                        </div>
-                        <div class="sm:col-span-5">
-                            <x-input-error :messages="$errors->all()" class="mb-2" />
-                            <button class="btn btn-primary">Abrir prestação de contas</button>
-                        </div>
-                    </form>
-                @endif
             </div>
-        @endif
+            <div class="divide-y divide-gray-100">
+                @forelse($paineis as $i)
+                    @php
+                        $aConferir = $i->pendente_despesas + $i->pendente_lancamentos;
+                        $devolvidos = $i->devolvido_despesas + $i->devolvido_lancamentos;
+                    @endphp
+                    <a href="{{ route('lancamentos.painel', $i) }}" class="flex items-start gap-4 px-6 py-4 hover:bg-gray-50 transition group">
+                        <span class="min-w-0 flex-1">
+                            <span class="block text-sm font-semibold text-gray-900 group-hover:text-brand-800">{{ $i->numero }} — {{ \Illuminate\Support\Str::limit($i->objeto, 70) }}</span>
+                            <span class="block text-xs text-gray-500 mt-0.5">{{ $i->proposta?->osc?->name }}</span>
+                        </span>
+                        <span class="shrink-0 flex items-center gap-2">
+                            @if($devolvidos)<span class="px-2 py-0.5 text-[11px] font-semibold bg-red-50 text-red-700 ring-1 ring-red-200 rounded">{{ $devolvidos }} devolvido(s)</span>@endif
+                            @if($aConferir)<span class="px-2 py-0.5 text-[11px] font-semibold bg-accent-50 text-accent-800 ring-1 ring-accent-200 rounded">{{ $aConferir }} a conferir</span>@endif
+                            <span class="text-xs font-semibold text-brand-700">Abrir painel →</span>
+                        </span>
+                    </a>
+                @empty
+                    <p class="px-6 py-4 text-sm text-gray-400">{{ $oscId ? 'Nenhuma parceria em execução.' : 'Nada a conferir.' }}</p>
+                @endforelse
+            </div>
+        </div>
 
         <div class="bg-white rounded-xl border border-gray-200 shadow-sm divide-y divide-gray-100 overflow-hidden">
             @forelse($prestacoes as $pc)
