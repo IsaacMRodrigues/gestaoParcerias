@@ -9,8 +9,8 @@ use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
 /**
- * A barra do portal da OSC logada: nove links numa linha passavam da tela
- * (01/10/2026). Os de propor e os da execução viraram grupos.
+ * O menu do portal da OSC logada: na barra lateral à esquerda (13/10/2026), em seções — participar,
+ * propor parceria, execução, organização e ajuda. O visitante segue com o cabeçalho de cima.
  */
 class BarraDoPortalTest extends TestCase
 {
@@ -25,7 +25,9 @@ class BarraDoPortalTest extends TestCase
         $osc->forceFill(['user_id' => $rl->id])->save();
 
         $html = $this->actingAs($rl)->get('/portal/minhas-propostas')->assertOk()->getContent();
-        $barra = substr($html, strpos($html, '<nav class="hidden lg:flex'), 8000);
+        $this->assertStringNotContainsString('<nav class="hidden lg:flex', $html, 'sem a barra de cima');
+        $lateral = substr($html, strpos($html, '<aside'));
+        $barra = substr($lateral, strpos($lateral, '<nav'));
         $barra = substr($barra, 0, strpos($barra, '</nav>'));
 
         foreach (['Chamamentos abertos', 'Minhas inscrições', 'Propor parceria', 'Manifestar interesse', 'Nova Proposta',
@@ -33,6 +35,7 @@ class BarraDoPortalTest extends TestCase
             $this->assertStringContainsString($rotulo, $barra, $rotulo);
         }
         $this->assertStringNotContainsString('Transparência', $barra, 'para a OSC, a Transparência fica no rodapé');
+        $this->assertStringContainsString('lg:pl-64', $html, 'o conteúdo abre espaço para a barra lateral');
     }
 
     public function test_quem_nao_esta_logado_ve_a_transparencia(): void

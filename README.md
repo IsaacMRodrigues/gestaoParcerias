@@ -136,6 +136,7 @@ cada item estão no [Histórico de entregas](#histórico-de-entregas). 🚀 marc
 | 06–07/10 | Instrumento nasce na conclusão da Celebração; **download** em PDF e ZIP em todos os fluxos; plano de aplicação digitado e textos até 1000 caracteres; otimização (Celebração de 106 para 44 consultas ao banco). 🚀 deploy de 07/10, ensaiado sobre uma cópia do banco de produção |
 | 07/10 | Depois do deploy: listas só com o que é da Secretaria; R$ e vírgula em todos os campos de dinheiro; Arquivos da OSC valendo em todos os fluxos (recusa da UG trava a Celebração) |
 | 08/10 | Caixas de seleção e barra de download nos fluxos; **Arquivos da OSC preenchendo os fluxos** (documentos complementares, habilitação da dispensa e modelos com os dados da OSC); revisão do README |
+| 13/10 | Menu do portal da OSC na **barra lateral**, como o da área interna |
 | 13/10 | **Painel da prestação de contas**: a OSC lança despesas, extratos, evidências, folha e bens ao longo da execução; a Prefeitura confere ou devolve cada um; a prestação do período é gerada já montada com o que foi lançado |
 
 ---
@@ -215,9 +216,11 @@ que a etapa existe e por que não entra.
 
 ### Menu do portal (OSC logada)
 
-Chamamentos abertos · Minhas inscrições · **Propor parceria** (Manifestar interesse, Nova Proposta) ·
-**Execução** (Alterações, Prestação de contas) · Arquivos da OSC · Suporte — a Transparência fica no rodapé. No
-menu da conta, **Meus dados e senha** (toda a equipe) e **Usuários da organização** (só o responsável legal).
+Barra lateral à esquerda, como a da área interna (`layouts/sidebar-osc`), em seções: **Participar** (Chamamentos
+abertos, Minhas inscrições) · **Propor parceria** (Manifestar interesse, Nova Proposta) · **Execução** (Alterações,
+Prestação de contas) · **Organização** (Arquivos da OSC) · **Ajuda** (Suporte) — a Transparência fica no rodapé. No
+menu da conta, no canto superior, **Meus dados e senha** (toda a equipe) e **Usuários da organização** (só o
+responsável legal). O visitante segue com o cabeçalho de cima.
 
 ### Peças que atravessam o sistema
 
@@ -682,6 +685,13 @@ Trazer os demais cenários para `tests/Feature` é uma das [Pendências](#pendê
 
 Da mais recente para a mais antiga. Cada entrada diz o que mudou, **por quê** e como foi
 conferido — o porquê é o que falta a quem pega o código depois.
+
+- [2026-10-13] **Menu do portal da OSC na barra lateral** (`layouts/portal`, `layouts/sidebar-osc`)
+  - A OSC logada tinha o menu numa barra horizontal no topo, com grupos em menu suspenso; passou para uma barra
+    lateral fixa à esquerda, no mesmo desenho da área interna (gaveta no celular), com os grupos abertos em seções.
+    A conta ficou no canto superior direito e a faixa "É a sua vez" no topo do conteúdo. O visitante não muda
+  - Conferido: `BarraDoPortalTest` (menu na lateral, sem a barra de cima); suíte 204/204; 435 telas sem erro; no
+    navegador, o painel da prestação com o menu novo
 
 - [2026-10-13] **Painel da prestação de contas** (`LancamentoController`, `Lancamento`, `Support\PrestacaoDosLancamentos`;
   migração `2026_10_13_100000`)
