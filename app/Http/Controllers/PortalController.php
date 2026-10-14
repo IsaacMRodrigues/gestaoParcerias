@@ -12,16 +12,25 @@ use Illuminate\View\View;
 
 class PortalController extends Controller
 {
-    public function index(): View
+    public function index(Request $request): View
     {
+        $busca = trim((string) $request->query('busca'));
+
         $chamamentos = Chamamento::with(['programa.orgao'])
             ->whereIn('status', ['publicado', 'em_inscricao'])
+            // Número, título, objeto ou a Secretaria.
+            ->when($busca !== '', fn ($q) => $q->where(fn ($sub) => $sub
+                ->where('numero', 'like', "%{$busca}%")
+                ->orWhere('titulo', 'like', "%{$busca}%")
+                ->orWhere('objeto', 'like', "%{$busca}%")
+                ->orWhereHas('programa.orgao', fn ($o) => $o->where('name', 'like', "%{$busca}%")->orWhere('sigla', 'like', "%{$busca}%"))))
             ->orderByRaw("CASE status WHEN 'em_inscricao' THEN 1 WHEN 'publicado' THEN 2 ELSE 3 END")
             ->orderByDesc('data_publicacao')
             ->orderBy('data_fim_inscricao')
-            ->paginate(12);
+            ->paginate(12)
+            ->withQueryString();
 
-        return view('portal.index', compact('chamamentos'));
+        return view('portal.index', compact('chamamentos', 'busca'));
     }
 
     /** Transparência pública: as parcerias celebradas, com valores e vigência, sem login. */
@@ -99,15 +108,22 @@ class PortalController extends Controller
     }
 
     /** Onde a OSC está envolvida: chamamento público, dispensa/inexigibilidade e manifestação. */
-    public function minhasPropostas(): View
+    public function minhasPropostas(Request $request): View
     {
         $osc = auth()->user()->oscVinculada();
         abort_unless($osc, 403, 'Sua conta não está vinculada a uma OSC.');
+        $busca = trim((string) $request->query('busca'));
 
         // `alteracoesEmAndamento` alimenta o selo pedido no modelo 3.3 — a OSC
         // vê na lista que aquela parceria está em alteração.
+        // Pesquisa: título ou objeto da proposta, número ou título do chamamento, a Secretaria.
         $propostas = $osc->propostas()
             ->with(['chamamento.programa.orgao', 'instrumento.alteracoes' => fn ($q) => $q->emAndamento()])
+            ->when($busca !== '', fn ($q) => $q->where(fn ($sub) => $sub
+                ->where('titulo', 'like', "%{$busca}%")
+                ->orWhere('objeto', 'like', "%{$busca}%")
+                ->orWhereHas('chamamento', fn ($c) => $c->where('numero', 'like', "%{$busca}%")->orWhere('titulo', 'like', "%{$busca}%"))
+                ->orWhereHas('chamamento.programa.orgao', fn ($o) => $o->where('name', 'like', "%{$busca}%"))))
             ->latest()
             ->get();
 
@@ -120,10 +136,15 @@ class PortalController extends Controller
         $manifestacoes = ManifestacaoInteresse::with('orgao')
             ->where('osc_id', $osc->id)
             ->whereNull('proposta_id')
+            ->when($busca !== '', fn ($q) => $q->where(fn ($sub) => $sub
+                ->where('titulo', 'like', "%{$busca}%")
+                ->orWhere('objeto', 'like', "%{$busca}%")
+                ->orWhere('protocolo', 'like', "%{$busca}%")
+                ->orWhereHas('orgao', fn ($o) => $o->where('name', 'like', "%{$busca}%"))))
             ->latest()
             ->get();
 
-        return view('portal.minhas-propostas', compact('osc', 'emChamamento', 'emDispensa', 'manifestacoes'));
+        return view('portal.minhas-propostas', compact('osc', 'emChamamento', 'emDispensa', 'manifestacoes', 'busca'));
     }
 
     public function participar(Chamamento $chamamento): View|RedirectResponse

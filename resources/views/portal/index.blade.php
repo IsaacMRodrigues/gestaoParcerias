@@ -53,12 +53,16 @@
             </div>
         @endif
 
-        <div class="flex items-center justify-between mb-5">
+        <div class="flex items-center justify-between mb-3">
             <h2 class="text-sm font-semibold text-gray-500 uppercase tracking-wider">Chamamentos disponíveis</h2>
             @if($chamamentos->total() > 0)
-                <span class="text-xs font-medium text-brand-700 bg-brand-50 px-2.5 py-1 rounded-full">{{ $chamamentos->total() }} aberto(s)</span>
+                <span class="text-xs font-medium text-brand-700 bg-brand-50 px-2.5 py-1 rounded-full">
+                    {{ $chamamentos->total() }} {{ $busca !== '' ? 'encontrado(s)' : 'aberto(s)' }}
+                </span>
             @endif
         </div>
+        <x-campo-pesquisa :action="route('portal.index')" ancora="chamamentos" class="mb-5"
+                          placeholder="Pesquisar por número, título, objeto ou Secretaria" />
 
         @forelse($chamamentos as $chamamento)
             <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6 mb-4 hover:shadow-md transition">
@@ -137,6 +141,12 @@
                 </div>
             </div>
         @empty
+            @if($busca !== '')
+                <div class="bg-white rounded-2xl border border-gray-200 px-6 py-10 text-center">
+                    <p class="text-sm text-gray-600">Nenhum chamamento aberto encontrado para <strong>"{{ $busca }}"</strong>.</p>
+                    <a href="{{ route('portal.index') }}#chamamentos" class="text-sm font-semibold text-brand-700 hover:underline mt-1 inline-block">Ver todos →</a>
+                </div>
+            @else
             <div class="bg-white rounded-2xl border border-gray-200 px-6 py-14 text-center">
                 <div class="w-14 h-14 mx-auto rounded-full bg-brand-50 flex items-center justify-center">
                     <svg class="w-7 h-7 text-brand-500" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.6">
@@ -160,6 +170,7 @@
                     </div>
                 @endguest
             </div>
+            @endif
         @endforelse
 
         @if($chamamentos->hasPages())

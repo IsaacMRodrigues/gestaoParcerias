@@ -22,6 +22,16 @@
 
         <x-flash-message />
 
+        <div class="space-y-2">
+            <x-campo-pesquisa :action="route('portal.minhas-propostas')"
+                              placeholder="Pesquisar por título, objeto, nº do chamamento, protocolo ou Secretaria" />
+            @if($busca !== '')
+                <p class="text-sm text-gray-500">
+                    {{ $emChamamento->count() + $emDispensa->count() + $manifestacoes->count() }} resultado(s) para <strong>"{{ $busca }}"</strong>.
+                </p>
+            @endif
+        </div>
+
         {{-- 1. Chamamento público --}}
         <section>
             <div class="flex items-center gap-3 mb-3">
@@ -33,7 +43,7 @@
                 @include('portal._card-proposta', ['proposta' => $proposta, 'cor' => $corProposta($proposta)])
             @empty
                 <div class="bg-white rounded-xl border border-gray-200 shadow-sm px-6 py-8 text-center">
-                    <p class="text-sm text-gray-500">Nenhuma proposta em chamamento público.</p>
+                    <p class="text-sm text-gray-500">{{ $busca !== '' ? 'Nenhuma proposta em chamamento público com essa pesquisa.' : 'Nenhuma proposta em chamamento público.' }}</p>
                     <a href="{{ route('portal.index') }}" class="text-sm font-semibold text-brand-700 hover:underline mt-1 inline-block">
                         Ver chamamentos abertos →
                     </a>
@@ -52,7 +62,11 @@
                 </span>
             </div>
 
-            @if($emDispensa->isEmpty() && $manifestacoes->isEmpty())
+            @if(($emDispensa->isEmpty() && $manifestacoes->isEmpty()) && $busca !== '')
+                <div class="bg-white rounded-xl border border-gray-200 shadow-sm px-6 py-8 text-center">
+                    <p class="text-sm text-gray-500">Nada encontrado com essa pesquisa.</p>
+                </div>
+            @elseif($emDispensa->isEmpty() && $manifestacoes->isEmpty())
                 <div class="bg-white rounded-xl border border-gray-200 shadow-sm px-6 py-8 text-center">
                     <p class="text-sm text-gray-500">
                         Nada por aqui. É pela manifestação de interesse que se propõe uma parceria quando não

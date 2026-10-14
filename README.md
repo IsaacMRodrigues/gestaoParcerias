@@ -138,6 +138,7 @@ cada item estão no [Histórico de entregas](#histórico-de-entregas). 🚀 marc
 | 07/10 | Depois do deploy: listas só com o que é da Secretaria; R$ e vírgula em todos os campos de dinheiro; Arquivos da OSC valendo em todos os fluxos (recusa da UG trava a Celebração) |
 | 08/10 | Caixas de seleção e barra de download nos fluxos; **Arquivos da OSC preenchendo os fluxos** (documentos complementares, habilitação da dispensa e modelos com os dados da OSC); revisão do README |
 | 13/10 | Menu do portal da OSC na **barra lateral**, como o da área interna |
+| 14/10 | **Pesquisa** nos Chamamentos abertos do portal e em Minhas inscrições da OSC |
 | 14/10 | Plano de Trabalho: a meta deixa de ter "Objetivo específico" (formulário e documento) |
 | 14/10 | Celebração com **21 etapas**: sai a etapa da SCP só para a publicação e a Autorização de Início, que passam para a etapa da Ordem de Pagamento Global |
 | 14/10 | **Relatórios da prestação de contas**: execução financeira por parceria (repassado, despesas, saldo, blocos do Anexo VI, plano aprovado × executado) e situação de cada prestação, na tela, em planilha e em PDF |
@@ -689,6 +690,15 @@ Trazer os demais cenários para `tests/Feature` é uma das [Pendências](#pendê
 
 Da mais recente para a mais antiga. Cada entrada diz o que mudou, **por quê** e como foi
 conferido — o porquê é o que falta a quem pega o código depois.
+
+- [2026-10-14] **Pesquisa nas listas do portal** (`components/campo-pesquisa`, `PortalController::index` e `minhasPropostas`)
+  - Com muitos itens, ficava difícil achar um. **Chamamentos abertos** (OSC, visitante e servidor no Portal Público)
+    pesquisa por número, título, objeto e Secretaria (nome ou sigla), mantendo a pesquisa na paginação; **Minhas
+    inscrições** pesquisa propostas (título, objeto, número e título do chamamento, Secretaria) e manifestações (título,
+    objeto, protocolo, Secretaria), com a contagem do que foi achado. A lista de Chamamentos da área interna já tinha
+    pesquisa
+  - Conferido: `PesquisaNasListasDoPortalTest` (2 testes); suíte 211/211; 460 telas sem erro; no navegador, Minhas
+    inscrições com o campo
 
 - [2026-10-14] **Meta sem "Objetivo específico"** (`plano/_editor`, `PlanoDocumento`, `PlanoTrabalhoController`)
   - A pedido, saiu o campo "Objetivo específico (conforme já descrito no item 4)" da nova meta, do resumo de cada meta
