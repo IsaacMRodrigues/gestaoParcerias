@@ -61,7 +61,7 @@
                 @endunless
             </form>
 
-            {{-- Os dados bancários são os da Celebração (enviados pela OSC na etapa 18). --}}
+            {{-- Os dados bancários são os da Celebração (enviados pela OSC na etapa 17). --}}
             @php $dadosBancarios = $instrumento->proposta?->pecas()->where('chave', 'dados_bancarios')->first(); @endphp
             <div class="bg-white rounded-xl border border-gray-200 p-6">
                 <h3 class="text-sm font-semibold text-gray-900 mb-2">Dados bancários</h3>

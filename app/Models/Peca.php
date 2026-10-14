@@ -353,14 +353,14 @@ class Peca extends Model
         'parecer_juridico'       => 7,
         'parecer_scp'            => 8,
         'termo'                  => 8,
-        // As etapas 9 a 15 são as assinaturas do Termo: o que vem
-        // depois andou seis casas.
-        'comprovante_publicacao_doe'  => 16,
-        'comprovante_publicacao_site' => 16,
-        'autorizacao_inicio'     => 16,
-        'dados_bancarios'        => 17,
-        'op_global'              => 18,
-        'comprovante_empenho'    => 21,
+        // As etapas 9 a 15 são as assinaturas do Termo. A publicação e a Autorização de Início
+        // vão com a OP Global, depois dos dados bancários.
+        'dados_bancarios'        => 16,
+        'comprovante_publicacao_doe'  => 17,
+        'comprovante_publicacao_site' => 17,
+        'autorizacao_inicio'     => 17,
+        'op_global'              => 17,
+        'comprovante_empenho'    => 20,
     ];
 
     /**
@@ -439,11 +439,11 @@ class Peca extends Model
                 'gestor' => ['etapa' => 13, 'rotulo' => 'Gestor da Parceria'],
                 'pm'     => ['etapa' => 15, 'rotulo' => 'Gabinete do Prefeito'],
             ],
-            // A OP Global: a SCP elabora (etapa 19); assinam o Gestor da
+            // A OP Global: a SCP elabora (etapa 18); assinam o Gestor da
             // Parceria e o Responsável da UG.
             'op_global' => [
-                'gestor' => ['etapa' => 19, 'rotulo' => 'Gestor da Parceria'],
-                'ug'     => ['etapa' => 20, 'rotulo' => 'Responsável da Unidade Gestora'],
+                'gestor' => ['etapa' => 18, 'rotulo' => 'Gestor da Parceria'],
+                'ug'     => ['etapa' => 19, 'rotulo' => 'Responsável da Unidade Gestora'],
             ],
         ],
     ];

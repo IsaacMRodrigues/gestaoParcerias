@@ -16,7 +16,8 @@ use Tests\TestCase;
 
 /**
  * A Ordem de Pagamento Global com duas assinaturas, nesta ordem: o Gestor da
- * Parceria e o Responsável da UG (decisão da gestão, 01/10/2026).
+ * Parceria e o Responsável da UG (decisão da gestão, 01/10/2026). Na etapa em que a
+ * SCP a elabora, ela também anexa a publicação e emite a Autorização de Início.
  */
 class OpGlobalDuasAssinaturasTest extends TestCase
 {
@@ -43,25 +44,36 @@ class OpGlobalDuasAssinaturasTest extends TestCase
         $responsavel = $servidor('ug', 'responsavel_unidade_gestora', $orgao);
         $gestor = $servidor('ug', 'gestor_parceria', $orgao);
 
-        // A SCP elabora a OP (etapa 19); o Gestor já foi escolhido no Termo.
+        // A SCP elabora a OP (etapa 18); o Gestor já foi escolhido no Termo.
         $proposta = Proposta::forceCreate(['chamamento_id' => $chamamento->id, 'osc_id' => $osc->id, 'titulo' => 'P', 'objeto' => 'x',
             'status' => 'aprovada', 'valor_solicitado' => 1, 'celebracao_iniciada_em' => now(),
-            'celebracao_etapa' => 18, 'celebracao_setor' => 'scp', 'celebracao_gestor_id' => $gestor->id]);
+            'celebracao_etapa' => 17, 'celebracao_setor' => 'scp', 'celebracao_gestor_id' => $gestor->id]);
         Peca::sincronizar($proposta, 'celebracao');
         $op = $proposta->pecas()->where('chave', 'op_global')->sole();
         $op->forceFill(['conteudo' => '<p>OP Global</p>'])->save();
 
+        // Na mesma etapa: a publicação do extrato e a Autorização de Início.
+        $pendencias = implode(' | ', $proposta->fresh()->pendenciasCelebracao('scp'));
+        $this->assertStringContainsString('Comprovante de publicação no Diário Oficial', $pendencias);
+        $this->assertStringContainsString('Autorização de Início de Execução', $pendencias);
+        $this->actingAs($scp)->post("/celebracao/{$proposta->id}/avancar")->assertStatus(422);
+        foreach (['comprovante_publicacao_doe', 'comprovante_publicacao_site'] as $chave) {
+            $proposta->pecas()->where('chave', $chave)->sole()->forceFill(['arquivo_path' => "pecas/{$chave}.pdf", 'arquivo_nome' => 'x.pdf'])->save();
+        }
+        $proposta->pecas()->where('chave', 'autorizacao_inicio')->sole()
+            ->forceFill(['assinado_em' => now(), 'assinado_por' => $scp->id, 'assinante_nome' => $scp->name])->save();
+
         $this->assertFalse($op->podeAssinar($scp), 'a SCP só elabora');
         $this->actingAs($scp)->post("/celebracao/{$proposta->id}/avancar")->assertSessionHasNoErrors();
         $proposta = $proposta->fresh();
-        $this->assertSame([19, 'gestor', $gestor->id], [(int) $proposta->celebracao_etapa, $proposta->celebracao_setor, (int) $proposta->celebracao_gestor_id],
+        $this->assertSame([18, 'gestor', $gestor->id], [(int) $proposta->celebracao_etapa, $proposta->celebracao_setor, (int) $proposta->celebracao_gestor_id],
             'o Gestor do Termo vale para a OP');
 
         // O Responsável da UG não passa na frente do Gestor.
         $this->actingAs($responsavel)->patch("/pecas/{$op->id}/assinar-parte")->assertForbidden();
         $this->actingAs($gestor)->patch("/pecas/{$op->id}/assinar-parte")->assertSessionHasNoErrors();
         $this->actingAs($gestor)->post("/celebracao/{$proposta->id}/avancar")->assertSessionHasNoErrors();
-        $this->assertSame(20, (int) $proposta->fresh()->celebracao_etapa);
+        $this->assertSame(19, (int) $proposta->fresh()->celebracao_etapa);
 
         $this->actingAs($responsavel)->post("/celebracao/{$proposta->id}/avancar")->assertStatus(422);
         $this->actingAs($responsavel)->patch("/pecas/{$op->id}/assinar-parte")->assertSessionHasNoErrors();
@@ -69,7 +81,7 @@ class OpGlobalDuasAssinaturasTest extends TestCase
         $this->actingAs($responsavel)->post("/celebracao/{$proposta->id}/avancar")->assertSessionHasNoErrors();
 
         $proposta = $proposta->fresh();
-        $this->assertSame([21, 'scp'], [(int) $proposta->celebracao_etapa, $proposta->celebracao_setor], 'segue para o empenho, a última');
+        $this->assertSame([20, 'scp'], [(int) $proposta->celebracao_etapa, $proposta->celebracao_setor], 'segue para o empenho, a última');
         $this->assertTrue($proposta->ultimaEtapaCelebracao());
         $this->assertSame(['gestor', 'ug'], $op->fresh()->assinaturasPartes->pluck('papel')->all());
     }

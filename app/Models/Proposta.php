@@ -107,10 +107,10 @@ class Proposta extends Model
         ['setor' => 'gestor', 'acao' => 'Gestor da Parceria: assinar o Termo e devolver à SCP'],
         ['setor' => 'scp',    'acao' => 'Encaminhar o Termo ao Gabinete'],
         ['setor' => 'pm',     'acao' => 'Gabinete: fazer a última assinatura do Termo e devolver à SCP'],
-        ['setor' => 'scp',    'acao' => 'Anexar o comprovante de publicação (Diário Oficial e site) e emitir a Autorização de Início de Execução'],
         ['setor' => 'osc',    'acao' => 'Informar os dados bancários da conta específica da parceria'],
         // A OP Global com duas assinaturas, nesta ordem: o Gestor da Parceria e o Responsável da UG.
-        ['setor' => 'scp',    'acao' => 'Elaborar a Ordem de Pagamento Global e encaminhar ao Gestor da Parceria'],
+        // A publicação do extrato e a Autorização de Início vêm junto com a OP Global.
+        ['setor' => 'scp',    'acao' => 'Anexar o comprovante de publicação (Diário Oficial e site), emitir a Autorização de Início de Execução e elaborar a Ordem de Pagamento Global, encaminhando ao Gestor da Parceria'],
         ['setor' => 'gestor', 'acao' => 'Gestor da Parceria: assinar a Ordem de Pagamento Global'],
         ['setor' => 'ug',     'perfil' => 'responsavel_unidade_gestora', 'acao' => 'Responsável da UG: assinar a Ordem de Pagamento Global'],
         ['setor' => 'scp',    'acao' => 'Anexar o comprovante de empenho global (encerra a Celebração)'],

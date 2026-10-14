@@ -34,7 +34,7 @@ assinados eletronicamente e validáveis por QR Code.
 | **1. Planejamento** (módulo 2.1)                                                                                                                   | ✅ Completo            | `ProcessoController`, `Processo`, `ProcessoPeca`                                   |
 | **2. Seleção** (2.2) — lista de chamamentos, prazo e resposta de recurso, manifestação de interesse, Nova Proposta, decisão da UG na dispensa | ✅ Completo            | `SelecaoController`, `ManifestacaoAnaliseController`, `PropostaController`         |
 | **Plano de Trabalho** (3.1) — os 13 itens do modelo da cliente                                                                                     | ✅ Completo            | `PlanoTrabalhoController`, `Concerns\TemPlanoDeTrabalho`, `Support\PlanoDocumento` |
-| **3. Celebração** (2.2 / 3.2) — 22 etapas: habilitação, etapa conjunta UG + SCP, Termo e OP Global assinados em sequência, empenho            | ✅ Completo            | `CelebracaoController`, motor `Peca`, `PecaAssinatura`                             |
+| **3. Celebração** (2.2 / 3.2) — 21 etapas: habilitação, etapa conjunta UG + SCP, Termo e OP Global assinados em sequência, empenho            | ✅ Completo            | `CelebracaoController`, motor `Peca`, `PecaAssinatura`                             |
 | **Devolução por documento** — em todos os trâmites                                                                                              | ✅ Completo            | `Support\Devolucao`                                                                    |
 | **Arquivos da OSC** — certidões, estatuto, ata, declarações e complementares anexados uma vez, preenchendo os fluxos                            | ✅ Completo            | `OscArquivoController`, `OscArquivo`, `Peca::puxarDaAreaDaOsc`                     |
 | **Formalização** (2.3) — instrumento (nasce na conclusão da Celebração), aditivo, apostilamento, OP parcial                                   | ✅ Completo            | `Proposta::criarInstrumento`, `AditivoController`, `OrdemPagamentoController`      |
@@ -137,6 +137,7 @@ cada item estão no [Histórico de entregas](#histórico-de-entregas). 🚀 marc
 | 07/10 | Depois do deploy: listas só com o que é da Secretaria; R$ e vírgula em todos os campos de dinheiro; Arquivos da OSC valendo em todos os fluxos (recusa da UG trava a Celebração) |
 | 08/10 | Caixas de seleção e barra de download nos fluxos; **Arquivos da OSC preenchendo os fluxos** (documentos complementares, habilitação da dispensa e modelos com os dados da OSC); revisão do README |
 | 13/10 | Menu do portal da OSC na **barra lateral**, como o da área interna |
+| 14/10 | Celebração com **21 etapas**: sai a etapa da SCP só para a publicação e a Autorização de Início, que passam para a etapa da Ordem de Pagamento Global |
 | 14/10 | **Relatórios da prestação de contas**: execução financeira por parceria (repassado, despesas, saldo, blocos do Anexo VI, plano aprovado × executado) e situação de cada prestação, na tela, em planilha e em PDF |
 | 13/10 | **Painel da prestação de contas**: a OSC lança despesas, extratos, evidências, folha e bens ao longo da execução; a Prefeitura confere ou devolve cada um; a prestação do período é gerada já montada com o que foi lançado |
 
@@ -297,7 +298,7 @@ na Celebração, nas Alterações e na Prestação — ver `User::setorNoTramite
 | ----------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------- |
 | **Seleção** (chamamento público) | UG → SCP → UG (prazo de recurso) → UG → SCP →**Prefeito** (6)                                                                                                                                                                                               | `Chamamento::ETAPAS_SELECAO`  |
 | **Manifestação de Interesse**     | OSC submete → SCP recebe → Secretaria opina → SCP defere ou indefere                                                                                                                                                                                                | `ManifestacaoInteresse`       |
-| **Celebração**                    | UG →**OSC** → UG + SCP (em paralelo) → SCP → SEPLAN → UG → SCP → PJ → SCP → **OSC** → SCP → **UG** → SCP → **Gestor** → SCP → **Gabinete** → SCP → **OSC** → SCP → **Gestor** → **UG** → SCP (22) | `Proposta::ETAPAS_CELEBRACAO` |
+| **Celebração**                    | UG →**OSC** → UG + SCP (em paralelo) → SCP → SEPLAN → UG → SCP → PJ → SCP → **OSC** → SCP → **UG** → SCP → **Gestor** → SCP → **Gabinete** → **OSC** → SCP → **Gestor** → **UG** → SCP (21) | `Proposta::ETAPAS_CELEBRACAO` |
 | **Alteração da Parceria**         | **OSC** → UG autoriza → SCP processa e decide (3)                                                                                                                                                                                                              | `Alteracao::ETAPAS`           |
 | **Prestação de Contas**           | **OSC** gera do painel e envia → SCP (análise prévia) → UG com Gestor e Comissão (3)                                                                                                                                                                                               | `PrestacaoContas::ETAPAS`     |
 | **Suporte**                         | quem abre ↔ equipe (TI e SCP)                                                                                                                                                                                                                                         | `Chamado`                     |
@@ -394,7 +395,7 @@ dois lugares, nunca na aprovação — na **criação** (responsável do setor) 
 
 Os fluxos designam etapas a setores, e **um deles é a própria OSC** — na Celebração ela elabora
 o Plano de Trabalho, anexa a habilitação, assina o Termo e informa os dados bancários (etapas 2, 10 e
-18 das 22). Mas OSC não tem lotação: `users.setor` é **NULL**.
+17 das 21). Mas OSC não tem lotação: `users.setor` é **NULL**.
 
 Quem comparava `$user->setor === 'osc'` obtinha sempre falso. Efeito: quando a UG encaminhava a
 Celebração à OSC, o item saía da caixa do município e **não entrava em lugar nenhum** — o trâmite
@@ -686,6 +687,20 @@ Trazer os demais cenários para `tests/Feature` é uma das [Pendências](#pendê
 
 Da mais recente para a mais antiga. Cada entrada diz o que mudou, **por quê** e como foi
 conferido — o porquê é o que falta a quem pega o código depois.
+
+- [2026-10-14] **Celebração sem a etapa da publicação** (`Proposta::ETAPAS_CELEBRACAO`, `Peca::CELEBRACAO_ETAPA`;
+  migração `2026_10_14_100000`)
+  - Saiu a etapa 17 (SCP: anexar os comprovantes de publicação no Diário Oficial e no site e emitir a Autorização de
+    Início de Execução), a pedido. Os três documentos continuam no checklist e passaram para a etapa da SCP que elabora
+    a Ordem de Pagamento Global, logo depois dos dados bancários da OSC — a SCP só encaminha a OP ao Gestor com a
+    publicação anexada e a Autorização assinada (a publicação é condição de eficácia do termo, art. 38). A
+    Celebração foi de 22 para 21 etapas; as etapas da OP andaram uma casa (`ASSINATURAS_EM_SEQUENCIA`)
+  - A migração renumera as celebrações (as que estavam na etapa que saiu vão para a dos dados bancários, com a OSC) e
+    os anexos avulsos dessas etapas
+  - O texto da Autorização de Início ainda pede os dados bancários, que agora a OSC informa antes dela — rever com a
+    SCP se o pedido sai do modelo
+  - Conferido: `OpGlobalDuasAssinaturasTest` atualizado (a SCP não avança sem a publicação e a Autorização); suíte
+    209/209; 460 telas sem erro; no banco local, a celebração concluída foi da etapa 22 para a 21
 
 - [2026-10-14] **Relatórios da prestação de contas** (`RelatorioPrestacaoController`, `Support\RelatorioPrestacao`,
   `relatorios/prestacao`, `relatorios/pdf`)
