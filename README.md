@@ -27,7 +27,7 @@ assinados eletronicamente e validáveis por QR Code.
 
 ## Estado atual
 
-*Atualizado em 13/10/2026.*
+*Atualizado em 14/10/2026.*
 
 | Etapa do ciclo                                                                                                                                            | Situação             | Onde fica                                                                                |
 | --------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------- | ---------------------------------------------------------------------------------------- |
@@ -54,8 +54,9 @@ o `RolesSeeder`, ensaiados antes sobre uma cópia do banco de produção.
 
 **No GitHub e ainda fora da produção** (sobem só quando pedido): listas por Secretaria, campos de dinheiro com
 R$, Arquivos da OSC valendo nos fluxos, caixas de seleção e barra de download, e os Arquivos da OSC
-preenchendo os fluxos (migração `2026_10_08_100000`) e o **painel da prestação de contas** (migração
-`2026_10_13_100000`). Ao subir, avisar que a inscrição em chamamento público passa a exigir a área Arquivos da OSC
+preenchendo os fluxos (migração `2026_10_08_100000`), o **painel da prestação de contas** (migração
+`2026_10_13_100000`), o menu lateral da OSC, os relatórios da prestação de contas e a Celebração com 21 etapas
+(migração `2026_10_14_100000`, que renumera as celebrações em andamento). Ao subir, avisar que a inscrição em chamamento público passa a exigir a área Arquivos da OSC
 completa, e que as despesas passam a ser lançadas pela OSC (as já lançadas pela Prefeitura entram como conferidas).
 
 As ações de produção que o deploy não faz (dados e painel) estão em
