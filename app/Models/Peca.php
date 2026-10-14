@@ -104,7 +104,7 @@ class Peca extends Model
             ['chave' => 'experiencia_previa',    'rotulo' => 'Comprovantes de experiência prévia (mínimo de um ano)',  'tipo' => 'arquivo', 'obrigatorio' => true],
             // Certidões e declarações ficam em "Arquivos da OSC"; as peças já entregues ficam como histórico.
             ['chave' => 'relacao_dirigentes',    'rotulo' => 'Relação nominal atualizada dos dirigentes',              'tipo' => 'arquivo', 'obrigatorio' => true],
-            ['chave' => 'docs_presidente',       'rotulo' => 'RG, CPF e comprovante de residência do presidente',      'tipo' => 'arquivo', 'obrigatorio' => true],
+            ['chave' => 'docs_presidente',       'rotulo' => 'RG, CPF e comprovante de endereço do representante legal', 'tipo' => 'arquivo', 'obrigatorio' => true],
             ['chave' => 'planilha_pessoal',      'rotulo' => 'Planilha de detalhamento de despesas de pessoal (se houver)', 'tipo' => 'arquivo', 'obrigatorio' => false],
             ['chave' => 'balanco_patrimonial',   'rotulo' => 'Balanço patrimonial do exercício anterior',              'tipo' => 'arquivo', 'obrigatorio' => true],
             ['chave' => 'relatorio_fotografico', 'rotulo' => 'Relatório fotográfico colorido do local (obra ou reforma)', 'tipo' => 'arquivo', 'obrigatorio' => false],

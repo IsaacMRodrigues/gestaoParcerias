@@ -31,8 +31,11 @@ class OscArquivo extends Model
         'institucionais' => [
             'rotulo' => 'Arquivos da OSC',
             'itens'  => [
-                'ata_eleicao' => 'Cópia da ata de eleição do quadro dirigente atual ou documento equivalente',
-                'estatuto'    => 'Cópia do estatuto registrado e suas eventuais alterações',
+                'ata_eleicao'        => 'Cópia da ata de eleição do quadro dirigente atual ou documento equivalente',
+                'estatuto'           => 'Cópia do estatuto registrado e suas eventuais alterações',
+                'docs_presidente'    => 'Cópia simples do RG, CPF e comprovante de endereço do representante legal',
+                'cartao_cnpj'        => 'Comprovante de inscrição no CNPJ, emitido no sítio eletrônico oficial da Receita Federal do Brasil (cadastro ativo há, no mínimo, três anos)',
+                'relacao_dirigentes' => 'Relação nominal atualizada dos dirigentes, conforme o estatuto, com endereço, telefone, e-mail, número e órgão expedidor da carteira de identidade e número de registro',
             ],
         ],
         'declaracoes' => [
@@ -49,8 +52,6 @@ class OscArquivo extends Model
         'complementares' => [
             'rotulo' => 'Documentos complementares',
             'itens'  => [
-                'docs_presidente'     => 'RG, CPF e comprovante de residência do presidente',
-                'relacao_dirigentes'  => 'Relação nominal atualizada dos dirigentes',
                 'balanco_patrimonial' => 'Balanço patrimonial do exercício anterior',
                 'experiencia_previa'  => 'Comprovantes de experiência prévia (mínimo de um ano)',
             ],

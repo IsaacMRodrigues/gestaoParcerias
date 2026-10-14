@@ -19,7 +19,7 @@
         : collect();
     $descricoes = [
         'certidoes'      => 'Com data de validade. Um aviso chega por e-mail ' . \App\Models\OscArquivo::DIAS_AVISO_VENCIMENTO . ' dias antes de vencer.',
-        'institucionais' => 'Estatuto e ata de eleição da diretoria atual.',
+        'institucionais' => 'Estatuto, ata de eleição da diretoria atual, documentos do representante legal, comprovante de inscrição no CNPJ e relação dos dirigentes.',
         'declaracoes'    => 'Abra o texto já preenchido com o cadastro, imprima, assine e anexe.',
         'complementares' => 'Opcionais. Enviados aqui, já preenchem os itens iguais da Celebração de cada parceria. O balanço tem validade.',
     ];
@@ -80,17 +80,22 @@
                                         @else
                                             <p class="text-xs text-gray-500 mt-0.5">
                                                 Versão {{ $atual->versao }} · enviada em {{ $atual->created_at->format('d/m/Y') }}
-                                                @if($atual->validade)
-                                                    ·
-                                                    @if($atual->vencida())
-                                                        <span class="font-semibold text-red-700">vencida em {{ $atual->validade->format('d/m/Y') }}</span>
-                                                    @elseif($atual->venceEmBreve())
-                                                        <span class="font-semibold text-accent-700">vence em {{ $atual->validade->format('d/m/Y') }}</span>
-                                                    @else
-                                                        válida até {{ $atual->validade->format('d/m/Y') }}
-                                                    @endif
+                                                ·
+                                                @if(! $atual->validade)
+                                                    sem data de validade
+                                                @elseif($atual->vencida())
+                                                    <span class="font-semibold text-red-700">venceu em {{ $atual->validade->format('d/m/Y') }}</span>
+                                                @elseif($atual->venceEmBreve())
+                                                    <span class="font-semibold text-accent-700">vence em {{ $atual->validade->format('d/m/Y') }}</span>
+                                                @else
+                                                    validade: {{ $atual->validade->format('d/m/Y') }}
                                                 @endif
                                             </p>
+                                        @endif
+
+                                        {{-- Item IV: a existência mínima, conferida pela data de abertura do CNPJ no cadastro (avisa, não trava). --}}
+                                        @if($tipo === 'cartao_cnpj' && ($avisoExistencia = $osc->avisoDeExistencia()))
+                                            <p class="mt-1 text-xs text-accent-800 bg-accent-50 border border-accent-200 rounded-lg px-2.5 py-1.5">{{ $avisoExistencia }}</p>
                                         @endif
 
                                         @if($proposta && $atual)
@@ -143,12 +148,16 @@
                                                     <input type="file" name="arquivo" required accept=".pdf,.jpg,.jpeg,.png"
                                                            class="block text-sm text-gray-600 file:mr-3 file:py-1.5 file:px-3 file:rounded-lg file:border-0 file:text-xs file:font-semibold file:bg-brand-50 file:text-brand-700 hover:file:bg-brand-100">
                                                 </div>
-                                                @if(\App\Models\OscArquivo::exigeValidade($tipo))
-                                                    <div>
-                                                        <label class="block text-xs text-gray-500 mb-1">{{ $tipo === 'balanco_patrimonial' ? 'Válido até' : 'Válida até' }} *</label>
+                                                {{-- Toda versão pode ter validade; certidões e balanço, obrigatoriamente. --}}
+                                                <div>
+                                                    @if(\App\Models\OscArquivo::exigeValidade($tipo))
+                                                        <label class="block text-xs text-gray-500 mb-1">Válido até *</label>
                                                         <input type="date" name="validade" required min="{{ now()->format('Y-m-d') }}" class="{{ $campo }}">
-                                                    </div>
-                                                @endif
+                                                    @else
+                                                        <label class="block text-xs text-gray-500 mb-1">Válido até (em branco se não vence)</label>
+                                                        <input type="date" name="validade" min="{{ now()->format('Y-m-d') }}" class="{{ $campo }}">
+                                                    @endif
+                                                </div>
                                                 <button type="submit" class="btn btn-primary btn-sm">Enviar</button>
                                             </form>
                                         </details>

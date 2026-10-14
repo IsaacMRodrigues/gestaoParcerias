@@ -138,6 +138,7 @@ cada item estão no [Histórico de entregas](#histórico-de-entregas). 🚀 marc
 | 07/10 | Depois do deploy: listas só com o que é da Secretaria; R$ e vírgula em todos os campos de dinheiro; Arquivos da OSC valendo em todos os fluxos (recusa da UG trava a Celebração) |
 | 08/10 | Caixas de seleção e barra de download nos fluxos; **Arquivos da OSC preenchendo os fluxos** (documentos complementares, habilitação da dispensa e modelos com os dados da OSC); revisão do README |
 | 13/10 | Menu do portal da OSC na **barra lateral**, como o da área interna |
+| 14/10 | Arquivos da OSC: exigidos os documentos do representante legal, o comprovante de inscrição no CNPJ (com aviso dos 3 anos de existência) e a relação dos dirigentes; **data de validade** em todos os documentos |
 | 14/10 | **Pesquisa** nos Chamamentos abertos do portal e em Minhas inscrições da OSC |
 | 14/10 | Plano de Trabalho: a meta deixa de ter "Objetivo específico" (formulário e documento) |
 | 14/10 | Celebração com **21 etapas**: sai a etapa da SCP só para a publicação e a Autorização de Início, que passam para a etapa da Ordem de Pagamento Global |
@@ -690,6 +691,23 @@ Trazer os demais cenários para `tests/Feature` é uma das [Pendências](#pendê
 
 Da mais recente para a mais antiga. Cada entrada diz o que mudou, **por quê** e como foi
 conferido — o porquê é o que falta a quem pega o código depois.
+
+- [2026-10-14] **Arquivos da OSC: três documentos exigidos e validade em todos** (`OscArquivo::GRUPOS`,
+  `Osc::avisoDeExistencia`, `arquivos-osc/_lista`, `Avisos::certidaoVencendo`)
+  - A SCP (mensagem de 08/10) pediu na área os itens II, IV e IX: **cópia simples do RG, CPF e comprovante de endereço do
+    representante legal**, **comprovante de inscrição no CNPJ** emitido no site da Receita (cadastro ativo há no mínimo
+    três anos) e **relação nominal atualizada dos dirigentes**, conforme o estatuto, com endereço, telefone, e-mail,
+    número e órgão expedidor da identidade e número de registro. Os três passaram a ser **exigidos** no grupo "Arquivos
+    da OSC", com a redação dela; o primeiro e o último eram complementares opcionais e seguem preenchendo os itens iguais
+    da Celebração (as chaves `docs_presidente` e `relacao_dirigentes` ficaram; o item da Celebração diz "representante
+    legal"). O comprovante de CNPJ é novo (`cartao_cnpj`)
+  - **Três anos de existência:** a data de abertura do CNPJ no cadastro gera um aviso junto ao comprovante, na área da
+    OSC e na análise da UG — não trava; quem decide é a UG
+  - **Validade em todos os documentos:** toda versão enviada pode ter "Válido até"; nas certidões e no balanço continua
+    obrigatória, nos demais fica em branco se o documento não vence. Com data, vale a regra das certidões: aviso por
+    e-mail antes de vencer (o texto distingue certidão, balanço e documento) e, vencido, vira pendência da área
+  - Conferido: `DocumentosEValidadeDaOscTest` (3 testes; falham com o documento opcional e sem o aviso); suíte 214/214;
+    460 telas sem erro. Sem conferência no navegador (a extensão estava desconectada)
 
 - [2026-10-14] **Pesquisa nas listas do portal** (`components/campo-pesquisa`, `PortalController::index` e `minhasPropostas`)
   - Com muitos itens, ficava difícil achar um. **Chamamentos abertos** (OSC, visitante e servidor no Portal Público)

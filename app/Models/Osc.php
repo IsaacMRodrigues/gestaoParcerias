@@ -106,6 +106,23 @@ class Osc extends Model
         return $pend;
     }
 
+    /** Mínimo de existência exigido da OSC, pelo CNPJ (comprovante de inscrição em Arquivos da OSC). */
+    public const ANOS_MINIMOS_DE_EXISTENCIA = 3;
+
+    /** Aviso quando a data de abertura do CNPJ no cadastro não mostra o mínimo de existência; não trava nada. */
+    public function avisoDeExistencia(): ?string
+    {
+        if ($this->data_abertura === null) {
+            return 'O cadastro da OSC não tem a data de abertura do CNPJ: confira o tempo de existência no comprovante de inscrição.';
+        }
+
+        $anos = (int) $this->data_abertura->diffInYears(now());
+
+        return $anos >= self::ANOS_MINIMOS_DE_EXISTENCIA ? null
+            : 'Pela data de abertura do CNPJ no cadastro (' . $this->data_abertura->format('d/m/Y') . '), a OSC tem '
+                . $anos . ' ano(s) de existência; o mínimo exigido é de ' . self::ANOS_MINIMOS_DE_EXISTENCIA . ' anos.';
+    }
+
     public function membros(): HasMany
     {
         return $this->hasMany(OscMembro::class);
