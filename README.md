@@ -42,7 +42,7 @@ assinados eletronicamente e validáveis por QR Code.
 | **4. Execução** (4.4) — repasses (Prefeitura), despesas com nota (lançadas pela OSC no painel), saldo | ✅ Completo | `ExecucaoController` |
 | **Alterações da Parceria** (3.3)                                                                                                                  | ✅ Completo            | `AlteracaoController`, `Alteracao`                                                   |
 | **Dossiê da OSC** (3.3) — o processo visível à organização                                                                                    | ✅ Completo            | `DossieController`, `Proposta::dossieParaOsc()`                                      |
-| **6. Prestação de Contas** (3.4) — painel em que a OSC lança ao longo da execução, conferência pela Prefeitura e a prestação do período gerada dos lançamentos | ✅ Completo | `LancamentoController`, `PrestacaoContasController`, `Support\PrestacaoDosLancamentos` |
+| **6. Prestação de Contas** (3.4) — painel em que a OSC lança ao longo da execução, conferência pela Prefeitura e a prestação do período gerada dos lançamentos; relatórios na tela, em planilha e PDF | ✅ Completo | `LancamentoController`, `PrestacaoContasController`, `Support\PrestacaoDosLancamentos`, `Support\RelatorioPrestacao` |
 | **Suporte** — dúvidas, problemas e sugestões                                                                                                     | ✅ Completo            | `SuporteController`, `Chamado`                                                       |
 | **5. Monitoramento e Fiscalização** (4.5)                                                                                                         | ⏳ Não iniciado       | aparece no menu como "em breve"                                                          |
 | **Solicitação de assinatura** (Aprovador de Assinatura)                                                                                           | ⏳ Aguarda definição | ver[Pendências](#pendências)                                                            |
@@ -137,6 +137,7 @@ cada item estão no [Histórico de entregas](#histórico-de-entregas). 🚀 marc
 | 07/10 | Depois do deploy: listas só com o que é da Secretaria; R$ e vírgula em todos os campos de dinheiro; Arquivos da OSC valendo em todos os fluxos (recusa da UG trava a Celebração) |
 | 08/10 | Caixas de seleção e barra de download nos fluxos; **Arquivos da OSC preenchendo os fluxos** (documentos complementares, habilitação da dispensa e modelos com os dados da OSC); revisão do README |
 | 13/10 | Menu do portal da OSC na **barra lateral**, como o da área interna |
+| 14/10 | **Relatórios da prestação de contas**: execução financeira por parceria (repassado, despesas, saldo, blocos do Anexo VI, plano aprovado × executado) e situação de cada prestação, na tela, em planilha e em PDF |
 | 13/10 | **Painel da prestação de contas**: a OSC lança despesas, extratos, evidências, folha e bens ao longo da execução; a Prefeitura confere ou devolve cada um; a prestação do período é gerada já montada com o que foi lançado |
 
 ---
@@ -563,7 +564,7 @@ Procedimento:
 
 ## Verificação
 
-`php artisan test` (sqlite em memória) roda **204 testes** em `tests/Feature`, um arquivo por regra de
+`php artisan test` (sqlite em memória) roda **209 testes** em `tests/Feature`, um arquivo por regra de
 negócio (quem abre qual parceria, contas e senhas, avisos por e-mail, segregação de encargos,
 cancelamento e prorrogação de chamamento, Nova Proposta, prazo e resposta de recurso, plano de
 trabalho do modelo, etapa conjunta, devolução por documento, Termo e OP em sequência, download de
@@ -685,6 +686,22 @@ Trazer os demais cenários para `tests/Feature` é uma das [Pendências](#pendê
 
 Da mais recente para a mais antiga. Cada entrada diz o que mudou, **por quê** e como foi
 conferido — o porquê é o que falta a quem pega o código depois.
+
+- [2026-10-14] **Relatórios da prestação de contas** (`RelatorioPrestacaoController`, `Support\RelatorioPrestacao`,
+  `relatorios/prestacao`, `relatorios/pdf`)
+  - Tela única (Prestação de Contas → Relatórios, no menu interno e no da OSC) com dois relatórios. **Execução
+    financeira**: uma linha por parceria — valor do termo, repassado, despesas, saldo, % executado, despesas nos quatro
+    blocos do Anexo VI, despesas a conferir e devolvidas; com uma parceria só, vem também o plano de aplicação aprovado
+    × executado, natureza por natureza. **Prestações de contas**: uma linha por prestação — período, situação (etapa e
+    setor ou encerrada), desde quando está lá, repassado, despesas e saldo do período, lançamentos a conferir e
+    devolvidos
+  - Filtros: Secretaria, OSC, parceria, período (corta repasses e despesas; nas prestações, as que tocam o período) e
+    situação. Recorte de sempre: a UG vê a sua Secretaria, quem atende o município vê tudo, a OSC só as próprias (sem
+    os filtros de Secretaria e OSC). Quem não tem `prestacao_contas`, `execucao` ou `monitoramento` não entra
+  - Saída na tela (com totais), em **planilha** (CSV para o Excel brasileiro: UTF-8 com BOM, ponto e vírgula, vírgula
+    decimal, com os filtros no cabeçalho) e em **PDF** paisagem com o cabeçalho da Prefeitura — os três da mesma fonte
+  - Conferido: `RelatorioPrestacaoTest` (5 testes; falha com o recorte por Secretaria e o período desligados); suíte
+    209/209; 460 telas sem erro (com o relatório nos três formatos); no navegador, como Prefeitura e como OSC
 
 - [2026-10-13] **Menu do portal da OSC na barra lateral** (`layouts/portal`, `layouts/sidebar-osc`)
   - A OSC logada tinha o menu numa barra horizontal no topo, com grupos em menu suspenso; passou para uma barra

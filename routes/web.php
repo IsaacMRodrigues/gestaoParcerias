@@ -26,6 +26,7 @@ use App\Http\Controllers\ManifestacaoController;
 use App\Http\Controllers\PortalController;
 use App\Http\Controllers\PrestacaoContasController;
 use App\Http\Controllers\LancamentoController;
+use App\Http\Controllers\RelatorioPrestacaoController;
 use App\Http\Controllers\ProcessoController;
 use App\Http\Controllers\SuporteController;
 use App\Http\Controllers\ProcessoPecaController;
@@ -358,6 +359,8 @@ Route::middleware('auth')->group(function () {
     // setor da vez, no controller.
     Route::get('prestacao-contas', [PrestacaoContasController::class, 'index'])->name('prestacao-contas.index');
     Route::post('prestacao-contas', [PrestacaoContasController::class, 'store'])->name('prestacao-contas.store');
+    // Antes de {pc}: senão "relatorios" seria lido como o número de uma prestação.
+    Route::get('prestacao-contas/relatorios', RelatorioPrestacaoController::class)->name('prestacao-contas.relatorios');
     Route::get('prestacao-contas/{pc}', [PrestacaoContasController::class, 'show'])->name('prestacao-contas.show');
     Route::put('prestacao-contas/{pc}', [PrestacaoContasController::class, 'atualizar'])->name('prestacao-contas.atualizar');
     Route::post('prestacao-contas/{pc}/bens', [PrestacaoContasController::class, 'adicionarBem'])->name('prestacao-contas.bens.store');

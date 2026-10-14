@@ -4,14 +4,22 @@
 <x-dynamic-component :component="$layout">
     @if(! $oscId)
         <x-slot name="header">
-            <h2 class="text-2xl font-bold text-gray-900">Prestação de Contas</h2>
-            <p class="text-sm text-gray-500 mt-0.5">O que as organizações enviaram, na ordem do período prestado.</p>
+            <div class="flex flex-wrap items-start justify-between gap-3">
+                <div>
+                    <h2 class="text-2xl font-bold text-gray-900">Prestação de Contas</h2>
+                    <p class="text-sm text-gray-500 mt-0.5">O que as organizações enviaram, na ordem do período prestado.</p>
+                </div>
+                <a href="{{ route('prestacao-contas.relatorios') }}" class="btn btn-outline btn-sm">Relatórios</a>
+            </div>
         </x-slot>
     @endif
 
     <div class="{{ $oscId ? 'max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-10' : 'py-8 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8' }} space-y-6">
         @if($oscId)
-            <h1 class="text-2xl font-bold text-gray-900">Prestação de contas</h1>
+            <div class="flex flex-wrap items-center justify-between gap-3">
+                <h1 class="text-2xl font-bold text-gray-900">Prestação de contas</h1>
+                <a href="{{ route('prestacao-contas.relatorios') }}" class="btn btn-outline btn-sm">Relatórios</a>
+            </div>
         @endif
         <x-flash-message />
 

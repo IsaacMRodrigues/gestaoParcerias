@@ -142,7 +142,8 @@
                 ]],
                 ['rotulo' => 'Execução', 'filhos' => [
                     ['url' => route('alteracoes.index'), 'rotulo' => 'Alterações', 'ativo' => request()->routeIs('alteracoes.*'), 'icone' => $icone['lapis']],
-                    ['url' => route('prestacao-contas.index'), 'rotulo' => 'Prestação de contas', 'ativo' => request()->routeIs('prestacao-contas.*') || request()->routeIs('lancamentos.*'), 'icone' => $icone['calculadora']],
+                    ['url' => route('prestacao-contas.index'), 'rotulo' => 'Prestação de contas', 'ativo' => request()->routeIs('prestacao-contas.*', 'lancamentos.*') && ! request()->routeIs('prestacao-contas.relatorios'), 'icone' => $icone['calculadora']],
+                    ['url' => route('prestacao-contas.relatorios'), 'rotulo' => 'Relatórios', 'ativo' => request()->routeIs('prestacao-contas.relatorios'), 'icone' => $icone['grafico']],
                 ]],
                 ['secao' => 'Organização', 'url' => route('portal.arquivos.index'), 'rotulo' => 'Arquivos da OSC', 'ativo' => request()->routeIs('portal.arquivos.*'), 'icone' => $icone['pasta']],
             );
