@@ -69,7 +69,7 @@ class PlanoDeTrabalhoModeloTest extends TestCase
             ->assertDontSee('name="valor_proprio"', false);
     }
 
-    public function test_meta_com_objetivo_especifico_e_atividades_com_periodo_e_estimado(): void
+    public function test_meta_com_atividades_com_periodo_e_estimado(): void
     {
         $this->actingAs($this->rl)->post($this->url('/metas'), [
             'objetivo_especifico' => 'Ensinar música', 'descricao' => 'Formar 30 alunos',
@@ -77,7 +77,8 @@ class PlanoDeTrabalhoModeloTest extends TestCase
             'meios_verificacao' => 'Lista de presença',
         ])->assertSessionHasNoErrors();
         $meta = $this->plano->metas()->sole();
-        $this->assertSame('Ensinar música', $meta->objetivo_especifico);
+        // O objetivo específico não faz parte da meta: não se grava.
+        $this->assertNull($meta->objetivo_especifico);
 
         $this->actingAs($this->rl)->post($this->url("/metas/{$meta->id}/etapas"), [
             'descricao' => 'Aulas de violão', 'data_inicio' => '2026-11-01', 'data_fim' => '2026-12-20', 'valor' => 600,
@@ -186,6 +187,7 @@ class PlanoDeTrabalhoModeloTest extends TestCase
         $p->desembolsos()->create(['meta_id' => $meta->id, 'parcela' => 1, 'valor' => 1000]);
 
         $html = PlanoDocumento::render($p->fresh());
+        $this->assertStringNotContainsString('conforme já descrito no item 4', $html, 'a meta não tem mais objetivo específico');
 
         $titulos = [
             '1 - Identificação Órgão/Entidade Proponente', '2 - Identificação do projeto', 'PEDIDO DE AVALIAÇÃO',

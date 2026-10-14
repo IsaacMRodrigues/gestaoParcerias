@@ -109,7 +109,6 @@ class PlanoDocumento
     {
         $html = '<p><strong>7 – Metas, indicadores e resultados (preencher conforme orientação abaixo)</strong></p>'
             . self::TABELA . '<thead><tr>'
-            . '<th>Objetivos específicos<br>(conforme já descrito no item 4)</th>'
             . '<th>Metas</th><th>Atividades</th><th>Indicadores<br>Qualitativas - Quantitativas</th>'
             . '<th>Resultados esperados</th><th>Meios de verificação</th>'
             . '</tr></thead><tbody>';
@@ -125,7 +124,6 @@ class PlanoDocumento
             ])->filter()->implode('<br>') ?: '—';
 
             $html .= '<tr>'
-                . '<td>' . e($meta->objetivo_especifico ?: '—') . '</td>'
                 . '<td>' . $meta->numero . '. ' . e($meta->descricao) . '</td>'
                 . '<td>' . $atividades . '</td>'
                 . '<td>' . $indicadores . '</td>'

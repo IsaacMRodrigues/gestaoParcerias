@@ -85,12 +85,10 @@ class PlanoTrabalhoController extends Controller
     {
         $dono = $this->donoEditavel($request);
 
-        // Item 7 do modelo: objetivo específico, meta, indicadores
-        // (qualitativos e quantitativos), resultados esperados e meios de
-        // verificação. As atividades são lançadas na própria meta.
-        $dono->criarMeta($request->validate([
-            'objetivo_especifico'  => ['nullable', 'string', 'max:1000'],
-            'descricao'            => ['required', 'string', 'max:1000'],
+        // Item 7 do modelo: meta, indicadores (qualitativos e quantitativos),
+        // resultados esperados e meios de verificação. As atividades são
+        // lançadas na própria meta.
+        $dono->criarMeta($request->validate([            'descricao'            => ['required', 'string', 'max:1000'],
             'indicador'            => ['nullable', 'string', 'max:1000'],
             'meta_quantitativa'    => ['nullable', 'string', 'max:1000'],
             'resultados_esperados' => ['nullable', 'string', 'max:1000'],

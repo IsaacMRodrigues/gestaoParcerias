@@ -150,7 +150,6 @@
                             <p class="text-sm font-semibold text-gray-900">Meta {{ $meta->numero }} — {{ $meta->descricao }}</p>
                             <dl class="mt-1 grid sm:grid-cols-2 gap-x-6 gap-y-1 text-xs text-gray-600">
                                 @foreach([
-                                    'Objetivo específico'       => $meta->objetivo_especifico,
                                     'Indicadores qualitativos'  => $meta->indicador,
                                     'Indicadores quantitativos' => $meta->meta_quantitativa,
                                     'Resultados esperados'      => $meta->resultados_esperados,
@@ -230,10 +229,6 @@
             <form action="{{ route($rota . '.metas.store', $id) }}" method="POST"
                   class="mt-4 pt-4 border-t border-gray-100 grid sm:grid-cols-2 gap-3">
                 @csrf
-                <div class="sm:col-span-2">
-                    <x-input-label for="meta_objetivo" value="Objetivo específico (conforme já descrito no item 4)" />
-                    <input type="text" name="objetivo_especifico" maxlength="1000" id="meta_objetivo" class="{{ $campo }}">
-                </div>
                 <div class="sm:col-span-2">
                     <x-input-label for="meta_descricao" value="Nova meta *" />
                     <p class="text-xs text-gray-400">Marco concreto, expressando quantidades e/ou qualidades.</p>
