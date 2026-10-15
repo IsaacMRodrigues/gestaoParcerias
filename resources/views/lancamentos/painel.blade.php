@@ -110,7 +110,7 @@
                 <div x-show="aba === '{{ $chave }}'" @if($chave !== $aba) style="display:none" @endif>
                     <div class="px-6 py-4 border-b border-gray-100 flex flex-wrap items-start justify-between gap-3">
                         <p class="text-sm text-gray-500 max-w-2xl">{{ $explicacao[$chave] }}</p>
-                        @if($podeConferir && $porAba[$chave]->filter(fn ($i) => $i->aConferir() && ! $i->travadoPorPrestacao())->isNotEmpty())
+                        @if($podeConferir && $porAba[$chave]->filter->aConferir()->isNotEmpty())
                             <form action="{{ route('lancamentos.conferir-todos', $instrumento) }}" method="POST"
                                   data-confirm="Marcar como conferidos todos os lançamentos a conferir desta aba?">
                                 @csrf <input type="hidden" name="aba" value="{{ $chave }}">

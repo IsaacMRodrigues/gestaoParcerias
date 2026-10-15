@@ -77,11 +77,14 @@ class ArquivosDaOscNosFluxosTest extends TestCase
         $this->assertNotEmpty(array_filter($p->pendenciasDaAnaliseDosArquivos(), fn ($x) => str_contains($x, 'recusado')));
         Mail::assertQueued(Aviso::class, fn ($m) => $m->hasTo($this->rl->email));
         $this->assertNotEmpty(array_filter($this->osc->pendenciasDosArquivos($p), fn ($x) => str_contains($x, 'Falta a última alteração')));
+        // Na própria área, a OSC vê a recusa no item, com a parceria e o motivo.
+        $this->actingAs($this->rl)->get('/portal/arquivos')->assertSee('Recusado na parceria')->assertSee('Falta a última alteração');
 
         // Nova versão: a pendência da OSC some e a UG analisa a versão nova.
         $this->actingAs($this->rl)->post('/portal/arquivos/estatuto', ['arquivo' => UploadedFile::fake()->create('estatuto.pdf', 10, 'application/pdf')])
             ->assertSessionHasNoErrors();
         $this->assertSame([], $this->osc->fresh()->pendenciasDosArquivos($p));
+        $this->actingAs($this->rl)->get('/portal/arquivos')->assertDontSee('Recusado na parceria');
         $this->assertContains('Arquivos da OSC: analisar ' . \App\Models\OscArquivo::rotulo('estatuto'), $p->fresh()->pendenciasDaAnaliseDosArquivos());
     }
 

@@ -138,6 +138,7 @@ cada item estão no [Histórico de entregas](#histórico-de-entregas). 🚀 marc
 | 07/10 | Depois do deploy: listas só com o que é da Secretaria; R$ e vírgula em todos os campos de dinheiro; Arquivos da OSC valendo em todos os fluxos (recusa da UG trava a Celebração) |
 | 08/10 | Caixas de seleção e barra de download nos fluxos; **Arquivos da OSC preenchendo os fluxos** (documentos complementares, habilitação da dispensa e modelos com os dados da OSC); revisão do README |
 | 13/10 | Menu do portal da OSC na **barra lateral**, como o da área interna |
+| 15/10 | **Teste completo no navegador** (Nova Proposta → Celebração em 21 etapas → execução → painel → prestação encerrada → relatórios) e três correções que ele achou |
 | 14/10 | Arquivos da OSC: exigidos os documentos do representante legal, o comprovante de inscrição no CNPJ (com aviso dos 3 anos de existência) e a relação dos dirigentes; **data de validade** em todos os documentos |
 | 14/10 | **Pesquisa** nos Chamamentos abertos do portal e em Minhas inscrições da OSC |
 | 14/10 | Plano de Trabalho: a meta deixa de ter "Objetivo específico" (formulário e documento) |
@@ -569,7 +570,7 @@ Procedimento:
 
 ## Verificação
 
-`php artisan test` (sqlite em memória) roda **209 testes** em `tests/Feature`, um arquivo por regra de
+`php artisan test` (sqlite em memória) roda **215 testes** em `tests/Feature`, um arquivo por regra de
 negócio (quem abre qual parceria, contas e senhas, avisos por e-mail, segregação de encargos,
 cancelamento e prorrogação de chamamento, Nova Proposta, prazo e resposta de recurso, plano de
 trabalho do modelo, etapa conjunta, devolução por documento, Termo e OP em sequência, download de
@@ -691,6 +692,28 @@ Trazer os demais cenários para `tests/Feature` é uma das [Pendências](#pendê
 
 Da mais recente para a mais antiga. Cada entrada diz o que mudou, **por quê** e como foi
 conferido — o porquê é o que falta a quem pega o código depois.
+
+- [2026-10-15] **Teste completo no navegador e as correções que ele achou**
+  - Um processo inteiro no sistema local, cada passo com o login de quem o faz (senhas locais redefinidas para o
+    teste): a OSC completou Arquivos da OSC e enviou uma Nova Proposta; a SCP encaminhou à Educação, que deferiu e
+    cadastrou a Gestora da Parceria (aprovada pelo administrador; troca de senha obrigatória no primeiro acesso); a
+    Celebração passou pelas 21 etapas com UG, OSC, SCP, SEPLAN, Procuradoria, Gestora e Gabinete — inclusive uma
+    recusa de arquivo da área e a nova versão, e a trava da etapa da OP Global sem a publicação — e o instrumento nasceu
+    na conclusão; a UG registrou um repasse; a OSC lançou despesas, extratos, evidência, folha e bem no painel; a UG
+    conferiu e devolveu uma despesa, a OSC corrigiu; a prestação de outubro foi gerada, assinada, analisada pela SCP e
+    encerrada pela UG; os relatórios saíram na tela, em planilha e em PDF
+  - **Corrigido — prestação que não encerrava:** lançamento corrigido depois de devolvido volta "a conferir"; enviada a
+    prestação, o período travava também a conferência da Prefeitura, e a UG não encerrava (exige tudo conferido).
+    Agora, numa prestação enviada, a Prefeitura ainda **confere** o lançamento (não devolve: o que estiver errado volta
+    com a devolução da prestação, que destrava o período); "Conferir todos os pendentes" também vale ali
+  - **Corrigido — recusa invisível na área:** a OSC só sabia da recusa de um arquivo pelo e-mail e pela Celebração;
+    agora o item em Arquivos da OSC mostra "Recusado na parceria …", com data e motivo, até a nova versão
+  - **Corrigido — menu lateral:** na tela de uma Nova Proposta marcava "Manifestar interesse" (o layout não recebe as
+    variáveis da tela; a manifestação vem da rota). E o campo do motivo da devolução no painel ficou largo
+  - Anotado, sem mudar: os tipos de anexo da proposta ainda oferecem "Cartão CNPJ", "Relação nominal dos dirigentes"
+    e "RG, CPF e comprovante de residência do presidente", que agora são de Arquivos da OSC
+  - Conferido: `PainelDaPrestacaoTest`, `ArquivosDaOscNosFluxosTest` e `BarraDoPortalTest` (falham com as correções
+    desligadas); suíte 215/215; 470 telas sem erro
 
 - [2026-10-14] **Arquivos da OSC: três documentos exigidos e validade em todos** (`OscArquivo::GRUPOS`,
   `Osc::avisoDeExistencia`, `arquivos-osc/_lista`, `Avisos::certidaoVencendo`)

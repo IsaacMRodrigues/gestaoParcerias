@@ -202,7 +202,10 @@ class PainelDaPrestacaoTest extends TestCase
 
         $this->assertTrue($noPeriodo->travadoPorPrestacao());
         $this->actingAs($this->rl)->delete(route('lancamentos.despesas.destroy', $noPeriodo))->assertStatus(422);
-        $this->actingAs($this->ug)->post(route('lancamentos.despesas.conferir', $noPeriodo), ['acao' => 'conferir'])->assertStatus(422);
+        // Enviada a prestação, a Prefeitura ainda confere (senão a UG nunca encerraria), mas não devolve o lançamento.
+        $this->actingAs($this->ug)->post(route('lancamentos.despesas.conferir', $noPeriodo), ['acao' => 'devolver', 'motivo' => 'x'])->assertStatus(422);
+        $this->actingAs($this->ug)->post(route('lancamentos.despesas.conferir', $noPeriodo), ['acao' => 'conferir'])->assertSessionHasNoErrors();
+        $this->assertTrue($noPeriodo->fresh()->conferido());
         $this->actingAs($this->rl)->delete(route('lancamentos.despesas.destroy', $depois))->assertRedirect();
 
         // Lançar com data num período já enviado não entra: ficaria preso sem conferência.
@@ -213,6 +216,8 @@ class PainelDaPrestacaoTest extends TestCase
 
         // Na última etapa, a UG só encerra com os lançamentos do período conferidos.
         $pc->forceFill(['etapa' => 2, 'setor' => 'ug'])->save();
+        $depois2 = Despesa::forceCreate(['instrumento_id' => $this->instrumento->id, 'data_despesa' => '2026-03-01', 'valor' => 10,
+            'natureza' => 'material_consumo', 'situacao' => 'pendente']);
         $this->assertContains('1 lançamento(s) do período ainda a conferir no painel', $pc->fresh()->pendencias());
     }
 

@@ -38,6 +38,22 @@ class BarraDoPortalTest extends TestCase
         $this->assertStringContainsString('lg:pl-64', $html, 'o conteúdo abre espaço para a barra lateral');
     }
 
+    public function test_na_tela_de_uma_nova_proposta_o_menu_marca_nova_proposta(): void
+    {
+        $this->seed(RolesSeeder::class);
+        $osc = Osc::forceCreate(['name' => 'OSC', 'cnpj' => '11.111.111/0001-11', 'email' => 'osc@example.com']);
+        $rl = User::factory()->create(['osc_id' => $osc->id, 'setor' => 'osc', 'status' => true, 'approval_status' => 'aprovado']);
+        $rl->assignRole('responsavel_legal');
+        $osc->forceFill(['user_id' => $rl->id])->save();
+        $m = \App\Models\ManifestacaoInteresse::forceCreate(['osc_id' => $osc->id, 'tipo' => 'proposta', 'titulo' => 'Reforço', 'objeto' => 'x',
+            'justificativa' => 'x', 'valor_solicitado' => 1, 'status' => 'rascunho']);
+
+        $html = $this->actingAs($rl)->get("/portal/manifestacoes/{$m->id}")->assertOk()->getContent();
+        $ativo = fn (string $rotulo) => (bool) preg_match('#<a href="[^"]*"\s+class="[^"]*bg-brand-600[^"]*">\s*<svg[^>]*>.*?</svg>\s*' . preg_quote($rotulo, '#') . '\s*</a>#s', $html);
+        $this->assertTrue($ativo('Nova Proposta'), 'marca Nova Proposta');
+        $this->assertFalse($ativo('Manifestar interesse'), 'não marca Manifestar interesse');
+    }
+
     public function test_quem_nao_esta_logado_ve_a_transparencia(): void
     {
         $this->get('/portal')->assertOk()->assertSee('Transparência')->assertDontSee('Propor parceria');

@@ -133,7 +133,10 @@
             ['secao' => 'Participar', 'url' => route('portal.index'), 'rotulo' => 'Chamamentos abertos', 'ativo' => request()->routeIs('portal.index') || request()->routeIs('portal.chamamento*'), 'icone' => $icone['megafone']],
         ];
         if (auth()->user()->ehRepresentanteOsc()) {
-            $novaProposta = isset($manifestacao) && request()->routeIs('portal.manifestacoes.show') && $manifestacao?->ehNovaProposta();
+            // O layout não recebe as variáveis da tela: a manifestação vem da rota.
+            $daRota = request()->routeIs('portal.manifestacoes.show') ? request()->route('manifestacao') : null;
+            $daRota = $daRota instanceof \App\Models\ManifestacaoInteresse ? $daRota : ($daRota ? \App\Models\ManifestacaoInteresse::find($daRota) : null);
+            $novaProposta = (bool) $daRota?->ehNovaProposta();
             array_push($navItens,
                 ['url' => route('portal.minhas-propostas'), 'rotulo' => 'Minhas inscrições', 'ativo' => request()->routeIs('portal.minhas*', 'portal.proposta.*', 'portal.dossie*'), 'icone' => $icone['lista']],
                 ['rotulo' => 'Propor parceria', 'filhos' => [

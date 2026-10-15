@@ -42,7 +42,7 @@
     </div>
 
     {{-- Ações: a OSC corrige ou exclui o que ainda é dela; a Prefeitura confere ou devolve. --}}
-    @if(($ehOsc && $item->podeSerAlteradoPelaOsc()) || ($podeConferir && ! $travado && ! $item->conferido()))
+    @if(($ehOsc && $item->podeSerAlteradoPelaOsc()) || ($podeConferir && ! $item->conferido()))
         <div class="mt-2 flex flex-wrap items-start gap-2">
             @if($ehOsc && $item->podeSerAlteradoPelaOsc())
                 <details class="group w-full">
@@ -60,18 +60,18 @@
                 </details>
             @endif
 
-            @if($podeConferir && ! $travado && ! $item->conferido())
+            @if($podeConferir && ! $item->conferido())
                 <form action="{{ $conferencia }}" method="POST">
                     @csrf <input type="hidden" name="acao" value="conferir">
                     <button class="btn btn-primary btn-sm">Conferido</button>
                 </form>
-                @unless($item->devolvido())
-                    <details class="group">
+                @unless($item->devolvido() || $travado)
+                    <details class="group w-full">
                         <summary class="{{ $acao }} text-accent-800 bg-accent-50 hover:bg-accent-100">Devolver à OSC</summary>
                         <form action="{{ $conferencia }}" method="POST" class="mt-2 flex flex-wrap gap-2">
                             @csrf <input type="hidden" name="acao" value="devolver">
                             <input name="motivo" required maxlength="1000" placeholder="O que está errado e como corrigir"
-                                   class="flex-1 min-w-0 border-gray-300 rounded-lg shadow-sm text-sm focus:ring-brand-500 focus:border-brand-500">
+                                   style="min-width:16rem" class="flex-1 border-gray-300 rounded-lg shadow-sm text-sm focus:ring-brand-500 focus:border-brand-500">
                             <button class="btn btn-secondary btn-sm">Devolver</button>
                         </form>
                     </details>

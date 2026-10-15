@@ -10,7 +10,8 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 /**
  * O que a OSC lança no painel da prestação de contas e a Prefeitura confere: a conferir, conferido
  * ou devolvido com motivo. A OSC corrige o que está a conferir ou devolvido, e o lançamento volta à
- * conferência. Entrou numa prestação já enviada, ninguém mais o altera.
+ * conferência. Entrou numa prestação já enviada, a OSC não o altera e a Prefeitura só o confere (devolver,
+ * só a prestação inteira).
  *
  * Quem usa declara dataDoLancamento() e tem as colunas situacao, conferido_por, conferido_em,
  * devolucao_motivo e lancado_por.

@@ -316,12 +316,16 @@ class LancamentoController extends Controller
     private function conferirItem(Request $request, Despesa|Lancamento $item, string $aba): RedirectResponse
     {
         abort_unless($this->podeConferir(), 403, 'Quem confere é a Prefeitura.');
-        abort_if($item->travadoPorPrestacao(), 422, 'Lançamento já enviado numa prestação de contas: a análise segue nela.');
 
         $dados = $request->validate([
             'acao'   => ['required', Rule::in(['conferir', 'devolver'])],
             'motivo' => ['required_if:acao,devolver', 'nullable', 'string', 'max:1000'],
         ], ['motivo.required_if' => 'Diga o que está errado — é o que a OSC vai ler para corrigir.']);
+
+        // Já numa prestação enviada, a OSC não o altera: conferir pode, devolver não — o que estiver
+        // errado volta com a devolução da prestação à OSC, que destrava o período.
+        abort_if($dados['acao'] === 'devolver' && $item->travadoPorPrestacao(), 422,
+            'Lançamento já enviado numa prestação de contas: para corrigi-lo, devolva a prestação à OSC.');
 
         if ($dados['acao'] === 'conferir') {
             $item->conferir(auth()->user());
@@ -342,7 +346,6 @@ class LancamentoController extends Controller
         $itens = $aba === 'despesa'
             ? $instrumento->despesas()->where('situacao', 'pendente')->get()
             : $instrumento->lancamentos()->where('situacao', 'pendente')->whereIn('tipo', $this->tiposDa($aba))->get();
-        $itens = $itens->reject->travadoPorPrestacao();
         $itens->each->conferir(auth()->user());
 
         return $this->voltar($instrumento, $aba, $itens->count() . ' lançamento(s) conferido(s).');

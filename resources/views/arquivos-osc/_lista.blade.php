@@ -17,6 +17,9 @@
     $analises = $proposta
         ? \App\Models\OscArquivoAnalise::where('proposta_id', $proposta->id)->with('analista')->get()->keyBy('osc_arquivo_id')
         : collect();
+    // Fora da tela de uma parceria (a área da OSC): a recusa da versão atual em qualquer parceria, para a OSC ver o que trocar.
+    $recusas = $proposta ? collect() : \App\Models\OscArquivoAnalise::whereIn('osc_arquivo_id', $atuais->pluck('id'))
+        ->where('situacao', 'recusado')->with('proposta')->latest('analisado_em')->get()->unique('osc_arquivo_id')->keyBy('osc_arquivo_id');
     $descricoes = [
         'certidoes'      => 'Com data de validade. Um aviso chega por e-mail ' . \App\Models\OscArquivo::DIAS_AVISO_VENCIMENTO . ' dias antes de vencer.',
         'institucionais' => 'Estatuto, ata de eleição da diretoria atual, documentos do representante legal, comprovante de inscrição no CNPJ e relação dos dirigentes.',
@@ -91,6 +94,13 @@
                                                     validade: {{ $atual->validade->format('d/m/Y') }}
                                                 @endif
                                             </p>
+                                        @endif
+
+                                        @if($atual && ($recusa = $recusas[$atual->id] ?? null))
+                                            <div class="mt-2 rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-xs text-red-800">
+                                                <span class="font-semibold">Recusado na parceria "{{ $recusa->proposta?->titulo }}"</span>
+                                                em {{ $recusa->analisado_em?->format('d/m/Y') }}@if($recusa->motivo): {{ $recusa->motivo }}@endif — envie uma nova versão.
+                                            </div>
                                         @endif
 
                                         {{-- Item IV: a existência mínima, conferida pela data de abertura do CNPJ no cadastro (avisa, não trava). --}}
