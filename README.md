@@ -139,6 +139,7 @@ cada item estão no [Histórico de entregas](#histórico-de-entregas). 🚀 marc
 | 07/10 | Depois do deploy: listas só com o que é da Secretaria; R$ e vírgula em todos os campos de dinheiro; Arquivos da OSC valendo em todos os fluxos (recusa da UG trava a Celebração) |
 | 08/10 | Caixas de seleção e barra de download nos fluxos; **Arquivos da OSC preenchendo os fluxos** (documentos complementares, habilitação da dispensa e modelos com os dados da OSC); revisão do README |
 | 13/10 | Menu do portal da OSC na **barra lateral**, como o da área interna |
+| 16/10 | **Tela "Solicitar acesso"**: o login leva ao cadastro do servidor, com o mesmo visual |
 | 16/10 | **Limpeza dos dados de teste**, local e produção: ficam as OSCs e as contas escolhidas, saem os processos e as contas pré-cadastradas |
 | 16/10 | **Prestação de contas sem o memorando de encaminhamento**: saem o bloco de campos, o documento gerado e a peça do checklist |
 | 16/10 | **Cadastro pelo próprio servidor**: o secretário se cadastra e escolhe "Responsável da UG"; a SCP aprova toda conta nova; as contas pré-cadastradas são apagadas (ficam o administrador e a SCP) |
@@ -694,6 +695,13 @@ Trazer os demais cenários para `tests/Feature` é uma das [Pendências](#pendê
 
 Da mais recente para a mais antiga. Cada entrada diz o que mudou, **por quê** e como foi
 conferido — o porquê é o que falta a quem pega o código depois.
+
+- [2026-10-16] **Tela "Solicitar acesso" para os servidores** (`auth/register`, `auth/login`, `layouts/guest`)
+  - O cadastro do servidor existia em `/register`, mas o login só levava ao cadastro de OSC. Agora o login tem
+    "É servidor da Prefeitura? Solicite seu acesso", e a tela segue o visual do login: título próprio (também na
+    aba do navegador), campos no mesmo padrão, senha com o olho de exibir e os links para entrar ou cadastrar OSC.
+    O layout de visitante aceita `titulo` e `subtitulo`; sem eles, continua "Acessar o sistema"
+  - Conferido: `AutoCadastroDeServidorTest` (o link no login e o título); suíte 221/221; as duas telas no navegador
 
 - [2026-10-16] **Limpeza dos dados de teste** (sem mudança de código; scripts avulsos, com backup antes)
   - Tudo o que havia sido feito até aqui era teste. **Local:** ficaram só o administrador e a SCP, perfis,

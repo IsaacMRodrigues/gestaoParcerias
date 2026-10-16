@@ -48,6 +48,12 @@
     </form>
 
     <p class="text-sm text-gray-500 text-center mt-6">
+        É servidor da Prefeitura?
+        <a href="{{ route('register') }}" class="font-semibold text-brand-700 hover:underline">
+            Solicite seu acesso
+        </a>
+    </p>
+    <p class="text-sm text-gray-500 text-center mt-2">
         É uma organização da sociedade civil?
         <a href="{{ route('portal.osc.create') }}" class="font-semibold text-brand-700 hover:underline">
             Cadastre sua OSC

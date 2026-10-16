@@ -7,7 +7,7 @@
 
         <link rel="icon" type="image/png" href="https://pmsgra.net/ico.png">
 
-        <title>Entrar — PGP · Gestão de Parcerias</title>
+        <title>{{ isset($titulo) ? trim(strip_tags($titulo)) : 'Entrar' }} — PGP · Gestão de Parcerias</title>
 
         <!-- Fonts -->
         <link rel="preconnect" href="https://fonts.bunny.net">
@@ -92,9 +92,9 @@
                             </span>
                         </a>
 
-                        <h1 class="text-3xl font-bold tracking-tight text-gray-900">Acessar o sistema</h1>
+                        <h1 class="text-3xl font-bold tracking-tight text-gray-900">{{ $titulo ?? 'Acessar o sistema' }}</h1>
                         <p class="text-sm text-gray-500 mt-2">
-                            Use suas credenciais institucionais.
+                            {{ $subtitulo ?? 'Use suas credenciais institucionais.' }}
                         </p>
 
                         <div class="mt-8">
