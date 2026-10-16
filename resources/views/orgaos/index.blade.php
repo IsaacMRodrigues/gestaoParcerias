@@ -6,10 +6,12 @@
                 <h2 class="text-2xl font-bold text-gray-900">Órgãos e usuários</h2>
                 <p class="text-sm text-gray-500 mt-0.5">Cada Secretaria com as contas de acesso dela.</p>
             </div>
-            <div class="flex items-center gap-3 shrink-0">
-                <a href="{{ route('usuarios.create') }}" class="btn btn-outline">+ Novo usuário</a>
-                <a href="{{ route('orgaos.create') }}" class="btn btn-primary">+ Novo órgão</a>
-            </div>
+            @can('cadastros')
+                <div class="flex items-center gap-3 shrink-0">
+                    <a href="{{ route('usuarios.create') }}" class="btn btn-outline">+ Novo usuário</a>
+                    <a href="{{ route('orgaos.create') }}" class="btn btn-primary">+ Novo órgão</a>
+                </div>
+            @endcan
         </div>
     </x-slot>
 
@@ -20,7 +22,7 @@
             {{-- Setor sem chefia designada: a porta de cadastrar a própria equipe
                  existe, mas ninguém lá dentro a enxerga. Quem fecha essa lacuna
                  é quem está nesta tela, e nada avisava. --}}
-            @if(! empty($setoresSemChefia))
+            @if(! empty($setoresSemChefia) && auth()->user()->can('cadastros'))
                 <div class="px-4 py-3 bg-gray-50 border border-gray-200 rounded-lg text-sm text-gray-700">
                     <p class="font-medium text-gray-900 mb-1">Setores sem quem cadastre a própria equipe</p>
                     <p>
@@ -98,12 +100,14 @@
                                     @endif
                                 </td>
                                 <td class="px-6 py-3 text-right whitespace-nowrap space-x-3">
-                                    <a href="{{ route('orgaos.edit', $orgao) }}" class="text-xs font-semibold text-brand-700 hover:text-brand-800 transition">Editar órgão</a>
-                                    <form action="{{ route('orgaos.destroy', $orgao) }}" method="POST" class="inline"
-                                          data-confirm="Deseja remover o órgão &quot;{{ $orgao->name }}&quot;?">
-                                        @csrf @method('DELETE')
-                                        <button type="submit" class="text-xs font-medium text-gray-500 hover:text-red-700 transition">Remover</button>
-                                    </form>
+                                    @can('cadastros')
+                                        <a href="{{ route('orgaos.edit', $orgao) }}" class="text-xs font-semibold text-brand-700 hover:text-brand-800 transition">Editar órgão</a>
+                                        <form action="{{ route('orgaos.destroy', $orgao) }}" method="POST" class="inline"
+                                              data-confirm="Deseja remover o órgão &quot;{{ $orgao->name }}&quot;?">
+                                            @csrf @method('DELETE')
+                                            <button type="submit" class="text-xs font-medium text-gray-500 hover:text-red-700 transition">Remover</button>
+                                        </form>
+                                    @endcan
                                 </td>
                             </tr>
 
@@ -113,7 +117,9 @@
                                 <tr x-show="aberto" x-cloak>
                                     <td colspan="5" class="px-6 py-3 pl-12 text-xs text-gray-400">
                                         Nenhum usuário nesta Secretaria.
-                                        <a href="{{ route('usuarios.create') }}" class="font-semibold text-brand-700 hover:underline">Cadastrar</a>
+                                        @can('cadastros')
+                                            <a href="{{ route('usuarios.create') }}" class="font-semibold text-brand-700 hover:underline">Cadastrar</a>
+                                        @endcan
                                     </td>
                                 </tr>
                             @endforelse

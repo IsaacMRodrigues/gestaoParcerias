@@ -27,10 +27,10 @@ class RolesSeeder extends Seeder
         'execucao'          => 'Execução financeira (repasses, despesas, notas fiscais)',
         'usuarios_setor'    => 'Cadastrar usuários do próprio setor (o administrador aprova)',
         'suporte'           => 'Atender o suporte (ver e responder os chamados de todos)',
-        // Só as contas de OSC. Quem tem `cadastros` já aprova todas, inclusive
-        // estas; esta permissão existe para a SCP decidir sobre a organização
-        // que ela atende sem ganhar a mesa de cadastros da Prefeitura.
+        // A SCP aprova as contas e consulta quem está no sistema sem ganhar a mesa de
+        // cadastros da Prefeitura (criar, editar e remover seguem com `cadastros`).
         'aprovar_contas' => 'Aprovar contas novas (servidores e integrantes de OSC)',
+        'ver_usuarios'   => 'Ver órgãos e usuários (só consulta)',
 
         // Funções da equipe da OSC: prefixo osc_ para nunca valerem dentro da Administração.
         'osc_propostas'     => 'Propostas e plano de trabalho',
@@ -60,7 +60,7 @@ class RolesSeeder extends Seeder
         // Prefeito: assina o Termo de Adjudicação e Homologação que encerra a Seleção.
         'prefeito_municipal'               => ['chamamentos', 'formalizacao'],
         // A SCP conduz a parceria do edital ao empenho e segue na execução e na prestação de contas.
-        'analista_tecnico_scp'             => ['planejamento', 'chamamentos', 'execucao', 'prestacao_contas', 'suporte', 'aprovar_contas'],
+        'analista_tecnico_scp'             => ['planejamento', 'chamamentos', 'execucao', 'prestacao_contas', 'suporte', 'aprovar_contas', 'ver_usuarios'],
         'responsavel_publicacao'           => ['chamamentos'],
         // Quem responde pela SEPLAN: o único que assina o Parecer Financeiro
         // (Peca::ASSINATURA_RESERVADA; elaborar é de qualquer um da SEPLAN) e

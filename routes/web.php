@@ -216,10 +216,14 @@ Route::middleware(['auth', 'staff', 'readonly'])->group(function () {
         Route::patch('usuarios/{usuario}/recusar', [UserController::class, 'recusar'])->name('usuarios.recusar');
     });
 
+    // A lista de órgãos e usuários: o administrador edita, a SCP consulta.
+    Route::get('orgaos', [OrgaoController::class, 'index'])->name('orgaos.index')
+        ->middleware('permission:cadastros|ver_usuarios');
+
     // Cadastros institucionais
     Route::middleware('permission:cadastros')->group(function () {
         Route::resource('usuarios', UserController::class)->except(['show']);
-        Route::resource('orgaos', OrgaoController::class)->except(['show']);
+        Route::resource('orgaos', OrgaoController::class)->except(['index', 'show']);
         // Sem create/store: quem abre o cadastro de uma OSC é a própria OSC,
         // em /cadastro/osc. Ver o cabeçalho do OscController.
         Route::resource('oscs', OscController::class)->only(['index', 'edit', 'update', 'destroy']);

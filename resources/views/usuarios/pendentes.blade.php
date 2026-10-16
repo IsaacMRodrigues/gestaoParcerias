@@ -2,11 +2,11 @@
     <x-slot name="header">
         <div class="flex items-center justify-between">
             <div>
-                @can('cadastros')
+                @canany(['cadastros', 'ver_usuarios'])
                     <p class="text-sm text-gray-500">
                         <a href="{{ route('orgaos.index') }}" class="hover:underline">Órgãos e usuários</a>
                     </p>
-                @endcan
+                @endcanany
                 <h2 class="text-2xl font-bold text-gray-900 mt-0.5">Cadastros pendentes de aprovação</h2>
             </div>
             <span class="px-3 py-1.5 text-sm font-medium bg-accent-50 text-accent-700 rounded-full">

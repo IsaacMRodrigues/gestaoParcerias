@@ -229,14 +229,20 @@
             </a>
         @endcan
 
-        {{-- Sem `cadastros`, mas aprova as contas novas: a SCP. Uma entrada só,
-             para não abrir a seção inteira de Cadastros a quem não a tem. --}}
-        @if(! auth()->user()->can('cadastros') && auth()->user()->can('aprovar_contas'))
+        {{-- Sem `cadastros`: a SCP aprova as contas novas e consulta os usuários. --}}
+        @if(! auth()->user()->can('cadastros') && auth()->user()->canAny(['aprovar_contas', 'ver_usuarios']))
             <p class="{{ $sec }}">Cadastros</p>
-            <a href="{{ route('usuarios.pendentes') }}" class="{{ $link }} {{ request()->routeIs('usuarios.pendentes') ? $on : '' }}">
-                Contas a aprovar
-                @if($navPendentes > 0)<span class="{{ $badge }}">{{ $navPendentes }}</span>@endif
-            </a>
+            @can('ver_usuarios')
+                <a href="{{ route('orgaos.index') }}" class="{{ $link }} {{ request()->routeIs('orgaos.index') ? $on : '' }}">
+                    Órgãos e usuários
+                </a>
+            @endcan
+            @can('aprovar_contas')
+                <a href="{{ route('usuarios.pendentes') }}" class="{{ $link }} {{ request()->routeIs('usuarios.pendentes') ? $on : '' }}">
+                    Contas a aprovar
+                    @if($navPendentes > 0)<span class="{{ $badge }}">{{ $navPendentes }}</span>@endif
+                </a>
+            @endcan
         @endif
 
         {{-- Cadastro da equipe do próprio setor: qualquer chefia, não só a da UG --}}

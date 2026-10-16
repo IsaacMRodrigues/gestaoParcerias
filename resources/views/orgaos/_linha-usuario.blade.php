@@ -40,11 +40,13 @@
         @endif
     </td>
     <td class="px-6 py-2.5 text-right whitespace-nowrap space-x-3">
-        <a href="{{ route('usuarios.edit', $usuario) }}" class="text-xs font-semibold text-brand-700 hover:text-brand-800 transition">Editar</a>
-        <form action="{{ route('usuarios.destroy', $usuario) }}" method="POST" class="inline"
-              data-confirm="Deseja remover {{ $usuario->name }}?">
-            @csrf @method('DELETE')
-            <button type="submit" class="text-xs font-medium text-gray-500 hover:text-red-700 transition">Remover</button>
-        </form>
+        @can('cadastros')
+            <a href="{{ route('usuarios.edit', $usuario) }}" class="text-xs font-semibold text-brand-700 hover:text-brand-800 transition">Editar</a>
+            <form action="{{ route('usuarios.destroy', $usuario) }}" method="POST" class="inline"
+                  data-confirm="Deseja remover {{ $usuario->name }}?">
+                @csrf @method('DELETE')
+                <button type="submit" class="text-xs font-medium text-gray-500 hover:text-red-700 transition">Remover</button>
+            </form>
+        @endcan
     </td>
 </tr>

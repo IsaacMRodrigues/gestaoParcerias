@@ -139,6 +139,7 @@ cada item estão no [Histórico de entregas](#histórico-de-entregas). 🚀 marc
 | 07/10 | Depois do deploy: listas só com o que é da Secretaria; R$ e vírgula em todos os campos de dinheiro; Arquivos da OSC valendo em todos os fluxos (recusa da UG trava a Celebração) |
 | 08/10 | Caixas de seleção e barra de download nos fluxos; **Arquivos da OSC preenchendo os fluxos** (documentos complementares, habilitação da dispensa e modelos com os dados da OSC); revisão do README |
 | 13/10 | Menu do portal da OSC na **barra lateral**, como o da área interna |
+| 16/10 | **A SCP vê os órgãos e usuários**, só para consulta; o menu da Seleção sem a seta solta |
 | 16/10 | **Tela "Solicitar acesso"**: o login leva ao cadastro do servidor, com o mesmo visual |
 | 16/10 | **Limpeza dos dados de teste**, local e produção: ficam as OSCs e as contas escolhidas, saem os processos e as contas pré-cadastradas |
 | 16/10 | **Prestação de contas sem o memorando de encaminhamento**: saem o bloco de campos, o documento gerado e a peça do checklist |
@@ -494,6 +495,7 @@ responsável legal restringe depois, no "Alterar" da listagem.
 | `monitoramento`                                                      | Leitura de alterações e prestações; o módulo próprio ainda não existe                                                                  |
 | `usuarios_setor`                                                     | **Meus usuários**: cadastrar a equipe do próprio setor (a SCP ou o administrador aprova)                                                       |
 | `aprovar_contas` | **Contas a aprovar**: decide toda conta nova — servidor (auto-cadastro ou equipe de setor) e integrante de OSC. É como a SCP aprova os cadastros sem ganhar a mesa de Cadastros |
+| `ver_usuarios` | **Órgãos e usuários**, só consulta: a lista de todas as Secretarias e contas, sem criar, editar ou remover (isso é `cadastros`). Dada à SCP |
 | `suporte`                                                            | **Atender** o suporte: ver e responder os chamados de todos, nota interna, encerrar                                                     |
 | `osc_*`                                                              | Funções da equipe da OSC, marcadas por pessoa — nunca valem dentro da Administração                                                      |
 
@@ -572,7 +574,7 @@ Procedimento:
 
 ## Verificação
 
-`php artisan test` (sqlite em memória) roda **221 testes** em `tests/Feature`, um arquivo por regra de
+`php artisan test` (sqlite em memória) roda **222 testes** em `tests/Feature`, um arquivo por regra de
 negócio (quem abre qual parceria, contas e senhas, avisos por e-mail, segregação de encargos,
 cancelamento e prorrogação de chamamento, Nova Proposta, prazo e resposta de recurso, plano de
 trabalho do modelo, etapa conjunta, devolução por documento, Termo e OP em sequência, download de
@@ -695,6 +697,14 @@ Trazer os demais cenários para `tests/Feature` é uma das [Pendências](#pendê
 
 Da mais recente para a mais antiga. Cada entrada diz o que mudou, **por quê** e como foi
 conferido — o porquê é o que falta a quem pega o código depois.
+
+- [2026-10-16] **A SCP vê os órgãos e usuários** (permissão `ver_usuarios`, `RolesSeeder`, `orgaos/index`)
+  - A SCP aprova as contas e precisava ver quem já está no sistema, como o administrador. Ganhou a tela
+    "Órgãos e usuários" no menu Cadastros, só para consulta: os botões de criar, editar e remover aparecem só
+    para quem tem `cadastros`, e as rotas deles continuam fechadas para ela. Rodar o `RolesSeeder` no deploy
+  - Menu: a etapa Seleção perdeu a seta de recolher, que ficava solta ao lado de "Chamamentos"; os subitens
+    ficam sempre à mostra, como nas outras etapas
+  - Conferido: `ScpVeOsUsuariosTest` (falha sem a mudança); suíte 222/222; 275 telas sem erro
 
 - [2026-10-16] **Tela "Solicitar acesso" para os servidores** (`auth/register`, `auth/login`, `layouts/guest`)
   - O cadastro do servidor existia em `/register`, mas o login só levava ao cadastro de OSC. Agora o login tem
