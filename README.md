@@ -702,6 +702,9 @@ conferido — o porquê é o que falta a quem pega o código depois.
     pré-cadastradas e a do gabinete). Ficaram, a pedido, as duas OSCs (Associação Bem Viver e OSC Teste) com as
     suas contas, e as contas do administrador, da SCP, da Raquel, da Gestora, do Jurídico e da OSC Teste.
     Backup do banco e dos anexos em `~/backups/pgp-*-antes-limpeza-testes-20261016-171800.*`, no servidor
+  - O e-mail das Secretarias, que tinha vindo dessas contas (migração `2026_08_27_130000`), também saiu: migração
+    `2026_10_16_130000` no local e o mesmo ajuste feito à mão na produção (15 órgãos). A gestora@gmail.com,
+    desativada desde antes, foi reativada para os testes
   - Conferido: páginas públicas respondendo; varredura de 285 telas em produção, sem erro. No próximo deploy, a
     migração `2026_10_16_110000` não encontra mais contas pré-cadastradas para apagar
 
