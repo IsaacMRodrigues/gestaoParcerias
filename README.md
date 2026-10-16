@@ -49,16 +49,13 @@ assinados eletronicamente e validáveis por QR Code.
 | **Avisos por e-mail** (4.7) — contas, suporte, vez no trâmite, resultados                                                                         | ✅ Completo            | `Support\Avisos`, `Mail\Aviso`                                                       |
 | **Integrações** (banco, Diário Oficial, GOV.BR)                                                                                                  | ⏳ Última fase        | —                                                                                       |
 
-**Em produção** está o deploy de 07/10/2026 (commit `ef5391d`): tudo de 26/09 a 07/10, com as 18 migrações e
-o `RolesSeeder`, ensaiados antes sobre uma cópia do banco de produção.
+**Em produção** está o deploy de 16/10/2026 (commit `83fc76f`): tudo de 08/10 a 16/10 — listas por
+Secretaria, Arquivos da OSC preenchendo os fluxos, o painel da prestação de contas, o menu lateral da OSC, os
+relatórios, a Celebração com 21 etapas, a pesquisa no portal, o cadastro pelo próprio servidor com a tela
+"Solicitar acesso", a prestação sem o memorando e a SCP vendo os usuários —, com as 8 migrações e o
+`RolesSeeder`, ensaiados antes sobre uma cópia do banco de produção (290 telas sem erro, lá e no ensaio).
 
-**No GitHub e ainda fora da produção** (sobem só quando pedido): listas por Secretaria, campos de dinheiro com
-R$, Arquivos da OSC valendo nos fluxos, caixas de seleção e barra de download, e os Arquivos da OSC
-preenchendo os fluxos (migração `2026_10_08_100000`), o **painel da prestação de contas** (migração
-`2026_10_13_100000`), o menu lateral da OSC, os relatórios da prestação de contas, a Celebração com 21 etapas
-(migração `2026_10_14_100000`, que renumera as celebrações em andamento) e o **cadastro pelo próprio servidor**
-(migrações `2026_10_16_*`: a SCP aprova toda conta e as contas pré-cadastradas são apagadas — rodar o `RolesSeeder`). Ao subir, avisar que a inscrição em chamamento público passa a exigir a área Arquivos da OSC
-completa, e que as despesas passam a ser lançadas pela OSC (as já lançadas pela Prefeitura entram como conferidas).
+**No GitHub e ainda fora da produção:** nada.
 
 As ações de produção que o deploy não faz (dados e painel) estão em
 [Pendências → Produção](#produção-ação-não-código).
@@ -139,6 +136,7 @@ cada item estão no [Histórico de entregas](#histórico-de-entregas). 🚀 marc
 | 07/10 | Depois do deploy: listas só com o que é da Secretaria; R$ e vírgula em todos os campos de dinheiro; Arquivos da OSC valendo em todos os fluxos (recusa da UG trava a Celebração) |
 | 08/10 | Caixas de seleção e barra de download nos fluxos; **Arquivos da OSC preenchendo os fluxos** (documentos complementares, habilitação da dispensa e modelos com os dados da OSC); revisão do README |
 | 13/10 | Menu do portal da OSC na **barra lateral**, como o da área interna |
+| 16/10 | **Deploy na Hostinger** (commit `83fc76f`): tudo de 08/10 a 16/10, com 8 migrações e o `RolesSeeder` |
 | 16/10 | **A SCP vê os órgãos e usuários**, só para consulta; o menu da Seleção sem a seta solta |
 | 16/10 | **Tela "Solicitar acesso"**: o login leva ao cadastro do servidor, com o mesmo visual |
 | 16/10 | **Limpeza dos dados de teste**, local e produção: ficam as OSCs e as contas escolhidas, saem os processos e as contas pré-cadastradas |
@@ -675,12 +673,10 @@ Trazer os demais cenários para `tests/Feature` é uma das [Pendências](#pendê
 
 ### Produção (ação, não código)
 
-- **Deploy pendente:** o que está no GitHub depois de 07/10 (ver [Estado atual](#estado-atual)), com uma
-  migração.
 - **Agendamento no hPanel** ([Deploy](#deploy), passo 7): sem ele, os avisos por e-mail ficam na fila.
-- **Contas pré-cadastradas são apagadas no deploy** (migrações `2026_10_16_105000` e `_110000`): Prefeito, SEPLAN,
-  Procuradoria e os Responsáveis de UG, mesmo com registro (a autoria fica em branco). Antes, avisar os secretários e setores para se cadastrarem em `/register` (o e-mail
-  institucional fica livre) e a SCP para aprovar; até lá, quem tem processo parado com eles espera.
+- **Avisar os secretários e setores** para se cadastrarem em "Solicitar acesso" (`/register`), e a SCP para
+  aprovar: desde 16/10 não há conta pré-cadastrada. Avisar também as OSCs de que a inscrição em chamamento passa
+  a exigir a área Arquivos da OSC completa, e de que as despesas passam a ser lançadas por elas no painel.
 - Cadastrar o **Gestor da Parceria** (perfil) em cada Secretaria antes de a primeira parceria chegar à
   assinatura do Termo — sem ele, a SCP não tem quem escolher na etapa 13 da Celebração.
 - Designar **Chefe de Setor** em cada Secretaria, senão o cadastro da própria equipe não tem quem o
@@ -697,6 +693,14 @@ Trazer os demais cenários para `tests/Feature` é uma das [Pendências](#pendê
 
 Da mais recente para a mais antiga. Cada entrada diz o que mudou, **por quê** e como foi
 conferido — o porquê é o que falta a quem pega o código depois.
+
+- [2026-10-16] **Deploy na Hostinger** (commit `83fc76f`, sobre o `ef5391d`)
+  - 95 arquivos (32 novos, 63 alterados, nenhum apagado), sem `vendor/` (o `composer.lock` não mudou) e sem
+    build novo. Backup antes em `~/backups/pgp-*-antes-deploy-20261016-185249.*`; md5 do servidor conferido
+    contra o `ef5391d` antes e contra o `83fc76f` depois; ensaio das 8 migrações e do `RolesSeeder` numa cópia
+    do banco de produção; manutenção ligada só durante envio, migrações e caches
+  - Conferido: páginas públicas (200), `/dashboard` (302), `/.env` (403); login com "Solicite seu acesso" e
+    "Voltar para o início"; varredura de 290 telas em produção, desfeita no fim, sem erro
 
 - [2026-10-16] **A SCP vê os órgãos e usuários** (permissão `ver_usuarios`, `RolesSeeder`, `orgaos/index`)
   - A SCP aprova as contas e precisava ver quem já está no sistema, como o administrador. Ganhou a tela
