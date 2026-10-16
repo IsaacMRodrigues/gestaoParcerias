@@ -2,9 +2,11 @@
     <x-slot name="header">
         <div class="flex items-center justify-between">
             <div>
-                <p class="text-sm text-gray-500">
-                    <a href="{{ route('orgaos.index') }}" class="hover:underline">Órgãos e usuários</a>
-                </p>
+                @can('cadastros')
+                    <p class="text-sm text-gray-500">
+                        <a href="{{ route('orgaos.index') }}" class="hover:underline">Órgãos e usuários</a>
+                    </p>
+                @endcan
                 <h2 class="text-2xl font-bold text-gray-900 mt-0.5">Cadastros pendentes de aprovação</h2>
             </div>
             <span class="px-3 py-1.5 text-sm font-medium bg-accent-50 text-accent-700 rounded-full">
@@ -51,13 +53,22 @@
                         </div>
                     </div>
 
-                    {{-- Aprovar/recusar apenas. Os perfis vêm de quem cadastrou
-                         (que sabe a função da pessoa) e o setor, do cadastro. Aqui
-                         o administrador confere e decide — não redefine. --}}
+                    {{-- Aprovar/recusar apenas. Os perfis vêm do cadastro (pedidos pela pessoa
+                         ou indicados pela chefia). Aqui a SCP ou o administrador confere a
+                         identidade e decide — não redefine. --}}
                     <form action="{{ route('usuarios.aprovar', $u) }}" method="POST" class="mt-4 border-t border-gray-100 pt-4 space-y-3">
                         @csrf @method('PATCH')
 
-                        @php $perfis = $u->roles->pluck('name')->all(); @endphp
+                        @php
+                            $perfis = $u->roles->pluck('name')->all();
+                            // Pede para ser o responsável de um setor (o secretário, na UG) que já tem um ativo?
+                            $jaTem = collect(\App\Models\User::RESPONSAVEL_DO_SETOR)
+                                ->filter(fn ($perfil, $setor) => in_array($perfil, $perfis, true) && $u->setor === $setor)
+                                ->flatMap(fn ($perfil, $setor) => \App\Models\User::role($perfil)
+                                    ->where('status', true)->where('approval_status', 'aprovado')->whereKeyNot($u->id)
+                                    ->when($setor === 'ug', fn ($q) => $q->where('orgao_id', $u->orgao_id))
+                                    ->get(['id', 'name', 'email']));
+                        @endphp
 
                         <div>
                             <x-input-label value="Perfis solicitados" />
@@ -69,17 +80,24 @@
                                         </span>
                                     @endforeach
                                 </div>
-                                @if($u->criadoPor)
-                                    <p class="text-xs text-gray-500 mt-1.5">Indicados por {{ $u->criadoPor->name }}.</p>
-                                @endif
+                                <p class="text-xs text-gray-500 mt-1.5">
+                                    {{ $u->criadoPor ? 'Indicados por ' . $u->criadoPor->name . '.' : 'Pedidos pela própria pessoa no cadastro: confira a identidade antes de aprovar.' }}
+                                </p>
                             @else
                                 {{-- Auto-cadastro não passa por chefe: ninguém indicou perfis.
                                      Aprovar aqui libera o login; os perfis se definem depois em
                                      Cadastros → Usuários, que é onde eles moram. --}}
                                 <p class="mt-1 text-sm text-accent-800 bg-accent-50 border border-accent-200 rounded-lg px-3 py-2">
                                     Nenhum perfil indicado — este cadastro não veio de um responsável de setor.
-                                    Ao aprovar, a pessoa entra sem acesso a nenhum módulo; defina os perfis em
-                                    <a href="{{ route('usuarios.edit', $u) }}" class="underline font-medium">Cadastros → Usuários</a>.
+                                    Ao aprovar, a pessoa entra sem acesso a nenhum módulo; os perfis se definem em
+                                    @can('cadastros')<a href="{{ route('usuarios.edit', $u) }}" class="underline font-medium">Cadastros → Usuários</a>@else Cadastros → Usuários, pelo administrador @endcan.
+                                </p>
+                            @endif
+                            @if($jaTem->isNotEmpty())
+                                <p class="mt-2 text-sm text-accent-800 bg-accent-50 border border-accent-200 rounded-lg px-3 py-2">
+                                    {{ $u->setor === 'ug' ? ($u->orgao->name ?? 'Esta Secretaria') : (\App\Models\User::LOTACOES[$u->setor] ?? 'Este setor') }}
+                                    já tem responsável ativo: {{ $jaTem->map(fn ($x) => $x->name . ' (' . $x->email . ')')->implode(', ') }}.
+                                    Aprovar é uma substituição — confira com a Secretaria e, se for o caso, desative a conta anterior.
                                 </p>
                             @endif
                             <x-input-error :messages="$errors->get('roles')" class="mt-1" />

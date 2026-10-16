@@ -40,13 +40,12 @@ class UserController extends Controller
     }
 
     /**
-     * Cadastros aguardando aprovação. Quem tem só aprovar_contas_osc (a SCP) vê só as contas de
-     * OSC; o mesmo recorte vale em aprovar/recusar.
+     * Cadastros aguardando aprovação: servidores (auto-cadastro e equipe de setor) e integrantes de
+     * OSC. Decidem o administrador (`cadastros`) e a SCP (`aprovar_contas`).
      */
     public function pendentes(): View
     {
         $pendentes = User::pendentes()
-            ->when(! auth()->user()->can('cadastros'), fn ($q) => $q->whereNotNull('osc_id'))
             ->with(['orgao', 'osc', 'criadoPor', 'roles'])
             ->orderBy('created_at')
             ->paginate(15);
@@ -66,7 +65,6 @@ class UserController extends Controller
     public function aprovar(Request $request, User $usuario): RedirectResponse
     {
         abort_unless($usuario->isPendente(), 422, 'Este cadastro não está pendente.');
-        $this->autorizarDecisao($usuario);
 
         // Conta que chegou acumulando encargos (cadastrada antes da regra) não
         // é liberada assim: os perfis se corrigem em Cadastros → Usuários.
@@ -100,21 +98,11 @@ class UserController extends Controller
     }
 
     /**
-     * Quem só tem `aprovar_contas_osc` decide sobre conta de OSC, e nada mais.
-     */
-    private function autorizarDecisao(User $usuario): void
-    {
-        abort_if(! auth()->user()->can('cadastros') && $usuario->osc_id === null, 403,
-            'Este cadastro não é de integrante de OSC.');
-    }
-
-    /**
      * Recusa o cadastro (com motivo) — mantém o registro e bloqueia o login.
      */
     public function recusar(Request $request, User $usuario): RedirectResponse
     {
         abort_unless($usuario->isPendente(), 422, 'Este cadastro não está pendente.');
-        $this->autorizarDecisao($usuario);
 
         $data = $request->validate([
             'rejeitado_motivo' => ['required', 'string', 'max:500'],

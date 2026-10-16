@@ -268,7 +268,7 @@ class User extends Authenticatable
     public function mensagemBloqueioLogin(): string
     {
         if ($this->isPendente()) {
-            return 'Seu cadastro está aguardando aprovação do administrador.';
+            return 'Seu cadastro está aguardando a aprovação do Setor de Convênios e Parcerias (SCP).';
         }
         if ($this->isRecusado()) {
             return 'Seu cadastro foi recusado' . ($this->rejeitado_motivo ? ': ' . $this->rejeitado_motivo : '.');
@@ -450,6 +450,30 @@ class User extends Authenticatable
      *
      * @return array<string,string> slug => rótulo
      */
+    /** Perfis que nenhum auto-cadastro pede: só o TI concede (acesso a tudo, leitura de tudo, chefia). */
+    public const PERFIS_FORA_DO_AUTOCADASTRO = [
+        'administrador_setorial',
+        'auditor_externo',
+        'auditor_geral',
+        'chefe_setor',
+        'analista',
+    ];
+
+    /**
+     * Perfis que quem se cadastra pode pedir no seu setor: os da Prefeitura, menos os que só o TI concede
+     * e os exclusivos de outro setor. A SCP confere a identidade e o pedido na aprovação.
+     *
+     * @return array<string, string> slug => rótulo
+     */
+    public static function perfisDoAutoCadastro(string $setor): array
+    {
+        return collect(self::$roleLabels)
+            ->reject(fn ($rotulo, $slug) => in_array($slug, self::PAPEIS_OSC, true))
+            ->reject(fn ($rotulo, $slug) => in_array($slug, self::PERFIS_FORA_DO_AUTOCADASTRO, true))
+            ->reject(fn ($rotulo, $slug) => isset(self::PERFIS_EXCLUSIVOS[$slug]) && self::PERFIS_EXCLUSIVOS[$slug] !== $setor)
+            ->all();
+    }
+
     public function perfisQuePodeConceder(): array
     {
         // O administrador já concede qualquer perfil em Cadastros; a régua abaixo é para o chefe de setor.

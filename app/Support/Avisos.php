@@ -161,7 +161,7 @@ class Avisos
     {
         $aprovadores = User::with('roles', 'permissions')
             ->where('status', true)->where('approval_status', 'aprovado')->get()
-            ->filter(fn (User $u) => $u->can('cadastros') || ($conta->osc_id && $u->can('aprovar_contas_osc')));
+            ->filter(fn (User $u) => $u->can('cadastros') || $u->can('aprovar_contas'));
 
         $origem = $conta->osc_id
             ? 'Integrante da organização ' . ($conta->osc?->name ?? '') . ', cadastrado pelo responsável legal.'

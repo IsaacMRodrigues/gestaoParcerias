@@ -96,6 +96,6 @@ class SubusuarioController extends Controller
         $usuario->syncRoles($request->perfis);
 
         return redirect()->route('subusuarios.index')->with('success',
-            'Usuário criado com os perfis escolhidos. Aguarde a aprovação do administrador para liberar o acesso.');
+            'Usuário criado com os perfis escolhidos. Aguarde a aprovação da SCP para liberar o acesso.');
     }
 }

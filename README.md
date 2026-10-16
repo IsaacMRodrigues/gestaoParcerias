@@ -55,8 +55,9 @@ o `RolesSeeder`, ensaiados antes sobre uma cópia do banco de produção.
 **No GitHub e ainda fora da produção** (sobem só quando pedido): listas por Secretaria, campos de dinheiro com
 R$, Arquivos da OSC valendo nos fluxos, caixas de seleção e barra de download, e os Arquivos da OSC
 preenchendo os fluxos (migração `2026_10_08_100000`), o **painel da prestação de contas** (migração
-`2026_10_13_100000`), o menu lateral da OSC, os relatórios da prestação de contas e a Celebração com 21 etapas
-(migração `2026_10_14_100000`, que renumera as celebrações em andamento). Ao subir, avisar que a inscrição em chamamento público passa a exigir a área Arquivos da OSC
+`2026_10_13_100000`), o menu lateral da OSC, os relatórios da prestação de contas, a Celebração com 21 etapas
+(migração `2026_10_14_100000`, que renumera as celebrações em andamento) e o **cadastro pelo próprio servidor**
+(migrações `2026_10_16_*`: a SCP aprova toda conta e as contas pré-cadastradas saem — rodar o `RolesSeeder`). Ao subir, avisar que a inscrição em chamamento público passa a exigir a área Arquivos da OSC
 completa, e que as despesas passam a ser lançadas pela OSC (as já lançadas pela Prefeitura entram como conferidas).
 
 As ações de produção que o deploy não faz (dados e painel) estão em
@@ -138,6 +139,7 @@ cada item estão no [Histórico de entregas](#histórico-de-entregas). 🚀 marc
 | 07/10 | Depois do deploy: listas só com o que é da Secretaria; R$ e vírgula em todos os campos de dinheiro; Arquivos da OSC valendo em todos os fluxos (recusa da UG trava a Celebração) |
 | 08/10 | Caixas de seleção e barra de download nos fluxos; **Arquivos da OSC preenchendo os fluxos** (documentos complementares, habilitação da dispensa e modelos com os dados da OSC); revisão do README |
 | 13/10 | Menu do portal da OSC na **barra lateral**, como o da área interna |
+| 16/10 | **Cadastro pelo próprio servidor**: o secretário se cadastra e escolhe "Responsável da UG"; a SCP aprova toda conta nova; saem as contas pré-cadastradas (ficam o administrador e a SCP) |
 | 15/10 | **Teste completo no navegador** (Nova Proposta → Celebração em 21 etapas → execução → painel → prestação encerrada → relatórios) e três correções que ele achou |
 | 14/10 | Arquivos da OSC: exigidos os documentos do representante legal, o comprovante de inscrição no CNPJ (com aviso dos 3 anos de existência) e a relação dos dirigentes; **data de validade** em todos os documentos |
 | 14/10 | **Pesquisa** nos Chamamentos abertos do portal e em Minhas inscrições da OSC |
@@ -161,18 +163,13 @@ php artisan db:seed
 ```
 
 O `migrate` deixa o ambiente utilizável: cria as Secretarias e demais Unidades Gestoras, os perfis e
-o **quadro de contas da Prefeitura** (migração `cria_quadro_de_usuarios_da_prefeitura`) — o
-administrador, o Prefeito, a SCP, a SEPLAN, a Procuradoria e um responsável por Unidade Gestora.
-A senha provisória está nessa migração. **Ela é pública, como todo este repositório: não use essas
-contas fora do ambiente local sem trocar a senha.**
+**só duas contas** (migração `cria_quadro_de_usuarios_da_prefeitura`): o administrador (`admin_parcerias`) e
+a SCP (`scp@gmail.com`). A senha provisória está nessa migração. **Ela é pública, como todo este repositório:
+não use essas contas fora do ambiente local sem trocar a senha.**
 
-| Para entrar como               | Login                                                               |
-| ------------------------------ | ------------------------------------------------------------------- |
-| Administrador do sistema       | `admin_parcerias`                                                 |
-| Responsável de uma Secretaria | o e-mail institucional dela (`educacao@saogoncalo.mg.gov.br`, …) |
-| Saúde, Fazenda e Trabalho     | `saude`, `fazenda`, `trabalho`                                |
-| Procuradoria Jurídica         | `procurador@saogoncalo.mg.gov.br`                                 |
-| SCP / SEPLAN / Prefeito        | `scp@gmail.com`, `seplan@gmail.com`, `prefeito@gmail.com`     |
+Todo o resto se cadastra sozinho: o servidor (secretário inclusive) em `/register`, escolhendo setor,
+Secretaria e perfis, e a SCP ou o administrador aprova; a OSC em `/cadastro/osc`. Para testar um processo do
+começo ao fim, cadastre as contas de cada setor e aprove-as como SCP.
 
 A tela de entrada aceita e-mail ou nome de usuário. **Não há conta de OSC pronta:** a organização
 entra pelo auto-cadastro em `/cadastro/osc`, que é o único caminho dela — percorrê-lo faz parte do
@@ -390,9 +387,11 @@ dois lugares, nunca na aprovação — na **criação** (responsável do setor) 
 - `aprovar()` não recebe mais perfis; confere a invariante que a tela antiga garantia (perfil
   exclusivo exige o setor correspondente) e recusa a aprovação com instrução, em vez de corrigir
   em silêncio.
-- **Auto-cadastro (`/register`) não passa por chefe**, então chega sem perfil algum. A tela avisa
-  que a pessoa entrará sem acesso a módulo nenhum e aponta para a edição do usuário — antes esse
-  caso era resolvido no próprio formulário de aprovação, que deixou de existir.
+- **Auto-cadastro (`/register`):** a pessoa escolhe o setor, a Secretaria e os perfis que pede, entre os do
+  seu setor (`User::perfisDoAutoCadastro`: os da Prefeitura menos `PERFIS_FORA_DO_AUTOCADASTRO` — administrador,
+  auditores, chefia, analista — e os exclusivos de outro setor). É assim que o secretário pede "Responsável da
+  Unidade Gestora". A conta nasce pendente com os perfis; a **SCP** (ou o administrador) confere a identidade e
+  aprova — e a tela de aprovação avisa quando a Secretaria (ou a SEPLAN) já tem responsável ativo.
 - `membro_osc` não pode ser oferecido a servidor (o tornaria externo). As listas de perfis do
   admin excluem `User::PAPEIS_OSC`, não um nome de papel específico.
 
@@ -465,7 +464,7 @@ responsável legal restringe depois, no "Alterar" da listagem.
 - Tela: **Portal → Usuários** (`portal.usuarios.*`), visível só para o responsável legal.
 - **A conta nasce pendente**: quem indica a pessoa é a entidade, quem abre a porta é a Prefeitura.
   Vai para a mesma fila de **Aprovações pendentes**, decidida pelo TI/Administrador ou pela SCP
-  (permissão `aprovar_contas_osc`, que só enxerga e decide contas de OSC). O login barra pendente.
+  (permissão `aprovar_contas`). O login barra pendente.
 - **Cada um troca a própria senha** em **Portal → Meus dados e senha** (`PerfilOscController`):
   nome, telefone e senha, pedindo a senha atual. O e-mail de acesso não muda por ali. Sem essa
   tela, a senha inicial definida por quem cadastrou ficava conhecida por outra pessoa para sempre —
@@ -490,8 +489,8 @@ responsável legal restringe depois, no "Alterar" da listagem.
 | `execucao` | **4 · Execução** (repasses, despesas, notas, saldo), **Alterações da Parceria** e a conferência do painel da prestação de contas |
 | `prestacao_contas`                                                   | **6 · Prestação de Contas**                                                                                                          |
 | `monitoramento`                                                      | Leitura de alterações e prestações; o módulo próprio ainda não existe                                                                  |
-| `usuarios_setor`                                                     | **Meus usuários**: cadastrar a equipe do próprio setor (o administrador aprova)                                                       |
-| `aprovar_contas_osc`                                                 | **Aprovações pendentes**, só as contas de OSC — é como a SCP decide sobre a equipe da organização sem ganhar a mesa de cadastros |
+| `usuarios_setor`                                                     | **Meus usuários**: cadastrar a equipe do próprio setor (a SCP ou o administrador aprova)                                                       |
+| `aprovar_contas` | **Contas a aprovar**: decide toda conta nova — servidor (auto-cadastro ou equipe de setor) e integrante de OSC. É como a SCP aprova os cadastros sem ganhar a mesa de Cadastros |
 | `suporte`                                                            | **Atender** o suporte: ver e responder os chamados de todos, nota interna, encerrar                                                     |
 | `osc_*`                                                              | Funções da equipe da OSC, marcadas por pessoa — nunca valem dentro da Administração                                                      |
 
@@ -570,7 +569,7 @@ Procedimento:
 
 ## Verificação
 
-`php artisan test` (sqlite em memória) roda **215 testes** em `tests/Feature`, um arquivo por regra de
+`php artisan test` (sqlite em memória) roda **220 testes** em `tests/Feature`, um arquivo por regra de
 negócio (quem abre qual parceria, contas e senhas, avisos por e-mail, segregação de encargos,
 cancelamento e prorrogação de chamamento, Nova Proposta, prazo e resposta de recurso, plano de
 trabalho do modelo, etapa conjunta, devolução por documento, Termo e OP em sequência, download de
@@ -674,8 +673,9 @@ Trazer os demais cenários para `tests/Feature` é uma das [Pendências](#pendê
 - **Deploy pendente:** o que está no GitHub depois de 07/10 (ver [Estado atual](#estado-atual)), com uma
   migração.
 - **Agendamento no hPanel** ([Deploy](#deploy), passo 7): sem ele, os avisos por e-mail ficam na fila.
-- Mover a conta `planejamento@saogoncalo.mg.gov.br` para o setor SEPLAN, com o perfil Responsável pela
-  SEPLAN.
+- **Contas pré-cadastradas saem no deploy** (migração `2026_10_16_110000`): Prefeito, SEPLAN, Procuradoria e
+  os Responsáveis de UG. Antes, avisar os secretários e setores para se cadastrarem em `/register` (o e-mail
+  institucional fica livre) e a SCP para aprovar; até lá, quem tem processo parado com eles espera.
 - Cadastrar o **Gestor da Parceria** (perfil) em cada Secretaria antes de a primeira parceria chegar à
   assinatura do Termo — sem ele, a SCP não tem quem escolher na etapa 13 da Celebração.
 - Designar **Chefe de Setor** em cada Secretaria, senão o cadastro da própria equipe não tem quem o
@@ -684,7 +684,7 @@ Trazer os demais cenários para `tests/Feature` é uma das [Pendências](#pendê
   com ela vazia; em 08/10 nenhuma tinha enviado arquivo).
 - Há **um único administrador** (TI): se a conta ficar inacessível, ninguém mais concede perfis.
 - Contas a rever: a Associação Bem Viver, sem RG do representante, e a OSC de teste criada em 23/09 (CNPJ
-  zerado), que sai quando os testes em produção acabarem. A Saúde ficou só com `gestor.saude` (07/10).
+  zerado), que sai quando os testes em produção acabarem.
 
 ---
 
@@ -692,6 +692,26 @@ Trazer os demais cenários para `tests/Feature` é uma das [Pendências](#pendê
 
 Da mais recente para a mais antiga. Cada entrada diz o que mudou, **por quê** e como foi
 conferido — o porquê é o que falta a quem pega o código depois.
+
+- [2026-10-16] **Cadastro pelo próprio servidor e aprovação pela SCP** (`RegisteredUserController`,
+  `User::perfisDoAutoCadastro`, `Support\ContasPreCadastradas`; migrações `2026_10_16_100000` e `_110000`)
+  - Antes o sistema trazia as contas prontas — um Responsável por UG no e-mail institucional (@saogoncalo), três
+    @provisorio.local, Prefeito, SEPLAN e Procuradoria —, todas com a mesma senha pública. Agora **cada servidor,
+    secretário inclusive, faz o próprio cadastro** em `/register`: setor, Secretaria, matrícula e os perfis que
+    pede, entre os do seu setor (a lista muda com o setor; "Responsável da Unidade Gestora" vem primeiro). Ficam
+    de fora administrador, auditores e chefia, que só o TI concede, e os exclusivos de outro setor; acumular
+    encargos continua barrado
+  - **A SCP aprova toda conta nova** (servidor e OSC): a permissão `aprovar_contas_osc` virou `aprovar_contas`
+    (a migração renomeia, sem perder quem a tinha), o menu da SCP mostra "Contas a aprovar" e o aviso por e-mail
+    chega a ela. A tela de aprovação mostra os perfis pedidos ("pedidos pela própria pessoa: confira a
+    identidade") e avisa quando a Secretaria já tem Responsável ativo — aprovar é uma substituição
+  - **Saem as contas pré-cadastradas**, menos o administrador e a SCP: sem registro, apagadas; com registro
+    (assinou, tramitou, abriu chamado), desativadas sem perfis, com o e-mail e o login liberados
+    (`fulano+desativadaN@…`), para o secretário se cadastrar com o endereço institucional. Ambiente novo nasce só
+    com o administrador e a SCP. No banco local: 13 apagadas, 8 desativadas
+  - Conferido: `AutoCadastroDeServidorTest` (5 testes; falham com a régua de perfis e o recorte antigo da SCP);
+    suíte 220/220; 460 telas sem erro; no navegador, o cadastro de uma secretária da Educação com o e-mail
+    institucional, o login barrado enquanto pendente e a aprovação pela SCP
 
 - [2026-10-15] **Teste completo no navegador e as correções que ele achou**
   - Um processo inteiro no sistema local, cada passo com o login de quem o faz (senhas locais redefinidas para o

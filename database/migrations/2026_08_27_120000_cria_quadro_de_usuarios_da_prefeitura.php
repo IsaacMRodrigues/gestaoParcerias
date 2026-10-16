@@ -1,13 +1,8 @@
 <?php
 
 /**
- * O quadro de contas da Prefeitura, para que todo ambiente novo nasça igual.
- *
- * Estas contas foram abertas uma a uma, à mão, no banco de quem desenvolve.
- * Quem clonasse o repositório recebia o sistema sem ninguém dentro dele: sem
- * gestor de Secretaria, sem Procuradoria, sem quem assina — e não havia como
- * percorrer um processo do começo ao fim para testar. Aqui elas passam a ser
- * parte do código, como já eram as Secretarias e os perfis.
+ * As contas que todo ambiente novo traz: o administrador e a SCP, que aprova os demais cadastros.
+
  *
  * Não sobrescreve nada: quem já existe (comparando pelo e-mail) fica como
  * está, com a sua senha e os seus perfis. Rodar de novo não muda nada, e num
@@ -41,36 +36,10 @@ return new class extends Migration
      * todas as Secretarias, tenha ou não lotação registrada.
      */
     private const QUADRO = [
-        // Administração do sistema e quem serve o Município inteiro.
+        // Só o administrador e a SCP: os demais servidores, secretários inclusive, fazem o próprio
+        // cadastro e a SCP aprova (ver ContasPreCadastradas).
         ['Pedro Henrique',      'pedrohenrique62669@gmail.com', 'admin_parcerias', 'ti',    null,   'administrador_setorial'],
-        ['Prefeito Municipal',  'prefeito@gmail.com',            null,             'pm',    null,   'prefeito_municipal'],
         ['SCP Raquel',          'scp@gmail.com',                 null,             'scp',   '0214', 'analista_tecnico_scp'],
-        ['SEPLAN Jesqueline',   'seplan@gmail.com',              null,             'seplan', null,  'analista_orcamentario_financeiro'],
-        ['Gestor Planejamento', 'planejamento@saogoncalo.mg.gov.br', null,          'seplan', '0214', 'analista_orcamentario_financeiro'],
-        ['Procuradoria Jurídica', 'procurador@saogoncalo.mg.gov.br', null,          'pj',    '0202', 'analista_juridico'],
-
-        // Um responsável por Unidade Gestora, na caixa institucional da Secretaria.
-        ['Gestor Governo',                 'governo@saogoncalo.mg.gov.br',            null, 'ug', '0201', 'responsavel_unidade_gestora'],
-        ['Gestor Jurídico',                'juridico@saogoncalo.mg.gov.br',           null, 'ug', '0202', 'responsavel_unidade_gestora'],
-        ['Gestor Administração',           'administracao@saogoncalo.mg.gov.br',      null, 'ug', '0203', 'responsavel_unidade_gestora'],
-        ['Gestor Obras',                   'obras@saogoncalo.mg.gov.br',              null, 'ug', '0205', 'responsavel_unidade_gestora'],
-        ['Gestor Educação',                'educacao@saogoncalo.mg.gov.br',           null, 'ug', '0207', 'responsavel_unidade_gestora'],
-        ['Gestor Esportes e Lazer',        'esportes@saogoncalo.mg.gov.br',           null, 'ug', '0208', 'responsavel_unidade_gestora'],
-        ['Gestor Meio Ambiente',           'meioambiente@saogoncalo.mg.gov.br',       null, 'ug', '0210', 'responsavel_unidade_gestora'],
-        ['Gestor Agricultura',             'agricultura@saogoncalo.mg.gov.br',        null, 'ug', '0211', 'responsavel_unidade_gestora'],
-        ['Gestor Serviços Urbanos',        'servicosurbanos@saogoncalo.mg.gov.br',    null, 'ug', '0215', 'responsavel_unidade_gestora'],
-        ['Gestor Cultura e Turismo',       'cultura@saogoncalo.mg.gov.br',            null, 'ug', '0216', 'responsavel_unidade_gestora'],
-        ['Gestor Desen. Econômico',        'desenvolvimento@saogoncalo.mg.gov.br',    null, 'ug', '0217', 'responsavel_unidade_gestora'],
-        ['Gestor Gestão de Pessoa',        'gestaodepessoas@saogoncalo.mg.gov.br',    null, 'ug', '0224', 'responsavel_unidade_gestora'],
-        ['Gestor Transporte',              'transportes@saogoncalo.mg.gov.br',        null, 'ug', '0225', 'responsavel_unidade_gestora'],
-        ['Gestor Ciência e Tecnologia',    'cienciaetecnologia@saogoncalo.mg.gov.br', null, 'ug', '0227', 'responsavel_unidade_gestora'],
-
-        // Três Secretarias cujo e-mail institucional ainda não foi informado:
-        // entram por nome de usuário, com endereço reservado que não existe de
-        // propósito — ninguém escreve para @provisorio.local por engano.
-        ['Gestor Fazenda',                 'fazenda@provisorio.local',  'fazenda',  'ug', '0204', 'responsavel_unidade_gestora'],
-        ['Gestor Saúde',                   'saude@provisorio.local',    'saude',    'ug', '0206', 'responsavel_unidade_gestora'],
-        ['Gestor Trabalho e Desen. Social','trabalho@provisorio.local', 'trabalho', 'ug', '0209', 'responsavel_unidade_gestora'],
     ];
 
     public function up(): void

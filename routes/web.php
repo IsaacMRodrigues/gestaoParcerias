@@ -209,9 +209,8 @@ Route::middleware(['auth', 'staff', 'readonly'])->group(function () {
     });
 
     // Aprovação de cadastros: auto-cadastro de servidor, equipe de setor e
-    // integrante de OSC. A SCP entra aqui por `aprovar_contas_osc` e só
-    // enxerga e decide as contas de OSC — o recorte é no UserController.
-    Route::middleware('permission:cadastros|aprovar_contas_osc')->group(function () {
+    // integrante de OSC. Decidem o administrador e a SCP (`aprovar_contas`).
+    Route::middleware('permission:cadastros|aprovar_contas')->group(function () {
         Route::get('usuarios/pendentes', [UserController::class, 'pendentes'])->name('usuarios.pendentes');
         Route::patch('usuarios/{usuario}/aprovar', [UserController::class, 'aprovar'])->name('usuarios.aprovar');
         Route::patch('usuarios/{usuario}/recusar', [UserController::class, 'recusar'])->name('usuarios.recusar');

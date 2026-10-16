@@ -2,13 +2,14 @@
     <div class="mb-6">
         <h2 class="text-lg font-semibold text-gray-900">Solicitar acesso</h2>
         <p class="text-sm text-gray-500 mt-1">
-            Para servidores internos. Seu acesso será liberado após a <strong>aprovação do administrador</strong>,
-            que também definirá seus perfis. OSCs devem usar o
+            Para servidores da Prefeitura, inclusive secretários. Escolha o seu setor e o que você faz nele;
+            o acesso é liberado depois que o <strong>Setor de Convênios e Parcerias (SCP)</strong> conferir os seus dados.
+            OSCs devem usar o
             <a href="{{ route('portal.osc.create') }}" class="text-brand-600 hover:underline">cadastro do portal</a>.
         </p>
     </div>
 
-    <form method="POST" action="{{ route('register') }}">
+    <form method="POST" action="{{ route('register') }}" x-data="{ setor: @js(old('setor', '')) }">
         @csrf
 
         <!-- Nome -->
@@ -42,7 +43,7 @@
         <!-- Setor de lotação -->
         <div class="mt-4">
             <x-input-label for="setor" value="Setor de lotação" />
-            <select id="setor" name="setor" required
+            <select id="setor" name="setor" required x-model="setor"
                     class="block mt-1 w-full border-gray-300 focus:border-brand-500 focus:ring-brand-500 rounded-md shadow-sm">
                 <option value="">Selecione...</option>
                 @foreach($setores as $valor => $rotulo)
@@ -65,6 +66,45 @@
                 @endforeach
             </select>
             <x-input-error :messages="$errors->get('orgao_id')" class="mt-2" />
+        </div>
+
+        <!-- Matrícula -->
+        <div class="mt-4">
+            <x-input-label for="matricula" value="Matrícula" />
+            <x-text-input id="matricula" class="block mt-1 w-full" type="text" name="matricula" :value="old('matricula')" autocomplete="off" />
+            <x-input-error :messages="$errors->get('matricula')" class="mt-2" />
+        </div>
+
+        <!-- Perfis do setor: a lista muda com o setor escolhido -->
+        <div class="mt-4">
+            <x-input-label value="O que você faz no sistema" />
+            <p class="text-xs text-gray-500 mt-0.5" x-show="! setor">Escolha o setor para ver os perfis.</p>
+            @foreach($perfisPorSetor as $setor => $perfis)
+                @php
+                    // O responsável do setor (o secretário, na UG) vem primeiro.
+                    $responsavel = \App\Models\User::RESPONSAVEL_DO_SETOR[$setor] ?? null;
+                    $perfis = collect($perfis)->sortBy(fn ($r, $slug) => $slug === $responsavel ? 0 : 1);
+                @endphp
+                <template x-if="setor === @js($setor)">
+                    <div class="mt-1.5 grid sm:grid-cols-2 gap-x-4 gap-y-1.5">
+                        @foreach($perfis as $slug => $rotulo)
+                            <label class="flex items-start gap-2 text-sm text-gray-700">
+                                <input type="checkbox" name="perfis[]" value="{{ $slug }}" @checked(in_array($slug, old('perfis', []), true))
+                                       class="mt-0.5 rounded border-gray-300 text-brand-600 focus:ring-brand-500">
+                                <span>
+                                    {{ $rotulo }}
+                                    @if($slug === $responsavel)<span class="block text-xs text-gray-500">o secretário ou responsável pelo setor</span>@endif
+                                </span>
+                            </label>
+                        @endforeach
+                    </div>
+                </template>
+            @endforeach
+            <p class="text-xs text-gray-500 mt-2" x-show="setor">
+                Gestor da Parceria e as Comissões são encargos por portaria: peça só se já foi designado.
+            </p>
+            <x-input-error :messages="$errors->get('perfis')" class="mt-2" />
+            <x-input-error :messages="$errors->get('perfis.*')" class="mt-1" />
         </div>
 
         <!-- Senha -->

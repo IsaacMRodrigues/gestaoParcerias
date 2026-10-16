@@ -23,12 +23,14 @@ class RegisteredUserController extends Controller
         // OSC tem fluxo próprio pelo portal; aqui é só para servidores internos.
         $setores = collect(User::LOTACOES)->except('osc');
         $orgaos  = Orgao::where('status', true)->orderBy('name')->get();
+        $perfisPorSetor = $setores->keys()->mapWithKeys(fn ($s) => [$s => User::perfisDoAutoCadastro($s)]);
 
-        return view('auth.register', compact('setores', 'orgaos'));
+        return view('auth.register', compact('setores', 'orgaos', 'perfisPorSetor'));
     }
 
     /**
-     * Cria o cadastro pendente, sem perfil; o administrador libera e atribui perfis na aprovação.
+     * Cria o cadastro pendente com os perfis que a pessoa pediu no seu setor; a SCP (ou o
+     * administrador) confere a identidade e o pedido e libera o acesso.
      *
      * @throws ValidationException
      */
@@ -41,19 +43,29 @@ class RegisteredUserController extends Controller
             'email'           => ['required', 'string', 'lowercase', 'email', 'max:255', 'unique:'.User::class],
             'cpf'             => ['nullable', 'string', 'max:14', 'unique:users,cpf'],
             'phone'           => ['nullable', 'string', 'max:20'],
+            'matricula'       => ['nullable', 'string', 'max:30', 'unique:users,matricula'],
             'setor'           => ['required', Rule::in($setoresValidos)],
             'orgao_id'        => ['nullable', 'required_if:setor,ug', 'exists:orgaos,id'],
+            'perfis'          => ['required', 'array', 'min:1'],
+            'perfis.*'        => [Rule::in(array_keys(User::perfisDoAutoCadastro((string) $request->input('setor'))))],
             'password'        => ['required', 'confirmed', Rules\Password::defaults()],
             'solicitacao_obs' => ['nullable', 'string', 'max:1000'],
         ], [
             'orgao_id.required_if' => 'Selecione a Secretaria/Unidade Gestora.',
+            'perfis.required'      => 'Escolha ao menos um perfil: é o que você vai fazer no sistema.',
+            'perfis.*.in'          => 'Um dos perfis escolhidos não pode ser pedido neste setor.',
         ]);
 
-        User::create([
+        if ($conflito = User::conflitoDeEncargos($request->input('perfis'))) {
+            throw ValidationException::withMessages(['perfis' => $conflito]);
+        }
+
+        $user = User::create([
             'name'            => $request->name,
             'email'           => $request->email,
             'cpf'             => $request->cpf,
             'phone'           => $request->phone,
+            'matricula'       => $request->matricula,
             'setor'           => $request->setor,
             'orgao_id'        => $request->orgao_id,
             'password'        => Hash::make($request->password),
@@ -61,8 +73,10 @@ class RegisteredUserController extends Controller
             'approval_status' => 'pendente',
             'solicitacao_obs' => $request->solicitacao_obs,
         ]);
+        // Pendente, os perfis não abrem nada: podeAutenticar() exige a aprovação.
+        $user->syncRoles($request->input('perfis'));
 
         return redirect()->route('login')->with('status',
-            'Cadastro enviado! Seu acesso será liberado após a aprovação do administrador.');
+            'Cadastro enviado! Seu acesso será liberado depois que o Setor de Convênios e Parcerias (SCP) conferir os seus dados.');
     }
 }
