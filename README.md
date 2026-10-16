@@ -700,7 +700,8 @@ conferido — o porquê é o que falta a quem pega o código depois.
   - O cadastro do servidor existia em `/register`, mas o login só levava ao cadastro de OSC. Agora o login tem
     "É servidor da Prefeitura? Solicite seu acesso", e a tela segue o visual do login: título próprio (também na
     aba do navegador), campos no mesmo padrão, senha com o olho de exibir e os links para entrar ou cadastrar OSC.
-    O layout de visitante aceita `titulo` e `subtitulo`; sem eles, continua "Acessar o sistema"
+    O layout de visitante aceita `titulo` e `subtitulo`; sem eles, continua "Acessar o sistema". No topo das telas
+    de visitante (login, solicitar acesso, esqueci a senha), o botão "Voltar para o início" leva à página inicial
   - Conferido: `AutoCadastroDeServidorTest` (o link no login e o título); suíte 221/221; as duas telas no navegador
 
 - [2026-10-16] **Limpeza dos dados de teste** (sem mudança de código; scripts avulsos, com backup antes)

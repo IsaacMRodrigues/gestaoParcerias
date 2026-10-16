@@ -83,6 +83,16 @@
                 <div class="flex-1 flex flex-col justify-center px-5 py-12 sm:px-12">
                     <div class="w-full max-w-md mx-auto">
 
+                        <a href="{{ route('landing') }}"
+                           class="inline-flex items-center gap-1.5 mb-8 px-3 py-1.5 rounded-lg border border-gray-200 text-sm font-medium text-gray-600
+                                  hover:bg-gray-50 hover:border-gray-300 hover:text-gray-900 transition
+                                  focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-500">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.2">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7"/>
+                            </svg>
+                            Voltar para o início
+                        </a>
+
                         {{-- No celular o painel some, então a marca aparece aqui --}}
                         <a href="{{ route('landing') }}" class="lg:hidden flex items-center gap-3 mb-8">
                             <x-marca class="h-11" />
@@ -103,9 +113,6 @@
 
                         <p class="text-xs text-gray-400 mt-10 pt-6 border-t border-gray-100">
                             © {{ now()->year }} Plataforma de Gestão de Parcerias
-                            <a href="{{ route('landing') }}" class="text-brand-700 font-medium hover:underline ml-1">
-                                Voltar ao início
-                            </a>
                         </p>
                     </div>
                 </div>

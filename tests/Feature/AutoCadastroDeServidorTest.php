@@ -53,7 +53,7 @@ class AutoCadastroDeServidorTest extends TestCase
 
     public function test_o_secretario_se_cadastra_como_responsavel_da_ug_e_aguarda_a_scp(): void
     {
-        $this->get('/login')->assertOk()->assertSee('Solicite seu acesso')->assertSee(route('register'));
+        $this->get('/login')->assertOk()->assertSee('Solicite seu acesso')->assertSee(route('register'))->assertSee('Voltar para o início');
         $this->get('/register')->assertOk()->assertSee('<title>Solicitar acesso', false)->assertDontSee('Acessar o sistema')
             ->assertSee('Responsável da Unidade Gestora')->assertSee('o secretário ou responsável pelo setor');
         $this->post('/register', $this->dados())->assertRedirect(route('login'))->assertSessionHasNoErrors();
