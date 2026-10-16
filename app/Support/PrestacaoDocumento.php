@@ -37,28 +37,6 @@ class PrestacaoDocumento
             . '</tbody></table>';
     }
 
-    /** Anexo I — memorando de encaminhamento. */
-    public static function oficio(PrestacaoContas $pc): string
-    {
-        $anexos = ['Relatório de Execução do Objeto — REO', 'Documentos que comprovam o REO',
-            'Relatório de Conciliação Bancária', 'Relatório de Comprovantes de Despesas',
-            'Relatório de Metas Financeiras', 'Relação de Bens Móveis',
-            'Extratos bancários do período (conta corrente e aplicação)',
-            'Comprovantes de despesas, em ordem cronológica', 'Termo de compromisso'];
-
-        return '<p style="text-align:center"><strong>MEMORANDO DE ENCAMINHAMENTO DA PRESTAÇÃO DE CONTAS</strong></p>'
-            . self::cabecalho($pc)
-            . '<p><br></p><p>Ao(À) Sr(a). Gestor(a) de Convênio/Parceria<br>Prefeitura Municipal de São Gonçalo do Rio Abaixo</p>'
-            . '<p>Encaminhamos a V. Sª. a prestação de contas referente ao termo acima identificado, composta de '
-            . '<strong>' . ($pc->folhas ?: '___') . '</strong> folhas numeradas, contendo a documentação comprobatória e os seguintes anexos:</p>'
-            . '<ul><li>' . implode('</li><li>', $anexos) . '</li></ul>'
-            . '<p>Foram recebidas <strong>' . ($pc->parcelas_recebidas ?: '___') . '</strong> parcela(s) do termo de parceria no período.</p>'
-            . '<p>Informamos que o responsável pela prestação de contas é o(a) Sr(a). <strong>' . e($pc->responsavel_nome ?: '___') . '</strong>'
-            . ', e-mail: ' . e($pc->responsavel_email ?: '___') . ', telefone: ' . e($pc->responsavel_telefone ?: '___') . '.</p>'
-            . '<p>Colocamo-nos à disposição de V. Sa. para quaisquer informações adicionais.</p>'
-            . self::assinatura($pc);
-    }
-
     /** Anexo III + Anexos IV a VII — o relatório que a OSC assina. */
     public static function relatorio(PrestacaoContas $pc): string
     {

@@ -139,6 +139,7 @@ cada item estão no [Histórico de entregas](#histórico-de-entregas). 🚀 marc
 | 07/10 | Depois do deploy: listas só com o que é da Secretaria; R$ e vírgula em todos os campos de dinheiro; Arquivos da OSC valendo em todos os fluxos (recusa da UG trava a Celebração) |
 | 08/10 | Caixas de seleção e barra de download nos fluxos; **Arquivos da OSC preenchendo os fluxos** (documentos complementares, habilitação da dispensa e modelos com os dados da OSC); revisão do README |
 | 13/10 | Menu do portal da OSC na **barra lateral**, como o da área interna |
+| 16/10 | **Prestação de contas sem o memorando de encaminhamento**: saem o bloco de campos, o documento gerado e a peça do checklist |
 | 16/10 | **Cadastro pelo próprio servidor**: o secretário se cadastra e escolhe "Responsável da UG"; a SCP aprova toda conta nova; as contas pré-cadastradas são apagadas (ficam o administrador e a SCP) |
 | 15/10 | **Teste completo no navegador** (Nova Proposta → Celebração em 21 etapas → execução → painel → prestação encerrada → relatórios) e três correções que ele achou |
 | 14/10 | Arquivos da OSC: exigidos os documentos do representante legal, o comprovante de inscrição no CNPJ (com aviso dos 3 anos de existência) e a relação dos dirigentes; **data de validade** em todos os documentos |
@@ -569,7 +570,7 @@ Procedimento:
 
 ## Verificação
 
-`php artisan test` (sqlite em memória) roda **220 testes** em `tests/Feature`, um arquivo por regra de
+`php artisan test` (sqlite em memória) roda **221 testes** em `tests/Feature`, um arquivo por regra de
 negócio (quem abre qual parceria, contas e senhas, avisos por e-mail, segregação de encargos,
 cancelamento e prorrogação de chamamento, Nova Proposta, prazo e resposta de recurso, plano de
 trabalho do modelo, etapa conjunta, devolução por documento, Termo e OP em sequência, download de
@@ -692,6 +693,15 @@ Trazer os demais cenários para `tests/Feature` é uma das [Pendências](#pendê
 
 Da mais recente para a mais antiga. Cada entrada diz o que mudou, **por quê** e como foi
 conferido — o porquê é o que falta a quem pega o código depois.
+
+- [2026-10-16] **Prestação de contas sem o memorando de encaminhamento** (`PrestacaoContasController`,
+  `Support\PrestacaoDocumento`, `Peca::TEMPLATES['prestacao_contas']`; migração `2026_10_16_120000`)
+  - A pedido do usuário, sai tudo do memorando: o bloco "Memorando de encaminhamento" da tela (nº de folhas,
+    parcelas recebidas, responsável, e-mail e telefone), o documento gerado deles e a peça
+    `oficio_encaminhamento` do checklist da OSC, que passa a ter nove itens. A migração tira a peça das
+    prestações abertas; as colunas `folhas`, `parcelas_recebidas` e `responsavel_*` ficam no banco, sem uso
+  - Conferido: `PainelDaPrestacaoTest::test_a_prestacao_nao_tem_memorando_de_encaminhamento` (falha sem a
+    mudança); suíte 221/221; 460 telas sem erro
 
 - [2026-10-16] **Cadastro pelo próprio servidor e aprovação pela SCP** (`RegisteredUserController`,
   `User::perfisDoAutoCadastro`, `Support\ContasPreCadastradas`; migrações `2026_10_16_100000`, `_105000` e `_110000`)

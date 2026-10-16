@@ -24,7 +24,6 @@ class PrestacaoContasController extends Controller
 {
     /** Blocos gerados a partir dos campos, e o que cada um regera. */
     private const GERADOS = [
-        'oficio_encaminhamento' => 'oficio',
         'relatorio'             => 'relatorio',
         'resumo_folha'          => 'resumoFolha',
     ];
@@ -111,9 +110,6 @@ class PrestacaoContasController extends Controller
                 : null,
             'iniciada_em' => now(),
             'created_by'  => auth()->id(),
-            // O responsável pela prestação começa sendo quem a abriu; a OSC muda se quiser.
-            'responsavel_nome'  => auth()->user()->name,
-            'responsavel_email' => auth()->user()->email,
         ]);
 
         Peca::sincronizar($pc, 'prestacao_contas');
@@ -233,16 +229,9 @@ class PrestacaoContasController extends Controller
         $this->autorizarSetor($pc);
         abort_unless($pc->setor === 'osc', 403, 'Estes campos são preenchidos pela OSC.');
 
-        $bloco = $request->validate(['bloco' => ['required', Rule::in(['oficio', 'reo', 'ref', 'folha'])]])['bloco'];
+        $bloco = $request->validate(['bloco' => ['required', Rule::in(['reo', 'ref', 'folha'])]])['bloco'];
 
         $regras = match ($bloco) {
-            'oficio' => [
-                'folhas'                => ['nullable', 'integer', 'min:1'],
-                'parcelas_recebidas'    => ['nullable', 'integer', 'min:0'],
-                'responsavel_nome'      => ['nullable', 'string', 'max:255'],
-                'responsavel_email'     => ['nullable', 'email', 'max:255'],
-                'responsavel_telefone'  => ['nullable', 'string', 'max:30'],
-            ],
             'reo' => [
                 'objetivo_geral'        => ['nullable', 'string'],
                 'objetivos_especificos' => ['nullable', 'string'],
@@ -292,8 +281,7 @@ class PrestacaoContasController extends Controller
             );
         }
 
-        $this->regerarDocumentos($pc->fresh(), $bloco === 'oficio' ? 'oficio_encaminhamento'
-            : ($bloco === 'folha' ? 'resumo_folha' : 'relatorio'));
+        $this->regerarDocumentos($pc->fresh(), $bloco === 'folha' ? 'resumo_folha' : 'relatorio');
 
         return back()->with('success', 'Dados salvos — o documento foi atualizado com as somas.');
     }

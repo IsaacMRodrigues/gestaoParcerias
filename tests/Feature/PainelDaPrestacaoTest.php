@@ -221,6 +221,19 @@ class PainelDaPrestacaoTest extends TestCase
         $this->assertContains('1 lançamento(s) do período ainda a conferir no painel', $pc->fresh()->pendencias());
     }
 
+    public function test_a_prestacao_nao_tem_memorando_de_encaminhamento(): void
+    {
+        $this->actingAs($this->rl)->post(route('prestacao-contas.store'), ['instrumento_id' => $this->instrumento->id,
+            'tipo' => 'parcial', 'periodo_inicio' => '2026-01-01', 'periodo_fim' => '2026-03-31'])->assertSessionHasNoErrors();
+        $pc = PrestacaoContas::sole();
+
+        $this->assertSame(0, $pc->pecas()->where('chave', 'oficio_encaminhamento')->count());
+        $this->actingAs($this->rl)->get(route('prestacao-contas.show', $pc))->assertOk()
+            ->assertDontSee('Memorando de encaminhamento')->assertDontSee('Salvar memorando')->assertSee('Relatório de Execução do Objeto');
+        $this->actingAs($this->rl)->put(route('prestacao-contas.atualizar', $pc), ['bloco' => 'oficio', 'folhas' => 3])
+            ->assertSessionHasErrors('bloco');
+    }
+
     public function test_a_lista_aponta_o_painel_de_cada_parceria(): void
     {
         $this->lancarDespesa('2026-01-20', '100,00', 'nf-a.pdf');

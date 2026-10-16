@@ -1,4 +1,4 @@
-{{-- Prestação de contas: a OSC lança campos; memorando, relatório e resumo da folha são gerados. --}}
+{{-- Prestação de contas: a OSC lança campos; relatório e resumo da folha são gerados. --}}
 @php
     $u = auth()->user();
     $ehOsc = $u->ehRepresentanteOsc();
@@ -82,26 +82,7 @@
         </div>
 
         @if($podeEditar)
-            {{-- 1. Memorando --}}
-            <form action="{{ route('prestacao-contas.atualizar', $pc) }}" method="POST" class="bg-white rounded-xl border border-gray-200 shadow-sm p-6 space-y-4">
-                @csrf @method('PUT') <input type="hidden" name="bloco" value="oficio">
-                <h2 class="font-semibold text-gray-900">Memorando de encaminhamento</h2>
-                <div class="grid sm:grid-cols-4 gap-3">
-                    <div><x-input-label for="folhas" value="Nº de folhas" />
-                        <x-text-input id="folhas" name="folhas" type="number" min="1" class="mt-1 block w-full" :value="$pc->folhas" /></div>
-                    <div><x-input-label for="parcelas_recebidas" value="Parcelas recebidas" />
-                        <x-text-input id="parcelas_recebidas" name="parcelas_recebidas" type="number" min="0" class="mt-1 block w-full" :value="$pc->parcelas_recebidas" /></div>
-                    <div><x-input-label for="responsavel_nome" value="Responsável pela prestação" />
-                        <x-text-input id="responsavel_nome" name="responsavel_nome" class="mt-1 block w-full" :value="$pc->responsavel_nome" /></div>
-                    <div><x-input-label for="responsavel_email" value="E-mail" />
-                        <x-text-input id="responsavel_email" name="responsavel_email" type="email" class="mt-1 block w-full" :value="$pc->responsavel_email" /></div>
-                </div>
-                <div class="sm:w-1/4"><x-input-label for="responsavel_telefone" value="Telefone" />
-                    <x-text-input id="responsavel_telefone" name="responsavel_telefone" class="mt-1 block w-full" :value="$pc->responsavel_telefone" /></div>
-                <button class="btn btn-secondary btn-sm">Salvar memorando</button>
-            </form>
-
-            {{-- 2. Relatório de Execução do Objeto --}}
+            {{-- 1. Relatório de Execução do Objeto --}}
             <form action="{{ route('prestacao-contas.atualizar', $pc) }}" method="POST" class="bg-white rounded-xl border border-gray-200 shadow-sm p-6 space-y-4">
                 @csrf @method('PUT') <input type="hidden" name="bloco" value="reo">
                 <h2 class="font-semibold text-gray-900">Relatório de Execução do Objeto</h2>
@@ -149,7 +130,7 @@
                 <button class="btn btn-secondary btn-sm">Salvar relatório do objeto</button>
             </form>
 
-            {{-- 3. Execução financeira --}}
+            {{-- 2. Execução financeira --}}
             <form action="{{ route('prestacao-contas.atualizar', $pc) }}" method="POST" class="bg-white rounded-xl border border-gray-200 shadow-sm p-6 space-y-4">
                 @csrf @method('PUT') <input type="hidden" name="bloco" value="ref">
                 <h2 class="font-semibold text-gray-900">Execução financeira</h2>
@@ -199,7 +180,7 @@
                 <button class="btn btn-secondary btn-sm">Salvar execução financeira</button>
             </form>
 
-            {{-- 4. Bens móveis --}}
+            {{-- 3. Bens móveis --}}
             <div class="bg-white rounded-xl border border-gray-200 shadow-sm p-6 space-y-4">
                 <h2 class="font-semibold text-gray-900">Bens móveis adquiridos</h2>
                 <p class="text-xs text-gray-500 -mt-2">Os bens lançados no painel entram sozinhos; inclua aqui só o que faltar.</p>
@@ -236,7 +217,7 @@
                 </form>
             </div>
 
-            {{-- 5. Folha --}}
+            {{-- 4. Folha --}}
             <form action="{{ route('prestacao-contas.atualizar', $pc) }}" method="POST" class="bg-white rounded-xl border border-gray-200 shadow-sm p-6 space-y-4">
                 @csrf @method('PUT') <input type="hidden" name="bloco" value="folha">
                 <h2 class="font-semibold text-gray-900">Resumo da folha de pagamento</h2>
@@ -269,7 +250,7 @@
         <div class="bg-white rounded-xl border border-gray-200 shadow-sm">
             @include('pecas._cabecalho', [
                 'titulo'    => 'Documentos da Prestação de Contas',
-                'descricao' => 'O memorando, o relatório e o resumo da folha são gerados dos campos acima, com as somas prontas — basta conferir e assinar.',
+                'descricao' => 'O relatório e o resumo da folha são gerados dos campos acima, com as somas prontas — basta conferir e assinar.',
                 'progresso' => $progresso,
             ])
             @include('pecas._checklist', ['pecas' => $pecas, 'nomeDoLote' => 'prestacao-de-contas-' . $pc->id])

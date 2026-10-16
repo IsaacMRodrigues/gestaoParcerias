@@ -136,10 +136,9 @@ class Peca extends Model
             ['chave' => 'comprovante_empenho',   'rotulo' => 'Comprovante de empenho global',                          'tipo' => 'arquivo', 'obrigatorio' => true],
         ],
 
-        // 3.4 Prestação de contas — os dez itens do checklist da OSC, mais os
+        // 3.4 Prestação de contas — os nove itens do checklist da OSC, mais os
         // dois documentos de análise da Administração.
         'prestacao_contas' => [
-            ['chave' => 'oficio_encaminhamento',  'rotulo' => 'Memorando de encaminhamento da prestação de contas (modelo padrão)', 'tipo' => 'modelo',  'obrigatorio' => true],
             ['chave' => 'relatorio',              'rotulo' => 'Relatório de Execução do Objeto e Financeira (preenchido no Portal)', 'tipo' => 'modelo', 'obrigatorio' => true],
             ['chave' => 'docs_execucao',          'rotulo' => 'Documentos que comprovam a execução do objeto',                  'tipo' => 'arquivo', 'obrigatorio' => true],
             ['chave' => 'extrato_conta',          'rotulo' => 'Extrato da conta corrente do período',                           'tipo' => 'arquivo', 'obrigatorio' => true],
@@ -368,7 +367,6 @@ class Peca extends Model
      * prévia é da SCP e o parecer conclusivo, da Unidade Gestora.
      */
     public const PRESTACAO_SETOR = [
-        'oficio_encaminhamento' => 'osc',
         'relatorio'             => 'osc',
         'docs_execucao'         => 'osc',
         'extrato_conta'         => 'osc',
@@ -383,7 +381,6 @@ class Peca extends Model
     ];
 
     public const PRESTACAO_ETAPA = [
-        'oficio_encaminhamento' => 0,
         'relatorio'             => 0,
         'docs_execucao'         => 0,
         'extrato_conta'         => 0,
