@@ -13,7 +13,7 @@ return new class extends Migration
 {
     public function up(): void
     {
-        Log::info('Contas pré-cadastradas removidas', ContasPreCadastradas::remover());
+        Log::info('Contas pré-cadastradas apagadas', ContasPreCadastradas::remover());
     }
 
     public function down(): void

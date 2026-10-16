@@ -57,7 +57,7 @@ R$, Arquivos da OSC valendo nos fluxos, caixas de seleção e barra de download,
 preenchendo os fluxos (migração `2026_10_08_100000`), o **painel da prestação de contas** (migração
 `2026_10_13_100000`), o menu lateral da OSC, os relatórios da prestação de contas, a Celebração com 21 etapas
 (migração `2026_10_14_100000`, que renumera as celebrações em andamento) e o **cadastro pelo próprio servidor**
-(migrações `2026_10_16_*`: a SCP aprova toda conta e as contas pré-cadastradas saem — rodar o `RolesSeeder`). Ao subir, avisar que a inscrição em chamamento público passa a exigir a área Arquivos da OSC
+(migrações `2026_10_16_*`: a SCP aprova toda conta e as contas pré-cadastradas são apagadas — rodar o `RolesSeeder`). Ao subir, avisar que a inscrição em chamamento público passa a exigir a área Arquivos da OSC
 completa, e que as despesas passam a ser lançadas pela OSC (as já lançadas pela Prefeitura entram como conferidas).
 
 As ações de produção que o deploy não faz (dados e painel) estão em
@@ -139,7 +139,7 @@ cada item estão no [Histórico de entregas](#histórico-de-entregas). 🚀 marc
 | 07/10 | Depois do deploy: listas só com o que é da Secretaria; R$ e vírgula em todos os campos de dinheiro; Arquivos da OSC valendo em todos os fluxos (recusa da UG trava a Celebração) |
 | 08/10 | Caixas de seleção e barra de download nos fluxos; **Arquivos da OSC preenchendo os fluxos** (documentos complementares, habilitação da dispensa e modelos com os dados da OSC); revisão do README |
 | 13/10 | Menu do portal da OSC na **barra lateral**, como o da área interna |
-| 16/10 | **Cadastro pelo próprio servidor**: o secretário se cadastra e escolhe "Responsável da UG"; a SCP aprova toda conta nova; saem as contas pré-cadastradas (ficam o administrador e a SCP) |
+| 16/10 | **Cadastro pelo próprio servidor**: o secretário se cadastra e escolhe "Responsável da UG"; a SCP aprova toda conta nova; as contas pré-cadastradas são apagadas (ficam o administrador e a SCP) |
 | 15/10 | **Teste completo no navegador** (Nova Proposta → Celebração em 21 etapas → execução → painel → prestação encerrada → relatórios) e três correções que ele achou |
 | 14/10 | Arquivos da OSC: exigidos os documentos do representante legal, o comprovante de inscrição no CNPJ (com aviso dos 3 anos de existência) e a relação dos dirigentes; **data de validade** em todos os documentos |
 | 14/10 | **Pesquisa** nos Chamamentos abertos do portal e em Minhas inscrições da OSC |
@@ -673,8 +673,8 @@ Trazer os demais cenários para `tests/Feature` é uma das [Pendências](#pendê
 - **Deploy pendente:** o que está no GitHub depois de 07/10 (ver [Estado atual](#estado-atual)), com uma
   migração.
 - **Agendamento no hPanel** ([Deploy](#deploy), passo 7): sem ele, os avisos por e-mail ficam na fila.
-- **Contas pré-cadastradas saem no deploy** (migração `2026_10_16_110000`): Prefeito, SEPLAN, Procuradoria e
-  os Responsáveis de UG. Antes, avisar os secretários e setores para se cadastrarem em `/register` (o e-mail
+- **Contas pré-cadastradas são apagadas no deploy** (migrações `2026_10_16_105000` e `_110000`): Prefeito, SEPLAN,
+  Procuradoria e os Responsáveis de UG, mesmo com registro (a autoria fica em branco). Antes, avisar os secretários e setores para se cadastrarem em `/register` (o e-mail
   institucional fica livre) e a SCP para aprovar; até lá, quem tem processo parado com eles espera.
 - Cadastrar o **Gestor da Parceria** (perfil) em cada Secretaria antes de a primeira parceria chegar à
   assinatura do Termo — sem ele, a SCP não tem quem escolher na etapa 13 da Celebração.
@@ -694,7 +694,7 @@ Da mais recente para a mais antiga. Cada entrada diz o que mudou, **por quê** e
 conferido — o porquê é o que falta a quem pega o código depois.
 
 - [2026-10-16] **Cadastro pelo próprio servidor e aprovação pela SCP** (`RegisteredUserController`,
-  `User::perfisDoAutoCadastro`, `Support\ContasPreCadastradas`; migrações `2026_10_16_100000` e `_110000`)
+  `User::perfisDoAutoCadastro`, `Support\ContasPreCadastradas`; migrações `2026_10_16_100000`, `_105000` e `_110000`)
   - Antes o sistema trazia as contas prontas — um Responsável por UG no e-mail institucional (@saogoncalo), três
     @provisorio.local, Prefeito, SEPLAN e Procuradoria —, todas com a mesma senha pública. Agora **cada servidor,
     secretário inclusive, faz o próprio cadastro** em `/register`: setor, Secretaria, matrícula e os perfis que
@@ -705,10 +705,12 @@ conferido — o porquê é o que falta a quem pega o código depois.
     (a migração renomeia, sem perder quem a tinha), o menu da SCP mostra "Contas a aprovar" e o aviso por e-mail
     chega a ela. A tela de aprovação mostra os perfis pedidos ("pedidos pela própria pessoa: confira a
     identidade") e avisa quando a Secretaria já tem Responsável ativo — aprovar é uma substituição
-  - **Saem as contas pré-cadastradas**, menos o administrador e a SCP: sem registro, apagadas; com registro
-    (assinou, tramitou, abriu chamado), desativadas sem perfis, com o e-mail e o login liberados
-    (`fulano+desativadaN@…`), para o secretário se cadastrar com o endereço institucional. Ambiente novo nasce só
-    com o administrador e a SCP. No banco local: 13 apagadas, 8 desativadas
+  - **As contas pré-cadastradas são apagadas**, menos o administrador e a SCP, mesmo as que assinaram ou
+    tramitaram: tudo o que fizeram foi teste. O registro fica, com a autoria em branco — as colunas de autoria do
+    módulo de processos (`documentos`, `processos`, `tramitacoes`, `pecas`, `processo_pecas`,
+    `processo_peca_anexos`) passam a aceitar isso, como as demais. O e-mail institucional fica livre para o
+    secretário se cadastrar. Ambiente novo nasce só com o administrador e a SCP. No banco local foram apagadas
+    também as contas de teste (OSC, Gestora, servidores avulsos): ficaram só o administrador e a SCP
   - Conferido: `AutoCadastroDeServidorTest` (5 testes; falham com a régua de perfis e o recorte antigo da SCP);
     suíte 220/220; 460 telas sem erro; no navegador, o cadastro de uma secretária da Educação com o e-mail
     institucional, o login barrado enquanto pendente e a aprovação pela SCP

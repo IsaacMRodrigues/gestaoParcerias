@@ -14,7 +14,7 @@ use Tests\TestCase;
 
 /**
  * Cada servidor, secretário inclusive, faz o próprio cadastro: escolhe o setor, a Secretaria e os
- * perfis do setor; a SCP confere a identidade e aprova. As contas que o sistema criava prontas saem.
+ * perfis do setor; a SCP confere a identidade e aprova. As contas que o sistema criava prontas são apagadas.
  */
 class AutoCadastroDeServidorTest extends TestCase
 {
@@ -90,24 +90,24 @@ class AutoCadastroDeServidorTest extends TestCase
             ->assertSee('já tem responsável ativo')->assertSee('João Atual');
     }
 
-    public function test_as_contas_pre_cadastradas_saem_e_a_com_registro_libera_o_email(): void
+    public function test_as_contas_pre_cadastradas_sao_apagadas_mesmo_com_registro(): void
     {
         $semRegistro = User::factory()->create(['email' => 'obras@saogoncalo.mg.gov.br', 'setor' => 'ug', 'status' => true]);
         $semRegistro->assignRole('responsavel_unidade_gestora');
         $comRegistro = User::factory()->create(['email' => 'educacao@saogoncalo.mg.gov.br', 'login' => 'educacao', 'setor' => 'ug', 'status' => true]);
         $comRegistro->assignRole('responsavel_unidade_gestora');
-        Chamado::forceCreate(['numero' => 1, 'user_id' => $comRegistro->id, 'autor_nome' => 'Gestor', 'categoria' => 'duvida', 'assunto' => 'x', 'status' => 'aberto']);
+        $chamado = Chamado::forceCreate(['numero' => 1, 'user_id' => $comRegistro->id, 'autor_nome' => 'Gestor', 'categoria' => 'duvida', 'assunto' => 'x', 'status' => 'aberto']);
+        $processo = \App\Models\Processo::forceCreate(['numero' => 'P-1', 'sequencial' => 1, 'esfera' => 'municipal', 'modalidade' => 'fomento',
+            'orgao_id' => $this->educacao->id, 'created_by' => $comRegistro->id, 'status' => 'rascunho', 'setor_atual' => 'ug', 'etapa' => 0]);
 
-        $feito = ContasPreCadastradas::remover();
+        $apagadas = ContasPreCadastradas::remover();
 
-        $this->assertSame(['obras@saogoncalo.mg.gov.br'], $feito['apagadas']);
-        $this->assertSame(['educacao@saogoncalo.mg.gov.br'], $feito['desativadas']);
+        $this->assertEqualsCanonicalizing(['obras@saogoncalo.mg.gov.br', 'educacao@saogoncalo.mg.gov.br'], $apagadas);
         $this->assertNull(User::find($semRegistro->id));
-        $desativada = User::find($comRegistro->id);
-        $this->assertFalse((bool) $desativada->status);
-        $this->assertSame('educacao+desativada' . $comRegistro->id . '@saogoncalo.mg.gov.br', $desativada->email);
-        $this->assertNull($desativada->login);
-        $this->assertFalse($desativada->hasRole('responsavel_unidade_gestora'));
+        $this->assertNull(User::find($comRegistro->id));
+        // O registro fica, sem autor.
+        $this->assertNull($chamado->fresh()->user_id);
+        $this->assertNull($processo->fresh()->created_by);
 
         // O endereço institucional fica livre para o secretário se cadastrar.
         $this->post('/register', $this->dados(['email' => 'educacao@saogoncalo.mg.gov.br']))->assertSessionHasNoErrors();

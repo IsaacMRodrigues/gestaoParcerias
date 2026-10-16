@@ -7,9 +7,8 @@ use Illuminate\Support\Facades\DB;
 
 /**
  * As contas que o sistema criava prontas (cria_quadro_de_usuarios_da_prefeitura) saem: cada servidor faz
- * o próprio cadastro e a SCP aprova. Sem nenhum registro, a conta é apagada; com registro (assinou,
- * enviou, aprovou algo), é desativada para guardar a autoria, perde os perfis e libera o e-mail e o
- * nome de usuário, para o secretário se cadastrar com o endereço institucional.
+ * o próprio cadastro e a SCP aprova. Tudo o que fizeram foi teste, então são apagadas mesmo com registro:
+ * a autoria fica em branco e o e-mail institucional fica livre para o secretário se cadastrar.
  */
 class ContasPreCadastradas
 {
@@ -25,38 +24,22 @@ class ContasPreCadastradas
         'gestor.saude@saogoncalo.mg.gov.br',
     ];
 
-    /** @return array{apagadas: list<string>, desativadas: list<string>} */
+    /** @return list<string> os e-mails apagados */
     public static function remover(array $emails = self::EMAILS): array
     {
-        $feito = ['apagadas' => [], 'desativadas' => []];
+        $apagadas = [];
 
         foreach (User::whereIn('email', $emails)->get() as $user) {
-            DB::transaction(function () use ($user, &$feito) {
-                $email = $user->email;
-                // Fora dos perfis em qualquer caso: não aparece em lista de quem assina ou recebe.
+            DB::transaction(function () use ($user) {
                 DB::table('model_has_roles')->where('model_type', User::class)->where('model_id', $user->id)->delete();
                 DB::table('model_has_permissions')->where('model_type', User::class)->where('model_id', $user->id)->delete();
-
-                if ($user->motivosParaNaoExcluir() === []) {
-                    DB::table('users')->where('id', $user->id)->delete();
-                    $feito['apagadas'][] = $email;
-
-                    return;
-                }
-
-                [$local, $dominio] = explode('@', $email, 2);
-                DB::table('users')->where('id', $user->id)->update([
-                    'status'     => false,
-                    'email'      => $local . '+desativada' . $user->id . '@' . $dominio,
-                    'login'      => null,
-                    'updated_at' => now(),
-                ]);
-                $feito['desativadas'][] = $email;
+                DB::table('users')->where('id', $user->id)->delete();
             });
+            $apagadas[] = $user->email;
         }
 
         app(\Spatie\Permission\PermissionRegistrar::class)->forgetCachedPermissions();
 
-        return $feito;
+        return $apagadas;
     }
 }

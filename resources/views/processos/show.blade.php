@@ -251,7 +251,7 @@
                                     @endif
                                 </p>
                                 <p class="text-xs text-gray-400">
-                                    {{ $t->enviado_em->format('d/m/Y H:i') }} por {{ $t->remetente->name }}
+                                    {{ $t->enviado_em->format('d/m/Y H:i') }}@if($t->remetente) por {{ $t->remetente->name }}@endif
                                     @if($t->recebido_em)
                                         · recebido em {{ $t->recebido_em->format('d/m/Y H:i') }}
                                         @if($t->recebedor) por {{ $t->recebedor->name }} @endif
