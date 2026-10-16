@@ -104,42 +104,20 @@
             @php
                 $emSelecao = request()->routeIs('chamamentos.*')
                     || request()->routeIs('propostas.*') || request()->routeIs('manifestacoes.*');
-                // Era um <p>: tinha a aparência exata de um link, mas clicar não
-                // fazia nada. Agora leva ao primeiro subitem a que o usuário
-                // tem acesso — o @canany acima garante que existe pelo menos um.
+                // Leva ao primeiro subitem a que o usuário tem acesso; o @canany garante que existe um.
                 $urlSelecao = auth()->user()->can('chamamentos')
                     ? route('chamamentos.index')
                     : route('propostas.index');
             @endphp
-            {{-- Seleção recolhe; a escolha fica no localStorage, mas dentro da seção ela abre sempre. --}}
-            <div x-data="{
-                    aberto: @js($emSelecao) || (() => {
-                        try { return localStorage.getItem('nav.selecao') !== 'fechado' } catch (e) { return true }
-                    })(),
-                    alternar() {
-                        this.aberto = !this.aberto;
-                        try { localStorage.setItem('nav.selecao', this.aberto ? 'aberto' : 'fechado') } catch (e) {}
-                    }
-                 }" class="relative">
-                {{-- Seleção só encaminha ao primeiro subitem; o pr-9 reserva o lugar da seta. --}}
-                <a href="{{ $urlSelecao }}" class="{{ $link }} pr-9 {{ $emSelecao ? $naSecao : '' }}">
+            <div>
+                {{-- Seleção só encaminha ao primeiro subitem. --}}
+                <a href="{{ $urlSelecao }}" class="{{ $link }} {{ $emSelecao ? $naSecao : '' }}">
                     <span class="{{ $etapa }} {{ $emSelecao ? $etapaSecao : $etapaOff }}">2</span>
                     Seleção
                     @if($navPropostasNovas > 0)<span class="{{ $badge }}">{{ $navPropostasNovas }}</span>@endif
                 </a>
-                <button type="button" @click="alternar()"
-                        :aria-expanded="aberto ? 'true' : 'false'"
-                        :aria-label="aberto ? 'Recolher a etapa Seleção' : 'Expandir a etapa Seleção'"
-                        class="absolute top-1/2 right-1 -translate-y-1/2 p-1.5 rounded-md text-gray-400
-                               hover:text-gray-700 hover:bg-gray-100 transition
-                               focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-500">
-                    <svg class="w-3.5 h-3.5 transition-transform" :class="aberto ? 'rotate-90' : ''"
-                         fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.6">
-                        <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/>
-                    </svg>
-                </button>
 
-                <div x-show="aberto" x-cloak>
+                <div>
                     @can('chamamentos')
                         <a href="{{ route('chamamentos.index') }}"
                            class="{{ $link }} pl-10 {{ request()->routeIs('chamamentos.*') ? $on : '' }}">
