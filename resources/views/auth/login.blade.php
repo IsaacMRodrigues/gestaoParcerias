@@ -17,7 +17,7 @@
             <x-input-label for="login" value="E-mail ou usuário" />
             <x-text-input id="login" class="block mt-1.5 w-full py-2.5" type="text" name="login"
                           :value="old('login')" required autofocus autocomplete="username"
-                          placeholder="{{ $daOsc ? 'seu@email.com' : 'nome@prefeitura.mg.gov.br' }}" />
+                          placeholder="{{ $daOsc ? 'seu@email.com' : 'nome@saogoncalo.mg.gov.br' }}" />
             <x-input-error :messages="$errors->get('login')" class="mt-2" />
         </div>
 
