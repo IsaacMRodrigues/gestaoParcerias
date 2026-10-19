@@ -55,7 +55,8 @@ relatórios, a Celebração com 21 etapas, a pesquisa no portal, o cadastro pelo
 "Solicitar acesso", a prestação sem o memorando e a SCP vendo os usuários —, com as 8 migrações e o
 `RolesSeeder`, ensaiados antes sobre uma cópia do banco de produção (290 telas sem erro, lá e no ensaio).
 
-**No GitHub e ainda fora da produção:** nada.
+**No GitHub e ainda fora da produção** (sobem só quando pedido): a entrada da OSC separada da entrada da
+Prefeitura (19/10), sem migração.
 
 As ações de produção que o deploy não faz (dados e painel) estão em
 [Pendências → Produção](#produção-ação-não-código).
@@ -136,6 +137,7 @@ cada item estão no [Histórico de entregas](#histórico-de-entregas). 🚀 marc
 | 07/10 | Depois do deploy: listas só com o que é da Secretaria; R$ e vírgula em todos os campos de dinheiro; Arquivos da OSC valendo em todos os fluxos (recusa da UG trava a Celebração) |
 | 08/10 | Caixas de seleção e barra de download nos fluxos; **Arquivos da OSC preenchendo os fluxos** (documentos complementares, habilitação da dispensa e modelos com os dados da OSC); revisão do README |
 | 13/10 | Menu do portal da OSC na **barra lateral**, como o da área interna |
+| 19/10 | **Entrada da Prefeitura e da OSC separadas**: cada uma com o seu link de cadastro |
 | 16/10 | **Deploy na Hostinger** (commit `83fc76f`): tudo de 08/10 a 16/10, com 8 migrações e o `RolesSeeder` |
 | 16/10 | **A SCP vê os órgãos e usuários**, só para consulta; o menu da Seleção sem a seta solta |
 | 16/10 | **Tela "Solicitar acesso"**: o login leva ao cadastro do servidor, com o mesmo visual |
@@ -693,6 +695,13 @@ Trazer os demais cenários para `tests/Feature` é uma das [Pendências](#pendê
 
 Da mais recente para a mais antiga. Cada entrada diz o que mudou, **por quê** e como foi
 conferido — o porquê é o que falta a quem pega o código depois.
+
+- [2026-10-19] **Entrada da Prefeitura e entrada da OSC separadas** (`auth/login`, `landing`, portal)
+  - O login da Prefeitura mostrava também "Cadastre sua OSC". A tela continua uma só, mas com duas entradas:
+    `/login` é a da Prefeitura (só "Solicite seu acesso") e `/login?acesso=osc` é a da OSC ("Acessar o Portal da
+    OSC", só "Cadastre sua OSC"). O cartão OSC da tela inicial e os botões "Entrar" do portal levam à da OSC; a
+    tela "Solicitar acesso" do servidor perdeu o link de cadastro de OSC
+  - Conferido: `AutoCadastroDeServidorTest` (cada entrada com o seu link); suíte 222/222; as duas no navegador
 
 - [2026-10-16] **Deploy na Hostinger** (commit `83fc76f`, sobre o `ef5391d`)
   - 95 arquivos (32 novos, 63 alterados, nenhum apagado), sem `vendor/` (o `composer.lock` não mudou) e sem

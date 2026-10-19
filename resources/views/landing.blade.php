@@ -19,7 +19,7 @@
         $acessoPrefeitura = $usuario?->temAcessoInterno()
             ? route('dashboard') : route('login');
         $acessoOsc = $usuario?->hasRole('responsavel_legal')
-            ? route('portal.index') : route('login');
+            ? route('portal.index') : route('login', ['acesso' => 'osc']);
     @endphp
 
     <div class="min-h-screen flex flex-col">

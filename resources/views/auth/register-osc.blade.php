@@ -5,7 +5,7 @@
             <h1 class="text-2xl font-bold text-gray-900">Cadastrar Organização</h1>
             <p class="text-gray-500 mt-1 text-sm">
                 Preencha os dados da sua OSC para participar dos chamamentos públicos.
-                Já tem conta? <a href="{{ route('login') }}" class="text-brand-600 hover:underline">Entrar</a>
+                Já tem conta? <a href="{{ route('login', ['acesso' => 'osc']) }}" class="text-brand-600 hover:underline">Entrar</a>
             </p>
         </div>
 

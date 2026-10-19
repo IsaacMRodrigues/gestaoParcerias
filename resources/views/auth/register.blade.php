@@ -133,8 +133,4 @@
         Já tem cadastro?
         <a href="{{ route('login') }}" class="font-semibold text-brand-700 hover:underline">Entrar</a>
     </p>
-    <p class="text-sm text-gray-500 text-center mt-2">
-        É uma organização da sociedade civil?
-        <a href="{{ route('portal.osc.create') }}" class="font-semibold text-brand-700 hover:underline">Cadastre sua OSC</a>
-    </p>
 </x-guest-layout>

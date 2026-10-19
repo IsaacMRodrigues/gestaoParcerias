@@ -119,7 +119,7 @@
                                     </a>
                                 @endif
                             @else
-                                <a href="{{ route('login') }}"
+                                <a href="{{ route('login', ['acesso' => 'osc']) }}"
                                    class="btn btn-primary">
                                     Entrar para Participar
                                 </a>
@@ -163,7 +163,7 @@
                            class="btn btn-primary">
                             Cadastrar minha OSC
                         </a>
-                        <a href="{{ route('login') }}"
+                        <a href="{{ route('login', ['acesso' => 'osc']) }}"
                            class="btn btn-outline">
                             Já tenho cadastro
                         </a>

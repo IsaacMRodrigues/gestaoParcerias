@@ -1,4 +1,11 @@
+{{-- Uma tela só para os dois públicos: ?acesso=osc é a entrada da OSC, com o cadastro de OSC; sem ele, a da Prefeitura. --}}
+@php $daOsc = request('acesso') === 'osc'; @endphp
 <x-guest-layout>
+    @if($daOsc)
+        <x-slot name="titulo">Acessar o Portal da OSC</x-slot>
+        <x-slot name="subtitulo">Entre com a conta da sua organização.</x-slot>
+    @endif
+
     <!-- Session Status -->
     <x-auth-session-status class="mb-4" :status="session('status')" />
 
@@ -10,7 +17,7 @@
             <x-input-label for="login" value="E-mail ou usuário" />
             <x-text-input id="login" class="block mt-1.5 w-full py-2.5" type="text" name="login"
                           :value="old('login')" required autofocus autocomplete="username"
-                          placeholder="nome@prefeitura.mg.gov.br" />
+                          placeholder="{{ $daOsc ? 'seu@email.com' : 'nome@prefeitura.mg.gov.br' }}" />
             <x-input-error :messages="$errors->get('login')" class="mt-2" />
         </div>
 
@@ -48,15 +55,16 @@
     </form>
 
     <p class="text-sm text-gray-500 text-center mt-6">
-        É servidor da Prefeitura?
-        <a href="{{ route('register') }}" class="font-semibold text-brand-700 hover:underline">
-            Solicite seu acesso
-        </a>
-    </p>
-    <p class="text-sm text-gray-500 text-center mt-2">
-        É uma organização da sociedade civil?
-        <a href="{{ route('portal.osc.create') }}" class="font-semibold text-brand-700 hover:underline">
-            Cadastre sua OSC
-        </a>
+        @if($daOsc)
+            Sua organização ainda não tem cadastro?
+            <a href="{{ route('portal.osc.create') }}" class="font-semibold text-brand-700 hover:underline">
+                Cadastre sua OSC
+            </a>
+        @else
+            É servidor da Prefeitura?
+            <a href="{{ route('register') }}" class="font-semibold text-brand-700 hover:underline">
+                Solicite seu acesso
+            </a>
+        @endif
     </p>
 </x-guest-layout>

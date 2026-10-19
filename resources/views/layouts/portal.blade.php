@@ -292,7 +292,7 @@
                     <div class="flex items-center gap-3 shrink-0">
                         <a href="{{ route('portal.osc.create') }}"
                            class="text-sm text-gray-600 hover:text-brand-700 transition whitespace-nowrap hidden sm:inline">Cadastrar OSC</a>
-                        <a href="{{ route('login') }}" class="btn btn-primary">Entrar</a>
+                        <a href="{{ route('login', ['acesso' => 'osc']) }}" class="btn btn-primary">Entrar</a>
                         <button @click="menu = !menu" aria-label="Menu"
                                 class="lg:hidden p-2 -mr-2 rounded-md text-gray-500 hover:text-gray-800 hover:bg-gray-100 transition">
                             <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">

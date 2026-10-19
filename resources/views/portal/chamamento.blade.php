@@ -72,7 +72,7 @@
                                 </span>
                             @endif
                         @else
-                            <a href="{{ route('login') }}"
+                            <a href="{{ route('login', ['acesso' => 'osc']) }}"
                                class="btn btn-primary">
                                 Entrar para Participar
                             </a>
@@ -266,7 +266,7 @@
                             @endif
                         @else
                             <div class="flex justify-center gap-3">
-                                <a href="{{ route('login') }}"
+                                <a href="{{ route('login', ['acesso' => 'osc']) }}"
                                    class="btn btn-primary">
                                     Entrar
                                 </a>
