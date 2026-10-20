@@ -33,7 +33,6 @@ class User extends Authenticatable
         'analista_orcamentario_financeiro' => 'Analista Orçamentário Financeiro',
         'responsavel_seplan'               => 'Responsável pela SEPLAN',
         'analista_tecnico_scp'             => 'Analista Técnico do SCP',
-        'aprovador_assinatura_eletronica'  => 'Aprovador de Assinatura Eletrônica',
         'auditor_externo'                  => 'Auditor Externo',
         'auditor_geral'                    => 'Auditor Geral',
         'cadastrador'                      => 'Cadastrador',

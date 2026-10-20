@@ -80,7 +80,6 @@ class RolesSeeder extends Seeder
         'contador'                         => ['prestacao_contas'],
         'encaminhador'                     => ['formalizacao'],
         'operador_ordem_pagamento'         => ['ordem_pagamento'],
-        'aprovador_assinatura_eletronica'  => [], // módulo de assinatura (futuro)
         'analista'                         => [], // acesso básico, em descontinuação
         // Responde pela entidade: faz tudo no portal, e só ele submete, recorre
         // e contra-assina (isso não é permissão marcável — ver ehResponsavelLegalOsc).

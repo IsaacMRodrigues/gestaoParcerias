@@ -60,7 +60,8 @@ class AutoCadastroDeServidorTest extends TestCase
             ->assertSee('Cadastre sua OSC')->assertDontSee('Solicite seu acesso');
         $this->get('/')->assertSee(route('login', ['acesso' => 'osc']), false);
         $this->get('/register')->assertOk()->assertSee('<title>Solicitar acesso', false)->assertDontSee('Acessar o sistema')
-            ->assertSee('Responsável da Unidade Gestora')->assertSee('o secretário ou responsável pelo setor');
+            ->assertSee('Responsável da Unidade Gestora')->assertSee('o secretário ou responsável pelo setor')
+            ->assertDontSee('Aprovador de Assinatura');
         $this->post('/register', $this->dados())->assertRedirect(route('login'))->assertSessionHasNoErrors();
 
         $maria = User::where('email', 'maria.educacao@saogoncalo.mg.gov.br')->sole();

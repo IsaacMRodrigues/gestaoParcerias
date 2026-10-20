@@ -45,7 +45,6 @@ assinados eletronicamente e validáveis por QR Code.
 | **6. Prestação de Contas** (3.4) — painel em que a OSC lança ao longo da execução, conferência pela Prefeitura e a prestação do período gerada dos lançamentos; relatórios na tela, em planilha e PDF | ✅ Completo | `LancamentoController`, `PrestacaoContasController`, `Support\PrestacaoDosLancamentos`, `Support\RelatorioPrestacao` |
 | **Suporte** — dúvidas, problemas e sugestões                                                                                                     | ✅ Completo            | `SuporteController`, `Chamado`                                                       |
 | **5. Monitoramento e Fiscalização** (4.5)                                                                                                         | ⏳ Não iniciado       | aparece no menu como "em breve"                                                          |
-| **Solicitação de assinatura** (Aprovador de Assinatura)                                                                                           | ⏳ Aguarda definição | ver[Pendências](#pendências)                                                            |
 | **Avisos por e-mail** (4.7) — contas, suporte, vez no trâmite, resultados                                                                         | ✅ Completo            | `Support\Avisos`, `Mail\Aviso`                                                       |
 | **Integrações** (banco, Diário Oficial, GOV.BR)                                                                                                  | ⏳ Última fase        | —                                                                                       |
 
@@ -58,7 +57,8 @@ relatórios, a Celebração com 21 etapas, a pesquisa no portal, o cadastro pelo
 Em 19/10 subiram também, sem migração, a entrada da OSC separada da entrada da Prefeitura e a dica de e-mail
 do login (commit `003d0fd`).
 
-**No GitHub e ainda fora da produção:** nada.
+**No GitHub e ainda fora da produção** (sobem só quando pedido): a saída do perfil Aprovador de Assinatura
+Eletrônica (20/10, migração `2026_10_20_100000`).
 
 As ações de produção que o deploy não faz (dados e painel) estão em
 [Pendências → Produção](#produção-ação-não-código).
@@ -139,6 +139,7 @@ cada item estão no [Histórico de entregas](#histórico-de-entregas). 🚀 marc
 | 07/10 | Depois do deploy: listas só com o que é da Secretaria; R$ e vírgula em todos os campos de dinheiro; Arquivos da OSC valendo em todos os fluxos (recusa da UG trava a Celebração) |
 | 08/10 | Caixas de seleção e barra de download nos fluxos; **Arquivos da OSC preenchendo os fluxos** (documentos complementares, habilitação da dispensa e modelos com os dados da OSC); revisão do README |
 | 13/10 | Menu do portal da OSC na **barra lateral**, como o da área interna |
+| 20/10 | **Sai o perfil Aprovador de Assinatura Eletrônica**, que não tinha permissão nem fluxo |
 | 19/10 | **Deploy na Hostinger** (commit `003d0fd`): as duas entradas e a dica de e-mail, 8 arquivos de tela, sem migração |
 | 19/10 | **Entrada da Prefeitura e da OSC separadas**: cada uma com o seu link de cadastro |
 | 16/10 | **Deploy na Hostinger** (commit `83fc76f`): tudo de 08/10 a 16/10, com 8 migrações e o `RolesSeeder` |
@@ -349,7 +350,6 @@ também precisa).
 | `contador`                         | Contador                                  | —              | prestacao_contas                                                                                                                   |
 | `encaminhador`                     | Encaminhador                              | —              | formalizacao                                                                                                                       |
 | `operador_ordem_pagamento`         | Operador de Ordem de Pagamento            | —              | ordem_pagamento                                                                                                                    |
-| `aprovador_assinatura_eletronica`  | Aprovador de Assinatura Eletrônica       | —              | —*(o fluxo ainda não existe)*                                                                                                  |
 | `analista`                         | Analista (em descontinuação)            | —              | —                                                                                                                                 |
 
 **OSC:** `responsavel_legal` (exclusivo do setor OSC — faz tudo no portal), `membro_osc` (a
@@ -631,9 +631,6 @@ Trazer os demais cenários para `tests/Feature` é uma das [Pendências](#pendê
 
 ### Decisões que dependem da gestão ou da cliente
 
-- **Solicitação de assinatura** (perfil Aprovador de Assinatura Eletrônica, pedido no módulo 3.1 como
-  botão "Enviar para assinatura"): falta definir quem solicita e quem aprova em cada tipo de
-  documento. Hoje quem tem a vez assina direto.
 - **Quem aprova os anexos da proposta** (`Documento`): hoje qualquer perfil interno com `propostas`,
   inclusive o Cadastrador. A habilitação já saiu desse caminho — os Arquivos da OSC são analisados pela UG
   na etapa 3 da Celebração —, mas o fluxograma do 3.2 diz que a documentação vai à SCP.
@@ -698,6 +695,14 @@ Trazer os demais cenários para `tests/Feature` é uma das [Pendências](#pendê
 
 Da mais recente para a mais antiga. Cada entrada diz o que mudou, **por quê** e como foi
 conferido — o porquê é o que falta a quem pega o código depois.
+
+- [2026-10-20] **Sai o perfil Aprovador de Assinatura Eletrônica** (`User::$roleLabels`, `RolesSeeder`; migração
+  `2026_10_20_100000`)
+  - Veio da especificação do Módulo 1 (aprovar o pedido de assinatura de cada usuário antes de ele assinar) e
+    nunca teve permissão nem fluxo: quem marcava no "Solicitar acesso" não ganhava nada. A assinatura segue
+    pelo perfil e pela vez no fluxo, e quem libera a pessoa para entrar e assinar é a SCP, ao aprovar a conta.
+    Sai da lista de perfis, do seeder e da pendência "Solicitação de assinatura"; a migração apaga o perfil
+    e o tira de quem o tinha
 
 - [2026-10-19] **Entrada da Prefeitura e entrada da OSC separadas** (`auth/login`, `landing`, portal)
   - O login da Prefeitura mostrava também "Cadastre sua OSC". A tela continua uma só, mas com duas entradas:
