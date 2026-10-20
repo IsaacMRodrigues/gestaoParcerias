@@ -45,6 +45,13 @@ class UserRequest extends FormRequest
     {
         return [
             function ($validator) {
+                // Sem `cadastros` (a SCP), não concede o que só o TI concede.
+                if (! $this->user()->can('cadastros')) {
+                    foreach (array_intersect((array) $this->input('roles', []), User::PERFIS_FORA_DO_AUTOCADASTRO) as $role) {
+                        $validator->errors()->add('roles', 'O perfil "' . (User::$roleLabels[$role] ?? $role) . '" é concedido só pelo administrador.');
+                    }
+                }
+
                 // Encargos que se fiscalizam não se acumulam — ver
                 // User::ENCARGOS_QUE_NAO_ACUMULAM.
                 if ($conflito = User::conflitoDeEncargos((array) $this->input('roles', []))) {

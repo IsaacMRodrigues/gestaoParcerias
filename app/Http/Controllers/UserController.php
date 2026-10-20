@@ -123,7 +123,9 @@ class UserController extends Controller
 
     public function create(): View
     {
-        $roles = Role::whereNotIn('name', User::PAPEIS_OSC)->orderBy('name')->get();
+        $roles = Role::whereNotIn('name', User::PAPEIS_OSC)
+            ->when(! auth()->user()->can('cadastros'), fn ($q) => $q->whereNotIn('name', User::PERFIS_FORA_DO_AUTOCADASTRO))
+            ->orderBy('name')->get();
 
         return view('usuarios.create', compact('roles'));
     }

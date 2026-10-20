@@ -233,7 +233,7 @@
         @if(! auth()->user()->can('cadastros') && auth()->user()->canAny(['aprovar_contas', 'ver_usuarios']))
             <p class="{{ $sec }}">Cadastros</p>
             @can('ver_usuarios')
-                <a href="{{ route('orgaos.index') }}" class="{{ $link }} {{ request()->routeIs('orgaos.index') ? $on : '' }}">
+                <a href="{{ route('orgaos.index') }}" class="{{ $link }} {{ request()->routeIs('orgaos.index') || request()->routeIs('usuarios.create') ? $on : '' }}">
                     Órgãos e usuários
                 </a>
             @endcan

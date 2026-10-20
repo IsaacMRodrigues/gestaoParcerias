@@ -6,12 +6,14 @@
                 <h2 class="text-2xl font-bold text-gray-900">Órgãos e usuários</h2>
                 <p class="text-sm text-gray-500 mt-0.5">Cada Secretaria com as contas de acesso dela.</p>
             </div>
-            @can('cadastros')
-                <div class="flex items-center gap-3 shrink-0">
-                    <a href="{{ route('usuarios.create') }}" class="btn btn-outline">+ Novo usuário</a>
+            <div class="flex items-center gap-3 shrink-0">
+                @canany(['cadastros', 'criar_usuarios'])
+                    <a href="{{ route('usuarios.create') }}" class="btn {{ auth()->user()->can('cadastros') ? 'btn-outline' : 'btn-primary' }}">+ Novo usuário</a>
+                @endcanany
+                @can('cadastros')
                     <a href="{{ route('orgaos.create') }}" class="btn btn-primary">+ Novo órgão</a>
-                </div>
-            @endcan
+                @endcan
+            </div>
         </div>
     </x-slot>
 
@@ -117,9 +119,9 @@
                                 <tr x-show="aberto" x-cloak>
                                     <td colspan="5" class="px-6 py-3 pl-12 text-xs text-gray-400">
                                         Nenhum usuário nesta Secretaria.
-                                        @can('cadastros')
+                                        @canany(['cadastros', 'criar_usuarios'])
                                             <a href="{{ route('usuarios.create') }}" class="font-semibold text-brand-700 hover:underline">Cadastrar</a>
-                                        @endcan
+                                        @endcanany
                                     </td>
                                 </tr>
                             @endforelse

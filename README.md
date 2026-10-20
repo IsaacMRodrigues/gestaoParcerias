@@ -58,7 +58,7 @@ Em 19/10 subiram também, sem migração, a entrada da OSC separada da entrada d
 do login (commit `003d0fd`).
 
 **No GitHub e ainda fora da produção** (sobem só quando pedido): a saída do perfil Aprovador de Assinatura
-Eletrônica (20/10, migração `2026_10_20_100000`).
+Eletrônica (20/10, migração `2026_10_20_100000`) e a SCP cadastrando servidores (20/10, rodar o `RolesSeeder`).
 
 As ações de produção que o deploy não faz (dados e painel) estão em
 [Pendências → Produção](#produção-ação-não-código).
@@ -139,6 +139,7 @@ cada item estão no [Histórico de entregas](#histórico-de-entregas). 🚀 marc
 | 07/10 | Depois do deploy: listas só com o que é da Secretaria; R$ e vírgula em todos os campos de dinheiro; Arquivos da OSC valendo em todos os fluxos (recusa da UG trava a Celebração) |
 | 08/10 | Caixas de seleção e barra de download nos fluxos; **Arquivos da OSC preenchendo os fluxos** (documentos complementares, habilitação da dispensa e modelos com os dados da OSC); revisão do README |
 | 13/10 | Menu do portal da OSC na **barra lateral**, como o da área interna |
+| 20/10 | **A SCP cadastra servidores**, sem os perfis que só o TI concede |
 | 20/10 | **Sai o perfil Aprovador de Assinatura Eletrônica**, que não tinha permissão nem fluxo |
 | 19/10 | **Deploy na Hostinger** (commit `003d0fd`): as duas entradas e a dica de e-mail, 8 arquivos de tela, sem migração |
 | 19/10 | **Entrada da Prefeitura e da OSC separadas**: cada uma com o seu link de cadastro |
@@ -499,6 +500,7 @@ responsável legal restringe depois, no "Alterar" da listagem.
 | `usuarios_setor`                                                     | **Meus usuários**: cadastrar a equipe do próprio setor (a SCP ou o administrador aprova)                                                       |
 | `aprovar_contas` | **Contas a aprovar**: decide toda conta nova — servidor (auto-cadastro ou equipe de setor) e integrante de OSC. É como a SCP aprova os cadastros sem ganhar a mesa de Cadastros |
 | `ver_usuarios` | **Órgãos e usuários**, só consulta: a lista de todas as Secretarias e contas, sem criar, editar ou remover (isso é `cadastros`). Dada à SCP |
+| `criar_usuarios` | **+ Novo usuário**: cadastra servidor já aprovado, sem os perfis que só o TI concede (administrador, auditores, Chefe de Setor). Dada à SCP |
 | `suporte`                                                            | **Atender** o suporte: ver e responder os chamados de todos, nota interna, encerrar                                                     |
 | `osc_*`                                                              | Funções da equipe da OSC, marcadas por pessoa — nunca valem dentro da Administração                                                      |
 
@@ -695,6 +697,12 @@ Trazer os demais cenários para `tests/Feature` é uma das [Pendências](#pendê
 
 Da mais recente para a mais antiga. Cada entrada diz o que mudou, **por quê** e como foi
 conferido — o porquê é o que falta a quem pega o código depois.
+
+- [2026-10-20] **A SCP cadastra servidores** (permissão `criar_usuarios`, `UserController::create`, `UserRequest`)
+  - Além de ver a lista, a SCP abre "+ Novo usuário" em Órgãos e usuários e cria a conta já aprovada (ela é
+    quem aprova). A lista de perfis não traz administrador, auditores nem Chefe de Setor, e a validação recusa
+    esses perfis mesmo num envio forjado. Editar e remover seguem só com `cadastros`. Rodar o `RolesSeeder`
+  - Conferido: `ScpVeOsUsuariosTest` (falha sem a mudança); suíte 222/222
 
 - [2026-10-20] **Sai o perfil Aprovador de Assinatura Eletrônica** (`User::$roleLabels`, `RolesSeeder`; migração
   `2026_10_20_100000`)
