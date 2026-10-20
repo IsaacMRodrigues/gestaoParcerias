@@ -94,7 +94,7 @@
                             @endforeach
                         </div>
                         <p class="text-xs text-gray-500 mt-1">
-                            <strong>Gestor da Parceria, Comissão de Seleção, Comissão de Monitoramento e Comissão de Avaliação</strong>
+                            <strong>Gestor da Parceria, Comissão de Seleção e Comissão de Monitoramento e Avaliação</strong>
                             não se acumulam: a mesma pessoa só pode ter um desses encargos.
                         </p>
                         <x-input-error :messages="$errors->get('perfis')" class="mt-1" />

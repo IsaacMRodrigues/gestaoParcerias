@@ -42,7 +42,7 @@ class PrestacaoContas extends Model
     public const ETAPAS = [
         ['setor' => 'osc', 'acao' => 'Elaborar e enviar a prestação de contas'],
         ['setor' => 'scp', 'acao' => 'Analisar previamente e encaminhar à Unidade Gestora'],
-        ['setor' => 'ug',  'acao' => 'Gestor da Parceria e Comissão de Monitoramento analisam e aprovam'],
+        ['setor' => 'ug',  'acao' => 'Gestor da Parceria e Comissão de Monitoramento e Avaliação analisam e aprovam'],
     ];
 
     /**

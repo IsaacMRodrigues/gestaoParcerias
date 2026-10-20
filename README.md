@@ -58,7 +58,8 @@ Em 19/10 subiram também, sem migração, a entrada da OSC separada da entrada d
 do login (commit `003d0fd`).
 
 **No GitHub e ainda fora da produção** (sobem só quando pedido): a saída do perfil Aprovador de Assinatura
-Eletrônica (20/10, migração `2026_10_20_100000`) e a SCP cadastrando servidores (20/10, rodar o `RolesSeeder`).
+Eletrônica (20/10, migração `2026_10_20_100000`) a SCP cadastrando servidores e a Comissão de Monitoramento e Avaliação única (20/10, migração
+`2026_10_20_110000`; rodar o `RolesSeeder`).
 
 As ações de produção que o deploy não faz (dados e painel) estão em
 [Pendências → Produção](#produção-ação-não-código).
@@ -139,6 +140,7 @@ cada item estão no [Histórico de entregas](#histórico-de-entregas). 🚀 marc
 | 07/10 | Depois do deploy: listas só com o que é da Secretaria; R$ e vírgula em todos os campos de dinheiro; Arquivos da OSC valendo em todos os fluxos (recusa da UG trava a Celebração) |
 | 08/10 | Caixas de seleção e barra de download nos fluxos; **Arquivos da OSC preenchendo os fluxos** (documentos complementares, habilitação da dispensa e modelos com os dados da OSC); revisão do README |
 | 13/10 | Menu do portal da OSC na **barra lateral**, como o da área interna |
+| 20/10 | **Comissão de Monitoramento e Avaliação volta a ser uma só** |
 | 20/10 | **A SCP cadastra servidores**, sem os perfis que só o TI concede |
 | 20/10 | **Sai o perfil Aprovador de Assinatura Eletrônica**, que não tinha permissão nem fluxo |
 | 19/10 | **Deploy na Hostinger** (commit `003d0fd`): as duas entradas e a dica de e-mail, 8 arquivos de tela, sem migração |
@@ -344,8 +346,7 @@ também precisa).
 | `analista_aditivo_apostilamento`   | Analista de Aditivo e Apostilamento       | —              | formalizacao                                                                                                                       |
 | `analista_prestacao_contas_previa` | Analista de Prestação de Contas Prévia | —              | prestacao_contas                                                                                                                   |
 | `comissao_selecao`                 | Comissão de Seleção                    | —              | propostas, pareceres_tecnico, pareceres_decisao                                                                                    |
-| `comissao_monitoramento`           | Comissão de Monitoramento                | —              | monitoramento                                                                                                                      |
-| `comissao_avaliacao`               | Comissão de Avaliação                  | —              | prestacao_contas                                                                                                                   |
+| `comissao_monitoramento_avaliacao` | Comissão de Monitoramento e Avaliação | —              | monitoramento, prestacao_contas |
 | `gestor_parceria`                  | Gestor da Parceria                        | —              | planejamento, monitoramento, execucao, prestacao_contas                                                                            |
 | `cadastrador`                      | Cadastrador                               | —              | chamamentos, propostas, formalizacao                                                                                               |
 | `contador`                         | Contador                                  | —              | prestacao_contas                                                                                                                   |
@@ -365,8 +366,8 @@ responsável legal cadastra; o perfil "Cadastrador de Usuário do Ente/Entidade"
 
 `chefe_setor` não abre módulo nenhum: só a porta de cadastrar a própria equipe. Acumula-se com o
 perfil técnico da pessoa, para que a chefia não vire atalho para permissões que o setor não tem.
-**Encargos que não se acumulam:** Gestor da Parceria, Comissão de Seleção, Comissão de Monitoramento
-e Comissão de Avaliação — a mesma pessoa tem um deles, no máximo (`User::ENCARGOS_QUE_NAO_ACUMULAM`),
+**Encargos que não se acumulam:** Gestor da Parceria, Comissão de Seleção e Comissão de Monitoramento
+e Avaliação — a mesma pessoa tem um deles, no máximo (`User::ENCARGOS_QUE_NAO_ACUMULAM`),
 conferido no servidor no cadastro pelo administrador, no cadastro pela chefia e na aprovação. Os perfis
 são da pessoa, não da parceria, então a regra vale por pessoa.
 
@@ -579,7 +580,7 @@ Procedimento:
 
 ## Verificação
 
-`php artisan test` (sqlite em memória) roda **222 testes** em `tests/Feature`, um arquivo por regra de
+`php artisan test` (sqlite em memória) roda **223 testes** em `tests/Feature`, um arquivo por regra de
 negócio (quem abre qual parceria, contas e senhas, avisos por e-mail, segregação de encargos,
 cancelamento e prorrogação de chamamento, Nova Proposta, prazo e resposta de recurso, plano de
 trabalho do modelo, etapa conjunta, devolução por documento, Termo e OP em sequência, download de
@@ -697,6 +698,15 @@ Trazer os demais cenários para `tests/Feature` é uma das [Pendências](#pendê
 
 Da mais recente para a mais antiga. Cada entrada diz o que mudou, **por quê** e como foi
 conferido — o porquê é o que falta a quem pega o código depois.
+
+- [2026-10-20] **Comissão de Monitoramento e Avaliação volta a ser uma só** (`User`, `RolesSeeder`; migração
+  `2026_10_20_110000`)
+  - Em 28/09 a comissão tinha virado dois perfis (Monitoramento e Avaliação, que não se acumulavam). Pela Lei
+    13.019 é uma comissão só, e assim volta: o perfil único tem as duas permissões (`monitoramento` e
+    `prestacao_contas`), e quem tinha qualquer um dos dois passa a ele. Continua sem acumular com o Gestor da
+    Parceria e a Comissão de Seleção. Rodar o `RolesSeeder`
+  - Conferido: `SegregacaoDeEncargosTest` (8 testes, um deles da migração com quem tinha uma ou as duas);
+    suíte 223/223
 
 - [2026-10-20] **A SCP cadastra servidores** (permissão `criar_usuarios`, `UserController::create`, `UserRequest`)
   - Além de ver a lista, a SCP abre "+ Novo usuário" em Órgãos e usuários e cria a conta já aprovada (ela é

@@ -10,8 +10,8 @@ use Spatie\Permission\Models\Role;
 use Tests\TestCase;
 
 /**
- * Gestor da Parceria, Comissão de Seleção, Comissão de Monitoramento e
- * Comissão de Avaliação: a mesma pessoa tem um desses encargos, no máximo
+ * Gestor da Parceria, Comissão de Seleção e Comissão de Monitoramento e
+ * Avaliação: a mesma pessoa tem um desses encargos, no máximo
  * (decisão da gestão, 28/09/2026). Ver User::ENCARGOS_QUE_NAO_ACUMULAM.
  */
 class SegregacaoDeEncargosTest extends TestCase
@@ -36,24 +36,41 @@ class SegregacaoDeEncargosTest extends TestCase
             'password' => 'Senha123', 'password_confirmation' => 'Senha123'];
     }
 
-    public function test_monitoramento_e_avaliacao_viraram_dois_perfis_com_uma_permissao_cada(): void
+    public function test_monitoramento_e_avaliacao_sao_uma_comissao_so(): void
     {
-        $this->assertNull(Role::where('name', 'comissao_monitoramento_avaliacao')->first());
-        $this->assertSame(['monitoramento'], Role::findByName('comissao_monitoramento')->permissions->pluck('name')->all());
-        $this->assertSame(['prestacao_contas'], Role::findByName('comissao_avaliacao')->permissions->pluck('name')->all());
+        $this->assertNull(Role::where('name', 'comissao_monitoramento')->first());
+        $this->assertNull(Role::where('name', 'comissao_avaliacao')->first());
+        $this->assertEqualsCanonicalizing(['monitoramento', 'prestacao_contas'],
+            Role::findByName('comissao_monitoramento_avaliacao')->permissions->pluck('name')->all());
+    }
+
+    public function test_quem_tinha_uma_das_duas_passa_a_comissao_unica(): void
+    {
+        $mon = Role::findOrCreate('comissao_monitoramento', 'web');
+        $ava = Role::findOrCreate('comissao_avaliacao', 'web');
+        $so = User::factory()->create();
+        $so->assignRole($ava);
+        $duas = User::factory()->create();
+        $duas->assignRole([$mon, $ava]);
+
+        (require database_path('migrations/2026_10_20_110000_comissao_de_monitoramento_e_avaliacao_volta_a_ser_uma.php'))->up();
+
+        $this->assertSame(['comissao_monitoramento_avaliacao'], $so->fresh()->getRoleNames()->all());
+        $this->assertSame(['comissao_monitoramento_avaliacao'], $duas->fresh()->getRoleNames()->all());
+        $this->assertNull(Role::where('name', 'comissao_avaliacao')->first());
     }
 
     public function test_cadastro_pelo_administrador_nao_aceita_dois_encargos(): void
     {
         $this->actingAs($this->admin)->post('/usuarios', $this->cadastro(['gestor_parceria', 'comissao_selecao']))
-            ->assertSessionHasErrors(['roles' => 'A mesma pessoa não pode acumular Comissão de Seleção e Gestor da Parceria. Gestor da Parceria, Comissão de Seleção, Comissão de Monitoramento e Comissão de Avaliação são encargos que se fiscalizam: escolha um só.']);
+            ->assertSessionHasErrors(['roles' => 'A mesma pessoa não pode acumular Comissão de Seleção e Gestor da Parceria. Gestor da Parceria, Comissão de Seleção e Comissão de Monitoramento e Avaliação são encargos que se fiscalizam: escolha um só.']);
 
         $this->assertNull(User::where('email', 'servidor@example.com')->first());
     }
 
-    public function test_monitoramento_e_avaliacao_tambem_nao_se_acumulam(): void
+    public function test_gestor_e_comissao_de_monitoramento_e_avaliacao_nao_se_acumulam(): void
     {
-        $this->actingAs($this->admin)->post('/usuarios', $this->cadastro(['comissao_monitoramento', 'comissao_avaliacao']))
+        $this->actingAs($this->admin)->post('/usuarios', $this->cadastro(['gestor_parceria', 'comissao_monitoramento_avaliacao']))
             ->assertSessionHasErrors('roles');
     }
 
@@ -71,7 +88,7 @@ class SegregacaoDeEncargosTest extends TestCase
 
         $this->actingAs($this->admin)->put("/usuarios/{$gestor->id}", [
             'name' => $gestor->name, 'email' => $gestor->email, 'setor' => 'ug', 'status' => 1,
-            'roles' => ['gestor_parceria', 'comissao_avaliacao'],
+            'roles' => ['gestor_parceria', 'comissao_monitoramento_avaliacao'],
         ])->assertSessionHasErrors('roles');
 
         $this->assertSame(['gestor_parceria'], $gestor->fresh()->getRoleNames()->all());
@@ -85,7 +102,7 @@ class SegregacaoDeEncargosTest extends TestCase
         $this->actingAs($chefe->fresh())->post('/meus-usuarios', [
             'name' => 'Novo', 'email' => 'novo@example.com', 'matricula' => '123', 'solicitacao_obs' => 'Equipe',
             'password' => 'Senha123', 'password_confirmation' => 'Senha123',
-            'perfis' => ['comissao_selecao', 'comissao_monitoramento'],
+            'perfis' => ['comissao_selecao', 'comissao_monitoramento_avaliacao'],
         ])->assertSessionHasErrors(['perfis']);
 
         $this->assertStringContainsString('não pode acumular', session('errors')->first('perfis'));

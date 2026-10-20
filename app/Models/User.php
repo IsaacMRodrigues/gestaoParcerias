@@ -38,8 +38,7 @@ class User extends Authenticatable
         'cadastrador'                      => 'Cadastrador',
         'chefe_setor'                      => 'Chefe de Setor',
         'contador'                         => 'Contador',
-        'comissao_monitoramento'           => 'Comissão de Monitoramento',
-        'comissao_avaliacao'               => 'Comissão de Avaliação',
+        'comissao_monitoramento_avaliacao' => 'Comissão de Monitoramento e Avaliação',
         'comissao_selecao'                 => 'Comissão de Seleção',
         'encaminhador'                     => 'Encaminhador',
         'gestor_parceria'                  => 'Gestor da Parceria',
@@ -189,8 +188,7 @@ class User extends Authenticatable
         'ug' => [
             'gestor_parceria',
             'comissao_selecao',
-            'comissao_monitoramento',
-            'comissao_avaliacao',
+            'comissao_monitoramento_avaliacao',
         ],
     ];
 
@@ -201,8 +199,7 @@ class User extends Authenticatable
     public const ENCARGOS_QUE_NAO_ACUMULAM = [
         'comissao_selecao',
         'gestor_parceria',
-        'comissao_monitoramento',
-        'comissao_avaliacao',
+        'comissao_monitoramento_avaliacao',
     ];
 
     /** Mensagem de erro se os perfis acumulam dois encargos; null se não acumulam. */
@@ -217,7 +214,7 @@ class User extends Authenticatable
         $nomes = array_map(fn ($p) => self::$roleLabels[$p] ?? $p, $acumulados);
 
         return 'A mesma pessoa não pode acumular ' . implode(' e ', [implode(', ', array_slice($nomes, 0, -1)), end($nomes)])
-            . '. Gestor da Parceria, Comissão de Seleção, Comissão de Monitoramento e Comissão de Avaliação '
+            . '. Gestor da Parceria, Comissão de Seleção e Comissão de Monitoramento e Avaliação '
             . 'são encargos que se fiscalizam: escolha um só.';
     }
 

@@ -74,9 +74,8 @@ class RolesSeeder extends Seeder
         'analista_aditivo_apostilamento'   => ['formalizacao'],
         'analista_prestacao_contas_previa' => ['prestacao_contas'],
         'comissao_selecao'                 => ['propostas', 'pareceres_tecnico', 'pareceres_decisao'],
-        // Comissões separadas: quem acompanha não é quem avalia.
-        'comissao_monitoramento'           => ['monitoramento'],
-        'comissao_avaliacao'               => ['prestacao_contas'],
+        // Uma comissão só: acompanha a execução e avalia a prestação de contas.
+        'comissao_monitoramento_avaliacao' => ['monitoramento', 'prestacao_contas'],
         'gestor_parceria'                  => ['planejamento', 'monitoramento', 'execucao', 'prestacao_contas'],
         'cadastrador'                      => ['chamamentos', 'propostas', 'formalizacao'],
         'contador'                         => ['prestacao_contas'],
