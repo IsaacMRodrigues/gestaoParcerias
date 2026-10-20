@@ -57,9 +57,11 @@ relatórios, a Celebração com 21 etapas, a pesquisa no portal, o cadastro pelo
 Em 19/10 subiram também, sem migração, a entrada da OSC separada da entrada da Prefeitura e a dica de e-mail
 do login (commit `003d0fd`).
 
-**No GitHub e ainda fora da produção** (sobem só quando pedido): a saída do perfil Aprovador de Assinatura
-Eletrônica (20/10, migração `2026_10_20_100000`) a SCP cadastrando servidores e a Comissão de Monitoramento e Avaliação única (20/10, migração
-`2026_10_20_110000`; rodar o `RolesSeeder`).
+Em 20/10 subiram a saída do perfil Aprovador de Assinatura Eletrônica, a SCP cadastrando servidores e a
+Comissão de Monitoramento e Avaliação única (commit `f183edd`, 2 migrações e o `RolesSeeder`, ensaiados numa
+cópia do banco de produção).
+
+**No GitHub e ainda fora da produção:** nada.
 
 As ações de produção que o deploy não faz (dados e painel) estão em
 [Pendências → Produção](#produção-ação-não-código).
@@ -140,6 +142,7 @@ cada item estão no [Histórico de entregas](#histórico-de-entregas). 🚀 marc
 | 07/10 | Depois do deploy: listas só com o que é da Secretaria; R$ e vírgula em todos os campos de dinheiro; Arquivos da OSC valendo em todos os fluxos (recusa da UG trava a Celebração) |
 | 08/10 | Caixas de seleção e barra de download nos fluxos; **Arquivos da OSC preenchendo os fluxos** (documentos complementares, habilitação da dispensa e modelos com os dados da OSC); revisão do README |
 | 13/10 | Menu do portal da OSC na **barra lateral**, como o da área interna |
+| 20/10 | **Deploy na Hostinger** (commit `f183edd`): os perfis de 20/10, 2 migrações e o `RolesSeeder` |
 | 20/10 | **Comissão de Monitoramento e Avaliação volta a ser uma só** |
 | 20/10 | **A SCP cadastra servidores**, sem os perfis que só o TI concede |
 | 20/10 | **Sai o perfil Aprovador de Assinatura Eletrônica**, que não tinha permissão nem fluxo |
