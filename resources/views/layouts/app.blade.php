@@ -89,9 +89,12 @@
                                     </div>
                                 @endif
                             </div>
-                            @role('responsavel_unidade_gestora')
-                            <x-dropdown-link :href="route('subusuarios.index')">Meus usuários</x-dropdown-link>
-                            @endrole
+                            {{-- Quem cadastra usuários: administrador e SCP, todas as contas; a chefia, a equipe do setor. --}}
+                            @if($navUser->canAny(['cadastros', 'criar_usuarios']))
+                                <x-dropdown-link :href="route('orgaos.index')">Meus usuários</x-dropdown-link>
+                            @elseif($navUser->podeCadastrarNoSetor())
+                                <x-dropdown-link :href="route('subusuarios.index')">Meus usuários</x-dropdown-link>
+                            @endif
                             <x-dropdown-link :href="route('profile.edit')">{{ __('Perfil') }}</x-dropdown-link>
                             <form method="POST" action="{{ route('logout') }}">
                                 @csrf

@@ -203,7 +203,7 @@
                         @if(auth()->user()->ehResponsavelLegalOsc())
                             <a href="{{ route('portal.usuarios.index') }}"
                                class="block px-4 py-2 text-sm hover:bg-gray-50 {{ request()->routeIs('portal.usuarios.*') ? 'text-brand-700 font-semibold' : '' }}">
-                                Usuários da OSC
+                                Meus usuários
                             </a>
                         @endif
                         <form method="POST" action="{{ route('logout') }}">

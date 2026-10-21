@@ -26,7 +26,7 @@
         ['Aprovações pendentes', route('usuarios.pendentes'), 'aprovar cadastros novos', $u->can('cadastros')],
         ['OSCs', route('oscs.index'), 'entidades organizacoes sociedade civil', $u->can('cadastros')],
 
-        ['Meus usuários', route('subusuarios.index'), 'equipe subusuarios da unidade', $u->hasRole('responsavel_unidade_gestora')],
+        ['Meus usuários', route('subusuarios.index'), 'equipe subusuarios da unidade', $u->podeCadastrarNoSetor()],
         ['Modelos padrão', route('modelos.index'), 'templates documentos ti', $u->hasRole('administrador_setorial')],
 
         ['Meu perfil', route('profile.edit'), 'conta senha dados pessoais', true],
