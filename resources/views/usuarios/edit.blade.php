@@ -1,6 +1,11 @@
 <x-app-layout>
     <x-slot name="header">
-        <h2 class="text-2xl font-bold text-gray-900">Editar Usuário</h2>
+        <div>
+            <p class="text-sm text-gray-500">
+                <a href="{{ route('orgaos.index') }}" class="hover:underline">Órgãos e usuários</a>
+            </p>
+            <h2 class="text-2xl font-bold text-gray-900 mt-0.5">Editar usuário</h2>
+        </div>
     </x-slot>
 
     <div class="py-8">
@@ -14,13 +19,8 @@
                     @include('usuarios._form', ['user' => $usuario])
 
                     <div class="flex items-center justify-end gap-4 pt-2">
-                        <a href="{{ route('orgaos.index') }}" class="text-sm text-gray-600 hover:text-gray-900">
-                            Cancelar
-                        </a>
-                        <button type="submit"
-                                class="btn btn-primary">
-                            Salvar
-                        </button>
+                        <a href="{{ route('orgaos.index') }}" class="btn btn-outline">Cancelar</a>
+                        <button type="submit" class="btn btn-primary">Salvar</button>
                     </div>
                 </form>
 

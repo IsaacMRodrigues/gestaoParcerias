@@ -22,7 +22,7 @@
         // Uma entrada só, com as palavras das duas telas que se juntaram: quem
         // procura "usuários" e quem procura "secretaria" chega ao mesmo lugar.
         ['Órgãos e usuários', route('orgaos.index'), 'usuarios servidores contas acesso secretaria orgao unidade gestora', $u->can('cadastros')],
-        ['Novo Usuário', route('usuarios.create'), 'criar cadastrar servidor', $u->can('cadastros')],
+        ['Cadastrar usuário', route('usuarios.create'), 'criar cadastrar novo usuário servidor', $u->canAny(['cadastros', 'criar_usuarios'])],
         ['Aprovações pendentes', route('usuarios.pendentes'), 'aprovar cadastros novos', $u->can('cadastros')],
         ['OSCs', route('oscs.index'), 'entidades organizacoes sociedade civil', $u->can('cadastros')],
 

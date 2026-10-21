@@ -61,7 +61,8 @@ Em 20/10 subiram a saída do perfil Aprovador de Assinatura Eletrônica, a SCP c
 Comissão de Monitoramento e Avaliação única (commit `f183edd`, 2 migrações e o `RolesSeeder`, ensaiados numa
 cópia do banco de produção).
 
-**No GitHub e ainda fora da produção:** nada.
+**No GitHub e ainda fora da produção** (sobem só quando pedido): as três telas de cadastro de usuário
+padronizadas (21/10), sem migração.
 
 As ações de produção que o deploy não faz (dados e painel) estão em
 [Pendências → Produção](#produção-ação-não-código).
@@ -142,6 +143,7 @@ cada item estão no [Histórico de entregas](#histórico-de-entregas). 🚀 marc
 | 07/10 | Depois do deploy: listas só com o que é da Secretaria; R$ e vírgula em todos os campos de dinheiro; Arquivos da OSC valendo em todos os fluxos (recusa da UG trava a Celebração) |
 | 08/10 | Caixas de seleção e barra de download nos fluxos; **Arquivos da OSC preenchendo os fluxos** (documentos complementares, habilitação da dispensa e modelos com os dados da OSC); revisão do README |
 | 13/10 | Menu do portal da OSC na **barra lateral**, como o da área interna |
+| 21/10 | **Telas de cadastro de usuário padronizadas**: as três com o mesmo visual e os textos corrigidos |
 | 20/10 | **Deploy na Hostinger** (commit `f183edd`): os perfis de 20/10, 2 migrações e o `RolesSeeder` |
 | 20/10 | **Comissão de Monitoramento e Avaliação volta a ser uma só** |
 | 20/10 | **A SCP cadastra servidores**, sem os perfis que só o TI concede |
@@ -701,6 +703,16 @@ Trazer os demais cenários para `tests/Feature` é uma das [Pendências](#pendê
 
 Da mais recente para a mais antiga. Cada entrada diz o que mudou, **por quê** e como foi
 conferido — o porquê é o que falta a quem pega o código depois.
+
+- [2026-10-21] **As três telas de cadastro de usuário com o mesmo padrão** (`usuarios/_form`, `usuarios/create`,
+  `usuarios/edit`, `subusuarios/create`, `portal/usuarios/create`)
+  - Continuam três telas, cada uma para o seu público: **Cadastros → Órgãos e usuários** (administrador e SCP, conta já
+    aprovada), **Meus usuários** (chefia do setor, fica pendente para a SCP) e **Usuários da Organização** (OSC, fica
+    pendente para a SCP). Agora com o mesmo título ("Cadastrar usuário", com o caminho acima), o mesmo quadro
+    explicando quem aprova, os campos na mesma ordem, "(opcional)" no lugar do asterisco, os perfis num quadro, a
+    senha com o olho de exibir e os botões "Cancelar" e "Cadastrar". A tela da chefia ainda dizia que quem
+    aprova é o administrador; passou a dizer a SCP
+  - Conferido: suíte 223/223; as três telas no navegador, com contas locais de teste apagadas depois
 
 - [2026-10-20] **Comissão de Monitoramento e Avaliação volta a ser uma só** (`User`, `RolesSeeder`; migração
   `2026_10_20_110000`)

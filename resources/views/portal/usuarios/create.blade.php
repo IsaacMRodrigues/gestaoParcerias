@@ -7,12 +7,10 @@
         <h1 class="text-2xl font-bold text-gray-900 mt-0.5 mb-6">Cadastrar usuário</h1>
 
         <div class="bg-white rounded-xl border border-gray-200 shadow-sm p-6">
-            <p class="text-sm text-gray-500 mb-5">
-                O cadastro vai para aprovação da Prefeitura e a pessoa entra depois de liberado.
-                Defina uma senha inicial e repasse a ela — no primeiro acesso, o sistema pede que ela
-                troque por uma sua. A partir da liberação, passa a atuar em nome de
-                <strong>{{ $osc->name }}</strong>.
-            </p>
+            <div class="rounded-lg border border-brand-100 bg-brand-50 p-3 text-sm text-gray-600 mb-5">
+                O cadastro fica <strong>pendente</strong> até o Setor de Convênios e Parcerias (SCP) da Prefeitura
+                aprovar. Depois de liberada, a pessoa atua em nome de <strong>{{ $osc->name }}</strong>.
+            </div>
 
             <form action="{{ route('portal.usuarios.store') }}" method="POST" class="space-y-4">
                 @csrf
@@ -50,18 +48,6 @@
                     </div>
                 </div>
 
-                <div class="grid grid-cols-2 gap-3">
-                    <div>
-                        <x-input-label for="password" value="Senha inicial" />
-                        <x-text-input id="password" name="password" type="password" class="block mt-1 w-full" required autocomplete="new-password" />
-                        <x-input-error :messages="$errors->get('password')" class="mt-1" />
-                    </div>
-                    <div>
-                        <x-input-label for="password_confirmation" value="Confirmar senha" />
-                        <x-text-input id="password_confirmation" name="password_confirmation" type="password" class="block mt-1 w-full" required autocomplete="new-password" />
-                        <x-input-error :messages="$errors->get('password_confirmation')" class="mt-1" />
-                    </div>
-                </div>
 
                 {{-- Perfil ≠ função. O perfil diz o que a pessoa É na
                      organização e sai impresso como papel de assinatura; as
@@ -88,6 +74,22 @@
                         @endforeach
                     </div>
                     <x-input-error :messages="$errors->get('perfis')" class="mt-1" />
+                </div>
+
+                <div>
+                    <div class="grid grid-cols-2 gap-3">
+                        <div>
+                            <x-input-label for="password" value="Senha inicial" />
+                            <x-input-senha id="password" class="mt-1" required autocomplete="new-password" />
+                            <x-input-error :messages="$errors->get('password')" class="mt-1" />
+                        </div>
+                        <div>
+                            <x-input-label for="password_confirmation" value="Confirmar senha" />
+                            <x-input-senha id="password_confirmation" class="mt-1" required autocomplete="new-password" />
+                            <x-input-error :messages="$errors->get('password_confirmation')" class="mt-1" />
+                        </div>
+                    </div>
+                    <p class="text-xs text-gray-500 mt-1">Repasse à pessoa: no primeiro acesso, o sistema pede que ela a troque por uma sua.</p>
                 </div>
 
                 <p class="text-xs text-gray-500 pt-1">

@@ -3,7 +3,7 @@
 
 {{-- Nome --}}
 <div>
-    <x-input-label for="name" value="Nome completo *" />
+    <x-input-label for="name" value="Nome completo" />
     <x-text-input id="name" name="name" type="text" class="mt-1 block w-full"
                   value="{{ old('name', $user?->name) }}" required autofocus />
     <x-input-error :messages="$errors->get('name')" class="mt-2" />
@@ -12,7 +12,7 @@
 {{-- E-mail e nome de usuário --}}
 <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
     <div>
-        <x-input-label for="email" value="E-mail *" />
+        <x-input-label for="email" value="E-mail" />
         <x-text-input id="email" name="email" type="email" class="mt-1 block w-full"
                       value="{{ old('email', $user?->email) }}" required />
         <x-input-error :messages="$errors->get('email')" class="mt-2" />
@@ -33,19 +33,19 @@
 {{-- CPF, Matrícula e Telefone --}}
 <div class="grid grid-cols-3 gap-4">
     <div>
-        <x-input-label for="cpf" value="CPF" />
+        <x-input-label for="cpf" value="CPF (opcional)" />
         <x-text-input id="cpf" name="cpf" type="text" class="mt-1 block w-full"
                       value="{{ old('cpf', $user?->cpf) }}" placeholder="000.000.000-00" maxlength="14" />
         <x-input-error :messages="$errors->get('cpf')" class="mt-2" />
     </div>
     <div>
-        <x-input-label for="matricula" value="Matrícula" />
+        <x-input-label for="matricula" value="Matrícula (opcional)" />
         <x-text-input id="matricula" name="matricula" type="text" class="mt-1 block w-full"
                       value="{{ old('matricula', $user?->matricula) }}" maxlength="50" />
         <x-input-error :messages="$errors->get('matricula')" class="mt-2" />
     </div>
     <div>
-        <x-input-label for="phone" value="Telefone institucional" />
+        <x-input-label for="phone" value="Telefone (opcional)" />
         <x-text-input id="phone" name="phone" type="text" class="mt-1 block w-full"
                       value="{{ old('phone', $user?->phone) }}" placeholder="(00) 00000-0000" maxlength="20" />
         <x-input-error :messages="$errors->get('phone')" class="mt-2" />
@@ -70,7 +70,7 @@
 <div>
     <x-input-label for="setor" value="Setor de lotação" />
     <select id="setor" name="setor"
-            class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-brand-500 focus:border-brand-500 text-sm">
+            class="mt-1 block w-full border-gray-300 rounded-lg shadow-sm focus:ring-brand-500 focus:border-brand-500 text-sm">
         <option value="">Nenhum</option>
         @foreach(\App\Models\User::LOTACOES as $key => $label)
             <option value="{{ $key }}" {{ old('setor', $user?->setor) === $key ? 'selected' : '' }}>
@@ -89,7 +89,7 @@
 <div>
     <x-input-label for="orgao_id" value="Unidade Gestora (Secretaria)" />
     <select id="orgao_id" name="orgao_id"
-            class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-brand-500 focus:border-brand-500 text-sm">
+            class="mt-1 block w-full border-gray-300 rounded-lg shadow-sm focus:ring-brand-500 focus:border-brand-500 text-sm">
         <option value="">Nenhuma</option>
         @foreach(\App\Models\Orgao::whereNotNull('codigo')->orderBy('codigo')->get() as $org)
             <option value="{{ $org->id }}" {{ (string) old('orgao_id', $user?->orgao_id) === (string) $org->id ? 'selected' : '' }}>
@@ -105,9 +105,9 @@
 
 {{-- Perfis de acesso (múltiplos) --}}
 <div>
-    <x-input-label value="Perfis de acesso *" />
+    <x-input-label value="Perfis de acesso" />
     @php $perfisAtuais = old('roles', $user?->roles->pluck('name')->all() ?? []); @endphp
-    <div class="mt-1 grid grid-cols-1 sm:grid-cols-2 gap-x-4 gap-y-1.5 border border-gray-200 rounded-md p-3 max-h-72 overflow-y-auto">
+    <div class="mt-1 grid grid-cols-1 sm:grid-cols-2 gap-x-4 gap-y-1.5 border border-gray-200 rounded-lg p-3 max-h-72 overflow-y-auto">
         @foreach($roles as $role)
             @php
                 $excl = \App\Models\User::PERFIS_EXCLUSIVOS[$role->name] ?? null;
@@ -139,18 +139,21 @@
 @endif
 
 {{-- Senha --}}
-<div class="grid grid-cols-2 gap-4">
-    <div>
-        <x-input-label for="password" value="{{ $user ? 'Nova senha (deixe em branco para manter; a pessoa troca no próximo acesso)' : 'Senha inicial * (a pessoa troca no primeiro acesso)' }}" />
-        <x-text-input id="password" name="password" type="password" class="mt-1 block w-full"
-                      autocomplete="new-password" />
-        <x-input-error :messages="$errors->get('password')" class="mt-2" />
+<div>
+    <div class="grid grid-cols-2 gap-4">
+        <div>
+            <x-input-label for="password" value="{{ $user ? 'Nova senha (opcional)' : 'Senha inicial' }}" />
+            <x-input-senha id="password" class="mt-1" autocomplete="new-password" />
+            <x-input-error :messages="$errors->get('password')" class="mt-2" />
+        </div>
+        <div>
+            <x-input-label for="password_confirmation" value="Confirmar senha" />
+            <x-input-senha id="password_confirmation" class="mt-1" autocomplete="new-password" />
+        </div>
     </div>
-    <div>
-        <x-input-label for="password_confirmation" value="Confirmar senha" />
-        <x-text-input id="password_confirmation" name="password_confirmation" type="password"
-                      class="mt-1 block w-full" autocomplete="new-password" />
-    </div>
+    <p class="text-xs text-gray-500 mt-1">
+        {{ $user ? 'Em branco, a senha atual continua; se trocar, a pessoa escolhe a dela no próximo acesso.' : 'Repasse à pessoa: no primeiro acesso, o sistema pede que ela a troque por uma sua.' }}
+    </p>
 </div>
 
 {{-- Status --}}

@@ -12,7 +12,7 @@ use Illuminate\View\View;
 
 /**
  * Cadastro da equipe do setor pela chefia (permissão usuarios_setor). O usuário herda setor e
- * órgão de quem cadastra e nasce pendente, até o administrador aprovar.
+ * órgão de quem cadastra e nasce pendente, até a SCP aprovar.
  */
 class SubusuarioController extends Controller
 {
