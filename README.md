@@ -62,7 +62,7 @@ Comissão de Monitoramento e Avaliação única (commit `f183edd`, 2 migrações
 cópia do banco de produção).
 
 **No GitHub e ainda fora da produção** (sobem só quando pedido): as três telas de cadastro de usuário
-padronizadas e o "Meus usuários" no menu da conta (21/10), sem migração.
+padronizadas o "Meus usuários" no menu da conta e o botão Voltar em todas as telas (21/10), sem migração.
 
 As ações de produção que o deploy não faz (dados e painel) estão em
 [Pendências → Produção](#produção-ação-não-código).
@@ -143,6 +143,7 @@ cada item estão no [Histórico de entregas](#histórico-de-entregas). 🚀 marc
 | 07/10 | Depois do deploy: listas só com o que é da Secretaria; R$ e vírgula em todos os campos de dinheiro; Arquivos da OSC valendo em todos os fluxos (recusa da UG trava a Celebração) |
 | 08/10 | Caixas de seleção e barra de download nos fluxos; **Arquivos da OSC preenchendo os fluxos** (documentos complementares, habilitação da dispensa e modelos com os dados da OSC); revisão do README |
 | 13/10 | Menu do portal da OSC na **barra lateral**, como o da área interna |
+| 21/10 | **Botão Voltar em todas as telas**, menos nos inícios |
 | 21/10 | **"Meus usuários" no menu da conta** de todos que cadastram usuários |
 | 21/10 | **Telas de cadastro de usuário padronizadas**: as três com o mesmo visual e os textos corrigidos |
 | 20/10 | **Deploy na Hostinger** (commit `f183edd`): os perfis de 20/10, 2 migrações e o `RolesSeeder` |
@@ -586,7 +587,7 @@ Procedimento:
 
 ## Verificação
 
-`php artisan test` (sqlite em memória) roda **224 testes** em `tests/Feature`, um arquivo por regra de
+`php artisan test` (sqlite em memória) roda **225 testes** em `tests/Feature`, um arquivo por regra de
 negócio (quem abre qual parceria, contas e senhas, avisos por e-mail, segregação de encargos,
 cancelamento e prorrogação de chamamento, Nova Proposta, prazo e resposta de recurso, plano de
 trabalho do modelo, etapa conjunta, devolução por documento, Termo e OP em sequência, download de
@@ -704,6 +705,15 @@ Trazer os demais cenários para `tests/Feature` é uma das [Pendências](#pendê
 
 Da mais recente para a mais antiga. Cada entrada diz o que mudou, **por quê** e como foi
 conferido — o porquê é o que falta a quem pega o código depois.
+
+- [2026-10-21] **Botão Voltar em todas as telas** (`components/botao-voltar`, `layouts/app`, `layouts/portal`)
+  - Fica no topo de toda tela da área interna (ao lado do título) e do portal, menos nos inícios (Painel e página
+    inicial do portal). Volta à tela anterior do sistema; se não há (link aberto direto, outra aba), vai ao
+    início da área. As telas de entrada já tinham o "Voltar para o início"
+  - Cuidado que ficou no código: num `onclick`, `URL` é o `document.URL` (texto), não o construtor — a origem
+    se compara pelo começo do `document.referrer`
+  - Conferido: `BotaoVoltarTest`; suíte 225/225; no navegador, voltar de Cadastrar usuário a Órgãos e usuários,
+    a tela aberta direto indo ao Painel, e o portal
 
 - [2026-10-21] **"Meus usuários" no menu da conta para todos que cadastram** (`layouts/app`, `layouts/portal`)
   - Só o Responsável da UG via o item. Agora aparece para o administrador e a SCP (leva a Órgãos e usuários),

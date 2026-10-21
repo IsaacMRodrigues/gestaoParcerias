@@ -50,6 +50,10 @@
                         </svg>
                     </button>
 
+                    @unless(request()->routeIs('dashboard'))
+                        <x-botao-voltar :inicio="route('dashboard')" />
+                    @endunless
+
                     <div class="flex-1 min-w-0">
                         @isset($header)
                             {{ $header }}
