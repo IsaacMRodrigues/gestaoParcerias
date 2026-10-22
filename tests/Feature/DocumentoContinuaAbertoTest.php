@@ -110,4 +110,24 @@ class DocumentoContinuaAbertoTest extends TestCase
         $html = $this->actingAs($ug)->get($tela)->assertOk()->assertSee('1 arquivo anexado em')->getContent();
         $this->assertMatchesRegularExpression('/>\s*Ver anexos\s*<\/a>/', $html);
     }
+
+    public function test_comprovante_da_ultima_etapa_manda_concluir(): void
+    {
+        $this->seed(RolesSeeder::class);
+        \Illuminate\Support\Facades\Storage::fake('local');
+        $orgao = Orgao::forceCreate(['name' => 'Cultura']);
+        $scp = User::factory()->create(['setor' => 'scp', 'status' => true, 'approval_status' => 'aprovado']);
+        $scp->assignRole('analista_tecnico_scp');
+        $processo = Processo::forceCreate(['numero' => '0216.0003.2026.01', 'orgao_id' => $orgao->id, 'created_by' => $scp->id,
+            'status' => 'em_tramite', 'setor_atual' => 'scp', 'etapa' => 9, 'modalidade' => 'chamamento_publico']);
+        $comprovante = ProcessoPeca::forceCreate(['processo_id' => $processo->id, 'tipo' => 'comprovante_publicacao']);
+
+        $this->actingAs($scp)->post(route('processos.pecas.anexos.store', [$processo, $comprovante]),
+            ['arquivo' => \Illuminate\Http\UploadedFile::fake()->create('diario.pdf', 50, 'application/pdf')])->assertSessionHasNoErrors();
+
+        $this->actingAs($scp)->get(route('processos.pecas.edit', [$processo, $comprovante]))->assertOk()
+            ->assertSee('Não precisa salvar')->assertSee('e conclua.');
+        $this->actingAs($scp)->get(route('processos.show', $processo))->assertOk()
+            ->assertSee('conclua o processo abaixo para encaminhá-lo à publicação')->assertSee('Concluir (encaminhar para publicação)');
+    }
 }

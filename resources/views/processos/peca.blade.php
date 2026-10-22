@@ -18,7 +18,8 @@
                     <strong>Anexado em {{ $anexos->max('created_at')->format('d/m/Y H:i') }}.</strong>
                     Não precisa salvar: o arquivo já faz parte do processo.
                     @if($podeAnexar)
-                        Quando terminar, <a href="{{ route('processos.show', $processo) }}#acao" class="font-semibold underline">volte ao processo</a> e encaminhe.
+                        Quando terminar, <a href="{{ route('processos.show', $processo) }}#acao" class="font-semibold underline">volte ao processo</a>
+                        e {{ $processo->ultimaEtapa() ? 'conclua' : 'encaminhe' }}.
                     @endif
                 </div>
             @elseif($peca->ehArquivo())

@@ -302,10 +302,14 @@
                                 <p class="text-sm text-red-700">
                                     🔴 Falta antes de encaminhar: <strong>{{ implode(', ', $pendencias) }}</strong>.
                                 </p>
-                            @elseif(!$processo->ultimaEtapa() && !$processo->etapaEhAnalise())
+                            @elseif(!$processo->etapaEhAnalise())
                                 <p class="text-sm font-medium text-brand-800 bg-brand-50 border border-brand-200 rounded-lg px-3 py-2">
                                     ✓ Tudo pronto nesta etapa:
-                                    {{ $processo->segueNoMesmoSetor() ? 'conclua a etapa abaixo.' : 'encaminhe para ' . (\App\Models\Processo::SETORES[$processo->proximoSetor()] ?? $processo->proximoSetor()) . '.' }}
+                                    @if($processo->ultimaEtapa())
+                                        conclua o processo abaixo para encaminhá-lo à publicação.
+                                    @else
+                                        {{ $processo->segueNoMesmoSetor() ? 'conclua a etapa abaixo.' : 'encaminhe para ' . (\App\Models\Processo::SETORES[$processo->proximoSetor()] ?? $processo->proximoSetor()) . '.' }}
+                                    @endif
                                 </p>
                             @endif
 

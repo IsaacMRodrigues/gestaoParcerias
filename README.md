@@ -594,7 +594,7 @@ Procedimento:
 
 ## Verificação
 
-`php artisan test` (sqlite em memória) roda **227 testes** em `tests/Feature`, um arquivo por regra de
+`php artisan test` (sqlite em memória) roda **228 testes** em `tests/Feature`, um arquivo por regra de
 negócio (quem abre qual parceria, contas e senhas, avisos por e-mail, segregação de encargos,
 cancelamento e prorrogação de chamamento, Nova Proposta, prazo e resposta de recurso, plano de
 trabalho do modelo, etapa conjunta, devolução por documento, Termo e OP em sequência, download de
@@ -719,9 +719,11 @@ conferido — o porquê é o que falta a quem pega o código depois.
     Anexar". O arquivo estava anexado; anexar já grava, mas nada dizia isso. Agora, com arquivo, o topo diz
     "Anexado em dd/mm hh:mm. Não precisa salvar: o arquivo já faz parte do processo. Quando terminar, volte ao
     processo e encaminhe"; antes de anexar, "O arquivo fica salvo ao clicar em Anexar". Na lista, "1 arquivo
-    anexado em dd/mm hh:mm" e o link vira "Ver anexos"
-  - Conferido: `DocumentoContinuaAbertoTest::test_portaria_anexada_avisa_que_ja_esta_salva` (falha sem a
-    mudança); suíte 227/227
+    anexado em dd/mm hh:mm" e o link vira "Ver anexos". Vale para todo documento anexado como arquivo (também o
+    Comprovante de Publicação); na última etapa o aviso manda concluir, e a ação diz "✓ Tudo pronto nesta etapa:
+    conclua o processo abaixo"
+  - Conferido: `DocumentoContinuaAbertoTest` (`test_portaria_anexada_avisa_que_ja_esta_salva`, que falha sem a
+    mudança, e `test_comprovante_da_ultima_etapa_manda_concluir`); suíte 228/228
 
 - [2026-10-22] **Planejamento: a tela diz se o documento foi salvo e quando é a vez de encaminhar**
   (`ProcessoPeca::foiEditado`, `Processo::pendenciasParaAvancar`, `processos/show`; migração `2026_10_22_100000`)
