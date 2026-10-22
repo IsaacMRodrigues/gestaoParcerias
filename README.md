@@ -61,14 +61,12 @@ Em 20/10 subiram a saída do perfil Aprovador de Assinatura Eletrônica, a SCP c
 Comissão de Monitoramento e Avaliação única (commit `f183edd`, 2 migrações e o `RolesSeeder`, ensaiados numa
 cópia do banco de produção).
 
-**No GitHub e ainda fora da produção** (sobem só quando pedido):
-- 21/10: as três telas de cadastro de usuário padronizadas, o "Meus usuários" no menu da conta e o botão Voltar
-  em todas as telas;
-- 22/10: a lista única de perfis do "Solicitar acesso", o aviso do Edital, a situação dos documentos do
-  Planejamento (migração `2026_10_22_100000`), o aviso dos documentos anexados como arquivo e o item 7 do
-  Plano de Trabalho o teto das atividades no valor pleiteado o item 13 só
-  com a planilha e com as atividades vinculadas escolhidas do item 7, e as declarações e os
-  complementares fora de Arquivos da OSC (de volta à Celebração), e a certidão municipal com a vigência à vista.
+Em 22/10 subiram as mudanças de 21 e 22/10 (commit `31dd092`, a migração `2026_10_22_100000` e o
+`RolesSeeder`, ensaiados numa cópia do banco de produção): telas de cadastro padronizadas, "Meus usuários",
+botão Voltar, perfis do "Solicitar acesso", avisos do Planejamento, itens 7 e 13 do Plano de Trabalho e Arquivos
+da OSC sem declarações e complementares, com a certidão municipal.
+
+**No GitHub e ainda fora da produção:** nada.
 
 As ações de produção que o deploy não faz (dados e painel) estão em
 [Pendências → Produção](#produção-ação-não-código).
@@ -149,6 +147,7 @@ cada item estão no [Histórico de entregas](#histórico-de-entregas). 🚀 marc
 | 07/10 | Depois do deploy: listas só com o que é da Secretaria; R$ e vírgula em todos os campos de dinheiro; Arquivos da OSC valendo em todos os fluxos (recusa da UG trava a Celebração) |
 | 08/10 | Caixas de seleção e barra de download nos fluxos; **Arquivos da OSC preenchendo os fluxos** (documentos complementares, habilitação da dispensa e modelos com os dados da OSC); revisão do README |
 | 13/10 | Menu do portal da OSC na **barra lateral**, como o da área interna |
+| 22/10 | **Deploy na Hostinger** (commit `31dd092`): tudo de 21 e 22/10, com uma migração e o `RolesSeeder` |
 | 22/10 | **Arquivos da OSC: certidão municipal** e a data de vigência à vista |
 | 22/10 | **Declarações e complementares saem de Arquivos da OSC** e voltam à Celebração |
 | 22/10 | **Item 13: atividades vinculadas escolhidas do item 7** |
