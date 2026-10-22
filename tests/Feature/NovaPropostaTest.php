@@ -125,10 +125,10 @@ class NovaPropostaTest extends TestCase
         $this->assertSame('0.00', $p->valor_solicitado, 'o valor se lança no plano de trabalho');
         $this->assertSame(0, $p->planoItens()->count());
 
-        // O texto segue editável no plano (item 13) e aparece nele.
-        $this->actingAs($this->rl)->put("/portal/manifestacoes/{$p->id}/plano/aplicacao", ['plano_aplicacao' => 'Revisto.'])
-            ->assertSessionHasNoErrors();
-        $this->assertSame('Revisto.', $p->fresh()->plano_aplicacao);
+        // No plano, o item 13 é só a planilha: o texto aparece para leitura, sem um segundo campo de descrição.
+        $this->actingAs($this->rl)->get("/portal/manifestacoes/{$p->id}")->assertOk()
+            ->assertSee('Descrição informada ao abrir a proposta')->assertSee('Instrutor de música por 10 meses.')
+            ->assertDontSee('Salvar descrição')->assertDontSee('name="plano_aplicacao"', false);
     }
 
     public function test_sem_plano_de_aplicacao_ou_com_texto_acima_de_mil_caracteres_nao_cria(): void

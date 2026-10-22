@@ -597,16 +597,12 @@
             A natureza de cada item alimenta o item 9, e é a mesma usada na execução e na prestação de contas.
         </p>
 
-        @if($podeEditar)
-            <form action="{{ route($rota . '.aplicacao', $id) }}" method="POST" class="mb-5 space-y-2">
-                @csrf @method('PUT')
-                <x-input-label for="plano_aplicacao" value="Descrição do plano de aplicação" />
-                <textarea name="plano_aplicacao" id="plano_aplicacao" rows="4" maxlength="1000" class="{{ $campo }}">{{ old('plano_aplicacao', $dono->plano_aplicacao) }}</textarea>
-                <x-input-error :messages="$errors->get('plano_aplicacao')" />
-                <button type="submit" class="btn btn-secondary btn-sm">Salvar descrição</button>
-            </form>
-        @elseif(filled($dono->plano_aplicacao))
-            <p class="mb-5 text-sm text-gray-700 whitespace-pre-line">{{ $dono->plano_aplicacao }}</p>
+        {{-- O item 13 é a planilha; o texto livre, quando houver, veio do primeiro formulário da Nova Proposta. --}}
+        @if(filled($dono->plano_aplicacao))
+            <div class="mb-5 text-sm text-gray-700">
+                <p class="text-xs text-gray-400">Descrição informada ao abrir a proposta</p>
+                <p class="whitespace-pre-line">{{ $dono->plano_aplicacao }}</p>
+            </div>
         @endif
 
         <div class="overflow-x-auto">

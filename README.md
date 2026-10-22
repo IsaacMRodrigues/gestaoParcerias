@@ -66,7 +66,8 @@ cópia do banco de produção).
   em todas as telas;
 - 22/10: a lista única de perfis do "Solicitar acesso", o aviso do Edital, a situação dos documentos do
   Planejamento (migração `2026_10_22_100000`), o aviso dos documentos anexados como arquivo e o item 7 do
-  Plano de Trabalho e o teto das atividades no valor pleiteado.
+  Plano de Trabalho o teto das atividades no valor pleiteado e o item 13 só
+  com a planilha.
 
 As ações de produção que o deploy não faz (dados e painel) estão em
 [Pendências → Produção](#produção-ação-não-código).
@@ -147,6 +148,7 @@ cada item estão no [Histórico de entregas](#histórico-de-entregas). 🚀 marc
 | 07/10 | Depois do deploy: listas só com o que é da Secretaria; R$ e vírgula em todos os campos de dinheiro; Arquivos da OSC valendo em todos os fluxos (recusa da UG trava a Celebração) |
 | 08/10 | Caixas de seleção e barra de download nos fluxos; **Arquivos da OSC preenchendo os fluxos** (documentos complementares, habilitação da dispensa e modelos com os dados da OSC); revisão do README |
 | 13/10 | Menu do portal da OSC na **barra lateral**, como o da área interna |
+| 22/10 | **Plano de Trabalho, item 13: só a planilha**, sem a descrição repetida |
 | 22/10 | **As atividades do plano não passam do valor pleiteado** |
 | 22/10 | **Plano de Trabalho, item 7**: indicadores num campo só e a atividade junto da meta |
 | 22/10 | **Documento anexado como arquivo diz que já está salvo** |
@@ -715,6 +717,13 @@ Trazer os demais cenários para `tests/Feature` é uma das [Pendências](#pendê
 
 Da mais recente para a mais antiga. Cada entrada diz o que mudou, **por quê** e como foi
 conferido — o porquê é o que falta a quem pega o código depois.
+
+- [2026-10-22] **Plano de Trabalho, item 13: só a planilha** (`plano/_editor`, `PlanoTrabalhoController`)
+  - Pedido da SCP: o campo "Descrição do plano de aplicação" repetia a planilha logo abaixo. Saiu do item 13,
+    com o "Salvar descrição" e a rota `aplicacao`. O texto livre continua sendo pedido no primeiro formulário
+    da Nova Proposta; quando há, o item 13 o mostra só para leitura ("Descrição informada ao abrir a proposta"),
+    e o documento do plano segue trazendo-o
+  - Conferido: `NovaPropostaTest` (o texto aparece, sem campo nem botão); suíte 229/229
 
 - [2026-10-22] **Plano de Trabalho: as atividades não passam do valor pleiteado** (`TemPlanoDeTrabalho::excessoNasAtividades`,
   `PlanoTrabalhoController`, `plano/_editor`)

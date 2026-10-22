@@ -25,7 +25,6 @@ class PlanoTrabalhoController extends Controller
         )->defaults('tipo', $tipo)->name($nome . '.' . $sufixo);
 
         $r('atualizar',        'put',    '',                                  'atualizar');
-        $r('atualizarAplicacao', 'put',  '/aplicacao',                        'aplicacao');
         $r('storeMeta',        'post',   '/metas',                            'metas.store');
         $r('destroyMeta',      'delete', '/metas/{meta}',                     'metas.destroy');
         $r('storeEtapa',       'post',   '/metas/{meta}/etapas',              'etapas.store');
@@ -74,16 +73,6 @@ class PlanoTrabalhoController extends Controller
         $dono->update($data);
 
         return back()->with('success', 'Plano de trabalho atualizado.');
-    }
-
-    /** O texto do plano de aplicação dos recursos (item 13), à parte da planilha de itens. */
-    public function atualizarAplicacao(Request $request): RedirectResponse
-    {
-        $this->donoEditavel($request)->update($request->validate([
-            'plano_aplicacao' => ['nullable', 'string', 'max:1000'],
-        ]));
-
-        return back()->with('success', 'Plano de aplicação atualizado.');
     }
 
     // ----------------------------------------------------------------- metas
