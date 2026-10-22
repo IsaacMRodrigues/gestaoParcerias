@@ -7,7 +7,10 @@
         <strong>Setor de Convênios e Parcerias (SCP)</strong> conferir os seus dados.
     </div>
 
-    <form method="POST" action="{{ route('register') }}" x-data="{ setor: @js(old('setor', '')) }" class="space-y-5">
+    {{-- Marcar um perfil exclusivo escolhe o setor dele; trocar o setor desmarca os exclusivos de outro. --}}
+    <form method="POST" action="{{ route('register') }}" class="space-y-5"
+          x-data="{ setor: @js(old('setor', '')), perfis: @js(array_values(old('perfis', []))), exclusivos: @js($exclusivos) }"
+          x-init="$watch('setor', s => perfis = perfis.filter(p => ! exclusivos[p] || exclusivos[p] === s))">
         @csrf
 
         <div>
@@ -69,33 +72,29 @@
             <x-input-error :messages="$errors->get('matricula')" class="mt-2" />
         </div>
 
-        {{-- Perfis do setor: a lista muda com o setor escolhido. --}}
         <div>
             <x-input-label value="O que você faz no sistema" />
-            <p class="text-xs text-gray-500 mt-1" x-show="! setor">Escolha o setor para ver os perfis.</p>
-            @foreach($perfisPorSetor as $setor => $perfis)
-                @php
-                    // O responsável do setor (o secretário, na UG) vem primeiro.
-                    $responsavel = \App\Models\User::RESPONSAVEL_DO_SETOR[$setor] ?? null;
-                    $perfis = collect($perfis)->sortBy(fn ($r, $slug) => $slug === $responsavel ? 0 : 1);
-                @endphp
-                <template x-if="setor === @js($setor)">
-                    <div class="mt-2 grid sm:grid-cols-2 gap-x-4 gap-y-2">
-                        @foreach($perfis as $slug => $rotulo)
-                            <label class="flex items-start gap-2.5 text-sm text-gray-700 cursor-pointer">
-                                <input type="checkbox" name="perfis[]" value="{{ $slug }}" @checked(in_array($slug, old('perfis', []), true))
-                                       class="mt-0.5 rounded border-gray-300 text-brand-600 shadow-sm focus:ring-brand-500">
-                                <span>
-                                    {{ $rotulo }}
-                                    @if($slug === $responsavel)<span class="block text-xs text-gray-500">o secretário ou responsável pelo setor</span>@endif
+            <div class="mt-2 grid sm:grid-cols-2 gap-x-4 gap-y-2">
+                @foreach($perfis as $slug => $rotulo)
+                    @php $exclusivo = $exclusivos[$slug] ?? null; @endphp
+                    <label class="flex items-start gap-2.5 text-sm text-gray-700 cursor-pointer">
+                        <input type="checkbox" name="perfis[]" value="{{ $slug }}" x-model="perfis"
+                               @if($exclusivo) @change="if ($event.target.checked) setor = @js($exclusivo)" @endif
+                               class="mt-0.5 rounded border-gray-300 text-brand-600 shadow-sm focus:ring-brand-500">
+                        <span>
+                            {{ $rotulo }}
+                            @if($exclusivo)
+                                <span class="block text-xs text-accent-700">
+                                    {{ $exclusivo === 'ug' ? 'exclusivo do secretário (Unidade Gestora)' : 'exclusivo: ' . (\App\Models\User::LOTACOES[$exclusivo] ?? $exclusivo) }}
                                 </span>
-                            </label>
-                        @endforeach
-                    </div>
-                </template>
-            @endforeach
-            <p class="text-xs text-gray-500 mt-2" x-show="setor">
-                Gestor da Parceria e as Comissões são encargos por portaria: peça só se já foi designado.
+                            @endif
+                        </span>
+                    </label>
+                @endforeach
+            </div>
+            <p class="text-xs text-gray-500 mt-2">
+                Marcar um perfil exclusivo escolhe o setor dele. Gestor da Parceria e as Comissões são encargos por
+                portaria: peça só se já foi designado.
             </p>
             <x-input-error :messages="$errors->get('perfis')" class="mt-2" />
             <x-input-error :messages="$errors->get('perfis.*')" class="mt-1" />

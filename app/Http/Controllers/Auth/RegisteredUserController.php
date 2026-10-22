@@ -23,9 +23,12 @@ class RegisteredUserController extends Controller
         // OSC tem fluxo próprio pelo portal; aqui é só para servidores internos.
         $setores = collect(User::LOTACOES)->except('osc');
         $orgaos  = Orgao::where('status', true)->orderBy('name')->get();
-        $perfisPorSetor = $setores->keys()->mapWithKeys(fn ($s) => [$s => User::perfisDoAutoCadastro($s)]);
+        // Uma lista só: os perfis exclusivos de um setor aparecem sempre, com o aviso, e marcá-los escolhe o setor.
+        $perfis = $setores->keys()->flatMap(fn ($s) => User::perfisDoAutoCadastro($s))
+            ->sortBy(fn ($r, $slug) => $slug === 'responsavel_unidade_gestora' ? 0 : 1)->all();
+        $exclusivos = collect(User::PERFIS_EXCLUSIVOS)->only(array_keys($perfis))->all();
 
-        return view('auth.register', compact('setores', 'orgaos', 'perfisPorSetor'));
+        return view('auth.register', compact('setores', 'orgaos', 'perfis', 'exclusivos'));
     }
 
     /**
