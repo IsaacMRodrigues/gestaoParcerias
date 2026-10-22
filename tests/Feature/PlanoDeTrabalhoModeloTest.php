@@ -71,21 +71,29 @@ class PlanoDeTrabalhoModeloTest extends TestCase
 
     public function test_meta_com_atividades_com_periodo_e_estimado(): void
     {
+        // A meta já entra com a primeira atividade; os indicadores são um campo só, à escolha da OSC.
         $this->actingAs($this->rl)->post($this->url('/metas'), [
             'objetivo_especifico' => 'Ensinar música', 'descricao' => 'Formar 30 alunos',
-            'indicador' => 'Satisfação', 'meta_quantitativa' => '30 alunos', 'resultados_esperados' => 'Alunos formados',
+            'indicador' => '30 alunos formados', 'meta_quantitativa' => 'não vem mais da tela', 'resultados_esperados' => 'Alunos formados',
             'meios_verificacao' => 'Lista de presença',
+            'atividade_descricao' => 'Aulas de violão', 'atividade_inicio' => '2026-11-01', 'atividade_fim' => '2026-12-20',
+            'atividade_valor' => '600,00',
         ])->assertSessionHasNoErrors();
         $meta = $this->plano->metas()->sole();
-        // O objetivo específico não faz parte da meta: não se grava.
+        // O objetivo específico não faz parte da meta: não se grava; o indicador quantitativo à parte também não.
         $this->assertNull($meta->objetivo_especifico);
-
-        $this->actingAs($this->rl)->post($this->url("/metas/{$meta->id}/etapas"), [
-            'descricao' => 'Aulas de violão', 'data_inicio' => '2026-11-01', 'data_fim' => '2026-12-20', 'valor' => 600,
-        ])->assertSessionHasNoErrors();
+        $this->assertNull($meta->meta_quantitativa);
+        $primeira = $meta->etapas()->sole();
+        $this->assertSame([1, 'Aulas de violão', '2026-12-20'], [$primeira->numero, $primeira->descricao, $primeira->data_fim->toDateString()]);
+        $this->assertEquals(600, $primeira->valor);
         $this->actingAs($this->rl)->post($this->url("/metas/{$meta->id}/etapas"), ['descricao' => 'Apresentação', 'valor' => 400]);
 
         $this->assertSame(1000.0, $this->plano->fresh()->load('metas.etapas')->totalDasMetas(), 'item 10: soma das atividades');
+        $this->assertSame(2, $meta->etapas()->max('numero'));
+
+        $tela = $this->actingAs($this->rl)->get("/portal/manifestacoes/{$this->plano->id}")->assertOk();
+        $tela->assertSee('Indicadores')->assertSee('Qualitativos ou quantitativos, à escolha da organização')
+            ->assertSee('name="atividade_descricao"', false)->assertDontSee('Indicadores quantitativos');
     }
 
     public function test_textos_vao_ate_mil_caracteres(): void

@@ -150,10 +150,9 @@
                             <p class="text-sm font-semibold text-gray-900">Meta {{ $meta->numero }} — {{ $meta->descricao }}</p>
                             <dl class="mt-1 grid sm:grid-cols-2 gap-x-6 gap-y-1 text-xs text-gray-600">
                                 @foreach([
-                                    'Indicadores qualitativos'  => $meta->indicador,
-                                    'Indicadores quantitativos' => $meta->meta_quantitativa,
-                                    'Resultados esperados'      => $meta->resultados_esperados,
-                                    'Meios de verificação'      => $meta->meios_verificacao,
+                                    'Indicadores'          => collect([$meta->indicador, $meta->meta_quantitativa])->filter()->implode(' · '),
+                                    'Resultados esperados' => $meta->resultados_esperados,
+                                    'Meios de verificação' => $meta->meios_verificacao,
                                 ] as $rotulo => $valor)
                                     @if($valor)
                                         <div><dt class="text-gray-400 inline">{{ $rotulo }}:</dt> <dd class="inline">{{ $valor }}</dd></div>
@@ -235,13 +234,11 @@
                     <input type="text" name="descricao" id="meta_descricao" required maxlength="1000" class="{{ $campo }}">
                     <x-input-error :messages="$errors->get('descricao')" class="mt-1" />
                 </div>
-                <div>
-                    <x-input-label for="meta_indicador" value="Indicadores qualitativos" />
+                {{-- Um campo só: qualitativos ou quantitativos, à escolha da OSC. --}}
+                <div class="sm:col-span-2">
+                    <x-input-label for="meta_indicador" value="Indicadores" />
+                    <p class="text-xs text-gray-400">Qualitativos ou quantitativos, à escolha da organização.</p>
                     <input type="text" name="indicador" id="meta_indicador" maxlength="1000" class="{{ $campo }}">
-                </div>
-                <div>
-                    <x-input-label for="meta_quantitativa" value="Indicadores quantitativos" />
-                    <input type="text" name="meta_quantitativa" id="meta_quantitativa" maxlength="1000" class="{{ $campo }}">
                 </div>
                 <div>
                     <x-input-label for="meta_resultados" value="Resultados esperados" />
@@ -250,6 +247,28 @@
                 <div>
                     <x-input-label for="meta_meios" value="Meios de verificação (comprovantes da realização)" />
                     <input type="text" name="meios_verificacao" maxlength="1000" id="meta_meios" class="{{ $campo }}">
+                </div>
+                {{-- A primeira atividade já entra com a meta; as demais, no quadro da meta. --}}
+                <div class="sm:col-span-2 grid sm:grid-cols-6 gap-2 items-end">
+                    <div class="sm:col-span-6">
+                        <x-input-label for="meta_atividade" value="Atividade" />
+                        <p class="text-xs text-gray-400">Tarefa que será executada para alcançar a meta. Depois de adicionar a meta, dá para lançar outras.</p>
+                        <input type="text" name="atividade_descricao" id="meta_atividade" maxlength="1000" class="{{ $campo }}">
+                        <x-input-error :messages="$errors->get('atividade_descricao')" class="mt-1" />
+                    </div>
+                    <div class="sm:col-span-2">
+                        <label for="meta_atividade_inicio" class="block text-xs text-gray-500">Início</label>
+                        <input type="date" name="atividade_inicio" id="meta_atividade_inicio" class="{{ $campo }}">
+                    </div>
+                    <div class="sm:col-span-2">
+                        <label for="meta_atividade_fim" class="block text-xs text-gray-500">Fim</label>
+                        <input type="date" name="atividade_fim" id="meta_atividade_fim" class="{{ $campo }}">
+                        <x-input-error :messages="$errors->get('atividade_fim')" class="mt-1" />
+                    </div>
+                    <div class="sm:col-span-2">
+                        <label class="block text-xs text-gray-500">Estimado (R$)</label>
+                        <x-input-dinheiro name="atividade_valor" id="meta_atividade_valor" class="mt-1" />
+                    </div>
                 </div>
                 <div class="sm:col-span-2">
                     <button class="btn btn-secondary btn-sm">Adicionar meta</button>

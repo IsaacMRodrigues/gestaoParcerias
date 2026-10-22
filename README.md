@@ -65,7 +65,8 @@ cópia do banco de produção).
 - 21/10: as três telas de cadastro de usuário padronizadas, o "Meus usuários" no menu da conta e o botão Voltar
   em todas as telas;
 - 22/10: a lista única de perfis do "Solicitar acesso", o aviso do Edital, a situação dos documentos do
-  Planejamento (migração `2026_10_22_100000`) e o aviso dos documentos anexados como arquivo.
+  Planejamento (migração `2026_10_22_100000`), o aviso dos documentos anexados como arquivo e o item 7 do
+  Plano de Trabalho.
 
 As ações de produção que o deploy não faz (dados e painel) estão em
 [Pendências → Produção](#produção-ação-não-código).
@@ -146,6 +147,7 @@ cada item estão no [Histórico de entregas](#histórico-de-entregas). 🚀 marc
 | 07/10 | Depois do deploy: listas só com o que é da Secretaria; R$ e vírgula em todos os campos de dinheiro; Arquivos da OSC valendo em todos os fluxos (recusa da UG trava a Celebração) |
 | 08/10 | Caixas de seleção e barra de download nos fluxos; **Arquivos da OSC preenchendo os fluxos** (documentos complementares, habilitação da dispensa e modelos com os dados da OSC); revisão do README |
 | 13/10 | Menu do portal da OSC na **barra lateral**, como o da área interna |
+| 22/10 | **Plano de Trabalho, item 7**: indicadores num campo só e a atividade junto da meta |
 | 22/10 | **Documento anexado como arquivo diz que já está salvo** |
 | 22/10 | **Planejamento diz se o documento foi salvo** e quando é a vez de encaminhar |
 | 22/10 | **Edital avisa "preenchido e salvo"** e que quem assina é a UG |
@@ -712,6 +714,17 @@ Trazer os demais cenários para `tests/Feature` é uma das [Pendências](#pendê
 
 Da mais recente para a mais antiga. Cada entrada diz o que mudou, **por quê** e como foi
 conferido — o porquê é o que falta a quem pega o código depois.
+
+- [2026-10-22] **Plano de Trabalho, item 7: indicadores num campo só e a atividade junto da meta**
+  (`PlanoTrabalhoController::storeMeta`, `plano/_editor`, `Support\PlanoDocumento`)
+  - Pedido da SCP: "faltou o campo Atividades" e "indicadores pode ser um campo só, à escolha da OSC". A nova
+    meta tem agora "Indicadores" (qualitativos ou quantitativos, à escolha da organização) no lugar dos dois
+    campos, e "Atividade" com início, fim e estimado, que entra como a atividade 1 da meta; as demais seguem
+    no quadro da meta. O documento do plano mostra uma coluna "Indicadores (qualitativos ou quantitativos)".
+    A coluna `meta_quantitativa` fica: metas antigas a mostram junto do indicador, e a prestação de contas
+    usa o indicador como quantidade prevista quando ela falta
+  - Conferido: `PlanoDeTrabalhoModeloTest` (meta com a primeira atividade, valor em R$, sem o quantitativo à
+    parte); suíte 228/228
 
 - [2026-10-22] **Documento anexado como arquivo diz que já está salvo** (`processos/peca`, `processos/_anexos`,
   `processos/show`)

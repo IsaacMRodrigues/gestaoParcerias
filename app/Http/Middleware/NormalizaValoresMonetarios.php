@@ -23,6 +23,7 @@ class NormalizaValoresMonetarios
         'valor_repasse',
         'valor_adicional',
         'valor_unitario',
+        'atividade_valor',
         'saldo_anterior',
         'outros_creditos',
         'recursos_proprios',

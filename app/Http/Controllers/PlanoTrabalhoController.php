@@ -85,15 +85,29 @@ class PlanoTrabalhoController extends Controller
     {
         $dono = $this->donoEditavel($request);
 
-        // Item 7 do modelo: meta, indicadores (qualitativos e quantitativos),
-        // resultados esperados e meios de verificação. As atividades são
-        // lançadas na própria meta.
-        $dono->criarMeta($request->validate([            'descricao'            => ['required', 'string', 'max:1000'],
+        // Item 7 do modelo: meta, indicadores (um campo, qualitativos ou quantitativos, à escolha da OSC),
+        // resultados esperados, meios de verificação e a primeira atividade; as demais, na própria meta.
+        $dados = $request->validate([
+            'descricao'            => ['required', 'string', 'max:1000'],
             'indicador'            => ['nullable', 'string', 'max:1000'],
-            'meta_quantitativa'    => ['nullable', 'string', 'max:1000'],
             'resultados_esperados' => ['nullable', 'string', 'max:1000'],
             'meios_verificacao'    => ['nullable', 'string', 'max:1000'],
-        ]));
+            'atividade_descricao'  => ['nullable', 'string', 'max:1000'],
+            'atividade_inicio'     => ['nullable', 'date'],
+            'atividade_fim'        => ['nullable', 'date', 'after_or_equal:atividade_inicio'],
+            'atividade_valor'      => ['nullable', 'numeric', 'min:0'],
+        ]);
+
+        $meta = $dono->criarMeta(collect($dados)->except(['atividade_descricao', 'atividade_inicio', 'atividade_fim', 'atividade_valor'])->all());
+        if (filled($dados['atividade_descricao'] ?? null)) {
+            $meta->etapas()->create([
+                'numero'      => 1,
+                'descricao'   => $dados['atividade_descricao'],
+                'data_inicio' => $dados['atividade_inicio'] ?? null,
+                'data_fim'    => $dados['atividade_fim'] ?? null,
+                'valor'       => $dados['atividade_valor'] ?? null,
+            ]);
+        }
 
         return back()->with('success', 'Meta adicionada.');
     }

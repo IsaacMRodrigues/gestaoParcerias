@@ -160,7 +160,7 @@ class PrestacaoContasController extends Controller
                 $pc->metas()->create([
                     'meta_id'             => $meta->id,
                     'descricao'           => $meta->descricao,
-                    'quantidade_prevista' => $meta->meta_quantitativa,
+                    'quantidade_prevista' => \Illuminate\Support\Str::limit($meta->meta_quantitativa ?: $meta->indicador, 57),
                     'ordem'               => $i,
                 ]);
             }

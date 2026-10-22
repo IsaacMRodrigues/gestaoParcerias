@@ -109,7 +109,7 @@ class PlanoDocumento
     {
         $html = '<p><strong>7 – Metas, indicadores e resultados (preencher conforme orientação abaixo)</strong></p>'
             . self::TABELA . '<thead><tr>'
-            . '<th>Metas</th><th>Atividades</th><th>Indicadores<br>Qualitativas - Quantitativas</th>'
+            . '<th>Metas</th><th>Atividades</th><th>Indicadores<br>(qualitativos ou quantitativos)</th>'
             . '<th>Resultados esperados</th><th>Meios de verificação</th>'
             . '</tr></thead><tbody>';
 
@@ -118,10 +118,8 @@ class PlanoDocumento
             $atividades = $meta->etapas->isNotEmpty()
                 ? $meta->etapas->map(fn ($a) => e($a->descricao))->implode('<br>')
                 : e($meta->atividades ?: '—');
-            $indicadores = collect([
-                $meta->indicador ? 'Qualitativos: ' . e($meta->indicador) : null,
-                $meta->meta_quantitativa ? 'Quantitativos: ' . e($meta->meta_quantitativa) : null,
-            ])->filter()->implode('<br>') ?: '—';
+            // Um campo só; metas antigas podem ter também o quantitativo, de quando eram dois.
+            $indicadores = collect([$meta->indicador, $meta->meta_quantitativa])->filter()->map(fn ($t) => e($t))->implode('<br>') ?: '—';
 
             $html .= '<tr>'
                 . '<td>' . $meta->numero . '. ' . e($meta->descricao) . '</td>'

@@ -338,11 +338,8 @@
                                     Meta {{ $meta->numero }} — {{ $meta->descricao }}
                                 </p>
                                 <div class="flex gap-4 mt-1 text-xs text-gray-500">
-                                    @if($meta->indicador)
-                                        <span>Indicador: {{ $meta->indicador }}</span>
-                                    @endif
-                                    @if($meta->meta_quantitativa)
-                                        <span>Meta: {{ $meta->meta_quantitativa }}</span>
+                                    @if($meta->indicador || $meta->meta_quantitativa)
+                                        <span>Indicadores: {{ collect([$meta->indicador, $meta->meta_quantitativa])->filter()->implode(' · ') }}</span>
                                     @endif
                                     @if($meta->data_inicio && $meta->data_fim)
                                         <span>{{ $meta->data_inicio->format('d/m/Y') }} a {{ $meta->data_fim->format('d/m/Y') }}</span>
