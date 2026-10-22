@@ -141,6 +141,24 @@
             As atividades de cada meta, com o período e o valor estimado, formam o item 10 — Cronograma de execução
             física e financeira.
         </p>
+        {{-- A soma das atividades não passa do valor pleiteado: o total à vista evita a surpresa do erro. --}}
+        @php
+            $somaAtividades = $dono->totalDasMetas();
+            $pleiteado      = (float) $dono->valor_solicitado;
+            $restante       = $pleiteado - $somaAtividades;
+        @endphp
+        @if($pleiteado > 0)
+            <p class="text-xs mb-4 {{ $restante < -0.005 ? 'text-red-700' : 'text-gray-600' }}">
+                Atividades: <strong>{{ $moeda($somaAtividades) }}</strong> de {{ $moeda($pleiteado) }} pleiteados
+                @if(abs($restante) < 0.005)
+                    — fecha com o valor pleiteado.
+                @elseif($restante > 0)
+                    — faltam {{ $moeda($restante) }}.
+                @else
+                    — passam {{ $moeda(-$restante) }} do valor pleiteado.
+                @endif
+            </p>
+        @endif
 
         <div class="space-y-4">
             @forelse($dono->metas as $meta)
@@ -213,6 +231,7 @@
                                 <label class="block text-xs text-gray-500">Estimado (R$)</label>
                                 <x-input-dinheiro name="valor" :id="'etapa_valor_' . $meta->id" class="mt-1" />
                             </div>
+                            <x-input-error :messages="$errors->get('valor_' . $meta->id)" class="sm:col-span-6" />
                             <div class="sm:col-span-6">
                                 <button class="btn btn-secondary btn-sm">Adicionar atividade</button>
                             </div>
@@ -269,6 +288,7 @@
                         <label class="block text-xs text-gray-500">Estimado (R$)</label>
                         <x-input-dinheiro name="atividade_valor" id="meta_atividade_valor" class="mt-1" />
                     </div>
+                    <x-input-error :messages="$errors->get('atividade_valor')" class="sm:col-span-6" />
                 </div>
                 <div class="sm:col-span-2">
                     <button class="btn btn-secondary btn-sm">Adicionar meta</button>

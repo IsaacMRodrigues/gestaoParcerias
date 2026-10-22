@@ -64,6 +64,13 @@ class PlanoTrabalhoController extends Controller
             'justificativa'         => ['nullable', 'string', 'max:1000'],
         ]);
 
+        // O pleiteado não fica abaixo do que as atividades já somam (item 10).
+        $atividades = $dono->load('metas.etapas')->totalDasMetas();
+        if ((float) $data['valor_solicitado'] + 0.01 < $atividades) {
+            return back()->withErrors(['valor_solicitado' => 'As atividades das metas já somam R$ '
+                . number_format($atividades, 2, ',', '.') . ': o valor pleiteado não pode ficar abaixo disso.'])->withInput();
+        }
+
         $dono->update($data);
 
         return back()->with('success', 'Plano de trabalho atualizado.');
@@ -98,6 +105,10 @@ class PlanoTrabalhoController extends Controller
             'atividade_valor'      => ['nullable', 'numeric', 'min:0'],
         ]);
 
+        if (filled($dados['atividade_descricao'] ?? null) && ($erro = $dono->excessoNasAtividades((float) ($dados['atividade_valor'] ?? 0)))) {
+            return back()->withErrors(['atividade_valor' => $erro])->withInput();
+        }
+
         $meta = $dono->criarMeta(collect($dados)->except(['atividade_descricao', 'atividade_inicio', 'atividade_fim', 'atividade_valor'])->all());
         if (filled($dados['atividade_descricao'] ?? null)) {
             $meta->etapas()->create([
@@ -128,12 +139,17 @@ class PlanoTrabalhoController extends Controller
 
         // Atividade da meta, com o período e o estimado do item 10 do modelo
         // (cronograma de execução física e financeira).
-        $meta->etapas()->create($request->validate([
+        $dados = $request->validate([
             'descricao'   => ['required', 'string', 'max:1000'],
             'data_inicio' => ['nullable', 'date'],
             'data_fim'    => ['nullable', 'date', 'after_or_equal:data_inicio'],
             'valor'       => ['nullable', 'numeric', 'min:0'],
-        ]) + ['numero' => (int) $meta->etapas()->max('numero') + 1]);
+        ]);
+        if ($erro = $dono->excessoNasAtividades((float) ($dados['valor'] ?? 0))) {
+            return back()->withErrors(['valor_' . $meta->id => $erro])->withInput();
+        }
+
+        $meta->etapas()->create($dados + ['numero' => (int) $meta->etapas()->max('numero') + 1]);
 
         return back()->with('success', 'Atividade adicionada.');
     }

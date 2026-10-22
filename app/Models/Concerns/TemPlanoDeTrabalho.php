@@ -67,6 +67,25 @@ trait TemPlanoDeTrabalho
         return (float) $this->metas->sum(fn (Meta $m) => $m->valorEstimado());
     }
 
+    /**
+     * As atividades não passam do valor pleiteado: o erro, se o acréscimo passar; null, se cabe.
+     * Sem valor pleiteado ainda, não há teto a conferir.
+     */
+    public function excessoNasAtividades(float $acrescimo): ?string
+    {
+        $pleiteado = (float) $this->valor_solicitado;
+        $atual     = $this->load('metas.etapas')->totalDasMetas();
+
+        if ($pleiteado <= 0 || $atual + $acrescimo <= $pleiteado + 0.01) {
+            return null;
+        }
+
+        $moeda = fn (float $v) => 'R$ ' . number_format($v, 2, ',', '.');
+
+        return 'As atividades somariam ' . $moeda($atual + $acrescimo) . ', acima do valor pleiteado (' . $moeda($pleiteado)
+            . '). Cabe ' . $moeda(max(0, $pleiteado - $atual)) . ' a mais.';
+    }
+
     /** Item 9: o valor de cada natureza, das 12 do modelo, somado do plano de aplicação. */
     public function naturezasDaDespesa(): array
     {

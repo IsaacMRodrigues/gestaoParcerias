@@ -218,4 +218,34 @@ class PlanoDeTrabalhoModeloTest extends TestCase
         $this->assertStringNotContainsString('Endereços de execução', $html);
         $this->assertStringNotContainsString('Contrapartida da OSC', $html);
     }
+
+    public function test_atividades_nao_passam_do_valor_pleiteado(): void
+    {
+        $this->plano->forceFill(['valor_solicitado' => 1000])->save();
+        $this->actingAs($this->rl)->post($this->url('/metas'), ['descricao' => 'Meta 1',
+            'atividade_descricao' => 'teste 1', 'atividade_valor' => '600,00'])->assertSessionHasNoErrors();
+        $meta = $this->plano->metas()->sole();
+        $this->actingAs($this->rl)->post($this->url("/metas/{$meta->id}/etapas"), ['descricao' => 'teste 2', 'valor' => '300,00'])
+            ->assertSessionHasNoErrors();
+
+        // A terceira passaria de R$ 1.000,00: barrada, com o quanto ainda cabe.
+        $this->actingAs($this->rl)->post($this->url("/metas/{$meta->id}/etapas"), ['descricao' => 'teste 3', 'valor' => '200,00'])
+            ->assertSessionHasErrors(['valor_' . $meta->id => 'As atividades somariam R$ 1.100,00, acima do valor pleiteado (R$ 1.000,00). Cabe R$ 100,00 a mais.']);
+        $this->assertSame(2, $meta->etapas()->count());
+        // Nova meta com atividade acima do que cabe também não entra.
+        $this->actingAs($this->rl)->post($this->url('/metas'), ['descricao' => 'Meta 2',
+            'atividade_descricao' => 'outra', 'atividade_valor' => '150,00'])->assertSessionHasErrors('atividade_valor');
+        $this->assertSame(1, $this->plano->metas()->count());
+
+        // O que cabe entra, e a tela mostra o total.
+        $this->actingAs($this->rl)->post($this->url("/metas/{$meta->id}/etapas"), ['descricao' => 'teste 3', 'valor' => '100,00'])
+            ->assertSessionHasNoErrors();
+        $this->actingAs($this->rl)->get("/portal/manifestacoes/{$this->plano->id}")->assertOk()
+            ->assertSee('R$ 1.000,00</strong> de R$ 1.000,00 pleiteados', false)->assertSee('fecha com o valor pleiteado');
+
+        // E o pleiteado não desce abaixo das atividades.
+        $this->actingAs($this->rl)->put($this->url(), ['titulo' => 'Oficinas', 'objeto' => 'Aulas', 'valor_solicitado' => '900,00'])
+            ->assertSessionHasErrors('valor_solicitado');
+        $this->assertEquals(1000, $this->plano->fresh()->valor_solicitado);
+    }
 }

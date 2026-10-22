@@ -66,7 +66,7 @@ cópia do banco de produção).
   em todas as telas;
 - 22/10: a lista única de perfis do "Solicitar acesso", o aviso do Edital, a situação dos documentos do
   Planejamento (migração `2026_10_22_100000`), o aviso dos documentos anexados como arquivo e o item 7 do
-  Plano de Trabalho.
+  Plano de Trabalho e o teto das atividades no valor pleiteado.
 
 As ações de produção que o deploy não faz (dados e painel) estão em
 [Pendências → Produção](#produção-ação-não-código).
@@ -147,6 +147,7 @@ cada item estão no [Histórico de entregas](#histórico-de-entregas). 🚀 marc
 | 07/10 | Depois do deploy: listas só com o que é da Secretaria; R$ e vírgula em todos os campos de dinheiro; Arquivos da OSC valendo em todos os fluxos (recusa da UG trava a Celebração) |
 | 08/10 | Caixas de seleção e barra de download nos fluxos; **Arquivos da OSC preenchendo os fluxos** (documentos complementares, habilitação da dispensa e modelos com os dados da OSC); revisão do README |
 | 13/10 | Menu do portal da OSC na **barra lateral**, como o da área interna |
+| 22/10 | **As atividades do plano não passam do valor pleiteado** |
 | 22/10 | **Plano de Trabalho, item 7**: indicadores num campo só e a atividade junto da meta |
 | 22/10 | **Documento anexado como arquivo diz que já está salvo** |
 | 22/10 | **Planejamento diz se o documento foi salvo** e quando é a vez de encaminhar |
@@ -596,7 +597,7 @@ Procedimento:
 
 ## Verificação
 
-`php artisan test` (sqlite em memória) roda **228 testes** em `tests/Feature`, um arquivo por regra de
+`php artisan test` (sqlite em memória) roda **229 testes** em `tests/Feature`, um arquivo por regra de
 negócio (quem abre qual parceria, contas e senhas, avisos por e-mail, segregação de encargos,
 cancelamento e prorrogação de chamamento, Nova Proposta, prazo e resposta de recurso, plano de
 trabalho do modelo, etapa conjunta, devolução por documento, Termo e OP em sequência, download de
@@ -714,6 +715,18 @@ Trazer os demais cenários para `tests/Feature` é uma das [Pendências](#pendê
 
 Da mais recente para a mais antiga. Cada entrada diz o que mudou, **por quê** e como foi
 conferido — o porquê é o que falta a quem pega o código depois.
+
+- [2026-10-22] **Plano de Trabalho: as atividades não passam do valor pleiteado** (`TemPlanoDeTrabalho::excessoNasAtividades`,
+  `PlanoTrabalhoController`, `plano/_editor`)
+  - Relato da SCP: com R$ 1.000,00 pleiteados, o sistema aceitou atividades de R$ 600 + 300 + 200. Só havia o
+    aviso de divergência, que não barra. Agora a atividade (no quadro da meta ou junto da nova meta) que
+    passaria do pleiteado é recusada, com o quanto ainda cabe ("As atividades somariam R$ 1.100,00, acima do
+    valor pleiteado (R$ 1.000,00). Cabe R$ 100,00 a mais."), e o pleiteado não desce abaixo do que as
+    atividades já somam. O item 7 mostra o total: "Atividades: R$ X de R$ Y pleiteados — faltam / passam /
+    fecha". Sem pleiteado informado, não há teto. O aviso de divergência continua para quando as atividades
+    ficam abaixo do pleiteado
+  - Conferido: `PlanoDeTrabalhoModeloTest::test_atividades_nao_passam_do_valor_pleiteado` (falha sem a mudança);
+    suíte 229/229
 
 - [2026-10-22] **Plano de Trabalho, item 7: indicadores num campo só e a atividade junto da meta**
   (`PlanoTrabalhoController::storeMeta`, `plano/_editor`, `Support\PlanoDocumento`)
