@@ -69,18 +69,6 @@ class OscArquivoController extends Controller
             ->with('success', OscArquivo::rotulo($tipo) . ': nova versão anexada.');
     }
 
-    /** O texto da declaração preenchido com o cadastro, para imprimir e assinar. */
-    public function declaracao(string $tipo): View
-    {
-        $osc = auth()->user()->oscVinculada();
-        abort_unless($osc && OscArquivo::ehDeclaracao($tipo), 404);
-
-        return view('portal.arquivos.declaracao', [
-            'titulo'   => OscArquivo::rotulo($tipo),
-            'conteudo' => Peca::declaracaoParaOsc($tipo, $osc),
-        ]);
-    }
-
     // ---------------------------------------------------------- Prefeitura
 
     public function daOsc(Osc $osc): View

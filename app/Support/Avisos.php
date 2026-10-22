@@ -533,31 +533,23 @@ class Avisos
         ));
     }
 
-    /** Certidão (ou balanço) de "Arquivos da OSC" perto de vencer: avisa quem cuida dos documentos da OSC. */
+    /** Certidão (ou outro documento com validade) de "Arquivos da OSC" perto de vencer: avisa quem cuida dos documentos da OSC. */
     public static function certidaoVencendo(\App\Models\OscArquivo $arquivo): void
     {
-        $balanco = $arquivo->tipo === 'balanco_patrimonial';
-        $certidao = \App\Models\OscArquivo::exigeValidade($arquivo->tipo) && ! $balanco;
+        $certidao = \App\Models\OscArquivo::exigeValidade($arquivo->tipo);
 
         self::enviar(self::daOsc($arquivo->osc_id, self::comFuncao('osc_documentos')), new Aviso(
-            assunto: ($balanco ? 'Balanço patrimonial' : ($certidao ? 'Certidão' : 'Documento')) . ' vence em ' . $arquivo->validade->format('d/m/Y'),
-            titulo: $balanco ? 'O balanço patrimonial da organização está perto de vencer'
-                : ($certidao ? 'Uma certidão da organização está perto de vencer' : 'Um documento da organização está perto de vencer'),
-            linhas: $balanco ? [
+            assunto: ($certidao ? 'Certidão' : 'Documento') . ' vence em ' . $arquivo->validade->format('d/m/Y'),
+            titulo: $certidao ? 'Uma certidão da organização está perto de vencer' : 'Um documento da organização está perto de vencer',
+            linhas: ! $certidao ? [
                 \App\Models\OscArquivo::rotulo($arquivo->tipo) . ' — válido até ' . $arquivo->validade->format('d/m/Y') . '.',
-                'Vencido, ele deixa de preencher sozinho o item da Celebração.',
-                'Envie o balanço do novo exercício em "Arquivos da OSC".',
-            ] : (! $certidao ? [
-                \App\Models\OscArquivo::rotulo($arquivo->tipo) . ' — válido até ' . $arquivo->validade->format('d/m/Y') . '.',
-                \App\Models\OscArquivo::ehComplementar($arquivo->tipo)
-                    ? 'Vencido, ele deixa de preencher sozinho o item da Celebração.'
-                    : 'Vencido, ele passa a impedir o envio de manifestação de interesse e Nova Proposta e a etapa da OSC na Celebração.',
+                'Vencido, ele passa a impedir o envio de manifestação de interesse e Nova Proposta e a etapa da OSC na Celebração.',
                 'Envie a versão atualizada em "Arquivos da OSC".',
             ] : [
                 \App\Models\OscArquivo::rotulo($arquivo->tipo) . ' — válida até ' . $arquivo->validade->format('d/m/Y') . '.',
                 'Vencida, ela passa a impedir o envio de manifestação de interesse e Nova Proposta e a etapa da OSC na Celebração.',
                 'Emita a certidão atualizada e envie a nova versão em "Arquivos da OSC".',
-            ]),
+            ],
             url: route('portal.arquivos.index'),
             botao: 'Abrir Arquivos da OSC',
         ));

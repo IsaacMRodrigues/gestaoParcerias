@@ -19,9 +19,10 @@ use Tests\Feature\Concerns\PreencheArquivosDaOsc;
 use Tests\TestCase;
 
 /**
- * O que a OSC já tem em "Arquivos da OSC" preenche os fluxos: os complementares viram o arquivo dos
- * itens iguais da Celebração; a área completa atende a habilitação da dispensa, e a verificação dela
- * já vem com o quadro dos arquivos; os modelos saem com o cadastro da OSC.
+ * O que a OSC já tem em "Arquivos da OSC" preenche os fluxos: os documentos do representante e a relação
+ * dos dirigentes viram o arquivo dos itens iguais da Celebração; a área completa atende a habilitação da
+ * dispensa, e a verificação dela já vem com o quadro dos arquivos; os modelos saem com o cadastro da OSC.
+ * Declarações, balanço e experiência prévia são da Celebração: a área não os pede.
  */
 class ArquivosDaOscPreenchemOsFluxosTest extends TestCase
 {
@@ -126,36 +127,44 @@ class ArquivosDaOscPreenchemOsFluxosTest extends TestCase
 
     public function test_o_arquivo_enviado_no_item_vale_por_cima_e_a_celebracao_concluida_nao_muda(): void
     {
-        $this->arquivo('experiencia_previa');
+        $this->arquivo('docs_presidente');
         $p = $this->celebracao();
         Peca::sincronizar($p, 'celebracao');
-        $peca = $this->peca($p, 'experiencia_previa');
+        $peca = $this->peca($p, 'docs_presidente');
 
-        $this->actingAs($this->rl)->post(route('pecas.upload', $peca), ['arquivo' => UploadedFile::fake()->create('atestados.pdf', 10)])
+        $this->actingAs($this->rl)->post(route('pecas.upload', $peca), ['arquivo' => UploadedFile::fake()->create('rg-cpf.pdf', 10)])
             ->assertSessionHasNoErrors();
-        $this->arquivo('experiencia_previa');
+        $this->arquivo('docs_presidente');
         Peca::sincronizar($p->fresh(), 'celebracao');
-        $this->assertSame('atestados.pdf', $peca->fresh()->arquivo_nome);
+        $this->assertSame('rg-cpf.pdf', $peca->fresh()->arquivo_nome);
         $this->assertFalse($peca->fresh()->vemDaAreaDaOsc());
 
-        $this->arquivo('balanco_patrimonial');
+        $this->arquivo('relacao_dirigentes');
         $p->forceFill(['celebracao_concluida_em' => now()])->save();
         Peca::sincronizar($p->fresh(), 'celebracao');
-        $this->assertFalse($this->peca($p, 'balanco_patrimonial')->temArquivo());
+        $this->assertFalse($this->peca($p, 'relacao_dirigentes')->temArquivo());
     }
 
-    public function test_balanco_vencido_nao_preenche_e_complementar_nao_e_exigido_na_area(): void
+    public function test_declaracoes_balanco_e_experiencia_sao_da_celebracao_e_nao_da_area(): void
     {
+        // A área completa não tem declaração, balanço nem experiência prévia, e não aceita esses envios.
         $this->preencherArquivosDaOsc($this->osc);
-        OscArquivo::where('osc_id', $this->osc->id)->whereIn('tipo', array_keys(OscArquivo::GRUPOS['complementares']['itens']))->delete();
         $this->assertSame([], $this->osc->fresh()->pendenciasDosArquivos());
+        foreach (['decl_art7', 'balanco_patrimonial', 'experiencia_previa'] as $tipo) {
+            $this->assertArrayNotHasKey($tipo, OscArquivo::tipos());
+        }
+        $this->actingAs($this->rl)->get('/portal/arquivos')->assertOk()
+            ->assertDontSee('Documentos complementares')->assertDontSee('Texto para assinar')->assertDontSee('Declaração de autenticidade');
 
-        $this->arquivo('balanco_patrimonial', ['validade' => now()->subDay()->toDateString()]);
-        $this->assertSame([], $this->osc->fresh()->pendenciasDosArquivos());
-
+        // Na Celebração, cada um é item da OSC, e nada vem pronto da área.
         $p = $this->celebracao();
         Peca::sincronizar($p, 'celebracao');
-        $this->assertFalse($this->peca($p, 'balanco_patrimonial')->temArquivo());
+        foreach (['decl_art7', 'decl_art33', 'decl_art34', 'decl_art39', 'decl_art45', 'decl_autenticidade', 'balanco_patrimonial', 'experiencia_previa'] as $chave) {
+            $peca = $this->peca($p, $chave);
+            $this->assertFalse($peca->vemDaAreaDaOsc(), $chave);
+            $this->assertFalse($peca->concluida(), $chave);
+        }
+        $this->assertStringContainsString('Associação Viver', $this->peca($p, 'decl_art7')->conteudo, 'a declaração sai com o cadastro');
     }
 
     public function test_a_area_completa_atende_a_habilitacao_da_dispensa_e_a_verificacao_vem_com_o_quadro(): void

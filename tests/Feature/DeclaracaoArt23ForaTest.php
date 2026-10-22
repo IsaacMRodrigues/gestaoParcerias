@@ -30,8 +30,8 @@ class DeclaracaoArt23ForaTest extends TestCase
 
         $chaves = $proposta->pecas()->pluck('chave');
         $this->assertNotContains('decl_art23', $chaves);
-        // As demais foram para "Arquivos da OSC" (30/09/2026): também não estão no checklist.
-        $this->assertNotContains('decl_art7', $chaves);
+        // As demais declarações são da Celebração, não de "Arquivos da OSC": estão no checklist.
+        $this->assertContains('decl_art7', $chaves);
         $this->assertNull(Peca::modeloTexto('celebracao', 'decl_art23'));
     }
 }

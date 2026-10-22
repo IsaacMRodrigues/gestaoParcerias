@@ -72,7 +72,6 @@ Route::middleware(['auth', 'osc'])->group(function () {
     // função de documentos (conferida no controller).
     Route::get('/portal/arquivos', [OscArquivoController::class, 'index'])->name('portal.arquivos.index');
     Route::post('/portal/arquivos/{tipo}', [OscArquivoController::class, 'store'])->name('portal.arquivos.store');
-    Route::get('/portal/arquivos/{tipo}/declaracao', [OscArquivoController::class, 'declaracao'])->name('portal.arquivos.declaracao');
 
     /*
      * Ver é de toda a equipe da OSC; agir, de quem tem a função marcada (User::FUNCOES_OSC).

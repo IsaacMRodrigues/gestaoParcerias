@@ -17,7 +17,10 @@ class OscArquivo extends Model
     /** Avisa a OSC por e-mail esta quantidade de dias antes de a certidão vencer. */
     public const DIAS_AVISO_VENCIMENTO = 7;
 
-    /** Grupos e documentos. Certidões e balanço têm validade; declarações têm texto-modelo; complementares são opcionais. */
+    /**
+     * Grupos e documentos: certidões (com validade) e os institucionais. As declarações e os documentos
+     * complementares (balanço, experiência prévia) são da Celebração, não se exigem antes dela.
+     */
     public const GRUPOS = [
         'certidoes' => [
             'rotulo' => 'CND — Certidões negativas',
@@ -36,24 +39,6 @@ class OscArquivo extends Model
                 'docs_presidente'    => 'Cópia simples do RG, CPF e comprovante de endereço do representante legal',
                 'cartao_cnpj'        => 'Comprovante de inscrição no CNPJ, emitido no sítio eletrônico oficial da Receita Federal do Brasil (cadastro ativo há, no mínimo, três anos)',
                 'relacao_dirigentes' => 'Relação nominal atualizada dos dirigentes, conforme o estatuto, com endereço, telefone, e-mail, número e órgão expedidor da carteira de identidade e número de registro',
-            ],
-        ],
-        'declaracoes' => [
-            'rotulo' => 'Declarações',
-            'itens'  => [
-                'decl_art7'          => 'Declaração — art. 7º, XXXIII, CF/88 (não emprega menor)',
-                'decl_art33'         => 'Declaração — art. 33, V, "c", Lei 13.019/2014 (condições materiais)',
-                'decl_art34'         => 'Declaração — art. 34, VII, Lei 13.019/2014 (sede e tempo de existência)',
-                'decl_art39'         => 'Declaração do representante legal de que a organização e seus dirigentes não incorrem em vedações (art. 39, Lei 13.019/2014)',
-                'decl_art45'         => 'Declaração — art. 45, Lei 13.019/2014 (vedações de remuneração)',
-                'decl_autenticidade' => 'Declaração de autenticidade dos documentos',
-            ],
-        ],
-        'complementares' => [
-            'rotulo' => 'Documentos complementares',
-            'itens'  => [
-                'balanco_patrimonial' => 'Balanço patrimonial do exercício anterior',
-                'experiencia_previa'  => 'Comprovantes de experiência prévia (mínimo de um ano)',
             ],
         ],
     ];
@@ -79,21 +64,10 @@ class OscArquivo extends Model
         return self::tipos()[$tipo] ?? $tipo;
     }
 
-    /** Certidões e balanço: valem até uma data. */
+    /** Certidões: valem até uma data. */
     public static function exigeValidade(string $tipo): bool
     {
-        return array_key_exists($tipo, self::GRUPOS['certidoes']['itens']) || $tipo === 'balanco_patrimonial';
-    }
-
-    /** Opcional na área: quando enviado, já preenche o item igual da Celebração. */
-    public static function ehComplementar(string $tipo): bool
-    {
-        return array_key_exists($tipo, self::GRUPOS['complementares']['itens']);
-    }
-
-    public static function ehDeclaracao(string $tipo): bool
-    {
-        return array_key_exists($tipo, self::GRUPOS['declaracoes']['itens']);
+        return array_key_exists($tipo, self::GRUPOS['certidoes']['itens']);
     }
 
     public function osc(): BelongsTo

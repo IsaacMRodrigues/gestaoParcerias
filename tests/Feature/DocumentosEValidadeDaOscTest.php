@@ -49,7 +49,6 @@ class DocumentosEValidadeDaOscTest extends TestCase
         $this->assertStringContainsString('Cópia simples do RG, CPF e comprovante de endereço do representante legal (não anexado)', $pendencias);
         $this->assertStringContainsString('Comprovante de inscrição no CNPJ', $pendencias);
         $this->assertStringContainsString('Relação nominal atualizada dos dirigentes, conforme o estatuto', $pendencias);
-        $this->assertFalse(OscArquivo::ehComplementar('docs_presidente'));
 
         $this->actingAs($this->rl)->get('/portal/arquivos')->assertOk()->assertSee('Comprovante de inscrição no CNPJ');
     }

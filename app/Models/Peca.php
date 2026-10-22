@@ -102,7 +102,7 @@ class Peca extends Model
             // Itens 2 a 6, 13, 14, 16 e 17 do checklist do módulo 3.2, um a um.
             ['chave' => 'oficio_pedido',         'rotulo' => 'Memorando do pedido, assinado pelo representante legal',    'tipo' => 'arquivo', 'obrigatorio' => true],
             ['chave' => 'experiencia_previa',    'rotulo' => 'Comprovantes de experiência prévia (mínimo de um ano)',  'tipo' => 'arquivo', 'obrigatorio' => true],
-            // Certidões e declarações ficam em "Arquivos da OSC"; as peças já entregues ficam como histórico.
+            // As certidões ficam em "Arquivos da OSC"; as peças já entregues ficam como histórico.
             ['chave' => 'relacao_dirigentes',    'rotulo' => 'Relação nominal atualizada dos dirigentes',              'tipo' => 'arquivo', 'obrigatorio' => true],
             ['chave' => 'docs_presidente',       'rotulo' => 'RG, CPF e comprovante de endereço do representante legal', 'tipo' => 'arquivo', 'obrigatorio' => true],
             ['chave' => 'planilha_pessoal',      'rotulo' => 'Planilha de detalhamento de despesas de pessoal (se houver)', 'tipo' => 'arquivo', 'obrigatorio' => false],
@@ -112,7 +112,13 @@ class Peca extends Model
             // Continua existindo para o que não cabe nos itens acima — e para
             // não perder o que as parcerias antigas já anexaram aqui.
             ['chave' => 'docs_habilitacao',      'rotulo' => 'Outros documentos de habilitação',                       'tipo' => 'arquivo', 'obrigatorio' => false],
-            // As declarações da habilitação ficam em "Arquivos da OSC"; a do art. 23, XIV, não é exigida.
+            // As declarações da habilitação são da Celebração (não se exigem antes dela); a do art. 23, XIV, não é exigida.
+            ['chave' => 'decl_art7',             'rotulo' => 'Declaração — art. 7º, XXXIII, CF/88 (não emprega menor)',                 'tipo' => 'modelo', 'obrigatorio' => true],
+            ['chave' => 'decl_art33',            'rotulo' => 'Declaração — art. 33, V, "c", Lei 13.019/2014 (condições materiais)',     'tipo' => 'modelo', 'obrigatorio' => true],
+            ['chave' => 'decl_art34',            'rotulo' => 'Declaração — art. 34, VII, Lei 13.019/2014 (sede e tempo de existência)', 'tipo' => 'modelo', 'obrigatorio' => true],
+            ['chave' => 'decl_art39',            'rotulo' => 'Declaração do representante legal de que a organização e seus dirigentes não incorrem em vedações (art. 39, Lei 13.019/2014)', 'tipo' => 'modelo', 'obrigatorio' => true],
+            ['chave' => 'decl_art45',            'rotulo' => 'Declaração — art. 45, Lei 13.019/2014 (vedações de remuneração)',         'tipo' => 'modelo', 'obrigatorio' => true],
+            ['chave' => 'decl_autenticidade',    'rotulo' => 'Declaração de autenticidade dos documentos',                              'tipo' => 'modelo', 'obrigatorio' => true],
             ['chave' => 'aprovacao_plano',       'rotulo' => 'Aprovação do Plano de Trabalho (modelo padrão)',         'tipo' => 'modelo',  'obrigatorio' => true],
             ['chave' => 'pedido_parecer',        'rotulo' => 'Pedido de Parecer Financeiro (modelo padrão)',           'tipo' => 'modelo',  'obrigatorio' => true],
             ['chave' => 'parecer_financeiro',    'rotulo' => 'Parecer Financeiro (modelo padrão)',                     'tipo' => 'modelo',  'obrigatorio' => true],
@@ -480,8 +486,6 @@ class Peca extends Model
     public const DA_AREA_DA_OSC = [
         'docs_presidente'     => 'docs_presidente',
         'relacao_dirigentes'  => 'relacao_dirigentes',
-        'balanco_patrimonial' => 'balanco_patrimonial',
-        'experiencia_previa'  => 'experiencia_previa',
     ];
 
     /** Itens que a área inteira, completa e em dia, já atende. */
@@ -2023,7 +2027,7 @@ HTML,
         return $peca->tipo === 'modelo' ? $origem->assinado() : $origem->temAnexo();
     }
 
-    /** Quadro dos arquivos da área da OSC para a verificação da habilitação: os exigidos e os complementares enviados. */
+    /** Quadro dos arquivos da área da OSC para a verificação da habilitação. */
     private static function quadroDosArquivosDaOsc(Osc $osc): string
     {
         $atuais = $osc->arquivosAtuais();
@@ -2031,9 +2035,6 @@ HTML,
 
         foreach (OscArquivo::tipos() as $tipo => $rotulo) {
             $a = $atuais[$tipo] ?? null;
-            if (!$a && OscArquivo::ehComplementar($tipo)) {
-                continue;
-            }
 
             $situacao = !$a ? 'Não anexado'
                 : 'Versão ' . $a->versao . ', enviada em ' . $a->created_at->format('d/m/Y')
@@ -2132,33 +2133,6 @@ HTML,
         $tokens += $daAlteracao;
 
         return array_map(fn ($v) => filled($v) ? $v : 'XXXXX', $tokens);
-    }
-
-    /** Declaração preenchida com o cadastro, para imprimir, assinar e anexar em "Arquivos da OSC". */
-    public static function declaracaoParaOsc(string $chave, Osc $osc): ?string
-    {
-        $bruto = self::MODELO['celebracao'][$chave] ?? null;
-        if ($bruto === null) {
-            return null;
-        }
-
-        $tokens = [
-            'cidade'       => 'São Gonçalo do Rio Abaixo',
-            'data'         => now()->format('d/m/Y'),
-            'ano'          => now()->year,
-            'data_extenso' => now()->locale('pt_BR')->translatedFormat('j \\d\\e F \\d\\e Y'),
-            'favorecido'   => $osc->name,
-        ] + self::tokensDaOsc($osc);
-
-        $html = \App\Support\Modelo::preencher($bruto, array_map(fn ($v) => filled($v) ? $v : 'XXXXX', $tokens));
-
-        // Vai ser impressa e assinada à mão: o bloco do representante ganha a linha de assinatura.
-        return preg_replace(
-            '#<p style="text-align:center"><br>(.*?)</p>#s',
-            '<p style="text-align:center;margin-top:3.5em"><span style="display:inline-block;min-width:20em;border-top:1px solid #111;padding-top:.3em">$1</span></p>',
-            $html,
-            1
-        );
     }
 
     /**

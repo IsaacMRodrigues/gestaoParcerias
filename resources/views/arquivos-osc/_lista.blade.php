@@ -23,8 +23,6 @@
     $descricoes = [
         'certidoes'      => 'Com data de validade. Um aviso chega por e-mail ' . \App\Models\OscArquivo::DIAS_AVISO_VENCIMENTO . ' dias antes de vencer.',
         'institucionais' => 'Estatuto, ata de eleição da diretoria atual, documentos do representante legal, comprovante de inscrição no CNPJ e relação dos dirigentes.',
-        'declaracoes'    => 'Abra o texto já preenchido com o cadastro, imprima, assine e anexe.',
-        'complementares' => 'Opcionais. Enviados aqui, já preenchem os itens iguais da Celebração de cada parceria. O balanço tem validade.',
     ];
     $acao = 'inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold cursor-pointer select-none transition marker:content-none';
     $seta = '<svg class="w-3.5 h-3.5 transition group-open:rotate-90" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.6"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/></svg>';
@@ -172,10 +170,6 @@
                                             </form>
                                         </details>
 
-                                        @if(\App\Models\OscArquivo::ehDeclaracao($tipo))
-                                            <a href="{{ route('portal.arquivos.declaracao', $tipo) }}" target="_blank"
-                                               class="{{ $acao }} text-gray-600 bg-gray-100 hover:bg-gray-200">Texto para assinar</a>
-                                        @endif
                                     @endif
 
                                     @if($historico->count() > 1 || ($historico->isNotEmpty() && ! $podeEditar))

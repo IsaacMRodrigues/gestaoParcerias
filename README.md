@@ -36,7 +36,7 @@ assinados eletronicamente e validáveis por QR Code.
 | **Plano de Trabalho** (3.1) — os 13 itens do modelo da cliente                                                                                     | ✅ Completo            | `PlanoTrabalhoController`, `Concerns\TemPlanoDeTrabalho`, `Support\PlanoDocumento` |
 | **3. Celebração** (2.2 / 3.2) — 21 etapas: habilitação, etapa conjunta UG + SCP, Termo e OP Global assinados em sequência, empenho            | ✅ Completo            | `CelebracaoController`, motor `Peca`, `PecaAssinatura`                             |
 | **Devolução por documento** — em todos os trâmites                                                                                              | ✅ Completo            | `Support\Devolucao`                                                                    |
-| **Arquivos da OSC** — certidões, estatuto, ata, declarações e complementares anexados uma vez, preenchendo os fluxos                            | ✅ Completo            | `OscArquivoController`, `OscArquivo`, `Peca::puxarDaAreaDaOsc`                     |
+| **Arquivos da OSC** — certidões, estatuto, ata e documentos do representante anexados uma vez, preenchendo os fluxos                           | ✅ Completo            | `OscArquivoController`, `OscArquivo`, `Peca::puxarDaAreaDaOsc`                     |
 | **Formalização** (2.3) — instrumento (nasce na conclusão da Celebração), aditivo, apostilamento, OP parcial                                   | ✅ Completo            | `Proposta::criarInstrumento`, `AditivoController`, `OrdemPagamentoController`      |
 | **Download de documentos** — PDF e ZIP em todos os fluxos, por quem pode                                                                           | ✅ Completo            | `Peca::podeBaixar`, `Support\DocumentoPdf`                                           |
 | **4. Execução** (4.4) — repasses (Prefeitura), despesas com nota (lançadas pela OSC no painel), saldo | ✅ Completo | `ExecucaoController` |
@@ -67,7 +67,8 @@ cópia do banco de produção).
 - 22/10: a lista única de perfis do "Solicitar acesso", o aviso do Edital, a situação dos documentos do
   Planejamento (migração `2026_10_22_100000`), o aviso dos documentos anexados como arquivo e o item 7 do
   Plano de Trabalho o teto das atividades no valor pleiteado o item 13 só
-  com a planilha e com as atividades vinculadas escolhidas do item 7.
+  com a planilha e com as atividades vinculadas escolhidas do item 7, e as declarações e os
+  complementares fora de Arquivos da OSC (de volta à Celebração).
 
 As ações de produção que o deploy não faz (dados e painel) estão em
 [Pendências → Produção](#produção-ação-não-código).
@@ -148,6 +149,7 @@ cada item estão no [Histórico de entregas](#histórico-de-entregas). 🚀 marc
 | 07/10 | Depois do deploy: listas só com o que é da Secretaria; R$ e vírgula em todos os campos de dinheiro; Arquivos da OSC valendo em todos os fluxos (recusa da UG trava a Celebração) |
 | 08/10 | Caixas de seleção e barra de download nos fluxos; **Arquivos da OSC preenchendo os fluxos** (documentos complementares, habilitação da dispensa e modelos com os dados da OSC); revisão do README |
 | 13/10 | Menu do portal da OSC na **barra lateral**, como o da área interna |
+| 22/10 | **Declarações e complementares saem de Arquivos da OSC** e voltam à Celebração |
 | 22/10 | **Item 13: atividades vinculadas escolhidas do item 7** |
 | 22/10 | **Plano de Trabalho, item 13: só a planilha**, sem a descrição repetida |
 | 22/10 | **As atividades do plano não passam do valor pleiteado** |
@@ -268,7 +270,7 @@ responsável legal). O visitante segue com o cabeçalho de cima.
 | **Plano de Trabalho** (`Concerns\TemPlanoDeTrabalho`) | O mesmo plano na manifestação e na proposta; no deferimento a**mesma linha** passa à proposta. O tipo de despesa é `Despesa::NATUREZAS`, o que torna o aprovado comparável ao executado                                                                                                                                                                       |
 | **Visibilidade à OSC** (`visivel_osc`)               | Cada documento carrega a marca;`Peca::INTERNAS` / `ProcessoPeca::INTERNAS` nascem fechados. Só circula documento pronto                                                                                                                                                                                                                                               |
 | **Recorte por órgão**                                 | `visiveisPara()` e `podeVerTodosOrgaos()`: quem é lotado numa Secretaria vê só o que é dela — nas telas, nas listas, na busca e no painel; SCP, SEPLAN, PJ, TI e auditoria veem tudo                                                                                                                                                                                                                             |
-| **Arquivos da OSC** (`OscArquivo`) | Certidões, estatuto, ata, declarações e documentos complementares, anexados uma vez e versionados. Exigidos para manifestação, Nova Proposta, inscrição e a etapa da OSC na Celebração; a UG os analisa em cada parceria; os complementares já preenchem os itens iguais da Celebração (`Peca::puxarDaAreaDaOsc`) |
+| **Arquivos da OSC** (`OscArquivo`) | Certidões e documentos institucionais (estatuto, ata, documentos do representante, CNPJ, relação dos dirigentes), anexados uma vez e versionados. Exigidos para manifestação, Nova Proposta, inscrição e a etapa da OSC na Celebração; a UG os analisa em cada parceria; os do representante e a relação dos dirigentes já preenchem os itens iguais da Celebração (`Peca::puxarDaAreaDaOsc`). As declarações, o balanço e a experiência prévia são da Celebração |
 | **Download** (`Peca::podeBaixar`, `Support\DocumentoPdf`) | Cada documento em PDF (texto) ou no arquivo original, e vários num ZIP pelas caixas de seleção. A SCP baixa tudo; a UG, o da sua Secretaria; a OSC, o que está aberto a ela |
 
 ---
@@ -448,7 +450,9 @@ não tinha botão para devolver. Beco sem saída: ninguém no sistema podia movi
 ### Documentos da OSC: a OSC apresenta, o município confere
 
 **Arquivos da OSC** (desde 01/10/2026) é onde ficam os documentos da organização — certidões com validade,
-estatuto, ata de eleição, as seis declarações e os complementares. Cada envio é uma versão; a certidão vencida
+estatuto, ata de eleição, documentos do representante legal, comprovante do CNPJ e relação dos dirigentes. As
+seis declarações, o balanço patrimonial e a experiência prévia **não** ficam aqui: são da Celebração, porque
+não se exigem antes dela (22/10/2026). Cada envio é uma versão; a certidão vencida
 e o que faltar travam a manifestação, a Nova Proposta, a inscrição no chamamento e a etapa da OSC na
 Celebração. A UG analisa cada arquivo **em cada parceria** (etapa 3 da Celebração); recusado, a OSC é avisada e
 só avança com nova versão. A Alteração e o Aditivo usam a mesma área.
@@ -718,6 +722,18 @@ Trazer os demais cenários para `tests/Feature` é uma das [Pendências](#pendê
 
 Da mais recente para a mais antiga. Cada entrada diz o que mudou, **por quê** e como foi
 conferido — o porquê é o que falta a quem pega o código depois.
+
+- [2026-10-22] **Declarações e documentos complementares saem de Arquivos da OSC e voltam à Celebração**
+  (`OscArquivo::GRUPOS`, `Peca::TEMPLATES['celebracao']`, `Peca::DA_AREA_DA_OSC`)
+  - Pedido da SCP: "essas declarações não são nos arquivos, é na fase de celebração; não posso exigir antes da
+    celebração; retira Declarações e Documentos complementares". A área fica com as certidões e os documentos
+    institucionais, e só eles pesam na manifestação, na Nova Proposta, na inscrição e na etapa da OSC na
+    Celebração. As seis declarações voltam ao checklist da Celebração (etapa da OSC, texto já preenchido com o
+    cadastro, assinadas pelo responsável legal); o balanço e a experiência prévia continuam itens da Celebração,
+    agora sem vir preenchidos da área. Saíram o "Texto para assinar" da área (rota e tela) e o aviso de
+    vencimento do balanço. Os arquivos que as OSCs já tinham enviado desses tipos ficam guardados, fora da tela
+  - Conferido: `ArquivosDaOscPreenchemOsFluxosTest::test_declaracoes_balanco_e_experiencia_sao_da_celebracao_e_nao_da_area`,
+    `ArquivosDaOscTest`, `DeclaracaoArt23ForaTest`; suíte 230/230
 
 - [2026-10-22] **Plano de Trabalho, item 13: atividades vinculadas escolhidas do item 7** (`PlanoTrabalhoController::storeItem`,
   `plano/_editor`)

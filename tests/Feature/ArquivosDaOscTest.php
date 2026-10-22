@@ -73,7 +73,7 @@ class ArquivosDaOscTest extends TestCase
     public function test_a_osc_anexa_uma_vez_e_cada_envio_e_uma_versao(): void
     {
         $this->actingAs($this->rl)->get('/portal/arquivos')->assertOk()
-            ->assertSee('CND — Certidões negativas')->assertSee('Declarações')->assertSee('Não anexado')->assertSee('Enviar arquivo');
+            ->assertSee('CND — Certidões negativas')->assertDontSee('Documentos complementares')->assertSee('Não anexado')->assertSee('Enviar arquivo');
 
         $this->enviar('cndt')->assertSessionHasErrors('validade');
         $this->enviar('cndt', ['validade' => now()->subDay()->toDateString()])->assertSessionHasErrors('validade');
@@ -100,17 +100,12 @@ class ArquivosDaOscTest extends TestCase
         ])->assertForbidden();
     }
 
-    public function test_a_declaracao_vem_preenchida_com_o_cadastro(): void
+    public function test_as_declaracoes_nao_sao_da_area(): void
     {
-        $this->actingAs($this->rl)->get('/portal/arquivos/decl_art7/declaracao')->assertOk()
-            ->assertSee('Associação Viver')->assertSee('Maria Presidente');
-        $this->actingAs($this->rl)->get('/portal/arquivos/estatuto/declaracao')->assertNotFound();
-
-        // Impressa para assinar à mão: toda declaração traz a linha de assinatura.
-        foreach (array_keys(OscArquivo::GRUPOS['declaracoes']['itens']) as $tipo) {
-            $this->actingAs($this->rl)->get("/portal/arquivos/{$tipo}/declaracao")
-                ->assertSee('border-top:1px solid #111', false);
-        }
+        // Ficam na Celebração: a área não as tem, nem o texto para assinar.
+        $this->actingAs($this->rl)->get('/portal/arquivos/decl_art7/declaracao')->assertNotFound();
+        $this->actingAs($this->rl)->post('/portal/arquivos/decl_art7', ['arquivo' => UploadedFile::fake()->create('d.pdf', 10, 'application/pdf')])
+            ->assertNotFound();
     }
 
     public function test_area_incompleta_ou_certidao_vencida_impede_o_envio_da_manifestacao(): void
@@ -140,7 +135,7 @@ class ArquivosDaOscTest extends TestCase
 
         $chaves = $proposta->pecas()->pluck('chave');
         $this->assertNotContains('certidoes_habilitacao', $chaves);
-        $this->assertNotContains('decl_art39', $chaves);
+        $this->assertContains('decl_art39', $chaves, 'as declarações são da Celebração');
         $this->assertNotEmpty(array_filter($proposta->fresh()->pendenciasCelebracao(), fn ($p) => str_starts_with($p, 'Arquivos da OSC:')));
 
         $this->preencherArquivosDaOsc($this->osc);
