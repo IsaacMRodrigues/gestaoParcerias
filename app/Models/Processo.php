@@ -318,7 +318,7 @@ class Processo extends Model
                 if (!$this->peca('justificativa_dispensa')?->assinado()) $pend[] = 'Justificativa de Dispensa/Inexigibilidade';
             } else {
                 $edital = $this->peca('edital');
-                if (empty($edital?->conteudo) || $edital->devolvida()) $pend[] = 'Edital (elaborar' . ($edital?->devolvida() ? ' — devolvido para correção' : '') . ')';
+                if (!$edital?->foiEditado() || empty($edital->conteudo) || $edital->devolvida()) $pend[] = 'Edital (elaborar e salvar' . ($edital?->devolvida() ? ' — devolvido para correção' : '') . ')';
             }
         } elseif ($this->etapa === 6 && !$ehDispensa) {
             if (!$this->peca('edital')?->assinado())              $pend[] = 'Edital (assinatura da UG)';

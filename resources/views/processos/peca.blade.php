@@ -25,12 +25,11 @@
                     Assinado por {{ $peca->assinanteNome() }} em {{ $peca->assinado_em->format('d/m/Y H:i') }}.
                 </div>
             {{-- Quem preenche não assina (o Edital: a SCP elabora, a UG assina): sem o aviso, salvar parecia não dar em nada. --}}
-            @elseif($podeEditar && !empty($peca->conteudo)
-                    && ($peca->setorAssinatura() !== $peca->setorResponsavel() || $peca->etapaAssinatura() !== $peca->etapaDesignada()))
+            @elseif($podeEditar && $peca->foiEditado() && $peca->assinadoPorOutraEtapa())
                 <div class="bg-brand-50 border border-brand-200 text-brand-800 px-4 py-3 rounded-lg text-sm">
-                    <strong>Preenchido e salvo.</strong>
+                    <strong>Preenchido e salvo em {{ $peca->editado_em->format('d/m/Y H:i') }}.</strong>
                     Quem assina é a {{ \App\Models\Processo::SETORES[$peca->setorAssinatura()] ?? $peca->setorAssinatura() }}, na etapa seguinte:
-                    quando terminar, <a href="{{ route('processos.show', $processo) }}" class="font-semibold underline">volte ao processo</a> e encaminhe.
+                    quando terminar, <a href="{{ route('processos.show', $processo) }}#acao" class="font-semibold underline">volte ao processo</a> e encaminhe.
                 </div>
             @elseif($podeAssinar && !$podeEditar)
                 <div class="bg-slate-50 border border-slate-200 text-slate-800 px-4 py-3 rounded-lg text-sm">

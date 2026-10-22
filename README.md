@@ -62,7 +62,7 @@ Comissão de Monitoramento e Avaliação única (commit `f183edd`, 2 migrações
 cópia do banco de produção).
 
 **No GitHub e ainda fora da produção** (sobem só quando pedido): as três telas de cadastro de usuário
-padronizadas o "Meus usuários" no menu da conta o botão Voltar em todas as telas (21/10) a lista única de perfis do "Solicitar acesso" e o aviso do Edital (22/10), sem migração.
+padronizadas o "Meus usuários" no menu da conta o botão Voltar em todas as telas (21/10) a lista única de perfis do "Solicitar acesso" o aviso do Edital e a situação dos documentos do Planejamento (22/10, migração `2026_10_22_100000`).
 
 As ações de produção que o deploy não faz (dados e painel) estão em
 [Pendências → Produção](#produção-ação-não-código).
@@ -143,6 +143,7 @@ cada item estão no [Histórico de entregas](#histórico-de-entregas). 🚀 marc
 | 07/10 | Depois do deploy: listas só com o que é da Secretaria; R$ e vírgula em todos os campos de dinheiro; Arquivos da OSC valendo em todos os fluxos (recusa da UG trava a Celebração) |
 | 08/10 | Caixas de seleção e barra de download nos fluxos; **Arquivos da OSC preenchendo os fluxos** (documentos complementares, habilitação da dispensa e modelos com os dados da OSC); revisão do README |
 | 13/10 | Menu do portal da OSC na **barra lateral**, como o da área interna |
+| 22/10 | **Planejamento diz se o documento foi salvo** e quando é a vez de encaminhar |
 | 22/10 | **Edital avisa "preenchido e salvo"** e que quem assina é a UG |
 | 22/10 | **"Solicitar acesso" com todos os perfis**: os exclusivos aparecem sempre, com aviso |
 | 21/10 | **Botão Voltar em todas as telas**, menos nos inícios |
@@ -707,6 +708,21 @@ Trazer os demais cenários para `tests/Feature` é uma das [Pendências](#pendê
 
 Da mais recente para a mais antiga. Cada entrada diz o que mudou, **por quê** e como foi
 conferido — o porquê é o que falta a quem pega o código depois.
+
+- [2026-10-22] **Planejamento: a tela diz se o documento foi salvo e quando é a vez de encaminhar**
+  (`ProcessoPeca::foiEditado`, `Processo::pendenciasParaAvancar`, `processos/show`; migração `2026_10_22_100000`)
+  - Relato da SCP: "não salva o Edital, não consigo prosseguir". Salvava: o problema era a tela. Os documentos
+    nascem com o texto-modelo, então a lista dizia "Preenchido — não assinado" desde a abertura, e depois de
+    salvar nada mudava; o aviso de bloqueio dizia "Assine antes de encaminhar" mesmo quando faltava elaborar; e
+    nada dizia que, salvo o Edital, a vez era de encaminhar à UG
+  - Agora o documento guarda quando foi salvo por alguém (`editado_em`). A lista mostra "Modelo — ainda não
+    editado", depois "Preenchido em dd/mm hh:mm — a Unidade Gestora assina na etapa seguinte" (ou "falta
+    assinar") e, por fim, "Assinado por…"; o link vira "Editar". Sem pendência, a ação do setor diz "✓ Tudo
+    pronto nesta etapa: encaminhe para …"; com pendência, "Falta antes de encaminhar: …". O Edital só conta
+    como elaborado depois de salvo (antes bastava o texto-modelo). O aviso do documento leva direto à ação
+    (`#acao`). A migração marca como editados os já assinados ou alterados depois de criados
+  - Conferido: `DocumentoContinuaAbertoTest::test_edital_mostra_se_foi_salvo_e_que_a_vez_e_de_encaminhar_a_ug`
+    (falha sem a mudança); suíte 226/226
 
 - [2026-10-22] **Edital: aviso de "preenchido e salvo" para a SCP** (`processos/peca`)
   - No Planejamento, a SCP elabora o Edital (etapa 6) e quem assina é a UG (etapa 7). Ao salvar, a tela só dizia

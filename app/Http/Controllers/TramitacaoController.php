@@ -57,7 +57,7 @@ class TramitacaoController extends Controller
         // peças obrigatórias da etapa precisam estar assinadas
         $pendentes = $processo->pendenciasParaAvancar();
         abort_unless(empty($pendentes), 422,
-            'Assine antes de encaminhar: ' . implode(', ', $pendentes) . '.');
+            'Falta antes de encaminhar: ' . implode(', ', $pendentes) . '.');
 
         // Na etapa de análise (SCP), o setor define a modalidade da seleção ao aprovar.
         $ehAnalise = $processo->etapaEhAnalise();

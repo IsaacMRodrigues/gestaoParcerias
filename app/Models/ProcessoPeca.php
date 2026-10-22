@@ -240,7 +240,7 @@ HTML,
     ];
 
     protected $fillable = [
-        'processo_id', 'tipo', 'visivel_osc', 'conteudo', 'assinado_por', 'assinado_em', 'assinante_nome', 'assinante_cargo', 'codigo_validacao',
+        'processo_id', 'tipo', 'visivel_osc', 'conteudo', 'editado_em', 'assinado_por', 'assinado_em', 'assinante_nome', 'assinante_cargo', 'codigo_validacao',
     ];
 
     /** Conteúdo inicial já com os dados conhecidos do processo (número, UG, data). */
@@ -272,7 +272,19 @@ HTML,
 
     protected function casts(): array
     {
-        return ['assinado_em' => 'datetime', 'visivel_osc' => 'boolean', 'devolvida_em' => 'datetime'];
+        return ['assinado_em' => 'datetime', 'visivel_osc' => 'boolean', 'devolvida_em' => 'datetime', 'editado_em' => 'datetime'];
+    }
+
+    /** Alguém salvou o documento: o texto-modelo de quando nasce não conta. */
+    public function foiEditado(): bool
+    {
+        return $this->editado_em !== null;
+    }
+
+    /** Quem preenche não é quem assina, ou assina em outra etapa (o Edital: a SCP elabora, a UG assina). */
+    public function assinadoPorOutraEtapa(): bool
+    {
+        return $this->setorAssinatura() !== $this->setorResponsavel() || $this->etapaAssinatura() !== $this->etapaDesignada();
     }
 
     public function processo(): BelongsTo

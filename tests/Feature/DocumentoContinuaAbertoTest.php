@@ -58,7 +58,7 @@ class DocumentoContinuaAbertoTest extends TestCase
         $this->actingAs($ug)->get($doc)->assertOk();
     }
 
-    public function test_edital_salvo_pela_scp_avisa_que_quem_assina_e_a_ug(): void
+    public function test_edital_mostra_se_foi_salvo_e_que_a_vez_e_de_encaminhar_a_ug(): void
     {
         $this->seed(RolesSeeder::class);
         $orgao = Orgao::forceCreate(['name' => 'Cultura']);
@@ -67,12 +67,22 @@ class DocumentoContinuaAbertoTest extends TestCase
         $scp->assignRole('analista_tecnico_scp');
         $processo = Processo::forceCreate(['numero' => '0216.0001.2026.01', 'orgao_id' => $orgao->id, 'created_by' => $ug->id,
             'status' => 'em_tramite', 'setor_atual' => 'scp', 'etapa' => 5, 'modalidade' => 'chamamento_publico']);
-        $edital = ProcessoPeca::forceCreate(['processo_id' => $processo->id, 'tipo' => 'edital']);
+        // Nasce com o texto-modelo, como na abertura do processo: isso não é "preenchido".
+        $edital = ProcessoPeca::forceCreate(['processo_id' => $processo->id, 'tipo' => 'edital',
+            'conteudo' => ProcessoPeca::conteudoInicial('edital', $processo)]);
         $doc = route('processos.pecas.edit', [$processo, $edital]);
+        $tela = route('processos.show', $processo);
 
         $this->actingAs($scp)->get($doc)->assertOk()->assertDontSee('Preenchido e salvo');
+        $this->actingAs($scp)->get($tela)->assertOk()->assertSee('Modelo — ainda não editado')
+            ->assertSee('Falta antes de encaminhar')->assertSee('Edital (elaborar e salvar)')->assertDontSee('Tudo pronto nesta etapa');
+
         $this->actingAs($scp)->put($doc, ['conteudo' => '<p>Edital do chamamento</p>'])->assertRedirect($doc);
         $this->actingAs($scp)->get($doc)->assertOk()->assertSee('Preenchido e salvo')
-            ->assertSee('Quem assina é a Unidade Gestora');
+            ->assertSee('Quem assina é a Unidade Gestora')->assertSee(route('processos.show', $processo) . '#acao', false);
+        $html = $this->actingAs($scp)->get($tela)->assertOk()->assertSee('a Unidade Gestora assina na etapa seguinte')
+            ->assertSee('Tudo pronto nesta etapa')->assertSee('encaminhe para Unidade Gestora')->assertDontSee('Falta antes de encaminhar')
+            ->getContent();
+        $this->assertMatchesRegularExpression('/>\s*Editar\s*<\/a>/', $html, 'o link do documento salvo vira "Editar"');
     }
 }

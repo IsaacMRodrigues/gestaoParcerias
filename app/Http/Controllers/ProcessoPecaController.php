@@ -114,7 +114,7 @@ class ProcessoPecaController extends Controller
             . (Processo::SETORES[$peca->setorResponsavel()] ?? $peca->setorResponsavel())
             . ' e só pode ser editada na etapa correspondente.');
 
-        $peca->update($request->validate(['conteudo' => ['nullable', 'string']]));
+        $peca->update($request->validate(['conteudo' => ['nullable', 'string']]) + ['editado_em' => now()]);
         $peca->limparDevolucao();
 
         // Continua no documento: salvar não deve devolver o usuário ao fluxo.

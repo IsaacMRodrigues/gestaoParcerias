@@ -267,7 +267,8 @@
                     @endforelse
                 </div>
 
-                {{-- Ações de trâmite (guiado) --}}
+                {{-- Ações de trâmite (guiado); #acao é o destino do "volte ao processo" dos documentos. --}}
+                <span id="acao" class="block" style="scroll-margin-top:6rem"></span>
                 @if($emAndamento)
                     @if(!$podeAtuar)
                         <div class="px-6 py-4 border-t border-gray-100 bg-gray-50 text-sm text-gray-500">
@@ -296,10 +297,15 @@
                                 </p>
                             @endif
 
-                            {{-- Pendências de assinatura (bloqueiam o encaminhamento) --}}
+                            {{-- O que falta bloqueia o encaminhamento; sem falta, diz que é a vez de encaminhar. --}}
                             @if(!empty($pendencias) && !$processo->ultimaEtapa())
                                 <p class="text-sm text-red-700">
-                                    🔴 Assine antes de encaminhar: <strong>{{ implode(', ', $pendencias) }}</strong>.
+                                    🔴 Falta antes de encaminhar: <strong>{{ implode(', ', $pendencias) }}</strong>.
+                                </p>
+                            @elseif(!$processo->ultimaEtapa() && !$processo->etapaEhAnalise())
+                                <p class="text-sm font-medium text-brand-800 bg-brand-50 border border-brand-200 rounded-lg px-3 py-2">
+                                    ✓ Tudo pronto nesta etapa:
+                                    {{ $processo->segueNoMesmoSetor() ? 'conclua a etapa abaixo.' : 'encaminhe para ' . (\App\Models\Processo::SETORES[$processo->proximoSetor()] ?? $processo->proximoSetor()) . '.' }}
                                 </p>
                             @endif
 
@@ -427,7 +433,7 @@
                     if (!$p) return 'Ver';
                     if ($p->ehArquivo()) return $p->podeAnexar($processo, $u) ? 'Anexar' : 'Ver';
                     if ($p->assinado()) return 'Ver';
-                    if ($p->podeEditarConteudo($processo, $u)) return 'Preencher';
+                    if ($p->podeEditarConteudo($processo, $u)) return $p->foiEditado() ? 'Editar' : 'Preencher';
                     if ($p->podeAssinar($processo, $u)) return 'Assinar';
                     return 'Ver';
                 };
@@ -438,8 +444,12 @@
                         return $n ? $n . ' ' . ($n === 1 ? 'arquivo anexado' : 'arquivos anexados') : 'Nenhum arquivo anexado';
                     }
                     if ($p->assinado()) return 'Assinado por ' . $p->assinanteNome() . ' em ' . $p->assinado_em->format('d/m/Y H:i');
-                    if (!empty($p->conteudo)) return 'Preenchido — não assinado';
-                    return 'Não preenchido';
+                    if (empty($p->conteudo)) return 'Não preenchido';
+                    if (!$p->foiEditado()) return 'Modelo — ainda não editado';
+                    $quem = \App\Models\Processo::SETORES[$p->setorAssinatura()] ?? $p->setorAssinatura();
+
+                    return 'Preenchido em ' . $p->editado_em->format('d/m/Y H:i') . ' — '
+                        . ($p->assinadoPorOutraEtapa() ? "a {$quem} assina na etapa seguinte" : 'falta assinar');
                 };
                 $comum = ['oficio', 'termo_referencia', 'pedido_parecer', 'parecer_financeiro', 'abertura'];
                 $ordem = $processo->ehDispensa()
