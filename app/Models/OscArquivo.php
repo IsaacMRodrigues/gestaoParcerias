@@ -27,6 +27,7 @@ class OscArquivo extends Model
             'itens'  => [
                 'cnd_federal'  => 'Certidão de débitos relativos a créditos tributários federais e à dívida ativa da União',
                 'cnd_estadual' => 'Certidão negativa de débitos estaduais',
+                'cnd_municipal' => 'Certidão negativa de débitos municipais',
                 'cndt'         => 'Certidão negativa de débitos trabalhistas — CNDT',
                 'crf_fgts'     => 'Certificado de regularidade do Fundo de Garantia do Tempo de Serviço — CRF/FGTS',
             ],

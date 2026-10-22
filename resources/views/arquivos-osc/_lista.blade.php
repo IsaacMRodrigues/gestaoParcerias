@@ -77,7 +77,12 @@
                                         <p class="text-sm font-semibold text-gray-900">{{ $rotulo }}</p>
 
                                         @if(! $atual)
-                                            <p class="text-xs text-accent-700 mt-0.5">Não anexado</p>
+                                            <p class="text-xs text-accent-700 mt-0.5">
+                                                Não anexado
+                                                @if(\App\Models\OscArquivo::exigeValidade($tipo))
+                                                    — ao enviar, informe a data de vigência (válida até)
+                                                @endif
+                                            </p>
                                         @else
                                             <p class="text-xs text-gray-500 mt-0.5">
                                                 Versão {{ $atual->versao }} · enviada em {{ $atual->created_at->format('d/m/Y') }}
@@ -87,9 +92,9 @@
                                                 @elseif($atual->vencida())
                                                     <span class="font-semibold text-red-700">venceu em {{ $atual->validade->format('d/m/Y') }}</span>
                                                 @elseif($atual->venceEmBreve())
-                                                    <span class="font-semibold text-accent-700">vence em {{ $atual->validade->format('d/m/Y') }}</span>
+                                                    <span class="font-semibold text-accent-700">vigente até {{ $atual->validade->format('d/m/Y') }} — vence em breve</span>
                                                 @else
-                                                    validade: {{ $atual->validade->format('d/m/Y') }}
+                                                    vigente até {{ $atual->validade->format('d/m/Y') }}
                                                 @endif
                                             </p>
                                         @endif
@@ -159,7 +164,7 @@
                                                 {{-- Toda versão pode ter validade; certidões e balanço, obrigatoriamente. --}}
                                                 <div>
                                                     @if(\App\Models\OscArquivo::exigeValidade($tipo))
-                                                        <label class="block text-xs text-gray-500 mb-1">Válido até *</label>
+                                                        <label class="block text-xs text-gray-500 mb-1">Vigência — válida até *</label>
                                                         <input type="date" name="validade" required min="{{ now()->format('Y-m-d') }}" class="{{ $campo }}">
                                                     @else
                                                         <label class="block text-xs text-gray-500 mb-1">Válido até (em branco se não vence)</label>

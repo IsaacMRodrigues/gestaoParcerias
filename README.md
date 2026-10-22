@@ -68,7 +68,7 @@ cópia do banco de produção).
   Planejamento (migração `2026_10_22_100000`), o aviso dos documentos anexados como arquivo e o item 7 do
   Plano de Trabalho o teto das atividades no valor pleiteado o item 13 só
   com a planilha e com as atividades vinculadas escolhidas do item 7, e as declarações e os
-  complementares fora de Arquivos da OSC (de volta à Celebração).
+  complementares fora de Arquivos da OSC (de volta à Celebração), e a certidão municipal com a vigência à vista.
 
 As ações de produção que o deploy não faz (dados e painel) estão em
 [Pendências → Produção](#produção-ação-não-código).
@@ -149,6 +149,7 @@ cada item estão no [Histórico de entregas](#histórico-de-entregas). 🚀 marc
 | 07/10 | Depois do deploy: listas só com o que é da Secretaria; R$ e vírgula em todos os campos de dinheiro; Arquivos da OSC valendo em todos os fluxos (recusa da UG trava a Celebração) |
 | 08/10 | Caixas de seleção e barra de download nos fluxos; **Arquivos da OSC preenchendo os fluxos** (documentos complementares, habilitação da dispensa e modelos com os dados da OSC); revisão do README |
 | 13/10 | Menu do portal da OSC na **barra lateral**, como o da área interna |
+| 22/10 | **Arquivos da OSC: certidão municipal** e a data de vigência à vista |
 | 22/10 | **Declarações e complementares saem de Arquivos da OSC** e voltam à Celebração |
 | 22/10 | **Item 13: atividades vinculadas escolhidas do item 7** |
 | 22/10 | **Plano de Trabalho, item 13: só a planilha**, sem a descrição repetida |
@@ -604,7 +605,7 @@ Procedimento:
 
 ## Verificação
 
-`php artisan test` (sqlite em memória) roda **230 testes** em `tests/Feature`, um arquivo por regra de
+`php artisan test` (sqlite em memória) roda **231 testes** em `tests/Feature`, um arquivo por regra de
 negócio (quem abre qual parceria, contas e senhas, avisos por e-mail, segregação de encargos,
 cancelamento e prorrogação de chamamento, Nova Proposta, prazo e resposta de recurso, plano de
 trabalho do modelo, etapa conjunta, devolução por documento, Termo e OP em sequência, download de
@@ -722,6 +723,15 @@ Trazer os demais cenários para `tests/Feature` é uma das [Pendências](#pendê
 
 Da mais recente para a mais antiga. Cada entrada diz o que mudou, **por quê** e como foi
 conferido — o porquê é o que falta a quem pega o código depois.
+
+- [2026-10-22] **Arquivos da OSC: certidão municipal e a vigência à vista** (`OscArquivo::GRUPOS`, `arquivos-osc/_lista`)
+  - Pedido da SCP: faltava a "Certidão negativa de débitos municipais", e a data de vigência para monitorar o
+    vencimento não aparecia. A certidão municipal entra entre a estadual e a CNDT, com validade obrigatória e o
+    aviso por e-mail de antes de vencer, como as demais; passa a ser exigida (as áreas completas ficam com ela
+    pendente). A data já era pedida no envio, mas escondida em "Enviar arquivo": agora a linha diz "Não anexado
+    — ao enviar, informe a data de vigência (válida até)", o campo se chama "Vigência — válida até" e, enviada,
+    a linha mostra "vigente até dd/mm/aaaa" (laranja perto de vencer, vermelho vencida)
+  - Conferido: `DocumentosEValidadeDaOscTest::test_certidao_municipal_exigida_e_vigencia_a_vista`; suíte 231/231
 
 - [2026-10-22] **Declarações e documentos complementares saem de Arquivos da OSC e voltam à Celebração**
   (`OscArquivo::GRUPOS`, `Peca::TEMPLATES['celebracao']`, `Peca::DA_AREA_DA_OSC`)

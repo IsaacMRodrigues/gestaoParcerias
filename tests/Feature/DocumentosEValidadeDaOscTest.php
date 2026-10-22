@@ -89,4 +89,26 @@ class DocumentosEValidadeDaOscTest extends TestCase
         OscArquivo::where('tipo', 'ata_eleicao')->update(['validade' => now()->subDay()->toDateString()]);
         $this->assertNotEmpty(array_filter($this->osc->fresh()->pendenciasDosArquivos(), fn ($p) => str_contains($p, 'ata de eleição') && str_contains($p, 'vencida')));
     }
+
+    public function test_certidao_municipal_exigida_e_vigencia_a_vista(): void
+    {
+        $this->preencherArquivosDaOsc($this->osc);
+        \App\Models\OscArquivo::where('osc_id', $this->osc->id)->where('tipo', 'cnd_municipal')->delete();
+
+        $this->assertContains('Certidão negativa de débitos municipais (não anexado)', $this->osc->fresh()->pendenciasDosArquivos());
+        $this->assertTrue(\App\Models\OscArquivo::exigeValidade('cnd_municipal'));
+        $this->actingAs($this->rl)->get('/portal/arquivos')->assertOk()
+            ->assertSee('Certidão negativa de débitos municipais')
+            ->assertSee('ao enviar, informe a data de vigência (válida até)')
+            ->assertSee('Vigência — válida até *');
+
+        // Sem a data de vigência, a certidão não entra; com ela, a linha mostra até quando vale.
+        $pdf = fn () => \Illuminate\Http\UploadedFile::fake()->create('cnd.pdf', 10, 'application/pdf');
+        $this->actingAs($this->rl)->post('/portal/arquivos/cnd_municipal', ['arquivo' => $pdf()])->assertSessionHasErrors('validade');
+        $vigencia = now()->addMonths(3);
+        $this->actingAs($this->rl)->post('/portal/arquivos/cnd_municipal', ['arquivo' => $pdf(), 'validade' => $vigencia->toDateString()])
+            ->assertSessionHasNoErrors();
+        $this->actingAs($this->rl)->get('/portal/arquivos')->assertSee('vigente até ' . $vigencia->format('d/m/Y'));
+        $this->assertSame([], $this->osc->fresh()->pendenciasDosArquivos());
+    }
 }
