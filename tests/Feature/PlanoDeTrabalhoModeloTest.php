@@ -113,7 +113,7 @@ class PlanoDeTrabalhoModeloTest extends TestCase
         $this->actingAs($this->rl)->post($this->url("/metas/{$meta->id}/etapas"), ['descricao' => $mil])->assertSessionHasNoErrors();
         $this->actingAs($this->rl)->post($this->url("/metas/{$meta->id}/etapas"), ['descricao' => $demais])->assertSessionHasErrors('descricao');
         $this->actingAs($this->rl)->post($this->url('/itens'), ['descricao' => $mil, 'tipo_despesa' => array_key_first(\App\Models\Despesa::NATUREZAS),
-            'quantidade' => 1, 'valor_unitario' => 10, 'atividades_vinculadas' => $mil])->assertSessionHasNoErrors();
+            'quantidade' => 1, 'valor_unitario' => 10])->assertSessionHasNoErrors();
     }
 
     public function test_campos_de_dinheiro_com_mascara_e_valor_em_formato_brasileiro(): void
@@ -247,5 +247,25 @@ class PlanoDeTrabalhoModeloTest extends TestCase
         $this->actingAs($this->rl)->put($this->url(), ['titulo' => 'Oficinas', 'objeto' => 'Aulas', 'valor_solicitado' => '900,00'])
             ->assertSessionHasErrors('valor_solicitado');
         $this->assertEquals(1000, $this->plano->fresh()->valor_solicitado);
+    }
+
+    public function test_item_do_plano_de_aplicacao_vincula_as_atividades_do_item_7(): void
+    {
+        $this->actingAs($this->rl)->get("/portal/manifestacoes/{$this->plano->id}")->assertOk()
+            ->assertSee('Cadastre as atividades das metas no item 7 para vinculá-las aqui.');
+
+        $this->actingAs($this->rl)->post($this->url('/metas'), ['descricao' => 'Meta 1', 'atividade_descricao' => 'Aulas de violão'])
+            ->assertSessionHasNoErrors();
+        $meta = $this->plano->metas()->sole();
+        $this->actingAs($this->rl)->post($this->url("/metas/{$meta->id}/etapas"), ['descricao' => 'Lanche'])->assertSessionHasNoErrors();
+        [$aulas, $lanche] = $meta->etapas()->orderBy('numero')->get()->all();
+
+        $this->actingAs($this->rl)->get("/portal/manifestacoes/{$this->plano->id}")->assertOk()
+            ->assertSee('name="atividades[]" value="' . $lanche->id . '"', false)->assertDontSee('name="atividades_vinculadas"', false);
+
+        // Escolhe entre as atividades; id de fora do plano é ignorado.
+        $this->actingAs($this->rl)->post($this->url('/itens'), ['descricao' => 'Instrutor', 'tipo_despesa' => array_key_first(\App\Models\Despesa::NATUREZAS),
+            'quantidade' => 1, 'valor_unitario' => 10, 'atividades' => [$aulas->id, $lanche->id, 999999]])->assertSessionHasNoErrors();
+        $this->assertSame('1.1 Aulas de violão; 1.2 Lanche', $this->plano->planoItens()->sole()->atividades_vinculadas);
     }
 }

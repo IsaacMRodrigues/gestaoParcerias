@@ -165,10 +165,21 @@ class PlanoTrabalhoController extends Controller
             'unidade'               => ['nullable', 'string', 'max:30'],
             'quantidade'            => ['required', 'numeric', 'min:0.01'],
             'valor_unitario'        => ['required', 'numeric', 'min:0'],
-            'atividades_vinculadas' => ['nullable', 'string', 'max:1000'],
+            'atividades'            => ['nullable', 'array'],
+            'atividades.*'          => ['integer'],
         ]);
 
-        $dono->planoItens()->create($dados + ['numero' => $dono->proximoNumero('planoItens')]);
+        // As atividades vinculadas se escolhem entre as do item 7 e se gravam como texto ("1.1 Aulas; 1.2 Lanche"),
+        // que é o que a tabela e o documento mostram.
+        $vinculadas = $dono->load('metas.etapas')->metas
+            ->flatMap(fn ($meta) => $meta->etapas->map(fn ($a) => [$a->id, $meta->numero . '.' . $a->numero . ' ' . $a->descricao]))
+            ->whereIn(0, $dados['atividades'] ?? [])->pluck(1)->implode('; ');
+        unset($dados['atividades']);
+
+        $dono->planoItens()->create($dados + [
+            'numero'                => $dono->proximoNumero('planoItens'),
+            'atividades_vinculadas' => \Illuminate\Support\Str::limit($vinculadas, 997) ?: null,
+        ]);
 
         return back()->with('success', 'Item incluído no plano de aplicação.');
     }

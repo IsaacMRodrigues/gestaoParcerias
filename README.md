@@ -66,8 +66,8 @@ cópia do banco de produção).
   em todas as telas;
 - 22/10: a lista única de perfis do "Solicitar acesso", o aviso do Edital, a situação dos documentos do
   Planejamento (migração `2026_10_22_100000`), o aviso dos documentos anexados como arquivo e o item 7 do
-  Plano de Trabalho o teto das atividades no valor pleiteado e o item 13 só
-  com a planilha.
+  Plano de Trabalho o teto das atividades no valor pleiteado o item 13 só
+  com a planilha e com as atividades vinculadas escolhidas do item 7.
 
 As ações de produção que o deploy não faz (dados e painel) estão em
 [Pendências → Produção](#produção-ação-não-código).
@@ -148,6 +148,7 @@ cada item estão no [Histórico de entregas](#histórico-de-entregas). 🚀 marc
 | 07/10 | Depois do deploy: listas só com o que é da Secretaria; R$ e vírgula em todos os campos de dinheiro; Arquivos da OSC valendo em todos os fluxos (recusa da UG trava a Celebração) |
 | 08/10 | Caixas de seleção e barra de download nos fluxos; **Arquivos da OSC preenchendo os fluxos** (documentos complementares, habilitação da dispensa e modelos com os dados da OSC); revisão do README |
 | 13/10 | Menu do portal da OSC na **barra lateral**, como o da área interna |
+| 22/10 | **Item 13: atividades vinculadas escolhidas do item 7** |
 | 22/10 | **Plano de Trabalho, item 13: só a planilha**, sem a descrição repetida |
 | 22/10 | **As atividades do plano não passam do valor pleiteado** |
 | 22/10 | **Plano de Trabalho, item 7**: indicadores num campo só e a atividade junto da meta |
@@ -599,7 +600,7 @@ Procedimento:
 
 ## Verificação
 
-`php artisan test` (sqlite em memória) roda **229 testes** em `tests/Feature`, um arquivo por regra de
+`php artisan test` (sqlite em memória) roda **230 testes** em `tests/Feature`, um arquivo por regra de
 negócio (quem abre qual parceria, contas e senhas, avisos por e-mail, segregação de encargos,
 cancelamento e prorrogação de chamamento, Nova Proposta, prazo e resposta de recurso, plano de
 trabalho do modelo, etapa conjunta, devolução por documento, Termo e OP em sequência, download de
@@ -717,6 +718,15 @@ Trazer os demais cenários para `tests/Feature` é uma das [Pendências](#pendê
 
 Da mais recente para a mais antiga. Cada entrada diz o que mudou, **por quê** e como foi
 conferido — o porquê é o que falta a quem pega o código depois.
+
+- [2026-10-22] **Plano de Trabalho, item 13: atividades vinculadas escolhidas do item 7** (`PlanoTrabalhoController::storeItem`,
+  `plano/_editor`)
+  - Relato da SCP: o campo "Atividades vinculadas" era texto livre e não oferecia as atividades já lançadas.
+    Agora são caixas de seleção com as atividades das metas ("Meta 1 · 1. Aulas de violão"); o item grava o
+    texto "1.1 Aulas de violão; 1.2 Lanche" (meta.atividade), que a tabela e o documento já mostram. Sem
+    atividade lançada, a tela pede para cadastrá-las no item 7
+  - Conferido: `PlanoDeTrabalhoModeloTest::test_item_do_plano_de_aplicacao_vincula_as_atividades_do_item_7`;
+    suíte 230/230
 
 - [2026-10-22] **Plano de Trabalho, item 13: só a planilha** (`plano/_editor`, `PlanoTrabalhoController`)
   - Pedido da SCP: o campo "Descrição do plano de aplicação" repetia a planilha logo abaixo. Saiu do item 13,

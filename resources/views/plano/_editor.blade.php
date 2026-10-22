@@ -684,9 +684,23 @@
                     <x-input-label for="item_valor" value="Valor unitário (R$) *" />
                     <x-input-dinheiro name="valor_unitario" id="item_valor" required class="mt-1" />
                 </div>
-                <div class="sm:col-span-2">
-                    <x-input-label for="item_atividades" value="Atividades vinculadas" />
-                    <input type="text" name="atividades_vinculadas" id="item_atividades" maxlength="1000" class="{{ $campo }}">
+                {{-- Vincula às atividades já lançadas no item 7, em vez de digitar. --}}
+                <div class="sm:col-span-3">
+                    <x-input-label value="Atividades vinculadas" />
+                    @php $atividadesDoPlano = $dono->metas->flatMap(fn ($m) => $m->etapas->map(fn ($a) => [$m, $a])); @endphp
+                    @if($atividadesDoPlano->isEmpty())
+                        <p class="text-xs text-gray-400 mt-1">Cadastre as atividades das metas no item 7 para vinculá-las aqui.</p>
+                    @else
+                        <div class="mt-1 grid sm:grid-cols-2 gap-x-4 gap-y-1.5 border border-gray-200 rounded-lg p-3 max-h-48 overflow-y-auto">
+                            @foreach($atividadesDoPlano as [$m, $a])
+                                <label class="flex items-start gap-2 text-sm text-gray-700">
+                                    <input type="checkbox" name="atividades[]" value="{{ $a->id }}"
+                                           class="mt-0.5 rounded border-gray-300 text-brand-600 shadow-sm focus:ring-brand-500">
+                                    <span><span class="text-gray-400">Meta {{ $m->numero }} ·</span> {{ $a->numero }}. {{ $a->descricao }}</span>
+                                </label>
+                            @endforeach
+                        </div>
+                    @endif
                 </div>
                 <div class="sm:col-span-3">
                     <button class="btn btn-secondary btn-sm">Adicionar item</button>
