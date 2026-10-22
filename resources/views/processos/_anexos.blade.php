@@ -53,6 +53,6 @@
             </button>
             <x-input-error :messages="$errors->get('arquivo')" class="w-full mt-1" />
         </form>
-        <p class="text-xs text-gray-400">Formatos: PDF, Word, Excel, JPG, PNG · até 10 MB.</p>
+        <p class="text-xs text-gray-400">Formatos: PDF, Word, Excel, JPG, PNG · até 10 MB. O arquivo fica salvo ao clicar em <strong>Anexar</strong>.</p>
     @endif
 </div>

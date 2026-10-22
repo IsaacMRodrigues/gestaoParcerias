@@ -12,7 +12,16 @@
         <div class="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 space-y-6">
             <x-flash-message />
 
-            @if($peca->ehArquivo())
+            {{-- Anexar já grava: sem o aviso, faltava um "Salvar" e o "Anexar" da lista parecia dizer que não tinha ido. --}}
+            @if($peca->ehArquivo() && $anexos->isNotEmpty())
+                <div class="bg-brand-50 border border-brand-200 text-brand-800 px-4 py-3 rounded-lg text-sm">
+                    <strong>Anexado em {{ $anexos->max('created_at')->format('d/m/Y H:i') }}.</strong>
+                    Não precisa salvar: o arquivo já faz parte do processo.
+                    @if($podeAnexar)
+                        Quando terminar, <a href="{{ route('processos.show', $processo) }}#acao" class="font-semibold underline">volte ao processo</a> e encaminhe.
+                    @endif
+                </div>
+            @elseif($peca->ehArquivo())
                 <div class="bg-gray-50 border border-gray-200 text-gray-700 px-4 py-3 rounded-lg text-sm">
                     Este documento é anexado como <strong>arquivo</strong> (sem edição de texto nem assinatura no sistema).
                     Responsável: <strong>{{ \App\Models\Processo::SETORES[$peca->setorResponsavel()] ?? $peca->setorResponsavel() }}</strong>.

@@ -85,4 +85,29 @@ class DocumentoContinuaAbertoTest extends TestCase
             ->getContent();
         $this->assertMatchesRegularExpression('/>\s*Editar\s*<\/a>/', $html, 'o link do documento salvo vira "Editar"');
     }
+
+    public function test_portaria_anexada_avisa_que_ja_esta_salva(): void
+    {
+        $this->seed(RolesSeeder::class);
+        \Illuminate\Support\Facades\Storage::fake('local');
+        $orgao = Orgao::forceCreate(['name' => 'Cultura']);
+        $ug = User::factory()->create(['setor' => 'ug', 'orgao_id' => $orgao->id, 'status' => true, 'approval_status' => 'aprovado']);
+        $ug->assignRole('responsavel_unidade_gestora');
+        $processo = Processo::forceCreate(['numero' => '0216.0002.2026.01', 'orgao_id' => $orgao->id, 'created_by' => $ug->id,
+            'status' => 'em_tramite', 'setor_atual' => 'ug', 'etapa' => 6, 'modalidade' => 'chamamento_publico']);
+        $portaria = ProcessoPeca::forceCreate(['processo_id' => $processo->id, 'tipo' => 'portaria_comissao']);
+        $doc = route('processos.pecas.edit', [$processo, $portaria]);
+        $tela = route('processos.show', $processo);
+
+        $this->actingAs($ug)->get($doc)->assertOk()->assertDontSee('Não precisa salvar')->assertSee('O arquivo fica salvo ao clicar em');
+        $this->assertMatchesRegularExpression('/>\s*Anexar\s*<\/a>/', $this->actingAs($ug)->get($tela)->getContent());
+
+        $this->actingAs($ug)->post(route('processos.pecas.anexos.store', [$processo, $portaria]),
+            ['arquivo' => \Illuminate\Http\UploadedFile::fake()->create('portaria.pdf', 50, 'application/pdf')])->assertSessionHasNoErrors();
+
+        $this->actingAs($ug)->get($doc)->assertOk()->assertSee('Não precisa salvar: o arquivo já faz parte do processo')
+            ->assertSee($tela . '#acao', false);
+        $html = $this->actingAs($ug)->get($tela)->assertOk()->assertSee('1 arquivo anexado em')->getContent();
+        $this->assertMatchesRegularExpression('/>\s*Ver anexos\s*<\/a>/', $html);
+    }
 }

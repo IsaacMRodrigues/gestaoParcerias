@@ -64,8 +64,8 @@ cópia do banco de produção).
 **No GitHub e ainda fora da produção** (sobem só quando pedido):
 - 21/10: as três telas de cadastro de usuário padronizadas, o "Meus usuários" no menu da conta e o botão Voltar
   em todas as telas;
-- 22/10: a lista única de perfis do "Solicitar acesso", o aviso do Edital e a situação dos documentos do
-  Planejamento (migração `2026_10_22_100000`).
+- 22/10: a lista única de perfis do "Solicitar acesso", o aviso do Edital, a situação dos documentos do
+  Planejamento (migração `2026_10_22_100000`) e o aviso dos documentos anexados como arquivo.
 
 As ações de produção que o deploy não faz (dados e painel) estão em
 [Pendências → Produção](#produção-ação-não-código).
@@ -146,6 +146,7 @@ cada item estão no [Histórico de entregas](#histórico-de-entregas). 🚀 marc
 | 07/10 | Depois do deploy: listas só com o que é da Secretaria; R$ e vírgula em todos os campos de dinheiro; Arquivos da OSC valendo em todos os fluxos (recusa da UG trava a Celebração) |
 | 08/10 | Caixas de seleção e barra de download nos fluxos; **Arquivos da OSC preenchendo os fluxos** (documentos complementares, habilitação da dispensa e modelos com os dados da OSC); revisão do README |
 | 13/10 | Menu do portal da OSC na **barra lateral**, como o da área interna |
+| 22/10 | **Documento anexado como arquivo diz que já está salvo** |
 | 22/10 | **Planejamento diz se o documento foi salvo** e quando é a vez de encaminhar |
 | 22/10 | **Edital avisa "preenchido e salvo"** e que quem assina é a UG |
 | 22/10 | **"Solicitar acesso" com todos os perfis**: os exclusivos aparecem sempre, com aviso |
@@ -593,7 +594,7 @@ Procedimento:
 
 ## Verificação
 
-`php artisan test` (sqlite em memória) roda **226 testes** em `tests/Feature`, um arquivo por regra de
+`php artisan test` (sqlite em memória) roda **227 testes** em `tests/Feature`, um arquivo por regra de
 negócio (quem abre qual parceria, contas e senhas, avisos por e-mail, segregação de encargos,
 cancelamento e prorrogação de chamamento, Nova Proposta, prazo e resposta de recurso, plano de
 trabalho do modelo, etapa conjunta, devolução por documento, Termo e OP em sequência, download de
@@ -711,6 +712,16 @@ Trazer os demais cenários para `tests/Feature` é uma das [Pendências](#pendê
 
 Da mais recente para a mais antiga. Cada entrada diz o que mudou, **por quê** e como foi
 conferido — o porquê é o que falta a quem pega o código depois.
+
+- [2026-10-22] **Documento anexado como arquivo diz que já está salvo** (`processos/peca`, `processos/_anexos`,
+  `processos/show`)
+  - Relato da UG na Portaria da Comissão de Seleção: "enviei, não tem botão para salvar, quando volto fica
+    Anexar". O arquivo estava anexado; anexar já grava, mas nada dizia isso. Agora, com arquivo, o topo diz
+    "Anexado em dd/mm hh:mm. Não precisa salvar: o arquivo já faz parte do processo. Quando terminar, volte ao
+    processo e encaminhe"; antes de anexar, "O arquivo fica salvo ao clicar em Anexar". Na lista, "1 arquivo
+    anexado em dd/mm hh:mm" e o link vira "Ver anexos"
+  - Conferido: `DocumentoContinuaAbertoTest::test_portaria_anexada_avisa_que_ja_esta_salva` (falha sem a
+    mudança); suíte 227/227
 
 - [2026-10-22] **Planejamento: a tela diz se o documento foi salvo e quando é a vez de encaminhar**
   (`ProcessoPeca::foiEditado`, `Processo::pendenciasParaAvancar`, `processos/show`; migração `2026_10_22_100000`)

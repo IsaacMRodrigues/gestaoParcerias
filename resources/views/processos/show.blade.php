@@ -431,7 +431,7 @@
                 $u = auth()->user();
                 $rotuloPeca = function ($p) use ($processo, $u) {
                     if (!$p) return 'Ver';
-                    if ($p->ehArquivo()) return $p->podeAnexar($processo, $u) ? 'Anexar' : 'Ver';
+                    if ($p->ehArquivo()) return !$p->temAnexo() ? ($p->podeAnexar($processo, $u) ? 'Anexar' : 'Ver') : 'Ver anexos';
                     if ($p->assinado()) return 'Ver';
                     if ($p->podeEditarConteudo($processo, $u)) return $p->foiEditado() ? 'Editar' : 'Preencher';
                     if ($p->podeAssinar($processo, $u)) return 'Assinar';
@@ -441,7 +441,8 @@
                     if (!$p) return 'Não criada';
                     if ($p->ehArquivo()) {
                         $n = $p->anexos()->count();
-                        return $n ? $n . ' ' . ($n === 1 ? 'arquivo anexado' : 'arquivos anexados') : 'Nenhum arquivo anexado';
+                        return $n ? $n . ' ' . ($n === 1 ? 'arquivo anexado' : 'arquivos anexados') . ' em ' . \Illuminate\Support\Carbon::parse($p->anexos()->max('created_at'))->format('d/m/Y H:i')
+                            : 'Nenhum arquivo anexado';
                     }
                     if ($p->assinado()) return 'Assinado por ' . $p->assinanteNome() . ' em ' . $p->assinado_em->format('d/m/Y H:i');
                     if (empty($p->conteudo)) return 'Não preenchido';
