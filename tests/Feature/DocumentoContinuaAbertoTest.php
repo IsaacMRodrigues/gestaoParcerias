@@ -57,4 +57,22 @@ class DocumentoContinuaAbertoTest extends TestCase
         $this->actingAs($ug)->patch("/processos/{$processo->id}/pecas/{$memorando->id}/assinar")->assertRedirect($doc);
         $this->actingAs($ug)->get($doc)->assertOk();
     }
+
+    public function test_edital_salvo_pela_scp_avisa_que_quem_assina_e_a_ug(): void
+    {
+        $this->seed(RolesSeeder::class);
+        $orgao = Orgao::forceCreate(['name' => 'Cultura']);
+        $ug = User::factory()->create(['setor' => 'ug', 'orgao_id' => $orgao->id, 'status' => true, 'approval_status' => 'aprovado']);
+        $scp = User::factory()->create(['setor' => 'scp', 'status' => true, 'approval_status' => 'aprovado']);
+        $scp->assignRole('analista_tecnico_scp');
+        $processo = Processo::forceCreate(['numero' => '0216.0001.2026.01', 'orgao_id' => $orgao->id, 'created_by' => $ug->id,
+            'status' => 'em_tramite', 'setor_atual' => 'scp', 'etapa' => 5, 'modalidade' => 'chamamento_publico']);
+        $edital = ProcessoPeca::forceCreate(['processo_id' => $processo->id, 'tipo' => 'edital']);
+        $doc = route('processos.pecas.edit', [$processo, $edital]);
+
+        $this->actingAs($scp)->get($doc)->assertOk()->assertDontSee('Preenchido e salvo');
+        $this->actingAs($scp)->put($doc, ['conteudo' => '<p>Edital do chamamento</p>'])->assertRedirect($doc);
+        $this->actingAs($scp)->get($doc)->assertOk()->assertSee('Preenchido e salvo')
+            ->assertSee('Quem assina é a Unidade Gestora');
+    }
 }

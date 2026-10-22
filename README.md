@@ -62,7 +62,7 @@ Comissão de Monitoramento e Avaliação única (commit `f183edd`, 2 migrações
 cópia do banco de produção).
 
 **No GitHub e ainda fora da produção** (sobem só quando pedido): as três telas de cadastro de usuário
-padronizadas o "Meus usuários" no menu da conta o botão Voltar em todas as telas (21/10) e a lista única de perfis do "Solicitar acesso" (22/10), sem migração.
+padronizadas o "Meus usuários" no menu da conta o botão Voltar em todas as telas (21/10) a lista única de perfis do "Solicitar acesso" e o aviso do Edital (22/10), sem migração.
 
 As ações de produção que o deploy não faz (dados e painel) estão em
 [Pendências → Produção](#produção-ação-não-código).
@@ -143,6 +143,7 @@ cada item estão no [Histórico de entregas](#histórico-de-entregas). 🚀 marc
 | 07/10 | Depois do deploy: listas só com o que é da Secretaria; R$ e vírgula em todos os campos de dinheiro; Arquivos da OSC valendo em todos os fluxos (recusa da UG trava a Celebração) |
 | 08/10 | Caixas de seleção e barra de download nos fluxos; **Arquivos da OSC preenchendo os fluxos** (documentos complementares, habilitação da dispensa e modelos com os dados da OSC); revisão do README |
 | 13/10 | Menu do portal da OSC na **barra lateral**, como o da área interna |
+| 22/10 | **Edital avisa "preenchido e salvo"** e que quem assina é a UG |
 | 22/10 | **"Solicitar acesso" com todos os perfis**: os exclusivos aparecem sempre, com aviso |
 | 21/10 | **Botão Voltar em todas as telas**, menos nos inícios |
 | 21/10 | **"Meus usuários" no menu da conta** de todos que cadastram usuários |
@@ -588,7 +589,7 @@ Procedimento:
 
 ## Verificação
 
-`php artisan test` (sqlite em memória) roda **225 testes** em `tests/Feature`, um arquivo por regra de
+`php artisan test` (sqlite em memória) roda **226 testes** em `tests/Feature`, um arquivo por regra de
 negócio (quem abre qual parceria, contas e senhas, avisos por e-mail, segregação de encargos,
 cancelamento e prorrogação de chamamento, Nova Proposta, prazo e resposta de recurso, plano de
 trabalho do modelo, etapa conjunta, devolução por documento, Termo e OP em sequência, download de
@@ -706,6 +707,14 @@ Trazer os demais cenários para `tests/Feature` é uma das [Pendências](#pendê
 
 Da mais recente para a mais antiga. Cada entrada diz o que mudou, **por quê** e como foi
 conferido — o porquê é o que falta a quem pega o código depois.
+
+- [2026-10-22] **Edital: aviso de "preenchido e salvo" para a SCP** (`processos/peca`)
+  - No Planejamento, a SCP elabora o Edital (etapa 6) e quem assina é a UG (etapa 7). Ao salvar, a tela só dizia
+    "Edital salvo." e parecia que nada tinha acontecido. Agora, com o texto salvo, o topo diz "Preenchido e
+    salvo. Quem assina é a Unidade Gestora, na etapa seguinte: volte ao processo e encaminhe". Vale para todo
+    documento em que quem preenche não é quem assina (hoje só o Edital)
+  - Conferido: `DocumentoContinuaAbertoTest::test_edital_salvo_pela_scp_avisa_que_quem_assina_e_a_ug` (falha sem
+    a mudança); suíte 226/226
 
 - [2026-10-22] **"Solicitar acesso" mostra todos os perfis, com o aviso dos exclusivos** (`RegisteredUserController::create`,
   `auth/register`)
