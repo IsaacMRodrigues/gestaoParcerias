@@ -61,8 +61,11 @@ Em 20/10 subiram a saída do perfil Aprovador de Assinatura Eletrônica, a SCP c
 Comissão de Monitoramento e Avaliação única (commit `f183edd`, 2 migrações e o `RolesSeeder`, ensaiados numa
 cópia do banco de produção).
 
-**No GitHub e ainda fora da produção** (sobem só quando pedido): as três telas de cadastro de usuário
-padronizadas o "Meus usuários" no menu da conta o botão Voltar em todas as telas (21/10) a lista única de perfis do "Solicitar acesso" o aviso do Edital e a situação dos documentos do Planejamento (22/10, migração `2026_10_22_100000`).
+**No GitHub e ainda fora da produção** (sobem só quando pedido):
+- 21/10: as três telas de cadastro de usuário padronizadas, o "Meus usuários" no menu da conta e o botão Voltar
+  em todas as telas;
+- 22/10: a lista única de perfis do "Solicitar acesso", o aviso do Edital e a situação dos documentos do
+  Planejamento (migração `2026_10_22_100000`).
 
 As ações de produção que o deploy não faz (dados e painel) estão em
 [Pendências → Produção](#produção-ação-não-código).
