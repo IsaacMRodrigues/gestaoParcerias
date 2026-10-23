@@ -67,7 +67,7 @@ botão Voltar, perfis do "Solicitar acesso", avisos do Planejamento, itens 7 e 1
 da OSC sem declarações e complementares, com a certidão municipal.
 
 **No GitHub e ainda fora da produção:** o registro de recebimento na Seleção (23/10, com a migração
-`2026_10_23_100000`), os Arquivos da OSC fora da Seleção e o Parecer Técnico Contábil no Planejamento (23/10,
+`2026_10_23_100000`), os Arquivos da OSC fora da Seleção, o Parecer Técnico Contábil no Planejamento e o aviso da Resposta ao recurso (23/10,
 com a migração `2026_10_23_110000` e o `RolesSeeder`).
 
 As ações de produção que o deploy não faz (dados e painel) estão em
@@ -149,6 +149,7 @@ cada item estão no [Histórico de entregas](#histórico-de-entregas). 🚀 marc
 | 07/10 | Depois do deploy: listas só com o que é da Secretaria; R$ e vírgula em todos os campos de dinheiro; Arquivos da OSC valendo em todos os fluxos (recusa da UG trava a Celebração) |
 | 08/10 | Caixas de seleção e barra de download nos fluxos; **Arquivos da OSC preenchendo os fluxos** (documentos complementares, habilitação da dispensa e modelos com os dados da OSC); revisão do README |
 | 13/10 | Menu do portal da OSC na **barra lateral**, como o da área interna |
+| 23/10 | **Resposta ao recurso**: o aviso diz que a vez é da Comissão de Seleção, não da UG |
 | 23/10 | **Parecer Técnico Contábil** na etapa 4 do Planejamento, assinado só pelo Contador, ao lado do Parecer Financeiro, assinado só pelo Responsável pela SEPLAN |
 | 23/10 | **Arquivos da OSC fora da Seleção**: a inscrição no chamamento não os exige, e a análise deles aparece só a partir da Celebração |
 | 23/10 | **Seleção com registro de recebimento**, como o Planejamento: o setor que recebe confirma antes de encaminhar, devolver ou mexer nos documentos |
@@ -727,6 +728,12 @@ Trazer os demais cenários para `tests/Feature` é uma das [Pendências](#pendê
 
 Da mais recente para a mais antiga. Cada entrada diz o que mudou, **por quê** e como foi
 conferido — o porquê é o que falta a quem pega o código depois.
+
+- [2026-10-23] **Resposta ao recurso: "Ação da Comissão de Seleção"** (`Peca::motivoTrava`)
+  - Relato da SCP: na etapa 3 da Seleção a Resposta ao recurso dizia "Ação do setor responsável: Unidade Gestora",
+    mas quem a emite é a Comissão de Seleção. Documento que só um perfil preenche (`PREENCHIMENTO_RESERVADO`)
+    passa a citar o perfil na trava
+  - Conferido: `RecursoPelaComissaoTest::test_a_resposta_ao_recurso_e_da_comissao_e_opcional`; suíte 237/237
 
 - [2026-10-23] **Parecer Técnico Contábil na etapa 4 do Planejamento** (`ProcessoPeca`, `Peca::ASSINATURA_RESERVADA`,
   `Processo::pendenciasParaAvancar`)

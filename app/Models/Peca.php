@@ -1847,9 +1847,13 @@ HTML,
             return $this->categoria === 'celebracao' ? 'Celebração concluída.' : 'Seleção encerrada.';
         }
 
-        // Etapa e setor da mesma ação pendente.
+        // Etapa e setor da mesma ação pendente; documento que só um perfil preenche (a Resposta ao recurso,
+        // da Comissão de Seleção) cita o perfil, não o setor.
         $etapa = $this->etapaDaProximaAcao();
-        $setor = $dono->tramiteSetorLabel($this->setorDaProximaAcao());
+        $perfil = self::PREENCHIMENTO_RESERVADO[$this->chave] ?? null;
+        $setor = $perfil
+            ? (User::$roleLabels[$perfil] ?? $perfil)
+            : $dono->tramiteSetorLabel($this->setorDaProximaAcao());
 
         if ($etapa !== null && $dono->tramiteEtapaAtual() !== $etapa) {
             return 'Disponível na etapa ' . ($etapa + 1) . ' do trâmite (' . $setor . ').';
@@ -1859,7 +1863,7 @@ HTML,
             return 'Falta registrar o recebimento da Seleção (' . $setor . ').';
         }
 
-        return 'Ação do setor responsável: ' . $setor . '.';
+        return ($perfil ? 'Ação da ' : 'Ação do setor responsável: ') . $setor . '.';
     }
 
     public function tamanhoFormatado(): string

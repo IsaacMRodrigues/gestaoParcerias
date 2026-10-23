@@ -112,6 +112,10 @@ class RecursoPelaComissaoTest extends TestCase
         $this->assertTrue($resposta->podePreencher($this->comissao));
         $this->assertFalse($resposta->podePreencher($this->ug), 'o resto da UG não responde pela Comissão');
         $this->actingAs($this->ug)->put("/pecas/{$resposta->id}", ['conteudo' => '<p>x</p>'])->assertForbidden();
+        // Quem não é da Comissão vê de quem é a vez: da Comissão, não da UG.
+        $this->assertSame('Ação da Comissão de Seleção.', $resposta->motivoTrava($this->ug));
+        $this->actingAs($this->ug)->get("/chamamentos/{$this->chamamento->id}/selecao")->assertOk()
+            ->assertSee('Ação da Comissão de Seleção.')->assertDontSee('Ação do setor responsável: Unidade Gestora');
 
         $this->actingAs($this->comissao)->put("/pecas/{$resposta->id}", ['conteudo' => '<p>Improvido.</p>'])->assertSessionHasNoErrors();
         $this->actingAs($this->ug)->patch("/pecas/{$resposta->id}/assinar")->assertForbidden();
