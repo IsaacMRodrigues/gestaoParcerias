@@ -70,6 +70,10 @@ class TermoDeHomologacaoTest extends TestCase
         $this->assertSame([5, 'pm'], [(int) $this->chamamento->fresh()->selecao_etapa, $this->chamamento->fresh()->selecao_setor]);
 
         $termo = $this->termo->fresh();
+        $this->assertFalse($termo->podeAssinar($this->prefeito), 'antes, o Gabinete registra o recebimento');
+        $this->actingAs($this->prefeito)->patch("/chamamentos/{$this->chamamento->id}/selecao/receber")->assertSessionHasNoErrors();
+
+        $termo = $this->termo->fresh();
         $this->assertFalse($termo->podePreencher($this->prefeito), 'o Prefeito não edita');
         $this->assertFalse($termo->podePreencher($this->scp), 'depois de enviado, nem a SCP');
         $this->actingAs($this->prefeito)->put("/pecas/{$termo->id}", ['conteudo' => '<p>outro texto</p>'])->assertForbidden();

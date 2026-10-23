@@ -20,12 +20,12 @@ class SelecaoTramitacao extends Model
 
     protected $fillable = [
         'chamamento_id', 'de_setor', 'para_setor',
-        'enviado_por', 'enviado_em', 'parecer', 'status',
+        'enviado_por', 'enviado_em', 'recebido_por', 'recebido_em', 'parecer', 'status',
     ];
 
     protected function casts(): array
     {
-        return ['enviado_em' => 'datetime'];
+        return ['enviado_em' => 'datetime', 'recebido_em' => 'datetime'];
     }
 
     public function chamamento(): BelongsTo
@@ -36,5 +36,10 @@ class SelecaoTramitacao extends Model
     public function remetente(): BelongsTo
     {
         return $this->belongsTo(User::class, 'enviado_por');
+    }
+
+    public function recebedor(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'recebido_por');
     }
 }

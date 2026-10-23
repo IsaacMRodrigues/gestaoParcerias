@@ -25,10 +25,41 @@ class SelecaoController extends Controller
             'Apenas o setor que está com a Seleção pode movimentá-la.');
     }
 
+    /** A Seleção que chega de outro setor espera o registro de recebimento antes de qualquer ação. */
+    private function exigirRecebimento(Chamamento $chamamento): void
+    {
+        abort_if($chamamento->aguardandoRecebimentoSelecao(), 422, 'Registre o recebimento da Seleção antes de atuar.');
+    }
+
+    /**
+     * Campos de recebimento da movimentação: entre etapas do mesmo setor a Seleção não muda de
+     * mãos e já chega recebida; só o que atravessa setores pede registro de chegada.
+     */
+    private function chegada(string $destino, string $origem): array
+    {
+        return $destino === $origem
+            ? ['recebido_por' => auth()->id(), 'recebido_em' => now()]
+            : [];
+    }
+
+    /** O setor de destino registra o recebimento antes de atuar. */
+    public function receber(Chamamento $chamamento): RedirectResponse
+    {
+        $this->autorizarSetor($chamamento);
+
+        $pendente = $chamamento->recebimentoPendenteSelecao();
+        abort_unless($pendente, 422, 'Não há recebimento a registrar.');
+
+        $pendente->update(['recebido_por' => auth()->id(), 'recebido_em' => now()]);
+
+        return back()->with('success', 'Recebimento registrado.');
+    }
+
     /** Encaminha a Seleção para o próximo setor do fluxo. */
     public function avancar(Request $request, Chamamento $chamamento): RedirectResponse
     {
         $this->autorizarSetor($chamamento);
+        $this->exigirRecebimento($chamamento);
         abort_unless($chamamento->podeAvancarSelecao(), 422,
             'Não é possível encaminhar a partir desta etapa.');
 
@@ -58,6 +89,7 @@ class SelecaoController extends Controller
             'enviado_em'  => now(),
             'parecer'     => $data['parecer'] ?? null,
             'status'      => 'enviado',
+            ...$this->chegada($proxSetor, $chamamento->selecao_setor),
         ]);
 
         $chamamento->update(array_merge([
@@ -78,6 +110,7 @@ class SelecaoController extends Controller
     public function devolver(Request $request, Chamamento $chamamento): RedirectResponse
     {
         $this->autorizarSetor($chamamento);
+        $this->exigirRecebimento($chamamento);
         abort_if((int) $chamamento->selecao_etapa === 0, 422, 'Não há etapa anterior para devolver.');
 
         $data = $request->validate(['parecer' => ['required', 'string']], [
@@ -97,6 +130,7 @@ class SelecaoController extends Controller
             'enviado_em'  => now(),
             'parecer'     => Devolucao::reabrir($escolhidas, $data['parecer'], auth()->user()),
             'status'      => 'devolvido',
+            ...$this->chegada($setorAnterior, $chamamento->selecao_setor),
         ]);
 
         $chamamento->update([
@@ -125,6 +159,7 @@ class SelecaoController extends Controller
 
         if ($naEtapa) {
             $this->autorizarSetor($chamamento);
+            $this->exigirRecebimento($chamamento);
         }
 
         $etapa = $naEtapa ? (int) $chamamento->selecao_etapa : null;
@@ -227,6 +262,7 @@ class SelecaoController extends Controller
     public function concluir(Request $request, Chamamento $chamamento): RedirectResponse
     {
         $this->autorizarSetor($chamamento);
+        $this->exigirRecebimento($chamamento);
         abort_unless($chamamento->ultimaEtapaSelecao(), 422,
             'A Seleção só pode ser encerrada na última etapa.');
 

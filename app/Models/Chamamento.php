@@ -163,6 +163,27 @@ class Chamamento extends Model
         return $this->hasMany(SelecaoTramitacao::class)->latest('id');
     }
 
+    /** A última movimentação, se chegou ao setor e ainda espera o registro de recebimento. */
+    public function recebimentoPendenteSelecao(): ?SelecaoTramitacao
+    {
+        if ($this->selecaoConcluida()) {
+            return null;
+        }
+
+        $ultima = $this->relationLoaded('selecaoTramitacoes')
+            ? $this->selecaoTramitacoes->first()
+            : $this->selecaoTramitacoes()->first();
+
+        return $ultima && is_null($ultima->recebido_em) && $ultima->para_setor === $this->selecao_setor
+            ? $ultima
+            : null;
+    }
+
+    public function aguardandoRecebimentoSelecao(): bool
+    {
+        return $this->recebimentoPendenteSelecao() !== null;
+    }
+
     public function recursos(): \Illuminate\Database\Eloquent\Relations\HasMany
     {
         return $this->hasMany(Recurso::class)->latest('id');

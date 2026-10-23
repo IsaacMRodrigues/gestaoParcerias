@@ -269,6 +269,7 @@ Route::middleware(['auth', 'staff', 'readonly'])->group(function () {
         Route::post('manifestacoes/{manifestacao}/indeferir', [ManifestacaoAnaliseController::class, 'indeferir'])->name('manifestacoes.indeferir');
 
         // Trâmite da Seleção: UG → SCP → UG → SCP → Prefeito
+        Route::patch('chamamentos/{chamamento}/selecao/receber', [SelecaoController::class, 'receber'])->name('chamamentos.selecao.receber');
         Route::post('chamamentos/{chamamento}/selecao/avancar', [SelecaoController::class, 'avancar'])->name('chamamentos.selecao.avancar');
         Route::post('chamamentos/{chamamento}/selecao/devolver', [SelecaoController::class, 'devolver'])->name('chamamentos.selecao.devolver');
         Route::post('chamamentos/{chamamento}/selecao/concluir', [SelecaoController::class, 'concluir'])->name('chamamentos.selecao.concluir');

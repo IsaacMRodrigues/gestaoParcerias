@@ -1423,6 +1423,12 @@ HTML,
         };
     }
 
+    /** Seleção recém-chegada ao setor: nada se faz antes do registro de recebimento. */
+    private function esperaRecebimento(Chamamento|Proposta|PrestacaoContas|Alteracao $dono): bool
+    {
+        return $dono instanceof Chamamento && $dono->aguardandoRecebimentoSelecao();
+    }
+
     /** Mapas de designação conforme a categoria em trâmite. */
     private function mapaSetor(): array
     {
@@ -1586,7 +1592,7 @@ HTML,
             return $this->podeAgirNaFasePrevia($user);
         }
 
-        if ($dono->tramiteEncerrado() || $this->assinado()) {
+        if ($dono->tramiteEncerrado() || $this->assinado() || $this->esperaRecebimento($dono)) {
             return false;
         }
 
@@ -1627,6 +1633,11 @@ HTML,
 
         if ($dono?->tramiteEncerrado()) {
             return 'O trâmite já foi concluído — os documentos ficam apenas para consulta.';
+        }
+
+        if ($dono && $this->esperaRecebimento($dono)) {
+            return 'A Seleção chegou ao setor '.$rotulo($dono->selecao_setor)
+                .' e falta registrar o recebimento, no quadro "Trâmite da Seleção".';
         }
 
         // Fora do trâmite, quem manda é o setor prévio (fase do edital).
@@ -1785,7 +1796,7 @@ HTML,
             return $this->podeAgirNaFasePrevia($user);
         }
 
-        if ($dono->tramiteEncerrado()) {
+        if ($dono->tramiteEncerrado() || $this->esperaRecebimento($dono)) {
             return false;
         }
 
@@ -1842,6 +1853,10 @@ HTML,
 
         if ($etapa !== null && $dono->tramiteEtapaAtual() !== $etapa) {
             return 'Disponível na etapa ' . ($etapa + 1) . ' do trâmite (' . $setor . ').';
+        }
+
+        if ($this->esperaRecebimento($dono)) {
+            return 'Falta registrar o recebimento da Seleção (' . $setor . ').';
         }
 
         return 'Ação do setor responsável: ' . $setor . '.';

@@ -92,7 +92,7 @@ class CaixaDeEntrada
             return collect();
         }
 
-        return Chamamento::with('programa.orgao')
+        return Chamamento::with(['programa.orgao', 'selecaoTramitacoes'])
             ->where('tipo', 'chamamento_publico')
             ->where('status', '!=', 'cancelado') // cancelado não anda: não é a vez de ninguém
             ->where('selecao_setor', $user->setor)
@@ -106,7 +106,7 @@ class CaixaDeEntrada
                     'Etapa '.($c->selecao_etapa + 1).'/'.count(Chamamento::ETAPAS_SELECAO)
                         .' — '.($c->etapaSelecaoInfo()['acao'] ?? ''),
                 ])->filter()->implode(' · '),
-                'aguardaRecebimento' => false,
+                'aguardaRecebimento' => $c->aguardandoRecebimentoSelecao(),
                 'url'   => route('chamamentos.selecao', $c),
                 'desde' => $c->updated_at,
             ]);

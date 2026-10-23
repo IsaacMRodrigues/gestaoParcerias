@@ -109,6 +109,7 @@ class DevolucaoPorDocumentoTest extends TestCase
         $this->assertSame([1, 'scp'], [(int) $c->selecao_etapa, $c->selecao_setor]);
         $this->assertContains('Publicação do resultado provisório (devolvido — enviar o arquivo corrigido)', $c->pendenciasSelecao());
 
+        $this->actingAs($this->scp)->patch("/chamamentos/{$this->chamamento->id}/selecao/receber")->assertSessionHasNoErrors();
         $this->actingAs($this->scp)->post("/pecas/{$publicacao->id}/arquivo", [
             'arquivo' => UploadedFile::fake()->create('certa.pdf', 20, 'application/pdf'),
         ])->assertSessionHasNoErrors();

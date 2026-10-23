@@ -136,7 +136,7 @@ class ChamamentoController extends Controller
             // Peças que o Planejamento já produziu: a Seleção exibe o documento
             // de lá (ver Peca::ORIGEM_PLANEJAMENTO), não uma cópia.
             'pecas.origem.processo', 'pecas.origem.anexos', 'pecas.origem.assinante',
-            'selecaoTramitacoes.remetente',
+            'selecaoTramitacoes.remetente', 'selecaoTramitacoes.recebedor',
             'recursos.osc',
             'propostas.osc',
         ]);

@@ -66,7 +66,8 @@ Em 22/10 subiram as mudanças de 21 e 22/10 (commit `31dd092`, a migração `202
 botão Voltar, perfis do "Solicitar acesso", avisos do Planejamento, itens 7 e 13 do Plano de Trabalho e Arquivos
 da OSC sem declarações e complementares, com a certidão municipal.
 
-**No GitHub e ainda fora da produção:** nada.
+**No GitHub e ainda fora da produção:** o registro de recebimento na Seleção (23/10, com a migração
+`2026_10_23_100000`).
 
 As ações de produção que o deploy não faz (dados e painel) estão em
 [Pendências → Produção](#produção-ação-não-código).
@@ -147,6 +148,7 @@ cada item estão no [Histórico de entregas](#histórico-de-entregas). 🚀 marc
 | 07/10 | Depois do deploy: listas só com o que é da Secretaria; R$ e vírgula em todos os campos de dinheiro; Arquivos da OSC valendo em todos os fluxos (recusa da UG trava a Celebração) |
 | 08/10 | Caixas de seleção e barra de download nos fluxos; **Arquivos da OSC preenchendo os fluxos** (documentos complementares, habilitação da dispensa e modelos com os dados da OSC); revisão do README |
 | 13/10 | Menu do portal da OSC na **barra lateral**, como o da área interna |
+| 23/10 | **Seleção com registro de recebimento**, como o Planejamento: o setor que recebe confirma antes de encaminhar, devolver ou mexer nos documentos |
 | 22/10 | **Deploy na Hostinger** (commit `31dd092`): tudo de 21 e 22/10, com uma migração e o `RolesSeeder` |
 | 22/10 | **Arquivos da OSC: certidão municipal** e a data de vigência à vista |
 | 22/10 | **Declarações e complementares saem de Arquivos da OSC** e voltam à Celebração |
@@ -722,6 +724,18 @@ Trazer os demais cenários para `tests/Feature` é uma das [Pendências](#pendê
 
 Da mais recente para a mais antiga. Cada entrada diz o que mudou, **por quê** e como foi
 conferido — o porquê é o que falta a quem pega o código depois.
+
+- [2026-10-23] **Seleção com registro de recebimento** (`SelecaoController::receber`, `Chamamento::recebimentoPendenteSelecao`,
+  `Peca::esperaRecebimento`)
+  - Pedido da SCP: no Planejamento o setor que recebe confirma o recebimento, e na Seleção não havia esse botão.
+    `selecao_tramitacoes` ganha `recebido_por`/`recebido_em`. Quando a Seleção chega de outro setor (encaminhada ou
+    devolvida), o quadro "Trâmite da Seleção" mostra "Registrar Recebimento" no lugar das ações; até lá o setor não
+    encaminha, não devolve, não abre espaço de anexo na etapa e não preenche nem assina os documentos dela (o
+    motivo aparece no documento). Entre etapas do mesmo setor (UG → UG) chega já recebida, e a migração marca
+    assim as movimentações antigas desse tipo. O histórico mostra quem recebeu e quando, e a caixa de entrada
+    destaca a Seleção que espera recebimento
+  - Conferido: `SelecaoRegistraRecebimentoTest`; `PrazoDeRecursoTest`, `DevolucaoPorDocumentoTest` e
+    `TermoDeHomologacaoTest` registram o recebimento antes de agir; suíte 233/233
 
 - [2026-10-22] **Arquivos da OSC: certidão municipal e a vigência à vista** (`OscArquivo::GRUPOS`, `arquivos-osc/_lista`)
   - Pedido da SCP: faltava a "Certidão negativa de débitos municipais", e a data de vigência para monitorar o

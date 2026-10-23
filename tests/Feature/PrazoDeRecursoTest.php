@@ -66,6 +66,11 @@ class PrazoDeRecursoTest extends TestCase
         ]);
     }
 
+    private function receberNaUg()
+    {
+        return $this->actingAs($this->ug)->patch("/chamamentos/{$this->chamamento->id}/selecao/receber");
+    }
+
     private function recorrer()
     {
         // O recurso é só o arquivo que a OSC anexa.
@@ -99,6 +104,7 @@ class PrazoDeRecursoTest extends TestCase
         $this->assertSame(['recurso.pdf', null], [$recurso->arquivo_nome, $recurso->fundamentacao]);
         Storage::disk('local')->assertExists($recurso->arquivo_path);
 
+        $this->receberNaUg();
         $this->actingAs($this->ug)->post("/chamamentos/{$this->chamamento->id}/selecao/avancar")->assertStatus(422);
 
         $this->assertSame(Chamamento::ETAPA_PRAZO_RECURSO, (int) $this->chamamento->fresh()->selecao_etapa);
@@ -112,6 +118,7 @@ class PrazoDeRecursoTest extends TestCase
         $this->assertFalse($this->chamamento->fresh()->faseRecursalAberta());
         $this->recorrer()->assertStatus(422);
 
+        $this->receberNaUg();
         $this->actingAs($this->ug)->post("/chamamentos/{$this->chamamento->id}/selecao/avancar")->assertSessionHasNoErrors();
         $this->assertSame(Chamamento::ETAPA_PRAZO_RECURSO + 1, (int) $this->chamamento->fresh()->selecao_etapa);
     }
@@ -121,6 +128,7 @@ class PrazoDeRecursoTest extends TestCase
         $this->abrirPrazo(1);
         $this->travel(2)->days();
 
+        $this->receberNaUg();
         $this->actingAs($this->ug)->post("/chamamentos/{$this->chamamento->id}/selecao/avancar")->assertSessionHasNoErrors();
         $this->assertSame(Chamamento::ETAPA_PRAZO_RECURSO + 1, (int) $this->chamamento->fresh()->selecao_etapa);
         $this->assertSame([], $this->chamamento->fresh()->pendenciasSelecao(), 'sem recurso, nada a responder');
@@ -129,6 +137,7 @@ class PrazoDeRecursoTest extends TestCase
     public function test_a_tela_da_selecao_mostra_a_etapa_e_o_prazo(): void
     {
         $this->abrirPrazo();
+        $this->receberNaUg();
 
         $this->actingAs($this->ug)->get("/chamamentos/{$this->chamamento->id}/selecao")->assertOk()
             ->assertSee('Recurso e resposta ao recurso')

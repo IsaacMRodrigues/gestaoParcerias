@@ -226,6 +226,7 @@
                     $souDoSetor   = $meuSetor === $chamamento->selecao_setor && auth()->user()->can('chamamentos');
                     $concluida    = $chamamento->selecaoConcluida();
                     $pendencias   = $concluida ? [] : $chamamento->pendenciasSelecao();
+                    $aReceber     = $chamamento->recebimentoPendenteSelecao();
                 @endphp
                 <div class="bg-white rounded-xl border border-gray-200 shadow-sm p-6">
                     <div class="flex items-start justify-between gap-3 mb-4">
@@ -342,8 +343,22 @@
                             </div>
                         @endif
 
-                        {{-- Ações do setor que está com a Seleção --}}
-                        @if($souDoSetor)
+                        {{-- Ações do setor que está com a Seleção; vinda de outro setor, antes registra o recebimento. --}}
+                        @if($souDoSetor && $aReceber)
+                            <div class="mt-4 pt-4 border-t border-gray-100">
+                                <div class="bg-accent-50 border border-accent-200 rounded-lg px-4 py-3 flex items-center justify-between gap-3 flex-wrap">
+                                    <p class="text-sm text-accent-800">
+                                        Encaminhada ao seu setor em {{ $aReceber->enviado_em?->format('d/m/Y H:i') }}
+                                        (origem: {{ \App\Models\Chamamento::SETORES_SELECAO[$aReceber->de_setor] ?? strtoupper($aReceber->de_setor) }}).
+                                        Registre o recebimento para iniciar a etapa.
+                                    </p>
+                                    <form action="{{ route('chamamentos.selecao.receber', $chamamento) }}" method="POST">
+                                        @csrf @method('PATCH')
+                                        <button type="submit" class="btn btn-primary btn-sm">Registrar Recebimento</button>
+                                    </form>
+                                </div>
+                            </div>
+                        @elseif($souDoSetor)
                             <div class="mt-4 pt-4 border-t border-gray-100 space-y-3">
                                 @if($chamamento->ultimaEtapaSelecao())
                                     <form action="{{ route('chamamentos.selecao.concluir', $chamamento) }}" method="POST"
@@ -448,6 +463,10 @@
                                         · {{ strtoupper($mov->de_setor) }} → {{ strtoupper($mov->para_setor) }}
                                         · {{ $mov->enviado_em?->format('d/m/Y H:i') }}
                                         @if($mov->remetente) · {{ $mov->remetente->name }} @endif
+                                        @if($mov->recebido_em && $mov->de_setor !== $mov->para_setor)
+                                            · recebido em {{ $mov->recebido_em->format('d/m/Y H:i') }}
+                                            @if($mov->recebedor) por {{ $mov->recebedor->name }} @endif
+                                        @endif
                                         @if($mov->parecer)
                                             <p class="text-gray-500 mt-0.5 whitespace-pre-line">{{ $mov->parecer }}</p>
                                         @endif
