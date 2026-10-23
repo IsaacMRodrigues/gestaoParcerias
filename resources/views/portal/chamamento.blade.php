@@ -188,56 +188,7 @@
                 @if($meuRecurso || ($participei && $chamamento->faseRecursalAberta()))
                     <div class="mt-6 border-t border-gray-100 pt-6">
                         <h2 class="text-sm font-semibold text-gray-700 mb-1">Recurso contra o resultado provisório</h2>
-                        @if($chamamento->prazo_recurso_ate)
-                            <p class="text-xs text-gray-500 mb-3">
-                                Prazo do edital: até {{ $chamamento->prazo_recurso_ate->format('d/m/Y') }}.
-                                @unless($meuRecurso) Recorrer é opcional. @endunless
-                            </p>
-                        @endif
-
-                        @if($meuRecurso)
-                            <div class="bg-gray-50 border border-gray-200 rounded-lg p-4">
-                                <p class="text-sm text-gray-700">
-                                    Recurso protocolado em
-                                    <strong>{{ $meuRecurso->protocolado_em?->format('d/m/Y H:i') }}</strong>.
-                                    @if($meuRecurso->temArquivo())
-                                        <a href="{{ route('recursos.download', $meuRecurso) }}" class="text-brand-600 hover:underline">
-                                            Baixar a peça enviada
-                                        </a>
-                                    @endif
-                                </p>
-
-                                <p class="text-xs text-gray-500 mt-2">
-                                    A Comissão de Seleção analisará o recurso. A resposta, se houver, aparecerá nos documentos da sua inscrição.
-                                </p>
-                            </div>
-                        @elseif(! auth()->user()->ehResponsavelLegalOsc())
-                            {{-- Membro da OSC vê que há prazo aberto, mas o
-                                 protocolo é do responsável legal. --}}
-                            <p class="text-sm text-gray-600 bg-gray-50 border border-gray-200 rounded-lg p-4">
-                                O prazo de recurso está aberto. O recurso precisa ser protocolado pelo
-                                <strong>responsável legal</strong> da organização.
-                            </p>
-                        @else
-                            <form action="{{ route('recursos.store', $chamamento) }}" method="POST"
-                                  enctype="multipart/form-data" class="space-y-3"
-                                  data-confirm="Protocolar o recurso? Após o envio não é possível alterá-lo.">
-                                @csrf
-                                {{-- O recurso é o arquivo que a OSC anexa, com as razões dentro dele. --}}
-                                <div>
-                                    <label for="arquivo" class="block text-xs font-medium text-gray-500 mb-1">
-                                        Recurso assinado, com as razões (arquivo único em PDF)
-                                    </label>
-                                    <input type="file" name="arquivo" id="arquivo" accept=".pdf" required
-                                           class="block w-full text-sm text-gray-600 file:mr-3 file:py-1.5 file:px-3 file:rounded file:border-0 file:text-xs file:bg-brand-50 file:text-brand-700 hover:file:bg-brand-100">
-                                    <x-input-error :messages="$errors->get('arquivo')" class="mt-1" />
-                                </div>
-                                <button type="submit"
-                                        class="btn btn-primary">
-                                    Protocolar recurso
-                                </button>
-                            </form>
-                        @endif
+                        @include('portal._recurso', ['chamamento' => $chamamento, 'meuRecurso' => $meuRecurso])
                     </div>
                 @endif
             @endauth

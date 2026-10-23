@@ -67,7 +67,7 @@ botão Voltar, perfis do "Solicitar acesso", avisos do Planejamento, itens 7 e 1
 da OSC sem declarações e complementares, com a certidão municipal.
 
 **No GitHub e ainda fora da produção:** o registro de recebimento na Seleção (23/10, com a migração
-`2026_10_23_100000`), os Arquivos da OSC fora da Seleção, o Parecer Técnico Contábil no Planejamento e a etapa do recurso da Seleção (23/10,
+`2026_10_23_100000`), os Arquivos da OSC fora da Seleção, o Parecer Técnico Contábil no Planejamento, a etapa do recurso da Seleção e o recurso na proposta da OSC (23/10,
 com a migração `2026_10_23_110000` e o `RolesSeeder`).
 
 As ações de produção que o deploy não faz (dados e painel) estão em
@@ -149,6 +149,7 @@ cada item estão no [Histórico de entregas](#histórico-de-entregas). 🚀 marc
 | 07/10 | Depois do deploy: listas só com o que é da Secretaria; R$ e vírgula em todos os campos de dinheiro; Arquivos da OSC valendo em todos os fluxos (recusa da UG trava a Celebração) |
 | 08/10 | Caixas de seleção e barra de download nos fluxos; **Arquivos da OSC preenchendo os fluxos** (documentos complementares, habilitação da dispensa e modelos com os dados da OSC); revisão do README |
 | 13/10 | Menu do portal da OSC na **barra lateral**, como o da área interna |
+| 23/10 | **Recurso na página da proposta da OSC**: o portal mostra quando o recurso abre, recebe o arquivo no prazo e mostra o protocolado |
 | 23/10 | **Etapa do recurso na Seleção**: o arquivo do recurso da OSC aparece na própria etapa, ao lado da Resposta ao recurso, que fica obrigatória quando há recurso |
 | 23/10 | **Resposta ao recurso**: o aviso diz que a vez é da Comissão de Seleção, não da UG |
 | 23/10 | **Parecer Técnico Contábil** na etapa 4 do Planejamento, assinado só pelo Contador, ao lado do Parecer Financeiro, assinado só pelo Responsável pela SEPLAN |
@@ -729,6 +730,15 @@ Trazer os demais cenários para `tests/Feature` é uma das [Pendências](#pendê
 
 Da mais recente para a mais antiga. Cada entrada diz o que mudou, **por quê** e como foi
 conferido — o porquê é o que falta a quem pega o código depois.
+
+- [2026-10-23] **Recurso na página da proposta da OSC** (`portal/_recurso`, `portal/proposta`)
+  - Relato da SCP: no módulo da OSC, a proposta de chamamento não tinha opção de recurso, só a Prefeitura e a
+    Comissão o viam. O formulário existia, mas só na página pública do chamamento e só com o prazo aberto. O
+    bloco vira o partial `portal/_recurso`, usado lá e na página da proposta, onde fica sempre à vista depois da
+    submissão: antes do Resultado Provisório diz que o recurso abre ali e como; no prazo, o responsável legal
+    anexa o PDF (a equipe vê que é com ele); depois, mostra o protocolado ou que o prazo terminou
+  - Conferido: `PrazoDeRecursoTest::test_a_osc_recorre_pela_pagina_da_propria_proposta` e
+    `test_sem_recurso_a_proposta_mostra_o_prazo_encerrado`; suíte 239/239
 
 - [2026-10-23] **Etapa do recurso: o arquivo da OSC e a resposta juntos; resposta obrigatória com recurso**
   (`chamamentos/_recursos-da-etapa`, `Chamamento::temRecurso`, `Peca::exigido`)

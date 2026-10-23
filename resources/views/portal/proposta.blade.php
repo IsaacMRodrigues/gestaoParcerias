@@ -79,6 +79,17 @@
             </div>
         @endif
 
+        {{-- Recurso contra o resultado provisório, na inscrição que a OSC acompanha (antes só na página do chamamento). --}}
+        @if($proposta->chamamento?->tipo === 'chamamento_publico' && $proposta->status !== 'rascunho')
+            <div class="bg-white rounded-xl border border-gray-200 shadow-sm p-6" id="recurso">
+                <h2 class="text-base font-semibold text-gray-800 mb-1">Recurso contra o resultado provisório</h2>
+                @include('portal._recurso', [
+                    'chamamento' => $proposta->chamamento,
+                    'meuRecurso' => $proposta->chamamento->recursos()->where('osc_id', $proposta->osc_id)->first(),
+                ])
+            </div>
+        @endif
+
         {{-- Plano de trabalho: a mesma tela da manifestação de interesse.
              Editável enquanto a proposta é rascunho e outra vez na Celebração,
              quando o município devolve o plano à OSC para elaborá-lo. --}}

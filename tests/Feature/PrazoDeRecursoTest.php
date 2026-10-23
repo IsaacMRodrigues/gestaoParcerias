@@ -134,6 +134,33 @@ class PrazoDeRecursoTest extends TestCase
         $this->assertSame([], $this->chamamento->fresh()->pendenciasSelecao(), 'sem recurso, nada a responder');
     }
 
+    public function test_a_osc_recorre_pela_pagina_da_propria_proposta(): void
+    {
+        $pagina = fn () => $this->actingAs($this->rl)->get('/portal/propostas/' . Proposta::sole()->id)->assertOk()
+            ->assertSee('Recurso contra o resultado provisório');
+
+        // Antes da publicação do Resultado Provisório, a tela diz quando o recurso abre.
+        $pagina()->assertSee('O recurso abre aqui quando a Prefeitura publicar')->assertDontSee('Protocolar recurso');
+
+        $this->abrirPrazo();
+        $pagina()->assertSee('Protocolar recurso')->assertSee('name="arquivo"', false);
+
+        $this->actingAs($this->rl)->from('/portal/propostas/' . Proposta::sole()->id)
+            ->post("/portal/chamamentos/{$this->chamamento->id}/recurso", [
+                'arquivo' => UploadedFile::fake()->create('recurso.pdf', 50, 'application/pdf'),
+            ])->assertRedirect('/portal/propostas/' . Proposta::sole()->id);
+        $pagina()->assertSee('Recurso protocolado em')->assertDontSee('Protocolar recurso');
+    }
+
+    public function test_sem_recurso_a_proposta_mostra_o_prazo_encerrado(): void
+    {
+        $this->abrirPrazo(1);
+        $this->travel(2)->days();
+
+        $this->actingAs($this->rl)->get('/portal/propostas/' . Proposta::sole()->id)->assertOk()
+            ->assertSee('O prazo de recurso terminou em')->assertDontSee('Protocolar recurso');
+    }
+
     public function test_a_tela_da_selecao_mostra_a_etapa_e_o_prazo(): void
     {
         $this->abrirPrazo();
