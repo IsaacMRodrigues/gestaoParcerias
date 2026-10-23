@@ -73,9 +73,6 @@
         @if($pendencias)
             <div class="bg-accent-50 border border-accent-200 rounded-lg px-4 py-3">
                 <p class="text-sm font-semibold text-accent-800">Falta para submeter:</p>
-                @if(collect($pendencias)->contains(fn ($p) => str_starts_with($p, 'Arquivos da OSC')))
-                    <p class="text-xs text-accent-700 mt-0.5">Os Arquivos da OSC se enviam uma vez, em <a href="{{ route('portal.arquivos.index') }}" class="font-semibold underline">Arquivos da OSC</a>, e valem para todas as propostas.</p>
-                @endif
                 <ul class="mt-1 text-sm text-accent-700 list-disc list-inside">
                     @foreach($pendencias as $p)<li>{{ $p }}</li>@endforeach
                 </ul>

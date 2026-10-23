@@ -456,13 +456,10 @@ class Proposta extends Model
      *
      * @param string|null $setor na etapa conjunta, só as da parte deste setor.
      */
-    /** O que falta para a OSC submeter a inscrição: o plano completo e os Arquivos da OSC completos e em dia. */
+    /** O que falta para a OSC submeter a inscrição: o plano completo. Os Arquivos da OSC só são cobrados na Celebração. */
     public function pendenciasParaSubmeter(): array
     {
-        return array_merge(
-            $this->pendenciasDoPlano(),
-            array_map(fn ($p) => 'Arquivos da OSC: ' . $p, $this->osc?->pendenciasDosArquivos() ?? []),
-        );
+        return $this->pendenciasDoPlano();
     }
 
     /** Para a UG: arquivos da OSC ainda não analisados nesta parceria, ou recusados sem nova versão. */

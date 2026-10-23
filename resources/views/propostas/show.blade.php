@@ -281,13 +281,14 @@
                 @endforelse
             </div>
 
-            {{-- Arquivos da OSC: anexados uma vez pela organização;
-                 a análise é desta parceria, sobre a versão que se viu. --}}
+            {{-- Arquivos da OSC: anexados uma vez pela organização; a análise é desta parceria, sobre a
+                 versão que se viu, e só na Celebração (na Seleção eles não são cobrados). --}}
+            @if($proposta->celebracaoIniciada())
             <div id="arquivos-osc" style="scroll-margin-top:7rem">
                 <div class="mb-3">
                     <h3 class="text-base font-semibold text-gray-800">Arquivos da OSC</h3>
                     <p class="text-xs text-gray-400 mt-0.5">
-                        Certidões, documentos institucionais e declarações que a organização anexou uma vez. Aprove ou recuse
+                        Certidões e documentos institucionais que a organização anexou uma vez. Aprove ou recuse
                         cada um nesta parceria; versão nova pede análise nova.
                     </p>
                 </div>
@@ -298,6 +299,7 @@
                     'podeAnalisar' => auth()->user()->can('propostas'),
                 ])
             </div>
+            @endif
 
             @php
                 // Na Celebração, a UG edita o plano até o documento dele ser

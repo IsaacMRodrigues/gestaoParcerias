@@ -222,7 +222,7 @@ class PortalController extends Controller
         abort_unless(auth()->user()->ehResponsavelLegalOsc(), 403,
             'Somente o responsável legal da OSC pode submeter a proposta.');
 
-        // O plano completo e os Arquivos da OSC em dia. A trava também está aqui, e não só no botão,
+        // O plano completo. A trava também está aqui, e não só no botão,
         // porque o botão é HTML.
         if ($pendencias = $proposta->pendenciasParaSubmeter()) {
             return back()->withErrors(['plano' => 'Falta para submeter: ' . implode('; ', $pendencias) . '.']);

@@ -149,11 +149,16 @@ class ArquivosDaOscTest extends TestCase
         $outra = Proposta::forceCreate(['chamamento_id' => $proposta->chamamento_id, 'osc_id' => $this->osc->id, 'titulo' => 'Outra',
             'objeto' => 'x', 'status' => 'em_analise', 'valor_solicitado' => 1]);
         $estatuto = $this->osc->arquivosAtuais()['estatuto'];
+        $url = "/propostas/{$proposta->id}/arquivos-osc/{$estatuto->id}/analisar";
+
+        // Na Seleção os arquivos não entram: a análise é da Celebração.
+        $this->actingAs($this->ug)->get("/propostas/{$proposta->id}")->assertOk()->assertDontSee('id="arquivos-osc"', false);
+        $this->actingAs($this->ug)->post($url, ['situacao' => 'aprovado'])->assertStatus(422);
+        $proposta->forceFill(['status' => 'aprovada', 'celebracao_iniciada_em' => now(), 'celebracao_etapa' => 2, 'celebracao_setor' => 'ug'])->save();
 
         $this->actingAs($this->ug)->get("/propostas/{$proposta->id}")->assertOk()
             ->assertSee('Arquivos da OSC')->assertSee('Aguardando análise nesta parceria');
 
-        $url = "/propostas/{$proposta->id}/arquivos-osc/{$estatuto->id}/analisar";
         $this->actingAs($this->ug)->post($url, ['situacao' => 'recusado'])->assertSessionHasErrors('motivo');
         $this->actingAs($this->ug)->post($url, ['situacao' => 'recusado', 'motivo' => 'Falta a última alteração.'])->assertSessionHasNoErrors();
 

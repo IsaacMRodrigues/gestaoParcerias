@@ -3,8 +3,8 @@
         <div>
             <h1 class="text-2xl font-bold text-gray-900">Arquivos da OSC</h1>
             <p class="text-sm text-gray-500 mt-1">
-                Anexe aqui, uma vez só, as certidões, os documentos institucionais e as declarações da organização.
-                Eles valem para todas as suas propostas e parcerias; a Prefeitura os analisa em cada uma. Para trocar
+                Anexe aqui, uma vez só, as certidões e os documentos institucionais da organização.
+                Eles valem para todas as suas parcerias; a Prefeitura os analisa na Celebração de cada uma. Para trocar
                 um documento, envie nova versão — as anteriores ficam no histórico.
             </p>
         </div>

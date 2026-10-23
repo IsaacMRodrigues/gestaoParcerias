@@ -88,18 +88,16 @@ class ArquivosDaOscNosFluxosTest extends TestCase
         $this->assertContains('Arquivos da OSC: analisar ' . \App\Models\OscArquivo::rotulo('estatuto'), $p->fresh()->pendenciasDaAnaliseDosArquivos());
     }
 
-    public function test_a_inscricao_no_chamamento_exige_a_area(): void
+    public function test_a_inscricao_no_chamamento_nao_exige_a_area(): void
     {
         $p = $this->proposta(['status' => 'rascunho']);
         $p->planoItens()->create(['numero' => 1, 'descricao' => 'Instrutor', 'tipo_despesa' => 'servicos_pf', 'quantidade' => 1, 'valor_unitario' => 1000]);
         $meta = $p->criarMeta(['descricao' => 'Meta 1']);
         $p->desembolsos()->create(['meta_id' => $meta->id, 'parcela' => 1, 'valor' => 1000]);
 
-        $this->actingAs($this->rl)->get("/portal/propostas/{$p->id}")->assertSee('Arquivos da OSC:');
-        $this->actingAs($this->rl)->patch("/portal/propostas/{$p->id}/submeter")->assertSessionHasErrors('plano');
-        $this->assertSame('rascunho', $p->fresh()->status);
-
-        $this->preencherArquivosDaOsc($this->osc);
+        // Certidões e documentos da OSC são cobrados na Celebração, não na Seleção.
+        $this->assertNotEmpty($this->osc->pendenciasDosArquivos());
+        $this->actingAs($this->rl)->get("/portal/propostas/{$p->id}")->assertDontSee('Arquivos da OSC:');
         $this->actingAs($this->rl)->patch("/portal/propostas/{$p->id}/submeter")->assertSessionHasNoErrors();
         $this->assertSame('submetida', $p->fresh()->status);
     }

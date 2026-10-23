@@ -67,7 +67,7 @@ botão Voltar, perfis do "Solicitar acesso", avisos do Planejamento, itens 7 e 1
 da OSC sem declarações e complementares, com a certidão municipal.
 
 **No GitHub e ainda fora da produção:** o registro de recebimento na Seleção (23/10, com a migração
-`2026_10_23_100000`).
+`2026_10_23_100000`) e os Arquivos da OSC fora da Seleção (23/10).
 
 As ações de produção que o deploy não faz (dados e painel) estão em
 [Pendências → Produção](#produção-ação-não-código).
@@ -148,6 +148,7 @@ cada item estão no [Histórico de entregas](#histórico-de-entregas). 🚀 marc
 | 07/10 | Depois do deploy: listas só com o que é da Secretaria; R$ e vírgula em todos os campos de dinheiro; Arquivos da OSC valendo em todos os fluxos (recusa da UG trava a Celebração) |
 | 08/10 | Caixas de seleção e barra de download nos fluxos; **Arquivos da OSC preenchendo os fluxos** (documentos complementares, habilitação da dispensa e modelos com os dados da OSC); revisão do README |
 | 13/10 | Menu do portal da OSC na **barra lateral**, como o da área interna |
+| 23/10 | **Arquivos da OSC fora da Seleção**: a inscrição no chamamento não os exige, e a análise deles aparece só a partir da Celebração |
 | 23/10 | **Seleção com registro de recebimento**, como o Planejamento: o setor que recebe confirma antes de encaminhar, devolver ou mexer nos documentos |
 | 22/10 | **Deploy na Hostinger** (commit `31dd092`): tudo de 21 e 22/10, com uma migração e o `RolesSeeder` |
 | 22/10 | **Arquivos da OSC: certidão municipal** e a data de vigência à vista |
@@ -724,6 +725,16 @@ Trazer os demais cenários para `tests/Feature` é uma das [Pendências](#pendê
 
 Da mais recente para a mais antiga. Cada entrada diz o que mudou, **por quê** e como foi
 conferido — o porquê é o que falta a quem pega o código depois.
+
+- [2026-10-23] **Arquivos da OSC fora da Seleção** (`Proposta::pendenciasParaSubmeter`, `propostas/show`,
+  `OscArquivoController::analisar`)
+  - Pedido da SCP: certidões e arquivos da OSC não fazem parte da Seleção, só da Celebração. A inscrição no
+    chamamento passa a pedir só o plano de trabalho completo; o quadro "Arquivos da OSC" da tela da proposta, com
+    o aprovar/recusar de cada arquivo, só aparece depois de iniciada a Celebração, e a análise antes disso é
+    recusada. Na Celebração nada muda: a etapa da OSC cobra a área completa e em dia, e a etapa conjunta cobra a
+    análise da UG. A manifestação de interesse e a Nova Proposta continuam exigindo a área
+  - Conferido: `ArquivosDaOscNosFluxosTest::test_a_inscricao_no_chamamento_nao_exige_a_area`,
+    `ArquivosDaOscTest::test_a_prefeitura_analisa_em_cada_parceria_e_versao_nova_pede_nova_analise`; suíte 233/233
 
 - [2026-10-23] **Seleção com registro de recebimento** (`SelecaoController::receber`, `Chamamento::recebimentoPendenteSelecao`,
   `Peca::esperaRecebimento`)

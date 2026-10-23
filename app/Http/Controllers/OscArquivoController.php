@@ -83,6 +83,7 @@ class OscArquivoController extends Controller
     {
         abort_unless($arquivo->osc_id === $proposta->osc_id, 404);
         abort_unless($proposta->visivelPara(auth()->user()), 403);
+        abort_unless($proposta->celebracaoIniciada(), 422, 'Os Arquivos da OSC são analisados na Celebração.');
 
         $dados = $request->validate([
             'situacao' => ['required', Rule::in(array_keys(OscArquivoAnalise::SITUACOES))],
