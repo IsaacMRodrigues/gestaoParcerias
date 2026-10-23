@@ -30,6 +30,7 @@ class ProcessoPeca extends Model
         'oficio'             => 'Memorando',
         'termo_referencia'   => 'Termo de Referência',
         'pedido_parecer'     => 'Pedido de Parecer Financeiro',
+        'parecer_contabil'   => 'Parecer Técnico Contábil',
         'parecer_financeiro' => 'Parecer Financeiro',
         'abertura'           => 'Termo de Abertura de Processo',
         'edital'             => 'Edital',
@@ -56,6 +57,7 @@ class ProcessoPeca extends Model
         'oficio'             => 'ug',
         'termo_referencia'   => 'ug',
         'pedido_parecer'     => 'scp',  // a SCP protocola o pedido de parecer à SEPLAN
+        'parecer_contabil'   => 'seplan', // assinado só pelo Contador (Peca::ASSINATURA_RESERVADA)
         'parecer_financeiro' => 'seplan',
         'abertura'           => 'ug',
         'edital'             => 'scp',
@@ -71,6 +73,7 @@ class ProcessoPeca extends Model
         'oficio'             => 0,
         'termo_referencia'   => 0,
         'pedido_parecer'     => 2,
+        'parecer_contabil'   => 3,
         'parecer_financeiro' => 3,
         'abertura'           => 4,
         'edital'             => 5,
@@ -141,6 +144,22 @@ HTML,
 <p><strong>Parceiro</strong>: XXXXXXXXX</p>
 <p><strong>Valor total</strong>: R$ XXXXX (XXXXX)</p>
 <p><strong>Prazo</strong>: XX meses</p>
+HTML,
+        'parecer_contabil' => self::CABECALHO . <<<'HTML'
+<p style="text-align:center"><strong>PARECER TÉCNICO CONTÁBIL Nº XXX/{{ano}}</strong></p>
+<p><strong>PROCESSO:</strong> {{numero_processo}}</p>
+<p><strong>INTERESSADO:</strong> Secretaria Municipal de {{unidade_gestora}} — Unidade Gestora</p>
+<p><strong>ASSUNTO:</strong> Análise contábil da despesa prevista para a parceria (Lei Federal nº 13.019/2014).</p>
+<p><br></p>
+<p><strong>I — RELATÓRIO</strong></p>
+<p>XXXXXXXXXXXX</p>
+<p><strong>II — ANÁLISE CONTÁBIL</strong></p>
+<p>Dotação: XXXXXXXXXXXX &nbsp; Ficha: XXXXXX &nbsp; Fonte: XXXXXXX &nbsp; Elemento de despesa: XXXXXXX</p>
+<p>XXXXXXXXXXXX</p>
+<p><strong>III — CONCLUSÃO</strong></p>
+<p>Ante o exposto, manifesto-me XXXXXXXX quanto aos aspectos contábeis da despesa, podendo o processo prosseguir.</p>
+<p><br></p>
+<p style="text-align:center">XXXXXXXXXX<br>Contador(a)</p>
 HTML,
         'parecer_financeiro' => self::CABECALHO . <<<'HTML'
 <p><strong>Nº</strong> XXX/{{ano}}</p>

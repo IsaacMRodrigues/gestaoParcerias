@@ -46,7 +46,7 @@ class Processo extends Model
         ['setor' => 'ug',     'acao' => 'Preencher Memorando e Termo de Referência e assinar'],
         ['setor' => 'scp',    'acao' => 'Analisar o Memorando e o Termo de Referência: aprovar ou rejeitar', 'analise' => true],
         ['setor' => 'scp',    'acao' => 'Solicitar o Parecer Financeiro à SEPLAN (Pedido de Parecer)'],
-        ['setor' => 'seplan', 'acao' => 'Emitir o Parecer Financeiro e assinar'],
+        ['setor' => 'seplan', 'acao' => 'Emitir o Parecer Técnico Contábil (assinado pelo Contador) e o Parecer Financeiro (assinado pelo Responsável pela SEPLAN)'],
         ['setor' => 'ug',     'acao' => 'Conferir o parecer e fazer a Abertura do Processo (assinar AP)'],
         ['setor' => 'scp',    'acao' => 'Elaborar o Edital e seus anexos'],
         ['setor' => 'ug',     'acao' => 'Revisar e assinar o Edital, anexar a Portaria da Comissão de Seleção e encaminhar à SCP'],
@@ -60,7 +60,7 @@ class Processo extends Model
         ['setor' => 'ug',     'acao' => 'Preencher Memorando e Termo de Referência e assinar'],
         ['setor' => 'scp',    'acao' => 'Analisar o Memorando e o Termo de Referência: aprovar ou rejeitar', 'analise' => true],
         ['setor' => 'scp',    'acao' => 'Solicitar o Parecer Financeiro à SEPLAN (Pedido de Parecer)'],
-        ['setor' => 'seplan', 'acao' => 'Emitir o Parecer Financeiro e assinar'],
+        ['setor' => 'seplan', 'acao' => 'Emitir o Parecer Técnico Contábil (assinado pelo Contador) e o Parecer Financeiro (assinado pelo Responsável pela SEPLAN)'],
         ['setor' => 'ug',     'acao' => 'Conferir o parecer e fazer a Abertura do Processo (assinar AP)'],
         ['setor' => 'ug',     'acao' => 'Emitir e assinar a Justificativa de Dispensa/Inexigibilidade (e, se parceria do SUAS, o Parecer Técnico CNAS)'],
         ['setor' => 'scp',    'acao' => 'Publicar a Justificativa no site oficial (trâmite externo)'],
@@ -308,7 +308,9 @@ class Processo extends Model
         } elseif ($this->etapa === 2) {
             if (!$this->peca('pedido_parecer')?->assinado())      $pend[] = 'Pedido de Parecer Financeiro';
         } elseif ($this->etapa === 3) {
-            if (!$this->peca('parecer_financeiro')?->assinado())  $pend[] = 'Parecer Financeiro';
+            // Processo aberto antes do Parecer Contábil não tem a peça: não há o que cobrar.
+            if (($contabil = $this->peca('parecer_contabil')) && !$contabil->assinado()) $pend[] = 'Parecer Técnico Contábil (assinatura do Contador)';
+            if (!$this->peca('parecer_financeiro')?->assinado())  $pend[] = 'Parecer Financeiro (assinatura do Responsável pela SEPLAN)';
         } elseif ($this->etapa === 4) {
             if (!$this->peca('abertura')?->assinado())            $pend[] = 'Termo de Abertura';
         } elseif ($this->etapa === 5) {

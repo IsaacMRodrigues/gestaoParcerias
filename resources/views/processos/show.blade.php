@@ -456,7 +456,7 @@
                     return 'Preenchido em ' . $p->editado_em->format('d/m/Y H:i') . ' — '
                         . ($p->assinadoPorOutraEtapa() ? "a {$quem} assina na etapa seguinte" : 'falta assinar');
                 };
-                $comum = ['oficio', 'termo_referencia', 'pedido_parecer', 'parecer_financeiro', 'abertura'];
+                $comum = ['oficio', 'termo_referencia', 'pedido_parecer', 'parecer_contabil', 'parecer_financeiro', 'abertura'];
                 $ordem = $processo->ehDispensa()
                     ? array_merge($comum, ['justificativa_dispensa', 'parecer_cnas'])
                     : array_merge($comum, ['edital', 'portaria_comissao', 'solicitacao_parecer_juridico', 'parecer_juridico', 'comprovante_publicacao']);

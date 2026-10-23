@@ -78,7 +78,8 @@ class RolesSeeder extends Seeder
         'comissao_monitoramento_avaliacao' => ['monitoramento', 'prestacao_contas'],
         'gestor_parceria'                  => ['planejamento', 'monitoramento', 'execucao', 'prestacao_contas'],
         'cadastrador'                      => ['chamamentos', 'propostas', 'formalizacao'],
-        'contador'                         => ['prestacao_contas'],
+        // Assina o Parecer Técnico Contábil no Planejamento.
+        'contador'                         => ['planejamento', 'prestacao_contas'],
         'encaminhador'                     => ['formalizacao'],
         'operador_ordem_pagamento'         => ['ordem_pagamento'],
         'analista'                         => [], // acesso básico, em descontinuação

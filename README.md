@@ -67,7 +67,8 @@ botão Voltar, perfis do "Solicitar acesso", avisos do Planejamento, itens 7 e 1
 da OSC sem declarações e complementares, com a certidão municipal.
 
 **No GitHub e ainda fora da produção:** o registro de recebimento na Seleção (23/10, com a migração
-`2026_10_23_100000`) e os Arquivos da OSC fora da Seleção (23/10).
+`2026_10_23_100000`), os Arquivos da OSC fora da Seleção e o Parecer Técnico Contábil no Planejamento (23/10,
+com a migração `2026_10_23_110000` e o `RolesSeeder`).
 
 As ações de produção que o deploy não faz (dados e painel) estão em
 [Pendências → Produção](#produção-ação-não-código).
@@ -148,6 +149,7 @@ cada item estão no [Histórico de entregas](#histórico-de-entregas). 🚀 marc
 | 07/10 | Depois do deploy: listas só com o que é da Secretaria; R$ e vírgula em todos os campos de dinheiro; Arquivos da OSC valendo em todos os fluxos (recusa da UG trava a Celebração) |
 | 08/10 | Caixas de seleção e barra de download nos fluxos; **Arquivos da OSC preenchendo os fluxos** (documentos complementares, habilitação da dispensa e modelos com os dados da OSC); revisão do README |
 | 13/10 | Menu do portal da OSC na **barra lateral**, como o da área interna |
+| 23/10 | **Parecer Técnico Contábil** na etapa 4 do Planejamento, assinado só pelo Contador, ao lado do Parecer Financeiro, assinado só pelo Responsável pela SEPLAN |
 | 23/10 | **Arquivos da OSC fora da Seleção**: a inscrição no chamamento não os exige, e a análise deles aparece só a partir da Celebração |
 | 23/10 | **Seleção com registro de recebimento**, como o Planejamento: o setor que recebe confirma antes de encaminhar, devolver ou mexer nos documentos |
 | 22/10 | **Deploy na Hostinger** (commit `31dd092`): tudo de 21 e 22/10, com uma migração e o `RolesSeeder` |
@@ -310,7 +312,7 @@ flowchart LR
     E1["1 · UG<br/>Memorando + Termo de<br/>Referência (assinar)"] --> E2{"2 · SCP<br/>analisar +<br/>definir modalidade"}
     E2 -->|devolve| E1
     E2 -->|aprova| E3["3 · SCP<br/>Pedido de Parecer<br/>Financeiro"]
-    E3 --> E4["4 · SEPLAN<br/>Parecer<br/>Financeiro"]
+    E3 --> E4["4 · SEPLAN<br/>Parecer Técnico Contábil (Contador)<br/>+ Parecer Financeiro (Responsável)"]
     E4 --> E5["5 · UG<br/>Abertura do<br/>Processo (assinar)"]
     E5 -->|Chamamento| C6["6 · SCP<br/>elaborar Edital"]
     C6 --> C7["7 · UG<br/>assinar Edital +<br/>Portaria da Comissão"]
@@ -374,7 +376,7 @@ também precisa).
 | `comissao_monitoramento_avaliacao` | Comissão de Monitoramento e Avaliação | —              | monitoramento, prestacao_contas |
 | `gestor_parceria`                  | Gestor da Parceria                        | —              | planejamento, monitoramento, execucao, prestacao_contas                                                                            |
 | `cadastrador`                      | Cadastrador                               | —              | chamamentos, propostas, formalizacao                                                                                               |
-| `contador`                         | Contador                                  | —              | prestacao_contas                                                                                                                   |
+| `contador`                         | Contador                                  | —              | planejamento, prestacao_contas —**único que assina o Parecer Técnico Contábil** (lotado na SEPLAN) |
 | `encaminhador`                     | Encaminhador                              | —              | formalizacao                                                                                                                       |
 | `operador_ordem_pagamento`         | Operador de Ordem de Pagamento            | —              | ordem_pagamento                                                                                                                    |
 | `analista`                         | Analista (em descontinuação)            | —              | —                                                                                                                                 |
@@ -725,6 +727,16 @@ Trazer os demais cenários para `tests/Feature` é uma das [Pendências](#pendê
 
 Da mais recente para a mais antiga. Cada entrada diz o que mudou, **por quê** e como foi
 conferido — o porquê é o que falta a quem pega o código depois.
+
+- [2026-10-23] **Parecer Técnico Contábil na etapa 4 do Planejamento** (`ProcessoPeca`, `Peca::ASSINATURA_RESERVADA`,
+  `Processo::pendenciasParaAvancar`)
+  - Pedido da SCP: na etapa da SEPLAN, o Parecer Técnico Contábil assinado apenas pelo Contador e o Parecer
+    Financeiro apenas pelo secretário, os dois na mesma etapa. Nova peça `parecer_contabil` (setor SEPLAN, etapa 4,
+    modelo com "XXXX" a substituir), com assinatura reservada ao perfil `contador`; o Parecer Financeiro já era
+    reservado ao `responsavel_seplan`. A SEPLAN só encaminha com os dois assinados. O Contador ganha a permissão
+    `planejamento` para abrir o processo e assinar, e precisa estar lotado na SEPLAN. A migração cria a peça nos
+    processos que ainda não passaram da etapa 4; nos demais ela não é cobrada
+  - Conferido: `ParecerContabilNoPlanejamentoTest`; suíte 236/236
 
 - [2026-10-23] **Arquivos da OSC fora da Seleção** (`Proposta::pendenciasParaSubmeter`, `propostas/show`,
   `OscArquivoController::analisar`)
