@@ -21,8 +21,8 @@ use Tests\TestCase;
  * Etapa própria do prazo de recurso na Seleção (decisão da gestão,
  * 29/09/2026): depois da publicação do Resultado Provisório, as OSCs podem
  * recorrer até a data do edital, que a SCP informa; recorrer é opcional, e a
- * UG só encerra a etapa depois do prazo. A Resposta ao recurso, da Comissão,
- * é opcional (ver RecursoPelaComissaoTest).
+ * UG só encerra a etapa depois do prazo. Havendo recurso, a Resposta ao recurso,
+ * da Comissão, é exigida (ver RecursoPelaComissaoTest).
  */
 class PrazoDeRecursoTest extends TestCase
 {

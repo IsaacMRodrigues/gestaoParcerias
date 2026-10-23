@@ -62,7 +62,7 @@ class Peca extends Model
             ['chave' => 'resultado_parcial',         'rotulo' => 'Resultado provisório (modelo padrão)',    'tipo' => 'modelo',  'obrigatorio' => true],
             ['chave' => 'pub_resultado_parcial',     'rotulo' => 'Publicação do resultado provisório',      'tipo' => 'arquivo', 'obrigatorio' => true],
             // Etapa 3: o recurso é o arquivo que cada OSC protocola pelo portal
-            // (model Recurso); a resposta é esta peça, da Comissão, opcional.
+            // (model Recurso); a resposta é esta peça, da Comissão, exigida quando há recurso (exigido()).
             ['chave' => 'resposta_recurso',          'rotulo' => 'Resposta ao recurso (modelo padrão)',     'tipo' => 'modelo',  'obrigatorio' => false],
             ['chave' => 'resultado_definitivo',      'rotulo' => 'Resultado definitivo (modelo padrão)',    'tipo' => 'modelo',  'obrigatorio' => true],
             // Etapa 4: a ata da sessão do resultado definitivo, anexada pela UG.
@@ -1757,6 +1757,13 @@ HTML,
     public const SEM_ASSINATURA = [
         'celebracao' => ['minuta_termo'],
     ];
+
+    /** Exigido para encaminhar: o obrigatório do modelo, e a Resposta ao recurso quando alguma OSC recorreu. */
+    public function exigido(): bool
+    {
+        return $this->obrigatorio
+            || ($this->chave === 'resposta_recurso' && $this->pecaable instanceof Chamamento && $this->pecaable->temRecurso());
+    }
 
     public function semAssinatura(): bool
     {

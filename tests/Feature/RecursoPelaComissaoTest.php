@@ -21,9 +21,9 @@ use Tests\TestCase;
 /**
  * Etapa 3 da Seleção, "Recurso e resposta ao recurso" (decisão da gestão,
  * 29/09/2026): o recurso é o arquivo que a OSC anexa, e aparece para a
- * Comissão de Seleção da Secretaria; a resposta é a peça "Resposta ao
- * recurso", opcional, preenchida e assinada pela Comissão. Na etapa 4, a UG
- * anexa a Ata do resultado definitivo.
+ * Comissão de Seleção da Secretaria, dentro da própria etapa; a resposta é a
+ * peça "Resposta ao recurso", preenchida e assinada pela Comissão, exigida
+ * quando há recurso. Na etapa 4, a UG anexa a Ata do resultado definitivo.
  */
 class RecursoPelaComissaoTest extends TestCase
 {
@@ -99,15 +99,17 @@ class RecursoPelaComissaoTest extends TestCase
         $this->actingAs($outra)->get("/chamamentos/{$this->chamamento->id}/selecao")->assertForbidden();
     }
 
-    public function test_a_resposta_ao_recurso_e_da_comissao_e_opcional(): void
+    public function test_a_resposta_ao_recurso_e_da_comissao(): void
     {
-        $this->recorrer();
         $resposta = $this->peca('resposta_recurso');
-        $this->assertFalse($resposta->obrigatorio);
+        $this->assertFalse($resposta->exigido(), 'sem recurso, não há o que responder');
+        $recurso = $this->recorrer();
+        $this->assertTrue($resposta->fresh()->exigido());
 
-        // A Comissão abre a Seleção só para a peça: sem os botões do trâmite.
+        // A Comissão abre a Seleção só para a peça: sem os botões do trâmite. O recurso está na mesma etapa.
         $this->actingAs($this->comissao)->get("/chamamentos/{$this->chamamento->id}/selecao")->assertOk()
-            ->assertSee('Resposta ao recurso')->assertDontSee('Encerrar o prazo de recurso');
+            ->assertSee('Resposta ao recurso')->assertDontSee('Encerrar o prazo de recurso')
+            ->assertSee('Recurso da OSC')->assertSee(route('recursos.download', $recurso), false);
 
         $this->assertTrue($resposta->podePreencher($this->comissao));
         $this->assertFalse($resposta->podePreencher($this->ug), 'o resto da UG não responde pela Comissão');
@@ -123,12 +125,20 @@ class RecursoPelaComissaoTest extends TestCase
         $this->assertTrue($resposta->fresh()->assinado());
     }
 
-    public function test_sem_resposta_a_etapa_se_encerra_depois_do_prazo(): void
+    public function test_com_recurso_a_etapa_so_passa_com_a_resposta_assinada(): void
     {
         $this->recorrer();
         $this->travel(4)->days();
 
+        $this->assertContains('Resposta ao recurso (modelo padrão) (assinar)', $this->chamamento->fresh()->pendenciasSelecao());
         $this->actingAs($this->comissao)->post("/chamamentos/{$this->chamamento->id}/selecao/avancar")->assertForbidden();
+        $this->actingAs($this->ug)->post("/chamamentos/{$this->chamamento->id}/selecao/avancar")->assertStatus(422);
+        $this->assertSame(Chamamento::ETAPA_PRAZO_RECURSO, (int) $this->chamamento->fresh()->selecao_etapa);
+
+        $resposta = $this->peca('resposta_recurso');
+        $this->actingAs($this->comissao)->put("/pecas/{$resposta->id}", ['conteudo' => '<p>Improvido.</p>'])->assertSessionHasNoErrors();
+        $this->actingAs($this->comissao)->patch("/pecas/{$resposta->id}/assinar")->assertSessionHasNoErrors();
+
         $this->actingAs($this->ug)->post("/chamamentos/{$this->chamamento->id}/selecao/avancar")->assertSessionHasNoErrors();
         $this->assertSame(Chamamento::ETAPA_PRAZO_RECURSO + 1, (int) $this->chamamento->fresh()->selecao_etapa);
     }

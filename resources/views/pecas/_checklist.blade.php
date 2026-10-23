@@ -130,6 +130,11 @@
         $podeAnexarExtra = ($rotaAnexoExtra ?? null) && $minhaVez && ($grupoAgora || $semEtapa);
     @endphp
 
+    {{-- O que a tela dona mostra dentro da etapa, além das peças (os recursos das OSCs na Seleção). --}}
+    @if(!$semEtapa && isset($extraPorEtapa[$nEtapa]))
+        <div class="{{ $grupoFuturo ? 'opacity-60' : '' }}">{!! $extraPorEtapa[$nEtapa] !!}</div>
+    @endif
+
     {{-- Etapa sem documento próprio: aparece dizendo o que se faz nela. --}}
     @if($pecasDoGrupo->isEmpty() && $acaoDaEtapa)
         <p class="px-6 py-3 text-xs text-gray-400 {{ $grupoFuturo ? 'opacity-60' : '' }}">
@@ -201,7 +206,7 @@
                             <p class="text-sm font-semibold {{ $peca->concluida() ? 'text-gray-500' : 'text-gray-900' }}">
                                 {{ $peca->rotulo }}
                                 {{-- Alguns rótulos já trazem "(opcional)" no texto; não repete --}}
-                                @if(! $peca->obrigatorio && ! \Illuminate\Support\Str::contains($peca->rotulo, 'opcional', true))
+                                @if(! $peca->exigido() && ! \Illuminate\Support\Str::contains($peca->rotulo, 'opcional', true))
                                     <span class="ml-1.5 text-xs font-medium text-gray-400">opcional</span>
                                 @endif
                                 {{-- Distingue o que alguém acrescentou do checklist oficial do fluxo --}}

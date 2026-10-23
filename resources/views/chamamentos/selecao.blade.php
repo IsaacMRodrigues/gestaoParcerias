@@ -478,49 +478,6 @@
                 </div>
             @endif
 
-            {{-- Recursos contra o resultado provisório --}}
-            @if($chamamento->temTramiteSelecao() && ($chamamento->recursos->isNotEmpty()
-                || (int) $chamamento->selecao_etapa === \App\Models\Chamamento::ETAPA_PRAZO_RECURSO))
-                <div class="bg-white rounded-xl border border-gray-200 shadow-sm">
-                    <div class="px-6 py-4 border-b border-gray-200 flex items-start justify-between gap-3">
-                        <div>
-                            <h3 class="text-base font-semibold text-gray-800">Recursos</h3>
-                            <p class="text-xs text-gray-400 mt-0.5">
-                                Protocolados pelas OSCs contra o resultado provisório
-                                @if($chamamento->prazo_recurso_ate) até {{ $chamamento->prazo_recurso_ate->format('d/m/Y') }}@endif.
-                                A Comissão de Seleção pode respondê-los com o documento "Resposta ao recurso" desta etapa (opcional).
-                            </p>
-                        </div>
-                    </div>
-
-                    @forelse($chamamento->recursos as $rec)
-                        <div class="px-6 py-4 border-b border-gray-100 last:border-0">
-                            <div class="flex items-start justify-between gap-3">
-                                <div class="min-w-0">
-                                    <p class="text-sm font-semibold text-gray-800">{{ $rec->osc->name ?? 'OSC' }}</p>
-                                    <p class="text-xs text-gray-400 mt-0.5">
-                                        Protocolado em {{ $rec->protocolado_em?->format('d/m/Y H:i') }}
-                                        @if($rec->temArquivo())
-                                            · <a href="{{ route('recursos.download', $rec) }}" class="text-brand-600 hover:underline">
-                                                {{ $rec->arquivo_nome }} ({{ $rec->tamanhoFormatado() }})
-                                            </a>
-                                        @endif
-                                    </p>
-                                </div>
-                            </div>
-                        </div>
-                    @empty
-                        <div class="px-6 py-6 text-sm text-gray-500">
-                            @if($chamamento->faseRecursalAberta())
-                                Prazo de recurso aberto — nenhum recurso protocolado até o momento.
-                            @else
-                                Prazo de recurso encerrado sem recursos.
-                            @endif
-                        </div>
-                    @endforelse
-                </div>
-            @endif
-
             {{-- Peças, com o progresso no próprio cabeçalho --}}
             <div class="bg-white rounded-xl border border-gray-200 shadow-sm">
                 @include('pecas._cabecalho', [
@@ -534,6 +491,9 @@
                     'pecas'          => $pecas,
                     'rotaAnexoExtra' => auth()->user()->can('chamamentos') ? route('chamamentos.selecao.anexos.store', $chamamento) : null,
                     'nomeDoLote'     => 'selecao-' . ($chamamento->numero ?: $chamamento->titulo),
+                    'extraPorEtapa'  => $chamamento->temTramiteSelecao()
+                        ? [\App\Models\Chamamento::ETAPA_PRAZO_RECURSO => view('chamamentos._recursos-da-etapa', ['chamamento' => $chamamento])->render()]
+                        : [],
                 ])
             </div>
         </div>

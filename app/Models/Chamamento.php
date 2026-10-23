@@ -71,7 +71,7 @@ class Chamamento extends Model
 
     /**
      * Etapa 3 (índice 2), "Recurso e resposta ao recurso": a OSC recorre no prazo do edital,
-     * com um arquivo; a Comissão de Seleção pode emitir a Resposta ao recurso (opcional).
+     * com um arquivo; havendo recurso, a Comissão de Seleção emite a Resposta ao recurso.
      */
     public const ETAPA_PRAZO_RECURSO = 2;
 
@@ -79,7 +79,7 @@ class Chamamento extends Model
     public const ETAPAS_SELECAO = [
         ['setor' => 'ug',  'acao' => 'Analisar as propostas: emitir o Relatório da Comissão, a Ata e o Resultado Provisório (assinar) e encaminhar à SCP'],
         ['setor' => 'scp', 'acao' => 'Anexar o comprovante de publicação do Resultado Provisório, informar o prazo de recurso do edital e devolver à UG'],
-        ['setor' => 'ug',  'acao' => 'Recurso e resposta ao recurso: as OSCs podem recorrer do Resultado Provisório até a data do edital; a Comissão de Seleção pode emitir a Resposta ao recurso (opcional); findo o prazo, encerrar a etapa'],
+        ['setor' => 'ug',  'acao' => 'Recurso e resposta ao recurso: as OSCs podem recorrer do Resultado Provisório até a data do edital; a Comissão de Seleção emite a Resposta ao recurso (obrigatória quando houver recurso); findo o prazo, encerrar a etapa'],
         ['setor' => 'ug',  'acao' => 'Emitir o Resultado Definitivo (assinar) e encaminhar à SCP'],
         ['setor' => 'scp', 'acao' => 'Anexar o comprovante de publicação do Resultado Definitivo e emitir o Termo de Adjudicação e Homologação'],
         ['setor' => 'pm',  'acao' => 'Assinar o Termo de Adjudicação e Homologação (encerra a Seleção)'],
@@ -187,6 +187,12 @@ class Chamamento extends Model
     public function recursos(): \Illuminate\Database\Eloquent\Relations\HasMany
     {
         return $this->hasMany(Recurso::class)->latest('id');
+    }
+
+    /** Alguma OSC recorreu do Resultado Provisório? Então a Resposta ao recurso é exigida. */
+    public function temRecurso(): bool
+    {
+        return $this->relationLoaded('recursos') ? $this->recursos->isNotEmpty() : $this->recursos()->exists();
     }
 
     /**
@@ -396,7 +402,7 @@ class Chamamento extends Model
         $exigidas = [
             0 => ['relatorio_comissao', 'ata_comissao', 'resultado_parcial'],
             1 => ['pub_resultado_parcial'],
-            2 => [],  // a Resposta ao recurso é opcional
+            2 => $this->temRecurso() ? ['resposta_recurso'] : [],  // sem recurso, não há o que responder
             3 => ['resultado_definitivo'],
             4 => ['pub_resultado_definitivo', 'termo_homologacao'],
             5 => ['termo_homologacao'],
