@@ -211,7 +211,8 @@ class Processo extends Model
     protected static function usuarioVeTodosProcessos(User $user): bool
     {
         return $user->podeVerTodosOrgaos()
-            || in_array($user->setor, self::SETORES_CENTRAIS, true);
+            || in_array($user->setor, self::SETORES_CENTRAIS, true)
+            || $user->can('parecer_contabil');
     }
 
     /** Restringe aos processos que o usuário pode ver (por órgão, exceto centrais). */

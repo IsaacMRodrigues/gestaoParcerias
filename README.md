@@ -376,7 +376,7 @@ também precisa).
 | `comissao_monitoramento_avaliacao` | Comissão de Monitoramento e Avaliação | —              | monitoramento, prestacao_contas |
 | `gestor_parceria`                  | Gestor da Parceria                        | —              | planejamento, monitoramento, execucao, prestacao_contas                                                                            |
 | `cadastrador`                      | Cadastrador                               | —              | chamamentos, propostas, formalizacao                                                                                               |
-| `contador`                         | Contador                                  | —              | planejamento, prestacao_contas —**único que assina o Parecer Técnico Contábil** (lotado na SEPLAN) |
+| `contador`                         | Contador                                  | —              | prestacao_contas, parecer_contabil —**único que preenche e assina o Parecer Técnico Contábil**, de qualquer lotação |
 | `encaminhador`                     | Encaminhador                              | —              | formalizacao                                                                                                                       |
 | `operador_ordem_pagamento`         | Operador de Ordem de Pagamento            | —              | ordem_pagamento                                                                                                                    |
 | `analista`                         | Analista (em descontinuação)            | —              | —                                                                                                                                 |
@@ -732,11 +732,13 @@ conferido — o porquê é o que falta a quem pega o código depois.
   `Processo::pendenciasParaAvancar`)
   - Pedido da SCP: na etapa da SEPLAN, o Parecer Técnico Contábil assinado apenas pelo Contador e o Parecer
     Financeiro apenas pelo secretário, os dois na mesma etapa. Nova peça `parecer_contabil` (setor SEPLAN, etapa 4,
-    modelo com "XXXX" a substituir), com assinatura reservada ao perfil `contador`; o Parecer Financeiro já era
-    reservado ao `responsavel_seplan`. A SEPLAN só encaminha com os dois assinados. O Contador ganha a permissão
-    `planejamento` para abrir o processo e assinar, e precisa estar lotado na SEPLAN. A migração cria a peça nos
+    modelo oficial da cliente), que o perfil `contador` preenche e assina de onde estiver lotado — no modelo, a
+    Secretaria de Fazenda (`ProcessoPeca::PERFIL_QUE_ATUA`); o Parecer Financeiro, reservado ao
+    `responsavel_seplan`, passa a seguir o modelo novo da cliente. A SEPLAN só encaminha com os dois assinados.
+    O Contador ganha só a permissão `parecer_contabil`: vê os processos, acha o parecer na caixa de entrada,
+    preenche e assina, mas não abre processo nem mexe nos outros documentos. A migração cria a peça nos
     processos que ainda não passaram da etapa 4; nos demais ela não é cobrada
-  - Conferido: `ParecerContabilNoPlanejamentoTest`; suíte 236/236
+  - Conferido: `ParecerContabilNoPlanejamentoTest`; suíte 237/237
 
 - [2026-10-23] **Arquivos da OSC fora da Seleção** (`Proposta::pendenciasParaSubmeter`, `propostas/show`,
   `OscArquivoController::analisar`)

@@ -12,8 +12,9 @@ use Illuminate\Support\Facades\Mail;
 use Tests\TestCase;
 
 /**
- * Etapa 4 do Planejamento (SEPLAN): o Parecer Técnico Contábil, que só o Contador assina, e o
- * Parecer Financeiro, que só o Responsável pela SEPLAN assina. O processo segue com os dois.
+ * Etapa 4 do Planejamento (SEPLAN): o Parecer Técnico Contábil, que só o Contador preenche e assina, de onde
+ * estiver lotado (a Fazenda), e o Parecer Financeiro, que só o Responsável pela SEPLAN assina. O processo segue
+ * com os dois.
  */
 class ParecerContabilNoPlanejamentoTest extends TestCase
 {
@@ -30,7 +31,9 @@ class ParecerContabilNoPlanejamentoTest extends TestCase
         Mail::fake();
 
         $orgao = Orgao::forceCreate(['name' => 'Educação']);
-        $this->contador   = $this->daSeplan('contador');
+        $fazenda = Orgao::forceCreate(['name' => 'Fazenda']);
+        $this->contador = User::factory()->create(['setor' => 'ug', 'orgao_id' => $fazenda->id, 'status' => true, 'approval_status' => 'aprovado']);
+        $this->contador->assignRole('contador');
         $this->secretario = $this->daSeplan('responsavel_seplan');
 
         $this->processo = Processo::forceCreate(['numero' => '0207.0001.2026.01', 'orgao_id' => $orgao->id,
@@ -77,9 +80,16 @@ class ParecerContabilNoPlanejamentoTest extends TestCase
         $this->assinar($this->secretario, 'parecer_contabil')->assertForbidden();
         $this->assinar($this->contador, 'parecer_financeiro')->assertForbidden();
         $this->actingAs($this->secretario)->get("/processos/{$this->processo->id}/pecas/{$this->peca('parecer_contabil')->id}")
-            ->assertOk()->assertSee('quem assina é o Contador');
+            ->assertOk()->assertSee('preenchido e assinado pelo Contador');
 
+        // Fora da SEPLAN e de outra Secretaria, o Contador acha o parecer na caixa, abre o processo, preenche e assina.
+        $item = \App\Support\CaixaDeEntrada::para($this->contador)->itens->sole();
+        $this->assertStringContainsString('Parecer Técnico Contábil', $item['titulo']);
+        $this->actingAs($this->contador)->get("/processos/{$this->processo->id}")->assertOk();
+        $this->actingAs($this->contador)->put("/processos/{$this->processo->id}/pecas/{$this->peca('parecer_contabil')->id}",
+            ['conteudo' => '<p>Parecer contábil: dotação 02.01, ficha 123.</p>'])->assertSessionHasNoErrors();
         $this->assinar($this->contador, 'parecer_contabil')->assertRedirect()->assertSessionHasNoErrors();
+        $this->assertTrue(\App\Support\CaixaDeEntrada::para($this->contador)->vazia());
         $this->assertSame(['Parecer Financeiro (assinatura do Responsável pela SEPLAN)'], $this->processo->fresh()->pendenciasParaAvancar());
 
         $this->assinar($this->secretario, 'parecer_financeiro')->assertRedirect()->assertSessionHasNoErrors();
@@ -92,5 +102,14 @@ class ParecerContabilNoPlanejamentoTest extends TestCase
     public function test_processo_novo_ja_nasce_com_o_parecer_contabil(): void
     {
         $this->assertArrayHasKey('parecer_contabil', ProcessoPeca::TIPOS);
+    }
+
+    public function test_o_contador_nao_abre_processo_nem_mexe_no_resto(): void
+    {
+        $this->actingAs($this->contador)->get('/processos/create')->assertForbidden();
+        $this->actingAs($this->contador)->get('/processos')->assertForbidden();
+        $this->assertFalse($this->peca('parecer_financeiro')->podeEditarConteudo($this->processo, $this->contador));
+        // A SEPLAN não preenche o parecer do Contador.
+        $this->assertFalse($this->peca('parecer_contabil')->podeEditarConteudo($this->processo, $this->secretario));
     }
 }

@@ -33,6 +33,8 @@ class RolesSeeder extends Seeder
         'ver_usuarios'   => 'Ver órgãos e usuários (só consulta)',
         // Criar conta de servidor já aprovada, sem os perfis que só o TI concede (User::PERFIS_FORA_DO_AUTOCADASTRO).
         'criar_usuarios' => 'Cadastrar servidores (sem administrador, auditores e chefia)',
+        // O Contador, de onde estiver lotado, abre o processo só para o Parecer Técnico Contábil.
+        'parecer_contabil' => 'Parecer Técnico Contábil do Planejamento (ver o processo e assinar)',
 
         // Funções da equipe da OSC: prefixo osc_ para nunca valerem dentro da Administração.
         'osc_propostas'     => 'Propostas e plano de trabalho',
@@ -78,8 +80,7 @@ class RolesSeeder extends Seeder
         'comissao_monitoramento_avaliacao' => ['monitoramento', 'prestacao_contas'],
         'gestor_parceria'                  => ['planejamento', 'monitoramento', 'execucao', 'prestacao_contas'],
         'cadastrador'                      => ['chamamentos', 'propostas', 'formalizacao'],
-        // Assina o Parecer Técnico Contábil no Planejamento.
-        'contador'                         => ['planejamento', 'prestacao_contas'],
+        'contador'                         => ['prestacao_contas', 'parecer_contabil'],
         'encaminhador'                     => ['formalizacao'],
         'operador_ordem_pagamento'         => ['ordem_pagamento'],
         'analista'                         => [], // acesso básico, em descontinuação

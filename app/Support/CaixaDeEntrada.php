@@ -5,6 +5,7 @@ namespace App\Support;
 use App\Models\Chamamento;
 use App\Models\ManifestacaoInteresse;
 use App\Models\Processo;
+use App\Models\ProcessoPeca;
 use App\Models\Proposta;
 use App\Models\User;
 use Illuminate\Support\Collection;
@@ -32,6 +33,7 @@ class CaixaDeEntrada
 
         $itens = collect()
             ->concat(self::processos($user))
+            ->concat(self::documentosDoPerfil($user))
             ->concat(self::selecoes($user))
             ->concat(self::analiseDePropostas($user))
             ->concat(self::celebracoes($user))
@@ -82,6 +84,33 @@ class CaixaDeEntrada
                 'aguardaRecebimento' => $p->aguardandoRecebimento(),
                 'url'   => route('processos.show', $p),
                 'desde' => $p->updated_at,
+            ]);
+    }
+
+    /**
+     * Planejamento: documento de um perfil (ProcessoPeca::PERFIL_QUE_ATUA, o Parecer Técnico Contábil) à espera
+     * dele, que vem de fora do setor do trâmite e por isso não cai em processos().
+     */
+    private static function documentosDoPerfil(User $user): Collection
+    {
+        $tipos = array_keys(array_filter(ProcessoPeca::PERFIL_QUE_ATUA, fn ($perfil) => $user->hasRole($perfil)));
+        if (!$tipos) {
+            return collect();
+        }
+
+        return ProcessoPeca::with('processo.orgao')
+            ->whereIn('tipo', $tipos)
+            ->whereNull('assinado_em')
+            ->whereHas('processo', fn ($q) => $q->where('status', 'em_tramite'))
+            ->get()
+            ->filter(fn (ProcessoPeca $peca) => $peca->podeEditarConteudo($peca->processo, $user) || $peca->podeAssinar($peca->processo, $user))
+            ->map(fn (ProcessoPeca $peca) => [
+                'tramite'   => 'Planejamento',
+                'titulo'    => ProcessoPeca::TIPOS[$peca->tipo].' — Processo '.$peca->processo->numero,
+                'subtitulo' => $peca->processo->orgao?->sigla ?: $peca->processo->orgao?->name,
+                'aguardaRecebimento' => false,
+                'url'   => route('processos.pecas.edit', [$peca->processo, $peca]),
+                'desde' => $peca->processo->updated_at,
             ]);
     }
 

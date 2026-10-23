@@ -1747,7 +1747,6 @@ HTML,
      */
     public const ASSINATURA_RESERVADA = [
         'parecer_financeiro' => 'responsavel_seplan',
-        'parecer_contabil'   => 'contador',
         'resposta_recurso'   => 'comissao_selecao',
     ];
 

@@ -237,12 +237,7 @@ Route::middleware(['auth', 'staff', 'readonly'])->group(function () {
         // A caixa virou única (os três trâmites) e mudou de lugar. O nome antigo
         // continua respondendo para não quebrar link salvo nem histórico.
         Route::get('processos/caixa', fn () => redirect()->route('caixa'))->name('processos.caixa');
-        Route::resource('processos', ProcessoController::class)->except(['edit', 'update']);
-        Route::get('processos/{processo}/imprimir-pecas', [ProcessoPecaController::class, 'imprimirLote'])->name('processos.pecas.imprimir-lote');
-        Route::get('processos/{processo}/pecas/{peca}', [ProcessoPecaController::class, 'edit'])->name('processos.pecas.edit');
-        Route::get('processos/{processo}/pecas/{peca}/imprimir', [ProcessoPecaController::class, 'imprimir'])->name('processos.pecas.imprimir');
-        Route::put('processos/{processo}/pecas/{peca}', [ProcessoPecaController::class, 'update'])->name('processos.pecas.update');
-        Route::patch('processos/{processo}/pecas/{peca}/assinar', [ProcessoPecaController::class, 'assinar'])->name('processos.pecas.assinar');
+        Route::resource('processos', ProcessoController::class)->except(['show', 'edit', 'update']);
         Route::post('processos/{processo}/pecas/{peca}/anexos', [ProcessoPecaController::class, 'anexar'])->name('processos.pecas.anexos.store');
         Route::get('processos/{processo}/pecas/{peca}/anexos/{anexo}', [ProcessoPecaController::class, 'baixarAnexo'])->name('processos.pecas.anexos.download');
         Route::delete('processos/{processo}/pecas/{peca}/anexos/{anexo}', [ProcessoPecaController::class, 'removerAnexo'])->name('processos.pecas.anexos.destroy');
@@ -251,6 +246,17 @@ Route::middleware(['auth', 'staff', 'readonly'])->group(function () {
         Route::post('processos/{processo}/devolver', [TramitacaoController::class, 'devolver'])->name('processos.devolver');
         Route::patch('processos/{processo}/concluir', [TramitacaoController::class, 'concluir'])->name('processos.concluir');
         Route::post('processos/{processo}/publicar-chamamento', [TramitacaoController::class, 'publicar'])->name('processos.publicar-chamamento');
+    });
+
+    // Ver o processo e preencher/assinar documento: também o Contador, para o Parecer Técnico Contábil
+    // (quem pode o quê em cada peça fica em ProcessoPeca). Depois do grupo acima, para processos/create vir antes.
+    Route::middleware('permission:planejamento|parecer_contabil')->group(function () {
+        Route::get('processos/{processo}', [ProcessoController::class, 'show'])->name('processos.show');
+        Route::get('processos/{processo}/imprimir-pecas', [ProcessoPecaController::class, 'imprimirLote'])->name('processos.pecas.imprimir-lote');
+        Route::get('processos/{processo}/pecas/{peca}', [ProcessoPecaController::class, 'edit'])->name('processos.pecas.edit');
+        Route::get('processos/{processo}/pecas/{peca}/imprimir', [ProcessoPecaController::class, 'imprimir'])->name('processos.pecas.imprimir');
+        Route::put('processos/{processo}/pecas/{peca}', [ProcessoPecaController::class, 'update'])->name('processos.pecas.update');
+        Route::patch('processos/{processo}/pecas/{peca}/assinar', [ProcessoPecaController::class, 'assinar'])->name('processos.pecas.assinar');
     });
 
     // Chamamentos e Seleção. O programa é só o agrupamento por Secretaria (Programa::doOrgao);

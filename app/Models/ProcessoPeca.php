@@ -57,7 +57,7 @@ class ProcessoPeca extends Model
         'oficio'             => 'ug',
         'termo_referencia'   => 'ug',
         'pedido_parecer'     => 'scp',  // a SCP protocola o pedido de parecer à SEPLAN
-        'parecer_contabil'   => 'seplan', // assinado só pelo Contador (Peca::ASSINATURA_RESERVADA)
+        'parecer_contabil'   => 'seplan', // na etapa da SEPLAN, pelo Contador (PERFIL_QUE_ATUA)
         'parecer_financeiro' => 'seplan',
         'abertura'           => 'ug',
         'edital'             => 'scp',
@@ -84,6 +84,14 @@ class ProcessoPeca extends Model
         // Rota Dispensa: ambas na etapa 5 (a justificativa substitui o edital)
         'justificativa_dispensa' => 5,
         'parecer_cnas'           => 5,
+    ];
+
+    /**
+     * Peças de um perfil, não de um setor: ele preenche e assina de onde estiver lotado, na etapa da peça
+     * (o Contador, da Fazenda, na etapa da SEPLAN).
+     */
+    public const PERFIL_QUE_ATUA = [
+        'parecer_contabil' => 'contador',
     ];
 
     /** Quem assina, quando difere de quem preenche (o Edital: a SCP elabora, a UG assina). */
@@ -146,20 +154,21 @@ HTML,
 <p><strong>Prazo</strong>: XX meses</p>
 HTML,
         'parecer_contabil' => self::CABECALHO . <<<'HTML'
-<p style="text-align:center"><strong>PARECER TÉCNICO CONTÁBIL Nº XXX/{{ano}}</strong></p>
-<p><strong>PROCESSO:</strong> {{numero_processo}}</p>
-<p><strong>INTERESSADO:</strong> Secretaria Municipal de {{unidade_gestora}} — Unidade Gestora</p>
-<p><strong>ASSUNTO:</strong> Análise contábil da despesa prevista para a parceria (Lei Federal nº 13.019/2014).</p>
+<p style="text-align:center"><strong>PARECER TÉCNICO CONTÁBIL XXX/{{ano}}</strong></p>
 <p><br></p>
-<p><strong>I — RELATÓRIO</strong></p>
-<p>XXXXXXXXXXXX</p>
-<p><strong>II — ANÁLISE CONTÁBIL</strong></p>
-<p>Dotação: XXXXXXXXXXXX &nbsp; Ficha: XXXXXX &nbsp; Fonte: XXXXXXX &nbsp; Elemento de despesa: XXXXXXX</p>
-<p>XXXXXXXXXXXX</p>
-<p><strong>III — CONCLUSÃO</strong></p>
-<p>Ante o exposto, manifesto-me XXXXXXXX quanto aos aspectos contábeis da despesa, podendo o processo prosseguir.</p>
+<p><strong>INTERESSADO:</strong> XXXXX</p>
+<p><strong>ASSUNTO:</strong> XXXXXXXX</p>
+<p><strong>1. DA DISPONIBILIDADE ORÇAMENTÁRIA</strong></p>
+<p>Conforme consulta ao sistema contábil, a despesa encontra-se devidamente amparada pelas dotações orçamentárias abaixo descritas:</p>
+<p><strong>UNIDADE GESTORA:</strong> {{unidade_gestora}}</p>
+<p><strong>ENQUADRAMENTO ORÇAMENTÁRIO E CONTÁBIL (SICOM {{ano}})</strong></p>
+<p>A classificação sugerida segue o Manual de Contabilidade Aplicada ao Setor Público (MCASP 11ª Edição) e o Ementário SICOM {{ano}} (TCEMG):</p>
+<p><strong>Resumo de Classificação de Despesa</strong></p>
+<table><thead><tr><th>Item</th><th>Órgão / Secretaria</th><th>Natureza (Elemento)</th><th>Ficha</th><th>Desdobramento</th><th>Descrição do Subelemento</th></tr></thead><tbody><tr><td>XXX</td><td>XXX</td><td>XXX</td><td>XXX</td><td>XXX</td><td>XXX</td></tr></tbody></table>
 <p><br></p>
-<p style="text-align:center">XXXXXXXXXX<br>Contador(a)</p>
+<p style="text-align:right">São Gonçalo do Rio Abaixo, XX de XXXX de {{ano}}.</p>
+<p><br></p>
+<p style="text-align:center">Júlio César do Couto<br>Contador CRCMG 077.481/O-9<br>Secretaria Municipal de Fazenda</p>
 HTML,
         'parecer_financeiro' => self::CABECALHO . <<<'HTML'
 <p><strong>Nº</strong> XXX/{{ano}}</p>
@@ -167,10 +176,10 @@ HTML,
 <p><strong>ASSUNTO:</strong> Dotação orçamentária e impacto financeiro</p>
 <p><strong>DATA:</strong> XX/XX/XXXX</p>
 <p><br></p>
-<p>A Secretaria Municipal de Planejamento, após análise, informa à Secretaria Municipal de administração que há previsão orçamentária e financeira na Lei Orçamentária Anual, para <strong>"XXXXXXX"</strong>.</p>
+<p>A Secretaria Municipal de Planejamento, após análise, informa que há previsão orçamentária e financeira na Lei Orçamentária Anual para a execução das despesas referentes a XXXXXXXX para demanda da Prefeitura Municipal de São Gonçalo do Rio Abaixo.</p>
 <p>Previsão da Despesa:</p>
 <table><thead><tr><th>Ano</th><th>Secretaria Municipal</th><th>Dotação</th><th>Recurso</th><th>Ficha</th><th>Desdobrada</th><th>Valor</th></tr></thead><tbody><tr><td>XXX</td><td>XXX</td><td>XXXXX</td><td>XXX</td><td>XXX</td><td>XXXXX</td><td>XXXXX</td></tr></tbody></table>
-<table><thead><tr><th>Valor da Receita</th><th>Despesa Prevista</th><th>Impacto</th><th>Valor Total</th></tr></thead><tbody><tr><td>XXXXX</td><td>XXXXX</td><td>XXX</td><td>XXXXX</td></tr></tbody></table>
+<table><thead><tr><th>Valor da Receita {{ano}}</th><th>Despesa Prevista</th><th>Impacto</th><th>Valor Total</th></tr></thead><tbody><tr><td>XXXXX</td><td>XXXXX</td><td>XXX</td><td>XXXXX</td></tr></tbody></table>
 <p>A estimativa do Impacto Orçamentário Financeiro para realização da despesa prevista no Exercício {{ano}} é de XXX% das receitas orçadas na Lei Orçamentária Anual nº XXXXX.</p>
 <p>Sendo só no momento, me coloco à disposição para quaisquer eventuais esclarecimentos.</p>
 <p><br></p>
@@ -405,9 +414,17 @@ HTML,
             && $this->emAndamento($processo)
             && !$processo->aguardandoRecebimento()  // precisa registrar o recebimento antes
             && !$this->assinado()
-            && $user->setor === $this->setorResponsavel()
+            && $this->atuaPor($user, $this->setorResponsavel())
             && $processo->setor_atual === $this->setorResponsavel()
             && $processo->etapa === $this->etapaDesignada();
+    }
+
+    /** O usuário é de quem atua na peça: o perfil dela (PERFIL_QUE_ATUA) ou, sem perfil, o setor. */
+    private function atuaPor(User $user, string $setor): bool
+    {
+        $perfil = self::PERFIL_QUE_ATUA[$this->tipo] ?? null;
+
+        return $perfil ? $user->hasRole($perfil) : $user->setor === $setor;
     }
 
     /** Por que não pode editar agora (a etapa, onde o processo está e com quem); null se pode. */
@@ -430,15 +447,21 @@ HTML,
         }
 
         if ($processo->aguardandoRecebimento()) {
-            return 'O processo chegou ao seu setor mas ainda não foi recebido. '
-                .'Registre o recebimento na tela do processo para liberar a edição.';
+            return isset(self::PERFIL_QUE_ATUA[$this->tipo])
+                ? 'O processo chegou à '.$meuSetor.', que ainda não registrou o recebimento; a edição libera depois disso.'
+                : 'O processo chegou ao seu setor mas ainda não foi recebido. '
+                    .'Registre o recebimento na tela do processo para liberar a edição.';
         }
 
         if ($this->assinado()) {
             return 'Este documento já foi assinado e não pode mais ser alterado.';
         }
 
-        if ($user->setor !== $this->setorResponsavel()) {
+        if (($perfil = self::PERFIL_QUE_ATUA[$this->tipo] ?? null) && !$user->hasRole($perfil)) {
+            return 'Este documento é preenchido e assinado pelo '.(User::$roleLabels[$perfil] ?? $perfil).'.';
+        }
+
+        if (!isset(self::PERFIL_QUE_ATUA[$this->tipo]) && $user->setor !== $this->setorResponsavel()) {
             return "Este documento é preenchido pelo setor {$meuSetor}, e o seu é "
                 .$user->setorLabel().'.';
         }
@@ -485,7 +508,7 @@ HTML,
             && !$processo->aguardandoRecebimento()  // precisa registrar o recebimento antes
             && !$this->assinado()
             && !empty($this->conteudo)
-            && $user->setor === $this->setorAssinatura()
+            && $this->atuaPor($user, $this->setorAssinatura())
             && $processo->setor_atual === $this->setorAssinatura()
             && $processo->etapa === $this->etapaAssinatura()
             // Assinatura reservada a um perfil — o Parecer Financeiro é do
