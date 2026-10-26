@@ -61,6 +61,11 @@ Em 20/10 subiram a saída do perfil Aprovador de Assinatura Eletrônica, a SCP c
 Comissão de Monitoramento e Avaliação única (commit `f183edd`, 2 migrações e o `RolesSeeder`, ensaiados numa
 cópia do banco de produção).
 
+Em 26/10, num segundo deploy (commit `154cbf4`, a migração `2026_10_26_100000` e o `RolesSeeder`, ensaiados
+numa cópia do banco de produção), subiram o item "Novas Propostas" do menu da Seleção (a SCP com lista própria,
+separada das manifestações), a Nova Proposta sem comprovantes de experiência e declarações e o Relatório e a Ata
+da Comissão fora do dossiê da OSC.
+
 Em 26/10 subiram as mudanças de 23 e 26/10 (commit `c11df7e`, as migrações `2026_10_23_100000` e
 `2026_10_23_110000` e o `RolesSeeder`, ensaiados numa cópia do banco de produção): registro de recebimento na
 Seleção, Arquivos da OSC fora da Seleção, Parecer Técnico Contábil na etapa 4 do Planejamento (com a permissão
@@ -69,9 +74,7 @@ e a resposta obrigatória quando há recurso, recurso na página da proposta da 
 Seleção da própria Secretaria. Na produção, o chamamento 1 (Cultura e Turismo) passa a pedir que a UG registre
 o recebimento.
 
-**No GitHub e ainda fora da produção:** o item "Novas Propostas" do menu da Seleção, a Nova Proposta sem
-comprovantes de experiência e declarações e o Relatório e a Ata da Comissão fora do dossiê da OSC (26/10, com a
-migração `2026_10_26_100000`).
+**No GitHub e ainda fora da produção:** nada.
 
 As ações de produção que o deploy não faz (dados e painel) estão em
 [Pendências → Produção](#produção-ação-não-código).
@@ -152,6 +155,7 @@ cada item estão no [Histórico de entregas](#histórico-de-entregas). 🚀 marc
 | 07/10 | Depois do deploy: listas só com o que é da Secretaria; R$ e vírgula em todos os campos de dinheiro; Arquivos da OSC valendo em todos os fluxos (recusa da UG trava a Celebração) |
 | 08/10 | Caixas de seleção e barra de download nos fluxos; **Arquivos da OSC preenchendo os fluxos** (documentos complementares, habilitação da dispensa e modelos com os dados da OSC); revisão do README |
 | 13/10 | Menu do portal da OSC na **barra lateral**, como o da área interna |
+| 26/10 | **Deploy na Hostinger** (commit `154cbf4`): Novas Propostas no menu, Nova Proposta sem experiência e declarações, Relatório e Ata internos |
 | 26/10 | **Relatório e Ata da Comissão de Seleção internos**: saem dos "Documentos do processo" que a OSC vê |
 | 26/10 | **Nova Proposta sem comprovantes de experiência e declarações**: a OSC os entrega na Celebração |
 | 26/10 | **Menu "Novas Propostas"**: o item "Propostas" muda de nome; a SCP, que não tinha a tela, passa a ter a lista própria, separada das manifestações |
