@@ -61,14 +61,15 @@ Em 20/10 subiram a saída do perfil Aprovador de Assinatura Eletrônica, a SCP c
 Comissão de Monitoramento e Avaliação única (commit `f183edd`, 2 migrações e o `RolesSeeder`, ensaiados numa
 cópia do banco de produção).
 
-Em 22/10 subiram as mudanças de 21 e 22/10 (commit `31dd092`, a migração `2026_10_22_100000` e o
-`RolesSeeder`, ensaiados numa cópia do banco de produção): telas de cadastro padronizadas, "Meus usuários",
-botão Voltar, perfis do "Solicitar acesso", avisos do Planejamento, itens 7 e 13 do Plano de Trabalho e Arquivos
-da OSC sem declarações e complementares, com a certidão municipal.
+Em 26/10 subiram as mudanças de 23 e 26/10 (commit `c11df7e`, as migrações `2026_10_23_100000` e
+`2026_10_23_110000` e o `RolesSeeder`, ensaiados numa cópia do banco de produção): registro de recebimento na
+Seleção, Arquivos da OSC fora da Seleção, Parecer Técnico Contábil na etapa 4 do Planejamento (com a permissão
+`parecer_contabil` do Contador e os modelos oficiais dos dois pareceres), etapa do recurso com o arquivo da OSC
+e a resposta obrigatória quando há recurso, recurso na página da proposta da OSC e a caixa de entrada só com a
+Seleção da própria Secretaria. Na produção, o chamamento 1 (Cultura e Turismo) passa a pedir que a UG registre
+o recebimento.
 
-**No GitHub e ainda fora da produção:** o registro de recebimento na Seleção (23/10, com a migração
-`2026_10_23_100000`), os Arquivos da OSC fora da Seleção, o Parecer Técnico Contábil no Planejamento, a etapa do recurso da Seleção, o recurso na proposta da OSC (23/10) e a caixa de entrada só com a Seleção da própria Secretaria (26/10,
-com a migração `2026_10_23_110000` e o `RolesSeeder`).
+**No GitHub e ainda fora da produção:** nada.
 
 As ações de produção que o deploy não faz (dados e painel) estão em
 [Pendências → Produção](#produção-ação-não-código).
@@ -149,6 +150,7 @@ cada item estão no [Histórico de entregas](#histórico-de-entregas). 🚀 marc
 | 07/10 | Depois do deploy: listas só com o que é da Secretaria; R$ e vírgula em todos os campos de dinheiro; Arquivos da OSC valendo em todos os fluxos (recusa da UG trava a Celebração) |
 | 08/10 | Caixas de seleção e barra de download nos fluxos; **Arquivos da OSC preenchendo os fluxos** (documentos complementares, habilitação da dispensa e modelos com os dados da OSC); revisão do README |
 | 13/10 | Menu do portal da OSC na **barra lateral**, como o da área interna |
+| 26/10 | **Deploy na Hostinger** (commit `c11df7e`): tudo de 23 e 26/10, com 2 migrações e o `RolesSeeder` |
 | 26/10 | **Caixa de entrada**: a UG só vê a Seleção da própria Secretaria (mostrava a de todas, que depois davam "pertence a outra Secretaria") |
 | 23/10 | **Recurso na página da proposta da OSC**: o portal mostra quando o recurso abre, recebe o arquivo no prazo e mostra o protocolado |
 | 23/10 | **Etapa do recurso na Seleção**: o arquivo do recurso da OSC aparece na própria etapa, ao lado da Resposta ao recurso, que fica obrigatória quando há recurso |
