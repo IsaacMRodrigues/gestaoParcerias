@@ -69,8 +69,9 @@ e a resposta obrigatória quando há recurso, recurso na página da proposta da 
 Seleção da própria Secretaria. Na produção, o chamamento 1 (Cultura e Turismo) passa a pedir que a UG registre
 o recebimento.
 
-**No GitHub e ainda fora da produção:** o item "Novas Propostas" do menu da Seleção e a Nova Proposta sem
-comprovantes de experiência e declarações (26/10).
+**No GitHub e ainda fora da produção:** o item "Novas Propostas" do menu da Seleção, a Nova Proposta sem
+comprovantes de experiência e declarações e o Relatório e a Ata da Comissão fora do dossiê da OSC (26/10, com a
+migração `2026_10_26_100000`).
 
 As ações de produção que o deploy não faz (dados e painel) estão em
 [Pendências → Produção](#produção-ação-não-código).
@@ -151,6 +152,7 @@ cada item estão no [Histórico de entregas](#histórico-de-entregas). 🚀 marc
 | 07/10 | Depois do deploy: listas só com o que é da Secretaria; R$ e vírgula em todos os campos de dinheiro; Arquivos da OSC valendo em todos os fluxos (recusa da UG trava a Celebração) |
 | 08/10 | Caixas de seleção e barra de download nos fluxos; **Arquivos da OSC preenchendo os fluxos** (documentos complementares, habilitação da dispensa e modelos com os dados da OSC); revisão do README |
 | 13/10 | Menu do portal da OSC na **barra lateral**, como o da área interna |
+| 26/10 | **Relatório e Ata da Comissão de Seleção internos**: saem dos "Documentos do processo" que a OSC vê |
 | 26/10 | **Nova Proposta sem comprovantes de experiência e declarações**: a OSC os entrega na Celebração |
 | 26/10 | **Menu "Novas Propostas"**: o item "Propostas" muda de nome; a SCP, que não tinha a tela, passa a ter a lista própria, separada das manifestações |
 | 26/10 | **Deploy na Hostinger** (commit `c11df7e`): tudo de 23 e 26/10, com 2 migrações e o `RolesSeeder` |
@@ -736,6 +738,14 @@ Trazer os demais cenários para `tests/Feature` é uma das [Pendências](#pendê
 
 Da mais recente para a mais antiga. Cada entrada diz o que mudou, **por quê** e como foi
 conferido — o porquê é o que falta a quem pega o código depois.
+
+- [2026-10-26] **Relatório e Ata da Comissão de Seleção são internos** (`Peca::INTERNAS`)
+  - Pedido da SCP: no portal da OSC, em "Documentos do processo", a fase da Seleção mostrava o Relatório e a Ata
+    da Comissão, que são documentos internos. As duas peças entram em `Peca::INTERNAS` (nascem fechadas à OSC) e
+    a migração `2026_10_26_100000` fecha as que já existem. O Resultado provisório e a publicação seguem à vista;
+    a SCP ainda pode abrir uma peça interna na curadoria do dossiê
+  - Conferido: `DocumentosInternosTest::test_relatorio_e_ata_da_comissao_sao_internos_e_o_resultado_nao`;
+    suíte 242/242
 
 - [2026-10-26] **Nova Proposta: experiência e declarações só na Celebração** (`ManifestacaoInteresse::pendenciasParaSubmeter`,
   `ManifestacaoController::storeDocumento`, `portal/manifestacoes/show`)

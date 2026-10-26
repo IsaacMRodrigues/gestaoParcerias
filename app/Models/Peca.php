@@ -456,7 +456,7 @@ class Peca extends Model
      * A SCP pode abrir ou fechar cada uma na curadoria do dossiê.
      */
     public const INTERNAS = [
-        'comissao_selecao', 'portaria_gestor', 'portaria_comissao_mon',
+        'comissao_selecao', 'relatorio_comissao', 'ata_comissao', 'portaria_gestor', 'portaria_comissao_mon',
         'gestor_parceria', 'comissao_monitoramento',
         'protocolo_juridico', 'pedido_parecer',
         'op_global', 'comprovante_empenho',

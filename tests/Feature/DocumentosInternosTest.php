@@ -104,6 +104,22 @@ class DocumentosInternosTest extends TestCase
         $this->actingAs($this->dona)->get("/portal/propostas/{$this->proposta->id}/dossie/peca/{$termo->id}")->assertOk();
     }
 
+    public function test_relatorio_e_ata_da_comissao_sao_internos_e_o_resultado_nao(): void
+    {
+        $chamamento = $this->proposta->chamamento;
+        Peca::sincronizar($chamamento, 'chamamento_publico');
+        $assinado = ['conteudo' => '<p>texto</p>', 'assinado_em' => now(), 'assinado_por' => $this->ugDona->id, 'assinante_nome' => 'UG'];
+        $chamamento->pecas()->whereIn('chave', ['relatorio_comissao', 'ata_comissao', 'resultado_parcial'])->update($assinado);
+        $relatorio = $chamamento->pecas()->where('chave', 'relatorio_comissao')->sole();
+
+        $this->assertFalse($relatorio->visivel_osc, 'nasce fechado à OSC');
+        $this->actingAs($this->dona)->get("/portal/propostas/{$this->proposta->id}")->assertOk()
+            ->assertSee('Resultado provisório')
+            ->assertDontSee('Relatório da Comissão de Seleção')->assertDontSee('Ata da Comissão de Seleção');
+        // Fechado à OSC, fica fora do dossiê também pelo endereço.
+        $this->actingAs($this->dona)->get("/portal/propostas/{$this->proposta->id}/dossie/peca/{$relatorio->id}")->assertNotFound();
+    }
+
     public function test_perfis_internos_continuam_vendo_o_planejamento(): void
     {
         $this->actingAs($this->ugDona)->get("/processos/{$this->processo->id}")
