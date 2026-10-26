@@ -122,6 +122,7 @@ class CaixaDeEntrada
         }
 
         return Chamamento::with(['programa.orgao', 'selecaoTramitacoes'])
+            ->visiveisPara($user)  // a UG só vê a Seleção da própria Secretaria
             ->where('tipo', 'chamamento_publico')
             ->where('status', '!=', 'cancelado') // cancelado não anda: não é a vez de ninguém
             ->where('selecao_setor', $user->setor)

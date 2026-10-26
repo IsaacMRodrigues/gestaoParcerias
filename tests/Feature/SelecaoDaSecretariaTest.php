@@ -14,7 +14,7 @@ use Tests\TestCase;
 
 /**
  * O chamamento é da Secretaria dele: a UG de outra Secretaria não abre a Seleção, não preenche nem
- * assina as peças e não encaminha, nem pelo endereço. A página pública segue aberta.
+ * assina as peças e não encaminha, nem pelo endereço, nem a vê na caixa de entrada. A página pública segue aberta.
  */
 class SelecaoDaSecretariaTest extends TestCase
 {
@@ -41,6 +41,10 @@ class SelecaoDaSecretariaTest extends TestCase
         };
         $daEducacao = $servidor($educacao);
         $daSaude = $servidor($saude);
+
+        // Nem na caixa de entrada: lá ela levaria ao "pertence a outra Secretaria".
+        $this->assertTrue(\App\Support\CaixaDeEntrada::para($daSaude)->vazia());
+        $this->assertSame('Seleção', \App\Support\CaixaDeEntrada::para($daEducacao)->itens->sole()['tramite']);
 
         $this->actingAs($daSaude)->get("/chamamentos/{$chamamento->id}/selecao")->assertForbidden();
         $this->actingAs($daSaude)->put("/pecas/{$ata->id}", ['conteudo' => '<p>intrusa</p>'])->assertForbidden();
