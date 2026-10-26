@@ -172,6 +172,24 @@ class NovaPropostaTest extends TestCase
         $this->assertFalse($this->naCaixa($this->ugEducacao, 'Oficinas de música'));
     }
 
+    public function test_o_menu_novas_propostas_leva_cada_um_a_sua_lista(): void
+    {
+        $p = $this->enviada();
+        $lista = route('manifestacoes.index', ['tipo' => 'proposta'], false);
+
+        // A SCP, sem a tela de Propostas, abre a lista das Novas Propostas; a de manifestações não as mistura.
+        $this->actingAs($this->scp)->get('/manifestacoes')->assertOk()
+            ->assertSee('Novas Propostas')->assertSee(e($lista), false)
+            ->assertDontSee('Oficinas de música');
+        $this->actingAs($this->scp)->get($lista)->assertOk()->assertSee('Oficinas de música');
+        $this->actingAs($this->scp)->get("/manifestacoes/{$p->id}")->assertOk()->assertSee(e($lista), false);
+
+        // A UG tem a tela de Propostas: o item com esse nome passa a se chamar Novas Propostas.
+        $menu = $this->actingAs($this->ugEducacao)->get('/propostas')->assertOk()->getContent();
+        $this->assertMatchesRegularExpression('#href="[^"]*/propostas"[^>]*>\s*Novas Propostas#', $menu);
+        $this->assertDoesNotMatchRegularExpression('#>\s*Propostas\s*(<span|</a>)#', $menu);
+    }
+
     public function test_a_scp_encaminha_a_ug_escolhida_e_so_ela_recebe(): void
     {
         $p = $this->encaminhada();

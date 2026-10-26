@@ -1,19 +1,20 @@
 @php
-    $navPropostasNovas = auth()->user()->can('propostas')
+    // Item "Novas Propostas": as inscrições submetidas e as Novas Propostas (sem chamamento) paradas com o
+    // setor de quem vê o menu. Quem tem a tela de Propostas (a UG) as vê lá; a SCP, na lista das Novas Propostas.
+    $navPropostasNovas = (auth()->user()->can('propostas')
         ? \App\Models\Proposta::visiveisPara(auth()->user())->where('status', 'submetida')->count()
-        : 0;
-    // Novas Propostas paradas com a UG de quem vê o menu.
-    $navPropostasNovas += auth()->user()->can('propostas')
-        ? \App\Models\ManifestacaoInteresse::doTipo('proposta')->emTramite()
-            ->visiveisPara(auth()->user())->where('setor_atual', auth()->user()->setorNoTramite())->count()
-        : 0;
+        : 0)
+        + (auth()->user()->canAny(['chamamentos', 'propostas'])
+            ? \App\Models\ManifestacaoInteresse::doTipo('proposta')->emTramite()
+                ->visiveisPara(auth()->user())->where('setor_atual', auth()->user()->setorNoTramite())->count()
+            : 0);
     // Contas novas a aprovar: o administrador e a SCP decidem.
     $navPendentes = auth()->user()->canAny(['cadastros', 'aprovar_contas']) ? \App\Models\User::pendentes()->count() : 0;
     // Selo do suporte: só para quem atende, e só do que ainda ocupa alguém.
     $navChamados = auth()->user()->can('suporte') ? \App\Models\Chamado::emAberto()->count() : 0;
     // Manifestações paradas esperando o setor de quem está vendo o menu.
     $navManifestacoes = auth()->user()->can('chamamentos')
-        ? \App\Models\ManifestacaoInteresse::visiveisPara(auth()->user())
+        ? \App\Models\ManifestacaoInteresse::doTipo('manifestacao')->visiveisPara(auth()->user())
             ->emTramite()
             ->where('setor_atual', auth()->user()->setorNoTramite())
             ->count()
@@ -108,6 +109,13 @@
                 $urlSelecao = auth()->user()->can('chamamentos')
                     ? route('chamamentos.index')
                     : route('propostas.index');
+                // Manifestação ou Nova Proposta aberta: o item aceso é o do tipo dela.
+                $tipoAberto = request()->routeIs('manifestacoes.*')
+                    ? (request()->route('manifestacao')?->tipo ?? (request('tipo') === 'proposta' ? 'proposta' : 'manifestacao'))
+                    : null;
+                $urlNovasPropostas = auth()->user()->can('propostas')
+                    ? route('propostas.index')
+                    : route('manifestacoes.index', ['tipo' => 'proposta']);
             @endphp
             <div>
                 {{-- Seleção só encaminha ao primeiro subitem. --}}
@@ -126,19 +134,18 @@
                     @endcan
                     @can('chamamentos')
                         {{-- Antessala da Seleção: proposta de OSC sem chamamento aberto --}}
-                        <a href="{{ route('manifestacoes.index') }}"
-                           class="{{ $link }} pl-10 {{ request()->routeIs('manifestacoes.*') ? $on : '' }}">
+                        <a href="{{ route('manifestacoes.index', ['tipo' => 'manifestacao']) }}"
+                           class="{{ $link }} pl-10 {{ $tipoAberto === 'manifestacao' ? $on : '' }}">
                             Manifestações de Interesse
                             @if($navManifestacoes > 0)<span class="{{ $badge }}">{{ $navManifestacoes }}</span>@endif
                         </a>
                     @endcan
-                    @can('propostas')
-                        <a href="{{ route('propostas.index') }}"
-                           class="{{ $link }} pl-10 {{ request()->routeIs('propostas.*') ? $on : '' }}">
-                            Propostas
-                            @if($navPropostasNovas > 0)<span class="{{ $badge }}">{{ $navPropostasNovas }}</span>@endif
-                        </a>
-                    @endcan
+                    {{-- A UG abre a tela de Propostas (inscrições e Novas Propostas); a SCP, sem ela, a lista das Novas Propostas. --}}
+                    <a href="{{ $urlNovasPropostas }}"
+                       class="{{ $link }} pl-10 {{ request()->routeIs('propostas.*') || $tipoAberto === 'proposta' ? $on : '' }}">
+                        Novas Propostas
+                        @if($navPropostasNovas > 0)<span class="{{ $badge }}">{{ $navPropostasNovas }}</span>@endif
+                    </a>
                 </div>
             </div>
         @else

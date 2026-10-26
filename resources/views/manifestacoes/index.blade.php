@@ -1,11 +1,19 @@
 <x-app-layout>
     <x-slot name="header">
         <div>
-            <h2 class="text-2xl font-bold text-gray-900">Manifestações de Interesse</h2>
-            <p class="text-sm text-gray-500 mt-0.5">
-                Propostas apresentadas por OSCs sem chamamento aberto — a SCP ouve a Secretaria e
-                decide o encaminhamento.
-            </p>
+            @if($tipo === 'proposta')
+                <h2 class="text-2xl font-bold text-gray-900">Novas Propostas</h2>
+                <p class="text-sm text-gray-500 mt-0.5">
+                    Propostas de OSCs para dispensa ou inexigibilidade, sem chamamento — a SCP escolhe a Secretaria e
+                    encaminha à Unidade Gestora, que defere ou indefere.
+                </p>
+            @else
+                <h2 class="text-2xl font-bold text-gray-900">Manifestações de Interesse</h2>
+                <p class="text-sm text-gray-500 mt-0.5">
+                    Propostas apresentadas por OSCs sem chamamento aberto — a SCP ouve a Secretaria e
+                    decide o encaminhamento.
+                </p>
+            @endif
         </div>
     </x-slot>
 
@@ -15,12 +23,12 @@
 
             <div class="flex flex-wrap gap-2">
                 @php $filtro = request('status'); @endphp
-                <a href="{{ route('manifestacoes.index') }}"
+                <a href="{{ route('manifestacoes.index', ['tipo' => $tipo]) }}"
                    class="px-2.5 py-1 text-xs font-semibold rounded-md ring-1 {{ $filtro ? 'bg-white text-gray-600 ring-gray-200' : 'bg-slate-100 text-slate-800 ring-slate-200' }}">
                     Todas
                 </a>
                 @foreach(['submetida', 'em_analise', 'analisada', 'deferida', 'indeferida'] as $st)
-                    <a href="{{ route('manifestacoes.index', ['status' => $st]) }}"
+                    <a href="{{ route('manifestacoes.index', ['tipo' => $tipo, 'status' => $st]) }}"
                        class="px-2.5 py-1 text-xs font-semibold rounded-md ring-1 {{ $filtro === $st ? 'bg-slate-100 text-slate-800 ring-slate-200' : 'bg-white text-gray-600 ring-gray-200' }}">
                         {{ \App\Models\ManifestacaoInteresse::STATUS[$st] }}
                     </a>
@@ -54,7 +62,7 @@
                     </a>
                 @empty
                     <div class="px-6 py-14">
-                        <x-empty-state icone="pasta">Nenhuma manifestação de interesse recebida.</x-empty-state>
+                        <x-empty-state icone="pasta">{{ $tipo === 'proposta' ? 'Nenhuma Nova Proposta recebida.' : 'Nenhuma manifestação de interesse recebida.' }}</x-empty-state>
                     </div>
                 @endforelse
             </div>

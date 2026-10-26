@@ -16,10 +16,11 @@
         <div>
             <p class="text-sm text-gray-500">
                 @if($novaProposta)
-                    <a href="{{ route('propostas.index') }}" class="hover:underline">Propostas</a>
+                    {{-- Como o item do menu: a UG volta à tela de Propostas; a SCP, que não a tem, à lista das Novas Propostas. --}}
+                    <a href="{{ auth()->user()->can('propostas') ? route('propostas.index') : route('manifestacoes.index', ['tipo' => 'proposta']) }}" class="hover:underline">Novas Propostas</a>
                     &rsaquo; Nova Proposta @if($manifestacao->fundamento_pedido)({{ \App\Models\ManifestacaoInteresse::FUNDAMENTOS_PEDIDO[$manifestacao->fundamento_pedido] ?? '' }})@endif
                 @else
-                    <a href="{{ route('manifestacoes.index') }}" class="hover:underline">Manifestações de Interesse</a>
+                    <a href="{{ route('manifestacoes.index', ['tipo' => 'manifestacao']) }}" class="hover:underline">Manifestações de Interesse</a>
                     &rsaquo; Análise
                 @endif
             </p>

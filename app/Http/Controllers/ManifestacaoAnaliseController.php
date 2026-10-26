@@ -25,17 +25,20 @@ class ManifestacaoAnaliseController extends Controller
 
     public function index(Request $request): View
     {
+        // Manifestação e Nova Proposta são itens separados do menu; a SCP, que recebe a Nova Proposta
+        // primeiro, não tem a tela de Propostas.
+        $tipo = array_key_exists((string) $request->tipo, ManifestacaoInteresse::TIPOS) ? $request->tipo : 'manifestacao';
+
         $manifestacoes = ManifestacaoInteresse::with(['osc', 'orgao'])
             ->visiveisPara(auth()->user())
-            // A Nova Proposta aparece aqui também (com etiqueta), porque a SCP, que
-            // a recebe primeiro, não tem acesso à tela de Propostas.
+            ->doTipo($tipo)
             ->where('status', '!=', 'rascunho')   // rascunho é da OSC; o município não vê
             ->when($request->filled('status'), fn ($q) => $q->where('status', $request->status))
             ->latest('submetida_em')
             ->paginate(15)
             ->withQueryString();
 
-        return view('manifestacoes.index', compact('manifestacoes'));
+        return view('manifestacoes.index', compact('manifestacoes', 'tipo'));
     }
 
     public function show(ManifestacaoInteresse $manifestacao): View

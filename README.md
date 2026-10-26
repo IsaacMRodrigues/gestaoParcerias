@@ -69,7 +69,7 @@ e a resposta obrigatória quando há recurso, recurso na página da proposta da 
 Seleção da própria Secretaria. Na produção, o chamamento 1 (Cultura e Turismo) passa a pedir que a UG registre
 o recebimento.
 
-**No GitHub e ainda fora da produção:** nada.
+**No GitHub e ainda fora da produção:** o item "Novas Propostas" do menu da Seleção (26/10).
 
 As ações de produção que o deploy não faz (dados e painel) estão em
 [Pendências → Produção](#produção-ação-não-código).
@@ -150,6 +150,7 @@ cada item estão no [Histórico de entregas](#histórico-de-entregas). 🚀 marc
 | 07/10 | Depois do deploy: listas só com o que é da Secretaria; R$ e vírgula em todos os campos de dinheiro; Arquivos da OSC valendo em todos os fluxos (recusa da UG trava a Celebração) |
 | 08/10 | Caixas de seleção e barra de download nos fluxos; **Arquivos da OSC preenchendo os fluxos** (documentos complementares, habilitação da dispensa e modelos com os dados da OSC); revisão do README |
 | 13/10 | Menu do portal da OSC na **barra lateral**, como o da área interna |
+| 26/10 | **Menu "Novas Propostas"**: o item "Propostas" muda de nome; a SCP, que não tinha a tela, passa a ter a lista própria, separada das manifestações |
 | 26/10 | **Deploy na Hostinger** (commit `c11df7e`): tudo de 23 e 26/10, com 2 migrações e o `RolesSeeder` |
 | 26/10 | **Caixa de entrada**: a UG só vê a Seleção da própria Secretaria (mostrava a de todas, que depois davam "pertence a outra Secretaria") |
 | 23/10 | **Recurso na página da proposta da OSC**: o portal mostra quando o recurso abre, recebe o arquivo no prazo e mostra o protocolado |
@@ -733,6 +734,15 @@ Trazer os demais cenários para `tests/Feature` é uma das [Pendências](#pendê
 
 Da mais recente para a mais antiga. Cada entrada diz o que mudou, **por quê** e como foi
 conferido — o porquê é o que falta a quem pega o código depois.
+
+- [2026-10-26] **Menu da Seleção: "Novas Propostas"** (`layouts/sidebar`, `ManifestacaoAnaliseController::index`)
+  - Relatos da SCP: a conta do Setor de Convênios não tinha a aba de Novas Propostas, só Chamamentos e
+    Manifestações de Interesse (a Nova Proposta vinha misturada nas manifestações, com etiqueta); e na UG o item
+    "Propostas" devia se chamar "Novas Propostas". Fica um item só, "Novas Propostas": quem tem a permissão
+    `propostas` (a UG) vai à tela de Propostas, como antes; a SCP, que não a tem, à lista das Novas Propostas
+    (`/manifestacoes?tipo=proposta`). A lista de manifestações passa a mostrar só manifestações, e o "voltar" da
+    Nova Proposta segue a mesma regra do menu (antes levava a SCP a um acesso negado)
+  - Conferido: `NovaPropostaTest::test_o_menu_novas_propostas_leva_cada_um_a_sua_lista`; suíte 240/240
 
 - [2026-10-26] **Caixa de entrada: Seleção só da própria Secretaria** (`CaixaDeEntrada::selecoes`)
   - Relato em produção: a UG da Ciência e Tecnologia via na caixa a Seleção do chamamento da Cultura e
