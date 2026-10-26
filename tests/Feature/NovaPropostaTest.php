@@ -172,6 +172,30 @@ class NovaPropostaTest extends TestCase
         $this->assertFalse($this->naCaixa($this->ugEducacao, 'Oficinas de música'));
     }
 
+    public function test_experiencia_e_declaracoes_ficam_para_a_celebracao(): void
+    {
+        $this->actingAs($this->rl)->post('/portal/novas-propostas', [
+            'titulo' => 'Oficinas de dança', 'objeto' => 'x', 'justificativa' => 'x', 'plano_aplicacao' => 'Instrutor, 10 meses.',
+        ])->assertSessionHasNoErrors();
+        $p = ManifestacaoInteresse::where('titulo', 'Oficinas de dança')->sole();
+        $p->update(['valor_solicitado' => 8000]);
+        $p->planoItens()->create(['numero' => 1, 'descricao' => 'Instrutor', 'tipo_despesa' => 'servicos_pf', 'quantidade' => 10, 'valor_unitario' => 800]);
+        $meta = $p->criarMeta(['descricao' => 'Meta 1']);
+        $p->desembolsos()->create(['meta_id' => $meta->id, 'parcela' => 1, 'valor' => 8000]);
+
+        // Sem comprovante de experiência nem declaração, a Nova Proposta já pode ser enviada.
+        $this->assertNotContains('comprovantes de experiência', $p->fresh()->pendenciasParaSubmeter());
+        $this->actingAs($this->rl)->get("/portal/manifestacoes/{$p->id}")->assertOk()
+            ->assertSee('Outros documentos (opcional)')->assertSee('a OSC os entrega na')
+            ->assertDontSee('<option value="experiencia_previa">', false);
+        $this->actingAs($this->rl)->post("/portal/manifestacoes/{$p->id}/documentos", [
+            'tipo' => 'experiencia_previa', 'arquivo' => \Illuminate\Http\UploadedFile::fake()->create('exp.pdf', 10, 'application/pdf'),
+        ])->assertSessionHasErrors('tipo');
+
+        $this->actingAs($this->rl)->patch("/portal/manifestacoes/{$p->id}/submeter")->assertSessionHas('success');
+        $this->assertSame('submetida', $p->fresh()->status);
+    }
+
     public function test_o_menu_novas_propostas_leva_cada_um_a_sua_lista(): void
     {
         $p = $this->enviada();

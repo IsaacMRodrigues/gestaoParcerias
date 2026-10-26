@@ -83,11 +83,20 @@
 
         {{-- 3. Documentos --}}
         <div class="bg-white rounded-xl border border-gray-200 shadow-sm p-6">
-            <h2 class="text-base font-semibold text-gray-800">Comprovantes de experiência e outros documentos</h2>
-            <p class="text-xs text-gray-400 mt-0.5 mb-4">
-                O que depende do objeto desta proposta. Certidões, estatuto, ata de eleição e declarações ficam em
-                <a href="{{ route('portal.arquivos.index') }}" class="text-brand-700 hover:underline">Arquivos da OSC</a>,
-                anexados uma vez para todas as propostas.
+            @if($manifestacao->ehNovaProposta())
+                <h2 class="text-base font-semibold text-gray-800">Outros documentos (opcional)</h2>
+                <p class="text-xs text-gray-400 mt-0.5 mb-4">
+                    Os comprovantes de experiência e as declarações não se enviam aqui: a OSC os entrega na
+                    Celebração, depois de a proposta ser deferida. Certidões, estatuto e ata de eleição ficam em
+                    <a href="{{ route('portal.arquivos.index') }}" class="text-brand-700 hover:underline">Arquivos da OSC</a>,
+                    anexados uma vez para todas as propostas.
+            @else
+                <h2 class="text-base font-semibold text-gray-800">Comprovantes de experiência e outros documentos</h2>
+                <p class="text-xs text-gray-400 mt-0.5 mb-4">
+                    O que depende do objeto desta proposta. Certidões, estatuto e ata de eleição ficam em
+                    <a href="{{ route('portal.arquivos.index') }}" class="text-brand-700 hover:underline">Arquivos da OSC</a>,
+                    anexados uma vez para todas as propostas; as declarações são assinadas na Celebração.
+            @endif
                 @if($faltamArquivos = $manifestacao->osc?->pendenciasDosArquivos())
                     <span class="block mt-1 text-accent-800">Falta completar: {{ implode('; ', $faltamArquivos) }}.</span>
                 @endif
@@ -123,6 +132,8 @@
                         <select name="tipo" id="tipo" required
                                 class="mt-1 border-gray-300 rounded-md shadow-sm text-sm focus:ring-brand-500 focus:border-brand-500">
                             @foreach(\App\Models\Documento::tiposParaAnexar() as $k => $rotulo)
+                                {{-- Na Nova Proposta, a experiência é item da Celebração. --}}
+                                @continue($manifestacao->ehNovaProposta() && $k === 'experiencia_previa')
                                 <option value="{{ $k }}">{{ $rotulo }}</option>
                             @endforeach
                         </select>

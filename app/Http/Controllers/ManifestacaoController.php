@@ -104,11 +104,15 @@ class ManifestacaoController extends Controller
 
         $request->validate([
             'arquivo' => ['required', 'file', 'mimes:pdf,doc,docx,xls,xlsx,jpg,jpeg,png', 'max:10240'],
-            // Estatuto, ata e certidões estão em "Arquivos da OSC".
-            'tipo'    => ['required', 'string', 'in:' . implode(',', array_keys(\App\Models\Documento::tiposParaAnexar()))],
+            // Estatuto, ata e certidões estão em "Arquivos da OSC"; na Nova Proposta, a experiência é da Celebração.
+            'tipo'    => ['required', 'string', 'in:' . implode(',', array_keys(array_diff_key(\App\Models\Documento::tiposParaAnexar(),
+                $manifestacao->ehNovaProposta() ? ['experiencia_previa' => true] : [])))],
         ], [
             'arquivo.max'   => 'O arquivo não pode ultrapassar 10 MB.',
             'arquivo.mimes' => 'Formatos aceitos: PDF, Word, Excel, JPG, PNG.',
+            'tipo.in'       => $manifestacao->ehNovaProposta() && $request->tipo === 'experiencia_previa'
+                ? 'Os comprovantes de experiência são entregues na Celebração.'
+                : 'Tipo de documento inválido.',
         ]);
 
         $arquivo = $request->file('arquivo');

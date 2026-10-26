@@ -69,7 +69,8 @@ e a resposta obrigatória quando há recurso, recurso na página da proposta da 
 Seleção da própria Secretaria. Na produção, o chamamento 1 (Cultura e Turismo) passa a pedir que a UG registre
 o recebimento.
 
-**No GitHub e ainda fora da produção:** o item "Novas Propostas" do menu da Seleção (26/10).
+**No GitHub e ainda fora da produção:** o item "Novas Propostas" do menu da Seleção e a Nova Proposta sem
+comprovantes de experiência e declarações (26/10).
 
 As ações de produção que o deploy não faz (dados e painel) estão em
 [Pendências → Produção](#produção-ação-não-código).
@@ -150,6 +151,7 @@ cada item estão no [Histórico de entregas](#histórico-de-entregas). 🚀 marc
 | 07/10 | Depois do deploy: listas só com o que é da Secretaria; R$ e vírgula em todos os campos de dinheiro; Arquivos da OSC valendo em todos os fluxos (recusa da UG trava a Celebração) |
 | 08/10 | Caixas de seleção e barra de download nos fluxos; **Arquivos da OSC preenchendo os fluxos** (documentos complementares, habilitação da dispensa e modelos com os dados da OSC); revisão do README |
 | 13/10 | Menu do portal da OSC na **barra lateral**, como o da área interna |
+| 26/10 | **Nova Proposta sem comprovantes de experiência e declarações**: a OSC os entrega na Celebração |
 | 26/10 | **Menu "Novas Propostas"**: o item "Propostas" muda de nome; a SCP, que não tinha a tela, passa a ter a lista própria, separada das manifestações |
 | 26/10 | **Deploy na Hostinger** (commit `c11df7e`): tudo de 23 e 26/10, com 2 migrações e o `RolesSeeder` |
 | 26/10 | **Caixa de entrada**: a UG só vê a Seleção da própria Secretaria (mostrava a de todas, que depois davam "pertence a outra Secretaria") |
@@ -734,6 +736,17 @@ Trazer os demais cenários para `tests/Feature` é uma das [Pendências](#pendê
 
 Da mais recente para a mais antiga. Cada entrada diz o que mudou, **por quê** e como foi
 conferido — o porquê é o que falta a quem pega o código depois.
+
+- [2026-10-26] **Nova Proposta: experiência e declarações só na Celebração** (`ManifestacaoInteresse::pendenciasParaSubmeter`,
+  `ManifestacaoController::storeDocumento`, `portal/manifestacoes/show`)
+  - Pedido da SCP: os comprovantes de experiência e as declarações estavam vinculados ao cadastro da Nova
+    Proposta e devem ser da fase de Celebração. A Nova Proposta deixa de exigir documento anexado ("comprovantes
+    de experiência"), o tipo "Comprovante de experiência prévia" sai do formulário dela (e o servidor o recusa), e
+    a seção vira "Outros documentos (opcional)", explicando que experiência e declarações vêm na Celebração, onde
+    já são itens obrigatórios da etapa da OSC. O texto que dizia que as declarações ficam em Arquivos da OSC
+    (desatualizado desde 22/10) foi corrigido também na manifestação de interesse, que segue pedindo os
+    comprovantes. Arquivos da OSC (certidões e institucionais) continuam exigidos na Nova Proposta
+  - Conferido: `NovaPropostaTest::test_experiencia_e_declaracoes_ficam_para_a_celebracao`; suíte 241/241
 
 - [2026-10-26] **Menu da Seleção: "Novas Propostas"** (`layouts/sidebar`, `ManifestacaoAnaliseController::index`)
   - Relatos da SCP: a conta do Setor de Convênios não tinha a aba de Novas Propostas, só Chamamentos e
