@@ -144,7 +144,18 @@ class PortalController extends Controller
             ->latest()
             ->get();
 
-        return view('portal.minhas-propostas', compact('osc', 'emChamamento', 'emDispensa', 'manifestacoes', 'busca'));
+        // Manifestação de interesse e Nova Proposta são caminhos diferentes: cada uma no seu bloco, com a
+        // parceria por dispensa ou inexigibilidade no bloco de onde nasceu.
+        $origem = ManifestacaoInteresse::whereIn('proposta_id', $emDispensa->pluck('id'))->pluck('tipo', 'proposta_id');
+        $blocos = [];
+        foreach (array_keys(ManifestacaoInteresse::TIPOS) as $tipo) {
+            $blocos[$tipo] = [
+                'propostas'     => $emDispensa->filter(fn ($p) => ($origem[$p->id] ?? 'manifestacao') === $tipo)->values(),
+                'manifestacoes' => $manifestacoes->where('tipo', $tipo)->values(),
+            ];
+        }
+
+        return view('portal.minhas-propostas', compact('osc', 'emChamamento', 'emDispensa', 'manifestacoes', 'blocos', 'busca'));
     }
 
     public function participar(Chamamento $chamamento): View|RedirectResponse

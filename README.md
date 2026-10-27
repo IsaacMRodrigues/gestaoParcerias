@@ -74,7 +74,8 @@ e a resposta obrigatória quando há recurso, recurso na página da proposta da 
 Seleção da própria Secretaria. Na produção, o chamamento 1 (Cultura e Turismo) passa a pedir que a UG registre
 o recebimento.
 
-**No GitHub e ainda fora da produção:** nada.
+**No GitHub e ainda fora da produção:** "Minhas inscrições" da OSC com Manifestações de interesse e Novas
+Propostas em blocos separados (27/10).
 
 As ações de produção que o deploy não faz (dados e painel) estão em
 [Pendências → Produção](#produção-ação-não-código).
@@ -155,6 +156,7 @@ cada item estão no [Histórico de entregas](#histórico-de-entregas). 🚀 marc
 | 07/10 | Depois do deploy: listas só com o que é da Secretaria; R$ e vírgula em todos os campos de dinheiro; Arquivos da OSC valendo em todos os fluxos (recusa da UG trava a Celebração) |
 | 08/10 | Caixas de seleção e barra de download nos fluxos; **Arquivos da OSC preenchendo os fluxos** (documentos complementares, habilitação da dispensa e modelos com os dados da OSC); revisão do README |
 | 13/10 | Menu do portal da OSC na **barra lateral**, como o da área interna |
+| 27/10 | **Minhas inscrições (OSC)**: Manifestações de interesse e Novas Propostas em blocos separados, cada uma com a sua etiqueta |
 | 26/10 | **Deploy na Hostinger** (commit `154cbf4`): Novas Propostas no menu, Nova Proposta sem experiência e declarações, Relatório e Ata internos |
 | 26/10 | **Relatório e Ata da Comissão de Seleção internos**: saem dos "Documentos do processo" que a OSC vê |
 | 26/10 | **Nova Proposta sem comprovantes de experiência e declarações**: a OSC os entrega na Celebração |
@@ -742,6 +744,15 @@ Trazer os demais cenários para `tests/Feature` é uma das [Pendências](#pendê
 
 Da mais recente para a mais antiga. Cada entrada diz o que mudou, **por quê** e como foi
 conferido — o porquê é o que falta a quem pega o código depois.
+
+- [2026-10-27] **Minhas inscrições: manifestação e Nova Proposta separadas** (`PortalController::minhasPropostas`,
+  `portal/minhas-propostas`)
+  - Relato: o mesmo problema corrigido na lista interna em 26/10 aparecia em "Minhas inscrições" da OSC — a Nova
+    Proposta vinha no bloco "Manifestação de interesse · Dispensa e inexigibilidade" com a etiqueta
+    "Manifestação de interesse". A tela passa a ter três blocos: Chamamentos públicos, Manifestações de interesse
+    e "Novas Propostas · Dispensa e inexigibilidade". Cada item leva a etiqueta do seu tipo, e a parceria por
+    dispensa ou inexigibilidade já deferida aparece no bloco de onde nasceu (pela manifestação que a gerou)
+  - Conferido: `NovaPropostaTest::test_minhas_inscricoes_separa_manifestacao_e_nova_proposta`; suíte 243/243
 
 - [2026-10-26] **Relatório e Ata da Comissão de Seleção são internos** (`Peca::INTERNAS`)
   - Pedido da SCP: no portal da OSC, em "Documentos do processo", a fase da Seleção mostrava o Relatório e a Ata

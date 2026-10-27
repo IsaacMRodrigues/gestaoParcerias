@@ -196,6 +196,28 @@ class NovaPropostaTest extends TestCase
         $this->assertSame('submetida', $p->fresh()->status);
     }
 
+    public function test_minhas_inscricoes_separa_manifestacao_e_nova_proposta(): void
+    {
+        $this->enviada();
+        ManifestacaoInteresse::forceCreate(['osc_id' => $this->rl->osc_id, 'tipo' => 'manifestacao', 'titulo' => 'Horta comunitária',
+            'objeto' => 'x', 'justificativa' => 'x', 'status' => 'rascunho', 'valor_solicitado' => 50]);
+
+        $html = $this->actingAs($this->rl)->get('/portal/minhas-propostas')->assertOk()->getContent();
+        $manifestacoes = strpos($html, 'Manifestações de interesse');
+        $novas = strpos($html, 'Novas Propostas · Dispensa e inexigibilidade');
+        $this->assertNotFalse($manifestacoes);
+        $this->assertNotFalse($novas);
+
+        // Cada uma no seu bloco, com a etiqueta do próprio tipo.
+        $blocoManifestacoes = substr($html, $manifestacoes, $novas - $manifestacoes);
+        $blocoNovas = substr($html, $novas);
+        $this->assertStringContainsString('Horta comunitária', $blocoManifestacoes);
+        $this->assertStringNotContainsString('Oficinas de música', $blocoManifestacoes);
+        $this->assertStringContainsString('Oficinas de música', $blocoNovas);
+        $this->assertStringNotContainsString('Horta comunitária', $blocoNovas);
+        $this->assertMatchesRegularExpression('#Nova Proposta</span>\s*<span[^>]*>Oficinas de música#', $blocoNovas);
+    }
+
     public function test_o_menu_novas_propostas_leva_cada_um_a_sua_lista(): void
     {
         $p = $this->enviada();
