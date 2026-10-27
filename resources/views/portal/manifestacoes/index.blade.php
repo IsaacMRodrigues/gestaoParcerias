@@ -11,13 +11,14 @@
                 @else
                     <h1 class="text-2xl font-bold text-gray-900">Manifestações de Interesse</h1>
                     <p class="text-sm text-gray-500 mt-1">
-                        Proponha uma parceria mesmo sem chamamento aberto. A Unidade Gestora da Secretaria
-                        escolhida analisa, e o Setor de Convênios e Parcerias decide o encaminhamento.
+                        Proponha à Prefeitura uma ação de interesse público, para que ela avalie abrir um chamamento
+                        (PMIS, art. 18 da Lei 13.019/2014). A Secretaria escolhida analisa e o Setor de Convênios e
+                        Parcerias decide se a proposta é acatada.
                     </p>
                 @endif
             </div>
             @can('osc_manifestacoes')
-                <a href="{{ $tipo === 'proposta' ? route('portal.novas-propostas.create') : route('portal.manifestacoes.create') }}" class="btn btn-primary shrink-0">
+                <a href="{{ $tipo === 'proposta' ? route('portal.novas-propostas.create') : route('manifestacao.publica.create') }}" class="btn btn-primary shrink-0">
                     {{ $tipo === 'proposta' ? '+ Nova proposta' : '+ Nova manifestação' }}
                 </a>
             @endcan
@@ -31,10 +32,11 @@
                 <a href="{{ route('portal.manifestacoes.show', $m) }}"
                    class="flex items-start gap-4 px-6 py-4 hover:bg-gray-50 transition group">
                     <span class="min-w-0 flex-1">
-                        <span class="block text-sm font-semibold text-gray-900 group-hover:text-brand-800">{{ $m->titulo }}</span>
+                        <span class="block text-sm font-semibold text-gray-900 group-hover:text-brand-800">{{ $m->tituloParaExibir() }}</span>
                         <span class="block text-xs text-gray-500 mt-0.5">
                             @if($m->protocolo)Protocolo nº {{ $m->protocolo }} · @endif
-                            {{ $m->orgao?->name ?? 'Aguardando encaminhamento da SCP' }} · R$ {{ number_format($m->valor_solicitado, 2, ',', '.') }}
+                            {{ $m->orgao?->name ?? 'Aguardando encaminhamento da SCP' }}
+                            @unless($m->ehPmis())· R$ {{ number_format($m->valor_solicitado, 2, ',', '.') }}@endunless
                         </span>
                         @if($m->status === 'indeferida' && $m->decisao_motivo)
                             <span class="block text-xs text-red-700 mt-1">Motivo: {{ $m->decisao_motivo }}</span>

@@ -151,9 +151,10 @@
                             sem necessidade de cadastro
                         </span>
                     </div>
-                    <div class="mt-5 grid grid-cols-1 sm:grid-cols-3 gap-5">
+                    <div class="mt-5 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
                         @foreach([
                             ['Cidadão', 'Chamamentos abertos e parcerias em andamento.', route('portal.index')],
+                            ['Manifestar interesse', 'Proponha uma ação de interesse público à Prefeitura (PMIS).', route('manifestacao.publica.create')],
                             ['Parlamentar', 'Repasses, valores e vigência das parcerias.', route('transparencia')],
                             ['Conselho', 'Acompanhamento das parcerias da política setorial.', route('transparencia')],
                         ] as [$titulo, $desc, $url])

@@ -52,6 +52,17 @@ Route::get('/portal/prorrogacoes/{prorrogacao}/{documento}', [\App\Http\Controll
     ->whereIn('documento', ['aviso', 'publicacao'])->name('portal.prorrogacao.arquivo');
 Route::get('/transparencia', [PortalController::class, 'transparencia'])->name('transparencia');
 
+// Manifestação de interesse (PMIS): formulário público, para qualquer pessoa ou para a OSC logada; quem enviou
+// acompanha pelo link pessoal, e a lista pública mostra o que foi recebido. Ver ManifestacaoPublicaController.
+Route::get('/manifestar-interesse', [\App\Http\Controllers\ManifestacaoPublicaController::class, 'create'])->name('manifestacao.publica.create');
+Route::post('/manifestar-interesse', [\App\Http\Controllers\ManifestacaoPublicaController::class, 'store'])
+    ->middleware('throttle:5,10')->name('manifestacao.publica.store');
+Route::get('/manifestacao/{token}', [\App\Http\Controllers\ManifestacaoPublicaController::class, 'acompanhar'])->name('manifestacao.acompanhar');
+Route::get('/manifestacao/{token}/arquivo', [\App\Http\Controllers\ManifestacaoPublicaController::class, 'arquivo'])->name('manifestacao.acompanhar.arquivo');
+Route::get('/manifestacoes-de-interesse', [\App\Http\Controllers\ManifestacaoPublicaController::class, 'index'])->name('manifestacao.publica.index');
+Route::get('/manifestacoes-de-interesse/{ano}/{numero}', [\App\Http\Controllers\ManifestacaoPublicaController::class, 'show'])
+    ->where(['ano' => '\d{4}', 'numero' => '\d{4,}'])->name('manifestacao.publica.show');
+
 // Auto-cadastro de OSC — só para visitante. O store abre uma conta nova e faz
 // login nela; se um servidor logado chegasse aqui, sairia da própria conta e
 // passaria a existir como OSC, que é exatamente o que não pode acontecer.
@@ -269,6 +280,7 @@ Route::middleware(['auth', 'staff', 'readonly'])->group(function () {
         Route::get('manifestacoes', [ManifestacaoAnaliseController::class, 'index'])->name('manifestacoes.index');
         Route::get('manifestacoes/{manifestacao}', [ManifestacaoAnaliseController::class, 'show'])->name('manifestacoes.show');
         Route::get('manifestacoes/{manifestacao}/documentos/{documento}', [ManifestacaoAnaliseController::class, 'downloadDocumento'])->name('manifestacoes.documentos.download');
+        Route::get('manifestacoes/{manifestacao}/arquivo', [ManifestacaoAnaliseController::class, 'arquivo'])->name('manifestacoes.arquivo');
         Route::post('manifestacoes/{manifestacao}/encaminhar', [ManifestacaoAnaliseController::class, 'encaminhar'])->name('manifestacoes.encaminhar');
         Route::post('manifestacoes/{manifestacao}/parecer', [ManifestacaoAnaliseController::class, 'parecer'])->name('manifestacoes.parecer');
         Route::post('manifestacoes/{manifestacao}/deferir', [ManifestacaoAnaliseController::class, 'deferir'])->name('manifestacoes.deferir');

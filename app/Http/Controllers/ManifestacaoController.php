@@ -37,12 +37,10 @@ class ManifestacaoController extends Controller
         return view('portal.manifestacoes.index', compact('manifestacoes', 'tipo'));
     }
 
-    public function create(): View
+    /** A manifestação é o formulário público do PMIS, o mesmo para a OSC logada. */
+    public function create(): RedirectResponse
     {
-        $orgaos = Orgao::orderBy('name')->get();
-        $tipo   = 'manifestacao';
-
-        return view('portal.manifestacoes.create', compact('orgaos', 'tipo'));
+        return redirect()->route('manifestacao.publica.create');
     }
 
     public function createProposta(): View
@@ -53,18 +51,9 @@ class ManifestacaoController extends Controller
         return view('portal.manifestacoes.create', compact('orgaos', 'tipo'));
     }
 
-    public function store(Request $request): RedirectResponse
+    public function store(): RedirectResponse
     {
-        $data = $this->validarDados($request);
-
-        $manifestacao = ManifestacaoInteresse::create($data + [
-            'tipo'   => 'manifestacao',
-            'osc_id' => auth()->user()->osc_id,
-            'status' => 'rascunho',
-        ]);
-
-        return redirect()->route('portal.manifestacoes.show', $manifestacao)
-            ->with('success', 'Manifestação criada. Monte o plano de trabalho e anexe a habilitação para submeter.');
+        return redirect()->route('manifestacao.publica.create');
     }
 
     /** A Secretaria não se escolhe aqui: quem a define é a SCP, ao encaminhar. */
@@ -87,9 +76,14 @@ class ManifestacaoController extends Controller
             ->with('success', 'Proposta criada. Monte o plano de trabalho e anexe a habilitação para enviar.');
     }
 
-    public function show(ManifestacaoInteresse $manifestacao): View
+    public function show(ManifestacaoInteresse $manifestacao): View|RedirectResponse
     {
         $this->autorizar($manifestacao);
+
+        // PMIS: a OSC acompanha pela mesma página de quem enviou sem login.
+        if ($manifestacao->ehPmis()) {
+            return redirect()->route('manifestacao.acompanhar', $manifestacao->token);
+        }
 
         $manifestacao->load(['orgao', 'metas.etapas', 'planoItens', 'desembolsos', 'contrapartidas', 'equipe',
             'documentos', 'parecerPor', 'decididaPor', 'proposta']);

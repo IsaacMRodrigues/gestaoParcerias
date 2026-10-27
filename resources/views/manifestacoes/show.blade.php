@@ -24,7 +24,7 @@
                     &rsaquo; Análise
                 @endif
             </p>
-            <h2 class="text-2xl font-bold text-gray-900 mt-0.5">{{ $manifestacao->titulo }}</h2>
+            <h2 class="text-2xl font-bold text-gray-900 mt-0.5">{{ $manifestacao->tituloParaExibir() }}</h2>
             @if($manifestacao->protocolo)
                 <p class="text-sm text-gray-500 mt-0.5">Protocolo nº <strong class="text-gray-700">{{ $manifestacao->protocolo }}</strong></p>
             @endif
@@ -35,11 +35,42 @@
         <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 space-y-6">
             <x-flash-message />
 
+            @if($manifestacao->ehPmis())
+                {{-- PMIS: quem propôs, os três textos do formulário público e o PDF. --}}
+                <div class="bg-white rounded-xl border border-gray-200 shadow-sm p-6 space-y-5">
+                    <dl class="grid grid-cols-2 sm:grid-cols-4 gap-4 text-sm">
+                        <div class="col-span-2"><dt class="text-xs font-medium text-gray-500 uppercase tracking-wide">Proponente</dt>
+                            <dd class="text-gray-800 mt-0.5">
+                                {{ $manifestacao->nomeDoProponente() }}
+                                <span class="text-gray-400">· {{ $manifestacao->osc_id ? 'OSC cadastrada' : (\App\Models\ManifestacaoInteresse::TIPOS_DE_PESSOA[$manifestacao->proponente_tipo] ?? '') }}</span>
+                            </dd>
+                            <dd class="text-xs text-gray-500 mt-0.5">{{ $manifestacao->proponente_email }}</dd></div>
+                        <div><dt class="text-xs font-medium text-gray-500 uppercase tracking-wide">Secretaria</dt>
+                            <dd class="text-gray-800 mt-0.5">{{ $manifestacao->orgao?->name }}</dd></div>
+                        <div><dt class="text-xs font-medium text-gray-500 uppercase tracking-wide">Situação</dt>
+                            <dd class="mt-0.5">
+                                <span class="inline-block px-2.5 py-1 text-xs font-semibold leading-snug bg-{{ $cor }}-50 text-{{ $cor }}-800 border border-{{ $cor }}-200 rounded-md">
+                                    {{ $manifestacao->statusLabel() }}
+                                </span>
+                            </dd></div>
+                    </dl>
+                    <div class="pt-5 border-t border-gray-100">
+                        @include('manifestacao-publica._textos', ['manifestacao' => $manifestacao])
+                    </div>
+                    @if($manifestacao->arquivo_path)
+                        <div class="pt-5 border-t border-gray-100">
+                            <a href="{{ route('manifestacoes.arquivo', $manifestacao) }}" class="btn btn-outline btn-sm">
+                                Baixar a proposta em PDF ({{ $manifestacao->arquivo_nome }})
+                            </a>
+                        </div>
+                    @endif
+                </div>
+            @else
             {{-- Identificação --}}
             <div class="bg-white rounded-xl border border-gray-200 shadow-sm p-6">
                 <dl class="grid grid-cols-2 sm:grid-cols-4 gap-4 text-sm">
                     <div><dt class="text-xs font-medium text-gray-500 uppercase tracking-wide">OSC</dt>
-                        <dd class="text-gray-800 mt-0.5">{{ $manifestacao->osc->name }}</dd></div>
+                        <dd class="text-gray-800 mt-0.5">{{ $manifestacao->nomeDoProponente() }}</dd></div>
                     <div><dt class="text-xs font-medium text-gray-500 uppercase tracking-wide">Secretaria</dt>
                         <dd class="text-gray-800 mt-0.5">{{ $manifestacao->orgao?->name ?? 'A definir pelo Setor de Convênios e Parcerias' }}</dd></div>
                     <div><dt class="text-xs font-medium text-gray-500 uppercase tracking-wide">Valor solicitado</dt>
@@ -103,8 +134,10 @@
                 <h3 class="text-base font-semibold text-gray-800 mt-6 pt-6 border-t border-gray-100">Documentos</h3>
                 {{-- Certidões, estatuto, ata e declarações: na área da OSC. --}}
                 <p class="text-xs text-gray-500 mt-1">
-                    Certidões, estatuto, ata de eleição e declarações estão em
-                    <a href="{{ route('oscs.arquivos', $manifestacao->osc_id) }}" class="text-brand-700 hover:underline">Arquivos da OSC</a>.
+                    @if($manifestacao->osc_id)
+                        Certidões, estatuto e ata de eleição estão em
+                        <a href="{{ route('oscs.arquivos', $manifestacao->osc_id) }}" class="text-brand-700 hover:underline">Arquivos da OSC</a>.
+                    @endif
                 </p>
                 <ul class="mt-2 divide-y divide-gray-100">
                     @forelse($manifestacao->documentos as $doc)
@@ -120,6 +153,8 @@
                     @endforelse
                 </ul>
             </div>
+
+            @endif
 
             {{-- Manifestação técnica da Secretaria --}}
             @if($manifestacao->parecer_em)
@@ -140,7 +175,9 @@
                 <div class="bg-white rounded-xl border border-gray-200 shadow-sm p-6">
                     <h3 class="text-base font-semibold text-gray-800">Decisão do SCP</h3>
                     <p class="mt-1 text-sm font-semibold {{ $manifestacao->status === 'deferida' ? 'text-brand-700' : 'text-red-700' }}">
-                        @if($manifestacao->status === 'deferida')
+                        @if(!$novaProposta)
+                            {{ $manifestacao->statusLabel() }}
+                        @elseif($manifestacao->status === 'deferida')
                             Deferida — {{ \App\Models\ManifestacaoInteresse::ENCAMINHAMENTOS[$manifestacao->decisao] ?? $manifestacao->decisao }}
                         @else
                             Indeferida
@@ -270,39 +307,18 @@
 
                     @if($souScp && $manifestacao->status === 'analisada' && !$novaProposta)
                         <div>
-                            <h3 class="text-base font-semibold text-gray-800">Decidir o encaminhamento</h3>
+                            <h3 class="text-base font-semibold text-gray-800">Acatar a manifestação</h3>
                             <p class="text-xs text-gray-500 mt-0.5 mb-3">
-                                O deferimento cria o chamamento do tipo escolhido e a proposta, levando o plano de
-                                trabalho e os documentos que a OSC já entregou.
+                                Acatar não obriga a abertura de chamamento público (art. 21 da Lei 13.019/2014): se ele vier,
+                                nasce no Planejamento. Quem enviou recebe a decisão e a fundamentação por e-mail.
                             </p>
                             <form action="{{ route('manifestacoes.deferir', $manifestacao) }}" method="POST" class="space-y-3">
                                 @csrf
-                                <div class="grid sm:grid-cols-2 gap-3">
-                                    <div>
-                                        <x-input-label for="decisao" value="Enquadramento *" />
-                                        <select name="decisao" id="decisao" required
-                                                class="mt-1 block w-full border-gray-300 rounded-md shadow-sm text-sm focus:ring-brand-500 focus:border-brand-500">
-                                            @foreach(\App\Models\ManifestacaoInteresse::ENCAMINHAMENTOS as $k => $rotulo)
-                                                <option value="{{ $k }}">{{ $rotulo }}</option>
-                                            @endforeach
-                                        </select>
-                                    </div>
-                                </div>
-                                <div>
-                                    <x-input-label for="numero" value="Número do chamamento *" />
-                                    <x-text-input id="numero" name="numero" type="text" required maxlength="50"
-                                                  placeholder="001/2026" :value="old('numero')"
-                                                  class="mt-1 block w-full sm:w-64" />
-                                    <x-input-error :messages="$errors->get('numero')" class="mt-1" />
-                                </div>
-                                <div>
-                                    <x-input-label for="fundamento" value="Fundamento do enquadramento *" />
-                                    <textarea name="fundamento" id="fundamento" rows="3" required
-                                              placeholder="Art. 30 (dispensa) ou art. 31 (inexigibilidade) da Lei 13.019/2014 e as razões de fato"
-                                              class="mt-1 block w-full border-gray-300 rounded-md shadow-sm text-sm focus:ring-brand-500 focus:border-brand-500">{{ old('fundamento') }}</textarea>
-                                    <x-input-error :messages="$errors->get('fundamento')" class="mt-1" />
-                                </div>
-                                <button class="btn btn-primary">Deferir e criar o chamamento</button>
+                                <textarea name="decisao_motivo" rows="3" required
+                                          placeholder="Fundamentação da decisão (o proponente lê)"
+                                          class="block w-full border-gray-300 rounded-md shadow-sm text-sm focus:ring-brand-500 focus:border-brand-500">{{ old('decisao_motivo') }}</textarea>
+                                <x-input-error :messages="$errors->get('decisao_motivo')" class="mt-1" />
+                                <button class="btn btn-primary">Acatar</button>
                             </form>
                         </div>
                     @endif
@@ -310,11 +326,11 @@
                     @if($souScp && !$novaProposta)
                         <div class="pt-4 border-t border-gray-100">
                             <form action="{{ route('manifestacoes.indeferir', $manifestacao) }}" method="POST" class="space-y-2"
-                                  data-confirm="Indeferir esta manifestação?">
+                                  data-confirm="Não acatar esta manifestação?">
                                 @csrf
-                                <textarea name="decisao_motivo" rows="2" required placeholder="Motivo do indeferimento (a OSC lerá no portal)"
+                                <textarea name="decisao_motivo" rows="2" required placeholder="Motivo de não acatar (o proponente lê)"
                                           class="block w-full border-gray-300 rounded-md shadow-sm text-sm focus:ring-red-500 focus:border-red-500"></textarea>
-                                <button class="btn btn-danger-outline">Indeferir</button>
+                                <button class="btn btn-danger-outline">Não acatar</button>
                             </form>
                         </div>
                     @endif

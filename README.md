@@ -75,7 +75,9 @@ Seleção da própria Secretaria. Na produção, o chamamento 1 (Cultura e Turis
 o recebimento.
 
 **No GitHub e ainda fora da produção:** "Minhas inscrições" da OSC com Manifestações de interesse e Novas
-Propostas em blocos separados (27/10).
+Propostas em blocos separados e a manifestação de interesse no modelo do PMIS, por formulário público (27/10, com
+a migração `2026_10_27_100000`). Antes de subir: `RECAPTCHA_SITE_KEY` e `RECAPTCHA_SECRET` no `.env` da produção
+(sem chave, o formulário público fica bloqueado lá).
 
 As ações de produção que o deploy não faz (dados e painel) estão em
 [Pendências → Produção](#produção-ação-não-código).
@@ -156,6 +158,7 @@ cada item estão no [Histórico de entregas](#histórico-de-entregas). 🚀 marc
 | 07/10 | Depois do deploy: listas só com o que é da Secretaria; R$ e vírgula em todos os campos de dinheiro; Arquivos da OSC valendo em todos os fluxos (recusa da UG trava a Celebração) |
 | 08/10 | Caixas de seleção e barra de download nos fluxos; **Arquivos da OSC preenchendo os fluxos** (documentos complementares, habilitação da dispensa e modelos com os dados da OSC); revisão do README |
 | 13/10 | Menu do portal da OSC na **barra lateral**, como o da área interna |
+| 27/10 | **Manifestação de interesse aberta a qualquer pessoa (PMIS)**: formulário público no modelo de Contagem, com reCAPTCHA, link de acompanhamento e lista pública; a decisão passa a ser acatar ou não |
 | 27/10 | **Minhas inscrições (OSC)**: Manifestações de interesse e Novas Propostas em blocos separados, cada uma com a sua etiqueta |
 | 26/10 | **Deploy na Hostinger** (commit `154cbf4`): Novas Propostas no menu, Nova Proposta sem experiência e declarações, Relatório e Ata internos |
 | 26/10 | **Relatório e Ata da Comissão de Seleção internos**: saem dos "Documentos do processo" que a OSC vê |
@@ -680,6 +683,10 @@ Trazer os demais cenários para `tests/Feature` é uma das [Pendências](#pendê
 
 ### Decisões que dependem da gestão ou da cliente
 
+- **O que o acatamento da manifestação de interesse (PMIS) faz** — por ora a SCP só acata ou não, com
+  fundamentação, e nada é criado; o chamamento, se houver, nasce no Planejamento. Falta a gestão decidir se o
+  acatamento deve abrir algo (processo de Planejamento, oitiva pública) e como.
+
 - **Quem aprova os anexos da proposta** (`Documento`): hoje qualquer perfil interno com `propostas`,
   inclusive o Cadastrador. A habilitação já saiu desse caminho — os Arquivos da OSC são analisados pela UG
   na etapa 3 da Celebração —, mas o fluxograma do 3.2 diz que a documentação vai à SCP.
@@ -744,6 +751,24 @@ Trazer os demais cenários para `tests/Feature` é uma das [Pendências](#pendê
 
 Da mais recente para a mais antiga. Cada entrada diz o que mudou, **por quê** e como foi
 conferido — o porquê é o que falta a quem pega o código depois.
+
+- [2026-10-27] **Manifestação de interesse aberta a qualquer pessoa (PMIS)** (`ManifestacaoPublicaController`,
+  `App\Rules\Recaptcha`, migração `2026_10_27_100000`, `resources/views/manifestacao-publica/`)
+  - Pedido da gestão: a manifestação de interesse passa a ser o PMIS dos arts. 18 a 21 da Lei 13.019/2014 —
+    qualquer pessoa física ou jurídica propõe, sem login, no modelo de https://sipcon.contagem.mg.gov.br/pmis-cadastrar.
+    Formulário público (`/manifestar-interesse`): nome/razão social, tipo de pessoa, e-mail, Secretaria, interesse
+    público, diagnóstico, viabilidade/custos/benefícios/prazos e o PDF (até 25 MB), com reCAPTCHA v2 (chaves em
+    `RECAPTCHA_SITE_KEY`/`RECAPTCHA_SECRET`; sem chave, só passa em `local`/testes) e limite de 5 envios a cada
+    10 minutos por endereço. O envio recebe protocolo, vai direto à UG da Secretaria e manda ao proponente um
+    e-mail com o link pessoal `/manifestacao/{token}`. A OSC logada usa o mesmo formulário, preenchido e vinculado
+    a ela; as entradas antigas do portal redirecionam para ele. Sem plano de trabalho, valores nem Arquivos da OSC
+    (a Nova Proposta segue com tudo isso). `osc_id` vira opcional (`nullOnDelete`).
+  - Análise: a UG opina e a SCP decide **acatar ou não acatar**, com fundamentação, sem criar chamamento nem
+    proposta (decisão interina, ver Pendências); o proponente recebe a decisão por e-mail. Lista pública
+    `/manifestacoes-de-interesse` (art. 20) com os textos, sem e-mail e sem o PDF, que traz o documento de
+    identidade de quem assina. Manifestações antigas, com plano, continuam abrindo como antes
+  - Conferido: `ManifestacaoPublicaTest` (7 testes) e `NovaPropostaTest` ajustado; suíte 250/250; formulário
+    conferido no navegador
 
 - [2026-10-27] **Minhas inscrições: manifestação e Nova Proposta separadas** (`PortalController::minhasPropostas`,
   `portal/minhas-propostas`)

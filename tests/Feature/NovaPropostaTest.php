@@ -280,19 +280,21 @@ class NovaPropostaTest extends TestCase
         Mail::assertQueued(\App\Mail\Aviso::class, fn ($m) => $m->hasTo($this->rl->email));
     }
 
-    public function test_a_manifestacao_deferida_continua_passando_pela_analise(): void
+    public function test_a_manifestacao_acatada_nao_cria_chamamento_nem_proposta(): void
     {
         $m = ManifestacaoInteresse::forceCreate(['tipo' => 'manifestacao', 'osc_id' => $this->rl->osc_id, 'orgao_id' => $this->educacao->id,
             'titulo' => 'Manifestação', 'objeto' => 'x', 'justificativa' => 'x', 'valor_solicitado' => 100,
             'status' => 'analisada', 'setor_atual' => 'scp', 'parecer_favoravel' => true, 'parecer_ug' => 'x']);
 
-        $this->actingAs($this->scp)->post("/manifestacoes/{$m->id}/deferir", [
-            'decisao' => 'dispensa', 'numero' => '006/2026', 'fundamento' => 'Art. 30.',
-        ])->assertSessionHasNoErrors();
+        // O PMIS não obriga o chamamento: acatar só registra a decisão, com fundamentação.
+        $this->actingAs($this->scp)->post("/manifestacoes/{$m->id}/deferir", [])->assertSessionHasErrors('decisao_motivo');
+        $this->actingAs($this->scp)->post("/manifestacoes/{$m->id}/deferir", ['decisao_motivo' => 'Há demanda na Secretaria.'])
+            ->assertSessionHasNoErrors();
 
-        $proposta = Proposta::findOrFail($m->fresh()->proposta_id);
-        $this->assertSame('submetida', $proposta->status);
-        $this->assertFalse($proposta->celebracaoIniciada());
+        $m = $m->fresh();
+        $this->assertSame(['deferida', 'Acatada', null], [$m->status, $m->statusLabel(), $m->proposta_id]);
+        $this->assertSame(0, Proposta::count());
+        $this->assertSame(0, \App\Models\Chamamento::count());
     }
 
     public function test_a_ug_indefere_com_motivo(): void
@@ -306,13 +308,10 @@ class NovaPropostaTest extends TestCase
         $this->assertSame('indeferida', $p->fresh()->status);
     }
 
-    public function test_a_manifestacao_de_interesse_continua_igual(): void
+    public function test_a_manifestacao_da_osc_e_o_formulario_publico(): void
     {
-        $this->actingAs($this->rl)->get('/portal/manifestacoes/nova')->assertOk()->assertSee('name="orgao_id"', false);
-        $this->actingAs($this->rl)->post('/portal/manifestacoes', [
-            'orgao_id' => $this->educacao->id, 'titulo' => 'Manifestação', 'objeto' => 'x', 'justificativa' => 'x', 'valor_solicitado' => 1,
-        ])->assertSessionHasNoErrors();
-
-        $this->assertSame('manifestacao', ManifestacaoInteresse::where('titulo', 'Manifestação')->value('tipo'));
+        $this->actingAs($this->rl)->get('/portal/manifestacoes/nova')->assertRedirect(route('manifestacao.publica.create'));
+        $this->actingAs($this->rl)->get(route('manifestacao.publica.create'))->assertOk()
+            ->assertSee('Manifestação em nome de')->assertDontSee('name="proponente_nome"', false);
     }
 }

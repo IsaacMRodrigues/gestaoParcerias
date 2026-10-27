@@ -10,8 +10,9 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Support\Facades\DB;
 
 /**
- * Manifestação de Interesse e Nova Proposta: a OSC propõe sem chamamento aberto. O
- * deferimento gera o chamamento e a proposta, que seguem pelo fluxo de sempre.
+ * Manifestação de Interesse e Nova Proposta. A manifestação é o PMIS (arts. 18 a 21 da Lei 13.019/2014):
+ * qualquer pessoa propõe por formulário público, sem plano de trabalho. A Nova Proposta é da OSC, com
+ * plano; o deferimento dela gera o chamamento e a proposta, que seguem pelo fluxo de sempre.
  */
 class ManifestacaoInteresse extends Model
 {
@@ -26,8 +27,10 @@ class ManifestacaoInteresse extends Model
     }
 
     protected $fillable = [
-        'tipo', 'protocolo', 'fundamento_pedido',
-        'osc_id', 'orgao_id', 'titulo', 'objeto', 'justificativa', 'publico_alvo',
+        'tipo', 'protocolo', 'token', 'fundamento_pedido',
+        'osc_id', 'proponente_nome', 'proponente_tipo', 'proponente_email',
+        'orgao_id', 'titulo', 'objeto', 'justificativa', 'publico_alvo',
+        'interesse_publico', 'diagnostico', 'viabilidade', 'arquivo_path', 'arquivo_nome', 'arquivo_tamanho',
         'descricao_realidade', 'objetivos', 'objetivos_especificos', 'metodologia', 'plano_aplicacao', 'valor_outras_fontes', 'vigencia_dias',
         'atuacao_rede', 'rede_cnpj', 'rede_razao_social', 'rede_municipio', 'rede_data_termo',
         'valor_solicitado', 'valor_proprio', 'data_inicio_prevista', 'data_fim_prevista',
@@ -92,6 +95,12 @@ class ManifestacaoInteresse extends Model
         'proposta'     => 'Nova Proposta',
     ];
 
+    /** Quem assina a manifestação do PMIS. */
+    public const TIPOS_DE_PESSOA = [
+        'pf' => 'Pessoa Física',
+        'pj' => 'Pessoa Jurídica',
+    ];
+
     /** Fundamento da Nova Proposta (arts. 30 e 31 da Lei 13.019/2014), decidido pela SCP. */
     public const FUNDAMENTOS_PEDIDO = [
         'dispensa'        => 'Dispensa de chamamento público (art. 30)',
@@ -125,6 +134,24 @@ class ManifestacaoInteresse extends Model
     public function ehNovaProposta(): bool
     {
         return $this->tipo === 'proposta';
+    }
+
+    /** Manifestação no formato do PMIS (formulário público), não a antiga, com plano de trabalho. */
+    public function ehPmis(): bool
+    {
+        return !$this->ehNovaProposta() && $this->interesse_publico !== null;
+    }
+
+    /** Quem propôs: a OSC vinculada ou quem se identificou no formulário público. */
+    public function nomeDoProponente(): ?string
+    {
+        return $this->osc?->name ?? $this->proponente_nome;
+    }
+
+    /** O PMIS não tem título: a lista mostra o protocolo. */
+    public function tituloParaExibir(): string
+    {
+        return $this->titulo ?: 'Manifestação nº ' . ($this->protocolo ?? $this->id);
     }
 
     public function tipoLabel(): string
@@ -177,8 +204,13 @@ class ManifestacaoInteresse extends Model
         return $this->belongsTo(User::class, 'decidida_por');
     }
 
+    /** Na manifestação a decisão é acatar ou não a proposta (o PMIS não obriga o chamamento). */
     public function statusLabel(): string
     {
+        if (!$this->ehNovaProposta() && $this->decidida()) {
+            return $this->status === 'deferida' ? 'Acatada' : 'Não acatada';
+        }
+
         return self::STATUS[$this->status] ?? $this->status;
     }
 

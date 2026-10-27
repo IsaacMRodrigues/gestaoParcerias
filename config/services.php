@@ -35,4 +35,10 @@ return [
         ],
     ],
 
+    // Formulário público da manifestação de interesse (App\Rules\Recaptcha).
+    'recaptcha' => [
+        'site_key' => env('RECAPTCHA_SITE_KEY'),
+        'secret' => env('RECAPTCHA_SECRET'),
+    ],
+
 ];

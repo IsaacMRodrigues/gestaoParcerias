@@ -41,14 +41,14 @@
                     <a href="{{ route('manifestacoes.show', $m) }}"
                        class="flex items-start gap-4 px-6 py-4 hover:bg-gray-50 transition group">
                         <span class="min-w-0 flex-1">
-                            <span class="block text-sm font-semibold text-gray-900 group-hover:text-brand-800">{{ $m->titulo }}</span>
+                            <span class="block text-sm font-semibold text-gray-900 group-hover:text-brand-800">{{ $m->tituloParaExibir() }}</span>
                             <span class="block text-xs text-gray-500 mt-0.5">
                                 @if($m->protocolo)Protocolo nº {{ $m->protocolo }} · @endif
                                 @if($m->ehNovaProposta())
                                     <span class="px-1.5 py-0.5 text-[11px] font-semibold bg-accent-50 text-accent-800 ring-1 ring-accent-200 rounded">Nova Proposta</span>
                                 @endif
-                                {{ $m->osc->name }} · {{ $m->orgao ? ($m->orgao->sigla ?: $m->orgao->name) : 'Secretaria a definir' }}
-                                · R$ {{ number_format($m->valor_solicitado, 2, ',', '.') }}
+                                {{ $m->nomeDoProponente() }} · {{ $m->orgao ? ($m->orgao->sigla ?: $m->orgao->name) : 'Secretaria a definir' }}
+                                @unless($m->ehPmis())· R$ {{ number_format($m->valor_solicitado, 2, ',', '.') }}@endunless
                             </span>
                         </span>
                         <span class="shrink-0 text-right">

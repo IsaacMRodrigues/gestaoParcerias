@@ -14,7 +14,7 @@
             <div class="flex flex-wrap gap-2">
                 <a href="{{ route('portal.index') }}" class="btn btn-outline">Chamamentos abertos</a>
                 @can('osc_manifestacoes')
-                    <a href="{{ route('portal.manifestacoes.create') }}" class="btn btn-primary">+ Manifestar interesse</a>
+                    <a href="{{ route('manifestacao.publica.create') }}" class="btn btn-primary">+ Manifestar interesse</a>
                 @endcan
             </div>
         </div>
@@ -57,7 +57,7 @@
                 'manifestacao' => [
                     'titulo' => 'Manifestações de interesse',
                     'vazio'  => 'Nada por aqui. É pela manifestação de interesse que se propõe uma parceria quando não há chamamento aberto.',
-                    'link'   => ['portal.manifestacoes.create', 'Manifestar interesse →'],
+                    'link'   => ['manifestacao.publica.create', 'Manifestar interesse →'],
                 ],
                 'proposta' => [
                     'titulo' => 'Novas Propostas · Dispensa e inexigibilidade',
@@ -103,9 +103,10 @@
                                        class="flex items-start gap-4 px-6 py-4 hover:bg-gray-50 transition group">
                                         <span class="min-w-0 flex-1">
                                             <span class="block text-[11px] font-semibold text-gray-400 uppercase tracking-wider">{{ \App\Models\ManifestacaoInteresse::TIPOS[$m->tipo] ?? 'Manifestação de interesse' }}</span>
-                                            <span class="block text-sm font-semibold text-gray-900 group-hover:text-brand-800">{{ $m->titulo }}</span>
+                                            <span class="block text-sm font-semibold text-gray-900 group-hover:text-brand-800">{{ $m->tituloParaExibir() }}</span>
                                             <span class="block text-xs text-gray-500 mt-0.5">
-                                                {{ $m->orgao?->name ?? 'Secretaria a definir pela SCP' }} · R$ {{ number_format($m->valor_solicitado, 2, ',', '.') }}
+                                                {{ $m->orgao?->name ?? 'Secretaria a definir pela SCP' }}
+                                                @unless($m->ehPmis())· R$ {{ number_format($m->valor_solicitado, 2, ',', '.') }}@endunless
                                             </span>
                                             @if($m->status === 'deferida')
                                                 <span class="block text-xs text-brand-700 mt-1">

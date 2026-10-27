@@ -278,6 +278,7 @@
     @php
         $navItens = [
             ['url' => route('portal.index'),   'rotulo' => 'Chamamentos abertos', 'ativo' => request()->routeIs('portal.index')],
+            ['url' => route('manifestacao.publica.create'), 'rotulo' => 'Manifestar interesse', 'ativo' => request()->routeIs('manifestacao.*')],
             ['url' => route('transparencia'), 'rotulo' => 'Transparência',       'ativo' => request()->routeIs('transparencia')],
         ];
         $navLink = fn (bool $ativo) => $ativo ? 'text-brand-700 font-semibold' : 'text-gray-600 hover:text-brand-700';

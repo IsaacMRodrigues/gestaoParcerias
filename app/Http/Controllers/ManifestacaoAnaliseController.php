@@ -63,6 +63,15 @@ class ManifestacaoAnaliseController extends Controller
         return Storage::disk('local')->download($documento->path, $documento->nome_original);
     }
 
+    /** O PDF da manifestação do PMIS. */
+    public function arquivo(ManifestacaoInteresse $manifestacao)
+    {
+        $this->autorizarLeitura($manifestacao);
+        abort_unless($manifestacao->arquivo_path && Storage::disk('local')->exists($manifestacao->arquivo_path), 404);
+
+        return Storage::disk('local')->download($manifestacao->arquivo_path, $manifestacao->arquivo_nome);
+    }
+
     /** SCP → Secretaria: pedido de manifestação técnica. */
     public function encaminhar(Request $request, ManifestacaoInteresse $manifestacao): RedirectResponse
     {
@@ -118,11 +127,33 @@ class ManifestacaoAnaliseController extends Controller
         return back()->with('success', 'Manifestação técnica registrada e devolvida à SCP.');
     }
 
-    /** Deferimento: faz nascer o chamamento e a proposta, com o plano e os documentos já entregues. */
+    /**
+     * Deferimento. Nova Proposta: faz nascer o chamamento e a proposta, com o plano e os documentos já entregues.
+     * Manifestação (PMIS): a SCP acata ou não a proposta, sem criar nada — acatar não obriga o chamamento
+     * (art. 21), que, se vier, nasce no Planejamento.
+     */
     public function deferir(Request $request, ManifestacaoInteresse $manifestacao): RedirectResponse
     {
         abort_if($manifestacao->decidida(), 422, 'Esta manifestação já foi decidida.');
         $this->autorizarDecisao($manifestacao);
+
+        if (!$manifestacao->ehNovaProposta()) {
+            $data = $request->validate([
+                'decisao_motivo' => ['required', 'string', 'max:5000'],
+            ], [
+                'decisao_motivo.required' => 'Fundamente a decisão: é o que o proponente lê.',
+            ]);
+
+            $manifestacao->update($data + [
+                'status'       => 'deferida',
+                'setor_atual'  => null,
+                'decisao'      => 'acatada',
+                'decidida_por' => auth()->id(),
+                'decidida_em'  => now(),
+            ]);
+
+            return back()->with('success', 'Manifestação acatada. Quem a enviou recebe a decisão por e-mail.');
+        }
 
         // Na Nova Proposta o enquadramento é o que a SCP decidiu ao encaminhar
         // (dispensa ou inexigibilidade); na manifestação, a SCP o escolhe aqui.
@@ -242,7 +273,7 @@ class ManifestacaoAnaliseController extends Controller
         $data = $request->validate([
             'decisao_motivo' => ['required', 'string'],
         ], [
-            'decisao_motivo.required' => 'Informe o motivo — é o que a OSC lerá no portal.',
+            'decisao_motivo.required' => 'Informe o motivo — é o que o proponente lê.',
         ]);
 
         $manifestacao->update($data + [
@@ -253,7 +284,9 @@ class ManifestacaoAnaliseController extends Controller
             'decidida_em'  => now(),
         ]);
 
-        return back()->with('success', 'Manifestação indeferida. A OSC verá o motivo no portal.');
+        return back()->with('success', $manifestacao->ehNovaProposta()
+            ? 'Proposta indeferida. A OSC verá o motivo no portal.'
+            : 'Manifestação não acatada. Quem a enviou recebe o motivo por e-mail.');
     }
 
     /** Quem decide: na manifestação, a SCP; na Nova Proposta, a UG a que a SCP a encaminhou. */

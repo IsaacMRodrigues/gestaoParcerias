@@ -403,10 +403,12 @@ class Avisos
         self::enviar(
             self::doSetor($m->setor_atual, fn (User $u) => $u->can('chamamentos')
                 && ManifestacaoInteresse::visiveisPara($u)->whereKey($m->id)->exists()),
-            self::avisoDeVez($m->tipoLabel(), trim(($m->protocolo ? 'Protocolo nº ' . $m->protocolo . ' — ' : '') . $m->titulo), $m->ehNovaProposta()
+            self::avisoDeVez($m->tipoLabel(), $m->titulo
+                    ? trim(($m->protocolo ? 'Protocolo nº ' . $m->protocolo . ' — ' : '') . $m->titulo)
+                    : $m->tituloParaExibir(), $m->ehNovaProposta()
                     ? ($m->status === 'submetida' ? 'Encaminhar à Unidade Gestora que vai atendê-la.' : 'Deferir ou indeferir a proposta.')
                     : ManifestacaoInteresse::STATUS[$m->status] . '.',
-                $m->osc?->name, route('manifestacoes.show', $m), false),
+                $m->nomeDoProponente(), route('manifestacoes.show', $m), false),
         );
     }
 
@@ -447,15 +449,68 @@ class Avisos
     {
         $deferida = $m->status === 'deferida';
 
+        // PMIS: a decisão é acatar ou não, e chega também a quem enviou sem conta, pelo link pessoal.
+        if ($m->ehPmis()) {
+            $resultado = $deferida ? 'acatada' : 'não acatada';
+            $aviso = new Aviso(
+                assunto: 'Manifestação de interesse nº ' . $m->protocolo . ' ' . $resultado,
+                titulo: 'Sua manifestação de interesse foi ' . $resultado,
+                linhas: array_values(array_filter([
+                    'Protocolo nº ' . $m->protocolo . ' — ' . $m->orgao?->name,
+                    $m->decisao_motivo ? ($deferida ? 'Fundamentação: ' : 'Motivo: ') . $m->decisao_motivo : null,
+                    $deferida ? 'Acatar a manifestação não obriga a abertura de chamamento público (art. 21 da Lei 13.019/2014).' : null,
+                ])),
+                url: route('manifestacao.acompanhar', $m->token),
+                botao: 'Acompanhar a manifestação',
+            );
+            $equipe = self::daOsc($m->osc_id, self::comFuncao('osc_manifestacoes'));
+            self::enviar($equipe, $aviso);
+            self::paraOProponente($m, $aviso, $equipe->pluck('email')->all());
+
+            return;
+        }
+
         $nome = $m->ehNovaProposta() ? 'proposta' : 'manifestação de interesse';
 
         self::enviar(self::daOsc($m->osc_id, self::comFuncao('osc_manifestacoes')), new Aviso(
             assunto: ucfirst($nome) . ' ' . ($deferida ? 'deferida' : 'indeferida'),
             titulo: 'Sua ' . $nome . ' foi ' . ($deferida ? 'deferida' : 'indeferida'),
-            linhas: [$m->titulo],
+            linhas: [$m->tituloParaExibir()],
             url: route('portal.manifestacoes.show', $m),
             botao: 'Ver a manifestação',
         ));
+    }
+
+    /** O PMIS recebido: protocolo e link pessoal para quem enviou, com ou sem conta. */
+    public static function manifestacaoRecebida(ManifestacaoInteresse $m): void
+    {
+        self::paraOProponente($m, new Aviso(
+            assunto: 'Manifestação de interesse recebida — protocolo nº ' . $m->protocolo,
+            titulo: 'Recebemos sua manifestação de interesse',
+            linhas: [
+                'Protocolo nº ' . $m->protocolo . ' — ' . $m->orgao?->name . '.',
+                'A Secretaria analisa a proposta e o Setor de Convênios e Parcerias decide se ela é acatada. '
+                    . 'Você recebe outro e-mail com a decisão.',
+                'Guarde este e-mail: o botão abaixo é o seu link para acompanhar a manifestação.',
+            ],
+            url: route('manifestacao.acompanhar', $m->token),
+            botao: 'Acompanhar a manifestação',
+        ));
+    }
+
+    /** E-mail de quem se identificou no formulário público, que pode não ter conta no sistema. */
+    private static function paraOProponente(ManifestacaoInteresse $m, Aviso $aviso, array $jaAvisados = []): void
+    {
+        if (!filter_var($m->proponente_email, FILTER_VALIDATE_EMAIL)
+            || in_array(mb_strtolower($m->proponente_email), array_map('mb_strtolower', $jaAvisados), true)) {
+            return;
+        }
+
+        try {
+            Mail::to($m->proponente_email, $m->proponente_nome)->queue($aviso);
+        } catch (\Throwable $e) {
+            Log::warning('Aviso por e-mail não enfileirado', ['para' => $m->proponente_email, 'erro' => $e->getMessage()]);
+        }
     }
 
     public static function alteracaoDecidida(Alteracao $a): void

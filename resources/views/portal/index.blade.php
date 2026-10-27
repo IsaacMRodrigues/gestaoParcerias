@@ -22,16 +22,14 @@
                    class="btn btn-secondary">
                     Ver chamamentos
                 </a>
-                @auth
-                    {{-- Sem chamamento aberto na sua área, o caminho é a manifestação
-                         de interesse: é o que a lei prevê e o que este portal aceita. --}}
-                    @if(auth()->user()->ehRepresentanteOsc() && auth()->user()->can('osc_manifestacoes'))
-                        <a href="{{ route('portal.manifestacoes.create') }}"
-                           class="btn btn-secondary">
-                            Manifestar interesse
-                        </a>
-                    @endif
-                @endauth
+                {{-- Sem chamamento aberto na área, o caminho é a manifestação de interesse (PMIS), aberta
+                     a qualquer pessoa; o servidor da Prefeitura não propõe. --}}
+                @unless(auth()->user()?->temAcessoInterno())
+                    <a href="{{ route('manifestacao.publica.create') }}"
+                       class="btn btn-secondary">
+                        Manifestar interesse
+                    </a>
+                @endunless
                 <a href="{{ route('transparencia') }}"
                    class="text-sm font-medium text-accent-600 hover:text-accent-700 hover:underline">
                     Parcerias já celebradas →

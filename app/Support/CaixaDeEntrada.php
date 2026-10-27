@@ -182,9 +182,9 @@ class CaixaDeEntrada
             ->get()
             ->map(fn (ManifestacaoInteresse $m) => [
                 'tramite'   => $m->ehNovaProposta() ? 'Nova Proposta' : 'Manifestação',
-                'titulo'    => $m->titulo,
+                'titulo'    => $m->tituloParaExibir(),
                 'subtitulo' => collect([
-                    $m->osc?->name,
+                    $m->nomeDoProponente(),
                     $m->orgao?->sigla ?: $m->orgao?->name,
                     $m->ehNovaProposta()
                         ? ($m->status === 'submetida' ? 'Recebida — encaminhar à Unidade Gestora' : 'Deferir ou indeferir')
