@@ -118,7 +118,9 @@ class PortalController extends Controller
         // vê na lista que aquela parceria está em alteração.
         // Pesquisa: título ou objeto da proposta, número ou título do chamamento, a Secretaria.
         $propostas = $osc->propostas()
-            ->with(['chamamento.programa.orgao', 'instrumento.alteracoes' => fn ($q) => $q->emAndamento()])
+            ->with(['chamamento.programa.orgao', 'instrumento.alteracoes' => fn ($q) => $q->emAndamento(),
+                // Só o recurso da própria OSC: o card mostra se ela já recorreu.
+                'chamamento.recursos' => fn ($q) => $q->where('osc_id', $osc->id)])
             ->when($busca !== '', fn ($q) => $q->where(fn ($sub) => $sub
                 ->where('titulo', 'like', "%{$busca}%")
                 ->orWhere('objeto', 'like', "%{$busca}%")

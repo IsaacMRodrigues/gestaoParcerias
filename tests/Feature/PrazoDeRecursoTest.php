@@ -152,6 +152,20 @@ class PrazoDeRecursoTest extends TestCase
         $pagina()->assertSee('Recurso protocolado em')->assertDontSee('Protocolar recurso');
     }
 
+    public function test_minhas_inscricoes_mostra_onde_entrar_com_recurso(): void
+    {
+        $lista = fn () => $this->actingAs($this->rl)->get('/portal/minhas-propostas')->assertOk();
+        $link = route('portal.proposta.show', Proposta::sole()) . '#recurso';
+
+        $lista()->assertSee('Recurso: abre quando a Prefeitura publicar o Resultado Provisório.')->assertDontSee('Entrar com recurso');
+
+        $this->abrirPrazo();
+        $lista()->assertSee('Prazo de recurso aberto')->assertSee('Entrar com recurso')->assertSee($link, false);
+
+        $this->recorrer()->assertSessionHasNoErrors();
+        $lista()->assertSee('Recurso protocolado')->assertDontSee('Entrar com recurso');
+    }
+
     public function test_sem_recurso_a_proposta_mostra_o_prazo_encerrado(): void
     {
         $this->abrirPrazo(1);

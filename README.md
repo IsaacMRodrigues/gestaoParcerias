@@ -160,6 +160,7 @@ cada item estão no [Histórico de entregas](#histórico-de-entregas). 🚀 marc
 | 07/10 | Depois do deploy: listas só com o que é da Secretaria; R$ e vírgula em todos os campos de dinheiro; Arquivos da OSC valendo em todos os fluxos (recusa da UG trava a Celebração) |
 | 08/10 | Caixas de seleção e barra de download nos fluxos; **Arquivos da OSC preenchendo os fluxos** (documentos complementares, habilitação da dispensa e modelos com os dados da OSC); revisão do README |
 | 13/10 | Menu do portal da OSC na **barra lateral**, como o da área interna |
+| 28/10 | **Recurso à vista em Minhas inscrições (OSC)**: cada inscrição em chamamento público diz a situação do recurso e, com o prazo aberto, tem o botão "Entrar com recurso" |
 | 28/10 | **Assinatura eletrônica avançada** (Lei 14.063/2020): senha no ato, hash SHA-256 do texto, carimbo do tempo pela Hora Legal Brasileira (NTP.br), trilha de auditoria encadeada, validação pública com integridade e conferência do PDF; a hora do carimbo passa a sair em Brasília (saía 3 h adiantada) |
 | 27/10 | **Manifestação de interesse aberta a qualquer pessoa (PMIS)**: formulário público no modelo de Contagem, com reCAPTCHA, link de acompanhamento e lista pública; a decisão passa a ser acatar ou não |
 | 27/10 | **Minhas inscrições (OSC)**: Manifestações de interesse e Novas Propostas em blocos separados, cada uma com a sua etiqueta |
@@ -768,6 +769,14 @@ Trazer os demais cenários para `tests/Feature` é uma das [Pendências](#pendê
 
 Da mais recente para a mais antiga. Cada entrada diz o que mudou, **por quê** e como foi
 conferido — o porquê é o que falta a quem pega o código depois.
+
+- [2026-10-28] **Recurso à vista em Minhas inscrições** (`portal/_card-proposta`, `PortalController::minhasPropostas`)
+  - Relato da SCP: na aba Minhas inscrições da OSC, nos chamamentos públicos, não havia onde entrar com recurso — o
+    formulário existia só dentro da página da inscrição, sem nada na lista que levasse a ele. Cada card de
+    inscrição em chamamento público ganha uma faixa com a situação: antes do Resultado Provisório, quando o recurso
+    abre; com o prazo aberto, o destaque com o botão "Entrar com recurso" (vai direto ao formulário); recurso
+    protocolado, a data; prazo encerrado, a data em que terminou
+  - Conferido: `PrazoDeRecursoTest::test_minhas_inscricoes_mostra_onde_entrar_com_recurso`; suíte 265/265
 
 - [2026-10-28] **Assinatura eletrônica avançada** (`Support\TrilhaDeAssinatura`, `Support\HoraLegal`,
   `AssinaturaEvento`, `DocumentoEmitido`, `components/assinar`, migração `2026_10_28_100000`)

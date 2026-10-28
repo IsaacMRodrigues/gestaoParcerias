@@ -43,4 +43,33 @@
         <a href="{{ route('portal.proposta.show', $proposta) }}"
            class="text-sm font-semibold text-gray-600 hover:text-gray-900 transition">Abrir</a>
     </div>
+
+    {{-- Recurso contra o resultado provisório: a situação fica à vista na lista; o formulário, na página da inscrição. --}}
+    @if($proposta->chamamento->tipo === 'chamamento_publico' && $proposta->status !== 'rascunho')
+        @php
+            $chamamento = $proposta->chamamento;
+            $recurso = $chamamento->recursos->firstWhere('osc_id', $proposta->osc_id);
+            $podeRecorrer = !$recurso && $chamamento->faseRecursalAberta();
+        @endphp
+        <div class="w-full flex flex-wrap items-center justify-between gap-3 rounded-lg border px-4 py-2.5 text-sm
+                    {{ $podeRecorrer ? 'bg-accent-50 border-accent-200' : 'bg-gray-50 border-gray-100' }}">
+            <span class="text-gray-700">
+                @if($recurso)
+                    <strong>Recurso protocolado</strong> em {{ $recurso->protocolado_em?->format('d/m/Y') }}. A Comissão de Seleção vai analisar.
+                @elseif($podeRecorrer)
+                    <strong class="text-accent-800">Prazo de recurso aberto</strong> até {{ $chamamento->prazo_recurso_ate->format('d/m/Y') }}.
+                    Recorrer contra o resultado provisório é opcional.
+                @elseif($chamamento->prazoRecursalEncerrado())
+                    Recurso: o prazo terminou em {{ $chamamento->prazo_recurso_ate->format('d/m/Y') }}.
+                @else
+                    Recurso: abre quando a Prefeitura publicar o Resultado Provisório.
+                @endif
+            </span>
+            @if($podeRecorrer)
+                <a href="{{ route('portal.proposta.show', $proposta) }}#recurso" class="btn btn-primary btn-sm">Entrar com recurso</a>
+            @elseif($recurso)
+                <a href="{{ route('portal.proposta.show', $proposta) }}#recurso" class="text-sm font-semibold text-brand-700 hover:underline">Ver recurso</a>
+            @endif
+        </div>
+    @endif
 </div>
