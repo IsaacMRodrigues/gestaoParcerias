@@ -236,6 +236,7 @@ class User extends Authenticatable
             'status'            => 'boolean',
             'approved_at'       => 'datetime',
             'deve_trocar_senha' => 'boolean',
+            'termos_aceitos_em' => 'datetime',
         ];
     }
 

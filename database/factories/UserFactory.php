@@ -30,7 +30,15 @@ class UserFactory extends Factory
             'email_verified_at' => now(),
             'password' => static::$password ??= Hash::make('password'),
             'remember_token' => Str::random(10),
+            // Conta de teste já com os Termos de Uso aceitos; semAceiteDosTermos() tira.
+            'termos_versao' => \App\Support\TermosDeUso::VERSAO,
+            'termos_aceitos_em' => now(),
         ];
+    }
+
+    public function semAceiteDosTermos(): static
+    {
+        return $this->state(fn (array $attributes) => ['termos_versao' => null, 'termos_aceitos_em' => null]);
     }
 
     /**

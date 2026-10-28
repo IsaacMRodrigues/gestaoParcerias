@@ -178,6 +178,16 @@
                 </div>
             </div>
 
+            <div class="bg-white rounded-xl border border-gray-200 shadow-sm p-6">
+            <label class="flex items-start gap-3 text-sm text-gray-700">
+                <input type="checkbox" name="aceite_termos" value="1" required @checked(old('aceite_termos'))
+                       class="mt-0.5 rounded border-gray-300 text-brand-600 focus:ring-brand-500">
+                <span>Li e aceito os <a href="{{ route('termos.index') }}" target="_blank" class="font-semibold text-brand-700 hover:underline">Termos de Uso</a>
+                    da Plataforma (versão {{ \App\Support\TermosDeUso::VERSAO }}).</span>
+            </label>
+            @error('aceite_termos') <p class="text-red-600 text-xs mt-2">{{ $message }}</p> @enderror
+            </div>
+
             <div class="flex items-center justify-between">
                 <a href="{{ route('portal.index') }}" class="text-sm text-gray-500 hover:text-gray-800">Cancelar</a>
                 <button type="submit"

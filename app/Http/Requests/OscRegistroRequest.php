@@ -40,7 +40,14 @@ class OscRegistroRequest extends FormRequest
             'bairro'     => ['nullable', 'string', 'max:100'],
             'cidade'     => ['required', 'string', 'max:100'],
             'estado'     => ['required', 'string', 'size:2'],
+
+            'aceite_termos' => ['accepted'],
         ];
+    }
+
+    public function messages(): array
+    {
+        return ['aceite_termos.accepted' => 'Para se cadastrar, leia e aceite os Termos de Uso.'];
     }
 
     public function attributes(): array

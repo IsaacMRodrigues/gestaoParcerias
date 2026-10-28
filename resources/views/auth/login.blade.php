@@ -67,4 +67,7 @@
             </a>
         @endif
     </p>
+    <p class="text-xs text-gray-400 text-center mt-3">
+        O uso do sistema segue os <a href="{{ route('termos.index') }}" class="hover:text-brand-700 hover:underline">Termos de Uso</a>.
+    </p>
 </x-guest-layout>

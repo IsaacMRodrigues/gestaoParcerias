@@ -59,6 +59,7 @@ class OscRegistroController extends Controller
             // legalmente; users.osc_id é o que dá acesso ao portal (e o que
             // permite à organização ter mais de uma conta).
             $user->update(['osc_id' => $osc->id]);
+            \App\Support\TermosDeUso::registrarAceite($user, 'cadastro');
 
             Auth::login($user);
         });

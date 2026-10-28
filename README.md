@@ -76,8 +76,10 @@ o recebimento.
 
 **No GitHub e ainda fora da produção:** "Minhas inscrições" da OSC com Manifestações de interesse e Novas
 Propostas em blocos separados e a manifestação de interesse no modelo do PMIS, por formulário público (27/10, com
-a migração `2026_10_27_100000`), e a **assinatura eletrônica avançada** (28/10, com a migração `2026_10_28_100000`,
-ensaiada numa cópia do banco de produção: as 11 assinaturas de lá entram na trilha). Antes de subir, no `.env` da
+a migração `2026_10_27_100000`), a **assinatura eletrônica avançada** (28/10, com a migração `2026_10_28_100000`,
+ensaiada numa cópia do banco de produção: as 11 assinaturas de lá entram na trilha), o recurso à vista em Minhas
+inscrições e os **Termos de Uso** (28/10, migração `2026_10_28_110000`: depois do deploy, toda conta que já existe
+aceita os Termos no próximo acesso). Antes de subir, no `.env` da
 produção: `RECAPTCHA_SITE_KEY` e `RECAPTCHA_SECRET` (sem chave, o formulário público fica bloqueado lá) e
 `TRUSTED_PROXIES` (sem ela, o IP gravado na trilha e no limite do formulário é o da CDN).
 
@@ -160,6 +162,7 @@ cada item estão no [Histórico de entregas](#histórico-de-entregas). 🚀 marc
 | 07/10 | Depois do deploy: listas só com o que é da Secretaria; R$ e vírgula em todos os campos de dinheiro; Arquivos da OSC valendo em todos os fluxos (recusa da UG trava a Celebração) |
 | 08/10 | Caixas de seleção e barra de download nos fluxos; **Arquivos da OSC preenchendo os fluxos** (documentos complementares, habilitação da dispensa e modelos com os dados da OSC); revisão do README |
 | 13/10 | Menu do portal da OSC na **barra lateral**, como o da área interna |
+| 28/10 | **Termos de Uso**: texto da versão 1.0, aceite obrigatório no cadastro (servidor e OSC) e no primeiro acesso de toda conta, registrado com versão, hash do texto, IP e navegador; nova versão pede novo aceite |
 | 28/10 | **Recurso à vista em Minhas inscrições (OSC)**: cada inscrição em chamamento público diz a situação do recurso e, com o prazo aberto, tem o botão "Entrar com recurso" |
 | 28/10 | **Assinatura eletrônica avançada** (Lei 14.063/2020): senha no ato, hash SHA-256 do texto, carimbo do tempo pela Hora Legal Brasileira (NTP.br), trilha de auditoria encadeada, validação pública com integridade e conferência do PDF; a hora do carimbo passa a sair em Brasília (saía 3 h adiantada) |
 | 27/10 | **Manifestação de interesse aberta a qualquer pessoa (PMIS)**: formulário público no modelo de Contagem, com reCAPTCHA, link de acompanhamento e lista pública; a decisão passa a ser acatar ou não |
@@ -721,6 +724,9 @@ Trazer os demais cenários para `tests/Feature` é uma das [Pendências](#pendê
   Resposta ao recurso): falta definir quem assina — três membros quaisquer da Comissão da Secretaria? — e
   se os já assinados continuam valendo. O mecanismo de várias assinaturas já existe (o do Termo).
 - **Ata do resultado definitivo** (etapa 4 da Seleção) está opcional: deve ser obrigatória?
+- **Termos de Uso (versão 1.0):** revisão pela Procuradoria do Município antes de valerem; o item 8 indica "os
+  canais oficiais do Município" para os direitos do titular — falta o contato do Encarregado de Dados (LGPD, art.
+  41), se o Município já o designou. Mudança no texto vira versão 1.1, e todos aceitam de novo.
 - **Quem confere o painel da prestação de contas:** hoje quem tem `execucao` ou `prestacao_contas` na Secretaria
   da parceria (Responsável da UG, Gestor da Parceria) e a SCP. Restringir ao Gestor da Parceria? E a
   periodicidade: a prestação parcial tem prazo fixo no termo, para o sistema avisar a OSC?
@@ -769,6 +775,27 @@ Trazer os demais cenários para `tests/Feature` é uma das [Pendências](#pendê
 
 Da mais recente para a mais antiga. Cada entrada diz o que mudou, **por quê** e como foi
 conferido — o porquê é o que falta a quem pega o código depois.
+
+- [2026-10-28] **Termos de Uso** (`Support\TermosDeUso`, `TermoAceite`, `ExigeAceiteDosTermos`, `TermosDeUsoController`,
+  `resources/views/termos/`, migração `2026_10_28_110000`)
+  - Pedido da gestão: todo usuário, da Prefeitura e da OSC, lê e aceita os Termos de Uso do sistema. Texto da versão
+    1.0 (`termos/_texto`), em 14 itens: objeto e aceite, quem é quem, cadastro e conta (pessoal e intransferível; o
+    responsável legal responde pela equipe da OSC), assinatura eletrônica (Lei 14.063/2020 e o que a trilha
+    registra), responsabilidades e condutas proibidas, comunicações por e-mail (ajudam, não substituem publicação
+    oficial nem prazos), transparência (Lei 13.019/2014 e LAI), dados pessoais (LGPD: bases legais, dados, finalidades,
+    compartilhamento com órgãos de controle, guarda e direitos do titular), registros, disponibilidade, documentos,
+    descumprimento, mudanças e foro
+  - Aceite: a caixa "Li e aceito" é exigida em "Solicitar acesso" (servidor) e no cadastro da OSC; conta criada por
+    outra pessoa (pela SCP, pelo TI, a equipe da OSC) e toda conta que já existia aceita no primeiro acesso — o
+    middleware leva qualquer tela à de aceite, depois da troca de senha obrigatória, e volta para onde a pessoa ia.
+    "Não aceito — sair" encerra a sessão. Os auditores (somente leitura) também aceitam
+  - Cada aceite fica em `termos_aceites`, que não se altera: conta, nome, e-mail, versão, SHA-256 do texto lido,
+    origem (cadastro, primeiro acesso, nova versão), IP, navegador e data. A conta guarda a versão aceita
+    (`users.termos_versao`). Texto mudado exige versão nova: `TermosDeUso::VERSAO`, `VIGENTE_DESDE` e `HASH` — o
+    teste confere o hash e falha se o texto mudar sem isso; com versão nova, todos aceitam de novo
+  - Página pública `/termos-de-uso`, com link nos rodapés e no login; logado, mostra quando a pessoa aceitou
+  - Conferido: `TermosDeUsoTest` (8 testes) e `AutoCadastroDeServidorTest` ajustado; suíte 273/273; num banco
+    descartável, entrar com conta sem aceite leva à tela, aceitar volta ao painel e o registro confere com o hash
 
 - [2026-10-28] **Recurso à vista em Minhas inscrições** (`portal/_card-proposta`, `PortalController::minhasPropostas`)
   - Relato da SCP: na aba Minhas inscrições da OSC, nos chamamentos públicos, não havia onde entrar com recurso — o

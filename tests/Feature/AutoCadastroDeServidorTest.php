@@ -31,7 +31,7 @@ class AutoCadastroDeServidorTest extends TestCase
         $this->educacao = Orgao::where('name', 'Educação')->first() ?? Orgao::forceCreate(['name' => 'Educação']);
         $this->scp = User::where('email', 'scp@gmail.com')->first();
         // A conta da migração nasce com a senha provisória pública, e por isso com troca obrigatória.
-        $this->scp?->forceFill(['deve_trocar_senha' => false])->save();
+        $this->scp?->forceFill(['deve_trocar_senha' => false, 'termos_versao' => \App\Support\TermosDeUso::VERSAO])->save();
     }
 
     private function dados(array $extra = []): array
@@ -39,7 +39,7 @@ class AutoCadastroDeServidorTest extends TestCase
         return $extra + [
             'name' => 'Maria Secretária', 'email' => 'maria.educacao@saogoncalo.mg.gov.br', 'matricula' => 'M-123',
             'setor' => 'ug', 'orgao_id' => $this->educacao->id, 'perfis' => ['responsavel_unidade_gestora'],
-            'password' => 'senha123', 'password_confirmation' => 'senha123',
+            'password' => 'senha123', 'password_confirmation' => 'senha123', 'aceite_termos' => '1',
         ];
     }
 

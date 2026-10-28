@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Auth;
 use App\Http\Controllers\Controller;
 use App\Models\Orgao;
 use App\Models\User;
+use App\Support\TermosDeUso;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
@@ -53,7 +54,9 @@ class RegisteredUserController extends Controller
             'perfis.*'        => [Rule::in(array_keys(User::perfisDoAutoCadastro((string) $request->input('setor'))))],
             'password'        => ['required', 'confirmed', Rules\Password::defaults()],
             'solicitacao_obs' => ['nullable', 'string', 'max:1000'],
+            'aceite_termos'   => ['accepted'],
         ], [
+            'aceite_termos.accepted' => 'Para se cadastrar, leia e aceite os Termos de Uso.',
             'orgao_id.required_if' => 'Selecione a Secretaria/Unidade Gestora.',
             'perfis.required'      => 'Escolha ao menos um perfil: é o que você vai fazer no sistema.',
             'perfis.*.in'          => 'Um dos perfis escolhidos não pode ser pedido neste setor.',
@@ -78,6 +81,7 @@ class RegisteredUserController extends Controller
         ]);
         // Pendente, os perfis não abrem nada: podeAutenticar() exige a aprovação.
         $user->syncRoles($request->input('perfis'));
+        TermosDeUso::registrarAceite($user, 'cadastro');
 
         return redirect()->route('login')->with('status',
             'Cadastro enviado! Seu acesso será liberado depois que o Setor de Convênios e Parcerias (SCP) conferir os seus dados.');

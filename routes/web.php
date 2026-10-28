@@ -71,6 +71,9 @@ Route::middleware('guest')->group(function () {
     Route::post('/cadastro/osc', [OscRegistroController::class, 'store'])->name('portal.osc.store');
 });
 
+// Termos de Uso, públicos (o aceite fica em routes/auth.php)
+Route::get('/termos-de-uso', [\App\Http\Controllers\TermosDeUsoController::class, 'index'])->name('termos.index');
+
 // Validação pública de documentos assinados
 Route::get('/validar', [\App\Http\Controllers\ValidacaoController::class, 'index'])->name('validacao.index');
 Route::post('/validar', [\App\Http\Controllers\ValidacaoController::class, 'verificar'])->name('validacao.verificar');

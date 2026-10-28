@@ -115,7 +115,10 @@
             <footer class="border-t border-gray-200 bg-white">
                 <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 flex flex-col sm:flex-row items-center justify-between gap-2 text-xs text-gray-400">
                     <span>Plataforma de Gestão de Parcerias — Sistema público municipal</span>
-                    <a href="{{ route('validacao.index') }}" class="hover:text-brand-700 transition">Validar documento</a>
+                    <span class="flex items-center gap-5">
+                        <a href="{{ route('termos.index') }}" class="hover:text-brand-700 transition">Termos de Uso</a>
+                        <a href="{{ route('validacao.index') }}" class="hover:text-brand-700 transition">Validar documento</a>
+                    </span>
                 </div>
             </footer>
         </div>
@@ -267,6 +270,7 @@
                     <span>Plataforma de Gestão de Parcerias — Sistema público municipal</span>
                     <span class="flex items-center gap-5">
                         <a href="{{ route('transparencia') }}" class="hover:text-brand-700 transition">Transparência</a>
+                        <a href="{{ route('termos.index') }}" class="hover:text-brand-700 transition">Termos de Uso</a>
                         <a href="{{ route('validacao.index') }}" class="hover:text-brand-700 transition">Validar documento</a>
                     </span>
                 </div>

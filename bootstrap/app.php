@@ -24,6 +24,8 @@ return Application::configure(basePath: dirname(__DIR__))
             \App\Http\Middleware\ParceriaVisivel::class,
             // Senha definida por outra pessoa se troca antes de tudo.
             \App\Http\Middleware\ExigeTrocaDeSenha::class,
+            // Sem o aceite da versão vigente dos Termos de Uso, nada se usa.
+            \App\Http\Middleware\ExigeAceiteDosTermos::class,
         ]);
 
         $middleware->alias([

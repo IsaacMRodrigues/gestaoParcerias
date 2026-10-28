@@ -120,6 +120,16 @@
             <x-input-error :messages="$errors->get('solicitacao_obs')" class="mt-2" />
         </div>
 
+        <div>
+            <label class="flex items-start gap-3 text-sm text-gray-700">
+                <input type="checkbox" name="aceite_termos" value="1" required @checked(old('aceite_termos'))
+                       class="mt-0.5 rounded border-gray-300 text-brand-600 focus:ring-brand-500">
+                <span>Li e aceito os <a href="{{ route('termos.index') }}" target="_blank" class="font-semibold text-brand-700 hover:underline">Termos de Uso</a>
+                    da Plataforma (versão {{ \App\Support\TermosDeUso::VERSAO }}).</span>
+            </label>
+            <x-input-error :messages="$errors->get('aceite_termos')" class="mt-2" />
+        </div>
+
         <x-primary-button class="w-full !py-3 text-base">
             Solicitar acesso
             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.4">
