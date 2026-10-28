@@ -31,3 +31,6 @@ Thumbs.db
 
 # Fotos de teste (522 MB) — material de trabalho local, não vai para o repositório
 /Docs. Desenvolvimento/galeria/
+
+# Instruções e chaves locais do Claude Code: nunca vão ao repositório (público)
+CLAUDE.md
