@@ -119,7 +119,7 @@ class CelebracaoController extends Controller
     {
         $peca = $proposta->pecas()->where('chave', 'plano_trabalho')->first();
 
-        if (!$peca || $peca->tipo !== 'modelo' || $peca->assinado()) {
+        if (!$peca || $peca->tipo !== 'modelo' || $peca->temAlgumaAssinatura()) {
             return;
         }
 

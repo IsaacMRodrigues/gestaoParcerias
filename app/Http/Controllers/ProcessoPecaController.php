@@ -122,24 +122,18 @@ class ProcessoPecaController extends Controller
             ->with('success', ProcessoPeca::TIPOS[$peca->tipo] . ' salvo.');
     }
 
-    public function assinar(Processo $processo, ProcessoPeca $peca): RedirectResponse
+    public function assinar(Request $request, Processo $processo, ProcessoPeca $peca): RedirectResponse
     {
         abort_unless($peca->processo_id === $processo->id, 404);
         abort_unless($processo->visivelPara(auth()->user()), 403, 'Este processo pertence a outra Secretaria.');
         abort_unless($peca->podeAssinar($processo, auth()->user()), 403,
             'Você não pode assinar esta peça nesta etapa.');
 
-        // Ver PecaController::assinar(): a identidade de quem assina fica
-        // gravada, para o carimbo não mudar quando a pessoa mudar.
-        $quem = auth()->user()->identidadeParaAssinatura();
+        if ($recusa = $this->senhaDaAssinaturaRecusada($request)) {
+            return redirect()->route('processos.pecas.edit', [$processo, $peca])->with('error', $recusa);
+        }
 
-        $peca->update([
-            'assinado_por'     => auth()->id(),
-            'assinado_em'      => now(),
-            'assinante_nome'   => $quem['nome'],
-            'assinante_cargo'  => $quem['cargo'],
-            'codigo_validacao' => $peca->codigo_validacao ?: ProcessoPeca::gerarCodigoValidacao(),
-        ]);
+        \App\Support\TrilhaDeAssinatura::assinar($peca, auth()->user());
         $peca->limparDevolucao();
 
         return redirect()->route('processos.pecas.edit', [$processo, $peca])

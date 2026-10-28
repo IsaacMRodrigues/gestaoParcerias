@@ -212,7 +212,7 @@ class PrestacaoContasController extends Controller
             }
 
             $peca = $pc->pecas()->where('chave', $chave)->first();
-            if (!$peca || $peca->assinado()) {
+            if (!$peca || $peca->temAlgumaAssinatura()) {
                 continue;
             }
 

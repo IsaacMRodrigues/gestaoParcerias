@@ -131,13 +131,9 @@ HTML;
         return !is_null($this->assinado_em);
     }
 
-    /** Gera um código de validação único (ex.: A1B2-C3D4-E5). */
+    /** Gera um código de validação único (ex.: A1B2-C3D4-E5) — ver TrilhaDeAssinatura::novoCodigo(). */
     public static function gerarCodigoValidacao(): string
     {
-        do {
-            $codigo = strtoupper(Str::random(4) . '-' . Str::random(4) . '-' . Str::random(2));
-        } while (static::where('codigo_validacao', $codigo)->exists());
-
-        return $codigo;
+        return \App\Support\TrilhaDeAssinatura::novoCodigo();
     }
 }

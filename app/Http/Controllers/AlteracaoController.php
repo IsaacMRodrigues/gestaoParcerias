@@ -263,7 +263,7 @@ class AlteracaoController extends Controller
     {
         $peca = $alteracao->pecas()->where('chave', 'proposta_alteracao')->first();
 
-        if (!$peca || $peca->assinado()) {
+        if (!$peca || $peca->temAlgumaAssinatura()) {
             return;
         }
 

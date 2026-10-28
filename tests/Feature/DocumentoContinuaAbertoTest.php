@@ -54,7 +54,7 @@ class DocumentoContinuaAbertoTest extends TestCase
         $doc = route('processos.pecas.edit', [$processo, $memorando]);
         $this->actingAs($ug)->put("/processos/{$processo->id}/pecas/{$memorando->id}", ['conteudo' => '<p>Memorando revisto</p>'])
             ->assertRedirect($doc);
-        $this->actingAs($ug)->patch("/processos/{$processo->id}/pecas/{$memorando->id}/assinar")->assertRedirect($doc);
+        $this->actingAs($ug)->patch("/processos/{$processo->id}/pecas/{$memorando->id}/assinar", ['senha_assinatura' => 'password'])->assertRedirect($doc);
         $this->actingAs($ug)->get($doc)->assertOk();
     }
 

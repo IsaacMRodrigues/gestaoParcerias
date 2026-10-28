@@ -16,7 +16,7 @@
                     <span class="text-lg">🔏</span>
                     <div>
                         Assinada eletronicamente por <strong>{{ $op->assinanteNome() }}</strong>
-                        em {{ $op->assinado_em->format('d/m/Y \à\s H:i') }}.
+                        em {{ \App\Support\HoraLegal::emBrasilia($op->assinado_em)->format('d/m/Y \à\s H:i') }}.
                         Código: <span class="font-mono">{{ $op->codigo_validacao }}</span>.
                     </div>
                 </div>
@@ -83,13 +83,7 @@
                 </a>
 
                 @unless($op->assinado())
-                    <form method="POST" action="{{ route('ordens-pagamento.assinar', $op) }}"
-                          data-confirm="Assinar eletronicamente esta ordem de pagamento? Após assinar não será possível editá-la.">
-                        @csrf @method('PATCH')
-                        <button type="submit" class="btn btn-primary">
-                            🔏 Assinar
-                        </button>
-                    </form>
+                    <x-assinar :action="route('ordens-pagamento.assinar', $op)" rotulo="🔏 Assinar" />
                 @endunless
             </div>
         </div>

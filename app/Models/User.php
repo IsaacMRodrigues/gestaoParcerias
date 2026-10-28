@@ -429,6 +429,12 @@ class User extends Authenticatable
         return $this->setor === 'scp' || $this->hasRole('administrador_setorial');
     }
 
+    /** IP e navegador da trilha das assinaturas são dado pessoal: veem só o administrador e os auditores. */
+    public function veTrilhaCompletaDasAssinaturas(): bool
+    {
+        return $this->hasAnyRole(['administrador_setorial', 'auditor_geral', 'auditor_externo']);
+    }
+
     /**
      * Cadastra a equipe do próprio setor? Pela permissão usuarios_setor e com lotação (o novo
      * usuário herda o setor). Quem tem cadastros usa a tela de Cadastros.

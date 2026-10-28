@@ -58,7 +58,7 @@ class ParecerContabilNoPlanejamentoTest extends TestCase
 
     private function assinar(User $quem, string $tipo)
     {
-        return $this->actingAs($quem)->patch("/processos/{$this->processo->id}/pecas/{$this->peca($tipo)->id}/assinar");
+        return $this->actingAs($quem)->patch("/processos/{$this->processo->id}/pecas/{$this->peca($tipo)->id}/assinar", ['senha_assinatura' => 'password']);
     }
 
     public function test_os_dois_pareceres_estao_na_mesma_etapa(): void

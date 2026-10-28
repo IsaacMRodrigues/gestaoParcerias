@@ -683,4 +683,21 @@ class Avisos
             botao: 'Ver o chamamento',
         ));
     }
+
+    /** A verificação diária achou a trilha das assinaturas ou um texto assinado alterado: avisa o administrador e os auditores. */
+    public static function trilhaDeAssinaturasComProblema(array $problemas): void
+    {
+        $quem = User::role(['administrador_setorial', 'auditor_geral', 'auditor_externo'])
+            ->where('status', true)->where('approval_status', 'aprovado')->get();
+
+        self::enviar($quem, new Aviso(
+            assunto: 'Trilha de auditoria das assinaturas com problema',
+            titulo: 'A verificação diária das assinaturas encontrou problema',
+            linhas: array_merge(
+                array_slice($problemas, 0, 10),
+                count($problemas) > 10 ? ['… e mais ' . (count($problemas) - 10) . '. A lista completa está no log do sistema.'] : [],
+                ['Alguém mexeu direto no banco de dados, ou um documento assinado foi reescrito. Confira antes de qualquer outra coisa.'],
+            ),
+        ));
+    }
 }

@@ -62,7 +62,7 @@ class CelebracaoEtapa7Test extends TestCase
         $minuta = $pecas['minuta_termo'];
         $this->assertFalse($minuta->podeAssinar($scp));
         $this->assertFalse($minuta->concluida(), 'o texto do modelo, como veio, não basta');
-        $this->actingAs($scp)->patch("/pecas/{$minuta->id}/assinar")->assertForbidden();
+        $this->actingAs($scp)->patch("/pecas/{$minuta->id}/assinar", ['senha_assinatura' => 'password'])->assertForbidden();
 
         $this->actingAs($scp)->put("/pecas/{$minuta->id}", ['conteudo' => '<p>Minuta do termo com a Associação, valor R$ 8.000.</p>'])
             ->assertSessionHasNoErrors();

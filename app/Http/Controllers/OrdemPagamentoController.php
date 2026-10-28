@@ -55,20 +55,16 @@ class OrdemPagamentoController extends Controller
             ->with('success', 'Ordem de pagamento salva.');
     }
 
-    public function assinar(OrdemPagamento $ordem): RedirectResponse
+    public function assinar(Request $request, OrdemPagamento $ordem): RedirectResponse
     {
         abort_if($ordem->assinado(), 403, 'Esta ordem de pagamento já está assinada.');
         abort_if(empty($ordem->conteudo), 422, 'Preencha o documento antes de assinar.');
 
-        $quem = auth()->user()->identidadeParaAssinatura();
+        if ($recusa = $this->senhaDaAssinaturaRecusada($request)) {
+            return redirect()->route('ordens-pagamento.edit', $ordem)->with('error', $recusa);
+        }
 
-        $ordem->update([
-            'assinado_por'     => auth()->id(),
-            'assinado_em'      => now(),
-            'assinante_nome'   => $quem['nome'],
-            'assinante_cargo'  => $quem['cargo'],
-            'codigo_validacao' => $ordem->codigo_validacao ?: OrdemPagamento::gerarCodigoValidacao(),
-        ]);
+        \App\Support\TrilhaDeAssinatura::assinar($ordem, auth()->user());
 
         return redirect()->route('ordens-pagamento.edit', $ordem)
             ->with('success', 'Ordem de pagamento assinada eletronicamente.');

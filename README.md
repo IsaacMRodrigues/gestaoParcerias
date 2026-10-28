@@ -76,8 +76,10 @@ o recebimento.
 
 **No GitHub e ainda fora da produção:** "Minhas inscrições" da OSC com Manifestações de interesse e Novas
 Propostas em blocos separados e a manifestação de interesse no modelo do PMIS, por formulário público (27/10, com
-a migração `2026_10_27_100000`). Antes de subir: `RECAPTCHA_SITE_KEY` e `RECAPTCHA_SECRET` no `.env` da produção
-(sem chave, o formulário público fica bloqueado lá).
+a migração `2026_10_27_100000`), e a **assinatura eletrônica avançada** (28/10, com a migração `2026_10_28_100000`,
+ensaiada numa cópia do banco de produção: as 11 assinaturas de lá entram na trilha). Antes de subir, no `.env` da
+produção: `RECAPTCHA_SITE_KEY` e `RECAPTCHA_SECRET` (sem chave, o formulário público fica bloqueado lá) e
+`TRUSTED_PROXIES` (sem ela, o IP gravado na trilha e no limite do formulário é o da CDN).
 
 As ações de produção que o deploy não faz (dados e painel) estão em
 [Pendências → Produção](#produção-ação-não-código).
@@ -158,6 +160,7 @@ cada item estão no [Histórico de entregas](#histórico-de-entregas). 🚀 marc
 | 07/10 | Depois do deploy: listas só com o que é da Secretaria; R$ e vírgula em todos os campos de dinheiro; Arquivos da OSC valendo em todos os fluxos (recusa da UG trava a Celebração) |
 | 08/10 | Caixas de seleção e barra de download nos fluxos; **Arquivos da OSC preenchendo os fluxos** (documentos complementares, habilitação da dispensa e modelos com os dados da OSC); revisão do README |
 | 13/10 | Menu do portal da OSC na **barra lateral**, como o da área interna |
+| 28/10 | **Assinatura eletrônica avançada** (Lei 14.063/2020): senha no ato, hash SHA-256 do texto, carimbo do tempo pela Hora Legal Brasileira (NTP.br), trilha de auditoria encadeada, validação pública com integridade e conferência do PDF; a hora do carimbo passa a sair em Brasília (saía 3 h adiantada) |
 | 27/10 | **Manifestação de interesse aberta a qualquer pessoa (PMIS)**: formulário público no modelo de Contagem, com reCAPTCHA, link de acompanhamento e lista pública; a decisão passa a ser acatar ou não |
 | 27/10 | **Minhas inscrições (OSC)**: Manifestações de interesse e Novas Propostas em blocos separados, cada uma com a sua etiqueta |
 | 26/10 | **Deploy na Hostinger** (commit `154cbf4`): Novas Propostas no menu, Nova Proposta sem experiência e declarações, Relatório e Ata internos |
@@ -621,7 +624,10 @@ Procedimento:
    cron da hospedagem chama a cada minuto: `<php 8.4> <pasta da aplicação>/artisan schedule:run`.
    **O SSH da Hostinger não tem `crontab`** — o cron se cria no hPanel (Avançado → Cron Jobs).
    Conferir se a fila anda: `./php artisan tinker` → `DB::table('jobs')->count()` volta a zero.
-8. **Teste de fumaça:** `/`, `/login`, `/portal`, `/transparencia`, `/validar` e `/cadastro/osc` em
+8. **IP real atrás da CDN** (uma vez): `TRUSTED_PROXIES` no `.env` com as faixas da CDN da hospedagem e
+   `config:cache`. Depois do deploy, conferir que as sessões novas (`sessions.ip_address`) gravam o IP de quem
+   acessa, não o da CDN; se não, a trilha das assinaturas guarda o cabeçalho cru para ajuste.
+9. **Teste de fumaça:** `/`, `/login`, `/portal`, `/transparencia`, `/validar` e `/cadastro/osc` em
    200; `/dashboard` em 302; `/.env` em 403; e **uma rota nova da entrega em 302** — se vier 404, o
    cache de rotas está velho. Por fim, conferir o `storage/logs/laravel.log`.
 
@@ -629,7 +635,7 @@ Procedimento:
 
 ## Verificação
 
-`php artisan test` (sqlite em memória) roda **231 testes** em `tests/Feature`, um arquivo por regra de
+`php artisan test` (sqlite em memória) roda **264 testes** em `tests/Feature`, um arquivo por regra de
 negócio (quem abre qual parceria, contas e senhas, avisos por e-mail, segregação de encargos,
 cancelamento e prorrogação de chamamento, Nova Proposta, prazo e resposta de recurso, plano de
 trabalho do modelo, etapa conjunta, devolução por documento, Termo e OP em sequência, download de
@@ -664,7 +670,7 @@ Trazer os demais cenários para `tests/Feature` é uma das [Pendências](#pendê
 
 ## Pendências
 
-*Atualizado em 13/10/2026.*
+*Atualizado em 28/10/2026.*
 
 ### Segurança
 
@@ -674,12 +680,19 @@ Trazer os demais cenários para `tests/Feature` é uma das [Pendências](#pendê
   ainda a usa. Até cada pessoa entrar e trocar, quem conhece a senha pública consegue entrar antes
   dela — e escolher a senha. Vale avisar os servidores para entrarem logo; conta que ninguém usa
   deve ser desativada.
-- A assinatura eletrônica não guarda resumo criptográfico do texto assinado: a integridade se apoia
-  no código de validação e no documento deixar de ser editável depois de assinado.
+- **Fuso horário:** o sistema roda em UTC (`config/app.php`) e as telas mostram a hora em UTC — 3 horas à
+  frente de Brasília. A assinatura já foi corrigida; o resto não. O que pesa: o **prazo de recurso** fecha às
+  20h59 de Brasília do último dia (`endOfDay()` em UTC), não às 23h59. Corrigir de vez é trocar o fuso da
+  aplicação e acertar as datas já gravadas, coluna a coluna (as de instante sim, as digitadas não) — entrega
+  própria, com ensaio na cópia da produção.
+- **Assinatura avançada, o que fica fora do código:** o inciso I pede o registro de como a identidade foi
+  validada no cadastro (hoje a conta é aprovada, mas não se anota que documento foi conferido); o parágrafo único
+  pede guarda em meio seguro pelo prazo do regulamento (hoje só o backup de cada deploy). O segundo fator (MFA),
+  que o inciso II permite exigir, ainda não existe.
 - O **DMARC** do domínio está em `p=none`: só monitora, não impede que alguém envie e-mail se
   passando por `@pmsgra.net`. SPF e DKIM estão certos; endurecer para `quarantine` é ajuste no DNS.
-- Requisitos não-funcionais ainda por fazer: **trilha de auditoria / logs imutáveis**, **MFA**,
-  adequação à **LGPD**.
+- Requisitos não-funcionais ainda por fazer: **logs imutáveis** fora das assinaturas (a trilha das assinaturas
+  existe desde 28/10), **MFA**, adequação à **LGPD**.
 
 ### Decisões que dependem da gestão ou da cliente
 
@@ -726,6 +739,10 @@ Trazer os demais cenários para `tests/Feature` é uma das [Pendências](#pendê
 - Na prestação de contas, o **laudo de obra** e os **pareceres** saem com `XXXXX` no corpo.
 - Checklist da dispensa: itens 16 a 18 e a publicação do termo (item 15).
 - Trazer as verificações HTTP para `tests/Feature`.
+- `documentos/{id}/download` dá erro 500 para documento de manifestação sem proposta (`DocumentoController::autorizarLeitura`
+  espera a proposta); na produção há um assim. Achado na varredura de 28/10.
+- Em MySQL, `AutoCadastroDeServidorTest::test_as_contas_pre_cadastradas_sao_apagadas_mesmo_com_registro` falha:
+  o teste grava `'municipal'` em `processos.esfera`, mais curta (o SQLite não confere o tamanho).
 - Itens finos anotados em agosto, a confirmar com a SCP: campos **Exercício** e **Prazo de Execução** no
   chamamento (2.2.1 do módulo 2) e reajuste/reequilíbrio na formalização.
 
@@ -751,6 +768,47 @@ Trazer os demais cenários para `tests/Feature` é uma das [Pendências](#pendê
 
 Da mais recente para a mais antiga. Cada entrada diz o que mudou, **por quê** e como foi
 conferido — o porquê é o que falta a quem pega o código depois.
+
+- [2026-10-28] **Assinatura eletrônica avançada** (`Support\TrilhaDeAssinatura`, `Support\HoraLegal`,
+  `AssinaturaEvento`, `DocumentoEmitido`, `components/assinar`, migração `2026_10_28_100000`)
+  - Pedido da gestão: as assinaturas da plataforma devem atender aos requisitos mínimos da assinatura eletrônica
+    avançada da Lei 14.063/2020, na redação do artigo que o Município vai regulamentar (incisos I a VI). O que
+    cada inciso ganhou:
+    - **II — credencial pessoal:** assinar pede a senha de novo, no próprio botão (`Controller::senhaDaAssinaturaRecusada`);
+      cinco erros seguidos travam a assinatura da conta por 15 minutos.
+    - **III — integridade:** cada assinatura grava o SHA-256 do texto assinado. A validação compara com o texto de
+      hoje e diz se mudou; o carimbo e o PDF imprimem o código de integridade.
+    - **IV — carimbo do tempo:** a hora vem dos servidores de estrato 1 do NTP.br, sincronizados pelo Observatório
+      Nacional, com a resposta conferida (eco da pergunta, estrato, relógio sincronizado). Sem resposta, vale o
+      relógio do servidor, e a assinatura diz isso. A hora exibida passa a ser a de Brasília: o sistema guarda em
+      UTC e o carimbo mostrava UTC dizendo "horário oficial de Brasília", 3 horas adiantado.
+    - **V — trilha de auditoria:** tabela só de acréscimo, cada evento com o hash do anterior (cadeia única: dois
+      eventos não nascem do mesmo elo). Guarda quem assinou (nome, cargo, CPF, e-mail, lotação, quem aprovou a
+      conta), a autenticação, o IP de quem acessa, o IP da conexão e o cabeçalho da CDN crus, o navegador, o hash
+      do texto e o carimbo do tempo. A devolução não apaga mais a assinatura da história: ela fica como anulada,
+      com o motivo, e o código antigo avisa na validação. `assinaturas:verificar` confere a cadeia e todo texto
+      assinado todo dia às 6h; se achar problema, avisa o administrador e os auditores por e-mail.
+    - **VI — validação pública:** `/validar/{código}` mostra autoria, CPF mascarado, data e hora de Brasília, a fonte
+      do tempo, o veredito de integridade e a trilha do documento (IP e navegador só para administrador e
+      auditores). Novo: **conferir o PDF** em `/validar` — o sistema registra o hash de cada PDF de documento
+      assinado que gera e reconhece o arquivo intacto; qualquer byte mudado, e ele recusa.
+    - **I — identidade:** a trilha registra os dados de identificação e a aprovação da conta; o procedimento de
+      conferência no cadastro segue como está (ver Pendências).
+  - As assinaturas anteriores entram na trilha na migração como "anteriores", com o hash do texto da implantação e
+    a hora original do relógio do servidor (a validação não as dá como carimbadas pelo NTP.br).
+  - Correções que o trabalho achou: texto assinado fora do trâmite (fase do edital, anexo avulso) podia ser
+    reescrito por um envio feito à mão, e o Termo em sequência podia mudar entre uma assinatura e outra — agora
+    qualquer assinatura trava o texto (`Peca::temAlgumaAssinatura`), e só a devolução o reabre. Dois cliques
+    seguidos não assinam duas vezes (linha travada). Códigos de validação passam a ser únicos entre todas as
+    tabelas e nunca voltam depois de anulados.
+  - IP atrás da CDN: o Laravel passa a ler o `X-Forwarded-For` das faixas em `TRUSTED_PROXIES`
+    (`config/trustedproxy.php`); esquema e host continuam os da conexão.
+  - Conferido: `AssinaturaEletronicaAvancadaTest` (13 testes, também em MySQL) e o novo teste do Termo em
+    `TermoAssinadoEmSequenciaTest`; as duas travas conferidas falhando com a regra desligada; suíte 264/264. Numa
+    cópia do banco de produção: migração, as 11 assinaturas na trilha e a cadeia íntegra; 1.144 telas abertas
+    por cada usuário, sem erro novo; assinatura de ponta a ponta com o NTP.br de verdade, validação, PDF
+    reconhecido e alterado recusado, devolução e anulação; o pedido de senha, a recusa e o carimbo vistos no
+    navegador. Da produção, o NTP.br responde em 8 ms.
 
 - [2026-10-27] **Manifestação de interesse aberta a qualquer pessoa (PMIS)** (`ManifestacaoPublicaController`,
   `App\Rules\Recaptcha`, migração `2026_10_27_100000`, `resources/views/manifestacao-publica/`)
@@ -3976,8 +4034,10 @@ que devolve à UG — o texto do Fluxo CP dizia "envia para UG". Funciona, mas �
   por migração/seed, com histórico no git.
 - **Documentos:** HTML guardado no banco (`conteudo`), gerado dos modelos com marcadores, assinado
   com carimbo, código de validação e QR Code; PDF por dompdf.
-- **Assinatura eletrônica:** própria do sistema, com a identidade de quem assina congelada no ato.
-  Assinatura qualificada (GOV.BR, ICP-Brasil, D4Sign…) segue a definir.
+- **Assinatura eletrônica:** própria do sistema, avançada nos termos da Lei 14.063/2020 — senha no ato, identidade
+  congelada, SHA-256 do texto, carimbo do tempo pelo NTP.br e trilha de auditoria encadeada por hash, com
+  validação pública pelo código e pelo PDF. Carimbo do tempo de Autoridade da ICP-Brasil (pago) e assinatura
+  qualificada (GOV.BR, ICP-Brasil) seguem a definir.
 - **Anexos:** disco local (`storage/app`), 10 MB por arquivo, baixados só por rota autorizada.
 - **Hospedagem:** compartilhada, sem git no servidor; deploy por `rsync` — ver [Deploy](#deploy).
 - **Integrações** (banco, Diário Oficial): última fase.

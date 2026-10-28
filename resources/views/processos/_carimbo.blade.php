@@ -45,6 +45,14 @@
             'qr'     => $qrContra ?? null,
         ];
     }
+
+    /* Carimbo do tempo e código de integridade de cada assinatura, da trilha (TrilhaDeAssinatura). */
+    foreach ($assinaturas as &$a) {
+        $a['fonte'] = \App\Support\TrilhaDeAssinatura::eventoDaAssinatura($a['codigo'])?->fonteDaHoraDaAssinatura();
+        $a['em'] = \App\Support\HoraLegal::emBrasilia($a['em']);
+    }
+    unset($a);
+    $hashes = \App\Support\TrilhaDeAssinatura::hashesAssinados(array_column($assinaturas, 'codigo'));
 @endphp
 
 @foreach($assinaturas as $i => $assinatura)
@@ -59,9 +67,10 @@
                 <p style="margin:0;">Documento {{ $assinatura['verbo'] }} por
                     <strong>{{ $assinatura['nome'] }}</strong>@if($assinatura['cargo']), {{ $assinatura['cargo'] }}@endif,
                     em <strong>{{ $assinatura['em']->format('d/m/Y') }}</strong>,
-                    às <strong>{{ $assinatura['em']->format('H:i') }}</strong>,
-                    conforme horário oficial de Brasília, com fundamento na Lei Federal nº 13.019/2014.</p>
-                <p style="margin:4px 0 0;">A autenticidade deste documento pode ser verificada apontando a câmera
+                    às <strong>{{ $assinatura['em']->format('H:i:s') }}</strong>,
+                    horário oficial de Brasília{{ $assinatura['fonte'] ? ' (carimbo do tempo pela Hora Legal Brasileira, NTP.br)' : '' }},
+                    com fundamento na Lei Federal nº 13.019/2014 e na Lei Federal nº 14.063/2020.</p>
+                <p style="margin:4px 0 0;">A autenticidade e a integridade deste documento podem ser verificadas apontando a câmera
                     para o QR Code ao lado, ou em <strong>{{ url('/validar') }}</strong> com o código
                     <strong style="font-family:monospace;letter-spacing:.5px;">{{ $assinatura['codigo'] }}</strong>.</p>
             </td>
@@ -72,4 +81,11 @@
             @endif
         </tr>
     </table>
+@endforeach
+
+@foreach($hashes as $hash)
+    <p style="margin:6px 0 0;font-size:9.5px;color:#475569;line-height:1.4;">
+        Código de integridade do texto assinado (SHA-256):
+        <span style="font-family:monospace;word-break:break-all;">{{ $hash }}</span>
+    </p>
 @endforeach

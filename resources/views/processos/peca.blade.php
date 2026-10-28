@@ -32,7 +32,7 @@
                 </div>
             @elseif($peca->assinado())
                 <div class="bg-brand-50 border border-brand-200 text-brand-800 px-4 py-3 rounded-lg text-sm">
-                    Assinado por {{ $peca->assinanteNome() }} em {{ $peca->assinado_em->format('d/m/Y H:i') }}.
+                    Assinado por {{ $peca->assinanteNome() }} em {{ \App\Support\HoraLegal::emBrasilia($peca->assinado_em)->format('d/m/Y H:i') }}.
                 </div>
             {{-- Quem preenche não assina (o Edital: a SCP elabora, a UG assina): sem o aviso, salvar parecia não dar em nada. --}}
             @elseif($podeEditar && $peca->foiEditado() && $peca->assinadoPorOutraEtapa())
@@ -140,7 +140,7 @@
                         @if($peca->assinado())
                             <p class="text-xs text-gray-500">
                                 Assinado por <strong>{{ $peca->assinanteNome() }}</strong>
-                                em {{ $peca->assinado_em->format('d/m/Y H:i') }}.
+                                em {{ \App\Support\HoraLegal::emBrasilia($peca->assinado_em)->format('d/m/Y H:i') }}.
                                 Código de validação: <strong>{{ $peca->codigo_validacao }}</strong>
                             </p>
                         @else
@@ -148,14 +148,7 @@
                         @endif
                     </div>
                     @if($podeAssinar)
-                        <form action="{{ route('processos.pecas.assinar', [$processo, $peca]) }}" method="POST"
-                              data-confirm="Confirma a assinatura deste documento?">
-                            @csrf @method('PATCH')
-                            <button type="submit"
-                                    class="btn btn-primary">
-                                Assinar
-                            </button>
-                        </form>
+                        <x-assinar :action="route('processos.pecas.assinar', [$processo, $peca])" />
                     @endif
                 </div>
             @endif

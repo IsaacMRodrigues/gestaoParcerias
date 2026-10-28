@@ -13,6 +13,9 @@ return Application::configure(basePath: dirname(__DIR__))
         health: '/up',
     )
     ->withMiddleware(function (Middleware $middleware): void {
+        // IP de quem acessa através da CDN (config/trustedproxy.php); esquema e host seguem os da conexão.
+        $middleware->trustProxies(headers: Request::HEADER_X_FORWARDED_FOR);
+
         // Dinheiro chega da tela com máscara ("40.000,00"); o resto do sistema
         // (validação `numeric`, casts decimais) fala em número.
         $middleware->web(append: [

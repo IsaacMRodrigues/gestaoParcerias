@@ -15,6 +15,14 @@ trait PodeSerDevolvida
 
     public function reabrirPorDevolucao(string $motivo, ?string $setor, ?string $nome): void
     {
+        \Illuminate\Support\Facades\DB::transaction(fn () => $this->reabrirJunto($motivo, $setor, $nome));
+    }
+
+    /** As assinaturas saem do documento, mas não da trilha: lá ficam como anuladas, com o motivo. */
+    private function reabrirJunto(string $motivo, ?string $setor, ?string $nome): void
+    {
+        \App\Support\TrilhaDeAssinatura::anular($this, $motivo);
+
         $campos = [
             'assinado_por' => null, 'assinado_em' => null, 'assinante_nome' => null, 'assinante_cargo' => null,
             // Assinado de novo, o documento ganha outro código: o antigo

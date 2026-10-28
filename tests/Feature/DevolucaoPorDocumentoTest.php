@@ -89,7 +89,7 @@ class DevolucaoPorDocumentoTest extends TestCase
             ->assertSee('Devolvido para correção')->assertSee('R$ 8.000, não R$ 80.000');
 
         // Assinado de novo, sai a marca.
-        $this->actingAs($this->ug)->patch("/pecas/{$aprovacao->id}/assinar")->assertSessionHasNoErrors();
+        $this->actingAs($this->ug)->patch("/pecas/{$aprovacao->id}/assinar", ['senha_assinatura' => 'password'])->assertSessionHasNoErrors();
         $this->assertFalse($aprovacao->fresh()->devolvida());
     }
 

@@ -12,7 +12,12 @@ class DocumentoPdf
 {
     public static function gerar(Model $doc): string
     {
-        $html = view('documentos.pdf', ['conteudo' => $doc->conteudo, 'assinaturas' => self::assinaturas($doc)])->render();
+        $assinaturas = self::assinaturas($doc);
+        $html = view('documentos.pdf', [
+            'conteudo'    => $doc->conteudo,
+            'assinaturas' => $assinaturas,
+            'hashes'      => TrilhaDeAssinatura::hashesAssinados(array_column($assinaturas, 'codigo')),
+        ])->render();
 
         $dompdf = new \Dompdf\Dompdf([
             'isRemoteEnabled'      => true,   // o brasão vem de endereço remoto
@@ -23,7 +28,10 @@ class DocumentoPdf
         $dompdf->loadHtml($html, 'UTF-8');
         $dompdf->render();
 
-        return $dompdf->output();
+        $pdf = $dompdf->output();
+        TrilhaDeAssinatura::registrarEmissao($doc, $pdf);
+
+        return $pdf;
     }
 
     /** "03-parecer-juridico.pdf"; sem posição, só o nome. */
@@ -34,7 +42,7 @@ class DocumentoPdf
         return ($posicao !== null ? sprintf('%02d-', $posicao) : '') . $nome . '.' . $extensao;
     }
 
-    /** @return list<array{nome: ?string, cargo: ?string, em: \Illuminate\Support\Carbon, codigo: ?string, qr: ?string}> */
+    /** @return list<array{nome: ?string, cargo: ?string, em: \Illuminate\Support\Carbon, codigo: ?string, qr: ?string, fonte: ?string}> */
     private static function assinaturas(Model $doc): array
     {
         $lista = [];
@@ -45,7 +53,8 @@ class DocumentoPdf
             $qr = $codigo
                 ? 'data:image/svg+xml;base64,' . base64_encode(QrCode::format('svg')->size(110)->margin(0)->generate(route('validacao.mostrar', $codigo)))
                 : null;
-            $lista[] = ['nome' => $nome, 'cargo' => $cargo, 'em' => $em, 'codigo' => $codigo, 'qr' => $qr];
+            $lista[] = ['nome' => $nome, 'cargo' => $cargo, 'em' => HoraLegal::emBrasilia($em), 'codigo' => $codigo, 'qr' => $qr,
+                'fonte' => TrilhaDeAssinatura::eventoDaAssinatura($codigo)?->fonteDaHoraDaAssinatura()];
         };
 
         if ($doc instanceof Peca && $doc->assinado_em === null && $doc->temAssinaturasEmSequencia()) {

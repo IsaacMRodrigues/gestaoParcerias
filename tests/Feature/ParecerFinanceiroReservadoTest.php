@@ -68,7 +68,7 @@ class ParecerFinanceiroReservadoTest extends TestCase
         $this->assertTrue($peca->podeEditarConteudo($processo, $this->analista), 'qualquer um da SEPLAN elabora');
         $this->assertFalse($peca->podeAssinar($processo, $this->analista));
 
-        $this->actingAs($this->analista)->patch("/processos/{$processo->id}/pecas/{$peca->id}/assinar")->assertForbidden();
+        $this->actingAs($this->analista)->patch("/processos/{$processo->id}/pecas/{$peca->id}/assinar", ['senha_assinatura' => 'password'])->assertForbidden();
         $this->assertFalse($peca->fresh()->assinado());
 
         $this->actingAs($this->analista)->get("/processos/{$processo->id}/pecas/{$peca->id}")
@@ -80,7 +80,7 @@ class ParecerFinanceiroReservadoTest extends TestCase
         [$processo, $peca] = $this->parecerDoPlanejamento();
 
         $this->assertTrue($peca->podeAssinar($processo, $this->responsavel));
-        $this->actingAs($this->responsavel)->patch("/processos/{$processo->id}/pecas/{$peca->id}/assinar");
+        $this->actingAs($this->responsavel)->patch("/processos/{$processo->id}/pecas/{$peca->id}/assinar", ['senha_assinatura' => 'password']);
         $this->assertTrue($peca->fresh()->assinado());
     }
 

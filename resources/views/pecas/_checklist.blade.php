@@ -227,7 +227,7 @@
                                     Vem do Planejamento — processo nº {{ $peca->origem->processo->numero }}
                                     @if($peca->origem->assinado())
                                         · assinado por {{ $peca->origem->assinanteNome() ?? '—' }}
-                                        em {{ $peca->origem->assinado_em->format('d/m/Y H:i') }}
+                                        em {{ \App\Support\HoraLegal::emBrasilia($peca->origem->assinado_em)->format('d/m/Y H:i') }}
                                     @endif
                                 </p>
                             @elseif($peca->vemDaAreaDaOsc() || $peca->atendidoPelaAreaDaOsc())
@@ -248,13 +248,13 @@
                                 </p>
                             @elseif($peca->assinado())
                                 <p class="text-xs text-gray-400 mt-0.5">
-                                    Assinado por {{ $peca->assinanteNome() }} em {{ $peca->dataDaAssinatura()?->format('d/m/Y H:i') }}
+                                    Assinado por {{ $peca->assinanteNome() }} em {{ \App\Support\HoraLegal::emBrasilia($peca->dataDaAssinatura())?->format('d/m/Y H:i') }}
                                 </p>
                                 @if($peca->contraAssinado())
                                     {{-- Termos anteriores à assinatura em sequência --}}
                                     <p class="text-xs text-gray-400 mt-0.5">
                                         Contra-assinado pela OSC — {{ $peca->contraAssinante->name ?? '—' }}
-                                        em {{ $peca->contra_assinado_em->format('d/m/Y H:i') }}
+                                        em {{ \App\Support\HoraLegal::emBrasilia($peca->contra_assinado_em)->format('d/m/Y H:i') }}
                                     </p>
                                 @endif
                             @elseif($trava)
@@ -462,7 +462,7 @@
                                                 <li>
                                                     {{ $loop->iteration }}. <strong>{{ $regra['rotulo'] }}</strong> —
                                                     @if($parte)
-                                                        assinado por {{ $parte->assinante_nome }} em {{ $parte->assinado_em->format('d/m/Y H:i') }}
+                                                        assinado por {{ $parte->assinante_nome }} em {{ \App\Support\HoraLegal::emBrasilia($parte->assinado_em)->format('d/m/Y H:i') }}
                                                         · código <span class="font-mono">{{ $parte->codigo_validacao }}</span>
                                                         · <a href="{{ route('validacao.mostrar', $parte->codigo_validacao) }}" target="_blank" class="text-brand-700 hover:underline">Validar</a>
                                                     @else
@@ -472,26 +472,14 @@
                                             @endforeach
                                         </ol>
                                         @if($assinaComoParte)
-                                            <form action="{{ route('pecas.assinar-parte', $peca) }}" method="POST" class="mt-3"
-                                                  data-confirm="Confirma a assinatura deste documento?">
-                                                @csrf @method('PATCH')
-                                                <button type="submit" class="btn btn-primary btn-sm">
-                                                    Assinar como {{ $peca->sequenciaDeAssinaturas()[$peca->papelDaVez()]['rotulo'] }}
-                                                </button>
-                                            </form>
+                                            <x-assinar :action="route('pecas.assinar-parte', $peca)" class="mt-3" pequeno
+                                                       :rotulo="'Assinar como ' . $peca->sequenciaDeAssinaturas()[$peca->papelDaVez()]['rotulo']" />
                                         @endif
                                     </div>
                                 @endif
 
                                 @if($peca->preenchido() && $podeAssinar)
-                                    <form action="{{ route('pecas.assinar', $peca) }}" method="POST" class="mt-2"
-                                          data-confirm="Confirma a assinatura digital deste documento?">
-                                        @csrf @method('PATCH')
-                                        <button type="submit"
-                                                class="btn btn-primary btn-sm">
-                                            Assinar
-                                        </button>
-                                    </form>
+                                    <x-assinar :action="route('pecas.assinar', $peca)" class="mt-2" pequeno />
                                 @endif
                             </div>
                         </details>

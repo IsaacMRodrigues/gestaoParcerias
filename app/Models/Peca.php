@@ -1135,6 +1135,13 @@ HTML,
         return !is_null($this->assinado_em);
     }
 
+    /** Já tem alguma assinatura, mesmo que falte parte da sequência: o texto só muda por devolução. */
+    public function temAlgumaAssinatura(): bool
+    {
+        return !is_null($this->assinado_em)
+            || ($this->temAssinaturasEmSequencia() && $this->assinaturasPartes->isNotEmpty());
+    }
+
     // ------------------------------------------------------------------
     // Assinaturas em sequência (ver ASSINATURAS_EM_SEQUENCIA)
     // ------------------------------------------------------------------
@@ -1214,20 +1221,31 @@ HTML,
         return $papel !== 'osc' || ($this->oscDona($user, $dono) && $user->ehResponsavelLegalOsc());
     }
 
+    /** A parte da vez assina; a linha do documento fica travada, e a assinatura entra na trilha junto. */
     public function assinarComoParte(User $user): PecaAssinatura
     {
-        $papel = $this->papelDaVez();
-        $quem  = $user->identidadeParaAssinatura();
+        $carimbo = app(\App\Support\HoraLegal::class)->agora();
+        $papel   = $this->papelDaVez();
+        $quem    = $user->identidadeParaAssinatura();
 
-        $assinatura = $this->assinaturasPartes()->create([
-            'papel'            => $papel,
-            'ordem'            => array_search($papel, array_keys($this->sequenciaDeAssinaturas()), true) + 1,
-            'assinado_por'     => $user->id,
-            'assinante_nome'   => $quem['nome'],
-            'assinante_cargo'  => $quem['cargo'],
-            'assinado_em'      => now(),
-            'codigo_validacao' => self::gerarCodigoValidacao(),
-        ]);
+        $assinatura = \Illuminate\Support\Facades\DB::transaction(function () use ($user, $carimbo, $papel, $quem) {
+            $atual = static::whereKey($this->id)->lockForUpdate()->firstOrFail();
+            abort_if($atual->assinaturaDe($papel) !== null, 409, 'Esta assinatura já foi feita.');
+
+            $assinatura = $atual->assinaturasPartes()->create([
+                'papel'            => $papel,
+                'ordem'            => array_search($papel, array_keys($atual->sequenciaDeAssinaturas()), true) + 1,
+                'assinado_por'     => $user->id,
+                'assinante_nome'   => $quem['nome'],
+                'assinante_cargo'  => $quem['cargo'],
+                'assinado_em'      => $carimbo->paraGravar(),
+                'codigo_validacao' => \App\Support\TrilhaDeAssinatura::novoCodigo(),
+            ]);
+
+            \App\Support\TrilhaDeAssinatura::registrarAssinatura($atual, $user, $assinatura->codigo_validacao, $carimbo, $papel);
+
+            return $assinatura;
+        });
         $this->unsetRelation('assinaturasPartes');
 
         return $assinatura;
@@ -1272,19 +1290,10 @@ HTML,
         return !is_null($this->contra_assinado_em);
     }
 
-    /** Gera um código de validação único (ex.: A1B2-C3D4-E5). */
+    /** Gera um código de validação único (ex.: A1B2-C3D4-E5) — ver TrilhaDeAssinatura::novoCodigo(). */
     public static function gerarCodigoValidacao(): string
     {
-        do {
-            $codigo = strtoupper(
-                \Illuminate\Support\Str::random(4) . '-' .
-                \Illuminate\Support\Str::random(4) . '-' .
-                \Illuminate\Support\Str::random(2)
-            );
-        } while (static::where('codigo_validacao', $codigo)->exists()
-            || PecaAssinatura::where('codigo_validacao', $codigo)->exists());
-
-        return $codigo;
+        return \App\Support\TrilhaDeAssinatura::novoCodigo();
     }
 
     public function temArquivo(): bool
@@ -1581,7 +1590,8 @@ HTML,
     /** Pode preencher (texto ou upload) agora? Só o setor designado, na etapa designada. */
     public function podePreencher(?User $user): bool
     {
-        if ($this->vemDoPlanejamento()) {
+        // Assinado não se edita, também fora do trâmite (fase do edital, anexo avulso).
+        if ($this->vemDoPlanejamento() || $this->temAlgumaAssinatura()) {
             return false;
         }
 
@@ -1592,7 +1602,7 @@ HTML,
             return $this->podeAgirNaFasePrevia($user);
         }
 
-        if ($dono->tramiteEncerrado() || $this->assinado() || $this->esperaRecebimento($dono)) {
+        if ($dono->tramiteEncerrado() || $this->esperaRecebimento($dono)) {
             return false;
         }
 
@@ -1629,6 +1639,10 @@ HTML,
 
         if ($this->assinado()) {
             return 'Este documento já foi assinado e não pode mais ser alterado.';
+        }
+
+        if ($this->temAlgumaAssinatura()) {
+            return 'Este documento já tem assinatura e o texto não muda mais. Para corrigir, devolva-o: as assinaturas recomeçam.';
         }
 
         if ($dono?->tramiteEncerrado()) {
@@ -1932,7 +1946,7 @@ HTML,
             // arquivos da OSC desatualizado, sem assinatura: recebe o texto preenchido.
             if ($texto !== null
                 && !$peca->wasRecentlyCreated
-                && !$peca->assinado()
+                && !$peca->temAlgumaAssinatura()
                 && $peca->conteudo !== $texto
                 && ($peca->conteudo === $bruto || empty($peca->conteudo) || self::soMudouOQuadro($peca->conteudo, $texto))
             ) {

@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Peca;
 use App\Support\DocumentoPdf;
+use App\Support\TrilhaDeAssinatura;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
@@ -44,11 +45,11 @@ class PecaController extends Controller
     }
 
     /** Volta para a linha da peça (#peca-{id}), não para o topo da página. */
-    private function voltarParaPeca(Peca $peca, string $mensagem): RedirectResponse
+    private function voltarParaPeca(Peca $peca, string $mensagem, string $tipo = 'success'): RedirectResponse
     {
         // 'peca_aberta': o documento em que se trabalhava volta aberto — salvar ou
         // assinar não deve fechá-lo e devolver o usuário à lista.
-        return back()->withFragment('peca-' . $peca->id)->with('success', $mensagem)->with('peca_aberta', $peca->id);
+        return back()->withFragment('peca-' . $peca->id)->with($tipo, $mensagem)->with('peca_aberta', $peca->id);
     }
 
     public function salvar(Request $request, Peca $peca): RedirectResponse
@@ -67,23 +68,18 @@ class PecaController extends Controller
         return $this->voltarParaPeca($peca, $peca->rotulo . ' salvo.');
     }
 
-    public function assinar(Peca $peca): RedirectResponse
+    public function assinar(Request $request, Peca $peca): RedirectResponse
     {
         abort_if($peca->tipo !== 'modelo', 422);
         abort_if(empty($peca->conteudo), 422, 'Preencha o documento antes de assinar.');
         $this->autorizar($peca, 'assinar');
 
-        // Nome e cargo ficam gravados aqui: o carimbo não pode mudar depois
-        // porque a pessoa editou o perfil ou trocou de setor.
-        $quem = auth()->user()->identidadeParaAssinatura();
+        if ($recusa = $this->senhaDaAssinaturaRecusada($request)) {
+            return $this->voltarParaPeca($peca, $recusa, 'error');
+        }
 
-        $peca->update([
-            'assinado_por'     => auth()->id(),
-            'assinado_em'      => now(),
-            'assinante_nome'   => $quem['nome'],
-            'assinante_cargo'  => $quem['cargo'],
-            'codigo_validacao' => $peca->codigo_validacao ?: Peca::gerarCodigoValidacao(),
-        ]);
+        // Nome e cargo gravados no ato, com hash do texto, carimbo do tempo e trilha (TrilhaDeAssinatura).
+        TrilhaDeAssinatura::assinar($peca, auth()->user());
 
         $peca->limparDevolucao();
 
@@ -91,11 +87,15 @@ class PecaController extends Controller
     }
 
     /** Assinatura de uma das partes de documento assinado em sequência (o Termo, a OP Global). */
-    public function assinarParte(Peca $peca): RedirectResponse
+    public function assinarParte(Request $request, Peca $peca): RedirectResponse
     {
         abort_unless($peca->temAssinaturasEmSequencia(), 422, 'Este documento não é assinado em sequência.');
         abort_unless($peca->podeAssinarComoParte(auth()->user()), 403,
             'Não é a sua vez de assinar este documento.');
+
+        if ($recusa = $this->senhaDaAssinaturaRecusada($request)) {
+            return $this->voltarParaPeca($peca, $recusa, 'error');
+        }
 
         $papel = $peca->papelDaVez();
         $peca->assinarComoParte(auth()->user());

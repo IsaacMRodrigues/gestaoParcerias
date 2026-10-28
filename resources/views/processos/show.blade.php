@@ -448,7 +448,7 @@
                         return $n ? $n . ' ' . ($n === 1 ? 'arquivo anexado' : 'arquivos anexados') . ' em ' . \Illuminate\Support\Carbon::parse($p->anexos()->max('created_at'))->format('d/m/Y H:i')
                             : 'Nenhum arquivo anexado';
                     }
-                    if ($p->assinado()) return 'Assinado por ' . $p->assinanteNome() . ' em ' . $p->assinado_em->format('d/m/Y H:i');
+                    if ($p->assinado()) return 'Assinado por ' . $p->assinanteNome() . ' em ' . \App\Support\HoraLegal::emBrasilia($p->assinado_em)->format('d/m/Y H:i');
                     if (empty($p->conteudo)) return 'Não preenchido';
                     if (!$p->foiEditado()) return 'Modelo — ainda não editado';
                     $quem = \App\Models\Processo::SETORES[$p->setorAssinatura()] ?? $p->setorAssinatura();

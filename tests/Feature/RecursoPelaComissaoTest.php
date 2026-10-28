@@ -120,8 +120,8 @@ class RecursoPelaComissaoTest extends TestCase
             ->assertSee('Ação da Comissão de Seleção.')->assertDontSee('Ação do setor responsável: Unidade Gestora');
 
         $this->actingAs($this->comissao)->put("/pecas/{$resposta->id}", ['conteudo' => '<p>Improvido.</p>'])->assertSessionHasNoErrors();
-        $this->actingAs($this->ug)->patch("/pecas/{$resposta->id}/assinar")->assertForbidden();
-        $this->actingAs($this->comissao)->patch("/pecas/{$resposta->id}/assinar")->assertSessionHasNoErrors();
+        $this->actingAs($this->ug)->patch("/pecas/{$resposta->id}/assinar", ['senha_assinatura' => 'password'])->assertForbidden();
+        $this->actingAs($this->comissao)->patch("/pecas/{$resposta->id}/assinar", ['senha_assinatura' => 'password'])->assertSessionHasNoErrors();
         $this->assertTrue($resposta->fresh()->assinado());
     }
 
@@ -137,7 +137,7 @@ class RecursoPelaComissaoTest extends TestCase
 
         $resposta = $this->peca('resposta_recurso');
         $this->actingAs($this->comissao)->put("/pecas/{$resposta->id}", ['conteudo' => '<p>Improvido.</p>'])->assertSessionHasNoErrors();
-        $this->actingAs($this->comissao)->patch("/pecas/{$resposta->id}/assinar")->assertSessionHasNoErrors();
+        $this->actingAs($this->comissao)->patch("/pecas/{$resposta->id}/assinar", ['senha_assinatura' => 'password'])->assertSessionHasNoErrors();
 
         $this->actingAs($this->ug)->post("/chamamentos/{$this->chamamento->id}/selecao/avancar")->assertSessionHasNoErrors();
         $this->assertSame(Chamamento::ETAPA_PRAZO_RECURSO + 1, (int) $this->chamamento->fresh()->selecao_etapa);

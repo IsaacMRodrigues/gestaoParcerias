@@ -70,13 +70,13 @@ class OpGlobalDuasAssinaturasTest extends TestCase
             'o Gestor do Termo vale para a OP');
 
         // O Responsável da UG não passa na frente do Gestor.
-        $this->actingAs($responsavel)->patch("/pecas/{$op->id}/assinar-parte")->assertForbidden();
-        $this->actingAs($gestor)->patch("/pecas/{$op->id}/assinar-parte")->assertSessionHasNoErrors();
+        $this->actingAs($responsavel)->patch("/pecas/{$op->id}/assinar-parte", ['senha_assinatura' => 'password'])->assertForbidden();
+        $this->actingAs($gestor)->patch("/pecas/{$op->id}/assinar-parte", ['senha_assinatura' => 'password'])->assertSessionHasNoErrors();
         $this->actingAs($gestor)->post("/celebracao/{$proposta->id}/avancar")->assertSessionHasNoErrors();
         $this->assertSame(19, (int) $proposta->fresh()->celebracao_etapa);
 
         $this->actingAs($responsavel)->post("/celebracao/{$proposta->id}/avancar")->assertStatus(422);
-        $this->actingAs($responsavel)->patch("/pecas/{$op->id}/assinar-parte")->assertSessionHasNoErrors();
+        $this->actingAs($responsavel)->patch("/pecas/{$op->id}/assinar-parte", ['senha_assinatura' => 'password'])->assertSessionHasNoErrors();
         $this->assertTrue($op->fresh()->assinado());
         $this->actingAs($responsavel)->post("/celebracao/{$proposta->id}/avancar")->assertSessionHasNoErrors();
 

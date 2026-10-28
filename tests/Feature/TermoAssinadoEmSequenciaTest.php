@@ -80,7 +80,7 @@ class TermoAssinadoEmSequenciaTest extends TestCase
 
     private function assinar(User $quem)
     {
-        return $this->actingAs($quem)->patch("/pecas/{$this->termo->id}/assinar-parte");
+        return $this->actingAs($quem)->patch("/pecas/{$this->termo->id}/assinar-parte", ['senha_assinatura' => 'password']);
     }
 
     private function etapa(): int
@@ -145,6 +145,24 @@ class TermoAssinadoEmSequenciaTest extends TestCase
         // Cada código valida e mostra o documento com as quatro assinaturas.
         $this->get('/validar/' . $termo->assinaturasPartes->first()->codigo_validacao)->assertOk()
             ->assertSee('Assinaturas do documento')->assertSee('Gabinete do Prefeito')->assertDontSee('Ainda faltam assinaturas');
+    }
+
+    public function test_cada_parte_entra_na_trilha_e_o_texto_trava_na_primeira_assinatura(): void
+    {
+        $this->actingAs($this->scp)->put("/pecas/{$this->termo->id}", ['conteudo' => '<p>Termo de Fomento nº 1/2026</p>'])->assertSessionHasNoErrors();
+        $this->avancar($this->scp)->assertSessionHasNoErrors();
+        $this->assinar($this->rl)->assertSessionHasNoErrors();
+
+        $evento = \App\Models\AssinaturaEvento::sole();
+        $this->assertSame(['osc', $this->rl->id, hash('sha256', '<p>Termo de Fomento nº 1/2026</p>')],
+            [$evento->papel, (int) $evento->user_id, $evento->hash_documento]);
+        $this->assertSame($this->termo->fresh()->assinaturaDe('osc')->codigo_validacao, $evento->codigo_validacao);
+
+        // De volta à etapa em que a SCP redige, o texto já assinado pela OSC não muda mais.
+        $this->proposta->fresh()->forceFill(['celebracao_etapa' => 8, 'celebracao_setor' => 'scp'])->save();
+        $this->assertFalse($this->termo->fresh()->podePreencher($this->scp));
+        $this->actingAs($this->scp)->put("/pecas/{$this->termo->id}", ['conteudo' => '<p>Outro termo</p>'])->assertForbidden();
+        $this->assertSame('<p>Termo de Fomento nº 1/2026</p>', $this->termo->fresh()->conteudo);
     }
 
     public function test_ninguem_assina_fora_da_vez(): void

@@ -74,6 +74,8 @@ Route::middleware('guest')->group(function () {
 // Validação pública de documentos assinados
 Route::get('/validar', [\App\Http\Controllers\ValidacaoController::class, 'index'])->name('validacao.index');
 Route::post('/validar', [\App\Http\Controllers\ValidacaoController::class, 'verificar'])->name('validacao.verificar');
+Route::post('/validar/arquivo', [\App\Http\Controllers\ValidacaoController::class, 'arquivo'])
+    ->middleware('throttle:20,1')->name('validacao.arquivo');
 Route::get('/validar/{codigo}', [\App\Http\Controllers\ValidacaoController::class, 'mostrar'])->name('validacao.mostrar');
 
 // Área da OSC logada (portal) — 'osc' barra o usuário interno: servidor analisa

@@ -27,10 +27,11 @@
                     <p style="margin:0;"><strong>ASSINATURA ELETRÔNICA.</strong> Documento assinado eletronicamente por
                         <strong>{{ $a['nome'] }}</strong>@if($a['cargo']), {{ $a['cargo'] }}@endif,
                         em <strong>{{ $a['em']->format('d/m/Y') }}</strong>,
-                        às <strong>{{ $a['em']->format('H:i') }}</strong>,
-                        conforme horário oficial de Brasília, com fundamento na Lei Federal nº 13.019/2014.</p>
+                        às <strong>{{ $a['em']->format('H:i:s') }}</strong>,
+                        horário oficial de Brasília{{ $a['fonte'] ? ' (carimbo do tempo pela Hora Legal Brasileira, NTP.br)' : '' }},
+                        com fundamento na Lei Federal nº 13.019/2014 e na Lei Federal nº 14.063/2020.</p>
                     @if($a['codigo'])
-                        <p style="margin:4px 0 0;">A autenticidade pode ser verificada em
+                        <p style="margin:4px 0 0;">A autenticidade e a integridade podem ser verificadas em
                             <strong>{{ url('/validar') }}</strong> com o código
                             <strong style="font-family:monospace;letter-spacing:.5px;">{{ $a['codigo'] }}</strong>.</p>
                     @endif
@@ -43,6 +44,18 @@
             </tr>
         </table>
     @endforeach
+
+    @foreach($hashes as $hash)
+        <p style="margin:6px 0 0;font-size:9px;color:#475569;line-height:1.4;text-align:left;">
+            Código de integridade do texto assinado (SHA-256): <span style="font-family:monospace;">{{ $hash }}</span>
+        </p>
+    @endforeach
+    {{-- Só os PDFs com assinatura entram no registro de emitidos (TrilhaDeAssinatura::registrarEmissao). --}}
+    @if(array_filter(array_column($assinaturas, 'codigo')))
+        <p style="margin:4px 0 0;font-size:9px;color:#475569;line-height:1.4;text-align:left;">
+            Este arquivo PDF pode ser conferido, tal como está, em {{ url('/validar') }}: qualquer alteração nele é detectada.
+        </p>
+    @endif
 </div>
 </body>
 </html>

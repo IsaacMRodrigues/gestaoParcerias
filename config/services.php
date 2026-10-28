@@ -41,4 +41,12 @@ return [
         'secret' => env('RECAPTCHA_SECRET'),
     ],
 
+    // Carimbo do tempo das assinaturas (App\Support\HoraLegal): servidores de estrato 1 do NTP.br, na ordem.
+    // Vazio, vale o relógio do servidor, e a assinatura diz isso.
+    'hora_legal' => [
+        'servidores' => array_filter(array_map('trim', explode(',', (string) env('HORA_LEGAL_SERVIDORES',
+            'a.st1.ntp.br,c.st1.ntp.br,d.st1.ntp.br,gps.ntp.br')))),
+        'timeout' => 1.0,
+    ],
+
 ];

@@ -81,7 +81,7 @@ class TermoDeHomologacaoTest extends TestCase
         $this->actingAs($this->prefeito)->get("/chamamentos/{$this->chamamento->id}/selecao")->assertOk()
             ->assertDontSee('name="conteudo"', false);
 
-        $this->actingAs($this->prefeito)->patch("/pecas/{$termo->id}/assinar")->assertSessionHasNoErrors();
+        $this->actingAs($this->prefeito)->patch("/pecas/{$termo->id}/assinar", ['senha_assinatura' => 'password'])->assertSessionHasNoErrors();
         $termo = $termo->fresh();
         $this->assertTrue($termo->assinado());
         $this->assertStringContainsString('Associação Viver', $termo->conteudo);

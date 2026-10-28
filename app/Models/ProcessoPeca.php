@@ -284,18 +284,10 @@ HTML,
         ]);
     }
 
-    /** Gera um código de validação único (ex.: A1B2-C3D4-E5). */
+    /** Gera um código de validação único (ex.: A1B2-C3D4-E5) — ver TrilhaDeAssinatura::novoCodigo(). */
     public static function gerarCodigoValidacao(): string
     {
-        do {
-            $codigo = strtoupper(
-                \Illuminate\Support\Str::random(4) . '-' .
-                \Illuminate\Support\Str::random(4) . '-' .
-                \Illuminate\Support\Str::random(2)
-            );
-        } while (static::where('codigo_validacao', $codigo)->exists());
-
-        return $codigo;
+        return \App\Support\TrilhaDeAssinatura::novoCodigo();
     }
 
     protected function casts(): array
