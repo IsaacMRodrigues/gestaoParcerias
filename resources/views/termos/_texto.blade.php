@@ -107,6 +107,10 @@ interesse social recebidas, sem o e-mail do proponente. A OSC e o proponente dec
 <p>A Plataforma registra os acessos e as operações feitas por cada conta, com data, hora e endereço IP, para
 segurança, auditoria e apuração de responsabilidades. Esses registros podem ser usados como prova em processos
 administrativos e judiciais.</p>
+<p>A Plataforma usa apenas cookies necessários ao seu funcionamento e à sua segurança, como o que mantém a sessão
+aberta e o que protege os formulários, e, só no formulário público de manifestação de interesse, os do reCAPTCHA do
+Google contra envios automáticos. Não usa cookies de propaganda nem de estatística. A lista completa está na Política
+de Cookies.</p>
 
 <h2>10. Disponibilidade</h2>
 <p>A Administração busca manter a Plataforma disponível de forma contínua, mas ela pode ficar fora do ar para

@@ -73,6 +73,7 @@ Route::middleware('guest')->group(function () {
 
 // Termos de Uso, públicos (o aceite fica em routes/auth.php)
 Route::get('/termos-de-uso', [\App\Http\Controllers\TermosDeUsoController::class, 'index'])->name('termos.index');
+Route::view('/politica-de-cookies', 'cookies.index')->name('cookies.index');
 
 // Validação pública de documentos assinados
 Route::get('/validar', [\App\Http\Controllers\ValidacaoController::class, 'index'])->name('validacao.index');

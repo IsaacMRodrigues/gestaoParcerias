@@ -162,6 +162,7 @@ cada item estão no [Histórico de entregas](#histórico-de-entregas). 🚀 marc
 | 07/10 | Depois do deploy: listas só com o que é da Secretaria; R$ e vírgula em todos os campos de dinheiro; Arquivos da OSC valendo em todos os fluxos (recusa da UG trava a Celebração) |
 | 08/10 | Caixas de seleção e barra de download nos fluxos; **Arquivos da OSC preenchendo os fluxos** (documentos complementares, habilitação da dispensa e modelos com os dados da OSC); revisão do README |
 | 13/10 | Menu do portal da OSC na **barra lateral**, como o da área interna |
+| 29/10 | **Cookies**: aviso em todas as telas (só cookies necessários, some no "Entendi") e Política de Cookies pública com a lista do que o sistema grava |
 | 28/10 | **Termos de Uso**: texto da versão 1.0, aceite obrigatório no cadastro (servidor e OSC) e no primeiro acesso de toda conta, registrado com versão, hash do texto, IP e navegador; nova versão pede novo aceite |
 | 28/10 | **Recurso à vista em Minhas inscrições (OSC)**: cada inscrição em chamamento público diz a situação do recurso e, com o prazo aberto, tem o botão "Entrar com recurso" |
 | 28/10 | **Assinatura eletrônica avançada** (Lei 14.063/2020): senha no ato, hash SHA-256 do texto, carimbo do tempo pela Hora Legal Brasileira (NTP.br), trilha de auditoria encadeada, validação pública com integridade e conferência do PDF; a hora do carimbo passa a sair em Brasília (saía 3 h adiantada) |
@@ -775,6 +776,20 @@ Trazer os demais cenários para `tests/Feature` é uma das [Pendências](#pendê
 
 Da mais recente para a mais antiga. Cada entrada diz o que mudou, **por quê** e como foi
 conferido — o porquê é o que falta a quem pega o código depois.
+
+- [2026-10-29] **Cookies** (`components/aviso-cookies`, `cookies/index`, rota `/politica-de-cookies`)
+  - Pedido da gestão, junto dos Termos de Uso. Levantamento do que o sistema grava: o cookie da sessão
+    (`config('session.cookie')`, pela duração da sessão), o `XSRF-TOKEN` (proteção dos formulários), o
+    `remember_web_…` (só com "Lembrar de mim", 400 dias), os do reCAPTCHA do Google (só na página do formulário
+    PMIS) e, fora dos cookies, o armazenamento local `pgp:paleta:recentes` da busca interna. Nada de propaganda,
+    estatística ou rede social; as fontes vêm do Bunny Fonts, sem cookies
+  - Por serem só necessários, o aviso informa e não pede escolha: aparece em todas as telas (entrada, portal e área
+    interna) até o "Entendi", que grava `pgp_aviso_cookies` por um ano pelo próprio navegador — fora da criptografia
+    de cookies (`bootstrap/app.php`), para o servidor ler. A Política de Cookies (`/politica-de-cookies`) traz a
+    tabela, com as durações lidas da configuração; link nos rodapés, no login e junto do reCAPTCHA no formulário
+    PMIS. Os Termos de Uso ganham um parágrafo sobre cookies no item 9 (a versão segue 1.0: ainda não foi aceita
+    em produção; novo `TermosDeUso::HASH`)
+  - Conferido: `PoliticaDeCookiesTest` (3 testes); suíte 276/276
 
 - [2026-10-28] **Termos de Uso** (`Support\TermosDeUso`, `TermoAceite`, `ExigeAceiteDosTermos`, `TermosDeUsoController`,
   `resources/views/termos/`, migração `2026_10_28_110000`)

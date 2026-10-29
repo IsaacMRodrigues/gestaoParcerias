@@ -118,5 +118,6 @@
                 </div>
             </div>
         </div>
+        <x-aviso-cookies />
     </body>
 </html>

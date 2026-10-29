@@ -117,6 +117,7 @@
                     <span>Plataforma de Gestão de Parcerias — Sistema público municipal</span>
                     <span class="flex items-center gap-5">
                         <a href="{{ route('termos.index') }}" class="hover:text-brand-700 transition">Termos de Uso</a>
+                        <a href="{{ route('cookies.index') }}" class="hover:text-brand-700 transition">Cookies</a>
                         <a href="{{ route('validacao.index') }}" class="hover:text-brand-700 transition">Validar documento</a>
                     </span>
                 </div>
@@ -271,6 +272,7 @@
                     <span class="flex items-center gap-5">
                         <a href="{{ route('transparencia') }}" class="hover:text-brand-700 transition">Transparência</a>
                         <a href="{{ route('termos.index') }}" class="hover:text-brand-700 transition">Termos de Uso</a>
+                        <a href="{{ route('cookies.index') }}" class="hover:text-brand-700 transition">Cookies</a>
                         <a href="{{ route('validacao.index') }}" class="hover:text-brand-700 transition">Validar documento</a>
                     </span>
                 </div>
@@ -354,5 +356,6 @@
     </div>
 @endif
 
+    <x-aviso-cookies />
 </body>
 </html>

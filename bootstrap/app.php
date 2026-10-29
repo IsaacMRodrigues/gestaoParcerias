@@ -16,6 +16,9 @@ return Application::configure(basePath: dirname(__DIR__))
         // IP de quem acessa através da CDN (config/trustedproxy.php); esquema e host seguem os da conexão.
         $middleware->trustProxies(headers: Request::HEADER_X_FORWARDED_FOR);
 
+        // Gravado pelo navegador no "Entendi" do aviso de cookies (components/aviso-cookies): não é criptografado.
+        $middleware->encryptCookies(except: ['pgp_aviso_cookies']);
+
         // Dinheiro chega da tela com máscara ("40.000,00"); o resto do sistema
         // (validação `numeric`, casts decimais) fala em número.
         $middleware->web(append: [

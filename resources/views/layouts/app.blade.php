@@ -123,6 +123,7 @@
                         <span>Plataforma de Gestão de Parcerias — Sistema público municipal</span>
                         <span class="flex items-center gap-5">
                             <a href="{{ route('termos.index') }}" class="hover:text-brand-700 transition">Termos de Uso</a>
+                            <a href="{{ route('cookies.index') }}" class="hover:text-brand-700 transition">Cookies</a>
                             <a href="{{ route('transparencia') }}" class="hover:text-brand-700 transition">
                                 Transparência pública
                             </a>
@@ -135,5 +136,6 @@
                  'abrir-paleta' disparado pela lupa do cabeçalho. --}}
             <x-busca-global />
         </div>
+        <x-aviso-cookies />
     </body>
 </html>
