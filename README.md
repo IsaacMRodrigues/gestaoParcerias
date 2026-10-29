@@ -74,14 +74,12 @@ e a resposta obrigatória quando há recurso, recurso na página da proposta da 
 Seleção da própria Secretaria. Na produção, o chamamento 1 (Cultura e Turismo) passa a pedir que a UG registre
 o recebimento.
 
-**No GitHub e ainda fora da produção:** "Minhas inscrições" da OSC com Manifestações de interesse e Novas
-Propostas em blocos separados e a manifestação de interesse no modelo do PMIS, por formulário público (27/10, com
-a migração `2026_10_27_100000`), a **assinatura eletrônica avançada** (28/10, com a migração `2026_10_28_100000`,
-ensaiada numa cópia do banco de produção: as 11 assinaturas de lá entram na trilha), o recurso à vista em Minhas
-inscrições e os **Termos de Uso** (28/10, migração `2026_10_28_110000`: depois do deploy, toda conta que já existe
-aceita os Termos no próximo acesso). Antes de subir, no `.env` da
-produção: `RECAPTCHA_SITE_KEY` e `RECAPTCHA_SECRET` (sem chave, o formulário público fica bloqueado lá) e
-`TRUSTED_PROXIES` (sem ela, o IP gravado na trilha e no limite do formulário é o da CDN).
+Em 29/10 subiu tudo de 27 a 29/10 (commit `0696cda`, as migrações `2026_10_27_100000`, `2026_10_28_100000` e
+`2026_10_28_110000`, ensaiadas numa cópia do banco de produção): a manifestação de interesse no modelo do PMIS,
+Minhas inscrições em blocos e com o recurso à vista, a assinatura eletrônica avançada (as 11 assinaturas de lá
+entraram na trilha, íntegra), os Termos de Uso e Adesão (as 12 contas aceitam no próximo acesso), o aviso e a
+Política de Cookies e a barra de validação. No `.env` da produção entraram as chaves do reCAPTCHA (o widget carrega
+no domínio) e o `TRUSTED_PROXIES` (as sessões passaram a gravar o IP de quem acessa, não o da CDN).
 
 As ações de produção que o deploy não faz (dados e painel) estão em
 [Pendências → Produção](#produção-ação-não-código).
@@ -162,6 +160,7 @@ cada item estão no [Histórico de entregas](#histórico-de-entregas). 🚀 marc
 | 07/10 | Depois do deploy: listas só com o que é da Secretaria; R$ e vírgula em todos os campos de dinheiro; Arquivos da OSC valendo em todos os fluxos (recusa da UG trava a Celebração) |
 | 08/10 | Caixas de seleção e barra de download nos fluxos; **Arquivos da OSC preenchendo os fluxos** (documentos complementares, habilitação da dispensa e modelos com os dados da OSC); revisão do README |
 | 13/10 | Menu do portal da OSC na **barra lateral**, como o da área interna |
+| 29/10 | **Deploy na Hostinger** (commit `0696cda`): tudo de 27 a 29/10, com 3 migrações e as chaves novas do `.env` |
 | 29/10 | **Barra de validação e Termos de Uso e Adesão** (minuta do decreto do MROSC): barra em cada página do PDF com nome, CPF parcialmente oculto, data e hora de Brasília, chave e QR Code; documento adulterado dado como inválido; cláusula de adesão à validade das assinaturas; CPF exigido para assinar |
 | 29/10 | **Cookies**: aviso em todas as telas (só cookies necessários, some no "Entendi") e Política de Cookies pública com a lista do que o sistema grava |
 | 28/10 | **Termos de Uso**: texto da versão 1.0, aceite obrigatório no cadastro (servidor e OSC) e no primeiro acesso de toda conta, registrado com versão, hash do texto, IP e navegador; nova versão pede novo aceite |
@@ -633,7 +632,10 @@ Procedimento:
 8. **IP real atrás da CDN** (uma vez): `TRUSTED_PROXIES` no `.env` com as faixas da CDN da hospedagem e
    `config:cache`. Depois do deploy, conferir que as sessões novas (`sessions.ip_address`) gravam o IP de quem
    acessa, não o da CDN; se não, a trilha das assinaturas guarda o cabeçalho cru para ajuste.
-9. **Teste de fumaça:** `/`, `/login`, `/portal`, `/transparencia`, `/validar` e `/cadastro/osc` em
+9. **Teste de fumaça — de dentro do servidor, nunca em rajada pela internet:** em 29/10, uns 15 `curl` seguidos
+   daqui fizeram a CDN da Hostinger bloquear por excesso de requisições o IP público da rede da Prefeitura inteira,
+   até o bloqueio cair sozinho. Rodar os `curl` por SSH, a partir do servidor, ou o kernel do Laravel num script.
+   O que conferir: `/`, `/login`, `/portal`, `/transparencia`, `/validar` e `/cadastro/osc` em
    200; `/dashboard` em 302; `/.env` em 403; e **uma rota nova da entrega em 302** — se vier 404, o
    cache de rotas está velho. Por fim, conferir o `storage/logs/laravel.log`.
 
