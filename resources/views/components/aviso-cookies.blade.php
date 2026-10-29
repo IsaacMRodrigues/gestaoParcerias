@@ -3,7 +3,7 @@
 @unless(request()->cookie('pgp_aviso_cookies'))
     <div x-data="{ aberto: true }" x-show="aberto" role="region" aria-label="Aviso de cookies"
          class="fixed z-50 rounded-xl border border-gray-200 bg-white shadow-lg p-4 text-sm text-gray-700"
-         style="left:1rem;right:1rem;bottom:1rem;max-width:28rem;margin-left:auto;">
+         style="left:4.75rem;right:1rem;bottom:1rem;max-width:28rem;margin-left:auto;">
         <p>
             Este sistema usa apenas <strong>cookies necessários</strong> para manter você conectado e proteger os
             formulários — nenhum de propaganda ou de estatística.

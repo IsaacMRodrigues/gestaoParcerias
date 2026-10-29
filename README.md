@@ -160,6 +160,7 @@ cada item estão no [Histórico de entregas](#histórico-de-entregas). 🚀 marc
 | 07/10 | Depois do deploy: listas só com o que é da Secretaria; R$ e vírgula em todos os campos de dinheiro; Arquivos da OSC valendo em todos os fluxos (recusa da UG trava a Celebração) |
 | 08/10 | Caixas de seleção e barra de download nos fluxos; **Arquivos da OSC preenchendo os fluxos** (documentos complementares, habilitação da dispensa e modelos com os dados da OSC); revisão do README |
 | 13/10 | Menu do portal da OSC na **barra lateral**, como o da área interna |
+| 29/10 | **Acessibilidade**, como no Agiliza: "Pular para o conteúdo", menu com tamanho do texto e alto contraste, atalhos de 0 a 7 (e-MAG), VLibras, página de ajuda e mapa do sítio |
 | 29/10 | **reCAPTCHA no cadastro da OSC**, o mesmo do formulário público do PMIS |
 | 29/10 | **Deploy na Hostinger** (commit `0696cda`): tudo de 27 a 29/10, com 3 migrações e as chaves novas do `.env` |
 | 29/10 | **Barra de validação e Termos de Uso e Adesão** (minuta do decreto do MROSC): barra em cada página do PDF com nome, CPF parcialmente oculto, data e hora de Brasília, chave e QR Code; documento adulterado dado como inválido; cláusula de adesão à validade das assinaturas; CPF exigido para assinar |
@@ -788,6 +789,27 @@ Trazer os demais cenários para `tests/Feature` é uma das [Pendências](#pendê
 
 Da mais recente para a mais antiga. Cada entrada diz o que mudou, **por quê** e como foi
 conferido — o porquê é o que falta a quem pega o código depois.
+
+- [2026-10-29] **Ferramentas de acessibilidade** (`components/acessibilidade*`, `public/css/acessibilidade.css`,
+  rotas `/acessibilidade` e `/mapa-do-sitio`)
+  - Pedido da gestão: as mesmas ferramentas do Agiliza (agiliza.pmsgra.net), em todas as telas — os três layouts e
+    a tela inicial, que tem HTML próprio:
+    - **"Pular para o conteúdo"**, a primeira parada do Tab, até o conteúdo (`[data-a11y-conteudo]`);
+    - **menu Acessibilidade**, no canto de baixo à esquerda: A−/A+ (100% a 130%, pelo tamanho da fonte da raiz, que
+      o Tailwind usa em `rem`), Contraste +/− (fundo preto, texto branco, links e ações em amarelo; o QR Code fica em
+      branco por `data-a11y-preservar`), ajuda e mapa do sítio. As escolhas ficam no navegador e são aplicadas no
+      `<head>`, antes de a tela aparecer;
+    - **atalhos do e-MAG** de 0 a 7, fora dos campos de texto: menu, conteúdo, texto maior e menor, contraste,
+      ajuda e mapa do sítio;
+    - **VLibras**, do Governo Federal, no meio da tela à direita;
+    - página **Acessibilidade** (atalhos e controles, e-MAG, Lei 13.146/2015, art. 63) e **Mapa do sítio**.
+  - O CSS é arquivo estático (`public/css`), fora do Tailwind: vale em todas as telas sem recompilar o CSS. O aviso
+    de cookies abre espaço para o botão no celular. A tela inicial, que ficara sem o aviso de cookies, passa a ter.
+    A Política de Cookies cita as preferências guardadas e o VLibras.
+  - Conferido: `AcessibilidadeTest` (3 testes); suíte 283/283; num Chromium sem interface, sobre o servidor local:
+    o Tab, o menu, A+ e o contraste pelos botões e pelos atalhos, a escolha mantida ao recarregar, o atalho que não
+    dispara no campo de texto, o 7 indo ao mapa, as cores calculadas no contraste (botão principal amarelo, QR em
+    branco) e o VLibras carregado
 
 - [2026-10-29] **reCAPTCHA no cadastro da OSC** (`components/recaptcha`, `OscRegistroRequest`)
   - Pedido da gestão: o cadastro público da OSC (`/cadastro/osc`) passa a pedir o "Não sou um robô", conferido no

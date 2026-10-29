@@ -15,8 +15,10 @@
 
         <!-- Scripts -->
         @vite(['resources/css/app.css', 'resources/js/app.js'])
+        <x-acessibilidade-cabecalho />
     </head>
     <body class="font-sans text-gray-900 antialiased bg-white">
+        <x-acessibilidade-pular />
 
         <div class="min-h-screen lg:grid lg:grid-cols-2">
 
@@ -81,7 +83,7 @@
                 <div class="h-1.5 bg-gradient-to-r from-brand-600 via-brand-500 to-accent-500 lg:hidden"></div>
 
                 <div class="flex-1 flex flex-col justify-center px-5 py-12 sm:px-12">
-                    <div class="w-full max-w-md mx-auto">
+                    <div class="w-full max-w-md mx-auto" id="conteudo" tabindex="-1" data-a11y-conteudo>
 
                         <a href="{{ route('landing') }}"
                            class="inline-flex items-center gap-1.5 mb-8 px-3 py-1.5 rounded-lg border border-gray-200 text-sm font-medium text-gray-600
@@ -119,5 +121,6 @@
             </div>
         </div>
         <x-aviso-cookies />
+        <x-acessibilidade />
     </body>
 </html>

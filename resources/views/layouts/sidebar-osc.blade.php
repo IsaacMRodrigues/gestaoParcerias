@@ -20,7 +20,7 @@
         </a>
     </div>
 
-    <nav class="flex-1 overflow-y-auto px-3 py-2">
+    <nav class="flex-1 overflow-y-auto px-3 py-2" data-a11y-menu>
         @foreach($navItens as $item)
             @if(isset($item['filhos']))
                 <p class="{{ $sec }}">{{ $item['rotulo'] }}</p>

@@ -6,8 +6,10 @@
     <link rel="icon" type="image/png" href="https://pmsgra.net/ico.png">
     <title>{{ isset($title) ? $title . ' — ' : '' }}Portal de Parcerias</title>
     @vite(['resources/css/app.css', 'resources/js/app.js'])
+    <x-acessibilidade-cabecalho />
 </head>
 <body class="bg-gray-50 text-gray-800">
+    <x-acessibilidade-pular />
 
 @php
     $portalInterno = auth()->check() && auth()->user()->temAcessoInterno();
@@ -44,7 +46,7 @@
                     <span class="text-sm font-bold text-gray-900">Portal Público</span>
                 </span>
 
-                <nav class="flex items-center gap-1.5 text-sm">
+                <nav class="flex items-center gap-1.5 text-sm" data-a11y-menu>
                     @foreach([
                         ['portal.index', route('portal.index'), 'Chamamentos'],
                         ['transparencia', route('transparencia'), 'Transparência'],
@@ -103,7 +105,7 @@
                 </x-dropdown>
             </div>
 
-            <main class="flex-1">
+            <main class="flex-1" id="conteudo" tabindex="-1" data-a11y-conteudo>
                 @unless(request()->routeIs('portal.index'))
                     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-5">
                         <x-botao-voltar :inicio="route('portal.index')" />
@@ -118,6 +120,7 @@
                     <span class="flex items-center gap-5">
                         <a href="{{ route('termos.index') }}" class="hover:text-brand-700 transition">Termos de Uso</a>
                         <a href="{{ route('cookies.index') }}" class="hover:text-brand-700 transition">Cookies</a>
+                        <a href="{{ route('acessibilidade') }}" class="hover:text-brand-700 transition">Acessibilidade</a>
                         <a href="{{ route('validacao.index') }}" class="hover:text-brand-700 transition">Validar documento</a>
                     </span>
                 </div>
@@ -257,7 +260,7 @@
                 </div>
             @endif
 
-            <main class="flex-1">
+            <main class="flex-1" id="conteudo" tabindex="-1" data-a11y-conteudo>
                 @unless(request()->routeIs('portal.index'))
                     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-5">
                         <x-botao-voltar :inicio="route('portal.index')" />
@@ -273,6 +276,7 @@
                         <a href="{{ route('transparencia') }}" class="hover:text-brand-700 transition">Transparência</a>
                         <a href="{{ route('termos.index') }}" class="hover:text-brand-700 transition">Termos de Uso</a>
                         <a href="{{ route('cookies.index') }}" class="hover:text-brand-700 transition">Cookies</a>
+                        <a href="{{ route('acessibilidade') }}" class="hover:text-brand-700 transition">Acessibilidade</a>
                         <a href="{{ route('validacao.index') }}" class="hover:text-brand-700 transition">Validar documento</a>
                     </span>
                 </div>
@@ -300,7 +304,7 @@
                         <span class="font-semibold text-gray-900 tracking-tight whitespace-nowrap hidden sm:block">Portal de Parcerias</span>
                     </a>
 
-                    <nav class="hidden lg:flex items-center gap-6 text-sm whitespace-nowrap">
+                    <nav class="hidden lg:flex items-center gap-6 text-sm whitespace-nowrap" data-a11y-menu>
                         @foreach($navItens as $item)
                             <a href="{{ $item['url'] }}" class="{{ $navLink($item['ativo']) }} transition">{{ $item['rotulo'] }}</a>
                         @endforeach
@@ -331,7 +335,7 @@
             </div>
         </header>
 
-        <main class="flex-1">
+        <main class="flex-1" id="conteudo" tabindex="-1" data-a11y-conteudo>
             @unless(request()->routeIs('portal.index'))
                 <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-5">
                     <x-botao-voltar :inicio="route('portal.index')" />
@@ -357,5 +361,6 @@
 @endif
 
     <x-aviso-cookies />
+    <x-acessibilidade />
 </body>
 </html>

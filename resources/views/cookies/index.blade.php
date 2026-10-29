@@ -54,7 +54,12 @@
 
             <p>Na área interna, a busca do sistema guarda no seu próprio navegador (armazenamento local, chave
                 <span class="font-mono">pgp:paleta:recentes</span>) as últimas telas abertas, para sugeri-las de novo. Essa
-                lista não é enviada ao servidor e some quando você limpa os dados do navegador.</p>
+                lista não é enviada ao servidor e some quando você limpa os dados do navegador. Do mesmo jeito ficam as
+                escolhas das ferramentas de acessibilidade, o tamanho do texto e o alto contraste
+                (<span class="font-mono">pgp:a11y:fonte</span> e <span class="font-mono">pgp:a11y:contraste</span>).</p>
+
+            <p>O tradutor de Libras VLibras, do Governo Federal, é carregado de vlibras.gov.br em todas as páginas e pode
+                guardar no navegador as preferências do tradutor.</p>
 
             <p>As fontes de letra vêm do Bunny Fonts, que não grava cookies. O reCAPTCHA só é carregado na página do
                 formulário público de manifestação de interesse, e o Google trata esses dados conforme a sua

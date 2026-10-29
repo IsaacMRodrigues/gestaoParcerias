@@ -77,7 +77,7 @@
                     <strong style="font-family:monospace;letter-spacing:.5px;">{{ $assinatura['codigo'] }}</strong>.</p>
             </td>
             @if($assinatura['qr'])
-                <td style="border:none;width:120px;vertical-align:top;padding-top:8px;text-align:center;">
+                <td data-a11y-preservar style="border:none;width:120px;vertical-align:top;padding-top:8px;text-align:center;">
                     <div style="width:110px;">{!! $assinatura['qr'] !!}</div>
                 </td>
             @endif

@@ -15,8 +15,10 @@
 
         <!-- Scripts -->
         @vite(['resources/css/app.css', 'resources/js/app.js'])
+        <x-acessibilidade-cabecalho />
     </head>
     <body class="font-sans antialiased text-gray-800">
+        <x-acessibilidade-pular />
         @php
             $navUser = auth()->user();
             $navRole = $navUser?->roles->first()?->name;
@@ -114,7 +116,7 @@
                 </header>
 
                 <!-- Page Content -->
-                <main class="flex-1">
+                <main class="flex-1" id="conteudo" tabindex="-1" data-a11y-conteudo>
                     {{ $slot }}
                 </main>
 
@@ -124,6 +126,7 @@
                         <span class="flex items-center gap-5">
                             <a href="{{ route('termos.index') }}" class="hover:text-brand-700 transition">Termos de Uso</a>
                             <a href="{{ route('cookies.index') }}" class="hover:text-brand-700 transition">Cookies</a>
+                            <a href="{{ route('acessibilidade') }}" class="hover:text-brand-700 transition">Acessibilidade</a>
                             <a href="{{ route('transparencia') }}" class="hover:text-brand-700 transition">
                                 Transparência pública
                             </a>
@@ -137,5 +140,6 @@
             <x-busca-global />
         </div>
         <x-aviso-cookies />
+        <x-acessibilidade />
     </body>
 </html>

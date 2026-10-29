@@ -1,0 +1,136 @@
+/*
+ * Ferramentas de acessibilidade (components/acessibilidade): "Pular para o conteúdo", o menu flutuante e o alto
+ * contraste. Arquivo estático, fora do Tailwind: vale em todas as telas sem recompilar o CSS do sistema.
+ */
+
+/* Pular para o conteúdo: escondido até receber o foco pelo Tab. */
+.a11y-pular {
+    position: fixed;
+    left: 12px;
+    top: 12px;
+    z-index: 2147483000;
+    padding: 10px 14px;
+    background: #fff;
+    color: #111827;
+    border: 2px solid #111827;
+    border-radius: 10px;
+    font: 600 14px/1.2 system-ui, sans-serif;
+    text-decoration: none;
+    transform: translateY(-200%);
+    transition: transform .15s ease;
+}
+.a11y-pular:focus { transform: translateY(0); outline: 3px solid #f59e0b; outline-offset: 2px; }
+
+/* Destino do salto e do atalho 1: sem contorno quando recebe o foco por script. */
+[data-a11y-conteudo]:focus { outline: none; }
+
+/* Menu flutuante, no canto de baixo à esquerda (o aviso de cookies fica à direita; o VLibras, no meio à direita). */
+.a11y-menu {
+    position: fixed;
+    left: 16px;
+    bottom: 16px;
+    z-index: 60;
+    font-family: system-ui, -apple-system, "Segoe UI", sans-serif;
+}
+.a11y-botao {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    height: 44px;
+    padding: 0 14px;
+    border: 1px solid #d1d5db;
+    border-radius: 999px;
+    background: #fff;
+    color: #111827;
+    font-size: 14px;
+    font-weight: 600;
+    box-shadow: 0 6px 16px rgba(0, 0, 0, .14);
+    cursor: pointer;
+}
+.a11y-botao svg { width: 22px; height: 22px; flex-shrink: 0; }
+.a11y-botao:hover { background: #f3f4f6; }
+.a11y-botao:focus-visible, .a11y-painel button:focus-visible, .a11y-painel a:focus-visible {
+    outline: 3px solid #2563eb;
+    outline-offset: 2px;
+}
+@media (max-width: 640px) {
+    .a11y-botao span { display: none; }
+    .a11y-botao { width: 44px; padding: 0; justify-content: center; }
+}
+.a11y-painel {
+    position: absolute;
+    left: 0;
+    bottom: 54px;
+    width: 280px;
+    padding: 12px;
+    border: 1px solid #e5e7eb;
+    border-radius: 14px;
+    background: #fff;
+    color: #111827;
+    box-shadow: 0 12px 28px rgba(0, 0, 0, .18);
+}
+.a11y-painel[hidden] { display: none; }
+.a11y-painel p { margin: 0 0 8px; font-size: 12px; font-weight: 700; letter-spacing: .04em; text-transform: uppercase; color: #4b5563; }
+.a11y-grade { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+.a11y-painel button, .a11y-painel a {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 40px;
+    padding: 6px 10px;
+    border: 1px solid #d1d5db;
+    border-radius: 10px;
+    background: #f9fafb;
+    color: #111827;
+    font-size: 14px;
+    font-weight: 600;
+    text-decoration: none;
+    cursor: pointer;
+}
+.a11y-painel button:hover, .a11y-painel a:hover { background: #eef2ff; }
+.a11y-painel button[aria-pressed="true"] { background: #111827; border-color: #111827; color: #fff; }
+.a11y-links { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 10px; padding-top: 10px; border-top: 1px solid #e5e7eb; }
+.a11y-nivel { margin-top: 8px; font-size: 12px; color: #4b5563; text-align: center; }
+
+/* ===== Alto contraste: fundo preto, texto branco, links e ações em amarelo (classe em <html>) ===== */
+html.a11y-contraste, html.a11y-contraste body { background: #000 !important; color: #fff !important; }
+html.a11y-contraste body *:not([vw], [vw] *) {
+    background-color: #000 !important;
+    background-image: none !important;
+    color: #fff !important;
+    border-color: #fff !important;
+    box-shadow: none !important;
+    text-shadow: none !important;
+    transition: none !important;
+}
+/* Trechos dentro da linha ficam sem fundo próprio: com fundo, cobririam a linha de cima nos títulos de entrelinha curta. */
+html.a11y-contraste body :is(span, a, strong, b, em, i, small, label, code, kbd, mark, abbr, sub, sup):not([vw] *) {
+    background-color: transparent !important;
+}
+html.a11y-contraste a:not([vw] *), html.a11y-contraste a:not([vw] *) * { color: #ffd700 !important; }
+html.a11y-contraste a:not([vw] *) { text-decoration: underline !important; }
+html.a11y-contraste button:not([vw] *), html.a11y-contraste .btn:not([vw] *) {
+    border: 1px solid #ffd700 !important;
+    color: #ffd700 !important;
+}
+html.a11y-contraste button *, html.a11y-contraste .btn * { color: inherit !important; }
+/* Mais específicos que a regra geral (body *:not(...)), para valerem sobre ela. */
+html.a11y-contraste body .btn-primary:not([vw] *), html.a11y-contraste body button[type="submit"]:not([vw] *),
+html.a11y-contraste .a11y-painel button[aria-pressed="true"] {
+    background-color: #ffd700 !important;
+    color: #000 !important;
+}
+html.a11y-contraste input, html.a11y-contraste select, html.a11y-contraste textarea {
+    background-color: #000 !important;
+    color: #fff !important;
+    border: 1px solid #fff !important;
+}
+html.a11y-contraste ::placeholder { color: #bdbdbd !important; opacity: 1; }
+html.a11y-contraste input[type="checkbox"], html.a11y-contraste input[type="radio"] { accent-color: #ffd700; }
+html.a11y-contraste :focus-visible { outline: 3px solid #ffd700 !important; outline-offset: 2px !important; }
+html.a11y-contraste hr { border-color: #fff !important; }
+/* QR Code e o que precisa do fundo branco para ser lido (marcado com data-a11y-preservar). */
+html.a11y-contraste body [data-a11y-preservar]:not([vw] *), html.a11y-contraste body [data-a11y-preservar] *:not([vw] *) {
+    background-color: #fff !important;
+    color: #000 !important;
+}

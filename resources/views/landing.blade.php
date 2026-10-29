@@ -6,8 +6,10 @@
     <link rel="icon" type="image/png" href="https://pmsgra.net/ico.png">
     <title>Parcerias com as OSCs — PGP · São Gonçalo do Rio Abaixo</title>
     @vite(['resources/css/app.css', 'resources/js/app.js'])
+    <x-acessibilidade-cabecalho />
 </head>
 <body class="antialiased text-gray-800 bg-gray-50">
+    <x-acessibilidade-pular />
 
     {{-- Faixa institucional: as duas cores da marca --}}
     <div class="h-1.5 bg-gradient-to-r from-brand-600 via-brand-500 to-accent-500"></div>
@@ -35,7 +37,7 @@
                     </span>
                 </a>
 
-                <nav class="hidden md:flex items-center gap-7 text-sm font-medium text-gray-600">
+                <nav class="hidden md:flex items-center gap-7 text-sm font-medium text-gray-600" data-a11y-menu>
                     <a href="{{ route('portal.index') }}" class="hover:text-brand-700 transition">Chamamentos</a>
                     <a href="{{ route('transparencia') }}" class="hover:text-brand-700 transition">Transparência</a>
                     <a href="{{ route('validacao.index') }}" class="hover:text-brand-700 transition">Validar documento</a>
@@ -43,7 +45,7 @@
             </div>
         </header>
 
-        <main class="flex-1">
+        <main class="flex-1" id="conteudo" tabindex="-1" data-a11y-conteudo>
 
             {{-- Hero institucional: o verde da marca ocupando espaço de verdade --}}
             <section class="relative overflow-hidden bg-brand-900">
@@ -222,5 +224,8 @@
             <div class="h-1.5 bg-gradient-to-r from-brand-600 via-brand-500 to-accent-500"></div>
         </footer>
     </div>
+    {{-- A tela inicial tem HTML próprio, fora dos layouts: o aviso de cookies e as ferramentas vêm aqui também. --}}
+    <x-aviso-cookies />
+    <x-acessibilidade />
 </body>
 </html>
