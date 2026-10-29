@@ -186,6 +186,7 @@
                     da Plataforma (versão {{ \App\Support\TermosDeUso::VERSAO }}).</span>
             </label>
             @error('aceite_termos') <p class="text-red-600 text-xs mt-2">{{ $message }}</p> @enderror
+            <x-recaptcha class="mt-4" />
             </div>
 
             <div class="flex items-center justify-between">

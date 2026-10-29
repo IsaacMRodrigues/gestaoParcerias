@@ -160,6 +160,7 @@ cada item estão no [Histórico de entregas](#histórico-de-entregas). 🚀 marc
 | 07/10 | Depois do deploy: listas só com o que é da Secretaria; R$ e vírgula em todos os campos de dinheiro; Arquivos da OSC valendo em todos os fluxos (recusa da UG trava a Celebração) |
 | 08/10 | Caixas de seleção e barra de download nos fluxos; **Arquivos da OSC preenchendo os fluxos** (documentos complementares, habilitação da dispensa e modelos com os dados da OSC); revisão do README |
 | 13/10 | Menu do portal da OSC na **barra lateral**, como o da área interna |
+| 29/10 | **reCAPTCHA no cadastro da OSC**, o mesmo do formulário público do PMIS |
 | 29/10 | **Deploy na Hostinger** (commit `0696cda`): tudo de 27 a 29/10, com 3 migrações e as chaves novas do `.env` |
 | 29/10 | **Barra de validação e Termos de Uso e Adesão** (minuta do decreto do MROSC): barra em cada página do PDF com nome, CPF parcialmente oculto, data e hora de Brasília, chave e QR Code; documento adulterado dado como inválido; cláusula de adesão à validade das assinaturas; CPF exigido para assinar |
 | 29/10 | **Cookies**: aviso em todas as telas (só cookies necessários, some no "Entendi") e Política de Cookies pública com a lista do que o sistema grava |
@@ -787,6 +788,13 @@ Trazer os demais cenários para `tests/Feature` é uma das [Pendências](#pendê
 
 Da mais recente para a mais antiga. Cada entrada diz o que mudou, **por quê** e como foi
 conferido — o porquê é o que falta a quem pega o código depois.
+
+- [2026-10-29] **reCAPTCHA no cadastro da OSC** (`components/recaptcha`, `OscRegistroRequest`)
+  - Pedido da gestão: o cadastro público da OSC (`/cadastro/osc`) passa a pedir o "Não sou um robô", conferido no
+    Google pela mesma regra do formulário do PMIS (`App\Rules\Recaptcha`; sem as chaves, só passa em desenvolvimento e
+    testes). O bloco do widget virou componente, usado pelos dois formulários. Sem limite de envios por IP: a rede da
+    Prefeitura sai por um IP só, e quem ajuda várias OSCs a se cadastrar do escritório seria barrado
+  - Conferido: `CadastroDaOscTest` (2 testes); suíte 280/280
 
 - [2026-10-29] **Barra de validação e Termos de Uso e Adesão** (`documentos/_barra-validacao`, `DocumentoPdf`,
   `Rules\Cpf`, `termos/_texto`)

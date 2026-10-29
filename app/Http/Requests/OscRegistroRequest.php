@@ -42,6 +42,8 @@ class OscRegistroRequest extends FormRequest
             'estado'     => ['required', 'string', 'size:2'],
 
             'aceite_termos' => ['accepted'],
+            // Cadastro público: o "Não sou um robô" barra o envio automático (sem chave, só em desenvolvimento e testes).
+            'g-recaptcha-response' => [new \App\Rules\Recaptcha],
         ];
     }
 

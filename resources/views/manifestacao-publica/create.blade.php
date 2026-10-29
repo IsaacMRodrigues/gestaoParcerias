@@ -112,17 +112,7 @@
                 <x-input-error :messages="$errors->get('arquivo')" class="mt-1" />
             </div>
 
-            @if(\App\Rules\Recaptcha::configurado())
-                <div>
-                    <div class="g-recaptcha" data-sitekey="{{ config('services.recaptcha.site_key') }}"></div>
-                    <x-input-error :messages="$errors->get('g-recaptcha-response')" class="mt-1" />
-                    <p class="text-xs text-gray-400 mt-1">A verificação usa o reCAPTCHA do Google, que grava cookies próprios
-                        (<a href="{{ route('cookies.index') }}" class="hover:underline">Política de Cookies</a>).</p>
-                </div>
-                <script src="https://www.google.com/recaptcha/api.js" async defer></script>
-            @else
-                <x-input-error :messages="$errors->get('g-recaptcha-response')" class="mt-1" />
-            @endif
+            <x-recaptcha />
 
             <div class="flex items-center gap-3 pt-2 border-t border-gray-100">
                 <button type="submit" class="btn btn-primary">Enviar manifestação</button>
