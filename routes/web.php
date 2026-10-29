@@ -344,6 +344,7 @@ Route::middleware(['auth', 'staff', 'readonly'])->group(function () {
     Route::get('oscs/{osc}/anexo/{campo}', [OscController::class, 'baixarAnexo'])->name('oscs.anexo');
     // A impressão também é da SCP, que baixa os documentos de todos os fluxos.
     Route::get('ordens-pagamento/{ordem}/imprimir', [OrdemPagamentoController::class, 'imprimir'])->name('ordens-pagamento.imprimir');
+    Route::get('ordens-pagamento/{ordem}/pdf', [OrdemPagamentoController::class, 'pdf'])->name('ordens-pagamento.pdf');
 
     // 4.4 Execução — repasses, despesas e controle de saldo do instrumento vigente
     Route::middleware('permission:execucao')->group(function () {

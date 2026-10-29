@@ -47,8 +47,9 @@
                 <div class="flex items-center gap-3 mb-4">
                     <span class="text-3xl">⚠️</span>
                     <div>
-                        <h1 class="text-xl font-bold text-red-800">Arquivo não reconhecido</h1>
-                        <p class="text-sm text-gray-600">{{ $nome }} não é nenhum dos PDFs gerados por este sistema.</p>
+                        <h1 class="text-xl font-bold text-red-800">Validação recusada</h1>
+                        <p class="text-sm text-gray-600">{{ $nome }} não é, tal como está, nenhum dos PDFs gerados por este sistema:
+                            este arquivo não pode ser validado.</p>
                     </div>
                 </div>
                 <p class="text-sm text-gray-700">Pode ser que:</p>

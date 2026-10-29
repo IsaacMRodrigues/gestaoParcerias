@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Auth;
 use App\Http\Controllers\Controller;
 use App\Models\Orgao;
 use App\Models\User;
+use App\Rules\Cpf;
 use App\Support\TermosDeUso;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -42,10 +43,16 @@ class RegisteredUserController extends Controller
     {
         $setoresValidos = array_keys(collect(User::LOTACOES)->except('osc')->all());
 
+        // O cadastro guarda o CPF com máscara: com ou sem ela na digitação, o "unique" compara igual.
+        if (Cpf::valido((string) $request->input('cpf'))) {
+            $request->merge(['cpf' => Cpf::formatar($request->input('cpf'))]);
+        }
+
         $request->validate([
             'name'            => ['required', 'string', 'max:255'],
             'email'           => ['required', 'string', 'lowercase', 'email', 'max:255', 'unique:'.User::class],
-            'cpf'             => ['nullable', 'string', 'max:14', 'unique:users,cpf'],
+            // Exigido: a barra de validação dos documentos assinados traz o CPF de quem assina.
+            'cpf'             => ['required', 'string', 'max:14', new Cpf, 'unique:users,cpf'],
             'phone'           => ['nullable', 'string', 'max:20'],
             'matricula'       => ['nullable', 'string', 'max:30', 'unique:users,matricula'],
             'setor'           => ['required', Rule::in($setoresValidos)],
@@ -56,7 +63,7 @@ class RegisteredUserController extends Controller
             'solicitacao_obs' => ['nullable', 'string', 'max:1000'],
             'aceite_termos'   => ['accepted'],
         ], [
-            'aceite_termos.accepted' => 'Para se cadastrar, leia e aceite os Termos de Uso.',
+            'aceite_termos.accepted' => 'Para se cadastrar, leia e aceite os Termos de Uso e Adesão.',
             'orgao_id.required_if' => 'Selecione a Secretaria/Unidade Gestora.',
             'perfis.required'      => 'Escolha ao menos um perfil: é o que você vai fazer no sistema.',
             'perfis.*.in'          => 'Um dos perfis escolhidos não pode ser pedido neste setor.',

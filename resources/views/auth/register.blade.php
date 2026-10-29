@@ -30,7 +30,7 @@
         <div class="grid grid-cols-2 gap-3">
             <div>
                 <x-input-label for="cpf" value="CPF" />
-                <x-text-input id="cpf" class="block mt-1.5 w-full py-2.5" type="text" name="cpf" :value="old('cpf')" autocomplete="off" />
+                <x-text-input id="cpf" class="block mt-1.5 w-full py-2.5" type="text" name="cpf" :value="old('cpf')" autocomplete="off" required />
                 <x-input-error :messages="$errors->get('cpf')" class="mt-2" />
             </div>
             <div>
@@ -124,7 +124,7 @@
             <label class="flex items-start gap-3 text-sm text-gray-700">
                 <input type="checkbox" name="aceite_termos" value="1" required @checked(old('aceite_termos'))
                        class="mt-0.5 rounded border-gray-300 text-brand-600 focus:ring-brand-500">
-                <span>Li e aceito os <a href="{{ route('termos.index') }}" target="_blank" class="font-semibold text-brand-700 hover:underline">Termos de Uso</a>
+                <span>Li e aceito os <a href="{{ route('termos.index') }}" target="_blank" class="font-semibold text-brand-700 hover:underline">Termos de Uso e Adesão</a>
                     da Plataforma (versão {{ \App\Support\TermosDeUso::VERSAO }}).</span>
             </label>
             <x-input-error :messages="$errors->get('aceite_termos')" class="mt-2" />

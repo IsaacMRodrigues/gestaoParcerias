@@ -48,7 +48,9 @@
 
     /* Carimbo do tempo e código de integridade de cada assinatura, da trilha (TrilhaDeAssinatura). */
     foreach ($assinaturas as &$a) {
-        $a['fonte'] = \App\Support\TrilhaDeAssinatura::eventoDaAssinatura($a['codigo'])?->fonteDaHoraDaAssinatura();
+        $evento = \App\Support\TrilhaDeAssinatura::eventoDaAssinatura($a['codigo']);
+        $a['fonte'] = $evento?->fonteDaHoraDaAssinatura();
+        $a['cpf'] = $evento?->cpfMascarado();
         $a['em'] = \App\Support\HoraLegal::emBrasilia($a['em']);
     }
     unset($a);
@@ -65,7 +67,7 @@
             <td style="border:none;width:48px;vertical-align:top;padding-top:8px;font-size:26px;">🔏</td>
             <td style="border:none;vertical-align:top;padding-top:8px;font-size:11px;color:#1e293b;line-height:1.5;">
                 <p style="margin:0;">Documento {{ $assinatura['verbo'] }} por
-                    <strong>{{ $assinatura['nome'] }}</strong>@if($assinatura['cargo']), {{ $assinatura['cargo'] }}@endif,
+                    <strong>{{ $assinatura['nome'] }}</strong>{{ $assinatura['cpf'] ? ' (CPF ' . $assinatura['cpf'] . ')' : '' }}@if($assinatura['cargo']), {{ $assinatura['cargo'] }}@endif,
                     em <strong>{{ $assinatura['em']->format('d/m/Y') }}</strong>,
                     às <strong>{{ $assinatura['em']->format('H:i:s') }}</strong>,
                     horário oficial de Brasília{{ $assinatura['fonte'] ? ' (carimbo do tempo pela Hora Legal Brasileira, NTP.br)' : '' }},

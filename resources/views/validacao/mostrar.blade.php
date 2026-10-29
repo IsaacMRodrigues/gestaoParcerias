@@ -13,9 +13,10 @@
                     @if($doc['integro'] === false)
                         <span class="text-3xl">⚠️</span>
                         <div>
-                            <h1 class="text-xl font-bold text-red-800">Assinatura autêntica, mas o texto foi alterado</h1>
-                            <p class="text-sm text-gray-600">O texto de hoje não é o que foi assinado: o código de integridade não confere.
-                                Não confie nesta cópia e procure o órgão que emitiu o documento.</p>
+                            <h1 class="text-xl font-bold text-red-800">Documento inválido</h1>
+                            <p class="text-sm text-gray-600">Validação recusada: o conteúdo foi alterado depois da assinatura, e o
+                                código de integridade não confere. Este documento não vale como documento assinado; procure o órgão
+                                que o emitiu.</p>
                         </div>
                     @else
                         <span class="text-3xl">✅</span>
@@ -147,7 +148,7 @@
 
                 @if(!empty($doc['conteudo']))
                     <div class="mt-8 pt-6 border-t border-gray-100">
-                        <h2 class="text-sm font-semibold text-gray-700 mb-3">{{ $doc['integro'] === false ? 'Texto de hoje (diferente do assinado)' : 'Cópia do documento' }}</h2>
+                        <h2 class="text-sm font-semibold text-gray-700 mb-3">{{ $doc['integro'] === false ? 'Texto de hoje (diferente do assinado, sem validade)' : 'Cópia do documento' }}</h2>
                         <div class="documento-copia border border-gray-200 rounded-lg bg-white p-6 sm:p-8 overflow-x-auto text-[14px] text-gray-900 leading-relaxed">
                             {!! $doc['conteudo'] !!}
                         </div>

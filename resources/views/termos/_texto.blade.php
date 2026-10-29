@@ -1,13 +1,14 @@
 {{-- Texto dos Termos de Uso, versão 1.0. Mudar uma vírgula aqui exige nova versão: TermosDeUso::VERSAO e ::HASH
      (o teste TermosDeUsoTest confere). Sem expressões Blade: o hash é do texto exato que a pessoa leu. --}}
 <h2>1. O que são estes Termos</h2>
-<p>Estes Termos de Uso regem o acesso e o uso da Plataforma de Gestão de Parcerias (PGP) do Município de São Gonçalo
+<p>Estes Termos de Uso e Adesão regem o acesso e o uso da Plataforma de Gestão de Parcerias (PGP) do Município de São Gonçalo
 do Rio Abaixo/MG, o sistema em que a Administração Municipal e as Organizações da Sociedade Civil (OSCs) conduzem as
 parcerias regidas pela Lei Federal nº 13.019/2014 e pelo Decreto Municipal nº 048/2020: planejamento, chamamento
 público, manifestação de interesse, celebração, execução, alterações e prestação de contas.</p>
-<p>Ao marcar "Li e aceito os Termos de Uso", o usuário declara que leu, entendeu e concorda com todas as regras abaixo.
-Quem não concordar não deve usar a Plataforma. O aceite fica registrado com a data, a hora, a versão dos Termos e o
-endereço IP da conexão.</p>
+<p>Ao marcar "Li e aceito os Termos de Uso e Adesão", o usuário declara que leu, entendeu e concorda com todas as
+regras abaixo, inclusive a adesão à assinatura eletrônica do item 4. O aceite é expresso, eletrônico e obrigatório
+no cadastro ou no primeiro acesso, e fica registrado com a data, a hora, a versão dos Termos e o endereço IP da
+conexão. Quem não concordar não pode usar a Plataforma.</p>
 
 <h2>2. Quem é quem</h2>
 <ul>
@@ -41,13 +42,23 @@ endereço IP da conexão.</p>
 <ul>
     <li>Os documentos da Plataforma são assinados eletronicamente, com a confirmação da senha pessoal no ato, nos
         termos da Lei Federal nº 14.063/2020 e da regulamentação municipal.</li>
-    <li>A assinatura é ato pessoal. A assinatura feita com as credenciais do usuário presume-se feita por ele, que
-        responde pelo conteúdo que assinou.</li>
+    <li><strong>Adesão:</strong> ao aceitar estes Termos, o usuário — e, pela OSC, o seu representante legal — adere
+        ao uso da assinatura eletrônica avançada da Plataforma e reconhece, de comum acordo com a Administração, a
+        validade jurídica e a eficácia probatória dos documentos e atos assim assinados, nos termos do art. 4º, II, da
+        Lei Federal nº 14.063/2020 e do art. 10, § 2º, da Medida Provisória nº 2.200-2/2001.</li>
+    <li>A assinatura é ato pessoal. O sigilo do login e da senha é de responsabilidade exclusiva do usuário, e é de sua
+        autoria inequívoca qualquer assinatura ou ato realizado com as suas credenciais; ele responde pelo conteúdo que
+        assinou.</li>
     <li>Cada assinatura registra o nome e o cargo do signatário, a data e a hora oficiais de Brasília, o código de
         integridade do texto assinado, o endereço IP e o navegador usados, numa trilha de auditoria que não pode ser
         alterada.</li>
-    <li>Todo documento assinado traz código de validação e QR Code, e qualquer pessoa pode conferir a sua
-        autenticidade e integridade na página pública de validação.</li>
+    <li>Todo documento assinado traz, no rodapé de cada página do PDF, a barra de validação: o nome e o CPF do
+        signatário, com parte dos dígitos oculta, a data e a hora oficiais de Brasília, a chave de validação e o QR
+        Code da página pública de conferência. Qualquer pessoa pode conferir ali a autenticidade e a integridade do
+        documento, pela chave, pelo QR Code ou pelo próprio arquivo PDF.</li>
+    <li>A impressão do documento assinado vale como cópia autêntica enquanto a chave ou o QR Code puderem ser
+        conferidos. O documento cujo conteúdo tenha sido alterado depois da assinatura tem a validação recusada e é
+        apontado como inválido.</li>
     <li>Depois de assinado, o documento não pode mais ser editado. A correção se faz por devolução, que anula a
         assinatura (o registro dela permanece na trilha) e exige nova assinatura.</li>
 </ul>
@@ -128,7 +139,7 @@ responsabilidade administrativa, civil e penal, e das consequências previstas n
 termo de parceria.</p>
 
 <h2>13. Mudanças nos Termos</h2>
-<p>Estes Termos podem ser atualizados. Cada versão tem número e data. Quando houver nova versão, a Plataforma pedirá
+<p>Estes Termos de Uso e Adesão podem ser atualizados. Cada versão tem número e data. Quando houver nova versão, a Plataforma pedirá
 um novo aceite no acesso seguinte, e o uso só continua com ele.</p>
 
 <h2>14. Suporte e foro</h2>

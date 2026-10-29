@@ -1,9 +1,15 @@
+@php
+    // A barra de validação ocupa a margem de baixo de cada página: a margem cresce com o número de assinaturas.
+    $barra = $assinaturas ? max(1.5, 0.45 + (count($assinaturas) + 2) * 0.3) : 0;
+    $margem = $assinaturas ? $barra + 0.9 : 1.5;
+@endphp
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
     <meta charset="UTF-8">
     <style>
-        @page { margin: 1.5cm 2cm; }
+        @page { margin: 1.5cm 2cm {{ $margem }}cm; }
+        .barra-validacao { position: fixed; left: 0; right: 0; bottom: -{{ $margem - 0.5 }}cm; }
         body { font-family: Helvetica, Arial, sans-serif; font-size: 13px; color: #111; }
         p { margin: .4rem 0; line-height: 1.6; text-align: justify; }
         strong { font-weight: bold; }
@@ -16,6 +22,10 @@
     </style>
 </head>
 <body>
+{{-- Fixa, antes do conteúdo: o dompdf a repete em todas as páginas. --}}
+@if($assinaturas)
+    <div class="barra-validacao">@include('documentos._barra-validacao', ['assinaturas' => $assinaturas])</div>
+@endif
 <div class="doc">
     {!! $conteudo !!}
 
@@ -25,7 +35,7 @@
             <tr>
                 <td style="border:none;vertical-align:top;padding-top:8px;font-size:11px;color:#1e293b;line-height:1.5;">
                     <p style="margin:0;"><strong>ASSINATURA ELETRÔNICA.</strong> Documento assinado eletronicamente por
-                        <strong>{{ $a['nome'] }}</strong>@if($a['cargo']), {{ $a['cargo'] }}@endif,
+                        <strong>{{ $a['nome'] }}</strong>{{ $a['cpf'] ? ' (CPF ' . $a['cpf'] . ')' : '' }}@if($a['cargo']), {{ $a['cargo'] }}@endif,
                         em <strong>{{ $a['em']->format('d/m/Y') }}</strong>,
                         às <strong>{{ $a['em']->format('H:i:s') }}</strong>,
                         horário oficial de Brasília{{ $a['fonte'] ? ' (carimbo do tempo pela Hora Legal Brasileira, NTP.br)' : '' }},

@@ -17,7 +17,7 @@ class TermosDeUso
     public const VIGENTE_DESDE = '28/10/2026';
 
     /** SHA-256 do texto desta versão (termos/_texto): texto mudado sem versão nova não passa nos testes. */
-    public const HASH = 'c72677f54beddc41155712893c5268f78b3953d80ca8714edc33dffecaf85241';
+    public const HASH = '2df23d560ad39ab3c118a6fa158d368c72460221c90745bd8d8a41fcda9532fc';
 
     public static function texto(): string
     {

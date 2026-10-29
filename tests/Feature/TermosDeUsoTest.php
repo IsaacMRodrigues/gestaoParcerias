@@ -76,7 +76,7 @@ class TermosDeUsoTest extends TestCase
         $scp = $this->servidor(['termos_versao' => '0.9', 'termos_aceitos_em' => now()->subYear()]);
 
         $this->actingAs($scp)->get('/dashboard')->assertRedirect(route('termos.aceitar'));
-        $this->actingAs($scp)->get(route('termos.aceitar'))->assertSee('Os Termos de Uso foram atualizados');
+        $this->actingAs($scp)->get(route('termos.aceitar'))->assertSee('Os Termos de Uso e Adesão foram atualizados');
         $this->actingAs($scp)->post(route('termos.aceitar.salvar'), ['aceite' => '1'])->assertRedirect();
 
         $this->assertSame('nova_versao', TermoAceite::sole()->origem);
@@ -105,7 +105,7 @@ class TermosDeUsoTest extends TestCase
     {
         $educacao = Orgao::forceCreate(['name' => 'Educação']);
         $dados = ['name' => 'Maria Secretária', 'email' => 'maria@saogoncalo.mg.gov.br', 'setor' => 'ug', 'orgao_id' => $educacao->id,
-            'perfis' => ['responsavel_unidade_gestora'], 'password' => 'senha123', 'password_confirmation' => 'senha123'];
+            'perfis' => ['responsavel_unidade_gestora'], 'password' => 'senha123', 'password_confirmation' => 'senha123', 'cpf' => '52998224725'];
 
         $this->get('/register')->assertSee('name="aceite_termos"', false);
         $this->post('/register', $dados)->assertSessionHasErrors('aceite_termos');

@@ -1,13 +1,13 @@
 <x-portal-layout>
-    <x-slot name="title">Termos de Uso</x-slot>
+    <x-slot name="title">Termos de Uso e Adesão</x-slot>
 
     <div class="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
         <div class="bg-white rounded-xl border border-gray-200 shadow-sm p-6 sm:p-8">
             <h1 class="text-2xl font-bold text-gray-900">
-                {{ auth()->user()->termos_versao ? 'Os Termos de Uso foram atualizados' : 'Termos de Uso' }}
+                {{ auth()->user()->termos_versao ? 'Os Termos de Uso e Adesão foram atualizados' : 'Termos de Uso e Adesão' }}
             </h1>
             <p class="text-sm text-gray-600 mt-1">
-                Antes de continuar, leia os Termos de Uso da Plataforma de Gestão de Parcerias. O uso do sistema depende
+                Antes de continuar, leia os Termos de Uso e Adesão da Plataforma de Gestão de Parcerias. O uso do sistema depende
                 do seu aceite, que fica registrado com a data, a hora e o endereço IP desta conexão.
             </p>
 
@@ -20,7 +20,7 @@
                 <label class="flex items-start gap-3 text-sm text-gray-800">
                     <input type="checkbox" name="aceite" value="1" required
                            class="mt-0.5 rounded border-gray-300 text-brand-600 focus:ring-brand-500">
-                    <span>Li e aceito os Termos de Uso (versão {{ \App\Support\TermosDeUso::VERSAO }}).</span>
+                    <span>Li e aceito os Termos de Uso e Adesão (versão {{ \App\Support\TermosDeUso::VERSAO }}).</span>
                 </label>
                 <x-input-error :messages="$errors->get('aceite')" />
 

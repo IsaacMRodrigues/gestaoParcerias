@@ -39,7 +39,7 @@ class AutoCadastroDeServidorTest extends TestCase
         return $extra + [
             'name' => 'Maria Secretária', 'email' => 'maria.educacao@saogoncalo.mg.gov.br', 'matricula' => 'M-123',
             'setor' => 'ug', 'orgao_id' => $this->educacao->id, 'perfis' => ['responsavel_unidade_gestora'],
-            'password' => 'senha123', 'password_confirmation' => 'senha123', 'aceite_termos' => '1',
+            'password' => 'senha123', 'password_confirmation' => 'senha123', 'aceite_termos' => '1', 'cpf' => '529.982.247-25',
         ];
     }
 

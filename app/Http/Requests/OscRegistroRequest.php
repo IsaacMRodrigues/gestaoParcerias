@@ -47,7 +47,7 @@ class OscRegistroRequest extends FormRequest
 
     public function messages(): array
     {
-        return ['aceite_termos.accepted' => 'Para se cadastrar, leia e aceite os Termos de Uso.'];
+        return ['aceite_termos.accepted' => 'Para se cadastrar, leia e aceite os Termos de Uso e Adesão.'];
     }
 
     public function attributes(): array

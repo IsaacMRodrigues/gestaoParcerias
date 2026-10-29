@@ -30,6 +30,8 @@ class UserFactory extends Factory
             'email_verified_at' => now(),
             'password' => static::$password ??= Hash::make('password'),
             'remember_token' => Str::random(10),
+            // CPF válido: a assinatura o exige (barra de validação).
+            'cpf' => fake('pt_BR')->unique()->cpf(),
             // Conta de teste já com os Termos de Uso aceitos; semAceiteDosTermos() tira.
             'termos_versao' => \App\Support\TermosDeUso::VERSAO,
             'termos_aceitos_em' => now(),

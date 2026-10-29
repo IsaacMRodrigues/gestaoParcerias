@@ -65,7 +65,7 @@
                 configurações do seu navegador, mas, sem eles, não é possível entrar no sistema nem enviar formulários.</p>
 
             <p>O tratamento de dados pessoais na Plataforma está descrito nos
-                <a href="{{ route('termos.index') }}" class="text-brand-700 hover:underline">Termos de Uso</a>, item 8, nos termos da
+                <a href="{{ route('termos.index') }}" class="text-brand-700 hover:underline">Termos de Uso e Adesão</a>, item 8, nos termos da
                 Lei Federal nº 13.709/2018 (LGPD).</p>
         </div>
     </div>

@@ -77,10 +77,15 @@
 
             {{-- Ações --}}
             <div class="flex flex-wrap items-center justify-between gap-3">
-                <a href="{{ route('ordens-pagamento.imprimir', $op) }}" target="_blank"
-                   class="btn btn-outline">
-                    Imprimir / PDF
-                </a>
+                <span class="flex flex-wrap gap-2">
+                    <a href="{{ route('ordens-pagamento.imprimir', $op) }}" target="_blank"
+                       class="btn btn-outline">
+                        Imprimir
+                    </a>
+                    @if(filled($op->conteudo))
+                        <a href="{{ route('ordens-pagamento.pdf', $op) }}" class="btn btn-outline">Baixar PDF</a>
+                    @endif
+                </span>
 
                 @unless($op->assinado())
                     <x-assinar :action="route('ordens-pagamento.assinar', $op)" rotulo="🔏 Assinar" />

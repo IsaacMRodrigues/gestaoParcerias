@@ -159,7 +159,7 @@ class AssinaturaEletronicaAvancadaTest extends TestCase
 
         // Texto mexido direto no banco: a validação e a verificação diária acusam.
         DB::table('processo_pecas')->where('id', $this->memorando->id)->update(['conteudo' => '<p>Memorando nº 2</p>']);
-        $this->get("/validar/{$codigo}")->assertOk()->assertSee('o texto foi alterado')->assertDontSee('Documento autêntico e íntegro');
+        $this->get("/validar/{$codigo}")->assertOk()->assertSee('Documento inválido')->assertSee('Validação recusada')->assertDontSee('Documento autêntico e íntegro');
         $this->assertStringContainsString('o texto mudou depois da assinatura', implode(' ', TrilhaDeAssinatura::verificar()['problemas']));
     }
 
@@ -231,7 +231,7 @@ class AssinaturaEletronicaAvancadaTest extends TestCase
         $this->post('/validar/arquivo', ['arquivo' => UploadedFile::fake()->createWithContent('memorando.pdf', $pdf)])->assertOk()
             ->assertSee('Arquivo autêntico e intacto')->assertSee($codigo)->assertSee('Memorando');
         $this->post('/validar/arquivo', ['arquivo' => UploadedFile::fake()->createWithContent('memorando.pdf', $pdf . ' ')])->assertOk()
-            ->assertSee('Arquivo não reconhecido');
+            ->assertSee('Validação recusada')->assertDontSee('Arquivo autêntico');
 
         // Documento sem assinatura não entra no registro.
         DocumentoPdf::gerar(ProcessoPeca::forceCreate(['processo_id' => $this->processo->id, 'tipo' => 'despacho', 'conteudo' => '<p>Rascunho</p>']));
@@ -288,6 +288,56 @@ class AssinaturaEletronicaAvancadaTest extends TestCase
         $this->assertFalse($portaria->fresh()->podePreencher($this->ug));
         $this->actingAs($this->ug)->put("/pecas/{$portaria->id}", ['conteudo' => '<p>Outra portaria</p>'])->assertForbidden();
         $this->assertSame('<p>Portaria</p>', $portaria->fresh()->conteudo);
+    }
+
+    public function test_conta_sem_cpf_informa_o_cpf_ao_assinar(): void
+    {
+        $this->ug->forceFill(['cpf' => null])->save();
+        $tela = fn () => $this->actingAs($this->ug)->get(route('processos.pecas.edit', [$this->processo, $this->memorando]));
+        $tela()->assertOk()->assertSee('name="cpf_assinatura"', false);
+
+        $this->assinar()->assertSessionHas('error', fn ($m) => str_contains($m, 'informe um CPF válido'));
+        $this->actingAs($this->ug)->patch("/processos/{$this->processo->id}/pecas/{$this->memorando->id}/assinar",
+            ['senha_assinatura' => 'password', 'cpf_assinatura' => '111.111.111-11'])->assertSessionHas('error');
+        $this->assertNull($this->memorando->fresh()->assinado_em);
+
+        // CPF de outra conta não serve.
+        User::factory()->create(['cpf' => '529.982.247-25']);
+        $this->actingAs($this->ug)->patch("/processos/{$this->processo->id}/pecas/{$this->memorando->id}/assinar",
+            ['senha_assinatura' => 'password', 'cpf_assinatura' => '52998224725'])->assertSessionHas('error', fn ($m) => str_contains($m, 'outra conta'));
+
+        $this->actingAs($this->ug)->patch("/processos/{$this->processo->id}/pecas/{$this->memorando->id}/assinar",
+            ['senha_assinatura' => 'password', 'cpf_assinatura' => '11144477735'])->assertSessionHasNoErrors()->assertSessionMissing('error');
+        $this->assertSame('111.444.777-35', $this->ug->fresh()->cpf);
+        $this->assertSame('111.444.777-35', AssinaturaEvento::sole()->dadosDeIdentidade()['cpf']);
+        $tela()->assertDontSee('name="cpf_assinatura"', false)->assertSee('***.444.777-**');
+    }
+
+    public function test_o_pdf_traz_a_barra_de_validacao_em_todas_as_paginas(): void
+    {
+        $this->horaLegal('2026-10-28 13:30:05.250000');
+        $this->assertStringNotContainsString('barra-validacao"', DocumentoPdf::html($this->memorando), 'sem assinatura, sem barra');
+
+        $this->assinar();
+        $memorando = $this->memorando->fresh();
+        $html = DocumentoPdf::html($memorando);
+
+        // Fixa antes do conteúdo: o dompdf a repete em cada página, na margem de baixo.
+        $this->assertMatchesRegularExpression('/<body>\s*(<!--.*?-->\s*)?<div class="barra-validacao">/s', $html);
+        $this->assertStringContainsString('.barra-validacao { position: fixed;', $html);
+        $barra = substr($html, strpos($html, '<div class="barra-validacao">'), 3000);
+        foreach (['DOCUMENTO ASSINADO ELETRONICAMENTE', $this->ug->name, 'CPF ***.456.789-**', '28/10/2026 às 10:30:05',
+                     'horário oficial de Brasília', $memorando->codigo_validacao, 'data:image/svg+xml;base64'] as $esperado) {
+            $this->assertStringContainsString($esperado, $barra);
+        }
+        $this->assertStringNotContainsString('123.456.789-09', $html, 'o CPF não sai inteiro');
+
+        // A impressão pelo navegador leva a mesma barra, e a tela do documento oferece o PDF do sistema.
+        $this->actingAs($this->ug)->get(route('processos.pecas.imprimir', [$this->processo, $memorando]))->assertOk()
+            ->assertSee('class="barra-validacao"', false)->assertSee('class="reserva-barra"', false)->assertSee('CPF ***.456.789-**');
+        $pdf = route('processos.pecas.imprimir-lote', [$this->processo, 'pecas' => [$memorando->id]]);
+        $this->actingAs($this->ug)->get(route('processos.pecas.edit', [$this->processo, $memorando]))->assertSee('Baixar PDF')->assertSee($pdf, false);
+        $this->actingAs($this->ug)->get($pdf)->assertOk()->assertHeader('Content-Type', 'application/pdf');
     }
 
     public function test_a_resposta_do_ntp_so_vale_se_for_desta_pergunta_e_de_relogio_sincronizado(): void

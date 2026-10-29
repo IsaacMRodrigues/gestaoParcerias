@@ -162,6 +162,7 @@ cada item estão no [Histórico de entregas](#histórico-de-entregas). 🚀 marc
 | 07/10 | Depois do deploy: listas só com o que é da Secretaria; R$ e vírgula em todos os campos de dinheiro; Arquivos da OSC valendo em todos os fluxos (recusa da UG trava a Celebração) |
 | 08/10 | Caixas de seleção e barra de download nos fluxos; **Arquivos da OSC preenchendo os fluxos** (documentos complementares, habilitação da dispensa e modelos com os dados da OSC); revisão do README |
 | 13/10 | Menu do portal da OSC na **barra lateral**, como o da área interna |
+| 29/10 | **Barra de validação e Termos de Uso e Adesão** (minuta do decreto do MROSC): barra em cada página do PDF com nome, CPF parcialmente oculto, data e hora de Brasília, chave e QR Code; documento adulterado dado como inválido; cláusula de adesão à validade das assinaturas; CPF exigido para assinar |
 | 29/10 | **Cookies**: aviso em todas as telas (só cookies necessários, some no "Entendi") e Política de Cookies pública com a lista do que o sistema grava |
 | 28/10 | **Termos de Uso**: texto da versão 1.0, aceite obrigatório no cadastro (servidor e OSC) e no primeiro acesso de toda conta, registrado com versão, hash do texto, IP e navegador; nova versão pede novo aceite |
 | 28/10 | **Recurso à vista em Minhas inscrições (OSC)**: cada inscrição em chamamento público diz a situação do recurso e, com o prazo aberto, tem o botão "Entrar com recurso" |
@@ -725,6 +726,14 @@ Trazer os demais cenários para `tests/Feature` é uma das [Pendências](#pendê
   Resposta ao recurso): falta definir quem assina — três membros quaisquer da Comissão da Secretaria? — e
   se os já assinados continuam valendo. O mecanismo de várias assinaturas já existe (o do Termo).
 - **Ata do resultado definitivo** (etapa 4 da Seleção) está opcional: deve ser obrigatória?
+- **Minuta do decreto do MROSC em plataforma própria** — pontos para a Procuradoria: (1) o § 1º do artigo da adesão
+  cita o art. 5º, § 2º, III, da Lei 14.063/2020; o acordo entre as partes que dá validade à assinatura avançada parece
+  estar no art. 4º, II (e na MP 2.200-2/2001, art. 10, § 2º), e o art. 5º, § 2º, lista casos de assinatura
+  **qualificada** obrigatória — conferir; (2) se entre esses casos estiverem os atos de **chefe de Poder**, o Termo
+  (assinado pelo Gabinete do Prefeito) e o Termo de Homologação (pelo Prefeito) podem exigir certificado ICP-Brasil;
+  (3) "site institucional do Município": a validação está em `parcerias.pmsgra.net`; se precisar ser o domínio
+  oficial, o TI da Prefeitura aponta um subdomínio de `saogoncalo.mg.gov.br` para o sistema. O artigo 1º põe
+  monitoramento e avaliação na plataforma: o módulo ainda não existe (ver Código).
 - **Termos de Uso (versão 1.0):** revisão pela Procuradoria do Município antes de valerem; o item 8 indica "os
   canais oficiais do Município" para os direitos do titular — falta o contato do Encarregado de Dados (LGPD, art.
   41), se o Município já o designou. Mudança no texto vira versão 1.1, e todos aceitam de novo.
@@ -776,6 +785,30 @@ Trazer os demais cenários para `tests/Feature` é uma das [Pendências](#pendê
 
 Da mais recente para a mais antiga. Cada entrada diz o que mudou, **por quê** e como foi
 conferido — o porquê é o que falta a quem pega o código depois.
+
+- [2026-10-29] **Barra de validação e Termos de Uso e Adesão** (`documentos/_barra-validacao`, `DocumentoPdf`,
+  `Rules\Cpf`, `termos/_texto`)
+  - Pedido da gestão, pela minuta do capítulo do decreto sobre o MROSC em plataforma própria:
+    - **Barra de validação** (art. 4º): no pé de **cada página** do PDF, quem assinou, com o **CPF parcialmente
+      oculto** (LGPD), a data e a hora oficiais de Brasília, a chave de validação e o QR Code. No PDF do sistema ela
+      fica na margem (o dompdf repete o elemento fixo); na impressão pelo navegador, um rodapé vazio de tabela, que o
+      navegador repete, reserva o lugar dela. O carimbo da tela e o do PDF também passam a trazer o CPF oculto.
+      O Planejamento e a Ordem de Pagamento ganham "Baixar PDF" (o PDF do sistema, conferível pelo arquivo), ao lado
+      do "Imprimir"; a OP passa a ter PDF próprio (`ordens-pagamento.pdf`).
+    - **CPF de quem assina:** o CPF sai do registro da trilha, gravado no ato. Conta sem CPF (4 contas internas na
+      produção) o informa no próprio painel da assinatura, conferido pelos dígitos e sem repetir o de outra conta;
+      "Solicitar acesso" passa a exigir CPF válido.
+    - **Inválido** (art. 4º, § 2º): documento com texto alterado depois da assinatura tem a validação recusada e
+      aparece como "Documento inválido"; PDF que não é, byte a byte, um emitido pelo sistema, "Validação recusada".
+    - **Termos de Uso e Adesão** (art. 3º, §§ 1º e 2º): o nome novo; a cláusula de adesão, em que o usuário (e, pela
+      OSC, o representante legal) reconhece de comum acordo a validade jurídica e a eficácia probatória das
+      assinaturas da Plataforma (Lei 14.063/2020, art. 4º, II; MP 2.200-2/2001, art. 10, § 2º); a autoria inequívoca
+      do que for feito com as credenciais; a barra de validação e a impressão como cópia autêntica. Versão segue 1.0
+      (ainda não aceita em produção), com novo `TermosDeUso::HASH`.
+  - Conferido: testes novos em `AssinaturaEletronicaAvancadaTest` (CPF no ato, barra no PDF e na impressão, "Baixar
+    PDF") e os ajustados; a factory passa a gerar CPF válido; suíte 278/278. PDFs de ensaio (uma e quatro
+    assinaturas, várias páginas) renderizados em imagem, e a página de impressão impressa pelo Chrome: a barra em
+    todas as páginas, sem cobrir o texto.
 
 - [2026-10-29] **Cookies** (`components/aviso-cookies`, `cookies/index`, rota `/politica-de-cookies`)
   - Pedido da gestão, junto dos Termos de Uso. Levantamento do que o sistema grava: o cookie da sessão

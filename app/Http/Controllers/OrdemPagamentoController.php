@@ -85,6 +85,18 @@ class OrdemPagamentoController extends Controller
         return view('ordens-pagamento.impressao', ['op' => $ordem, 'instrumento' => $ordem->instrumento, 'qrValidacao' => $qrValidacao]);
     }
 
+    /** A ordem em PDF, pelo mesmo gerador dos demais documentos (barra de validação e registro do arquivo emitido). */
+    public function pdf(OrdemPagamento $ordem): \Illuminate\Http\Response
+    {
+        abort_unless(auth()->user()->can('ordem_pagamento') || auth()->user()->baixaTodosOsDocumentos(), 403);
+        abort_if(blank($ordem->conteudo), 404, 'Esta ordem de pagamento não tem texto para gerar o PDF.');
+
+        return response(\App\Support\DocumentoPdf::gerar($ordem), 200, [
+            'Content-Type'        => 'application/pdf',
+            'Content-Disposition' => 'attachment; filename="' . \App\Support\DocumentoPdf::nomeArquivo('Ordem de Pagamento ' . $ordem->numero) . '"',
+        ]);
+    }
+
     public function destroy(OrdemPagamento $ordem): RedirectResponse
     {
         $instrumento = $ordem->instrumento;

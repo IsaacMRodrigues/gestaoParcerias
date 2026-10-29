@@ -22,7 +22,7 @@ class TermosDeUsoController extends Controller
 
     public function salvar(Request $request): RedirectResponse
     {
-        $request->validate(['aceite' => ['accepted']], ['aceite.accepted' => 'Para continuar, marque que leu e aceita os Termos de Uso.']);
+        $request->validate(['aceite' => ['accepted']], ['aceite.accepted' => 'Para continuar, marque que leu e aceita os Termos de Uso e Adesão.']);
 
         $user = $request->user();
         if (!TermosDeUso::aceitou($user)) {

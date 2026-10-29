@@ -182,7 +182,7 @@
             <label class="flex items-start gap-3 text-sm text-gray-700">
                 <input type="checkbox" name="aceite_termos" value="1" required @checked(old('aceite_termos'))
                        class="mt-0.5 rounded border-gray-300 text-brand-600 focus:ring-brand-500">
-                <span>Li e aceito os <a href="{{ route('termos.index') }}" target="_blank" class="font-semibold text-brand-700 hover:underline">Termos de Uso</a>
+                <span>Li e aceito os <a href="{{ route('termos.index') }}" target="_blank" class="font-semibold text-brand-700 hover:underline">Termos de Uso e Adesão</a>
                     da Plataforma (versão {{ \App\Support\TermosDeUso::VERSAO }}).</span>
             </label>
             @error('aceite_termos') <p class="text-red-600 text-xs mt-2">{{ $message }}</p> @enderror

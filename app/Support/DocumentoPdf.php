@@ -7,17 +7,15 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Str;
 use SimpleSoftwareIO\QrCode\Facades\QrCode;
 
-/** PDF de um documento de texto (Peca ou ProcessoPeca), com todas as assinaturas e o QR de validação de cada uma. */
+/**
+ * PDF de um documento de texto (Peca, ProcessoPeca ou OrdemPagamento), com todas as assinaturas, o QR de validação de
+ * cada uma e, em cada página, a barra de validação.
+ */
 class DocumentoPdf
 {
     public static function gerar(Model $doc): string
     {
-        $assinaturas = self::assinaturas($doc);
-        $html = view('documentos.pdf', [
-            'conteudo'    => $doc->conteudo,
-            'assinaturas' => $assinaturas,
-            'hashes'      => TrilhaDeAssinatura::hashesAssinados(array_column($assinaturas, 'codigo')),
-        ])->render();
+        $html = self::html($doc);
 
         $dompdf = new \Dompdf\Dompdf([
             'isRemoteEnabled'      => true,   // o brasão vem de endereço remoto
@@ -34,6 +32,17 @@ class DocumentoPdf
         return $pdf;
     }
 
+    public static function html(Model $doc): string
+    {
+        $assinaturas = self::assinaturas($doc);
+
+        return view('documentos.pdf', [
+            'conteudo'    => $doc->conteudo,
+            'assinaturas' => $assinaturas,
+            'hashes'      => TrilhaDeAssinatura::hashesAssinados(array_column($assinaturas, 'codigo')),
+        ])->render();
+    }
+
     /** "03-parecer-juridico.pdf"; sem posição, só o nome. */
     public static function nomeArquivo(string $rotulo, ?int $posicao = null, string $extensao = 'pdf'): string
     {
@@ -42,8 +51,12 @@ class DocumentoPdf
         return ($posicao !== null ? sprintf('%02d-', $posicao) : '') . $nome . '.' . $extensao;
     }
 
-    /** @return list<array{nome: ?string, cargo: ?string, em: \Illuminate\Support\Carbon, codigo: ?string, qr: ?string, fonte: ?string}> */
-    private static function assinaturas(Model $doc): array
+    /**
+     * As assinaturas do documento, com a hora de Brasília e o CPF parcialmente oculto, gravado na trilha no ato.
+     *
+     * @return list<array{nome: ?string, cargo: ?string, em: \Illuminate\Support\Carbon, codigo: ?string, qr: ?string, fonte: ?string, cpf: ?string}>
+     */
+    public static function assinaturas(Model $doc): array
     {
         $lista = [];
         $adicionar = function (?string $nome, ?string $cargo, $em, ?string $codigo) use (&$lista) {
@@ -53,8 +66,9 @@ class DocumentoPdf
             $qr = $codigo
                 ? 'data:image/svg+xml;base64,' . base64_encode(QrCode::format('svg')->size(110)->margin(0)->generate(route('validacao.mostrar', $codigo)))
                 : null;
+            $evento = TrilhaDeAssinatura::eventoDaAssinatura($codigo);
             $lista[] = ['nome' => $nome, 'cargo' => $cargo, 'em' => HoraLegal::emBrasilia($em), 'codigo' => $codigo, 'qr' => $qr,
-                'fonte' => TrilhaDeAssinatura::eventoDaAssinatura($codigo)?->fonteDaHoraDaAssinatura()];
+                'fonte' => $evento?->fonteDaHoraDaAssinatura(), 'cpf' => $evento?->cpfMascarado()];
         };
 
         if ($doc instanceof Peca && $doc->assinado_em === null && $doc->temAssinaturasEmSequencia()) {
