@@ -81,6 +81,9 @@ entraram na trilha, íntegra), os Termos de Uso e Adesão (as 12 contas aceitam 
 Política de Cookies e a barra de validação. No `.env` da produção entraram as chaves do reCAPTCHA (o widget carrega
 no domínio) e o `TRUSTED_PROXIES` (as sessões passaram a gravar o IP de quem acessa, não o da CDN).
 
+No mesmo dia, num segundo deploy (commit `51d8702`, sem migração), subiram o reCAPTCHA no cadastro da OSC e as
+ferramentas de acessibilidade (menu, atalhos do e-MAG, VLibras, ajuda e mapa do sítio).
+
 As ações de produção que o deploy não faz (dados e painel) estão em
 [Pendências → Produção](#produção-ação-não-código).
 
@@ -160,6 +163,7 @@ cada item estão no [Histórico de entregas](#histórico-de-entregas). 🚀 marc
 | 07/10 | Depois do deploy: listas só com o que é da Secretaria; R$ e vírgula em todos os campos de dinheiro; Arquivos da OSC valendo em todos os fluxos (recusa da UG trava a Celebração) |
 | 08/10 | Caixas de seleção e barra de download nos fluxos; **Arquivos da OSC preenchendo os fluxos** (documentos complementares, habilitação da dispensa e modelos com os dados da OSC); revisão do README |
 | 13/10 | Menu do portal da OSC na **barra lateral**, como o da área interna |
+| 29/10 | **Deploy na Hostinger** (commit `51d8702`): o reCAPTCHA no cadastro da OSC e as ferramentas de acessibilidade, sem migração; conferido só de dentro do servidor (1.209 telas sem erro) |
 | 29/10 | **Acessibilidade**, como no Agiliza: "Pular para o conteúdo", menu com tamanho do texto e alto contraste, atalhos de 0 a 7 (e-MAG), VLibras, página de ajuda e mapa do sítio |
 | 29/10 | **reCAPTCHA no cadastro da OSC**, o mesmo do formulário público do PMIS |
 | 29/10 | **Deploy na Hostinger** (commit `0696cda`): tudo de 27 a 29/10, com 3 migrações e as chaves novas do `.env` |
